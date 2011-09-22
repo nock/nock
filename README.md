@@ -30,27 +30,27 @@ Then the test can call the module, and the module will do the HTTP requests.
 
 You can specify the return status code for a path on the first argument of reply like this:
 
-  var couchdb = nock('http://myapp.iriscouch.com')
-                  .get('/users/1')
-                  .reply(404);
+    var couchdb = nock('http://myapp.iriscouch.com')
+                    .get('/users/1')
+                    .reply(404);
 
 You can also specify the reply body as a string:
 
-var couchdb = nock('http://www.google.com')
-                .get('/')
-                .reply(200, "Hello from Google!");
+    var couchdb = nock('http://www.google.com')
+                    .get('/')
+                    .reply(200, "Hello from Google!");
 
 as a JSON-encoded object:
 
-var couchdb = nock('http://myapp.iriscouch.com')
-                .get('/')
-                .reply(200, {username: 'pgte', email: 'pedro.teixeira@gmail.com', _id: "4324243fsd"});
+    var couchdb = nock('http://myapp.iriscouch.com')
+                    .get('/')
+                    .reply(200, {username: 'pgte', email: 'pedro.teixeira@gmail.com', _id: "4324243fsd"});
 
 or even as a file:
 
-var couchdb = nock('http://myapp.iriscouch.com')
-                .get('/')
-                .replyWithFile(200, __dirname + '/replies/user.json');
+    var couchdb = nock('http://myapp.iriscouch.com')
+                    .get('/')
+                    .replyWithFile(200, __dirname + '/replies/user.json');
 
 ## Chaining
 
