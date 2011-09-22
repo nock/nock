@@ -30,25 +30,25 @@ Then the test can call the module, and the module will do the HTTP requests.
 
 You can specify the return status code for a path on the first argument of reply like this:
 
-    var couchdb = nock('http://myapp.iriscouch.com')
+    var scope = nock('http://myapp.iriscouch.com')
                     .get('/users/1')
                     .reply(404);
 
 You can also specify the reply body as a string:
 
-    var couchdb = nock('http://www.google.com')
+    var scope = nock('http://www.google.com')
                     .get('/')
                     .reply(200, "Hello from Google!");
 
 as a JSON-encoded object:
 
-    var couchdb = nock('http://myapp.iriscouch.com')
+    var scope = nock('http://myapp.iriscouch.com')
                     .get('/')
                     .reply(200, {username: 'pgte', email: 'pedro.teixeira@gmail.com', _id: "4324243fsd"});
 
 or even as a file:
 
-    var couchdb = nock('http://myapp.iriscouch.com')
+    var scope = nock('http://myapp.iriscouch.com')
                     .get('/')
                     .replyWithFile(200, __dirname + '/replies/user.json');
 
@@ -56,7 +56,7 @@ or even as a file:
 
 You can chain behaviour like this:
 
-    var couchdb = nock('http://myapp.iriscouch.com')
+    var scope = nock('http://myapp.iriscouch.com')
                     .get('/users/1')
                     .reply(404)
                     .post('/users', {username: 'pgte', email: 'pedro.teixeira@gmail.com'})
@@ -64,6 +64,50 @@ You can chain behaviour like this:
                     .get('/users/123ABC')
                     .reply(200, {_id: "123ABC", _rev: "946B7D1C", username: 'pgte', email: 'pedro.teixeira@gmail.com'});
 
+
+## Path filtering
+
+You can also filter the URLs based on a function.
+
+This can be useful, for instance, if you have random or time-dependent data in your URL.
+
+You can use a regexp for replacement, just like String.replace:
+
+    var scope = nock('http://api.myservice.com')
+                    .filterPath(/password=[^&]*/g, 'password=XXX')
+                    .get('/users/1?password=XXX')
+                    .reply(200, 'user');
+
+Or you can use a function:
+
+    var scope = nock('http://api.myservice.com')
+                    .filterPath(function(path) {
+                       return '/ABC';
+                     })
+                    .get('/ABC')
+                    .reply(200, 'user');
+
+## Request Body filtering
+
+You can also filter the request body based on a function.
+
+This can be useful, for instance, if you have random or time-dependent data in your URL.
+
+You can use a regexp for replacement, just like String.replace:
+
+    var scope = nock('http://api.myservice.com')
+                    .filterRequestBody(/password=[^&]*/g, 'password=XXX')
+                    .post('/users/1', 'data=ABC&password=XXX')
+                    .reply(201, 'OK');
+
+Or you can use a function:
+
+    var scope = nock('http://api.myservice.com')
+                    .filterRequestBody(function(path) {
+                       return 'ABC';
+                     })
+                    .post('/', 'ABC')
+                    .reply(201, 'OK');
 
 # Expectations
 

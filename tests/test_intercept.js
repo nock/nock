@@ -188,10 +188,6 @@ tap.test("body data is differentiating", function(t) {
 
 });
 
-tap.test("you can filter URLs", function(t) {
-  t.end();
-});
-
 tap.test("chaining", function(t) {
   var repliedCount = 0;
   var scope = nock('http://www.spiffy.com')
@@ -350,4 +346,97 @@ tap.test("reply with JSON", function(t) {
   
   req.end();
   
+});
+
+tap.test("filter path with function", function(t) {
+  var scope = nock('http://www.filterurls.com')
+     .filteringPath(function(path) {
+        return '/?a=2&b=1';
+      })
+     .get('/?a=2&b=1')
+     .reply(200, "Hello World!");
+
+  var req = http.request({
+     host: "www.filterurls.com"
+    , method: 'GET'
+    , path: '/?a=1&b=2'
+    , port: 80
+  }, function(res) {
+   t.equal(res.statusCode, 200);
+   res.on('end', function() {
+     scope.done();
+     t.end();
+   });
+  });
+
+  req.end();
+});
+
+tap.test("filter path with regexp", function(t) {
+  var scope = nock('http://www.filterurlswithregexp.com')
+     .filteringPath(/\d/g, '3')
+     .get('/?a=3&b=3')
+     .reply(200, "Hello World!");
+
+  var req = http.request({
+     host: "www.filterurlswithregexp.com"
+    , method: 'GET'
+    , path: '/?a=1&b=2'
+    , port: 80
+  }, function(res) {
+   t.equal(res.statusCode, 200);
+   res.on('end', function() {
+     scope.done();
+     t.end();
+   });
+  });
+
+  req.end();
+});
+
+tap.test("filter body with function", function(t) {
+  var scope = nock('http://www.filterboddiez.com')
+     .filteringRequestBody(function(body) {
+       t.equal(body, 'mamma mia');
+        return 'mamma tua';
+      })
+     .post('/', 'mamma tua')
+     .reply(200, "Hello World!");
+
+  var req = http.request({
+     host: "www.filterboddiez.com"
+    , method: 'POST'
+    , path: '/'
+    , port: 80
+  }, function(res) {
+   t.equal(res.statusCode, 200);
+   res.on('end', function() {
+     scope.done();
+     t.end();
+   });
+  });
+
+  req.end('mamma mia');
+});
+
+tap.test("filter body with regexp", function(t) {
+  var scope = nock('http://www.filterboddiezregexp.com')
+     .filteringRequestBody(/mia/, 'nostra')
+     .post('/', 'mamma nostra')
+     .reply(200, "Hello World!");
+
+  var req = http.request({
+     host: "www.filterboddiezregexp.com"
+    , method: 'POST'
+    , path: '/'
+    , port: 80
+  }, function(res) {
+   t.equal(res.statusCode, 200);
+   res.on('end', function() {
+     scope.done();
+     t.end();
+   });
+  });
+
+  req.end('mamma mia');
 });
