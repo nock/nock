@@ -40,7 +40,7 @@ You can also specify the reply body as a string:
                     .get('/')
                     .reply(200, "Hello from Google!");
 
-as a JSON-encoded object:
+or as a JSON-encoded object:
 
     var scope = nock('http://myapp.iriscouch.com')
                     .get('/')
