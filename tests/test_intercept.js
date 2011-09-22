@@ -69,7 +69,7 @@ tap.test("not mocked should work in http", function(t) {
   t.end();
 });
 
-tap.test("post works", function(t) {
+tap.test("post", function(t) {
   var dataCalled = false;
   
   var scope = nock('http://www.google.com')
@@ -108,7 +108,7 @@ tap.test("body data is differentiating", function(t) {
   t.end();
 });
 
-tap.test("chaining works", function(t) {
+tap.test("chaining", function(t) {
   var repliedCount = 0;
   var scope = nock('http://www.spiffy.com')
      .get('/')
@@ -124,7 +124,7 @@ tap.test("chaining works", function(t) {
      t.end();
    }
    
-   t.test("post works", function(t) {
+   t.test("post", function(t) {
      var req = http.request({
          host: "www.spiffy.com"
        , method: 'POST'
@@ -148,7 +148,7 @@ tap.test("chaining works", function(t) {
      req.end();
    });
 
-   t.test("get works", function(t) {
+   t.test("get", function(t) {
      var req = http.request({
          host: "www.spiffy.com"
        , method: 'GET'
@@ -174,7 +174,7 @@ tap.test("chaining works", function(t) {
    });
 });
 
-tap.test("encoding works", function(t) {
+tap.test("encoding", function(t) {
   var dataCalled = false
   
   var scope = nock('http://www.encoderz.com')
@@ -204,4 +204,66 @@ tap.test("encoding works", function(t) {
   });
   
   req.end();
+});
+
+tap.test("reply with file", function(t) {
+  var dataCalled = false
+  
+  var scope = nock('http://www.filereplier.com')
+    .get('/')
+    .replyWithFile(200, __dirname + '/../assets/reply_file_1.txt')
+    .get('/test')
+    .reply(200, 'Yay!');
+
+  var req = http.request({
+      host: "www.filereplier.com"
+    , path: '/'
+    , port: 80
+  }, function(res) {
+    
+    t.equal(res.statusCode, 200);
+    res.on('end', function() {
+      t.ok(dataCalled);
+      t.end();
+    });
+    res.on('data', function(data) {
+      dataCalled = true;
+      t.equal(data.toString(), "Hello from the file!", "response should match");
+    });
+    
+  });
+  
+  req.end();
+  
+});
+
+tap.test("reply with JSON", function(t) {
+  var dataCalled = false
+  
+  var scope = nock('http://www.jsonreplier.com')
+    .get('/')
+    .reply(200, {hello: "world"});
+
+  var req = http.request({
+      host: "www.jsonreplier.com"
+    , path: '/'
+    , port: 80
+  }, function(res) {
+    
+    res.setEncoding('utf8');
+    t.equal(res.statusCode, 200);
+    res.on('end', function() {
+      t.ok(dataCalled);
+      scope.done();
+      t.end();
+    });
+    res.on('data', function(data) {
+      dataCalled = true;
+      t.equal(data.toString(), '{"hello":"world"}', "response should match");
+    });
+    
+  });
+  
+  req.end();
+  
 });
