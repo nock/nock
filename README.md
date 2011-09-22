@@ -71,7 +71,7 @@ You can also filter the URLs based on a function.
 
 This can be useful, for instance, if you have random or time-dependent data in your URL.
 
-You can use a regexp for replacement, just like String.replace:
+You can use a regexp for replacement, just like String.prototype.replace:
 
     var scope = nock('http://api.myservice.com')
                     .filterPath(/password=[^&]*/g, 'password=XXX')
@@ -93,7 +93,7 @@ You can also filter the request body based on a function.
 
 This can be useful, for instance, if you have random or time-dependent data in your URL.
 
-You can use a regexp for replacement, just like String.replace:
+You can use a regexp for replacement, just like String.prototype.replace:
 
     var scope = nock('http://api.myservice.com')
                     .filterRequestBody(/password=[^&]*/g, 'password=XXX')
