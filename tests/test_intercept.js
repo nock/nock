@@ -18,13 +18,13 @@ tap.test("get gets mocked", function(t) {
     t.equal(res.statusCode, 200);
     res.on('end', function() {
       t.ok(dataCalled);
+      scope.done();
       t.end();
     });
     res.on('data', function(data) {
       dataCalled = true;
       t.ok(data instanceof Buffer, "data should be buffer");
       t.equal(data.toString(), "Hello World!", "response should match");
-      scope.done();
     });
     
   });
@@ -86,13 +86,13 @@ tap.test("post", function(t) {
      t.equal(res.statusCode, 201);
      res.on('end', function() {
        t.ok(dataCalled);
+       scope.done();
        t.end();
      });
      res.on('data', function(data) {
        dataCalled = true;
        t.ok(data instanceof Buffer, "data should be buffer");
        t.equal(data.toString(), "OK!", "response should match");
-       scope.done();
      });
 
    });
@@ -101,10 +101,94 @@ tap.test("post", function(t) {
 });
 
 tap.test("headers work", function(t) {
-  t.end();
+
+  var scope = nock('http://www.headdy.com')
+     .get('/')
+     .reply(200, "Hello World!", {'X-My-Headers': 'My Header value'});
+
+  var req = http.request({
+     host: "www.headdy.com"
+    , method: 'GET'
+    , path: '/'
+    , port: 80
+  }, function(res) {
+   t.equal(res.statusCode, 200);
+   res.on('end', function() {
+     t.similar(res.headers, {'X-My-Headers': 'My Header value'});
+     t.end();
+   });
+  });
+
+  req.end();
+
 });
 
 tap.test("body data is differentiating", function(t) {
+  var doneCount = 0
+    , scope = nock('http://www.boddydiff.com')
+               .post('/', 'abc')
+               .reply(200, "Hey 1")
+               .post('/', 'def')
+               .reply(200, "Hey 2");
+
+   function done(t) {
+     doneCount += 1;
+     if (doneCount === 2) {
+       scope.di
+     }
+     t.end();
+   };
+
+
+  t.test("A", function(t) {
+    var req = http.request({
+       host: "www.boddydiff.com"
+      , method: 'POST'
+      , path: '/'
+      , port: 80
+    }, function(res) {
+       var dataCalled = false;
+       t.equal(res.statusCode, 200);
+       res.on('end', function() {
+         t.ok(dataCalled);
+         done(t);
+       });
+       res.on('data', function(data) {
+         dataCalled = true;
+         t.ok(data instanceof Buffer, "data should be buffer");
+         t.equal(data.toString(), "Hey 1", "response should match");
+       });
+    });
+
+    req.end('abc');
+  });
+
+  t.test("B", function(t) {
+    var req = http.request({
+       host: "www.boddydiff.com"
+      , method: 'POST'
+      , path: '/'
+      , port: 80
+    }, function(res) {
+       var dataCalled = false;
+       t.equal(res.statusCode, 200);
+       res.on('end', function() {
+         t.ok(dataCalled);
+         done(t);
+       });
+       res.on('data', function(data) {
+         dataCalled = true;
+         t.ok(data instanceof Buffer, "data should be buffer");
+         t.equal(data.toString(), "Hey 2", "response should match");
+       });
+    });
+
+    req.end('def');
+  });
+
+});
+
+tap.test("you can filter URLs", function(t) {
   t.end();
 });
 
@@ -159,13 +243,13 @@ tap.test("chaining", function(t) {
        t.equal(res.statusCode, 200);
        res.on('end', function() {
          t.ok(dataCalled);
+         scope.done();
          t.end();
        });
        res.on('data', function(data) {
          dataCalled = true;
          t.ok(data instanceof Buffer, "data should be buffer");
          t.equal(data.toString(), "Hello World!", "response should match");
-         scope.done();
        });
 
      });
@@ -192,13 +276,13 @@ tap.test("encoding", function(t) {
     t.equal(res.statusCode, 200);
     res.on('end', function() {
       t.ok(dataCalled);
+      scope.done();
       t.end();
     });
     res.on('data', function(data) {
       dataCalled = true;
       t.type(data, 'string', "data should be string");
       t.equal(data, "SGVsbG8gV29ybGQh", "response should match base64 encoding");
-      scope.done();
     });
     
   });
