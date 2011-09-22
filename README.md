@@ -81,7 +81,7 @@ Example:
 
     setTimeout(function() {
       google.done(); // will throw an assertion error if meanwhile a "GET http://google.com" was not performed.
-    });
+    }, 5000);
 
 # How does it work?
 
