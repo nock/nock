@@ -1,0 +1,18 @@
+{ "name" : "nock"
+, "description" : "HTTP Server mocking for Node.js"
+, "tags" : ["Mock", "HTTP", "testing", "isolation"]
+, "version" : "0.0.1"
+, "author" : "Pedro Teixeira <pedro.teixeira@gmail.com>"
+, "repository" :
+  { "type" : "git"
+  , "url" : "http://github.com/pgte/nock.git"
+  }
+, "bugs" :
+  { "web" : "http://github.com/pgte/nock/issues" }
+, "engines" : ["node >= 0.4.10"]
+, "main" : "./index"
+, "devDependencies": {
+    "tap": "0.0.x"
+}
+, "scripts": { "test": "node_modules/.bin/tap tests" }
+}
