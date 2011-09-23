@@ -52,6 +52,10 @@ or even as a file:
                     .get('/')
                     .replyWithFile(200, __dirname + '/replies/user.json');
 
+## HTTP Verbs
+
+Nock supports get, post, put and delete HTTP verbs.
+
 ## Chaining
 
 You can chain behaviour like this:
