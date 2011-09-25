@@ -131,6 +131,14 @@ Example:
       google.done(); // will throw an assertion error if meanwhile a "GET http://google.com" was not performed.
     }, 5000);
 
+# Logging
+
+Nock can log matches if you pass in a log function like this:
+
+    var google = nock('http://google.com')
+                    .log(console.log)
+                    ...
+
 # How does it work?
 
 Nock works by overriding Node's http.request function.
