@@ -440,3 +440,32 @@ tap.test("filter body with regexp", function(t) {
 
   req.end('mamma mia');
 });
+
+tap.test("abort request", function(t) {
+  var scope = nock('http://www.google.com')
+    .get('/hey')
+    .reply(200, 'nobody');
+
+  var req = http.request({
+    host: 'www.google.com'
+   , path: '/hey'
+  });
+
+  req.on('response', function(res) {
+    t.equal(res.statusCode, 300, 'this should never execute');
+  });
+
+  req.on('close', function(err) {
+    t.equal(err.code, 'aborted');
+    scope.done();
+    t.end();
+  });
+
+  req.on('end', function() {
+    scope.done();
+    t.end();
+  });
+
+  req.abort();
+  req.end();
+});
