@@ -459,7 +459,7 @@ tap.test("abort request", function(t) {
     });
 
     res.on('end', function() {
-      t.equal(res.statusCode, 300, 'this should never execute');
+      t.true(false, 'this should never execute');
     });
     
     req.abort();
