@@ -452,20 +452,78 @@ tap.test("abort request", function(t) {
   });
 
   req.on('response', function(res) {
-    t.equal(res.statusCode, 300, 'this should never execute');
+    res.on('close', function(err) {
+      t.equal(err.code, 'aborted');
+      scope.done();
+      t.end();
+    });
+
+    res.on('end', function() {
+      t.equal(res.statusCode, 300, 'this should never execute');
+    });
+    
+    req.abort();
   });
 
-  req.on('close', function(err) {
-    t.equal(err.code, 'aborted');
-    scope.done();
-    t.end();
-  });
-
-  req.on('end', function() {
-    scope.done();
-    t.end();
-  });
-
-  req.abort();
   req.end();
+});
+
+tap.test("pause response before data", function(t) {
+  var scope = nock('http://www.mouse.com')
+    .get('/pauser')
+    .reply(200, 'nobody');
+
+  var req = http.request({
+    host: 'www.mouse.com'
+   , path: '/pauser'
+  });
+
+  req.on('response', function(res) {
+    res.pause();
+
+    var waited = false;
+    setTimeout(function() {
+      waited = true;
+      res.resume();
+    }, 500);
+
+    res.on('data', function(data) {
+      t.true(waited);
+    });
+
+    res.on('end', function() {
+      scope.done();
+      t.end();
+    });
+  });
+
+  req.end();
+});
+
+tap.test("pause response after data", function(t) {
+  var scope = nock('http://pauseme.com')
+    .get('/')
+    .reply(200, 'nobody');
+
+  var req = http.get({
+    host: 'pauseme.com'
+   , path: '/'
+  }, function(res) {
+    var waited = false;
+    setTimeout(function() {
+      waited = true;
+      res.resume();
+    }, 500);
+
+    res.on('data', function(data) {
+      t.false(waited);
+      res.pause();
+    });
+
+    res.on('end', function() {
+      t.true(waited);
+      scope.done();
+      t.end();
+    });
+  });
 });
