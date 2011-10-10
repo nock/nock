@@ -3,9 +3,9 @@
 , "tags" : ["Mock", "HTTP", "testing", "isolation"]
 , "version" : "0.2.1"
 , "author" : "Pedro Teixeira <pedro.teixeira@gmail.com>"
-, "contributors" : {
-    "Roly Fentanes"
-}
+, "contributors" :
+  [ "Roly Fentanes"
+  ]
 , "repository" :
   { "type" : "git"
   , "url" : "http://github.com/pgte/nock.git"
