@@ -527,3 +527,42 @@ tap.test("pause response after data", function(t) {
     });
   });
 });
+
+tap.test("chaining API", function(t) {
+  var scope = nock('http://chainchomp.com')
+    .get('/one')
+    .reply(200, 'first one')
+    .get('/two')
+    .reply(200, 'second one');
+
+  http.get({
+    host: 'chainchomp.com'
+   , path: '/one'
+  }, function(res) {
+    res.setEncoding('utf8');
+    t.equal(res.statusCode, 200, 'status should be ok');
+    res.on('data', function(data) {
+      t.equal(data, 'first one', 'should be equal to first reply');
+    });
+
+    res.on('end', function() {
+
+      http.get({
+        host: 'chainchomp.com'
+       , path: '/two'
+      }, function(res) {
+        res.setEncoding('utf8');
+        t.equal(res.statusCode, 200, 'status should be ok');
+        res.on('data', function(data) {
+          t.equal(data, 'second one', 'should be qual to second reply');
+        });
+
+        res.on('end', function() {
+          scope.done();
+          t.end();
+        });
+      });
+
+    });
+  });
+});
