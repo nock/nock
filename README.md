@@ -22,7 +22,7 @@ On your test, you can setup your mocking object like this:
 
 This setup says that we will intercept every HTTP call to `http://myapp.iriscouch.com`.
 
-It will intercept an HTTP GET request to '/users/1' and reply with a status 404.
+It will intercept an HTTP GET request to '/users/1' and reply with a status 200, and the body will contain a user representation in JSON.
 
 Then the test can call the module, and the module will do the HTTP requests.
 
