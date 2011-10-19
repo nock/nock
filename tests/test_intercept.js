@@ -111,10 +111,11 @@ tap.test("request headers exposed", function(t) {
     , method: 'GET'
     , path: '/'
     , port: 80
-    , headers: { 'X-My-Headers': 'My custom Header value' }
+    , headers: {'X-My-Headers': 'My custom Header value'}
   });
 
-  t.similar(req._headers, {'X-My-Headers': 'My custom Header value'});
+  console.dir(req._headers)
+  t.equivalent(req._headers, {'x-my-headers': 'My custom Header value', 'host': 'www.headdy.com'});
   t.end();
 });
 
