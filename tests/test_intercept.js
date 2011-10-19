@@ -100,6 +100,24 @@ tap.test("post", function(t) {
    req.end();
 });
 
+tap.test("request headers exposed", function(t) {
+
+  var scope = nock('http://www.headdy.com')
+     .get('/')
+     .reply(200, "Hello World!", {'X-My-Headers': 'My Header value'});
+
+  var req = http.request({
+     host: "www.headdy.com"
+    , method: 'GET'
+    , path: '/'
+    , port: 80
+    , headers: { 'X-My-Headers': 'My custom Header value' }
+  });
+
+  t.similar(req._headers, {'X-My-Headers': 'My custom Header value'});
+  t.end();
+});
+
 tap.test("headers work", function(t) {
 
   var scope = nock('http://www.headdy.com')
