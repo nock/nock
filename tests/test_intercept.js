@@ -1,6 +1,8 @@
-var nock = require('../.')
-var http = require('http');
-var tap  = require('tap');
+var nock    = require('../.')
+var http    = require('http');
+var util    = require('util');
+var events  = require('events');
+var tap     = require('tap');
 
 tap.test("get gets mocked", function(t) {
   var dataCalled = false
@@ -114,7 +116,6 @@ tap.test("request headers exposed", function(t) {
     , headers: {'X-My-Headers': 'My custom Header value'}
   });
 
-  console.dir(req._headers)
   t.equivalent(req._headers, {'x-my-headers': 'My custom Header value', 'host': 'www.headdy.com'});
   t.end();
 });
@@ -544,6 +545,108 @@ tap.test("pause response after data", function(t) {
       scope.done();
       t.end();
     });
+  });
+});
+
+tap.test("response pipe", function(t) {
+  var dest = (function() {
+    function Constructor() {
+      events.EventEmitter.call(this);
+
+      this.buffer = new Buffer(0);
+      this.writable = true;
+    }
+
+    util.inherits(Constructor, events.EventEmitter);
+
+    Constructor.prototype.end = function() {
+      this.emit('end');
+    };
+
+    Constructor.prototype.write = function(chunk) {
+      var buf = new Buffer(this.buffer.length + chunk.length);
+
+      this.buffer.copy(buf);
+      chunk.copy(buf, this.buffer.length);
+
+      this.buffer = buf;
+
+      return true;
+    };
+
+    return new Constructor();
+  })();
+
+  var scope = nock('http://pauseme.com')
+    .get('/')
+    .reply(200, 'nobody');
+
+  var req = http.get({
+    host: 'pauseme.com'
+   , path: '/'
+  }, function(res) {
+    dest.on('pipe', function() {
+      t.pass('should emit "pipe" event')
+    });
+
+    dest.on('end', function() {
+      scope.done();
+      t.equal(dest.buffer.toString(), 'nobody');
+      t.end();
+    });
+
+    res.pipe(dest);
+  });
+});
+
+tap.test("response pipe without implicit end", function(t) {
+  var dest = (function() {
+    function Constructor() {
+      events.EventEmitter.call(this);
+
+      this.buffer = new Buffer(0);
+      this.writable = true;
+    }
+
+    util.inherits(Constructor, events.EventEmitter);
+
+    Constructor.prototype.end = function() {
+      this.emit('end');
+    };
+
+    Constructor.prototype.write = function(chunk) {
+      var buf = new Buffer(this.buffer.length + chunk.length);
+
+      this.buffer.copy(buf);
+      chunk.copy(buf, this.buffer.length);
+
+      this.buffer = buf;
+
+      return true;
+    };
+
+    return new Constructor();
+  })();
+
+  var scope = nock('http://pauseme.com')
+    .get('/')
+    .reply(200, 'nobody');
+
+  var req = http.get({
+    host: 'pauseme.com'
+   , path: '/'
+  }, function(res) {
+    dest.on('end', function() {
+      t.fail('should not call end implicitly');
+    });
+
+    res.on('end', function() {
+      scope.done();
+      t.pass('should emit end event');
+      t.end();
+    });
+
+    res.pipe(dest, {end: false});
   });
 });
 
