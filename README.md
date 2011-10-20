@@ -26,6 +26,17 @@ It will intercept an HTTP GET request to '/users/1' and reply with a status 200,
 
 Then the test can call the module, and the module will do the HTTP requests.
 
+
+## Specifying request body
+
+You can specify the request body to be matched as the second argument to the `get`, `post`, `put` or `delete` specifications like this:
+
+    var scope = nock('http://myapp.iriscouch.com')
+                    .post('/users', {username: 'pgte', email: 'pedro.teixeira@gmail.com'})
+                    .reply(201, {ok: true, id: "123ABC", rev: "946B7D1C"});
+
+The request body can be a string or a JSON object.
+
 ## Specifying replies
 
 You can specify the return status code for a path on the first argument of reply like this:
@@ -51,6 +62,14 @@ or even as a file:
     var scope = nock('http://myapp.iriscouch.com')
                     .get('/')
                     .replyWithFile(200, __dirname + '/replies/user.json');
+
+### Specifying reply headers
+
+You can specify the reply headers like this:
+
+    var scope = nock('http://www.headdy.com')
+       .get('/')
+       .reply(200, "Hello World!", {'X-My-Headers': 'My Header value'});
 
 ## HTTP Verbs
 
