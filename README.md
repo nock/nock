@@ -97,14 +97,14 @@ This can be useful, for instance, if you have random or time-dependent data in y
 You can use a regexp for replacement, just like String.prototype.replace:
 
     var scope = nock('http://api.myservice.com')
-                    .filterPath(/password=[^&]*/g, 'password=XXX')
+                    .filteringPath(/password=[^&]*/g, 'password=XXX')
                     .get('/users/1?password=XXX')
                     .reply(200, 'user');
 
 Or you can use a function:
 
     var scope = nock('http://api.myservice.com')
-                    .filterPath(function(path) {
+                    .filteringPath(function(path) {
                        return '/ABC';
                      })
                     .get('/ABC')
@@ -119,14 +119,14 @@ This can be useful, for instance, if you have random or time-dependent data in y
 You can use a regexp for replacement, just like String.prototype.replace:
 
     var scope = nock('http://api.myservice.com')
-                    .filterRequestBody(/password=[^&]*/g, 'password=XXX')
+                    .filteringRequestBody(/password=[^&]*/g, 'password=XXX')
                     .post('/users/1', 'data=ABC&password=XXX')
                     .reply(201, 'OK');
 
 Or you can use a function:
 
     var scope = nock('http://api.myservice.com')
-                    .filterRequestBody(function(path) {
+                    .filteringRequestBody(function(path) {
                        return 'ABC';
                      })
                     .post('/', 'ABC')
