@@ -150,6 +150,11 @@ Example:
       google.done(); // will throw an assertion error if meanwhile a "GET http://google.com" was not performed.
     }, 5000);
 
+## .isDone()
+
+You can also call `isDone()`, which will return a boolean saying if all the expectations are met or not (instead of throwing an exception);
+
+
 # Logging
 
 Nock can log matches if you pass in a log function like this:
