@@ -190,6 +190,8 @@ The `nockCalls` var will contain an array of strings representing the generated 
 
 Copy and paste that code into your tests, customize at will, and you're done!
 
+(Remember that you should do this one test at a time).
+
 # How does it work?
 
 Nock works by overriding Node's http.request function.
