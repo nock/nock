@@ -162,7 +162,48 @@ Nock can log matches if you pass in a log function like this:
     var google = nock('http://google.com')
                     .log(console.log)
                     ...
+# Restoring
+
+You can restore the HTTP interceptor to the normal unmocked behaviour by calling:
+
+    nock.restore();
+
+# Recording
+
+This is a cool feature:
+
+Guessing what the HTTP calls are is a mess, specially if you are introducing nock on your already-coded tests.
+
+For these cases where you want to mock an existing live system you can record and playback the HTTP calls like this:
+
+    nock.rec();
+    // Some HTTP calls happen and the nock code necessary to mock
+    // those calls will be outputted to console
+
+If you just want to capture the generated code into a var as an array you can use:
+
+    nock.rec(true); // :no_output = true
+    // ... some HTTP calls
+    var nockCalls = nock.play();
+
+The `nockCalls` var will contain an array of strings representing the generated code you need.
+
+Copy and paste that code into your tests, customize at will, and you're done!
 
 # How does it work?
 
 Nock works by overriding Node's http.request function.
+
+# License
+
+(The MIT License)
+
+Copyright (c) 2011 Pedro Teixeira. http://about.me/pedroteixeira
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the 'Software'), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+FUCK YEAH.

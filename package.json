@@ -1,11 +1,12 @@
 { "name" : "nock"
 , "description" : "HTTP Server mocking for Node.js"
 , "tags" : ["Mock", "HTTP", "testing", "isolation"]
-, "version" : "0.4.0"
+, "version" : "0.5.0"
 , "author" : "Pedro Teixeira <pedro.teixeira@gmail.com>"
 , "contributors" :
-  [ "Roly Fentanes"
-  , "Alexander Simmerl"
+  [ {name:"Roly Fentanes" }
+  , {name:"Alexander Simmerl"}
+  , {name:"Pedro Teixeira"}
   ]
 , "repository" :
   { "type" : "git"
