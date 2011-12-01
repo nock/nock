@@ -176,15 +176,15 @@ Guessing what the HTTP calls are is a mess, specially if you are introducing noc
 
 For these cases where you want to mock an existing live system you can record and playback the HTTP calls like this:
 
-    nock.rec();
+    nock.recorder.rec();
     // Some HTTP calls happen and the nock code necessary to mock
     // those calls will be outputted to console
 
 If you just want to capture the generated code into a var as an array you can use:
 
-    nock.rec(true); // :no_output = true
+    nock.recorder.rec(true); // :no_output = true
     // ... some HTTP calls
-    var nockCalls = nock.play();
+    var nockCalls = nock.recorder.play();
 
 The `nockCalls` var will contain an array of strings representing the generated code you need.
 
