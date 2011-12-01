@@ -4,9 +4,10 @@
 , "version" : "0.5.1"
 , "author" : "Pedro Teixeira <pedro.teixeira@gmail.com>"
 , "contributors" :
-  [ {name:"Roly Fentanes" }
-  , {name:"Alexander Simmerl"}
-  , {name:"Pedro Teixeira"}
+  [ {"name":"Roly Fentanes" }
+  , {"name":"Alexander Simmerl"}
+  , {"name":"Pedro Teixeira"}
+  , {"name":"Nuno Job"}
   ]
 , "repository" :
   { "type" : "git"
