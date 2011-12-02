@@ -20,5 +20,5 @@
 , "devDependencies": {
     "tap": "0.0.x"
 }
-, "scripts": { "test": "node_modules/.bin/tap tests" }
+, "scripts": { "test": "node node_modules/tap/bin/tap.js tests" }
 }
