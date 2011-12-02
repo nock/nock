@@ -1,4 +1,4 @@
-# Nock
+# Nock [![Build Status](https://secure.travis-ci.org/<GITHUB_USER>/<REPO_NAME>.png)](http://travis-ci.org/<GITHUB_USER>/<REPO_NAME>)
 
 Nock is an HTTP mocking and expectations library for Node.js
 
