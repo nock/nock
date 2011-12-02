@@ -688,3 +688,36 @@ tap.test("chaining API", function(t) {
     });
   });
 });
+
+tap.test("same URI", function(t) {
+  var scope = nock('http://sameurii.com')
+    .get('/abc')
+    .reply(200, 'first one')
+    .get('/abc')
+    .reply(200, 'second one');
+
+  http.get({
+    host: 'sameurii.com'
+   , path: '/abc'
+  }, function(res) {
+    res.on('data', function(data) {
+      res.setEncoding('utf8');
+      t.equal(data.toString(), 'first one', 'should be qual to first reply');
+      res.on('end', function() {
+        http.get({
+          host: 'sameurii.com'
+         , path: '/abc'
+        }, function(res) {
+          res.setEncoding('utf8');
+          res.on('data', function(data) {
+            t.equal(data.toString(), 'second one', 'should be qual to second reply');
+            res.on('end', function() {
+              scope.done();
+              t.end();
+            });
+          });
+        });
+      });
+    });
+  });
+});
