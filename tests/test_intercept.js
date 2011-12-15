@@ -102,6 +102,29 @@ tap.test("post", function(t) {
    req.end();
 });
 
+tap.test("isDone", function(t) {
+  var scope = nock('http://www.google.com')
+    .get('/')
+    .reply(200, "Hello World!");
+
+  t.notOk(scope.isDone(), "not done when a request is outstanding");
+
+  var req = http.request({
+      host: "www.google.com"
+    , path: '/'
+    , port: 80
+  }, function(res) {
+    t.equal(res.statusCode, 200);
+    res.on('end', function() {
+      t.ok(scope.isDone(), "done after request is made");
+      scope.done();
+      t.end();
+    });
+  });
+
+  req.end();
+});
+
 tap.test("request headers exposed", function(t) {
 
   var scope = nock('http://www.headdy.com')
