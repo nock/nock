@@ -721,3 +721,62 @@ tap.test("same URI", function(t) {
     });
   });
 });
+
+tap.test("can use hostname instead of host", function(t) {
+  var dataCalled = false
+
+  var scope = nock('http://www.google.com')
+    .get('/')
+    .reply(200, "Hello World!");
+
+  var req = http.request({
+      hostname: "www.google.com"
+    , path: '/'
+  }, function(res) {
+
+    t.equal(res.statusCode, 200);
+    res.on('end', function() {
+      t.ok(dataCalled);
+      scope.done();
+      t.end();
+    });
+    res.on('data', function(data) {
+      dataCalled = true;
+      t.ok(data instanceof Buffer, "data should be buffer");
+      t.equal(data.toString(), "Hello World!", "response should match");
+    });
+
+  });
+
+  req.end();
+});
+
+tap.test("can take a port", function(t) {
+  var dataCalled = false
+
+  var scope = nock('http://www.myserver.com:3333')
+    .get('/')
+    .reply(200, "Hello World!");
+
+  var req = http.request({
+      hostname: "www.myserver.com"
+    , path: '/'
+    , port: 3333
+  }, function(res) {
+
+    t.equal(res.statusCode, 200);
+    res.on('end', function() {
+      t.ok(dataCalled);
+      scope.done();
+      t.end();
+    });
+    res.on('data', function(data) {
+      dataCalled = true;
+      t.ok(data instanceof Buffer, "data should be buffer");
+      t.equal(data.toString(), "Hello World!", "response should match");
+    });
+
+  });
+
+  req.end();
+});
