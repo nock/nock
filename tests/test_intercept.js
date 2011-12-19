@@ -1,5 +1,6 @@
 var nock    = require('../.')
 var http    = require('http');
+var https   = require('https');
 var util    = require('util');
 var events  = require('events');
 var tap     = require('tap');
@@ -799,6 +800,33 @@ tap.test("can take a port", function(t) {
       t.equal(data.toString(), "Hello World!", "response should match");
     });
 
+  });
+
+  req.end();
+});
+
+tap.test("can use https", function(t) {
+  var dataCalled = false
+
+  var scope = nock('https://google.com')
+    .get('/')
+    .reply(200, "Hello World!");
+
+  var req = https.request({
+      host: "google.com"
+    , path: '/'
+  }, function(res) {
+    t.equal(res.statusCode, 200);
+    res.on('end', function() {
+      t.ok(dataCalled);
+      scope.done();
+      t.end();
+    });
+    res.on('data', function(data) {
+      dataCalled = true;
+      t.ok(data instanceof Buffer, "data should be buffer");
+      t.equal(data.toString(), "Hello World!", "response should match");
+    });
   });
 
   req.end();
