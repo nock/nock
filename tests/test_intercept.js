@@ -132,16 +132,20 @@ tap.test("request headers exposed", function(t) {
      .get('/')
      .reply(200, "Hello World!", {'X-My-Headers': 'My Header value'});
 
-  var req = http.request({
+  var req = http.get({
      host: "www.headdy.com"
     , method: 'GET'
     , path: '/'
     , port: 80
     , headers: {'X-My-Headers': 'My custom Header value'}
+  }, function(res) {
+    res.on('end', function() {
+      scope.done();
+      t.end();
+    });
   });
 
   t.equivalent(req._headers, {'x-my-headers': 'My custom Header value', 'host': 'www.headdy.com'});
-  t.end();
 });
 
 tap.test("headers work", function(t) {
@@ -159,11 +163,98 @@ tap.test("headers work", function(t) {
    t.equal(res.statusCode, 200);
    res.on('end', function() {
      t.equivalent(res.headers, {'x-my-headers': 'My Header value'});
+     scope.done();
      t.end();
    });
   });
 
   req.end();
+
+});
+
+tap.test("match headers", function(t) {
+  var scope = nock('http://www.headdy.com')
+     .get('/')
+     .matchHeader('x-my-headers', 'My custom Header value')
+     .reply(200, "Hello World!");
+
+  http.get({
+     host: "www.headdy.com"
+    , method: 'GET'
+    , path: '/'
+    , port: 80
+    , headers: {'X-My-Headers': 'My custom Header value'}
+  }, function(res) {
+    res.setEncoding('utf8');
+    t.equal(res.statusCode, 200);
+
+    res.on('data', function(data) {
+      t.equal(data, 'Hello World!');
+    });
+
+    res.on('end', function() {
+      scope.done();
+      t.end();
+    });
+  });
+
+});
+
+tap.test("match all headers", function(t) {
+  var scope = nock('http://api.headdy.com')
+     .matchHeader('accept', 'application/json')
+     .get('/one')
+     .reply(200, { hello: "world" })
+     .get('/two')
+     .reply(200, { a: 1, b: 2, c: 3 });
+
+  var ended = 0;
+  var end = function() {
+    scope.done();
+    t.end();
+  };
+
+  http.get({
+     host: "api.headdy.com"
+    , method: 'GET'
+    , path: '/one'
+    , port: 80
+    , headers: {'Accept': 'application/json'}
+  }, function(res) {
+    res.setEncoding('utf8');
+    t.equal(res.statusCode, 200);
+
+    res.on('data', function(data) {
+      t.equal(data, '{"hello":"world"}');
+    });
+
+    res.on('end', function() {
+      if (++ended === 2) {
+        end();
+      }
+    });
+  });
+
+  http.get({
+     host: "api.headdy.com"
+    , method: 'GET'
+    , path: '/two'
+    , port: 80
+    , headers: {'accept': 'application/json'}
+  }, function(res) {
+    res.setEncoding('utf8');
+    t.equal(res.statusCode, 200);
+
+    res.on('data', function(data) {
+      t.equal(data, '{"a":1,"b":2,"c":3}');
+    });
+
+    res.on('end', function() {
+      if (++ended === 2) {
+        end();
+      }
+    });
+  });
 
 });
 
