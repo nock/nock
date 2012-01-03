@@ -158,7 +158,7 @@ tap.test("headers work", function(t) {
   }, function(res) {
    t.equal(res.statusCode, 200);
    res.on('end', function() {
-     t.similar(res.headers, {'X-My-Headers': 'My Header value'});
+     t.equivalent(res.headers, {'x-my-headers': 'My Header value'});
      t.end();
    });
   });
