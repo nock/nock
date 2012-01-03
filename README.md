@@ -132,6 +132,15 @@ Or you can use a function:
                     .post('/', 'ABC')
                     .reply(201, 'OK');
 
+## Request Headers Matching
+
+If you need to match requests only if certain request headers match, you can.
+
+    var scope = nock('http://api.myservice.com')
+                    .matchHeader('accept', 'application/json')
+                    .get('/')
+                    .reply(200, {data: "hello world"})
+
 # Expectations
 
 Every time an HTTP request is performed for a scope that is mocked, Nock expects to find a handler for it. If it doesn't, it will throw an error.
