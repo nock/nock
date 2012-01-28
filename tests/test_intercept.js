@@ -867,7 +867,7 @@ tap.test("can take a port", function(t) {
     , path: '/'
     , port: 3333
   }, function(res) {
-
+    
     t.equal(res.statusCode, 200);
     res.on('end', function() {
       scope.done();
