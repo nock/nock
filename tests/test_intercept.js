@@ -891,7 +891,7 @@ tap.test("can use https", function(t) {
   }, function(res) {
     t.equal(res.statusCode, 200);
     res.on('end', function() {
-      t.ok(dataCalled);
+      t.ok(dataCalled, 'data event called');
       scope.done();
       t.end();
     });
@@ -899,6 +899,70 @@ tap.test("can use https", function(t) {
       dataCalled = true;
       t.ok(data instanceof Buffer, "data should be buffer");
       t.equal(data.toString(), "Hello World!", "response should match");
+    });
+  });
+
+  req.end();
+});
+
+tap.test("can use ClientRequest using GET", function(t) {
+  
+  var dataCalled = false
+
+  var scope = nock('http://www2.clientrequester.com')
+    .get('/dsad')
+    .reply(202, "HEHE!");
+    
+  var req = new http.ClientRequest({
+      host: "www2.clientrequester.com"
+    , path: '/dsad'
+  });
+  req.end();
+
+  req.on('response', function(res) {
+    t.equal(res.statusCode, 202);
+    res.on('end', function() {
+      t.ok(dataCalled, "data event was called");
+      scope.done();
+      t.end();
+    });
+    res.on('data', function(data) {
+      dataCalled = true;
+      t.ok(data instanceof Buffer, "data should be buffer");
+      t.equal(data.toString(), "HEHE!", "response should match");
+    });
+  });
+
+  req.end();
+});
+
+tap.test("can use ClientRequest using POST", function(t) {
+  
+  var dataCalled = false
+
+  var scope = nock('http://www2.clientrequester.com')
+    .post('/posthere/please', 'heyhey this is the body')
+    .reply(201, "DOOONE!");
+    
+  var req = new http.ClientRequest({
+      host: "www2.clientrequester.com"
+    , path: '/posthere/please'
+    , method: 'POST'
+  });
+  req.write('heyhey this is the body');
+  req.end();
+
+  req.on('response', function(res) {
+    t.equal(res.statusCode, 201);
+    res.on('end', function() {
+      t.ok(dataCalled, "data event was called");
+      scope.done();
+      t.end();
+    });
+    res.on('data', function(data) {
+      dataCalled = true;
+      t.ok(data instanceof Buffer, "data should be buffer");
+      t.equal(data.toString(), "DOOONE!", "response should match");
     });
   });
 
