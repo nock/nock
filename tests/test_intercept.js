@@ -201,7 +201,7 @@ tap.test("match headers", function(t) {
 });
 
 tap.test("match all headers", function(t) {
-  var scope = nock('http://api.headdy.com')
+  var scope = nock('http://www2.headdy.com')
      .matchHeader('accept', 'application/json')
      .get('/one')
      .reply(200, { hello: "world" })
@@ -209,12 +209,15 @@ tap.test("match all headers", function(t) {
      .reply(200, { a: 1, b: 2, c: 3 });
 
   var ended = 0;
-  var end = function() {
-    scope.done();
-    t.end();
-  };
-
-  http.get({
+  function callback() {
+    ended += 1;
+    if (ended === 2) {
+      scope.done();
+      t.end();
+    }
+  }
+  
+  http.request({
      host: "api.headdy.com"
     , method: 'GET'
     , path: '/one'
@@ -228,14 +231,10 @@ tap.test("match all headers", function(t) {
       t.equal(data, '{"hello":"world"}');
     });
 
-    res.on('end', function() {
-      if (++ended === 2) {
-        end();
-      }
-    });
+    res.on('end', callback);
   });
 
-  http.get({
+  http.request({
      host: "api.headdy.com"
     , method: 'GET'
     , path: '/two'
@@ -249,11 +248,7 @@ tap.test("match all headers", function(t) {
       t.equal(data, '{"a":1,"b":2,"c":3}');
     });
 
-    res.on('end', function() {
-      if (++ended === 2) {
-        end();
-      }
-    });
+    res.on('end', callback);
   });
 
 });
@@ -967,4 +962,49 @@ tap.test("can use ClientRequest using POST", function(t) {
   });
 
   req.end();
+});
+
+tap.test("same url matches twice", function(t) {
+  var scope = nock('http://www.twicematcher.com')
+     .get('/hey')
+     .reply(200, "First match")
+     .get('/hey')
+     .reply(201, "Second match");
+     
+  var replied = 0;
+  
+  function callback() {
+    replied += 1;
+    if (replied == 2) {
+      scope.done();
+      t.end();
+    }
+  }
+
+  http.get({
+     host: "www.twicematcher.com"
+    , path: '/hey'
+  }, function(res) {
+    t.equal(res.statusCode, 200);
+
+    res.on('data', function(data) {
+      t.equal(data.toString(), 'First match', 'should match first request response body');
+    });
+
+    res.on('end', callback);
+  });
+
+  http.get({
+     host: "www.twicematcher.com"
+    , path: '/hey'
+  }, function(res) {
+    t.equal(res.statusCode, 201);
+
+    res.on('data', function(data) {
+      t.equal(data.toString(), 'Second match', 'should match second request response body');
+    });
+
+    res.on('end', callback);
+  });
+
 });
