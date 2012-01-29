@@ -37,39 +37,41 @@ tap.test("get gets mocked", function(t) {
 
 tap.test("not mocked should work in http", function(t) {
   var dataCalled = false;
-
-  var scope = nock('http://www.yahoo.com')
-    .get('/')
-    .reply(200, "Hello World!");
-
-    var req = http.request({
-        host: "www.amazon.com"
-      , path: '/'
-      , port: 80
-    }, function(res) {
+  
+  var req = http.request({
+      host: "www.amazon.com"
+    , path: '/'
+    , port: 80
+  }, function(res) {
+    
+    t.equal(res.statusCode, 200);
+    res.on('end', function() {
+      var doneFails = false;
       
-      t.equal(res.statusCode, 200);
-      res.on('end', function() {
-        var doneFails = false;
-        
-        t.ok(dataCalled);
-        try {
-          scope.done();
-        } catch(err) {
-          doneFails = true;
-        }
-        t.ok(doneFails);
-        t.end();
-      });
-      res.on('data', function(data) {
-        dataCalled = true;
-      });
-      
+      t.ok(dataCalled);
+      try {
+        scope.done();
+      } catch(err) {
+        doneFails = true;
+      }
+      t.ok(doneFails);
+      t.end();
     });
     
-    req.end();
-
-  t.end();
+    res.on('data', function(data) {
+      dataCalled = true;
+    });
+    
+  });
+  
+  req.on('error', function(err) {
+    if (err.code !== 'ECONNREFUSED') {
+      throw err;
+    }
+    t.end();
+  });
+    
+  req.end();
 });
 
 tap.test("post", function(t) {
@@ -193,6 +195,7 @@ tap.test("match headers", function(t) {
     });
 
     res.on('end', function() {
+      console.log('all done here');
       scope.done();
       t.end();
     });
@@ -201,7 +204,7 @@ tap.test("match headers", function(t) {
 });
 
 tap.test("match all headers", function(t) {
-  var scope = nock('http://www2.headdy.com')
+  var scope = nock('http://api.headdy.com')
      .matchHeader('accept', 'application/json')
      .get('/one')
      .reply(200, { hello: "world" })
@@ -217,9 +220,8 @@ tap.test("match all headers", function(t) {
     }
   }
   
-  http.request({
+  http.get({
      host: "api.headdy.com"
-    , method: 'GET'
     , path: '/one'
     , port: 80
     , headers: {'Accept': 'application/json'}
@@ -234,9 +236,8 @@ tap.test("match all headers", function(t) {
     res.on('end', callback);
   });
 
-  http.request({
+  http.get({
      host: "api.headdy.com"
-    , method: 'GET'
     , path: '/two'
     , port: 80
     , headers: {'accept': 'application/json'}
