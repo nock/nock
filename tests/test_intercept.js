@@ -1009,3 +1009,56 @@ tap.test("same url matches twice", function(t) {
   });
 
 });
+
+tap.test("scopes are independent", function(t) {
+  var scope1 = nock('http://www34.google.com')
+    .get('/')
+    .reply(200, "Hello World!");
+  var scope2 = nock('http://www34.google.com')
+    .get('/')
+    .reply(200, "Hello World!");
+
+  var req = http.request({
+      host: "www34.google.com"
+    , path: '/'
+    , port: 80
+  }, function(res) {
+    res.on('end', function() {
+      t.ok(scope1.isDone());
+      t.ok(! scope2.isDone()); // fails
+      t.end();
+    });
+  });
+
+  req.end();
+});
+
+tap.test("two scopes with the same request are consumed", function(t) {
+  var scope1 = nock('http://www36.google.com')
+    .get('/')
+    .reply(200, "Hello World!");
+  
+  var scope2 = nock('http://www36.google.com')
+    .get('/')
+    .reply(200, "Hello World!");
+  
+  var doneCount = 0;
+  function done() {
+    doneCount += 1;
+    if (doneCount == 2) {
+      t.end();
+    }
+  }
+
+  for (var i = 0; i < 2; i += 1) {
+    var req = http.request({
+        host: "www36.google.com"
+      , path: '/'
+      , port: 80
+    }, function(res) {
+      res.on('end', done);
+    });
+
+    req.end();
+  }
+});
