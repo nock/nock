@@ -1,7 +1,7 @@
 { "name" : "nock"
 , "description" : "HTTP Server mocking for Node.js"
 , "tags" : ["Mock", "HTTP", "testing", "isolation"]
-, "version" : "0.8.0"
+, "version" : "0.8.1"
 , "author" : "Pedro Teixeira <pedro.teixeira@gmail.com>"
 , "contributors" :
   [ {"name":"Roly Fentanes" }
@@ -10,6 +10,8 @@
   , {"name":"Nuno Job"}
   , {"name":"Ian Young"}
   , {"name":"nilsbunger"}
+  , {"name": "bacchusrx", "email": "bacchusrx@eightstar.ca"}
+  , {"name": "Fabiano França"}
   ]
 , "repository" :
   { "type" : "git"
