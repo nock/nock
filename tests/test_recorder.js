@@ -27,3 +27,15 @@ tap.test('records', function(t) {
   req.end();
   return req;
 });
+
+tap.test('checks if callback is specified', function(t) {
+  var options = {
+    host: 'www.google.com', method: 'GET', path: '/', port: 80
+  };
+  
+  nock.restore();
+  nock.recorder.rec(true);
+  
+  http.request(options, undefined).end();
+  t.end();
+});
