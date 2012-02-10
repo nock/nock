@@ -1071,20 +1071,19 @@ tap.test("allow unmocked option works", function(t) {
     .reply(200, 'Hi!');
 
   function secondIsDone() {
-    console.log('ended ---- ');
     t.ok(! scope.isDone());
     http.request({
         host: "www.google.com"
       , path: "/"
       , port: 80
     }, function(res) {
-      t.assert(res.statusCode === 200, 'GET Google Home page');
+      console.log(res.statusCode);
+      t.assert(res.statusCode < 400 && res.statusCode >= 200, 'GET Google Home page');
       t.end();
     }).end();
   }
 
   function firstIsDone() {
-    console.log('ended ---- ');
     t.ok(! scope.isDone());
     http.request({
         host: "www.google.com"
