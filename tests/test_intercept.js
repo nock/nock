@@ -1062,3 +1062,32 @@ tap.test("two scopes with the same request are consumed", function(t) {
     req.end();
   }
 });
+
+tap.test("allow unmocked option works", function(t) {
+  var scope = nock('http://www.google.com', {allowUnmocked: true})
+    .get('/abc')
+    .reply(200, 'Hey!')
+    .get('/wont/get/here')
+    .reply(200, 'Hi!');
+
+  function firstIsDone() {
+    console.log('ended ---- ');
+    t.ok(! scope.isDone());
+    http.request({
+        host: "www.google.com"
+      , path: "/does/not/exist/dskjsakdj"
+      , port: 80
+    }, function(res) {
+      t.assert(res.statusCode === 404, 'Google say it does not exist');
+      t.end();
+    }).end();
+  }
+
+  http.request({
+      host: "www.google.com"
+    , path: "/abc"
+    , port: 80
+  }, function(res) {
+    res.on('end', firstIsDone);
+  }).end();
+});

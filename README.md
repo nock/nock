@@ -141,6 +141,18 @@ If you need to match requests only if certain request headers match, you can.
                     .get('/')
                     .reply(200, {data: "hello world"})
 
+## Allow __unmocked__ requests on a mocked hostname
+
+If you need some request on the same host name to be mocked and some others to **really** go through the HTTP stack, you can use the `allowUnmocked` option like this:
+
+    options = {allowUnmocked: true};
+    var scope = nock('http://my.existing.service.com', options)
+      .get('/my/url')
+      .reply(200, 'OK!');
+
+     GET /my/url => goes through nock
+     GET /other/url => actually makes request to the server
+
 # Expectations
 
 Every time an HTTP request is performed for a scope that is mocked, Nock expects to find a handler for it. If it doesn't, it will throw an error.
