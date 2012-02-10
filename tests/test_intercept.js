@@ -1070,6 +1070,19 @@ tap.test("allow unmocked option works", function(t) {
     .get('/wont/get/here')
     .reply(200, 'Hi!');
 
+  function secondIsDone() {
+    console.log('ended ---- ');
+    t.ok(! scope.isDone());
+    http.request({
+        host: "www.google.com"
+      , path: "/"
+      , port: 80
+    }, function(res) {
+      t.assert(res.statusCode === 200, 'GET Google Home page');
+      t.end();
+    }).end();
+  }
+
   function firstIsDone() {
     console.log('ended ---- ');
     t.ok(! scope.isDone());
@@ -1079,7 +1092,7 @@ tap.test("allow unmocked option works", function(t) {
       , port: 80
     }, function(res) {
       t.assert(res.statusCode === 404, 'Google say it does not exist');
-      t.end();
+      res.on('end', secondIsDone);
     }).end();
   }
 
