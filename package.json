@@ -1,17 +1,18 @@
 { "name" : "nock"
 , "description" : "HTTP Server mocking for Node.js"
 , "tags" : ["Mock", "HTTP", "testing", "isolation"]
-, "version" : "0.8.2"
+, "version" : "0.8.4"
 , "author" : "Pedro Teixeira <pedro.teixeira@gmail.com>"
 , "contributors" :
-  [ {"name":"Roly Fentanes" }
-  , {"name":"Alexander Simmerl"}
-  , {"name":"Pedro Teixeira"}
-  , {"name":"Nuno Job"}
-  , {"name":"Ian Young"}
-  , {"name":"nilsbunger"}
+  [ {"name": "Roly Fentanes" }
+  , {"name": "Alexander Simmerl"}
+  , {"name": "Pedro Teixeira"}
+  , {"name": "Nuno Job"}
+  , {"name": "Ian Young"}
+  , {"name": "nilsbunger"}
   , {"name": "bacchusrx", "email": "bacchusrx@eightstar.ca"}
   , {"name": "Fabiano França"}
+  , {"name": "Sascha Drews"}
   ]
 , "repository" :
   { "type" : "git"
