@@ -901,6 +901,28 @@ tap.test("can use https", function(t) {
   req.end();
 });
 
+tap.test("complaints if https route is missing", function(t) {
+  var dataCalled = false
+
+  var scope = nock('https://google.com')
+    .get('/')
+    .reply(200, "Hello World!");
+
+  try {
+    var req = https.request({
+        host: "google.com"
+      , path: '/abcdef892932'
+    }, function(res) {
+      throw new Error('should not come here!');
+    }).end();
+  } catch (err) {
+    t.ok(err.message.match(/No match for HTTP request GET \/abcdef892932/));
+    t.end();
+  }
+  
+
+});
+
 tap.test("can use ClientRequest using GET", function(t) {
   
   var dataCalled = false
