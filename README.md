@@ -75,6 +75,13 @@ You can specify the reply headers like this:
 
 Nock supports get, post, put and delete HTTP verbs.
 
+## Support for HTTP and HTTPS
+
+By default nock assumes HTTP. If you need to use HTTPS you can specify the `https://` prefix like this:
+
+    var scope = nock('https://secure.my.server.com')
+       // ...
+
 ## Chaining
 
 You can chain behaviour like this:
