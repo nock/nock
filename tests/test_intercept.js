@@ -1125,3 +1125,20 @@ tap.test("allow unmocked option works", function(t) {
     res.on('end', firstIsDone);
   }).end();
 });
+
+tap.test("default reply headers work", function(t) {
+  var scope = nock('http://default.reply.headers.com')
+    .defaultReplyHeaders({'X-Powered-By': 'Meeee', 'X-Another-Header': 'Hey man!'})
+    .get('/')
+    .reply(200, '', {A: 'b'});
+
+  function done(res) {
+    t.deepEqual(res.headers, {'x-powered-by': 'Meeee', 'x-another-header': 'Hey man!', a: 'b'});
+    t.end();
+  }
+
+  http.request({
+      host: 'default.reply.headers.com'
+    , path: '/'
+  }, done).end();
+});
