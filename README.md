@@ -63,13 +63,22 @@ or even as a file:
                     .get('/')
                     .replyWithFile(200, __dirname + '/replies/user.json');
 
-### Specifying reply headers
+### Specifying Reply Headers
 
 You can specify the reply headers like this:
 
     var scope = nock('http://www.headdy.com')
        .get('/')
        .reply(200, "Hello World!", {'X-My-Headers': 'My Header value'});
+
+### Default Reply Headers
+
+You can also specify default reply headers for all responses like this:
+
+    var scope = nock('http://www.headdy.com')
+      .defaultReplyHeaders({'X-Powered-By': 'Rails', 'Content-Type': 'application/json'})
+      .get('/')
+      .reply(200, 'The default headers should come too');
 
 ## HTTP Verbs
 
