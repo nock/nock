@@ -195,7 +195,6 @@ tap.test("match headers", function(t) {
     });
 
     res.on('end', function() {
-      console.log('all done here');
       scope.done();
       t.end();
     });
@@ -1099,7 +1098,6 @@ tap.test("allow unmocked option works", function(t) {
       , path: "/"
       , port: 80
     }, function(res) {
-      console.log(res.statusCode);
       t.assert(res.statusCode < 400 && res.statusCode >= 200, 'GET Google Home page');
       t.end();
     }).end();
@@ -1141,4 +1139,19 @@ tap.test("default reply headers work", function(t) {
       host: 'default.reply.headers.com'
     , path: '/'
   }, done).end();
+});
+
+tap.test('clean all works', function(t) {
+  var scope = nock('http://clean.all.coz')
+    .get('/')
+    .reply(200);
+
+  nock.cleanAll();
+
+  var req = http.get({host: 'clean.all.coz', path: '/'});
+  req.on('error', function(e) {
+    t.equal(e.code, 'ENOTFOUND');
+    t.end();
+  });
+  req.end()
 });

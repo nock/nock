@@ -191,6 +191,11 @@ Example:
 
 You can also call `isDone()`, which will return a boolean saying if all the expectations are met or not (instead of throwing an exception);
 
+## .cleanAll()
+
+You can cleanup all the prepared mocks (could be useful to cleanup some state after a failed test) like this:
+
+    nock.cleanAll();
 
 # Logging
 
