@@ -128,6 +128,22 @@ tap.test("isDone", function(t) {
   req.end();
 });
 
+tap.test("requireDone", function(t) {
+  var scope = nock('http://www.google.com')
+    .get('/', false, { requireDone: false })
+    .reply(200, "Hello World!");
+
+  t.ok(scope.isDone(), "done when a requireDone is set to false");
+
+  scope.get('/', false, { requireDone: true})
+       .reply(200, "Hello World!");
+
+  t.notOk(scope.isDone(), "not done when a requireDone is explicitly set to true");
+
+  nock.cleanAll()
+  t.end();
+});
+
 tap.test("request headers exposed", function(t) {
 
   var scope = nock('http://www.headdy.com')
