@@ -269,6 +269,28 @@ tap.test("match all headers", function(t) {
 
 });
 
+tap.test("header manipulation", function(t) {
+  var scope = nock('http://example.com')
+                .get('/accounts')
+                .reply(200, { accounts: [{ id: 1, name: 'Joe Blow' }] })
+    , req;
+
+  req = http.get({ host: 'example.com', path: '/accounts' }, function (res) {
+    res.on('end', function () {
+      scope.done();
+      t.end();
+    });
+  });
+
+  req.setHeader('X-Custom-Header', 'My Value');
+  t.equal(req.getHeader('X-Custom-Header'), 'My Value', 'Custom header was not set');
+
+  req.removeHeader('X-Custom-Header');
+  t.notOk(req.getHeader('X-Custom-Header'), 'Custom header was not removed');
+
+  req.end();
+});
+
 tap.test("body data is differentiating", function(t) {
   var doneCount = 0
     , scope = nock('http://www.boddydiff.com')
