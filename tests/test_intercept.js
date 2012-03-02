@@ -4,6 +4,7 @@ var https   = require('https');
 var util    = require('util');
 var events  = require('events');
 var tap     = require('tap');
+var mikealRequest = require('request');
 
 tap.test("get gets mocked", function(t) {
   var dataCalled = false
@@ -1170,4 +1171,37 @@ tap.test('clean all works', function(t) {
     t.end();
   });
   req.end()
+});
+
+
+tap.test('username and password works', function(t) {
+  var scope = nock('http://passwordyy.com')
+    .log(console.log)
+    .get('/')
+    .reply(200, "Welcome, username");
+
+  http.request({
+    hostname: 'passwordyy.com',
+    auth: "username:password",
+    path: '/'
+  }, function(res) {
+    scope.done();
+    t.end();
+  }).end();
+});
+
+
+tap.test('works with mikeal/request and username and password', function(t) {
+    var scope = nock('http://passwordyyyyy.com')
+      .get('/abc')
+      .reply(200, "Welcome, username");
+
+  mikealRequest({uri: 'http://username:password@passwordyyyyy.com/abc', log:true}, function(err, res, body) {
+    console.log(err);
+    t.ok(! err, 'error');
+    t.ok(scope.isDone());
+    t.equal(body, "Welcome, username");
+    t.end();
+  });
+
 });
