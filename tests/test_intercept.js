@@ -374,6 +374,7 @@ tap.test("chaining", function(t) {
    }
    
    t.test("post", function(t) {
+     var dataCalled;
      var req = http.request({
          host: "www.spiffy.com"
        , method: 'POST'
@@ -398,6 +399,7 @@ tap.test("chaining", function(t) {
    });
 
    t.test("get", function(t) {
+     var dataCalled;
      var req = http.request({
          host: "www.spiffy.com"
        , method: 'GET'
