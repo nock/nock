@@ -243,6 +243,17 @@ Copy and paste that code into your tests, customize at will, and you're done!
 
 Nock works by overriding Node's `http.request` function. Also, it overrides `http.ClientRequest` too to cover for modules that use it directly.
 
+# PROTIP
+
+If you don't want to match the request body you can use this trick (by @theycallmeswift):
+
+    var scope = nock('http://api.myservice.com')
+      .filteringRequestBody(function(path) {
+        return '*';
+      })
+      .post('/some_uri', '*')
+      .reply(200, 'OK');
+
 # License
 
 (The MIT License)
