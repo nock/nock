@@ -1,7 +1,7 @@
 { "name" : "nock"
 , "description" : "HTTP Server mocking for Node.js"
 , "tags" : ["Mock", "HTTP", "testing", "isolation"]
-, "version" : "0.10.2"
+, "version" : "0.10.3"
 , "author" : "Pedro Teixeira <pedro.teixeira@gmail.com>"
 , "contributors" :
   [ {"name": "Roly Fentanes" }
@@ -25,7 +25,7 @@
 , "main" : "./index"
 , "devDependencies": {
     "tap": "0.2.x",
-    "request": "*"
+    "request": "* "
 }
 , "scripts": { "test": "node node_modules/tap/bin/tap.js tests" }
 }
