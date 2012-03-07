@@ -6,6 +6,7 @@ var events  = require('events');
 var tap     = require('tap');
 var mikealRequest = require('request');
 
+
 tap.test("get gets mocked", function(t) {
   var dataCalled = false
   
@@ -1228,4 +1229,35 @@ tap.test('works with mikeal/request and username and password', function(t) {
     t.end();
   });
 
+});
+
+tap.test('different ports work works', function(t) {
+  var scope = nock('http://abc.portyyyy.com:8081')
+    .log(console.log)
+    .get('/pathhh')
+    .reply(200, "Welcome, username");
+
+  http.request({
+    hostname: 'abc.portyyyy.com',
+    port: 8081,
+    path: '/pathhh'
+  }, function(res) {
+    scope.done();
+    t.end();
+  }).end();
+});
+
+tap.test('different ports work work with Mikeal request', function(t) {
+  var scope = nock('http://abc.portyyyy.com:8082')
+    .log(console.log)
+    .get('/pathhh')
+    .reply(200, "Welcome to Mikeal Request!");
+
+  mikealRequest.get('http://abc.portyyyy.com:8082/pathhh', function(err, res, body) {
+    console.log(err);
+    t.ok(! err, 'no error');
+    t.equal(body, 'Welcome to Mikeal Request!');
+    t.ok(scope.isDone());
+    t.end();
+  });
 });

@@ -102,6 +102,13 @@ By default nock assumes HTTP. If you need to use HTTPS you can specify the `http
     var scope = nock('https://secure.my.server.com')
        // ...
 
+## Non-standard ports
+
+If you use HTTPS and port 80 or HTTPS and port 443, don't specify the port in the scope. Otherwise, you should specify the port like this:
+
+    var scope = nock('http://my.server.com:8081')
+      ...
+
 ## Chaining
 
 You can chain behaviour like this:
