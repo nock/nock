@@ -107,6 +107,58 @@ tap.test("post", function(t) {
    req.end();
 });
 
+tap.test("get with reply callback", function(t) {
+  var scope = nock('http://www.google.com')
+     .get('/')
+     .reply(200, function() {
+        return 'OK!';
+     });
+
+  var req = http.request({
+     host: "www.google.com"
+    , path: '/'
+    , port: 80
+  }, function(res) {
+    res.on('end', function() {
+      scope.done();
+      t.end();
+    });
+    res.on('data', function(data) {
+      t.equal(data.toString(), 'OK!', 'response should match');
+    });
+  });
+
+  req.end();
+});
+
+tap.test("post with reply callback, uri, and request body", function(t) {
+  var input = 'key=val';
+
+  var scope = nock('http://www.google.com')
+     .post('/echo', input)
+     .reply(200, function(uri, body) {
+        return ['OK', uri, body].join(' ');
+     });
+
+  var req = http.request({
+     host: "www.google.com"
+    , method: 'POST'
+    , path: '/echo'
+    , port: 80
+  }, function(res) {
+    res.on('end', function() {
+      scope.done();
+      t.end();
+    });
+    res.on('data', function(data) {
+      t.equal(data.toString(), 'OK /echo key=val' , 'response should match');
+    });
+  });
+
+  req.write(input);
+  req.end();
+});
+
 tap.test("isDone", function(t) {
   var scope = nock('http://www.google.com')
     .get('/')
