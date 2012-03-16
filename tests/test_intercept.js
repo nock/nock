@@ -131,13 +131,13 @@ tap.test("get with reply callback", function(t) {
   req.end();
 });
 
-tap.test("post with reply callback and requestBody", function(t) {
+tap.test("post with reply callback, uri, and request body", function(t) {
   var input = 'key=val';
 
   var scope = nock('http://www.google.com')
      .post('/echo', input)
-     .reply(200, function(requestBody) {
-        return 'OK ' + requestBody ;
+     .reply(200, function(uri, body) {
+        return ['OK', uri, body].join(' ');
      });
 
   var req = http.request({
@@ -151,7 +151,7 @@ tap.test("post with reply callback and requestBody", function(t) {
       t.end();
     });
     res.on('data', function(data) {
-      t.equal(data.toString(), 'OK ' + input, 'response should match');
+      t.equal(data.toString(), 'OK /echo key=val' , 'response should match');
     });
   });
 
