@@ -68,6 +68,15 @@ or even as a file:
                     .get('/')
                     .replyWithFile(200, __dirname + '/replies/user.json');
 
+Instead of an object or a buffer you can also pass in a callback to be evaluated for the value of the response body:
+
+    var scope = nock('http://www.google.com')
+       .filteringRequestBody(/.*/, '*')
+       .post('/echo', '*')
+       .reply(201, function(uri, requestBody) {
+         return requestBody;
+       });
+
 ### Specifying Reply Headers
 
 You can specify the reply headers like this:
