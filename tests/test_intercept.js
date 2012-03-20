@@ -541,6 +541,57 @@ tap.test("reply with file", function(t) {
   
 });
 
+tap.test("reply with file and pipe response", function(t) {
+  var scope = nock('http://www.files.com')
+    .get('/')
+    .replyWithFile(200, __dirname + '/../assets/reply_file_1.txt')
+
+  var req = http.get({
+      host: "www.files.com"
+    , path: '/'
+    , port: 80
+  }, function(res) {
+    var str = '';
+    var fakeStream = new(require('stream').Stream);
+    fakeStream.writable = true;
+
+    fakeStream.write = function(d) {
+      str += d;
+    };
+
+    fakeStream.end = function() {
+      t.equal(str, "Hello from the file!", "response should match");
+      t.end();
+    };
+
+    res.pipe(fakeStream);
+    res.setEncoding('utf8');
+    t.equal(res.statusCode, 200);
+    
+  });
+  
+});
+
+tap.test("reply with file with mikeal/request", function(t) {
+  var scope = nock('http://www.files.com')
+    .get('/')
+    .replyWithFile(200, __dirname + '/../assets/reply_file_1.txt')
+
+  var options = { uri: 'http://www.files.com/', onResponse: true };
+  mikealRequest('http://www.files.com/', function(err, res, body) {
+    if (err) {
+      throw err;
+    }
+
+    res.setEncoding('utf8');
+    t.equal(res.statusCode, 200);
+
+    t.equal(body, "Hello from the file!", "response should match");
+    t.end();
+  });
+  
+});
+
 tap.test("reply with JSON", function(t) {
   var dataCalled = false
   
