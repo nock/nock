@@ -1304,7 +1304,6 @@ tap.test('clean all works', function(t) {
 
 tap.test('username and password works', function(t) {
   var scope = nock('http://passwordyy.com')
-    .log(console.log)
     .get('/')
     .reply(200, "Welcome, username");
 
@@ -1325,7 +1324,6 @@ tap.test('works with mikeal/request and username and password', function(t) {
       .reply(200, "Welcome, username");
 
   mikealRequest({uri: 'http://username:password@passwordyyyyy.com/abc', log:true}, function(err, res, body) {
-    console.log(err);
     t.ok(! err, 'error');
     t.ok(scope.isDone());
     t.equal(body, "Welcome, username");
@@ -1336,7 +1334,6 @@ tap.test('works with mikeal/request and username and password', function(t) {
 
 tap.test('different ports work works', function(t) {
   var scope = nock('http://abc.portyyyy.com:8081')
-    .log(console.log)
     .get('/pathhh')
     .reply(200, "Welcome, username");
 
@@ -1352,12 +1349,10 @@ tap.test('different ports work works', function(t) {
 
 tap.test('different ports work work with Mikeal request', function(t) {
   var scope = nock('http://abc.portyyyy.com:8082')
-    .log(console.log)
     .get('/pathhh')
     .reply(200, "Welcome to Mikeal Request!");
 
   mikealRequest.get('http://abc.portyyyy.com:8082/pathhh', function(err, res, body) {
-    console.log(err);
     t.ok(! err, 'no error');
     t.equal(body, 'Welcome to Mikeal Request!');
     t.ok(scope.isDone());
