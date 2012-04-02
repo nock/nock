@@ -1,7 +1,7 @@
 { "name" : "nock"
 , "description" : "HTTP Server mocking for Node.js"
 , "tags" : ["Mock", "HTTP", "testing", "isolation"]
-, "version" : "0.11.4"
+, "version" : "0.11.6"
 , "author" : "Pedro Teixeira <pedro.teixeira@gmail.com>"
 , "contributors" :
   [ {"name": "Roly Fentanes" }
@@ -16,6 +16,7 @@
   , {"name": "Mike Swift"}
   , {"name": "James Herdman"}
   , {"name": "David Björklund"}
+  , {"name": "Andrew Kramolisch"}
   ]
 , "repository" :
   { "type" : "git"
