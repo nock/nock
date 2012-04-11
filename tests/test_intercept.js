@@ -107,6 +107,34 @@ tap.test("post", function(t) {
    req.end();
 });
 
+tap.test("post with empty response body", function(t) {
+  var dataCalled = false;
+  
+  var scope = nock('http://www.google.com')
+     .post('/form')
+     .reply(200);
+
+   var req = http.request({
+       host: "www.google.com"
+     , method: 'POST'
+     , path: '/form'
+     , port: 80
+   }, function(res) {
+
+     t.equal(res.statusCode, 200);
+     res.on('end', function() {
+       t.notOk(dataCalled);
+       scope.done();
+       t.end();
+     });
+     res.on('data', function(data) {
+       dataCalled = true;
+       t.end();
+     });
+   });
+   req.end();
+});
+
 tap.test("get with reply callback", function(t) {
   var scope = nock('http://www.google.com')
      .get('/')
