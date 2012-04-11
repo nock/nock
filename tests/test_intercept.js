@@ -107,6 +107,30 @@ tap.test("post", function(t) {
    req.end();
 });
 
+tap.test("head", function(t) {
+  var dataCalled = false;
+  
+  var scope = nock('http://www.google.com')
+     .head('/form')
+     .reply(201, "OK!");
+
+   var req = http.request({
+       host: "www.google.com"
+     , method: 'HEAD'
+     , path: '/form'
+     , port: 80
+   }, function(res) {
+
+     t.equal(res.statusCode, 201);
+     res.on('end', function() {
+       scope.done();
+       t.end();
+     });
+   });
+
+   req.end();
+});
+
 tap.test("get with reply callback", function(t) {
   var scope = nock('http://www.google.com')
      .get('/')
