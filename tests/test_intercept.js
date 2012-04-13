@@ -112,10 +112,41 @@ tap.test("post with empty response body", function(t) {
   
   var scope = nock('http://www.google.com')
      .post('/form')
-     .reply(200);
+     .reply(201, "OK!");
 
    var req = http.request({
        host: "www.google.com"
+     , method: 'POST'
+     , path: '/form'
+     , port: 80
+   }, function(res) {
+
+     t.equal(res.statusCode, 201);
+     res.on('end', function() {
+       t.ok(dataCalled);
+       scope.done();
+       t.end();
+     });
+     res.on('data', function(data) {
+       dataCalled = true;
+       t.ok(data instanceof Buffer, "data should be buffer");
+       t.equal(data.toString(), "OK!", "response should match");
+     });
+
+   });
+   req.end();
+});
+
+tap.test("post, lowercase", function(t) {
+  var dataCalled = false;
+  
+  var scope = nock('http://www.google.com')
+     .post('/form')
+     .reply(200, "OK!");
+
+   var req = http.request({
+       host: "www.google.com"
+     , method: 'post'
      , method: 'POST'
      , path: '/form'
      , port: 80
@@ -132,6 +163,7 @@ tap.test("post with empty response body", function(t) {
        t.end();
      });
    });
+
    req.end();
 });
 
