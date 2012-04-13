@@ -107,6 +107,8 @@ tap.test("post", function(t) {
    req.end();
 });
 
+
+
 tap.test("post with empty response body", function(t) {
   var dataCalled = false;
   
@@ -403,6 +405,30 @@ tap.test("header manipulation", function(t) {
   t.notOk(req.getHeader('X-Custom-Header'), 'Custom header was not removed');
 
   req.end();
+});
+
+tap.test("head", function(t) {
+  var dataCalled = false;
+  
+  var scope = nock('http://www.google.com')
+     .head('/form')
+     .reply(201, "OK!");
+
+   var req = http.request({
+       host: "www.google.com"
+     , method: 'HEAD'
+     , path: '/form'
+     , port: 80
+   }, function(res) {
+
+     t.equal(res.statusCode, 201);
+     res.on('end', function() {
+       scope.done();
+       t.end();
+     });
+   });
+
+   req.end();
 });
 
 tap.test("body data is differentiating", function(t) {
