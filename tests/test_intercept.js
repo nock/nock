@@ -221,6 +221,38 @@ tap.test("post with reply callback, uri, and request body", function(t) {
   req.end();
 });
 
+tap.test("reply with callback and filtered path and body", function(t) {
+  var noPrematureExecution = false;
+
+  var scope = nock('http://www.realcallback.com')
+     .filteringPath(/.*/, '*')
+     .filteringRequestBody(/.*/, '*')
+     .post('*', '*')
+     .reply(200,  function(uri, body) {
+         t.assert(noPrematureExecution);
+         return ['OK', uri, body].join(' ');
+      });
+
+  var req = http.request({
+     host: "www.realcallback.com"
+    , method: 'POST'
+    , path: '/original/path'
+    , port: 80
+  }, function(res) {
+   t.equal(res.statusCode, 200);
+   res.on('end', function() {
+     scope.done();
+     t.end();
+   });
+   res.on('data', function(data) {
+     t.equal(data.toString(), 'OK /original/path original=body' , 'response should match');
+   });
+  });
+
+  noPrematureExecution = true;
+  req.end('original=body');
+});
+
 tap.test("isDone", function(t) {
   var scope = nock('http://www.google.com')
     .get('/')
