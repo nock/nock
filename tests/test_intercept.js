@@ -1405,20 +1405,24 @@ tap.test("default reply headers work", function(t) {
 });
 
 tap.test('clean all works', function(t) {
-  var scope = nock('http://clean.all.coz')
-    .get('/')
+  var scope = nock('http://amazon.com')
+    .get('/nonexistent')
     .reply(200);
 
-  nock.cleanAll();
+  var req = http.get({host: 'amazon.com', path: '/nonexistent'}, function(res) {
+    t.assert(res.statusCode === 200, "should mock before cleanup");
 
-  var req = http.get({host: 'clean.all.coz', path: '/'});
-  req.on('error', function(e) {
-    t.equal(e.code, 'ENOTFOUND');
-    t.end();
+    nock.cleanAll();
+
+    var req = http.get({host: 'amazon.com', path: '/nonexistent'}, function(res) {
+      t.assert(res.statusCode !== 200, "should clean up properly");
+      t.end();
+    }).on('error', function(err) {
+      t.end();
+    });
   });
-  req.end()
-});
 
+});
 
 tap.test('username and password works', function(t) {
   var scope = nock('http://passwordyy.com')
