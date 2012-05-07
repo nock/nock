@@ -1481,3 +1481,18 @@ tap.test('different ports work work with Mikeal request', function(t) {
     t.end();
   });
 });
+
+tap.test('explicitly specifiying port 80 works', function(t) {
+  var scope = nock('http://abc.portyyyy.com:80')
+    .get('/pathhh')
+    .reply(200, "Welcome, username");
+
+  http.request({
+    hostname: 'abc.portyyyy.com',
+    port: 80,
+    path: '/pathhh'
+  }, function(res) {
+    scope.done();
+    t.end();
+  }).end();
+});
