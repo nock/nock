@@ -237,7 +237,7 @@ You can restore the HTTP interceptor to the normal unmocked behaviour by calling
 
     nock.restore();
 
-# Turning Nock Off
+# Turning Nock Off (experimental!)
 
 You can bypass Nock completely by setting `NOCK_OFF` environment variable to `"true"`.
 
