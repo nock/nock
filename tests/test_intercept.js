@@ -110,11 +110,9 @@ tap.test("post", function(t) {
 
 
 tap.test("post with empty response body", function(t) {
-  var dataCalled = false;
-  
   var scope = nock('http://www.google.com')
      .post('/form')
-     .reply(201, "OK!");
+     .reply(200);
 
    var req = http.request({
        host: "www.google.com"
@@ -123,16 +121,13 @@ tap.test("post with empty response body", function(t) {
      , port: 80
    }, function(res) {
 
-     t.equal(res.statusCode, 201);
+     t.equal(res.statusCode, 200);
      res.on('end', function() {
-       t.ok(dataCalled);
        scope.done();
        t.end();
      });
      res.on('data', function(data) {
-       dataCalled = true;
-       t.ok(data instanceof Buffer, "data should be buffer");
-       t.equal(data.toString(), "OK!", "response should match");
+       t.fail("No body should be returned")
      });
 
    });
