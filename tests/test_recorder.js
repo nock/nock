@@ -23,8 +23,7 @@ tap.test('records', function(t) {
       t.end();
     });
   });
-  req.write('ABCDEF');
-  req.end();
+  req.end('ABCDEF');
   return req;
 });
 
