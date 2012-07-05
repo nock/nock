@@ -24,10 +24,10 @@
   ]
 , "repository" :
   { "type" : "git"
-  , "url" : "http://github.com/pgte/nock.git"
+  , "url" : "http://github.com/flatiron/nock.git"
   }
 , "bugs" :
-  { "url" : "http://github.com/pgte/nock/issues" }
+  { "url" : "http://github.com/flatiron/nock/issues" }
 , "engines" : ["node >= 0.4.10"]
 , "main" : "./index"
 , "devDependencies": {
