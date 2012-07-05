@@ -6,7 +6,6 @@ var events  = require('events');
 var tap     = require('tap');
 var mikealRequest = require('request');
 
-
 tap.test("get gets mocked", function(t) {
   var dataCalled = false
   
@@ -1490,4 +1489,22 @@ tap.test('explicitly specifiying port 80 works', function(t) {
     scope.done();
     t.end();
   }).end();
+});
+
+tap.test('post with object', function(t) {
+  var scope = nock('http://uri')
+    .post('/claim', {some_data: "something"})
+    .reply(200)
+    .log(console.log);
+
+  http.request({
+    hostname: 'uri',
+    port: 80,
+    method: "POST",
+    path: '/claim'
+  }, function(res) {
+    scope.done();
+    t.end();
+  }).end('{"some_data":"something"}');
+
 });
