@@ -1508,3 +1508,25 @@ tap.test('post with object', function(t) {
   }).end('{"some_data":"something"}');
 
 });
+
+tap.test('accept string as request target', function(t) {
+  var scope = nock('http://www.example.com')
+    .get('/')
+    .reply(200, "Hello World!");
+
+  http.get('http://www.example.com', function(res) {
+    t.equal(res.statusCode, 200);
+
+    res.on('data', function(data) {
+      dataCalled = true;
+      t.ok(data instanceof Buffer, "data should be buffer");
+      t.equal(data.toString(), "Hello World!", "response should match");
+    });
+
+    res.on('end', function() {
+      t.ok(dataCalled);
+      scope.done();
+      t.end();
+    });
+  });
+});
