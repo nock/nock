@@ -7,8 +7,30 @@ var tap     = require('tap');
 var mikealRequest = require('request');
 
 tap.test("get gets mocked", function(t) {
-  var dataCalled = false
-  
+  var dataCalled = false;
+
+  var scope = nock('http://twitter.com')
+    .get('/')
+    .reply(200, "Hello World!");
+
+  http.get('http://twitter.com', function(res) {
+    t.equal(res.statusCode, 200);
+    res.on('end', function() {
+      t.ok(dataCalled);
+      scope.done();
+      t.end();
+    });
+    res.on('data', function(data) {
+      dataCalled = true;
+      t.ok(data instanceof Buffer, "data should be buffer");
+      t.equal(data.toString(), "Hello World!", "reponse should match");
+    });
+  });
+});
+
+tap.test("request get gets mocked", function(t) {
+  var dataCalled = false;
+
   var scope = nock('http://www.google.com')
     .get('/')
     .reply(200, "Hello World!");
@@ -18,7 +40,7 @@ tap.test("get gets mocked", function(t) {
     , path: '/'
     , port: 80
   }, function(res) {
-    
+
     t.equal(res.statusCode, 200);
     res.on('end', function() {
       t.ok(dataCalled);
@@ -30,25 +52,25 @@ tap.test("get gets mocked", function(t) {
       t.ok(data instanceof Buffer, "data should be buffer");
       t.equal(data.toString(), "Hello World!", "response should match");
     });
-    
+
   });
-  
+
   req.end();
 });
 
 tap.test("not mocked should work in http", function(t) {
   var dataCalled = false;
-  
+
   var req = http.request({
       host: "www.amazon.com"
     , path: '/'
     , port: 80
   }, function(res) {
-    
+
     t.equal(res.statusCode, 200);
     res.on('end', function() {
       var doneFails = false;
-      
+
       t.ok(dataCalled);
       try {
         scope.done();
