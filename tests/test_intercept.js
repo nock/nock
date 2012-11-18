@@ -167,7 +167,7 @@ tap.test("get with reply callback", function(t) {
   var scope = nock('http://www.google.com')
      .get('/')
      .reply(200, function() {
-        return 'OK!';
+        return { message: 'OK!' };
      });
 
   var req = http.request({
@@ -180,7 +180,7 @@ tap.test("get with reply callback", function(t) {
       t.end();
     });
     res.on('data', function(data) {
-      t.equal(data.toString(), 'OK!', 'response should match');
+      t.equal(data.toString(), JSON.stringify({ message: 'OK!' }), 'response should match');
     });
   });
 
