@@ -167,11 +167,35 @@ tap.test("get with reply callback", function(t) {
   var scope = nock('http://www.google.com')
      .get('/')
      .reply(200, function() {
-        return { message: 'OK!' };
+        return 'OK!';
      });
 
   var req = http.request({
      host: "www.google.com"
+    , path: '/'
+    , port: 80
+  }, function(res) {
+    res.on('end', function() {
+      scope.done();
+      t.end();
+    });
+    res.on('data', function(data) {
+      t.equal(data.toString(), 'OK!', 'response should match');
+    });
+  });
+
+  req.end();
+});
+
+tap.test("get with reply callback returning object", function(t) {
+  var scope = nock('http://www.googlezzzz.com')
+     .get('/')
+     .reply(200, function() {
+        return { message: 'OK!' };
+     });
+
+  var req = http.request({
+     host: "www.googlezzzz.com"
     , path: '/'
     , port: 80
   }, function(res) {
