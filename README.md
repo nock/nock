@@ -148,7 +148,7 @@ var scope = nock('http://my.server.com:8081')
 
 You can chain behaviour like this:
 
-```
+```js
 var scope = nock('http://myapp.iriscouch.com')
                 .get('/users/1')
                 .reply(404)
