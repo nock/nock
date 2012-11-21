@@ -1494,8 +1494,7 @@ tap.test('explicitly specifiying port 80 works', function(t) {
 tap.test('post with object', function(t) {
   var scope = nock('http://uri')
     .post('/claim', {some_data: "something"})
-    .reply(200)
-    .log(console.log);
+    .reply(200);
 
   http.request({
     hostname: 'uri',
@@ -1529,4 +1528,22 @@ tap.test('accept string as request target', function(t) {
       t.end();
     });
   });
+});
+
+tap.test('request has path', function(t) {
+  var scope = nock('http://haspath.com')
+    .get('/the/path/to/infinity')
+    .reply(200);
+
+  var req = http.request({
+    hostname: 'haspath.com',
+    port: 80,
+    method: "GET",
+    path: '/the/path/to/infinity'
+  }, function(res) {
+    scope.done();
+    t.equal(req.path, '/the/path/to/infinity', 'should have req.path set to /the/path/to/infinity');
+    t.end();
+  });
+  req.end();
 });
