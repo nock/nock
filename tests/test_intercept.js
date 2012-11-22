@@ -1571,3 +1571,15 @@ tap.test('request has path', function(t) {
   });
   req.end();
 });
+
+tap.test('persists interceptors', function(t) {
+  var scope = nock('http://persisssists.con')
+    .persist()
+    .get('/')
+    .reply(200, "Persisting all the way");
+
+  http.get('http://persisssists.con/', function(res) {
+    t.ok(! scope.isDone());
+    t.end();
+  }).end();
+});

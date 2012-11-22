@@ -36,6 +36,17 @@ When you setup an interceptor for an URL and that interceptor is used, it is rem
 This means that if you can intercept 2 or more calls to the same URL and return different things on each of them.
 It also means that you must setup one interceptor for each request you are going to have, otherwise nock will throw an error because that URL was not present in the interceptor list.
 
+## .persist()
+
+You can make all the interceptors for a scope persist by calling `.persist()` on it:
+
+```js
+var scope = nock('http://persisssists.con')
+  .persist()
+  .get('/')
+  .reply(200, "Persisting all the way");
+```
+
 ## Specifying request body
 
 You can specify the request body to be matched as the second argument to the `get`, `post`, `put` or `delete` specifications like this:
