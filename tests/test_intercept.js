@@ -6,6 +6,7 @@ var events  = require('events');
 var tap     = require('tap');
 var mikealRequest = require('request');
 
+
 tap.test("get gets mocked", function(t) {
   var dataCalled = false
   
@@ -1580,6 +1581,10 @@ tap.test('persists interceptors', function(t) {
 
   http.get('http://persisssists.con/', function(res) {
     t.ok(! scope.isDone());
-    t.end();
+    console.log('Hey');
+    http.get('http://persisssists.con/', function(res) {
+      t.ok(! scope.isDone());
+      t.end();
+    }).end();
   }).end();
 });
