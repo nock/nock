@@ -1581,7 +1581,6 @@ tap.test('persists interceptors', function(t) {
 
   http.get('http://persisssists.con/', function(res) {
     t.ok(! scope.isDone());
-    console.log('Hey');
     http.get('http://persisssists.con/', function(res) {
       t.ok(! scope.isDone());
       t.end();
