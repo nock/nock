@@ -1393,6 +1393,7 @@ tap.test("allow unmocked option works", function(t) {
       , port: 80
     }, function(res) {
       t.assert(res.statusCode === 404, 'Google say it does not exist');
+      res.on('data', function() {});
       res.on('end', secondIsDone);
     }).end();
   }
