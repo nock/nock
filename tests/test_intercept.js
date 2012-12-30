@@ -1380,6 +1380,7 @@ tap.test("allow unmocked option works", function(t) {
       , path: "/"
       , port: 80
     }, function(res) {
+      res.destroy();
       t.assert(res.statusCode < 400 && res.statusCode >= 200, 'GET Google Home page');
       t.end();
     }).end();
@@ -1435,6 +1436,7 @@ tap.test('clean all works', function(t) {
     nock.cleanAll();
 
     var req = http.get({host: 'amazon.com', path: '/nonexistent'}, function(res) {
+      res.destroy();
       t.assert(res.statusCode !== 200, "should clean up properly");
       t.end();
     }).on('error', function(err) {
