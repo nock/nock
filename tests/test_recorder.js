@@ -19,7 +19,7 @@ tap.test('records', function(t) {
       nock.restore();
       ret = nock.recorder.play();
       t.equal(ret.length, 1);
-      t.equal(ret[0].indexOf("\nnock('expensecat.iriscouch.com')\n  .post('/', \"ABCDEF\")\n  .reply("), 0);
+      t.equal(ret[0].indexOf("\nnock('http://expensecat.iriscouch.com')\n  .post('/', \"ABCDEF\")\n  .reply("), 0);
       t.end();
     });
   });
@@ -31,10 +31,10 @@ tap.test('checks if callback is specified', function(t) {
   var options = {
     host: 'www.google.com', method: 'GET', path: '/', port: 80
   };
-  
+
   nock.restore();
   nock.recorder.rec(true);
-  
+
   http.request(options, undefined).end();
   t.end();
 });

@@ -1590,3 +1590,25 @@ tap.test('persists interceptors', function(t) {
     }).end();
   }).end();
 });
+
+tap.test('(re-)activate after restore', function(t) {
+  var scope = nock('http://google.com')
+    .get('/')
+    .reply(200, 'Hello, World!');
+
+  nock.restore();
+
+  http.get('http://google.com', function(res) {
+    res.on('end', function() {
+      t.ok(! scope.isDone());
+
+      nock.activate();
+      http.get('http://google.com', function(res) {
+        res.on('end', function() {
+          t.ok(scope.isDone());
+          t.end();
+        });
+      }).end();
+    });
+  }).end();
+});
