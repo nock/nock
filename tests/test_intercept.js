@@ -385,6 +385,34 @@ tap.test("match headers", function(t) {
 
 });
 
+tap.test("match headers with regexp", function(t) {
+  var scope = nock('http://www.headier.com')
+     .get('/')
+     .matchHeader('x-my-headers', /My He.d.r [0-9.]+/)
+     .reply(200, "Hello World!");
+
+  http.get({
+     host: "www.headier.com"
+    , method: 'GET'
+    , path: '/'
+    , port: 80
+    , headers: {'X-My-Headers': 'My Header 1.0'}
+  }, function(res) {
+    res.setEncoding('utf8');
+    t.equal(res.statusCode, 200);
+
+    res.on('data', function(data) {
+      t.equal(data, 'Hello World!');
+    });
+
+    res.on('end', function() {
+      scope.done();
+      t.end();
+    });
+  });
+
+});
+
 tap.test("match all headers", function(t) {
   var scope = nock('http://api.headdy.com')
      .matchHeader('accept', 'application/json')
