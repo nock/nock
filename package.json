@@ -31,7 +31,7 @@
 , "engines" : ["node >= 0.4.10"]
 , "main" : "./index"
 , "devDependencies": {
-    "tap": "0.2.x",
+    "tap": "0.4.x",
     "request": "*"
 }
 , "scripts": { "test": "node node_modules/tap/bin/tap.js tests" }
