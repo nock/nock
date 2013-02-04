@@ -6,7 +6,6 @@ var events  = require('events');
 var tap     = require('tap');
 var mikealRequest = require('request');
 
-
 tap.test("get gets mocked", function(t) {
   var dataCalled = false
   
@@ -1638,5 +1637,48 @@ tap.test('(re-)activate after restore', function(t) {
         });
       }).end();
     });
+  }).end();
+});
+
+tap.test("allow unmocked option works with https", function(t) {
+  t.plan(5)
+  var scope = nock('https://www.google.com', {allowUnmocked: true})
+    .get('/abc')
+    .reply(200, 'Hey!')
+    .get('/wont/get/here')
+    .reply(200, 'Hi!');
+
+  function secondIsDone() {
+    t.ok(! scope.isDone());
+    https.request({
+        host: "www.google.com"
+      , path: "/"
+    }, function(res) {
+      console.log('OK 2');
+      t.ok(true, 'Google replied to /');
+      res.destroy();
+      t.assert(res.statusCode < 400 && res.statusCode >= 200, 'GET Google Home page');
+    }).end();
+  }
+
+  function firstIsDone() {
+    t.ok(! scope.isDone(), 'scope is not done');
+    https.request({
+        host: "www.google.com"
+      , path: "/does/not/exist/dskjsakdj"
+    }, function(res) {
+      console.log('OK 1');
+      t.equal(503, res.statusCode, 'real google response status code');
+      res.on('data', function() {});
+      res.on('end', secondIsDone);
+    }).end();
+  }
+
+  https.request({
+      host: "www.google.com"
+    , path: "/abc"
+  }, function(res) {
+    console.log('First ended');
+    res.on('end', firstIsDone);
   }).end();
 });
