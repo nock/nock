@@ -1,7 +1,7 @@
 { "name" : "nock"
 , "description" : "HTTP Server mocking for Node.js"
 , "tags" : ["Mock", "HTTP", "testing", "isolation"]
-, "version" : "0.15.0"
+, "version" : "0.15.1"
 , "author" : "Pedro Teixeira <pedro.teixeira@gmail.com>"
 , "contributors" :
   [ {"name": "Roly Fentanes" }
