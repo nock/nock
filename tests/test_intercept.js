@@ -1682,3 +1682,20 @@ tap.test("allow unmocked option works with https", function(t) {
     res.on('end', firstIsDone);
   }).end();
 });
+
+tap.test('allow unmocked post with json data', function(t) {
+  var scope = nock('https://httpbin.org', { allowUnmocked: true }).
+    get("/abc").
+    reply(200, "Hey!");
+
+  var options = {
+    method: 'POST',
+    uri: 'https://httpbin.org/post',
+    json: { some: 'data' }
+  };
+
+  mikealRequest(options, function(err, resp, body) {
+    t.equal(200, resp.statusCode)
+    t.end();
+  });
+});
