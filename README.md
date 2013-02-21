@@ -116,7 +116,7 @@ var scope = nock('http://www.headdy.com')
 
 ## HTTP Verbs
 
-Nock supports any HTTP verb, and it has convenience methods for the GET, POST, PUT, HEAD and DELETE HTTP verbs.
+Nock supports any HTTP verb, and it has convenience methods for the GET, POST, PUT, HEAD, DELETE, PATCH and MERGE HTTP verbs.
 
 You can intercept any HTTP verb using `.intercept(path, verb [, requestBody [, options]])`:
 
