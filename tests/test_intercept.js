@@ -3,10 +3,10 @@ var http    = require('http');
 var https   = require('https');
 var util    = require('util');
 var events  = require('events');
-var tap     = require('tap');
+var test    = require('tap').test;
 var mikealRequest = require('request');
 
-tap.test("get gets mocked", function(t) {
+test("get gets mocked", function(t) {
   var dataCalled = false
   
   var scope = nock('http://www.google.com')
@@ -36,7 +36,7 @@ tap.test("get gets mocked", function(t) {
   req.end();
 });
 
-tap.test("not mocked should work in http", function(t) {
+test("not mocked should work in http", function(t) {
   var dataCalled = false;
   
   var req = http.request({
@@ -75,7 +75,7 @@ tap.test("not mocked should work in http", function(t) {
   req.end();
 });
 
-tap.test("post", function(t) {
+test("post", function(t) {
   var dataCalled = false;
   
   var scope = nock('http://www.google.com')
@@ -108,7 +108,7 @@ tap.test("post", function(t) {
 
 
 
-tap.test("post with empty response body", function(t) {
+test("post with empty response body", function(t) {
   var scope = nock('http://www.google.com')
      .post('/form')
      .reply(200);
@@ -133,7 +133,7 @@ tap.test("post with empty response body", function(t) {
    req.end();
 });
 
-tap.test("post, lowercase", function(t) {
+test("post, lowercase", function(t) {
   var dataCalled = false;
   
   var scope = nock('http://www.google.com')
@@ -163,7 +163,7 @@ tap.test("post, lowercase", function(t) {
    req.end();
 });
 
-tap.test("get with reply callback", function(t) {
+test("get with reply callback", function(t) {
   var scope = nock('http://www.google.com')
      .get('/')
      .reply(200, function() {
@@ -187,7 +187,7 @@ tap.test("get with reply callback", function(t) {
   req.end();
 });
 
-tap.test("get with reply callback returning object", function(t) {
+test("get with reply callback returning object", function(t) {
   var scope = nock('http://www.googlezzzz.com')
      .get('/')
      .reply(200, function() {
@@ -211,7 +211,7 @@ tap.test("get with reply callback returning object", function(t) {
   req.end();
 });
 
-tap.test("post with reply callback, uri, and request body", function(t) {
+test("post with reply callback, uri, and request body", function(t) {
   var input = 'key=val';
 
   var scope = nock('http://www.google.com')
@@ -239,7 +239,7 @@ tap.test("post with reply callback, uri, and request body", function(t) {
   req.end();
 });
 
-tap.test("reply with callback and filtered path and body", function(t) {
+test("reply with callback and filtered path and body", function(t) {
   var noPrematureExecution = false;
 
   var scope = nock('http://www.realcallback.com')
@@ -271,7 +271,7 @@ tap.test("reply with callback and filtered path and body", function(t) {
   req.end('original=body');
 });
 
-tap.test("isDone", function(t) {
+test("isDone", function(t) {
   var scope = nock('http://www.google.com')
     .get('/')
     .reply(200, "Hello World!");
@@ -294,7 +294,7 @@ tap.test("isDone", function(t) {
   req.end();
 });
 
-tap.test("requireDone", function(t) {
+test("requireDone", function(t) {
   var scope = nock('http://www.google.com')
     .get('/', false, { requireDone: false })
     .reply(200, "Hello World!");
@@ -310,7 +310,7 @@ tap.test("requireDone", function(t) {
   t.end();
 });
 
-tap.test("request headers exposed", function(t) {
+test("request headers exposed", function(t) {
 
   var scope = nock('http://www.headdy.com')
      .get('/')
@@ -332,7 +332,7 @@ tap.test("request headers exposed", function(t) {
   t.equivalent(req._headers, {'x-my-headers': 'My custom Header value', 'host': 'www.headdy.com'});
 });
 
-tap.test("headers work", function(t) {
+test("headers work", function(t) {
 
   var scope = nock('http://www.headdy.com')
      .get('/')
@@ -356,7 +356,7 @@ tap.test("headers work", function(t) {
 
 });
 
-tap.test("match headers", function(t) {
+test("match headers", function(t) {
   var scope = nock('http://www.headdy.com')
      .get('/')
      .matchHeader('x-my-headers', 'My custom Header value')
@@ -384,7 +384,7 @@ tap.test("match headers", function(t) {
 
 });
 
-tap.test("match headers with regexp", function(t) {
+test("match headers with regexp", function(t) {
   var scope = nock('http://www.headier.com')
      .get('/')
      .matchHeader('x-my-headers', /My He.d.r [0-9.]+/)
@@ -412,7 +412,7 @@ tap.test("match headers with regexp", function(t) {
 
 });
 
-tap.test("match all headers", function(t) {
+test("match all headers", function(t) {
   var scope = nock('http://api.headdy.com')
      .matchHeader('accept', 'application/json')
      .get('/one')
@@ -463,7 +463,7 @@ tap.test("match all headers", function(t) {
 
 });
 
-tap.test("header manipulation", function(t) {
+test("header manipulation", function(t) {
   var scope = nock('http://example.com')
                 .get('/accounts')
                 .reply(200, { accounts: [{ id: 1, name: 'Joe Blow' }] })
@@ -485,7 +485,7 @@ tap.test("header manipulation", function(t) {
   req.end();
 });
 
-tap.test("head", function(t) {
+test("head", function(t) {
   var dataCalled = false;
   
   var scope = nock('http://www.google.com')
@@ -509,7 +509,7 @@ tap.test("head", function(t) {
    req.end();
 });
 
-tap.test("body data is differentiating", function(t) {
+test("body data is differentiating", function(t) {
   var doneCount = 0
     , scope = nock('http://www.boddydiff.com')
                .post('/', 'abc')
@@ -574,7 +574,7 @@ tap.test("body data is differentiating", function(t) {
 
 });
 
-tap.test("chaining", function(t) {
+test("chaining", function(t) {
   var repliedCount = 0;
   var scope = nock('http://www.spiffy.com')
      .get('/')
@@ -642,7 +642,7 @@ tap.test("chaining", function(t) {
    });
 });
 
-tap.test("encoding", function(t) {
+test("encoding", function(t) {
   var dataCalled = false
   
   var scope = nock('http://www.encoderz.com')
@@ -674,7 +674,7 @@ tap.test("encoding", function(t) {
   req.end();
 });
 
-tap.test("reply with file", function(t) {
+test("reply with file", function(t) {
   var dataCalled = false
   
   var scope = nock('http://www.filereplier.com')
@@ -705,7 +705,7 @@ tap.test("reply with file", function(t) {
   
 });
 
-tap.test("reply with file and pipe response", function(t) {
+test("reply with file and pipe response", function(t) {
   var scope = nock('http://www.files.com')
     .get('/')
     .replyWithFile(200, __dirname + '/../assets/reply_file_1.txt')
@@ -736,7 +736,7 @@ tap.test("reply with file and pipe response", function(t) {
   
 });
 
-tap.test("reply with file with mikeal/request", function(t) {
+test("reply with file with mikeal/request", function(t) {
   var scope = nock('http://www.files.com')
     .get('/')
     .replyWithFile(200, __dirname + '/../assets/reply_file_1.txt')
@@ -756,7 +756,7 @@ tap.test("reply with file with mikeal/request", function(t) {
   
 });
 
-tap.test("reply with JSON", function(t) {
+test("reply with JSON", function(t) {
   var dataCalled = false
   
   var scope = nock('http://www.jsonreplier.com')
@@ -787,7 +787,7 @@ tap.test("reply with JSON", function(t) {
   
 });
 
-tap.test("filter path with function", function(t) {
+test("filter path with function", function(t) {
   var scope = nock('http://www.filterurls.com')
      .filteringPath(function(path) {
         return '/?a=2&b=1';
@@ -811,7 +811,7 @@ tap.test("filter path with function", function(t) {
   req.end();
 });
 
-tap.test("filter path with regexp", function(t) {
+test("filter path with regexp", function(t) {
   var scope = nock('http://www.filterurlswithregexp.com')
      .filteringPath(/\d/g, '3')
      .get('/?a=3&b=3')
@@ -833,7 +833,7 @@ tap.test("filter path with regexp", function(t) {
   req.end();
 });
 
-tap.test("filter body with function", function(t) {
+test("filter body with function", function(t) {
   var scope = nock('http://www.filterboddiez.com')
      .filteringRequestBody(function(body) {
        t.equal(body, 'mamma mia');
@@ -858,7 +858,7 @@ tap.test("filter body with function", function(t) {
   req.end('mamma mia');
 });
 
-tap.test("filter body with regexp", function(t) {
+test("filter body with regexp", function(t) {
   var scope = nock('http://www.filterboddiezregexp.com')
      .filteringRequestBody(/mia/, 'nostra')
      .post('/', 'mamma nostra')
@@ -880,7 +880,7 @@ tap.test("filter body with regexp", function(t) {
   req.end('mamma mia');
 });
 
-tap.test("abort request", function(t) {
+test("abort request", function(t) {
   var scope = nock('http://www.google.com')
     .get('/hey')
     .reply(200, 'nobody');
@@ -907,7 +907,7 @@ tap.test("abort request", function(t) {
   req.end();
 });
 
-tap.test("pause response before data", function(t) {
+test("pause response before data", function(t) {
   var scope = nock('http://www.mouse.com')
     .get('/pauser')
     .reply(200, 'nobody');
@@ -939,7 +939,7 @@ tap.test("pause response before data", function(t) {
   req.end();
 });
 
-tap.test("pause response after data", function(t) {
+test("pause response after data", function(t) {
   var scope = nock('http://pauseme.com')
     .get('/')
     .reply(200, 'nobody');
@@ -967,7 +967,7 @@ tap.test("pause response after data", function(t) {
   });
 });
 
-tap.test("response pipe", function(t) {
+test("response pipe", function(t) {
   var dest = (function() {
     function Constructor() {
       events.EventEmitter.call(this);
@@ -1018,7 +1018,7 @@ tap.test("response pipe", function(t) {
   });
 });
 
-tap.test("response pipe without implicit end", function(t) {
+test("response pipe without implicit end", function(t) {
   var dest = (function() {
     function Constructor() {
       events.EventEmitter.call(this);
@@ -1069,7 +1069,7 @@ tap.test("response pipe without implicit end", function(t) {
   });
 });
 
-tap.test("chaining API", function(t) {
+test("chaining API", function(t) {
   var scope = nock('http://chainchomp.com')
     .get('/one')
     .reply(200, 'first one')
@@ -1108,7 +1108,7 @@ tap.test("chaining API", function(t) {
   });
 });
 
-tap.test("same URI", function(t) {
+test("same URI", function(t) {
   var scope = nock('http://sameurii.com')
     .get('/abc')
     .reply(200, 'first one')
@@ -1141,7 +1141,7 @@ tap.test("same URI", function(t) {
   });
 });
 
-tap.test("can use hostname instead of host", function(t) {
+test("can use hostname instead of host", function(t) {
   var scope = nock('http://www.google.com')
     .get('/')
     .reply(200, "Hello World!");
@@ -1161,7 +1161,7 @@ tap.test("can use hostname instead of host", function(t) {
   req.end();
 });
 
-tap.test("can take a port", function(t) {
+test("can take a port", function(t) {
   var scope = nock('http://www.myserver.com:3333')
     .get('/')
     .reply(200, "Hello World!");
@@ -1182,7 +1182,7 @@ tap.test("can take a port", function(t) {
   req.end();
 });
 
-tap.test("can use https", function(t) {
+test("can use https", function(t) {
   var dataCalled = false
 
   var scope = nock('https://google.com')
@@ -1209,7 +1209,7 @@ tap.test("can use https", function(t) {
   req.end();
 });
 
-tap.test("complaints if https route is missing", function(t) {
+test("complaints if https route is missing", function(t) {
   var dataCalled = false
 
   var scope = nock('https://google.com')
@@ -1231,7 +1231,7 @@ tap.test("complaints if https route is missing", function(t) {
 
 });
 
-tap.test("can use ClientRequest using GET", function(t) {
+test("can use ClientRequest using GET", function(t) {
   
   var dataCalled = false
 
@@ -1262,7 +1262,7 @@ tap.test("can use ClientRequest using GET", function(t) {
   req.end();
 });
 
-tap.test("can use ClientRequest using POST", function(t) {
+test("can use ClientRequest using POST", function(t) {
   
   var dataCalled = false
 
@@ -1295,7 +1295,7 @@ tap.test("can use ClientRequest using POST", function(t) {
   req.end();
 });
 
-tap.test("same url matches twice", function(t) {
+test("same url matches twice", function(t) {
   var scope = nock('http://www.twicematcher.com')
      .get('/hey')
      .reply(200, "First match")
@@ -1340,7 +1340,7 @@ tap.test("same url matches twice", function(t) {
 
 });
 
-tap.test("scopes are independent", function(t) {
+test("scopes are independent", function(t) {
   var scope1 = nock('http://www34.google.com')
     .get('/')
     .reply(200, "Hello World!");
@@ -1363,7 +1363,7 @@ tap.test("scopes are independent", function(t) {
   req.end();
 });
 
-tap.test("two scopes with the same request are consumed", function(t) {
+test("two scopes with the same request are consumed", function(t) {
   var scope1 = nock('http://www36.google.com')
     .get('/')
     .reply(200, "Hello World!");
@@ -1393,7 +1393,7 @@ tap.test("two scopes with the same request are consumed", function(t) {
   }
 });
 
-tap.test("allow unmocked option works", function(t) {
+test("allow unmocked option works", function(t) {
   var scope = nock('http://www.google.com', {allowUnmocked: true})
     .get('/abc')
     .reply(200, 'Hey!')
@@ -1435,7 +1435,7 @@ tap.test("allow unmocked option works", function(t) {
   }).end();
 });
 
-tap.test("default reply headers work", function(t) {
+test("default reply headers work", function(t) {
   var scope = nock('http://default.reply.headers.com')
     .defaultReplyHeaders({'X-Powered-By': 'Meeee', 'X-Another-Header': 'Hey man!'})
     .get('/')
@@ -1452,7 +1452,7 @@ tap.test("default reply headers work", function(t) {
   }, done).end();
 });
 
-tap.test('clean all works', function(t) {
+test('clean all works', function(t) {
   var scope = nock('http://amazon.com')
     .get('/nonexistent')
     .reply(200);
@@ -1473,7 +1473,7 @@ tap.test('clean all works', function(t) {
 
 });
 
-tap.test('username and password works', function(t) {
+test('username and password works', function(t) {
   var scope = nock('http://passwordyy.com')
     .get('/')
     .reply(200, "Welcome, username");
@@ -1489,7 +1489,7 @@ tap.test('username and password works', function(t) {
 });
 
 
-tap.test('works with mikeal/request and username and password', function(t) {
+test('works with mikeal/request and username and password', function(t) {
     var scope = nock('http://passwordyyyyy.com')
       .get('/abc')
       .reply(200, "Welcome, username");
@@ -1503,7 +1503,7 @@ tap.test('works with mikeal/request and username and password', function(t) {
 
 });
 
-tap.test('different ports work works', function(t) {
+test('different ports work works', function(t) {
   var scope = nock('http://abc.portyyyy.com:8081')
     .get('/pathhh')
     .reply(200, "Welcome, username");
@@ -1518,7 +1518,7 @@ tap.test('different ports work works', function(t) {
   }).end();
 });
 
-tap.test('different ports work work with Mikeal request', function(t) {
+test('different ports work work with Mikeal request', function(t) {
   var scope = nock('http://abc.portyyyy.com:8082')
     .get('/pathhh')
     .reply(200, "Welcome to Mikeal Request!");
@@ -1531,7 +1531,7 @@ tap.test('different ports work work with Mikeal request', function(t) {
   });
 });
 
-tap.test('explicitly specifiying port 80 works', function(t) {
+test('explicitly specifiying port 80 works', function(t) {
   var scope = nock('http://abc.portyyyy.com:80')
     .get('/pathhh')
     .reply(200, "Welcome, username");
@@ -1546,7 +1546,7 @@ tap.test('explicitly specifiying port 80 works', function(t) {
   }).end();
 });
 
-tap.test('post with object', function(t) {
+test('post with object', function(t) {
   var scope = nock('http://uri')
     .post('/claim', {some_data: "something"})
     .reply(200);
@@ -1563,7 +1563,7 @@ tap.test('post with object', function(t) {
 
 });
 
-tap.test('accept string as request target', function(t) {
+test('accept string as request target', function(t) {
   var scope = nock('http://www.example.com')
     .get('/')
     .reply(200, "Hello World!");
@@ -1585,7 +1585,7 @@ tap.test('accept string as request target', function(t) {
   });
 });
 
-tap.test('request has path', function(t) {
+test('request has path', function(t) {
   var scope = nock('http://haspath.com')
     .get('/the/path/to/infinity')
     .reply(200);
@@ -1603,7 +1603,7 @@ tap.test('request has path', function(t) {
   req.end();
 });
 
-tap.test('persists interceptors', function(t) {
+test('persists interceptors', function(t) {
   var scope = nock('http://persisssists.con')
     .persist()
     .get('/')
@@ -1618,19 +1618,21 @@ tap.test('persists interceptors', function(t) {
   }).end();
 });
 
-tap.test('(re-)activate after restore', function(t) {
+test('(re-)activate after restore', function(t) {
   var scope = nock('http://google.com')
     .get('/')
     .reply(200, 'Hello, World!');
 
   nock.restore();
 
-  http.get('http://google.com', function(res) {
+  http.get('http://google.com/', function(res) {
+    res.resume();
     res.on('end', function() {
       t.ok(! scope.isDone());
 
       nock.activate();
       http.get('http://google.com', function(res) {
+        res.resume();
         res.on('end', function() {
           t.ok(scope.isDone());
           t.end();
@@ -1640,7 +1642,7 @@ tap.test('(re-)activate after restore', function(t) {
   }).end();
 });
 
-tap.test("allow unmocked option works with https", function(t) {
+test("allow unmocked option works with https", function(t) {
   t.plan(5)
   var scope = nock('https://www.google.com', {allowUnmocked: true})
     .get('/abc')
@@ -1654,7 +1656,7 @@ tap.test("allow unmocked option works with https", function(t) {
         host: "www.google.com"
       , path: "/"
     }, function(res) {
-      console.log('OK 2');
+      res.resume();
       t.ok(true, 'Google replied to /');
       res.destroy();
       t.assert(res.statusCode < 400 && res.statusCode >= 200, 'GET Google Home page');
@@ -1667,7 +1669,6 @@ tap.test("allow unmocked option works with https", function(t) {
         host: "www.google.com"
       , path: "/does/not/exist/dskjsakdj"
     }, function(res) {
-      console.log('OK 1');
       t.equal(503, res.statusCode, 'real google response status code');
       res.on('data', function() {});
       res.on('end', secondIsDone);
@@ -1683,7 +1684,8 @@ tap.test("allow unmocked option works with https", function(t) {
   }).end();
 });
 
-tap.test('allow unmocked post with json data', function(t) {
+
+test('allow unmocked post with json data', function(t) {
   var scope = nock('https://httpbin.org', { allowUnmocked: true }).
     get("/abc").
     reply(200, "Hey!");

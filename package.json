@@ -34,7 +34,7 @@
     "propagate": "0.2.x"
 }
 , "devDependencies": {
-    "tap": "0.4.x",
+    "tap": "*",
     "request": "*"
 }
 , "scripts": { "test": "node node_modules/tap/bin/tap.js tests" }
