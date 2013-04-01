@@ -10,6 +10,7 @@ test("get gets mocked", function(t) {
   var dataCalled = false
   
   var scope = nock('http://www.google.com')
+    .log(console.log)
     .get('/')
     .reply(200, "Hello World!");
 
@@ -1698,6 +1699,53 @@ test('allow unmocked post with json data', function(t) {
 
   mikealRequest(options, function(err, resp, body) {
     t.equal(200, resp.statusCode)
+    t.end();
+  });
+});
+
+test('allow unordered body with json encoding', function(t) {
+  var scope =
+  nock('http://wtfjs.org')
+    .log(console.log)
+    .post('/like-wtf', {
+      foo: 'bar',
+      bar: 'foo'
+    })
+    .reply(200, 'Heyyyy!');
+
+  mikealRequest({
+    uri: 'http://wtfjs.org/like-wtf',
+    method: 'POST',
+    json: {
+      bar: 'foo',
+      foo: 'bar'
+    }},
+  function (e, r, body) {
+    t.equal(body, 'Heyyyy!');
+    scope.done();
+    t.end();
+  });
+});
+
+test('allow unordered body with form encoding', function(t) {
+  var scope =
+  nock('http://wtfjs.org')
+    .post('/like-wtf', {
+      foo: 'bar',
+      bar: 'foo'
+    })
+    .reply(200, 'Heyyyy!');
+
+  mikealRequest({
+    uri: 'http://wtfjs.org/like-wtf',
+    method: 'POST',
+    form: {
+      bar: 'foo',
+      foo: 'bar'
+    }},
+  function (e, r, body) {
+    t.equal(body, 'Heyyyy!');
+    scope.done();
     t.end();
   });
 });
