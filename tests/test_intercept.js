@@ -10,7 +10,6 @@ test("get gets mocked", function(t) {
   var dataCalled = false
   
   var scope = nock('http://www.google.com')
-    .log(console.log)
     .get('/')
     .reply(200, "Hello World!");
 
@@ -1680,7 +1679,6 @@ test("allow unmocked option works with https", function(t) {
       host: "www.google.com"
     , path: "/abc"
   }, function(res) {
-    console.log('First ended');
     res.on('end', firstIsDone);
   }).end();
 });
@@ -1706,7 +1704,6 @@ test('allow unmocked post with json data', function(t) {
 test('allow unordered body with json encoding', function(t) {
   var scope =
   nock('http://wtfjs.org')
-    .log(console.log)
     .post('/like-wtf', {
       foo: 'bar',
       bar: 'foo'
