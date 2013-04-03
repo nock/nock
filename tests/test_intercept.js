@@ -1746,3 +1746,26 @@ test('allow unordered body with form encoding', function(t) {
     t.end();
   });
 });
+
+
+test('allow string json spec', function(t) {
+  var bodyObject = {bar: 'foo', foo: 'bar'};
+
+  var scope =
+  nock('http://wtfjs.org')
+    .post('/like-wtf', JSON.stringify(bodyObject))
+    .reply(200, 'Heyyyy!');
+
+  mikealRequest({
+    uri: 'http://wtfjs.org/like-wtf',
+    method: 'POST',
+    json: {
+      bar: 'foo',
+      foo: 'bar'
+    }},
+  function (e, r, body) {
+    t.equal(body, 'Heyyyy!');
+    scope.done();
+    t.end();
+  });
+});
