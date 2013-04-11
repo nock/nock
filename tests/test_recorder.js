@@ -4,6 +4,7 @@ var nock    = require('../.')
 
 tap.test('records', function(t) {
   nock.restore();
+  nock.recorder.clear();
   var cb1 = false
     , options = { method: 'POST'
                 , host:'google.com'
@@ -25,7 +26,6 @@ tap.test('records', function(t) {
     });
   });
   req.end('ABCDEF');
-  return req;
 });
 
 
@@ -35,8 +35,34 @@ tap.test('checks if callback is specified', function(t) {
   };
 
   nock.restore();
+  nock.recorder.clear();
   nock.recorder.rec(true);
 
-  http.request(options, undefined).end();
+  http.request(options).end();
   t.end();
+});
+
+tap.test('when request body is json, it goes unstringified', function(t) {
+  var payload = {a: 1, b: true};
+  var options = {
+    method: 'POST',
+    host: 'www.google.com', method: 'GET', path: '/', port: 80
+  };
+
+  nock.restore();
+  nock.recorder.clear();
+  t.equal(nock.recorder.play().length, 0);
+  nock.recorder.rec(true);
+
+  var request = http.request(options, function(res) {
+    res.resume();
+    res.once('end', function() {
+      ret = nock.recorder.play();
+      t.equal(ret.length, 2);
+      t.equal(ret[1].indexOf("\nnock('http://www.google.com')\n  .post('/', {\"a\":1, \"b\": true})\n  .reply("), 0);
+      t.end();
+    })
+  });
+
+  request.end(JSON.stringify(payload));
 });
