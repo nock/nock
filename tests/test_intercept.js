@@ -6,6 +6,29 @@ var events  = require('events');
 var test    = require('tap').test;
 var mikealRequest = require('request');
 
+test("allow override works (2)", function(t) {
+  var scope = 
+  nock("https://httpbin.org",{allowUnmocked: true}).
+    post("/post").
+    reply(200,"99problems");
+
+  options = {
+    method: "POST",
+    uri: "https://httpbin.org/post",
+    json: {
+      some: "data"
+    }
+  };
+
+  mikealRequest(options, function(err, resp, body) {
+    scope.done();
+    t.end();
+    return console.log(resp.statusCode, body);
+  });
+});
+
+return;
+
 test("get gets mocked", function(t) {
   var dataCalled = false
   
