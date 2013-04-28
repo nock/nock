@@ -188,7 +188,7 @@ var scope = nock('http://api.myservice.com')
 
 You can also filter the request body based on a function.
 
-This can be useful, for instance, if you have random or time-dependent data in your URL.
+This can be useful, for instance, if you have random or time-dependent data in your request body.
 
 You can use a regexp for replacement, just like String.prototype.replace:
 
