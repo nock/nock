@@ -27,8 +27,6 @@ test("allow override works (2)", function(t) {
   });
 });
 
-return;
-
 test("get gets mocked", function(t) {
   var dataCalled = false
   
