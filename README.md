@@ -286,6 +286,16 @@ var scope = nock('http://persisssists.con')
   .reply(200, "Persisting all the way");
 ```
 
+## pendingMocks
+
+If a scope is not done, you can inspect the scope to infer which ones are still pending using the `scope.pendingMocks` property:
+
+```js
+if (!scope.isDone()) {
+  console.error('pending mocks: %j', scope.pendingMocks);
+}
+```
+
 # Logging
 
 Nock can log matches if you pass in a log function like this:
