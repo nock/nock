@@ -21,6 +21,7 @@
   , {"name": "Brian J Brennan"}
   , {"name": "Attila Incze"}
   , {"name": "Mac Angell"}
+  , {"name": "Tom Hosford"}
   ]
 , "repository" :
   { "type" : "git"
