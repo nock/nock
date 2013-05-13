@@ -1790,3 +1790,15 @@ test('allow string json spec', function(t) {
     t.end();
   });
 });
+
+test('has a req property on the response', function(t) {
+  var scope = nock('http://wtfjs.org').get('/like-wtf').reply(200);
+  req = http.request('http://wtfjs.org/like-wtf', function(res) {
+    res.on('end', function() {
+      t.ok(res.req, "req property doesn't exist");
+      scope.done();
+      t.end();
+    });
+  });
+  req.end();
+});
