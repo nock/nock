@@ -1690,7 +1690,7 @@ test("allow unmocked option works with https", function(t) {
         host: "www.google.com"
       , path: "/does/not/exist/dskjsakdj"
     }, function(res) {
-      t.equal(503, res.statusCode, 'real google response status code');
+      t.equal(404, res.statusCode, 'real google response status code');
       res.on('data', function() {});
       res.on('end', secondIsDone);
     }).end();
