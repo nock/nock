@@ -144,6 +144,18 @@ var scope = nock('http://my.server.com:8081')
   ...
 ```
 
+## Repeat response n times
+
+You are able to specify the number of times to repeat the same response.
+
+```js
+nock('http://zombo.com').get('/').times(2).reply(200, 'Ok');
+
+http.get('http://zombo.com/'); // respond body "Ok"
+http.get('http://zombo.com/'); // respond body "Ok"
+http.get('http://zombo.com/'); // respond with zombo.com result
+```
+
 ## Chaining
 
 You can chain behaviour like this:

@@ -1803,7 +1803,7 @@ test('has a req property on the response', function(t) {
   req.end();
 });
 
-test("disabled real HTTP request", function(t) {
+test('disabled real HTTP request', function(t) {
   nock.disableNetConnect();
   
   try {
@@ -1818,7 +1818,7 @@ test("disabled real HTTP request", function(t) {
   nock.enableNetConnect();
 });
 
-test("enable real HTTP request only for google.com, via string", function(t) {
+test('enable real HTTP request only for google.com, via string', function(t) {
   nock.enableNetConnect('google.com');
   
   try {
@@ -1837,7 +1837,7 @@ test("enable real HTTP request only for google.com, via string", function(t) {
   nock.enableNetConnect();
 });
 
-test("enable real HTTP request only for google.com, via regexp", function(t) {
+test('enable real HTTP request only for google.com, via regexp', function(t) {
   nock.enableNetConnect(/google\.com/);
   
   try {
@@ -1853,5 +1853,27 @@ test("enable real HTTP request only for google.com, via regexp", function(t) {
     t.end();
   }
   
+  nock.enableNetConnect();
+});
+
+test('repeating response 2 times', function(t) {
+  nock.disableNetConnect();
+
+  var _mock = nock('http://zombo.com')
+    .get('/')
+    .times(2)
+    .reply(200, "Hello World!");
+
+  http.get('http://zombo.com', function(res) {
+    t.equal(200, res.statusCode, 'first request');
+  });
+
+  http.get('http://zombo.com', function(res) {
+    t.equal(200, res.statusCode, 'second request');
+  });
+  
+  nock.cleanAll()
+  t.end();
+
   nock.enableNetConnect();
 });
