@@ -6,6 +6,52 @@ var events  = require('events');
 var test    = require('tap').test;
 var mikealRequest = require('request');
 
+test("not mocked should work in http", function(t) {
+  try {
+      nock.disableNetConnect();
+  
+    var dataCalled = false;
+  
+    var req = http.request({
+        host: "www.amazon.com"
+      , path: '/'
+      , port: 80
+    }, function(res) {
+    
+      t.equal(res.statusCode, 200);
+      res.on('end', function() {
+        var doneFails = false;
+      
+        t.ok(dataCalled);
+        try {
+          scope.done();
+        } catch(err) {
+          doneFails = true;
+        }
+        t.ok(doneFails);
+        t.end();
+      });
+    
+      res.on('data', function(data) {
+        dataCalled = true;
+      });
+    });
+  
+    req.on('error', function(err) {
+      // throw err;
+      t.end();
+    });
+    
+    req.end();
+
+  } catch(err) {
+    t.equal(err.message, 'Nock: Not allow net connect for "www.amazon.com:80"');
+    t.end();
+  } finally {
+    nock.enableNetConnect();
+  }
+});
+
 test("allow override works (2)", function(t) {
   var scope = 
   nock("https://httpbin.org",{allowUnmocked: true}).
@@ -87,6 +133,8 @@ test("not mocked should work in http", function(t) {
   });
   
   req.on('error', function(err) {
+    console.log("*****");
+    console.log(err);
     if (err.code !== 'ECONNREFUSED') {
       throw err;
     }
