@@ -8,7 +8,7 @@ var mikealRequest = require('request');
 
 test("not mocked should work in http", function(t) {
   try {
-      nock.disableNetConnect();
+    nock.disableNetConnect();
   
     var dataCalled = false;
   
@@ -38,7 +38,7 @@ test("not mocked should work in http", function(t) {
     });
   
     req.on('error', function(err) {
-      // throw err;
+      throw err;
       t.end();
     });
     
