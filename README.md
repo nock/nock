@@ -349,6 +349,24 @@ For enabled real HTTP requests.
 nock.enableNetConnect();
 ```
 
+You could restrict real HTTP request...
+
+```js
+// using a string
+nock.enableNetConnect('amazon.com');
+
+// or a RegExp
+nock.enableNetConnect(/(amazon|github).com/);
+
+http.get('http://www.amazon.com/');
+http.get('http://github.com/'); // only for second example
+
+// This request will be done!
+http.get('http://google.com/');
+// this will throw NetConnectNotAllowedError with message:
+// Nock: Not allow net connect for "google.com:80"
+```
+
 # Recording
 
 This is a cool feature:
