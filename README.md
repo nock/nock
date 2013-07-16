@@ -324,6 +324,31 @@ This way you can have your tests hit the real servers just by switching on this 
 $ NOCK_OFF=true node my_test.js
 ```
 
+# Enable/Disable real HTTP request
+
+As default, if you do not mock a host, a real HTTP request will do, but sometimes you should not permit real HTTP request, so...
+
+For disable real http request.
+
+```js
+nock.disableNetConnect();
+```
+
+So, if you try to request any host not 'nocked', it will thrown an NetConnectNotAllowedError.
+
+```js
+nock.disableNetConnect();
+http.get('http://google.com/');
+// this code throw NetConnectNotAllowedError with message:
+// Nock: Not allow net connect for "google.com:80"
+```
+
+For enabled real HTTP requests.
+
+```js
+nock.enableNetConnect();
+```
+
 # Recording
 
 This is a cool feature:
