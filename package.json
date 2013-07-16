@@ -1,7 +1,7 @@
 { "name" : "nock"
 , "description" : "HTTP Server mocking for Node.js"
 , "tags" : ["Mock", "HTTP", "testing", "isolation"]
-, "version" : "0.20.0"
+, "version" : "0.20.1"
 , "author" : "Pedro Teixeira <pedro.teixeira@gmail.com>"
 , "contributors" :
   [ {"name": "Roly Fentanes" }
@@ -24,6 +24,7 @@
   , {"name": "Tom Hosford"}
   , {"name": "Aurélien Thieriot"}
   , {"name": "Alex Zylman"}
+  , {"name": "Celestino Gomes", "email": "contact@tinogomes.com"}
   ]
 , "repository" :
   { "type" : "git"
@@ -41,4 +42,5 @@
     "request": "*"
 }
 , "scripts": { "test": "node node_modules/tap/bin/tap.js tests" }
+, "license": "MIT"
 }
