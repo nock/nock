@@ -1807,7 +1807,9 @@ test("disabled real HTTP request", function(t) {
   nock.disableNetConnect();
   
   try {
-    http.get('http://www.amazon.com')
+    http.get('http://www.amazon.com', function(res) {
+      throw "should not request this";
+    });
   } catch(err) {
     t.equal(err.message, 'Nock: Not allow net connect for "www.amazon.com:80"');
     t.end();
@@ -1819,31 +1821,33 @@ test("disabled real HTTP request", function(t) {
 test("enable real HTTP request only for google.com, via string", function(t) {
   nock.enableNetConnect('google.com');
   
-  http.get('http://google.com.br/').on('error', function(err) {
-    throw err;
-    t.end();
-  });
-  
   try {
-    http.get('http://www.amazon.com')
+    http.get('http://google.com.br/').on('error', function(err) {
+      throw err;
+    });
+
+    http.get('http://www.amazon.com', function(res) {
+      throw "should not deliver this request"
+    })
   } catch(err) {
     t.equal(err.message, 'Nock: Not allow net connect for "www.amazon.com:80"');
-    t.end();
   }
   
+  t.end();
   nock.enableNetConnect();
 });
 
 test("enable real HTTP request only for google.com, via regexp", function(t) {
   nock.enableNetConnect(/google\.com/);
   
-  http.get('http://google.com.br/').on('error', function(err) {
-    throw err;
-    t.end();
-  });
-  
   try {
-    http.get('http://www.amazon.com')
+    http.get('http://google.com.br/').on('error', function(err) {
+      throw err;
+    });
+
+    http.get('http://www.amazon.com', function(res) {
+      throw "should not request this";
+    });
   } catch(err) {
     t.equal(err.message, 'Nock: Not allow net connect for "www.amazon.com:80"');
     t.end();
