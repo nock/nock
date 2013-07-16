@@ -349,6 +349,17 @@ For enabled real HTTP requests.
 nock.enableNetConnect();
 ```
 
+You should configure to real HTTP request only for some match
+
+```js
+nock.enableNetConnect('amazon.com');
+http.get('http://www.amazon.com/');
+// This request will be done!
+http.get('http://google.com/');
+// this will throw NetConnectNotAllowedError with message:
+// Nock: Not allow net connect for "google.com:80"
+```
+
 # Recording
 
 This is a cool feature:
