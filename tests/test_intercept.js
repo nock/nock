@@ -1856,21 +1856,77 @@ test('enable real HTTP request only for google.com, via regexp', function(t) {
   nock.enableNetConnect();
 });
 
-test('repeating response 2 times', function(t) {
+test('repeating once', function(t) {
   nock.disableNetConnect();
 
   var _mock = nock('http://zombo.com')
     .get('/')
-    .times(2)
+    .once()
     .reply(200, "Hello World!");
-
+    
   http.get('http://zombo.com', function(res) {
     t.equal(200, res.statusCode, 'first request');
   });
+  
+  nock.cleanAll()
+  t.end();
 
-  http.get('http://zombo.com', function(res) {
-    t.equal(200, res.statusCode, 'second request');
-  });
+  nock.enableNetConnect();
+});
+
+test('repeating twice', function(t) {
+  nock.disableNetConnect();
+
+  var _mock = nock('http://zombo.com')
+    .get('/')
+    .twice()
+    .reply(200, "Hello World!");
+    
+  for (var i=0; i < 2; i++) {
+    http.get('http://zombo.com', function(res) {
+      t.equal(200, res.statusCode, 'first request');
+    });
+  };
+  
+  nock.cleanAll()
+  t.end();
+
+  nock.enableNetConnect();
+});
+
+test('repeating thrice', function(t) {
+  nock.disableNetConnect();
+
+  var _mock = nock('http://zombo.com')
+    .get('/')
+    .thrice()
+    .reply(200, "Hello World!");
+    
+  for (var i=0; i < 3; i++) {
+    http.get('http://zombo.com', function(res) {
+      t.equal(200, res.statusCode, 'first request');
+    });
+  };
+  
+  nock.cleanAll()
+  t.end();
+
+  nock.enableNetConnect();
+});
+
+test('repeating response 4 times', function(t) {
+  nock.disableNetConnect();
+
+  var _mock = nock('http://zombo.com')
+    .get('/')
+    .times(4)
+    .reply(200, "Hello World!");
+    
+  for (var i=0; i < 4; i++) {
+    http.get('http://zombo.com', function(res) {
+      t.equal(200, res.statusCode, 'first request');
+    });
+  };
   
   nock.cleanAll()
   t.end();
