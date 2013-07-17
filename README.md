@@ -149,11 +149,21 @@ var scope = nock('http://my.server.com:8081')
 You are able to specify the number of times to repeat the same response.
 
 ```js
-nock('http://zombo.com').get('/').times(2).reply(200, 'Ok');
+nock('http://zombo.com').get('/').times(4).reply(200, 'Ok');
 
 http.get('http://zombo.com/'); // respond body "Ok"
 http.get('http://zombo.com/'); // respond body "Ok"
+http.get('http://zombo.com/'); // respond body "Ok"
+http.get('http://zombo.com/'); // respond body "Ok"
 http.get('http://zombo.com/'); // respond with zombo.com result
+```
+
+Sugar sintaxe
+
+```js
+nock('http://zombo.com').get('/').once().reply(200, 'Ok');
+nock('http://zombo.com').get('/').twice().reply(200, 'Ok');
+nock('http://zombo.com').get('/').thrice().reply(200, 'Ok');
 ```
 
 ## Chaining
