@@ -405,6 +405,54 @@ test("match headers", function(t) {
 
 });
 
+test("multiple match headers", function(t) {
+  var scope = nock('http://www.headdy.com')
+     .get('/')
+     .matchHeader('x-my-headers', 'My custom Header value')
+     .reply(200, "Hello World!")
+     .get('/')
+     .matchHeader('x-my-headers', 'other value')
+     .reply(200, "Hello World other value!");
+
+  http.get({
+     host: "www.headdy.com"
+    , method: 'GET'
+    , path: '/'
+    , port: 80
+    , headers: {'X-My-Headers': 'other value'}
+  }, function(res) {
+    res.setEncoding('utf8');
+    t.equal(res.statusCode, 200);
+
+    res.on('data', function(data) {
+      t.equal(data, 'Hello World other value!');
+    });
+
+    res.on('end', function() {
+      http.get({
+         host: "www.headdy.com"
+        , method: 'GET'
+        , path: '/'
+        , port: 80
+        , headers: {'X-My-Headers': 'My custom Header value'}
+      }, function(res) {
+        res.setEncoding('utf8');
+        t.equal(res.statusCode, 200);
+
+        res.on('data', function(data) {
+          t.equal(data, 'Hello World!');
+        });
+
+        res.on('end', function() {
+          scope.done();
+          t.end();
+        });
+      });
+    });
+  });
+
+});
+
 test("match headers with regexp", function(t) {
   var scope = nock('http://www.headier.com')
      .get('/')
