@@ -1707,7 +1707,6 @@ test("persist reply with file", function(t) {
       t.equal(res.statusCode, 200);
       res.on('end', function() {
         t.ok(dataCalled);
-        t.end();
       });
       res.on('data', function(data) {
         dataCalled = true;
@@ -1717,6 +1716,7 @@ test("persist reply with file", function(t) {
     });
     req.end();
   }
+  t.end();
 
 });
 
