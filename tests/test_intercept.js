@@ -1687,6 +1687,39 @@ test('persists interceptors', function(t) {
   }).end();
 });
 
+test("persist reply with file", function(t) {
+  var dataCalled = false
+
+  var scope = nock('http://www.filereplier.com')
+    .persist()
+    .get('/')
+    .replyWithFile(200, __dirname + '/../assets/reply_file_1.txt')
+    .get('/test')
+    .reply(200, 'Yay!');
+
+  for (var i=0; i < 2; i++) {
+    var req = http.request({
+        host: "www.filereplier.com"
+      , path: '/'
+      , port: 80
+    }, function(res) {
+
+      t.equal(res.statusCode, 200);
+      res.on('end', function() {
+        t.ok(dataCalled);
+      });
+      res.on('data', function(data) {
+        dataCalled = true;
+        t.equal(data.toString(), "Hello from the file!", "response should match");
+      });
+
+    });
+    req.end();
+  }
+  t.end();
+
+});
+
 test('(re-)activate after restore', function(t) {
   var scope = nock('http://google.com')
     .get('/')
