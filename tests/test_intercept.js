@@ -2031,3 +2031,18 @@ test('superagent works', function(t) {
     t.end();
   });
 });
+
+test('superagent works with query string', function(t) {
+  var responseText = 'Yay superagentzzz';
+  var headers = { 'Content-Type': 'text/plain'};
+  nock('http://superagent.cz')
+    .get('/somepath?a=b')
+    .reply(200, responseText, headers);
+
+  superagent
+  .get('http://superagent.cz/somepath?a=b')
+  .end(function(err, res) {
+    t.equal(res.text, responseText);
+    t.end();
+  });
+});
