@@ -2046,3 +2046,34 @@ test('superagent works with query string', function(t) {
     t.end();
   });
 });
+
+test('response is streams2 compatible', function(t) {
+  var responseText = 'streams2 streams2 streams2';
+  nock('http://stream2hostnameftw')
+    .get('/somepath')
+    .reply(200, responseText);
+
+
+  http.request({
+      host: "stream2hostnameftw"
+    , path: "/somepath"
+  }, function(res) {
+    res.setEncoding('utf8');
+
+    var body = '';
+
+    res.on('readable', function() {
+      var buf;
+      while (buf = res.read())
+        body += buf;
+    });
+
+    res.once('end', function() {
+      t.equal(body, responseText);
+      t.end();
+    });
+
+  }).end();
+
+});
+
