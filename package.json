@@ -1,47 +1,105 @@
-{ "name" : "nock"
-, "description" : "HTTP Server mocking for Node.js"
-, "tags" : ["Mock", "HTTP", "testing", "isolation"]
-, "version" : "0.24.1"
-, "author" : "Pedro Teixeira <pedro.teixeira@gmail.com>"
-, "contributors" :
-  [ {"name": "Roly Fentanes" }
-  , {"name": "Alexander Simmerl"}
-  , {"name": "Pedro Teixeira"}
-  , {"name": "Nuno Job"}
-  , {"name": "Ian Young"}
-  , {"name": "nilsbunger"}
-  , {"name": "bacchusrx", "email": "bacchusrx@eightstar.ca"}
-  , {"name": "Fabiano França"}
-  , {"name": "Sascha Drews"}
-  , {"name": "Mike Swift"}
-  , {"name": "James Herdman"}
-  , {"name": "David Björklund"}
-  , {"name": "Andrew Kramolisch"}
-  , {"name": "Balazs Nagy"}
-  , {"name": "Brian J Brennan"}
-  , {"name": "Attila Incze"}
-  , {"name": "Mac Angell"}
-  , {"name": "Tom Hosford"}
-  , {"name": "Aurélien Thieriot"}
-  , {"name": "Alex Zylman"}
-  , {"name": "Celestino Gomes", "email": "contact@tinogomes.com"}
-  , {"name": "David Rousselie"}
-  ]
-, "repository" :
-  { "type" : "git"
-  , "url" : "http://github.com/pgte/nock.git"
-  }
-, "bugs" :
-  { "url" : "http://github.com/pgte/nock/issues" }
-, "engines" : ["node >= 0.4.10"]
-, "main" : "./index"
-, "dependencies": {
+{
+  "name": "nock",
+  "description": "HTTP Server mocking for Node.js",
+  "tags": [
+    "Mock",
+    "HTTP",
+    "testing",
+    "isolation"
+  ],
+  "version": "0.24.1",
+  "author": "Pedro Teixeira <pedro.teixeira@gmail.com>",
+  "contributors": [
+    {
+      "name": "Roly Fentanes"
+    },
+    {
+      "name": "Alexander Simmerl"
+    },
+    {
+      "name": "Pedro Teixeira"
+    },
+    {
+      "name": "Nuno Job"
+    },
+    {
+      "name": "Ian Young"
+    },
+    {
+      "name": "nilsbunger"
+    },
+    {
+      "name": "bacchusrx",
+      "email": "bacchusrx@eightstar.ca"
+    },
+    {
+      "name": "Fabiano França"
+    },
+    {
+      "name": "Sascha Drews"
+    },
+    {
+      "name": "Mike Swift"
+    },
+    {
+      "name": "James Herdman"
+    },
+    {
+      "name": "David Björklund"
+    },
+    {
+      "name": "Andrew Kramolisch"
+    },
+    {
+      "name": "Balazs Nagy"
+    },
+    {
+      "name": "Brian J Brennan"
+    },
+    {
+      "name": "Attila Incze"
+    },
+    {
+      "name": "Mac Angell"
+    },
+    {
+      "name": "Tom Hosford"
+    },
+    {
+      "name": "Aurélien Thieriot"
+    },
+    {
+      "name": "Alex Zylman"
+    },
+    {
+      "name": "Celestino Gomes",
+      "email": "contact@tinogomes.com"
+    },
+    {
+      "name": "David Rousselie"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/pgte/nock.git"
+  },
+  "bugs": {
+    "url": "http://github.com/pgte/nock/issues"
+  },
+  "engines": [
+    "node >= 0.4.10"
+  ],
+  "main": "./index",
+  "dependencies": {
     "propagate": "0.2.x"
-}
-, "devDependencies": {
+  },
+  "devDependencies": {
     "tap": "*",
-    "request": "*"
-}
-, "scripts": { "test": "node node_modules/tap/bin/tap.js tests" }
-, "license": "MIT"
+    "request": "*",
+    "superagent": "~0.15.7"
+  },
+  "scripts": {
+    "test": "node node_modules/tap/bin/tap.js tests"
+  },
+  "license": "MIT"
 }

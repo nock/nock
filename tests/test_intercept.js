@@ -5,9 +5,10 @@ var util    = require('util');
 var events  = require('events');
 var test    = require('tap').test;
 var mikealRequest = require('request');
+var superagent = require('superagent');
 
 test("allow override works (2)", function(t) {
-  var scope = 
+  var scope =
   nock("https://httpbin.org",{allowUnmocked: true}).
     post("/post").
     reply(200,"99problems");
@@ -29,7 +30,7 @@ test("allow override works (2)", function(t) {
 
 test("get gets mocked", function(t) {
   var dataCalled = false
-  
+
   var scope = nock('http://www.google.com')
     .get('/')
     .reply(200, "Hello World!");
@@ -39,7 +40,7 @@ test("get gets mocked", function(t) {
     , path: '/'
     , port: 80
   }, function(res) {
-    
+
     t.equal(res.statusCode, 200);
     res.on('end', function() {
       t.ok(dataCalled);
@@ -51,25 +52,25 @@ test("get gets mocked", function(t) {
       t.ok(data instanceof Buffer, "data should be buffer");
       t.equal(data.toString(), "Hello World!", "response should match");
     });
-    
+
   });
-  
+
   req.end();
 });
 
 test("not mocked should work in http", function(t) {
   var dataCalled = false;
-  
+
   var req = http.request({
       host: "www.amazon.com"
     , path: '/'
     , port: 80
   }, function(res) {
-    
+
     t.equal(res.statusCode, 200);
     res.on('end', function() {
       var doneFails = false;
-      
+
       t.ok(dataCalled);
       try {
         scope.done();
@@ -79,26 +80,26 @@ test("not mocked should work in http", function(t) {
       t.ok(doneFails);
       t.end();
     });
-    
+
     res.on('data', function(data) {
       dataCalled = true;
     });
-    
+
   });
-  
+
   req.on('error', function(err) {
     if (err.code !== 'ECONNREFUSED') {
       throw err;
     }
     t.end();
   });
-    
+
   req.end();
 });
 
 test("post", function(t) {
   var dataCalled = false;
-  
+
   var scope = nock('http://www.google.com')
      .post('/form')
      .reply(201, "OK!");
@@ -156,7 +157,7 @@ test("post with empty response body", function(t) {
 
 test("post, lowercase", function(t) {
   var dataCalled = false;
-  
+
   var scope = nock('http://www.google.com')
      .post('/form')
      .reply(200, "OK!");
@@ -497,7 +498,7 @@ test("match all headers", function(t) {
       t.end();
     }
   }
-  
+
   http.get({
      host: "api.headdy.com"
     , path: '/one'
@@ -556,7 +557,7 @@ test("header manipulation", function(t) {
 
 test("head", function(t) {
   var dataCalled = false;
-  
+
   var scope = nock('http://www.google.com')
      .head('/form')
      .reply(201, "OK!");
@@ -650,7 +651,7 @@ test("chaining", function(t) {
      .reply(200, "Hello World!")
      .post('/form')
      .reply(201, "OK!");
-   
+
    function endOne(t) {
      repliedCount += 1;
      if (t === 2) {
@@ -658,7 +659,7 @@ test("chaining", function(t) {
      }
      t.end();
    }
-   
+
    t.test("post", function(t) {
      var dataCalled;
      var req = http.request({
@@ -713,7 +714,7 @@ test("chaining", function(t) {
 
 test("encoding", function(t) {
   var dataCalled = false
-  
+
   var scope = nock('http://www.encoderz.com')
     .get('/')
     .reply(200, "Hello World!");
@@ -723,9 +724,9 @@ test("encoding", function(t) {
     , path: '/'
     , port: 80
   }, function(res) {
-    
+
     res.setEncoding('base64');
-    
+
     t.equal(res.statusCode, 200);
     res.on('end', function() {
       t.ok(dataCalled);
@@ -737,15 +738,15 @@ test("encoding", function(t) {
       t.type(data, 'string', "data should be string");
       t.equal(data, "SGVsbG8gV29ybGQh", "response should match base64 encoding");
     });
-    
+
   });
-  
+
   req.end();
 });
 
 test("reply with file", function(t) {
   var dataCalled = false
-  
+
   var scope = nock('http://www.filereplier.com')
     .get('/')
     .replyWithFile(200, __dirname + '/../assets/reply_file_1.txt')
@@ -757,7 +758,7 @@ test("reply with file", function(t) {
     , path: '/'
     , port: 80
   }, function(res) {
-    
+
     t.equal(res.statusCode, 200);
     res.on('end', function() {
       t.ok(dataCalled);
@@ -767,11 +768,11 @@ test("reply with file", function(t) {
       dataCalled = true;
       t.equal(data.toString(), "Hello from the file!", "response should match");
     });
-    
+
   });
-  
+
   req.end();
-  
+
 });
 
 test("reply with file and pipe response", function(t) {
@@ -800,9 +801,9 @@ test("reply with file and pipe response", function(t) {
     res.pipe(fakeStream);
     res.setEncoding('utf8');
     t.equal(res.statusCode, 200);
-    
+
   });
-  
+
 });
 
 test("reply with file with mikeal/request", function(t) {
@@ -822,12 +823,12 @@ test("reply with file with mikeal/request", function(t) {
     t.equal(body, "Hello from the file!", "response should match");
     t.end();
   });
-  
+
 });
 
 test("reply with JSON", function(t) {
   var dataCalled = false
-  
+
   var scope = nock('http://www.jsonreplier.com')
     .get('/')
     .reply(200, {hello: "world"});
@@ -837,7 +838,7 @@ test("reply with JSON", function(t) {
     , path: '/'
     , port: 80
   }, function(res) {
-    
+
     res.setEncoding('utf8');
     t.equal(res.statusCode, 200);
     res.on('end', function() {
@@ -849,11 +850,11 @@ test("reply with JSON", function(t) {
       dataCalled = true;
       t.equal(data.toString(), '{"hello":"world"}', "response should match");
     });
-    
+
   });
-  
+
   req.end();
-  
+
 });
 
 test("filter path with function", function(t) {
@@ -969,7 +970,7 @@ test("abort request", function(t) {
     res.on('end', function() {
       t.true(false, 'this should never execute');
     });
-    
+
     req.abort();
   });
 
@@ -1240,7 +1241,7 @@ test("can take a port", function(t) {
     , path: '/'
     , port: 3333
   }, function(res) {
-    
+
     t.equal(res.statusCode, 200);
     res.on('end', function() {
       scope.done();
@@ -1296,18 +1297,18 @@ test("complaints if https route is missing", function(t) {
     t.ok(err.message.match(/No match for HTTP request GET \/abcdef892932/));
     t.end();
   }
-  
+
 
 });
 
 test("can use ClientRequest using GET", function(t) {
-  
+
   var dataCalled = false
 
   var scope = nock('http://www2.clientrequester.com')
     .get('/dsad')
     .reply(202, "HEHE!");
-    
+
   var req = new http.ClientRequest({
       host: "www2.clientrequester.com"
     , path: '/dsad'
@@ -1332,13 +1333,13 @@ test("can use ClientRequest using GET", function(t) {
 });
 
 test("can use ClientRequest using POST", function(t) {
-  
+
   var dataCalled = false
 
   var scope = nock('http://www2.clientrequester.com')
     .post('/posthere/please', 'heyhey this is the body')
     .reply(201, "DOOONE!");
-    
+
   var req = new http.ClientRequest({
       host: "www2.clientrequester.com"
     , path: '/posthere/please'
@@ -1370,9 +1371,9 @@ test("same url matches twice", function(t) {
      .reply(200, "First match")
      .get('/hey')
      .reply(201, "Second match");
-     
+
   var replied = 0;
-  
+
   function callback() {
     replied += 1;
     if (replied == 2) {
@@ -1436,11 +1437,11 @@ test("two scopes with the same request are consumed", function(t) {
   var scope1 = nock('http://www36.google.com')
     .get('/')
     .reply(200, "Hello World!");
-  
+
   var scope2 = nock('http://www36.google.com')
     .get('/')
     .reply(200, "Hello World!");
-  
+
   var doneCount = 0;
   function done() {
     doneCount += 1;
@@ -1886,7 +1887,7 @@ test('has a req property on the response', function(t) {
 
 test('disabled real HTTP request', function(t) {
   nock.disableNetConnect();
-  
+
   try {
     http.get('http://www.amazon.com', function(res) {
       throw "should not request this";
@@ -1895,13 +1896,13 @@ test('disabled real HTTP request', function(t) {
     t.equal(err.message, 'Nock: Not allow net connect for "www.amazon.com:80"');
     t.end();
   }
-  
+
   nock.enableNetConnect();
 });
 
 test('enable real HTTP request only for google.com, via string', function(t) {
   nock.enableNetConnect('google.com');
-  
+
   try {
     http.get('http://google.com.br/').on('error', function(err) {
       throw err;
@@ -1913,14 +1914,14 @@ test('enable real HTTP request only for google.com, via string', function(t) {
   } catch(err) {
     t.equal(err.message, 'Nock: Not allow net connect for "www.amazon.com:80"');
   }
-  
+
   t.end();
   nock.enableNetConnect();
 });
 
 test('enable real HTTP request only for google.com, via regexp', function(t) {
   nock.enableNetConnect(/google\.com/);
-  
+
   try {
     http.get('http://google.com.br/').on('error', function(err) {
       throw err;
@@ -1933,7 +1934,7 @@ test('enable real HTTP request only for google.com, via regexp', function(t) {
     t.equal(err.message, 'Nock: Not allow net connect for "www.amazon.com:80"');
     t.end();
   }
-  
+
   nock.enableNetConnect();
 });
 
@@ -1944,11 +1945,11 @@ test('repeating once', function(t) {
     .get('/')
     .once()
     .reply(200, "Hello World!");
-    
+
   http.get('http://zombo.com', function(res) {
     t.equal(200, res.statusCode, 'first request');
   });
-  
+
   nock.cleanAll()
   t.end();
 
@@ -1962,13 +1963,13 @@ test('repeating twice', function(t) {
     .get('/')
     .twice()
     .reply(200, "Hello World!");
-    
+
   for (var i=0; i < 2; i++) {
     http.get('http://zombo.com', function(res) {
       t.equal(200, res.statusCode, 'first request');
     });
   };
-  
+
   nock.cleanAll()
   t.end();
 
@@ -1982,13 +1983,13 @@ test('repeating thrice', function(t) {
     .get('/')
     .thrice()
     .reply(200, "Hello World!");
-    
+
   for (var i=0; i < 3; i++) {
     http.get('http://zombo.com', function(res) {
       t.equal(200, res.statusCode, 'first request');
     });
   };
-  
+
   nock.cleanAll()
   t.end();
 
@@ -2002,15 +2003,31 @@ test('repeating response 4 times', function(t) {
     .get('/')
     .times(4)
     .reply(200, "Hello World!");
-    
+
   for (var i=0; i < 4; i++) {
     http.get('http://zombo.com', function(res) {
       t.equal(200, res.statusCode, 'first request');
     });
   };
-  
+
   nock.cleanAll()
   t.end();
 
   nock.enableNetConnect();
+});
+
+
+test('superagent works', function(t) {
+  var responseText = 'Yay superagent!';
+  var headers = { 'Content-Type': 'text/plain'};
+  nock('http://superagent.cz')
+    .get('/somepath')
+    .reply(200, responseText, headers);
+
+  superagent
+  .get('http://superagent.cz/somepath')
+  .end(function(err, res) {
+    t.equal(res.text, responseText);
+    t.end();
+  });
 });
