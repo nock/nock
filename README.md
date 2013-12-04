@@ -21,7 +21,12 @@ var nock = require('nock');
 
 var couchdb = nock('http://myapp.iriscouch.com')
                 .get('/users/1')
-                .reply(200, {_id: "123ABC", _rev: "946B7D1C", username: 'pgte', email: 'pedro.teixeira@gmail.com'});
+                .reply(200, {
+                  _id: '123ABC', 
+                  _rev: '946B7D1C', 
+                  username: 'pgte', 
+                  email: 'pedro.teixeira@gmail.com'
+                 });
 ```
 
 This setup says that we will intercept every HTTP call to `http://myapp.iriscouch.com`.
@@ -42,8 +47,15 @@ You can specify the request body to be matched as the second argument to the `ge
 
 ```js
 var scope = nock('http://myapp.iriscouch.com')
-                .post('/users', {username: 'pgte', email: 'pedro.teixeira@gmail.com'})
-                .reply(201, {ok: true, id: "123ABC", rev: "946B7D1C"});
+                .post('/users', {
+                  username: 'pgte', 
+                  email: 'pedro.teixeira@gmail.com'
+                })
+                .reply(201, {
+                  ok: true, 
+                  id: '123ABC', 
+                  rev: '946B7D1C'
+                });
 ```
 
 The request body can be a string or a JSON object.
@@ -63,7 +75,7 @@ You can also specify the reply body as a string:
 ```js
 var scope = nock('http://www.google.com')
                 .get('/')
-                .reply(200, "Hello from Google!");
+                .reply(200, 'Hello from Google!');
 ```
 
 or as a JSON-encoded object:
@@ -71,7 +83,11 @@ or as a JSON-encoded object:
 ```js
 var scope = nock('http://myapp.iriscouch.com')
                 .get('/')
-                .reply(200, {username: 'pgte', email: 'pedro.teixeira@gmail.com', _id: "4324243fsd"});
+                .reply(200, {
+                  username: 'pgte', 
+                  email: 'pedro.teixeira@gmail.com', 
+                  _id: '4324243fsd'
+                });
 ```
 
 or even as a file:
@@ -100,7 +116,9 @@ You can specify the reply headers like this:
 ```js
 var scope = nock('http://www.headdy.com')
    .get('/')
-   .reply(200, "Hello World!", {'X-My-Headers': 'My Header value'});
+   .reply(200, 'Hello World!', {
+     'X-My-Headers': 'My Header value'
+   });
 ```
 
 ### Default Reply Headers
@@ -109,7 +127,10 @@ You can also specify default reply headers for all responses like this:
 
 ```js
 var scope = nock('http://www.headdy.com')
-  .defaultReplyHeaders({'X-Powered-By': 'Rails', 'Content-Type': 'application/json'})
+  .defaultReplyHeaders({
+    'X-Powered-By': 'Rails', 
+    'Content-Type': 'application/json'
+  })
   .get('/')
   .reply(200, 'The default headers should come too');
 ```
@@ -174,10 +195,22 @@ You can chain behaviour like this:
 var scope = nock('http://myapp.iriscouch.com')
                 .get('/users/1')
                 .reply(404)
-                .post('/users', {username: 'pgte', email: 'pedro.teixeira@gmail.com'})
-                .reply(201, {ok: true, id: "123ABC", rev: "946B7D1C"})
+                .post('/users', {
+                  username: 'pgte', 
+                  email: 'pedro.teixeira@gmail.com'
+                })
+                .reply(201, {
+                  ok: true, 
+                  id: '123ABC', 
+                  rev: '946B7D1C'
+                })
                 .get('/users/123ABC')
-                .reply(200, {_id: "123ABC", _rev: "946B7D1C", username: 'pgte', email: 'pedro.teixeira@gmail.com'});
+                .reply(200, {
+                  _id: '123ABC', 
+                  _rev: '946B7D1C', 
+                  username: 'pgte', 
+                  email: 'pedro.teixeira@gmail.com'
+                });
 ```
 
 ## Path filtering
@@ -240,7 +273,9 @@ If you need to match requests only if certain request headers match, you can.
 var scope = nock('http://api.myservice.com')
                 .matchHeader('accept', 'application/json')
                 .get('/')
-                .reply(200, {data: "hello world"})
+                .reply(200, {
+                  data: 'hello world'
+                })
 ```
 
 You can also use a regexp for the header body.
@@ -249,7 +284,9 @@ You can also use a regexp for the header body.
 var scope = nock('http://api.myservice.com')
                 .matchHeader('User-Agent', /Mozilla\/.*/)
                 .get('/')
-                .reply(200, {data: "hello world"})
+                .reply(200, {
+                  data: 'hello world'
+                })
 ```
 
 ## Allow __unmocked__ requests on a mocked hostname
@@ -305,7 +342,7 @@ You can make all the interceptors for a scope persist by calling `.persist()` on
 var scope = nock('http://persisssists.con')
   .persist()
   .get('/')
-  .reply(200, "Persisting all the way");
+  .reply(200, 'Persisting all the way');
 ```
 
 ## pendingMocks
