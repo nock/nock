@@ -22,9 +22,9 @@ var nock = require('nock');
 var couchdb = nock('http://myapp.iriscouch.com')
                 .get('/users/1')
                 .reply(200, {
-                  _id: '123ABC', 
-                  _rev: '946B7D1C', 
-                  username: 'pgte', 
+                  _id: '123ABC',
+                  _rev: '946B7D1C',
+                  username: 'pgte',
                   email: 'pedro.teixeira@gmail.com'
                  });
 ```
@@ -48,12 +48,12 @@ You can specify the request body to be matched as the second argument to the `ge
 ```js
 var scope = nock('http://myapp.iriscouch.com')
                 .post('/users', {
-                  username: 'pgte', 
+                  username: 'pgte',
                   email: 'pedro.teixeira@gmail.com'
                 })
                 .reply(201, {
-                  ok: true, 
-                  id: '123ABC', 
+                  ok: true,
+                  id: '123ABC',
                   rev: '946B7D1C'
                 });
 ```
@@ -84,8 +84,8 @@ or as a JSON-encoded object:
 var scope = nock('http://myapp.iriscouch.com')
                 .get('/')
                 .reply(200, {
-                  username: 'pgte', 
-                  email: 'pedro.teixeira@gmail.com', 
+                  username: 'pgte',
+                  email: 'pedro.teixeira@gmail.com',
                   _id: '4324243fsd'
                 });
 ```
@@ -109,6 +109,17 @@ var scope = nock('http://www.google.com')
    });
 ```
 
+
+A Stream works too:
+```js
+var scope = nock('http://www.google.com')
+   .get('/cat-poems')
+   .reply(200, function(uri, requestBody) {
+     return fs.createReadStream('cat-poems.txt');
+   });
+```
+
+
 ### Specifying Reply Headers
 
 You can specify the reply headers like this:
@@ -128,7 +139,7 @@ You can also specify default reply headers for all responses like this:
 ```js
 var scope = nock('http://www.headdy.com')
   .defaultReplyHeaders({
-    'X-Powered-By': 'Rails', 
+    'X-Powered-By': 'Rails',
     'Content-Type': 'application/json'
   })
   .get('/')
@@ -187,6 +198,19 @@ nock('http://zombo.com').get('/').twice().reply(200, 'Ok');
 nock('http://zombo.com').get('/').thrice().reply(200, 'Ok');
 ```
 
+## Delay the response
+
+You are able to specify the number of milliseconds that your reply should be delayed.
+
+```js
+nock('http://my.server.com')
+  .get('/')
+  .delay(2000) // 2 seconds
+  .reply(200, '<html></html>')
+```
+
+NOTE: the [`'response'`](http://nodejs.org/api/http.html#http_event_response) event will occur immediately, but the [IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage) not emit it's `'end'` event until after the delay.
+
 ## Chaining
 
 You can chain behaviour like this:
@@ -196,19 +220,19 @@ var scope = nock('http://myapp.iriscouch.com')
                 .get('/users/1')
                 .reply(404)
                 .post('/users', {
-                  username: 'pgte', 
+                  username: 'pgte',
                   email: 'pedro.teixeira@gmail.com'
                 })
                 .reply(201, {
-                  ok: true, 
-                  id: '123ABC', 
+                  ok: true,
+                  id: '123ABC',
                   rev: '946B7D1C'
                 })
                 .get('/users/123ABC')
                 .reply(200, {
-                  _id: '123ABC', 
-                  _rev: '946B7D1C', 
-                  username: 'pgte', 
+                  _id: '123ABC',
+                  _rev: '946B7D1C',
+                  username: 'pgte',
                   email: 'pedro.teixeira@gmail.com'
                 });
 ```
