@@ -1,4 +1,5 @@
-var nock    = require('../.')
+var fs      = require('fs');
+var nock    = require('../.');
 var http    = require('http');
 var https   = require('https');
 var util    = require('util');
@@ -2077,3 +2078,101 @@ test('response is streams2 compatible', function(t) {
 
 });
 
+function checkDuration(t, ms) {
+  var _end = t.end;
+  var start = process.hrtime();
+  t.end = function () {
+    var fin = process.hrtime(start);
+    var finMs =
+      (fin[0] * 1e+9) +  // seconds -> ms
+      (fin[1] * 1e-6); // nanoseconds -> ms
+
+    t.ok(finMs >= ms, 'Duration of ' + Math.round(finMs) + 'ms should be longer than ' + ms + 'ms');
+    _end.call(t);
+  };
+}
+
+test('calling delay delays the response', function (t) {
+  checkDuration(t, 25);
+
+  nock('http://funk')
+    .get('/')
+    .delay(25)
+    .reply(200, 'OK');
+
+  http.get('http://funk/', function (res) {
+    res.setEncoding('utf8');
+
+    var body = '';
+
+    res.on('data', function(chunk) {
+      body += chunk;
+    });
+
+    res.once('end', function() {
+      t.equal(body, 'OK');
+      t.end();
+    });
+  });
+});
+
+test('using reply callback with delay provides proper arguments', function (t) {
+  nock('http://localhost')
+    .get('/')
+    .delay(25)
+    .reply(200, function (path, requestBody) {
+      t.equal(path, '/', 'path arg should be set');
+      t.equal(requestBody, 'OK', 'requestBody arg should be set');
+      t.end();
+    });
+
+  http.request('http://localhost/', function () {}).end('OK');
+});
+
+test('delay works with replyWithFile', function (t) {
+  checkDuration(t, 25);
+  nock('http://localhost')
+    .get('/')
+    .delay(25)
+    .replyWithFile(200, __dirname + '/../assets/reply_file_1.txt');
+
+  http.request('http://localhost/', function (res) {
+    res.setEncoding('utf8');
+
+    var body = '';
+
+    res.on('data', function(chunk) {
+      body += chunk;
+    });
+
+    res.once('end', function() {
+      t.equal(body, 'Hello from the file!', 'the body should eql the text from the file');
+      t.end();
+    });
+  }).end('OK');
+});
+
+test('delay works with when you return a generic stream from the reply callback', function (t) {
+  checkDuration(t, 25);
+  nock('http://localhost')
+    .get('/')
+    .delay(25)
+    .reply(200, function (path, reqBody) {
+      return fs.createReadStream(__dirname + '/../assets/reply_file_1.txt');
+    });
+
+  http.request('http://localhost/', function (res) {
+    res.setEncoding('utf8');
+
+    var body = '';
+
+    res.on('data', function(chunk) {
+      body += chunk;
+    });
+
+    res.once('end', function() {
+      t.equal(body, 'Hello from the file!', 'the body should eql the text from the file');
+      t.end();
+    });
+  }).end('OK');
+});
