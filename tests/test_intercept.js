@@ -1523,6 +1523,49 @@ test("default reply headers work", function(t) {
   }, done).end();
 });
 
+test("JSON encoded replies set the content-type header", function(t) {
+  var scope = nock('http://localhost')
+    .get('/')
+    .reply(200, {
+      A: 'b'
+    });
+
+  function done(res) {
+    scope.done();
+    t.equal(res.statusCode, 200);
+    t.equal(res.headers['content-type'], 'application/json');
+    t.end();
+  }
+
+  http.request({
+      host: 'localhost'
+    , path: '/'
+  }, done).end();
+});
+
+
+test("JSON encoded replies does not overwrite existing content-type header", function(t) {
+  var scope = nock('http://localhost')
+    .get('/')
+    .reply(200, {
+      A: 'b'
+    }, {
+      'Content-Type': 'unicorns'
+    });
+
+  function done(res) {
+    scope.done();
+    t.equal(res.statusCode, 200);
+    t.equal(res.headers['content-type'], 'unicorns');
+    t.end();
+  }
+
+  http.request({
+      host: 'localhost'
+    , path: '/'
+  }, done).end();
+});
+
 test('clean all works', function(t) {
   var scope = nock('http://amazon.com')
     .get('/nonexistent')
