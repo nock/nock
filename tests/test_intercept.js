@@ -841,6 +841,7 @@ test("reply with JSON", function(t) {
 
     res.setEncoding('utf8');
     t.equal(res.statusCode, 200);
+    t.equal(res.headers['content-type'], 'application/json');
     res.on('end', function() {
       t.ok(dataCalled);
       scope.done();
