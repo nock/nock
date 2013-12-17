@@ -842,6 +842,7 @@ test("reply with JSON", function(t) {
 
     res.setEncoding('utf8');
     t.equal(res.statusCode, 200);
+    t.equal(res.headers['content-type'], 'application/json');
     res.on('end', function() {
       t.ok(dataCalled);
       scope.done();
@@ -1519,6 +1520,49 @@ test("default reply headers work", function(t) {
 
   http.request({
       host: 'default.reply.headers.com'
+    , path: '/'
+  }, done).end();
+});
+
+test("JSON encoded replies set the content-type header", function(t) {
+  var scope = nock('http://localhost')
+    .get('/')
+    .reply(200, {
+      A: 'b'
+    });
+
+  function done(res) {
+    scope.done();
+    t.equal(res.statusCode, 200);
+    t.equal(res.headers['content-type'], 'application/json');
+    t.end();
+  }
+
+  http.request({
+      host: 'localhost'
+    , path: '/'
+  }, done).end();
+});
+
+
+test("JSON encoded replies does not overwrite existing content-type header", function(t) {
+  var scope = nock('http://localhost')
+    .get('/')
+    .reply(200, {
+      A: 'b'
+    }, {
+      'Content-Type': 'unicorns'
+    });
+
+  function done(res) {
+    scope.done();
+    t.equal(res.statusCode, 200);
+    t.equal(res.headers['content-type'], 'unicorns');
+    t.end();
+  }
+
+  http.request({
+      host: 'localhost'
     , path: '/'
   }, done).end();
 });
