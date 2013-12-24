@@ -4,6 +4,7 @@ var http    = require('http');
 var https   = require('https');
 var util    = require('util');
 var events  = require('events');
+var stream  = require('stream');
 var test    = require('tap').test;
 var mikealRequest = require('request');
 var superagent = require('superagent');
@@ -2220,3 +2221,42 @@ test('delay works with when you return a generic stream from the reply callback'
     });
   }).end('OK');
 });
+
+if (stream.Readable) {
+  test('when a stream is used for the response body, it will not be read until after the response event', function (t) {
+    var responseEvent = false;
+    var text = 'Hello World\n';
+
+    function SimpleStream(opt) {
+      stream.Readable.call(this, opt);
+    }
+    util.inherits(SimpleStream, stream.Readable);
+    SimpleStream.prototype._read = function() {
+      t.ok(responseEvent);
+      this.push(text);
+      this.push(null);
+    };
+
+    nock('http://localhost')
+      .get('/')
+      .reply(200, function (path, reqBody) {
+        return new SimpleStream();
+      });
+
+    http.get('http://localhost/', function (res) {
+      responseEvent = true;
+      res.setEncoding('utf8');
+
+      var body = '';
+
+      res.on('data', function(chunk) {
+        body += chunk;
+      });
+
+      res.once('end', function() {
+        t.equal(body, text);
+        t.end();
+      });
+    });
+  });
+}
