@@ -2222,6 +2222,35 @@ test('delay works with when you return a generic stream from the reply callback'
   }).end('OK');
 });
 
+test("finish event fired before end event (bug-139)", function(t) {
+	var scope = nock('http://www.filterboddiezregexp.com')
+		.filteringRequestBody(/mia/, 'nostra')
+		.post('/', 'mamma nostra')
+		.reply(200, "Hello World!");
+
+	var finishCalled = false;
+	var req = http.request({
+													 host: "www.filterboddiezregexp.com"
+													 , method: 'POST'
+													 , path: '/'
+													 , port: 80
+												 }, function(res) {
+		t.equal(finishCalled, true);
+		t.equal(res.statusCode, 200);
+		res.on('end', function() {
+			scope.done();
+			t.end();
+		});
+	});
+
+	req.on('finish', function() {
+		finishCalled = true;
+	});
+
+	req.end('mamma mia');
+
+});
+
 if (stream.Readable) {
   test('when a stream is used for the response body, it will not be read until after the response event', function (t) {
     var responseEvent = false;
