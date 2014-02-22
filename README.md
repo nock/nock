@@ -467,7 +467,9 @@ nock.recorder.rec();
 If you just want to capture the generated code into a var as an array you can use:
 
 ```js
-nock.recorder.rec(true); // :no_output = true
+nock.recorder.rec({
+  dont_print: true
+});
 // ... some HTTP calls
 var nockCalls = nock.recorder.play();
 ```
@@ -477,6 +479,26 @@ The `nockCalls` var will contain an array of strings representing the generated 
 Copy and paste that code into your tests, customize at will, and you're done!
 
 (Remember that you should do this one test at a time).
+
+In case you want to generate the code yourself or pass the test data in some other way, you can pass the `output_objects` option to `rec`:
+
+```js
+nock.recorder.rec({
+  output_objects: true
+});
+// ... some HTTP calls
+var nockCallObjects = nock.recorder.play();
+```
+
+The returned call objects have the following properties:
+ `scope`:     the scope of the call (e.g. `https://github.com`)
+ `port`:      the port of the call (e.g. `80`, `443` or `undefined` if the HTTP request didn't have `options.port` defined)
+ `method`:    the HTTP verb of the call (e.g. `GET`)
+ `path`:      the path of the call (e.g. `/pgte/nock`)
+ `body`:      the body of the call, if any
+ `reply`:     the HTTP status of the reply (e.g. `200`)
+ `response`:  the body of the reply
+ `headers`:   the headers of the reply
 
 # How does it work?
 
