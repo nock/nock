@@ -491,14 +491,21 @@ var nockCallObjects = nock.recorder.play();
 ```
 
 The returned call objects have the following properties:
- `scope`:     the scope of the call (e.g. `https://github.com`)
- `port`:      the port of the call (e.g. `80`, `443` or `undefined` if the HTTP request didn't have `options.port` defined)
- `method`:    the HTTP verb of the call (e.g. `GET`)
- `path`:      the path of the call (e.g. `/pgte/nock`)
- `body`:      the body of the call, if any
- `reply`:     the HTTP status of the reply (e.g. `200`)
- `response`:  the body of the reply
- `headers`:   the headers of the reply
+ `scope` - the scope of the call (e.g. `https://github.com`)
+
+ `port` - the port of the call (e.g. `80`, `443` or `undefined` if the HTTP request didn't have `options.port` defined)
+
+ `method` - the HTTP verb of the call (e.g. `'GET'`)
+
+ `path` - the path of the call (e.g. `'/pgte/nock'`)
+
+ `body` - the body of the call, if any
+
+ `reply` - the HTTP status as string of the reply (e.g. `'200'`)
+
+ `response` - the body of the reply
+
+ `headers` - the headers of the reply
 
 # How does it work?
 
