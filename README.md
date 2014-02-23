@@ -499,7 +499,7 @@ The returned call objects have the following properties:
 
  `body` - the body of the call, if any
 
- `reply` - the HTTP status as string of the reply (e.g. `'200'`)
+ `status` - the HTTP status of the reply (e.g. `200`)
 
  `response` - the body of the reply
 
