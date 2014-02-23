@@ -52,7 +52,7 @@ tap.test('records objects', function(t) {
       t.type(ret, 'object');
       t.equal(ret.scope, "http://google.com");
       t.equal(ret.method, "POST");
-      t.ok(typeof(ret.reply) !== 'undefined');
+      t.ok(typeof(ret.status) !== 'undefined');
       t.ok(typeof(ret.response) !== 'undefined');
       t.end();
     });
@@ -127,7 +127,7 @@ tap.test('when request body is json, it goes unstringified in objects', function
       t.equal(ret.scope, "http://www.google.com");
       t.equal(ret.method, "POST");
       t.ok(ret.body && ret.body.a && ret.body.a === payload.a && ret.body.b && ret.body.b === payload.b);
-      t.ok(typeof(ret.reply) !== 'undefined');
+      t.ok(typeof(ret.status) !== 'undefined');
       t.ok(typeof(ret.response) !== 'undefined');
       t.end();
     })
@@ -140,31 +140,49 @@ tap.test('records nonstandard ports', function(t) {
   nock.restore();
   nock.recorder.clear();
   t.equal(nock.recorder.play().length, 0);
-  //  A random public proxy used for testing.
-  var options = { host:'barracuda-web.eisd.net'
-                , port:'3128'
-                , path:'/' }
-  ;
 
-  nock.recorder.rec({
-    dont_print: true,
-    output_objects: true
-  });
-  var req = http.request(options, function(res) {
-    res.resume();
-    var ret;
-    res.once('end', function() {
-      nock.restore();
-      ret = nock.recorder.play();
-      t.equal(ret.length, 1);
-      var ret = ret[0];
-      t.type(ret, 'object');
-      t.equal(ret.scope, "http://barracuda-web.eisd.net:3128");
-      t.equal(ret.method, "GET");
-      t.ok(typeof(ret.reply) !== 'undefined');
-      t.ok(typeof(ret.response) !== 'undefined');
-      t.end();
+  var REQUEST_BODY = 'ABCDEF';
+  var RESPONSE_BODY = '012345';
+
+  //  Create test http server and perform the tests while it's up.
+  var testServer = http.createServer(function (req, res) {
+    res.write(RESPONSE_BODY);
+    res.end();
+  }).listen(8081, function(err) {
+
+    t.equal(err, undefined);
+
+    var options = { host:'localhost'
+                  , port:testServer.address().port
+                  , path:'/' }
+    ;
+
+    nock.recorder.rec({
+      dont_print: true,
+      output_objects: true
     });
+    var req = http.request(options, function(res) {
+      res.resume();
+      var ret;
+      res.once('end', function() {
+        nock.restore();
+        ret = nock.recorder.play();
+        t.equal(ret.length, 1);
+        var ret = ret[0];
+        t.type(ret, 'object');
+        t.equal(ret.scope, "http://localhost:" + options.port);
+        t.equal(ret.method, "GET");
+        t.equal(ret.body, REQUEST_BODY);
+        t.equal(ret.status, 200);
+        t.equal(ret.response, RESPONSE_BODY);
+        t.end();
+
+        //  Close the test server, we are done with it.
+        testServer.close();
+      });
+    });
+
+    req.end(REQUEST_BODY);
   });
-  req.end('ABCDEF');
+
 });
