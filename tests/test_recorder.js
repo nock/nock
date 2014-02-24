@@ -167,7 +167,7 @@ tap.test('records nonstandard ports', function(t) {
       res.once('end', function() {
         nock.restore();
         ret = nock.recorder.play();
-        t.equal(ret.length, 1);
+        t.ok(ret.length >= 1);
         var ret = ret[0];
         t.type(ret, 'object');
         t.equal(ret.scope, "http://localhost:" + options.port);
