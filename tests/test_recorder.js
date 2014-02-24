@@ -167,6 +167,13 @@ tap.test('records nonstandard ports', function(t) {
       res.once('end', function() {
         nock.restore();
         ret = nock.recorder.play();
+
+        //  Travis CI build is failing on Node 0.8. This code is not really a test,
+        //  just there to dump whatever is actually getting returned by the request.
+        for(var i = 0; i < ret.length; ++i) {
+          t.equal(ret[i], '');
+        }
+
         t.equal(ret.length, 1);
         var ret = ret[0];
         t.type(ret, 'object');
