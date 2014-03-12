@@ -2248,7 +2248,28 @@ test("finish event fired before end event (bug-139)", function(t) {
 	});
 
 	req.end('mamma mia');
+});
 
+test("port can be specified in url (caused wrong path parsing)", function(t) {
+  var scope = nock('http://localhost:8080')
+    .get('/')
+    .reply(200);
+
+  var finishCalled = false;
+  var req = http.request({
+    host: "localhost",
+    method: 'GET',
+    path: '/',
+    port: 8080
+  }, function(res) {
+    t.equal(res.statusCode, 200);
+    res.on('end', function() {
+      scope.done();
+      t.end();
+    });
+  });
+
+  req.end();
 });
 
 if (stream.Readable) {
