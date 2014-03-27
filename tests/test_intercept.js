@@ -2093,6 +2093,20 @@ test('superagent works with query string', function(t) {
   });
 });
 
+test('superagent posts', function(t) {
+  nock('http://superagent.cz')
+    .post('/somepath?b=c')
+    .reply(204);
+
+  superagent
+  .post('http://superagent.cz/somepath?b=c')
+  .send('some data')
+  .end(function(err, res) {
+    t.equal(res.status, 204);
+    t.end();
+  });
+});
+
 test('response is streams2 compatible', function(t) {
   var responseText = 'streams2 streams2 streams2';
   nock('http://stream2hostnameftw')
