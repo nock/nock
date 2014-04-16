@@ -505,9 +505,7 @@ var nockCallObjects = nock.recorder.play();
 ```
 
 The returned call objects have the following properties:
- `scope` - the scope of the call (e.g. `https://github.com`)
-
- `port` - the port of the call (e.g. `80`, `443` or `undefined` if the HTTP request didn't have `options.port` defined)
+ `scope` - the scope of the call including the protocol and non-standard ports (e.g. `'https://github.com:12345'`)
 
  `method` - the HTTP verb of the call (e.g. `'GET'`)
 
@@ -515,7 +513,7 @@ The returned call objects have the following properties:
 
  `body` - the body of the call, if any
 
- `reply` - the HTTP status as string of the reply (e.g. `'200'`)
+ `status` - the HTTP status of the reply (e.g. `200`)
 
  `response` - the body of the reply
 
