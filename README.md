@@ -494,7 +494,7 @@ Copy and paste that code into your tests, customize at will, and you're done!
 
 (Remember that you should do this one test at a time).
 
-In case you want to generate the code yourself or pass the test data in some other way, you can pass the `output_objects` option to `rec`:
+In case you want to generate the code yourself or use the test data in some other way, you can pass the `output_objects` option to `rec`:
 
 ```js
 nock.recorder.rec({
@@ -505,9 +505,8 @@ var nockCallObjects = nock.recorder.play();
 ```
 
 The returned call objects have the following properties:
- `scope` - the scope of the call (e.g. `https://github.com`)
 
- `port` - the port of the call (e.g. `80`, `443` or `undefined` if the HTTP request didn't have `options.port` defined)
+ `scope` - the scope of the call including the protocol and non-standard ports (e.g. `'https://github.com:12345'`)
 
  `method` - the HTTP verb of the call (e.g. `'GET'`)
 
@@ -515,11 +514,47 @@ The returned call objects have the following properties:
 
  `body` - the body of the call, if any
 
- `reply` - the HTTP status as string of the reply (e.g. `'200'`)
+ `status` - the HTTP status of the reply (e.g. `200`)
 
  `response` - the body of the reply
 
  `headers` - the headers of the reply
+
+ `reqheader` - the headers of the request
+
+If you save this as a JSON file, you can load them directly through `nock.load(path)`. Then you can post-process them before using them in the tests for example to add them request body filtering (shown here fixing timestamps to match the ones captured during recording):
+
+```js
+nocks = nock.load(pathToJson);
+nocks.forEach(function(nock) {
+  nock.filteringRequestBody = function(body) {
+    if(typeof(body) !== 'string') {
+      return body;
+    }
+
+    return body.replace(/(timestamp):([0-9]+)/g, function(match, key, value) {
+      return key + ':timestampCapturedDuringRecording'
+    });
+  };
+});
+```
+
+Alternatively, if you need to pre-process the captured nock definitions before using them (e.g. to add scope filtering) then you can use `nock.loadDefs(path)` and `nock.define(nockDefs)`. Shown here is scope filtering for Dropbox node module which constantly changes the subdomain to which it sends the requests:
+
+```js
+//  Pre-process the nock definitions as scope filtering has to be defined before the nocks are defined (due to its very hacky nature).
+var nockDefs = nock.loadDefs(pathToJson);
+nockDefs.forEach(function(def) {
+  //  Do something with the definition object e.g. scope filtering.
+  def.options = def.options || {};
+  def.options.filteringScope = function(scope) {
+    return /^https:\/\/api[0-9]*.dropbox.com/.test(scope);
+  };
+}
+
+//  Load the nocks from pre-processed definitions.
+var nocks = nock.define(nockDefs);
+```
 
 # How does it work?
 
