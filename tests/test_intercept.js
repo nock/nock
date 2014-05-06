@@ -1777,7 +1777,7 @@ test('(re-)activate after restore', function(t) {
   http.get('http://google.com/', function(res) {
     res.resume();
     res.on('end', function() {
-      t.ok(! scope.isDone());
+      t.ok(!scope.isDone());
 
       nock.activate();
       http.get('http://google.com', function(res) {
@@ -2387,4 +2387,89 @@ test('delayConnection works with when you return a generic stream from the reply
       t.end();
     });
   }).end('OK');
+});
+
+test('define() is backward compatible', function(t) {
+  var nockDef = {
+    "scope":"http://example.com",
+    //  "port" has been deprecated
+    "port":12345,
+    "method":"GET",
+    "path":"/",
+    //  "reply" has been deprected
+    "reply":"500"
+  };
+
+  nocks = nock.define([nockDef]);
+
+  t.ok(nocks);
+
+  var req = new http.request({
+    host: 'example.com',
+    port: nockDef.port,
+    method: nockDef.method,
+    path: nockDef.path
+  }, function(res) {
+    t.equal(res.statusCode, 500);
+
+    res.once('end', function() {
+      t.end();
+    });
+  });
+
+  req.on('error', function(err) {
+    console.error(err);
+    //  This should never happen.
+    t.ok(false, 'Error should never occur.');
+    t.end();
+  });
+
+  req.end();
+
+});
+
+test('define() works with non-JSON responses', function(t) {
+  var nockDef = {
+    "scope":"http://example.com",
+    "method":"POST",
+    "path":"/",
+    "body":"�",
+    "status":200,
+    "response":"�"
+  };
+
+  nocks = nock.define([nockDef]);
+
+  t.ok(nocks);
+
+  var req = new http.request({
+    host: 'example.com',
+    method: nockDef.method,
+    path: nockDef.path
+  }, function(res) {
+    t.equal(res.statusCode, nockDef.status);
+
+    var dataChunks = [];
+
+    res.on('data', function(chunk) {
+      dataChunks.push(chunk);
+    });
+
+    res.once('end', function() {
+      var response = Buffer.concat(dataChunks);
+      t.equal(response.toString('utf8'), nockDef.response, 'responses match');
+      t.end();
+    });
+  });
+
+  req.on('error', function(err) {
+    console.error(err);
+    //  This should never happen.
+    t.ok(false, 'Error should never occur.');
+    t.end();
+  });
+
+  req.write(nockDef.body);
+  req.end();
+
 });

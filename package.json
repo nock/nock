@@ -83,6 +83,7 @@
     },
     {
       "name": "Ivan Erceg",
+      "url": "https://github.com/ierceg",
       "email": "ivan@softwaremarbles.com"
     }
   ],
@@ -98,7 +99,8 @@
   ],
   "main": "./index",
   "dependencies": {
-    "propagate": "0.2.x"
+    "propagate": "0.2.x",
+    "lodash": "2.4.1"
   },
   "devDependencies": {
     "tap": "*",
