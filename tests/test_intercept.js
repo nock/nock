@@ -9,6 +9,19 @@ var test    = require('tap').test;
 var mikealRequest = require('request');
 var superagent = require('superagent');
 
+test("double activation throws exception", function(t) {
+  nock.restore();
+  try {
+    nock.activate();
+    nock.activate();
+    //  This line should never be reached.
+    t.false(true);
+  } catch(e) {
+    t.equal(e.toString(), 'Error: Nock already active');
+  }
+  t.end();
+});
+
 test("allow override works (2)", function(t) {
   var scope =
   nock("https://httpbin.org",{allowUnmocked: true}).
@@ -1297,7 +1310,7 @@ test("complaints if https route is missing", function(t) {
       throw new Error('should not come here!');
     }).end();
   } catch (err) {
-    t.ok(err.message.match(/No match for HTTP request GET \/abcdef892932/));
+    t.ok(err.message.match(/No match for request GET https:\/\/google.com\/abcdef892932/));
     t.end();
   }
 
@@ -1479,11 +1492,12 @@ test("allow unmocked option works", function(t) {
         host: "www.google.com"
       , path: "/"
       , port: 80
-    }, function(res) {
-      res.destroy();
-      t.assert(res.statusCode < 400 && res.statusCode >= 200, 'GET Google Home page');
-      t.end();
-    }).end();
+      }, function(res) {
+        res.destroy();
+        t.assert(res.statusCode < 400 && res.statusCode >= 200, 'GET Google Home page');
+        t.end();
+      }
+    ).end();
   }
 
   function firstIsDone() {
@@ -1492,20 +1506,22 @@ test("allow unmocked option works", function(t) {
         host: "www.google.com"
       , path: "/does/not/exist/dskjsakdj"
       , port: 80
-    }, function(res) {
-      t.assert(res.statusCode === 404, 'Google say it does not exist');
-      res.on('data', function() {});
-      res.on('end', secondIsDone);
-    }).end();
+      }, function(res) {
+        t.assert(res.statusCode === 404, 'Google say it does not exist');
+        res.on('data', function() {});
+        res.on('end', secondIsDone);
+      }
+    ).end();
   }
 
   http.request({
       host: "www.google.com"
     , path: "/abc"
     , port: 80
-  }, function(res) {
-    res.on('end', firstIsDone);
-  }).end();
+    }, function(res) {
+      res.on('end', firstIsDone);
+    }
+  ).end();
 });
 
 test("default reply headers work", function(t) {
@@ -2400,7 +2416,7 @@ test('define() is backward compatible', function(t) {
     "reply":"500"
   };
 
-  nocks = nock.define([nockDef]);
+  var nocks = nock.define([nockDef]);
 
   t.ok(nocks);
 
@@ -2438,7 +2454,7 @@ test('define() works with non-JSON responses', function(t) {
     "response":"�"
   };
 
-  nocks = nock.define([nockDef]);
+  var nocks = nock.define([nockDef]);
 
   t.ok(nocks);
 
@@ -2470,6 +2486,52 @@ test('define() works with non-JSON responses', function(t) {
   });
 
   req.write(nockDef.body);
+  req.end();
+
+});
+
+test('define() works with binary buffers', function(t) {
+  var nockDef = {
+    "scope":"http://example.com",
+    "method":"POST",
+    "path":"/",
+    "body":"8001",
+    "status":200,
+    "response":"8001"
+  };
+
+  var nocks = nock.define([nockDef]);
+
+  t.ok(nocks);
+
+  var req = new http.request({
+    host: 'example.com',
+    method: nockDef.method,
+    path: nockDef.path
+  }, function(res) {
+    t.equal(res.statusCode, nockDef.status);
+
+    var dataChunks = [];
+
+    res.on('data', function(chunk) {
+      dataChunks.push(chunk);
+    });
+
+    res.once('end', function() {
+      var response = Buffer.concat(dataChunks);
+      t.equal(response.toString('hex'), nockDef.response, 'responses match');
+      t.end();
+    });
+  });
+
+  req.on('error', function(err) {
+    console.error(err);
+    //  This should never happen.
+    t.ok(false, 'Error should never occur.');
+    t.end();
+  });
+
+  req.write(new Buffer(nockDef.body, 'hex'));
   req.end();
 
 });

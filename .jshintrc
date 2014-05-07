@@ -1,0 +1,18 @@
+{
+  "node": true,
+  "browser": false,
+  "couch": true,
+  "indent": 2,
+  "bitwise": true,
+  "curly": true,
+  "eqeqeq": true,
+  "forin": true,
+  "undef": true,
+  "unused": true,
+  "laxcomma": true,
+  "-W097": false,
+  "-W014": false,
+  "maxparams": 4,
+  "maxdepth": 2,
+  "maxstatements": 8
+}
