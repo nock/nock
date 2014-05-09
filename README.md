@@ -136,7 +136,7 @@ var scope = nock('http://www.example.com', {
    .reply(200);
 ```
 
-If no `reqheaders` are specified or if `host` is not specified in them, Nock will automatically add `host` value to request header.
+If `reqheaders` is not specified or if `host` is not part of it, Nock will automatically add `host` value to request header.
 
 ### Specifying Reply Headers
 

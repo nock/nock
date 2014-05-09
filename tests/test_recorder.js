@@ -1,7 +1,8 @@
 var nock    = require('../.')
   , tap     = require('tap')
   , http    = require('http')
-  , https   = require('https');
+  , https   = require('https')
+  , _       = require('lodash');
 
 tap.test('recording turns off nock interception (backward compatibility behavior)', function(t) {
 
@@ -201,4 +202,38 @@ tap.test('records https correctly', function(t) {
     });
   });
   req.end('012345');
+});
+
+tap.test('records request headers correctly', function(t) {
+  nock.restore();
+  nock.recorder.clear();
+  t.equal(nock.recorder.play().length, 0);
+
+  nock.recorder.rec({
+    dont_print: true,
+    output_objects: true
+  });
+
+  var req = http.request({
+      hostname: 'www.example.com',
+      path: '/',
+      method: 'GET',
+      auth: 'foo:bar'
+    }, function(res) {
+      res.resume();
+      res.once('end', function() {
+        nock.restore();
+        var ret = nock.recorder.play();
+        t.equal(ret.length, 1);
+        ret = ret[0];
+        t.type(ret, 'object');
+        t.true(_.isEqual(ret.reqheaders, {
+          host: 'www.example.com',
+          'authorization': 'Basic Zm9vOmJhcg=='
+        }));
+        t.end();
+      });
+    }
+  );
+  req.end();
 });

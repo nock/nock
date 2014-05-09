@@ -2553,15 +2553,48 @@ test('issue #163 - Authorization header isn\'t mocked', function(t) {
     r.end();
   }
 
-  makeRequest(function(header) {
+  makeRequest(function(headers) {
     var n = nock('http://www.example.com', {
       reqheaders: { 'authorization': 'Basic Zm9vOmJhcg==' }
     }).get('/').reply(200);
 
     makeRequest(function(nockHeader) {
       n.done();
-      t.true(_.isEqual(header, nockHeader));
+      t.true(_.isEqual(headers, nockHeader));
       t.end();
     });
   });
+});
+
+test('define() uses reqheaders', function(t) {
+  var nockDef = {
+    "scope":"http://example.com",
+    "method":"GET",
+    "path":"/",
+    "status":200,
+    "reqheaders": {
+      host: 'example.com',
+      'authorization': 'Basic Zm9vOmJhcg=='
+    }
+  };
+
+  var nocks = nock.define([nockDef]);
+
+  t.ok(nocks);
+
+  var req = new http.request({
+    host: 'example.com',
+    method: nockDef.method,
+    path: nockDef.path,
+    auth: 'foo:bar'
+  }, function(res) {
+    t.equal(res.statusCode, nockDef.status);
+
+    res.once('end', function() {
+      t.true(_.isEqual(res.req._headers, nockDef.reqheaders));
+      t.end();
+    });
+  });
+  req.end();
+
 });
