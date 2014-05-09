@@ -153,6 +153,59 @@ tap.test('when request body is json, it goes unstringified in objects', function
   request.end(JSON.stringify(payload));
 });
 
+tap.test('records nonstandard ports', function(t) {
+  nock.restore();
+  nock.recorder.clear();
+  t.equal(nock.recorder.play().length, 0);
+
+  var REQUEST_BODY = 'ABCDEF';
+  var RESPONSE_BODY = '012345';
+
+  //  Create test http server and perform the tests while it's up.
+  var testServer = http.createServer(function (req, res) {
+    res.write(RESPONSE_BODY);
+    res.end();
+  }).listen(8081, function(err) {
+
+    t.equal(err, undefined);
+
+    var options = { host:'localhost'
+                  , port:testServer.address().port
+                  , path:'/' }
+    ;
+
+    var rec_options = {
+      dont_print: true,
+      output_objects: true
+    };
+
+    nock.recorder.rec(rec_options);
+
+    var req = http.request(options, function(res) {
+      res.resume();
+      res.once('end', function() {
+        nock.restore();
+        var ret = nock.recorder.play();
+        t.equal(ret.length, 1);
+        ret = ret[0];
+        t.type(ret, 'object');
+        t.equal(ret.scope, "http://localhost:" + options.port);
+        t.equal(ret.method, "GET");
+        t.equal(ret.body, REQUEST_BODY);
+        t.equal(ret.status, 200);
+        t.equal(ret.response, RESPONSE_BODY);
+        t.end();
+
+        //  Close the test server, we are done with it.
+        testServer.close();
+      });
+    });
+
+    req.end(REQUEST_BODY);
+  });
+
+});
+
 tap.test('rec() throws when reenvoked with already recorder requests', function(t) {
   nock.restore();
   nock.recorder.clear();
