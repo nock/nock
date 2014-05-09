@@ -225,6 +225,36 @@ test("get with reply callback", function(t) {
   req.end();
 });
 
+test("get to different subdomain with reply callback and filtering scope", function(t) {
+  //  We scope for www.google.com but through scope filtering we
+  //  will accept any <subdomain>.google.com
+  var scope = nock('http://www.google.com', {
+      filteringScope: function(scope) {
+        return /^http:\/\/.*\.google\.com/.test(scope);
+      }
+    })
+    .get('/')
+    .reply(200, function() {
+      return 'OK!';
+    });
+
+  var req = http.request({
+     host: "any-subdomain-will-do.google.com"
+    , path: '/'
+    , port: 80
+  }, function(res) {
+    res.on('end', function() {
+      scope.done();
+      t.end();
+    });
+    res.on('data', function(data) {
+      t.equal(data.toString(), 'OK!', 'response should match');
+    });
+  });
+
+  req.end();
+});
+
 test("get with reply callback returning object", function(t) {
   var scope = nock('http://www.googlezzzz.com')
      .get('/')
