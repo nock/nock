@@ -122,6 +122,21 @@ var scope = nock('http://www.google.com')
    });
 ```
 
+### Specifying Request Headers
+
+You can specify the request headers like this:
+
+```
+var scope = nock('http://www.example.com', {
+  reqheaders: {
+    'authorization': 'Basic Auth'
+  }
+})
+   .get('/')
+   .reply(200);
+```
+
+If no `reqheaders` are specified or if `host` is not specified in them, Nock will automatically add `host` value to request header.
 
 ### Specifying Reply Headers
 
