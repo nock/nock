@@ -8,12 +8,15 @@ tap.test('recording turns off nock interception (backward compatibility behavior
 
   //  We ensure that there are no overrides.
   nock.restore();
+  t.false(nock.isActive());
   //  We active the nock overriding - as it's done by merely loading nock.
   nock.activate();
+  t.true(nock.isActive());
   //  We start recording.
   nock.recorder.rec();
-  //  Nothing happens - which was the original behavior.
-  t.ok(true);
+  //  Nothing happens (nothing has been thrown) - which was the original behavior -
+  //  and mocking has been deactivated.
+  t.false(nock.isActive());
 
   t.end();
 
