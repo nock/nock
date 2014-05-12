@@ -2631,8 +2631,7 @@ test('define() uses reqheaders', function(t) {
 
 test('sending binary and receiving JSON should work ', function(t) {
   var scope = nock('http://example.com')
-    .filteringPath(function(path) { return path; })
-    .filteringRequestBody(function() { return '*'; })
+    .filteringRequestBody(/.*/, '*')
     .post('/some/path', '*')
     .reply(201, { foo: '61' }, {
       'Content-Type': 'application/json'
