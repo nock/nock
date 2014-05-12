@@ -2628,3 +2628,36 @@ test('define() uses reqheaders', function(t) {
   req.end();
 
 });
+
+test('sending binary and receiving JSON should work ', function(t) {
+  var scope = nock('http://example.com')
+    .filteringPath(function(path) { return path; })
+    .filteringRequestBody(function() { return '*'; })
+    .post('/some/path', '*')
+    .reply(201, { foo: '61' }, {
+      'Content-Type': 'application/json'
+    });
+
+  mikealRequest({
+    method: 'POST',
+    uri: 'http://example.com/some/path',
+    body: new Buffer('ffd8ffe000104a46494600010101006000600000ff', 'hex'),
+    headers: { 'Accept': 'application/json', 'Content-Length': 23861 }
+  }, function(err, res, body) {
+      scope.done();
+
+      t.equal(res.statusCode, 201);
+      t.equal(body.length, 12);
+
+      var json;
+      try {
+        json = JSON.parse(body);
+      } catch (e) {
+        json = {};
+      }
+
+      t.equal(json.foo, '61');
+      t.end();
+    }
+  );
+});
