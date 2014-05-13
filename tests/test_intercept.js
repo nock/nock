@@ -12,14 +12,17 @@ var _       = require('lodash');
 
 test("double activation throws exception", function(t) {
   nock.restore();
+  t.false(nock.isActive());
   try {
     nock.activate();
+    t.true(nock.isActive());
     nock.activate();
     //  This line should never be reached.
     t.false(true);
   } catch(e) {
     t.equal(e.toString(), 'Error: Nock already active');
   }
+  t.true(nock.isActive());
   t.end();
 });
 
@@ -1820,6 +1823,7 @@ test('(re-)activate after restore', function(t) {
     .reply(200, 'Hello, World!');
 
   nock.restore();
+  t.false(nock.isActive());
 
   http.get('http://google.com/', function(res) {
     res.resume();
@@ -1827,6 +1831,7 @@ test('(re-)activate after restore', function(t) {
       t.ok(!scope.isDone());
 
       nock.activate();
+      t.true(nock.isActive());
       http.get('http://google.com', function(res) {
         res.resume();
         res.on('end', function() {
