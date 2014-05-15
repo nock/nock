@@ -32,7 +32,7 @@ test("allow override works (2)", function(t) {
     post("/post").
     reply(200,"99problems");
 
-  options = {
+  var options = {
     method: "POST",
     uri: "https://httpbin.org/post",
     json: {
