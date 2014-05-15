@@ -339,7 +339,8 @@ tap.test('records and replays gzipped nocks correctly', function(t) {
       debug('mocked request finished');
 
       t.equal(err, mockedErr);
-      t.equal(mockedResp.body, mockedResp.Body);
+      t.equal(mockedResp.body, mockedResp.body);
+      t.equal(mockedResp.headers['content-encoding'], 'gzip');
 
       _.each(nocks, function(nock) {
         nock.done();
