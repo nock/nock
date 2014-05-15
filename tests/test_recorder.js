@@ -1,8 +1,12 @@
+
 var nock    = require('../.')
   , tap     = require('tap')
   , http    = require('http')
   , https   = require('https')
-  , _       = require('lodash');
+  , _       = require('lodash')
+  , debug   = require('debug')('nock.test_recorder')
+  , mikealRequest = require('request')
+  , superagent = require('superagent');
 
 tap.test('recording turns off nock interception (backward compatibility behavior)', function(t) {
 
@@ -292,4 +296,118 @@ tap.test('records request headers correctly', function(t) {
     }
   );
   req.end();
+});
+
+tap.test('records and replays gzipped nocks correctly', function(t) {
+
+  nock.restore();
+  nock.recorder.clear();
+  t.equal(nock.recorder.play().length, 0);
+
+  nock.recorder.rec({
+    dont_print: true,
+    output_objects: true
+  });
+
+  var makeRequest = function(callback) {
+    superagent.get('http://bit.ly/1hKHiTe', callback);
+  };
+
+  debug('make request to record');
+
+  makeRequest(function(err, resp) {
+
+    debug('recorded request finished');
+
+    t.ok(!err);
+    t.ok(resp);
+    t.ok(resp.headers);
+    t.equal(resp.headers['content-encoding'], 'gzip');
+
+    nock.restore();
+    var nockDefs = nock.recorder.play();
+    nock.recorder.clear();
+    nock.activate();
+
+    t.equal(nockDefs.length, 2);
+    var nocks = nock.define(nockDefs);
+
+    debug('make request to mock');
+
+    makeRequest(function(mockedErr, mockedResp) {
+
+      debug('mocked request finished');
+
+      t.equal(err, mockedErr);
+      t.equal(mockedResp.body, mockedResp.Body);
+
+      _.each(nocks, function(nock) {
+        nock.done();
+      });
+
+      t.end();
+
+    });
+  });
+
+});
+
+tap.test('records and replays nocks correctly', function(t) {
+
+  nock.restore();
+  nock.recorder.clear();
+  t.equal(nock.recorder.play().length, 0);
+
+  nock.recorder.rec({
+    dont_print: true,
+    output_objects: true
+  });
+
+  var makeRequest = function(callback) {
+
+    var options = {
+      method: 'GET',
+      uri: 'http://bit.ly/1hKHiTe',
+    };
+
+    mikealRequest(options, callback);
+
+  };
+
+  debug('make request to record');
+
+  makeRequest(function(err, resp, body) {
+
+    debug('recorded request finished');
+
+    t.ok(!err);
+    t.ok(resp);
+    t.ok(body);
+
+    nock.restore();
+    var nockDefs = nock.recorder.play();
+    nock.recorder.clear();
+    nock.activate();
+
+    t.equal(nockDefs.length, 2);
+    var nocks = nock.define(nockDefs);
+
+    debug('make request to mock');
+
+    makeRequest(function(mockedErr, mockedResp, mockedBody) {
+
+      debug('mocked request finished');
+
+      t.equal(err, mockedErr);
+      t.equal(body, mockedBody);
+
+      _.each(nocks, function(nock) {
+        nock.done();
+      });
+
+      t.end();
+
+    });
+  });
+
 });
