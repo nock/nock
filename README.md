@@ -547,7 +547,7 @@ The returned call objects have the following properties:
 
  `status` - the HTTP status of the reply (e.g. `200`)
 
- `response` - the body of the reply
+ `response` - the body of the reply which can be a JSON, string, hex string representing binary buffers or an array of such hex strings (when handling `content-encoded` in reply header)
 
  `headers` - the headers of the reply
 
