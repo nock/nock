@@ -106,7 +106,8 @@
   "devDependencies": {
     "tap": "*",
     "request": "*",
-    "superagent": "~0.15.7"
+    "superagent": "~0.15.7",
+    "needle": "^0.7.1"
   },
   "scripts": {
     "test": "node node_modules/tap/bin/tap.js --dd tests"
