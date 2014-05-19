@@ -1,3 +1,4 @@
+
 var fs      = require('fs');
 var nock    = require('../.');
 var http    = require('http');
@@ -9,6 +10,7 @@ var test    = require('tap').test;
 var mikealRequest = require('request');
 var superagent = require('superagent');
 var _       = require('lodash');
+var needle  = require("needle");
 
 test("double activation throws exception", function(t) {
   nock.restore();
@@ -2664,4 +2666,22 @@ test('sending binary and receiving JSON should work ', function(t) {
       t.end();
     }
   );
+});
+
+test('fix #146 - resume() is automatically invoked when the response is drained', function(t) {
+  var replyLength = 1024 * 1024;
+  var replyBuffer = new Buffer((new Array(replyLength + 1)).join("."));
+  t.equal(replyBuffer.length, replyLength);
+
+  nock("http://www.abc.com")
+    .get("/abc")
+    .reply(200, replyBuffer);
+
+  needle.get("http://www.abc.com/abc", function(err, res, buffer) {
+    t.notOk(err);
+    t.ok(res);
+    t.ok(buffer);
+    t.equal(buffer, replyBuffer);
+    t.end();
+  });
 });
