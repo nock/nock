@@ -1620,6 +1620,23 @@ test("JSON encoded replies does not overwrite existing content-type header", fun
   }, done).end();
 });
 
+test("blank response doesn't have content-type application/json attached to it", function(t) {
+  var scope = nock('http://localhost')
+    .get('/')
+    .reply(200);
+
+  function done(res) {
+    t.equal(res.statusCode, 200);
+    t.notEqual(res.headers['content-type'], "application/json");
+    t.end();
+  }
+
+  http.request({
+      host: 'localhost'
+    , path: '/'
+  }, done).end();
+});
+
 test('clean all works', function(t) {
   var scope = nock('http://amazon.com')
     .get('/nonexistent')
