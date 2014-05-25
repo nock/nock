@@ -107,7 +107,8 @@
     "tap": "*",
     "request": "*",
     "superagent": "~0.15.7",
-    "needle": "^0.7.1"
+    "needle": "^0.7.1",
+    "restify": "^2.8.1"
   },
   "scripts": {
     "test": "node node_modules/tap/bin/tap.js --dd tests"
