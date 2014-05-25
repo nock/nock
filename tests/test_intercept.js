@@ -11,6 +11,7 @@ var mikealRequest = require('request');
 var superagent = require('superagent');
 var _       = require('lodash');
 var needle  = require("needle");
+var restify = require('restify');
 
 test("double activation throws exception", function(t) {
   nock.restore();
@@ -2700,5 +2701,130 @@ test('fix #146 - resume() is automatically invoked when the response is drained'
     t.ok(buffer);
     t.equal(buffer, replyBuffer);
     t.end();
+  });
+});
+
+test("handles get with restify client", function(t) {
+  var scope =
+  nock("https://www.example.com").
+    get("/get").
+    reply(200, 'get');
+
+  var client = restify.createClient({
+    url: 'https://www.example.com'
+  })
+
+  client.get('/get', function(err, req, res) {
+    req.on('result', function(err, res) {
+      res.body = '';
+      res.setEncoding('utf8');
+      res.on('data', function(chunk) {
+        res.body += chunk;
+      });
+
+      res.on('end', function() {
+        t.equal(res.body, 'get')
+        t.end();
+        scope.done();
+      });
+    });
+  });
+});
+
+test("handles post with restify client", function(t) {
+  var scope =
+  nock("https://www.example.com").
+    post("/post", 'hello world').
+    reply(200, 'post');
+
+  var client = restify.createClient({
+    url: 'https://www.example.com'
+  })
+
+  client.post('/post', function(err, req, res) {
+    req.on('result', function(err, res) {
+      res.body = '';
+      res.setEncoding('utf8');
+      res.on('data', function(chunk) {
+        res.body += chunk;
+      });
+
+      res.on('end', function() {
+        t.equal(res.body, 'post')
+        t.end();
+        scope.done();
+      });
+    });
+
+    req.write('hello world');
+    req.end();
+  });
+});
+
+test("handles get with restify JsonClient", function(t) {
+  var scope =
+  nock("https://www.example.com").
+    get("/get").
+    reply(200, {get: 'ok'});
+
+  var client = restify.createJsonClient({
+    url: 'https://www.example.com'
+  })
+
+  client.get('/get', function(err, req, res, obj) {
+    t.equal(obj.get, 'ok');
+    t.end();
+    scope.done();
+  });
+});
+
+test("handles post with restify JsonClient", function(t) {
+  var scope =
+  nock("https://www.example.com").
+    post("/post", {username: 'banana'}).
+    reply(200, {post: 'ok'});
+
+  var client = restify.createJsonClient({
+    url: 'https://www.example.com'
+  })
+
+  client.post('/post', {username: 'banana'}, function(err, req, res, obj) {
+    t.equal(obj.post, 'ok');
+    t.end();
+    scope.done();
+  });
+});
+
+test("handles 404 with restify JsonClient", function(t) {
+  var scope =
+  nock("https://www.example.com").
+    put("/404").
+    reply(404);
+
+  var client = restify.createJsonClient({
+    url: 'https://www.example.com'
+  })
+
+  client.put('/404', function(err, req, res, obj) {
+    t.equal(res.statusCode, 404);
+    t.end();
+    scope.done();
+  });
+});
+
+test("handles 500 with restify JsonClient", function(t) {
+  var scope =
+  nock("https://www.example.com").
+    delete("/500").
+    reply(500);
+
+  var client = restify.createJsonClient({
+    url: 'https://www.example.com'
+  })
+
+  client.del('/500', function(err, req, res, obj) {
+    t.equal(res.statusCode, 500);
+    t.end();
+    scope.done();
   });
 });
