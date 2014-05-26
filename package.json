@@ -95,7 +95,7 @@
     "url": "http://github.com/pgte/nock/issues"
   },
   "engines": [
-    "node >= 0.4.10"
+    "node >= 0.10.0"
   ],
   "main": "./index",
   "dependencies": {
