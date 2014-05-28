@@ -2828,3 +2828,22 @@ test("handles 500 with restify JsonClient", function(t) {
     scope.done();
   });
 });
+
+test('test request timeout option', function(t) {
+
+  nock('http://example.com')
+    .get('/test')
+    .reply(200, JSON.stringify({ foo: 'bar' }));
+
+  var options = {
+    url: 'http://example.com/test',
+    method: 'GET',
+    timeout: 2000
+  };
+
+  mikealRequest(options, function(err, res, body) {
+    t.strictEqual(err, null);
+    t.equal(body, '{"foo":"bar"}');
+    t.end();
+  });
+});
