@@ -2019,6 +2019,36 @@ test('disabled real HTTP request', function(t) {
   nock.enableNetConnect();
 });
 
+test('NetConnectNotAllowedError is instance of Error', function(t) {
+  nock.disableNetConnect();
+
+  try {
+    http.get('http://www.amazon.com', function(res) {
+      throw "should not request this";
+    });
+  } catch(err) {
+    t.type(err, 'Error');
+    t.end();
+  }
+
+  nock.enableNetConnect();
+});
+
+test('NetConnectNotAllowedError exposes the stack', function(t) {
+  nock.disableNetConnect();
+
+  try {
+    http.get('http://www.amazon.com', function(res) {
+      throw "should not request this";
+    });
+  } catch(err) {
+    t.notEqual(err.stack, undefined);
+    t.end();
+  }
+
+  nock.enableNetConnect();
+});
+
 test('enable real HTTP request only for google.com, via string', function(t) {
   nock.enableNetConnect('google.com');
 
