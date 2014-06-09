@@ -2932,3 +2932,19 @@ test('done does not fail when specified request header is not missing', function
   });
 
 });
+
+test('request with delay and timeout', function(t) {
+  endpoint = nock("http://some-server.com")
+    .post("/")
+    .delay(1000)
+    .reply(200, {});
+
+  mikealRequest.post({
+      url: "http://some-server.com/",
+      timeout: 10
+    },
+    function (err) {
+      t.type(err, 'null');
+      t.end();
+  });
+});
