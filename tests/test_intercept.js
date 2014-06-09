@@ -2944,7 +2944,8 @@ test('mikeal/request with delayConnection and request.timeout', function(t) {
       timeout: 10
     },
     function (err) {
-      t.type(err, Error);
+      t.type(err, 'Error');
+      t.equal(err && err.code, "ETIMEDOUT");
       t.end();
   });
 });
