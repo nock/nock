@@ -2944,7 +2944,8 @@ test('request with delay and timeout', function(t) {
       timeout: 10
     },
     function (err) {
-      t.type(err, 'null');
+      t.type(err, 'Error');
+      t.equal(err && err.code, "ETIMEDOUT");
       t.end();
   });
 });
