@@ -2933,10 +2933,10 @@ test('done does not fail when specified request header is not missing', function
 
 });
 
-test('request with delay and timeout', function(t) {
+test('mikeal/request with delayConnection and request.timeout', function(t) {
   endpoint = nock("http://some-server.com")
     .post("/")
-    .delay(1000)
+    .delayConnection(1000)
     .reply(200, {});
 
   mikealRequest.post({
@@ -2944,7 +2944,7 @@ test('request with delay and timeout', function(t) {
       timeout: 10
     },
     function (err) {
-      t.type(err, 'null');
+      t.type(err, Error);
       t.end();
   });
 });
