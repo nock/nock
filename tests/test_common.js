@@ -17,3 +17,35 @@ tap.test('isBinaryBuffer works', function(t) {
   t.end();
 
 });
+
+tap.test('headerKeysToLowerCase works', function(t) {
+
+  var headers = {
+    'HoSt': 'example.com',
+    'Content-typE': 'plain/text'
+  };
+
+  var lowerCaseHeaders = common.headerKeysToLowerCase(headers);
+
+  t.equal(headers.HoSt, lowerCaseHeaders.host);
+  t.equal(headers['Content-typE'], lowerCaseHeaders['content-type']);
+  t.end();
+
+});
+
+tap.test('headerKeysToLowerCase throws on conflicting keys', function(t) {
+
+  var headers = {
+    'HoSt': 'example.com',
+    'HOST': 'example.com'
+  };
+
+  try {
+    common.headerKeysToLowerCase(headers);
+  } catch(e) {
+    t.equal(e.toString(), 'Error: Failed to convert header keys to lower case due to key conflict: host');
+    t.end();
+  }
+
+});
+

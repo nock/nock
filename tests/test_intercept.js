@@ -2985,3 +2985,28 @@ test("get correct filtering with scope and request headers filtering", function(
   t.equivalent(req._headers, { host: requestHeaders.host });
 
 });
+
+test('mocking succeeds even when mocked and specified request header names have different cases', function(t) {
+  scope = nock('http://example.com', {
+    reqheaders: {
+      "x-app-token": "apptoken",
+      "x-auth-token": "apptoken"
+    }
+  })
+  .post('/resource')
+  .reply(200, { status: "ok" });
+
+  mikealRequest({
+    method: 'POST',
+    uri: 'http://example.com/resource',
+    headers: {
+      "X-App-TOKEN": "apptoken",
+      "X-Auth-TOKEN": "apptoken"
+    }
+  }, function(err, res, body) {
+    t.type(err, 'null');
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+
+});
