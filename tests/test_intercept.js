@@ -2949,3 +2949,39 @@ test('mikeal/request with delayConnection and request.timeout', function(t) {
       t.end();
   });
 });
+
+test("get correct filtering with scope and request headers filtering", function(t) {
+  var responseText = 'OK!';
+  var responseHeaders = { 'Content-Type': 'text/plain'};
+  var requestHeaders = { host: 'a.subdomain.of.google.com' };
+
+  var scope = nock('http://a.subdomain.of.google.com', {
+      filteringScope: function(scope) {
+        return (/^http:\/\/.*\.google\.com/).test(scope);
+      }
+    })
+    .get('/somepath')
+    .reply(200, responseText, responseHeaders);
+
+  var dataCalled = false;
+  var host = 'some.other.subdomain.of.google.com';
+  var req = http.get({
+    host: host,
+    method: 'GET',
+    path: '/somepath',
+    port: 80
+  }, function(res) {
+    res.on('data', function(data) {
+      dataCalled = true;
+      t.equal(data.toString(), responseText);
+    });
+    res.on('end', function() {
+      t.true(dataCalled);
+      scope.done();
+      t.end();
+    });
+  });
+
+  t.equivalent(req._headers, { host: requestHeaders.host });
+
+});
