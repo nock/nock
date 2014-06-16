@@ -122,6 +122,12 @@ var scope = nock('http://www.google.com')
    });
 ```
 
+## Specifiying headers
+
+### Header field names are case-insensitive
+
+Per [HTTP/1.1 4.2 Message Headers](http://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2) specification, all message headers are case insensitive and internally Nock uses lower-case for all field names even if some other combination of cases was specified either in mocking specification or in mocked requests themselves.
+
 ### Specifying Request Headers
 
 You can specify the request headers like this:
@@ -137,6 +143,8 @@ var scope = nock('http://www.example.com', {
 ```
 
 If `reqheaders` is not specified or if `host` is not part of it, Nock will automatically add `host` value to request header.
+
+If no request headers are specified for mocking then Nock will automatically skip matching of request headers. Since `host` header is a special case which may get automatically inserted by Nock, its matching is skipped unless it was *also* specified in the request being mocked.
 
 ### Specifying Reply Headers
 
@@ -509,6 +517,8 @@ nock.recorder.rec();
 // those calls will be outputted to console
 ```
 
+## `dont_print` option
+
 If you just want to capture the generated code into a var as an array you can use:
 
 ```js
@@ -525,6 +535,8 @@ Copy and paste that code into your tests, customize at will, and you're done!
 
 (Remember that you should do this one test at a time).
 
+## `output_object` option
+
 In case you want to generate the code yourself or use the test data in some other way, you can pass the `output_objects` option to `rec`:
 
 ```js
@@ -537,21 +549,14 @@ var nockCallObjects = nock.recorder.play();
 
 The returned call objects have the following properties:
 
- `scope` - the scope of the call including the protocol and non-standard ports (e.g. `'https://github.com:12345'`)
-
- `method` - the HTTP verb of the call (e.g. `'GET'`)
-
- `path` - the path of the call (e.g. `'/pgte/nock'`)
-
- `body` - the body of the call, if any
-
- `status` - the HTTP status of the reply (e.g. `200`)
-
- `response` - the body of the reply which can be a JSON, string, hex string representing binary buffers or an array of such hex strings (when handling `content-encoded` in reply header)
-
- `headers` - the headers of the reply
-
- `reqheader` - the headers of the request
+* `scope` - the scope of the call including the protocol and non-standard ports (e.g. `'https://github.com:12345'`)
+* `method` - the HTTP verb of the call (e.g. `'GET'`)
+* `path` - the path of the call (e.g. `'/pgte/nock'`)
+* `body` - the body of the call, if any
+* `status` - the HTTP status of the reply (e.g. `200`)
+* `response` - the body of the reply which can be a JSON, string, hex string representing binary buffers or an array of such hex strings (when handling `content-encoded` in reply header)
+* `headers` - the headers of the reply
+* `reqheader` - the headers of the request
 
 If you save this as a JSON file, you can load them directly through `nock.load(path)`. Then you can post-process them before using them in the tests for example to add them request body filtering (shown here fixing timestamps to match the ones captured during recording):
 
@@ -586,6 +591,20 @@ nockDefs.forEach(function(def) {
 //  Load the nocks from pre-processed definitions.
 var nocks = nock.define(nockDefs);
 ```
+
+## `suppress_reqheaders_recording` option
+
+Sometimes it's hard to provide correct request headers as some of them depend on the timestamp or other values that may change after the tests have been recorder. To suppress recording of request headers set `suppress_reqheaders_recording` option property equal to `true`.
+
+```js
+nock.recorder.rec({
+  dont_print: true,
+  output_objects: true,
+  suppress_reqheaders_recording: true
+});
+```
+
+This uses Nock's property to skip request headers matching when no mocking request headers are specified.
 
 # How does it work?
 
