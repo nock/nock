@@ -49,3 +49,22 @@ tap.test('headersFieldNamesToLowerCase throws on conflicting keys', function(t) 
 
 });
 
+tap.test('deleteHeadersField deletes fields with case-insensitive field names', function(t) {
+
+  var headers = {
+    HoSt: 'example.com',
+    'Content-typE': 'plain/text'
+  };
+
+  t.true(headers.HoSt);
+  t.true(headers['Content-typE']);
+
+  common.deleteHeadersField(headers, 'HOST');
+  common.deleteHeadersField(headers, 'CONTENT-TYPE');
+
+  t.false(headers.HoSt);
+  t.false(headers['Content-typE']);
+  t.end();
+
+});
+
