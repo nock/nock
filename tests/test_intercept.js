@@ -2646,7 +2646,7 @@ test('issue #163 - Authorization header isn\'t mocked', function(t) {
 
     makeRequest(function(nockHeader) {
       n.done();
-      t.true(_.isEqual(headers, nockHeader));
+      t.equivalent(headers, nockHeader);
       t.end();
     });
   });
@@ -2677,7 +2677,7 @@ test('define() uses reqheaders', function(t) {
     t.equal(res.statusCode, nockDef.status);
 
     res.once('end', function() {
-      t.true(_.isEqual(res.req._headers, nockDef.reqheaders));
+      t.equivalent(res.req._headers, nockDef.reqheaders);
       t.end();
     });
   });
@@ -2993,8 +2993,28 @@ test('mocking succeeds even when mocked and specified request header names have 
       "x-auth-token": "apptoken"
     }
   })
-  .post('/resource')
-  .reply(200, { status: "ok" });
+    .post('/resource')
+    .reply(200, { status: "ok" });
+
+  mikealRequest({
+    method: 'POST',
+    uri: 'http://example.com/resource',
+    headers: {
+      "X-App-TOKEN": "apptoken",
+      "X-Auth-TOKEN": "apptoken"
+    }
+  }, function(err, res, body) {
+    t.type(err, 'null');
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+
+});
+
+test('mocking succeeds even when host request header is not specified', function(t) {
+  scope = nock('http://example.com')
+    .post('/resource')
+    .reply(200, { status: "ok" });
 
   mikealRequest({
     method: 'POST',
