@@ -122,7 +122,7 @@ var scope = nock('http://www.google.com')
    });
 ```
 
-## Specifiying headers
+## Specifying headers
 
 ### Header field names are case-insensitive
 
@@ -592,19 +592,21 @@ nockDefs.forEach(function(def) {
 var nocks = nock.define(nockDefs);
 ```
 
-## `suppress_reqheaders_recording` option
+## `enable_reqheaders_recording` option
 
-Sometimes it's hard to provide correct request headers as some of them depend on the timestamp or other values that may change after the tests have been recorder. To suppress recording of request headers set `suppress_reqheaders_recording` option property equal to `true`.
+Recording request headers by default is deemed more trouble than its worth as some of them depend on the timestamp or other values that may change after the tests have been recorder thus leading to complex postprocessing of recorded tests. Thus by default the request headers are not recorded.
+
+The genuine use cases for recording request headers (e.g. checking authorization) can be handled manually or by using `enable_reqheaders_recording` in `recorder.rec()` options.
 
 ```js
 nock.recorder.rec({
   dont_print: true,
   output_objects: true,
-  suppress_reqheaders_recording: true
+  enable_reqheaders_recording: true
 });
 ```
 
-This uses Nock's property to skip request headers matching when no mocking request headers are specified.
+Note that even when request headers recording is enabled Nock will never record `user-agent` headers. `user-agent` values change with the version of Node and underlying operating system and are thus useless for matching as all that they can indicate is that the user agent isn't the one that was used to record the tests.
 
 # How does it work?
 
