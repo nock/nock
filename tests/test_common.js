@@ -43,7 +43,7 @@ tap.test('headersFieldNamesToLowerCase throws on conflicting keys', function(t) 
   try {
     common.headersFieldNamesToLowerCase(headers);
   } catch(e) {
-    t.equal(e.toString(), 'Error: Failed to convert header keys to lower case due to key conflict: host');
+    t.equal(e.toString(), 'Error: Failed to convert header keys to lower case due to field name conflict: host');
     t.end();
   }
 
