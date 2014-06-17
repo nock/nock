@@ -3105,3 +3105,31 @@ test('mikeal/request with strictSSL: true', function(t) {
   });
 
 });
+
+test('response readable pull stream works as expected', function(t) {
+  scope = nock('http://streamingalltheway.com')
+    .get('/ssstream')
+    .reply(200, "this is the response body yeah");
+
+  var req = http.request({
+        host: "streamingalltheway.com"
+      , path: '/ssstream'
+      , port: 80
+    }, function(res) {
+
+      var responseBody = '';
+      t.equal(res.statusCode, 200);
+      res.on('readable', function() {
+        var chunk;
+        while (null !== (chunk = res.read())) {
+          responseBody += chunk.toString();
+        }
+        if (chunk === null) {
+          t.equal(responseBody, "this is the response body yeah");
+          t.end();
+        }
+      });
+    });
+
+  req.end();
+});
