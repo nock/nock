@@ -366,6 +366,19 @@ var scope = nock('http://api.myservice.com')
                 })
 ```
 
+You can also use a function for the header body.
+
+```js
+var scope = nock('http://api.myservice.com')
+                .matchHeader('content-length', function (val) {
+                  return val >= 1000;
+                })
+                .get('/')
+                .reply(200, {
+                  data: 'hello world'
+                })
+```
+
 ## Allow __unmocked__ requests on a mocked hostname
 
 If you need some request on the same host name to be mocked and some others to **really** go through the HTTP stack, you can use the `allowUnmocked` option like this:
