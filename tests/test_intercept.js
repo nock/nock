@@ -2646,7 +2646,7 @@ test('issue #163 - Authorization header isn\'t mocked', function(t) {
 
     makeRequest(function(nockHeader) {
       n.done();
-      t.true(_.isEqual(headers, nockHeader));
+      t.equivalent(headers, nockHeader);
       t.end();
     });
   });
@@ -2677,7 +2677,7 @@ test('define() uses reqheaders', function(t) {
     t.equal(res.statusCode, nockDef.status);
 
     res.once('end', function() {
-      t.true(_.isEqual(res.req._headers, nockDef.reqheaders));
+      t.equivalent(res.req._headers, nockDef.reqheaders);
       t.end();
     });
   });
@@ -2948,4 +2948,85 @@ test('mikeal/request with delayConnection and request.timeout', function(t) {
       t.equal(err && err.code, "ETIMEDOUT");
       t.end();
   });
+});
+
+test("get correct filtering with scope and request headers filtering", function(t) {
+  var responseText = 'OK!';
+  var responseHeaders = { 'Content-Type': 'text/plain'};
+  var requestHeaders = { host: 'a.subdomain.of.google.com' };
+
+  var scope = nock('http://a.subdomain.of.google.com', {
+      filteringScope: function(scope) {
+        return (/^http:\/\/.*\.google\.com/).test(scope);
+      }
+    })
+    .get('/somepath')
+    .reply(200, responseText, responseHeaders);
+
+  var dataCalled = false;
+  var host = 'some.other.subdomain.of.google.com';
+  var req = http.get({
+    host: host,
+    method: 'GET',
+    path: '/somepath',
+    port: 80
+  }, function(res) {
+    res.on('data', function(data) {
+      dataCalled = true;
+      t.equal(data.toString(), responseText);
+    });
+    res.on('end', function() {
+      t.true(dataCalled);
+      scope.done();
+      t.end();
+    });
+  });
+
+  t.equivalent(req._headers, { host: requestHeaders.host });
+
+});
+
+test('mocking succeeds even when mocked and specified request header names have different cases', function(t) {
+  scope = nock('http://example.com', {
+    reqheaders: {
+      "x-app-token": "apptoken",
+      "x-auth-token": "apptoken"
+    }
+  })
+    .post('/resource')
+    .reply(200, { status: "ok" });
+
+  mikealRequest({
+    method: 'POST',
+    uri: 'http://example.com/resource',
+    headers: {
+      "X-App-TOKEN": "apptoken",
+      "X-Auth-TOKEN": "apptoken"
+    }
+  }, function(err, res, body) {
+    t.type(err, 'null');
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+
+});
+
+test('mocking succeeds even when host request header is not specified', function(t) {
+  scope = nock('http://example.com')
+    .post('/resource')
+    .reply(200, { status: "ok" });
+
+  mikealRequest({
+    method: 'POST',
+    uri: 'http://example.com/resource',
+    headers: {
+      "X-App-TOKEN": "apptoken",
+      "X-Auth-TOKEN": "apptoken"
+    }
+  }, function(err, res, body) {
+    t.type(err, 'null');
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+
 });
