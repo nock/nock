@@ -316,6 +316,8 @@ var scope = nock('http://api.myservice.com')
                 .reply(200, 'user');
 ```
 
+Note that `scope.filteringPath` is not cummulative: it should only be used once per scope.
+
 ## Request Body filtering
 
 You can also filter the request body based on a function.
