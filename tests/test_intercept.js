@@ -3088,3 +3088,20 @@ test('mocking succeeds even when host request header is not specified', function
   });
 
 });
+
+test('mikeal/request with strictSSL: true', function(t) {
+  scope = nock('https://strictssl.com')
+    .post('/what')
+    .reply(200, { status: "ok" });
+
+  mikealRequest({
+    method: 'POST',
+    uri: 'https://strictssl.com/what',
+    strictSSL: true
+  }, function(err, res, body) {
+    t.type(err, 'null');
+    t.equal(res && res.statusCode, 200);
+    t.end();
+  });
+
+});
