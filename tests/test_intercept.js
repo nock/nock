@@ -14,6 +14,7 @@ var needle  = require("needle");
 var restify = require('restify');
 var domain  = require('domain');
 
+
 test("double activation throws exception", function(t) {
   nock.restore();
   t.false(nock.isActive());
@@ -3130,6 +3131,29 @@ test('response readable pull stream works as expected', function(t) {
         }
       });
     });
+
+  req.end();
+});
+
+test(".setNoDelay", function(t) {
+  var dataCalled = false
+
+  var scope = nock('http://nodelayyy.com')
+    .get('/yay')
+    .reply(200, "Hi");
+
+  var req = http.request({
+      host: "nodelayyy.com"
+    , path: '/yay'
+    , port: 80
+  }, function(res) {
+
+    t.equal(res.statusCode, 200);
+    res.on('end', t.end.bind(t));
+
+  });
+
+  req.setNoDelay(true);
 
   req.end();
 });
