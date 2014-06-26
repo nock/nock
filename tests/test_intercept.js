@@ -2066,14 +2066,12 @@ test('has a req property on the response', function(t) {
 test('disabled real HTTP request', function(t) {
   nock.disableNetConnect();
 
-  try {
-    http.get('http://www.amazon.com', function(res) {
-      throw "should not request this";
-    });
-  } catch(err) {
+  http.get('http://www.amazon.com', function(res) {
+    throw "should not request this";
+  }).on('error', function(err) {
     t.equal(err.message, 'Nock: Not allow net connect for "www.amazon.com:80"');
     t.end();
-  }
+  });
 
   nock.enableNetConnect();
 });
@@ -2081,14 +2079,12 @@ test('disabled real HTTP request', function(t) {
 test('NetConnectNotAllowedError is instance of Error', function(t) {
   nock.disableNetConnect();
 
-  try {
-    http.get('http://www.amazon.com', function(res) {
-      throw "should not request this";
-    });
-  } catch(err) {
+  http.get('http://www.amazon.com', function(res) {
+    throw "should not request this";
+  }).on('error', function (err) {
     t.type(err, 'Error');
     t.end();
-  }
+  });
 
   nock.enableNetConnect();
 });
@@ -2096,14 +2092,12 @@ test('NetConnectNotAllowedError is instance of Error', function(t) {
 test('NetConnectNotAllowedError exposes the stack', function(t) {
   nock.disableNetConnect();
 
-  try {
-    http.get('http://www.amazon.com', function(res) {
-      throw "should not request this";
-    });
-  } catch(err) {
+  http.get('http://www.amazon.com', function(res) {
+    throw "should not request this";
+  }).on('error', function (err) {
     t.notEqual(err.stack, undefined);
     t.end();
-  }
+  });
 
   nock.enableNetConnect();
 });
@@ -2111,17 +2105,15 @@ test('NetConnectNotAllowedError exposes the stack', function(t) {
 test('enable real HTTP request only for google.com, via string', function(t) {
   nock.enableNetConnect('google.com');
 
-  try {
-    http.get('http://google.com.br/').on('error', function(err) {
-      throw err;
-    });
+  http.get('http://google.com.br/').on('error', function(err) {
+    throw err;
+  });
 
-    http.get('http://www.amazon.com', function(res) {
-      throw "should not deliver this request"
-    })
-  } catch(err) {
+  http.get('http://www.amazon.com', function(res) {
+    throw "should not deliver this request"
+  }).on('error', function (err) {
     t.equal(err.message, 'Nock: Not allow net connect for "www.amazon.com:80"');
-  }
+  });
 
   t.end();
   nock.enableNetConnect();
@@ -2130,18 +2122,16 @@ test('enable real HTTP request only for google.com, via string', function(t) {
 test('enable real HTTP request only for google.com, via regexp', function(t) {
   nock.enableNetConnect(/google\.com/);
 
-  try {
-    http.get('http://google.com.br/').on('error', function(err) {
-      throw err;
-    });
+  http.get('http://google.com.br/').on('error', function(err) {
+    throw err;
+  });
 
-    http.get('http://www.amazon.com', function(res) {
-      throw "should not request this";
-    });
-  } catch(err) {
+  http.get('http://www.amazon.com', function(res) {
+    throw "should not request this";
+  }).on('error', function (err) {
     t.equal(err.message, 'Nock: Not allow net connect for "www.amazon.com:80"');
     t.end();
-  }
+  });
 
   nock.enableNetConnect();
 });
