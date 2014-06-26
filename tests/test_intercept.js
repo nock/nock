@@ -3157,3 +3157,38 @@ test(".setNoDelay", function(t) {
 
   req.end();
 });
+
+test("match basic authentication header", function(t) {
+  var username = 'testuser'
+    , password = 'testpassword'
+    , authString = username + ":" + password
+    , encrypted = (new Buffer(authString)).toString( 'base64' );
+
+  var scope = nock('http://www.headdy.com')
+     .get('/')
+     .matchHeader('Authorization', function(val) {
+       var expected = 'Basic ' + encrypted;
+       return val == expected;
+     })
+     .reply(200, "Hello World!");
+
+  http.get({
+     host: "www.headdy.com"
+    , path: '/'
+    , port: 80
+    , auth: authString
+  }, function(res) {
+    res.setEncoding('utf8');
+    t.equal(res.statusCode, 200);
+
+    res.on('data', function(data) {
+      t.equal(data, 'Hello World!');
+    });
+
+    res.on('end', function() {
+      scope.done();
+      t.end();
+    });
+  });
+
+});
