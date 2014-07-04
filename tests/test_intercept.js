@@ -1392,26 +1392,28 @@ test("can use https", function(t) {
   req.end();
 });
 
-test("complaints if https route is missing", function(t) {
+test("emits error if https route is missing", function(t) {
   var dataCalled = false
 
   var scope = nock('https://google.com')
     .get('/')
     .reply(200, "Hello World!");
 
-  try {
-    var req = https.request({
-        host: "google.com"
-      , path: '/abcdef892932'
-    }, function(res) {
-      throw new Error('should not come here!');
-    }).end();
-  } catch (err) {
-    t.ok(err.message.match(/No match for request GET https:\/\/google.com\/abcdef892932/));
-    t.end();
-  }
+  var req = https.request({
+      host: "google.com"
+    , path: '/abcdef892932'
+  }, function(res) {
+    throw new Error('should not come here!');
+  });
+        
+  req.end();
 
-
+  // This listener is intentionally after the end call so make sure that
+  // listeners added after the end will catch the error
+  req.on('error', function (err) {
+      t.ok(err.message.match(/No match for request GET https:\/\/google.com\/abcdef892932/));
+      t.end();
+  });
 });
 
 test("can use ClientRequest using GET", function(t) {
