@@ -1405,7 +1405,7 @@ test("emits error if https route is missing", function(t) {
   }, function(res) {
     throw new Error('should not come here!');
   });
-        
+
   req.end();
 
   // This listener is intentionally after the end call so make sure that
@@ -3183,4 +3183,16 @@ test("match basic authentication header", function(t) {
     });
   });
 
+});
+
+test('socket setKeepAlive', function(t) {
+  var scope = nock('http://setkeepalive.com')
+     .get('/')
+     .reply(200, "hey");
+
+  var req = http.get('http://setkeepalive.com');
+  req.once('socket', function(socket) {
+    socket.setKeepAlive(true);
+    t.end();
+  });
 });
