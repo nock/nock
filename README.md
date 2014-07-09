@@ -551,7 +551,7 @@ Copy and paste that code into your tests, customize at will, and you're done!
 
 (Remember that you should do this one test at a time).
 
-## `output_object` option
+## `output_objects` option
 
 In case you want to generate the code yourself or use the test data in some other way, you can pass the `output_objects` option to `rec`:
 
