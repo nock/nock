@@ -1344,6 +1344,26 @@ test("can use hostname instead of host", function(t) {
   req.end();
 });
 
+test('hostname is case insensitive', function(t) {
+  var scope = nock('http://caseinsensitive.com')
+     .get('/path')
+     .reply(200, "hey");
+
+  var options = {
+    hostname: 'cASEinsensitivE.com',
+    path: '/path',
+    method: 'GET'
+  };
+
+  var req = http.request(options, function(res) {
+    scope.done();
+    t.end();
+  });
+
+  req.end();
+});
+
+
 test("can take a port", function(t) {
   var scope = nock('http://www.myserver.com:3333')
     .get('/')
@@ -3196,3 +3216,4 @@ test('socket setKeepAlive', function(t) {
     t.end();
   });
 });
+
