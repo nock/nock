@@ -104,11 +104,12 @@
     "debug": "^0.8.1"
   },
   "devDependencies": {
-    "tap": "*",
-    "request": "*",
-    "superagent": "~0.15.7",
+    "hyperquest": "^0.3.0",
     "needle": "^0.7.1",
-    "restify": "^2.8.1"
+    "request": "*",
+    "restify": "^2.8.1",
+    "superagent": "~0.15.7",
+    "tap": "*"
   },
   "scripts": {
     "test": "node node_modules/tap/bin/tap.js --dd tests"

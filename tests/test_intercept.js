@@ -13,6 +13,7 @@ var _       = require('lodash');
 var needle  = require("needle");
 var restify = require('restify');
 var domain  = require('domain');
+var hyperquest = require('hyperquest');
 
 
 test("double activation throws exception", function(t) {
@@ -3217,3 +3218,18 @@ test('socket setKeepAlive', function(t) {
   });
 });
 
+test('hyperquest works', function(t) {
+  nock('http://superagent.cz')
+    .get('/somepath')
+    .reply(200, 'Yay hyperquest!');
+
+  var req = hyperquest('http://superagent.cz/somepath');
+  var reply = '';
+  req.on('data', function(d) {
+    reply += d;
+  });
+  req.once('end', function() {
+    t.equals(reply, 'Yay hyperquest!');
+    t.end();
+  });
+});
