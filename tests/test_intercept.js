@@ -3219,11 +3219,11 @@ test('socket setKeepAlive', function(t) {
 });
 
 test('hyperquest works', function(t) {
-  nock('http://superagent.cz')
+  nock('http://hyperquest.com')
     .get('/somepath')
     .reply(200, 'Yay hyperquest!');
 
-  var req = hyperquest('http://superagent.cz/somepath');
+  var req = hyperquest('http://hyperquest.com/somepath');
   var reply = '';
   req.on('data', function(d) {
     reply += d;
