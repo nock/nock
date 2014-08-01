@@ -15,7 +15,6 @@ var restify = require('restify');
 var domain  = require('domain');
 var hyperquest = require('hyperquest');
 
-
 test("double activation throws exception", function(t) {
   nock.restore();
   t.false(nock.isActive());
@@ -1432,8 +1431,33 @@ test("emits error if https route is missing", function(t) {
   // This listener is intentionally after the end call so make sure that
   // listeners added after the end will catch the error
   req.on('error', function (err) {
-      t.ok(err.message.match(/No match for request GET https:\/\/google.com\/abcdef892932/));
-      t.end();
+    t.equal(err.message.trim(), 'Nock: No match for request GET https://google.com/abcdef892932');
+    t.end();
+  });
+});
+
+test("emits error if https route is missing", function(t) {
+  var dataCalled = false
+
+  var scope = nock('https://google.com:123')
+    .get('/')
+    .reply(200, "Hello World!");
+
+  var req = https.request({
+      host: "google.com",
+      port: 123,
+      path: '/dsadsads'
+  }, function(res) {
+    throw new Error('should not come here!');
+  });
+
+  req.end();
+
+  // This listener is intentionally after the end call so make sure that
+  // listeners added after the end will catch the error
+  req.on('error', function (err) {
+    t.equal(err.message.trim(), 'Nock: No match for request GET https://google.com:123/dsadsads');
+    t.end();
   });
 });
 
