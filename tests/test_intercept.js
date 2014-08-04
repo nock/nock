@@ -3242,6 +3242,37 @@ test('request emits socket', function(t) {
   });
 });
 
+test('socket emits connect and secureConnect', function(t) {
+  t.plan(3);
+
+  var scope = nock('http://gotzsocketz.com')
+     .post('/')
+     .reply(200, "hey");
+
+  var req = http.request({
+      host: "gotzsocketz.com"
+    , path: '/'
+    , method: 'POST'
+  });
+
+  req.on('socket', function(socket) {
+    socket.once('connect', function() {
+      req.end();
+      t.ok(true);
+    });
+    socket.once('secureConnect', function() {
+      t.ok(true);
+    });
+  });
+
+  req.once('response', function(res) {
+    res.setEncoding('utf8');
+    res.on('data', function(d) {
+      t.equal(d, 'hey');
+    });
+  });
+});
+
 test('socket setKeepAlive', function(t) {
   var scope = nock('http://setkeepalive.com')
      .get('/')
