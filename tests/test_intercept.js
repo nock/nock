@@ -3230,6 +3230,18 @@ test("match basic authentication header", function(t) {
 
 });
 
+test('request emits socket', function(t) {
+  var scope = nock('http://gotzsocketz.com')
+     .get('/')
+     .reply(200, "hey");
+
+  var req = http.get('http://gotzsocketz.com');
+  req.once('socket', function(socket) {
+    t.type(socket, Object);
+    t.end();
+  });
+});
+
 test('socket setKeepAlive', function(t) {
   var scope = nock('http://setkeepalive.com')
      .get('/')
