@@ -925,7 +925,7 @@ test("reply with file with headers", function(t) {
   var scope = nock('http://www.filereplier2.com')
     .get('/')
     .replyWithFile(200, __dirname + '/../assets/reply_file_2.txt.gz', {
-      'content-type': 'gzip'
+      'content-encoding': 'gzip'
     });
 
   var req = http.request({
