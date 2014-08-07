@@ -15,6 +15,7 @@ var restify = require('restify');
 var domain  = require('domain');
 var hyperquest = require('hyperquest');
 
+
 test("double activation throws exception", function(t) {
   nock.restore();
   t.false(nock.isActive());
@@ -915,6 +916,37 @@ test("reply with file and pipe response", function(t) {
     t.equal(res.statusCode, 200);
 
   });
+
+});
+
+test("reply with file with headers", function(t) {
+  var dataCalled = false
+
+  var scope = nock('http://www.filereplier2.com')
+    .get('/')
+    .replyWithFile(200, __dirname + '/../assets/reply_file_2.txt.gz', {
+      'content-type': 'gzip'
+    });
+
+  var req = http.request({
+      host: "www.filereplier2.com"
+    , path: '/'
+    , port: 80
+  }, function(res) {
+
+    t.equal(res.statusCode, 200);
+    res.on('end', function() {
+      t.ok(dataCalled);
+      t.end();
+    });
+    res.on('data', function(data) {
+      dataCalled = true;
+      t.equal(data.length, 57);
+    });
+
+  });
+
+  req.end();
 
 });
 
