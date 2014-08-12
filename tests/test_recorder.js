@@ -254,7 +254,7 @@ tap.test('records https correctly', function(t) {
       t.equal(ret.length, 1);
       ret = ret[0];
       t.type(ret, 'object');
-      t.equal(ret.scope, "https://google.com:80");
+      t.equal(ret.scope, "https://google.com:443");
       t.equal(ret.method, "POST");
       t.ok(typeof(ret.status) !== 'undefined');
       t.ok(typeof(ret.response) !== 'undefined');
