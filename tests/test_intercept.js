@@ -3336,3 +3336,47 @@ test('hyperquest works', function(t) {
     t.end();
   });
 });
+
+test('remove interceptor for GET resource', function(t) {
+  scope = nock('http://example.org')
+    .get('/somepath')
+    .reply(200, 'hey');
+
+  var mocks = scope.pendingMocks();
+  t.deepEqual(mocks, ['GET http://example.org:80/somepath']);
+
+  var result = nock.removeInterceptor({
+    hostname : 'example.org',
+    path : '/somepath'
+  });
+  t.ok(result, 'result should be true');
+
+  nock('http://example.org')
+    .get('/somepath')
+    .reply(202, 'other-content');
+
+  http.get({
+    host: 'example.org',
+    path : '/somepath'
+  }, function(res) {
+    res.setEncoding('utf8');
+    t.equal(res.statusCode, 202);
+
+    res.on('data', function(data) {
+      t.equal(data, 'other-content');
+    });
+
+    res.on('end', function() {
+      t.end();
+    });
+  });
+});
+
+test('remove interceptor for not found resource', function(t) {
+  var result = nock.removeInterceptor({
+    hostname : 'example.org',
+    path : '/somepath'
+  });
+  t.notOk(result, 'result should be false as no interceptor was found');
+  t.end();
+});

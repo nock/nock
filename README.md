@@ -624,6 +624,26 @@ nock.recorder.rec({
 
 Note that even when request headers recording is enabled Nock will never record `user-agent` headers. `user-agent` values change with the version of Node and underlying operating system and are thus useless for matching as all that they can indicate is that the user agent isn't the one that was used to record the tests.
 
+## .removeInterceptor()
+This allows removing a specific interceptor for a url. It's useful when there's a list of common interceptors but one test requires one of them to behave differently.
+
+Examples:
+```js
+nock.removeInterceptor({
+  hostname : 'localhost',
+  path : '/mockedResource'
+});
+```
+
+```js
+nock.removeInterceptor({
+  hostname : 'localhost',
+  path : '/login'
+  method: 'POST'
+  proto : 'https'
+});
+```
+
 # How does it work?
 
 Nock works by overriding Node's `http.request` function. Also, it overrides `http.ClientRequest` too to cover for modules that use it directly.
