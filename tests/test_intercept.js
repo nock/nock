@@ -316,6 +316,35 @@ test("post with reply callback, uri, and request body", function(t) {
   req.end();
 });
 
+test("post with chaining on call", function(t) {
+  var input = 'key=val';
+
+  var scope = nock('http://www.google.com')
+     .post('/echo', input)
+     .reply(200, function(uri, body) {
+        return ['OK', uri, body].join(' ');
+     });
+
+  var req = http.request({
+     host: "www.google.com"
+    , method: 'POST'
+    , path: '/echo'
+    , port: 80
+  }, function(res) {
+    res.on('end', function() {
+      scope.done();
+      t.end();
+    });
+    res.on('data', function(data) {
+      t.equal(data.toString(), 'OK /echo key=val' , 'response should match');
+    });
+  }).on('error', function(error){
+    t.equal(error, null);
+    t.end();
+  });
+  req.end(input);
+});
+
 test("reply with callback and filtered path and body", function(t) {
   var noPrematureExecution = false;
 
