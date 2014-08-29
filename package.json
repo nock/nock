@@ -99,9 +99,9 @@
   ],
   "main": "./index",
   "dependencies": {
-    "propagate": "0.2.x",
+    "propagate": "0.3.x",
     "lodash": "2.4.1",
-    "debug": "^0.8.1"
+    "debug": "^1.0.4"
   },
   "devDependencies": {
     "hyperquest": "^0.3.0",
