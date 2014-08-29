@@ -99,7 +99,7 @@
   ],
   "main": "./index",
   "dependencies": {
-    "propagate": "0.2.x",
+    "propagate": "0.3.x",
     "lodash": "2.4.1",
     "debug": "^1.0.4"
   },
