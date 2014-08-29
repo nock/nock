@@ -21,15 +21,16 @@ test('works with dynamodb', function(t) {
 
   db.getItem(
     {
-        'Key': {
-          'Artist': {
-            'S': 'Lady Gaga'
+      Key: {
+        Artist: {
+          S: 'Lady Gaga'
         }
       },
-      'TableName': 'Music'
+      TableName: 'Music'
     },
     function(err, resp) {
       if (err) throw err;
+      t.deepEqual(resp, {});
       t.end();
     });
 });
