@@ -438,9 +438,9 @@ var scope = nock('http://persisssists.con')
   .reply(200, 'Persisting all the way');
 ```
 
-## pendingMocks
+## .pendingMocks()
 
-If a scope is not done, you can inspect the scope to infer which ones are still pending using the `scope.pendingMocks` function:
+If a scope is not done, you can inspect the scope to infer which ones are still pending using the `scope.pendingMocks()` function:
 
 ```js
 if (!scope.isDone()) {
