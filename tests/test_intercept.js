@@ -3409,3 +3409,35 @@ test('remove interceptor for not found resource', function(t) {
   t.notOk(result, 'result should be false as no interceptor was found');
   t.end();
 });
+
+test('isDone() must consider repeated responses', function(t) {
+
+  var scope = nock('http://www.example.com')
+    .get('/')
+    .times(2)
+    .reply(204);
+
+  function makeRequest(callback) {
+    var req = http.request({
+      host: "www.example.com",
+      path: '/',
+      port: 80
+    }, function(res) {
+      t.equal(res.statusCode, 204);
+      res.on('end', callback);
+    });
+    req.end();
+  }
+
+  t.notOk(scope.isDone(), "should not be done before all requests");
+  makeRequest(function() {
+    t.notOk(scope.isDone(), "should not yet be done after the first request");
+    makeRequest(function() {
+      t.ok(scope.isDone(), "should be done after the two requests are made");
+      scope.done();
+      t.end();
+    });
+  });
+
+});
+
