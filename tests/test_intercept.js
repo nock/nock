@@ -3441,3 +3441,19 @@ test('isDone() must consider repeated responses', function(t) {
 
 });
 
+test('you must setup an interceptor for each request', function(t) {
+  var scope = nock('http://www.example.com')
+     .get('/hey')
+     .reply(200, 'First match');
+
+  mikealRequest.get('http://www.example.com/hey', function(error, res, body) {
+    t.equal(res.statusCode, 200);
+    t.equal(body, 'First match', 'should match first request response body');
+
+    mikealRequest.get('http://www.example.com/hey', function(error, res, body) {
+      t.equal(error && error.toString(), 'Error: Nock: No match for request GET http://www.example.com/hey ');
+      scope.done();
+      t.end();
+    });
+  });
+});
