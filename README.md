@@ -283,12 +283,12 @@ This can be useful, for instance, if you have a node moduel that randomly change
 
 ```js
 var scope = nock('https://api.dropbox.com', {
-  filteringScope: function(scope) {
-    return /^https:\/\/api[0-9]*.dropbox.com/.test(scope);
+    filteringScope: function(scope) {
+      return /^https:\/\/api[0-9]*.dropbox.com/.test(scope);
+    }
   })
   .get('/1/metadata/auto/Photos?include_deleted=false&list=true')
   .reply(200);
-}
 ```
 
 ## Path filtering
