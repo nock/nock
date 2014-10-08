@@ -528,12 +528,34 @@ Guessing what the HTTP calls are is a mess, specially if you are introducing noc
 For these cases where you want to mock an existing live system you can record and playback the HTTP calls like this:
 
 ```js
+var nocks = nock.nocker.start('path-to-your-test-file' [, options]);
+// Some HTTP calls happen
+nock.nocker.end(nocks);
+```
+
+When recording your tests, invoke the tests with `NOCK_RECORDING` environment variable. In that case `nocker.start` will start recording the HTTP calls and `nocker.end` will persist `nock` definition objects for all the recorded calls into the given file name.
+
+When you want to run mocked tests, simlpy run them without any additional environment variable and then `nocker.start` will load the definitions from the given file and `nocker.end` will check that all the mocked calls were satisfied.
+
+### `options` object
+
+This object may have three properties relevant to `nock`:
+
+* `preprocessor`: a function that will accept `nock` definition objects and preprocess them before they are used to create `nock` objects
+* `postprocessor`: a function that will accept `nock` objects generated from (optionally preprocessed) definition objects
+* `recording_options`: additional options object to be passed to `nock` recorder (see below for more details on it)
+
+## Low-lever recording API
+
+The `nocker` is a high-level API made to make it recording and replaying of nocks easier for you. But `nock` also exposes low-lever recording API:
+
+```js
 nock.recorder.rec();
 // Some HTTP calls happen and the nock code necessary to mock
 // those calls will be outputted to console
 ```
 
-## `dont_print` option
+### `dont_print` option
 
 If you just want to capture the generated code into a var as an array you can use:
 
@@ -551,7 +573,7 @@ Copy and paste that code into your tests, customize at will, and you're done!
 
 (Remember that you should do this one test at a time).
 
-## `output_objects` option
+### `output_objects` option
 
 In case you want to generate the code yourself or use the test data in some other way, you can pass the `output_objects` option to `rec`:
 
@@ -608,7 +630,7 @@ nockDefs.forEach(function(def) {
 var nocks = nock.define(nockDefs);
 ```
 
-## `enable_reqheaders_recording` option
+### `enable_reqheaders_recording` option
 
 Recording request headers by default is deemed more trouble than its worth as some of them depend on the timestamp or other values that may change after the tests have been recorder thus leading to complex postprocessing of recorded tests. Thus by default the request headers are not recorded.
 
@@ -624,7 +646,8 @@ nock.recorder.rec({
 
 Note that even when request headers recording is enabled Nock will never record `user-agent` headers. `user-agent` values change with the version of Node and underlying operating system and are thus useless for matching as all that they can indicate is that the user agent isn't the one that was used to record the tests.
 
-## .removeInterceptor()
+### .removeInterceptor()
+
 This allows removing a specific interceptor for a url. It's useful when there's a list of common interceptors but one test requires one of them to behave differently.
 
 Examples:
