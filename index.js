@@ -6,4 +6,6 @@ module.exports.recorder = {
   , clear   : recorder.clear
   , play : recorder.outputs
 };
+
+module.exports.nockWith = require('./lib/nockWith');
 module.exports.restore = recorder.restore;

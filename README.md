@@ -644,6 +644,79 @@ nock.removeInterceptor({
 });
 ```
 
+# With
+
+fixture recording support and playback
+
+## Setup
+
+**You must specify a fixture directory before using, for example:
+
+In your test helper
+
+```javascript
+var nockWith = require('nock').nockWith;
+
+nockWith.fixtures = '/path/to/fixtures/';
+nockWith.assert   = true;   //not required, enables and disables using assert
+```
+
+### Options
+
+- `nockWith.fixtures` : path to fixture directory
+- `nockWith.assert` : whether or not to assert that all nocks have been satisfied in the callback
+
+
+## Usage
+
+By default if the fixture doesn't exist, nockWith will create a new fixture and save the recorded output
+for you. The next time you run the test, if the fixture exists, it will be loaded in.
+
+If you want to force recording regardless of the existsance of the fixture, pass in
+`{ record: true }` as an option to the second parameter.
+
+The `this` context of the call back function will be have a property `scopes` to access all of the loaded
+nock scopes
+
+```javascript
+  var nockWith = require('nock').nockWith;
+
+  nockWith.fixtures = '/path/to/fixtures/'; //this only needs to be set once in your test helper
+
+  nockWith('someFixture.json', function (nockDone) {
+
+    this.scopes.forEach(function(scope) {
+      scope.filteringRequestBody = function(body) {
+        if(typeof(body) !== 'string') {
+          return body;
+        }
+
+        return body.replace(/(timestamp):([0-9]+)/g, function(match, key, value) {
+          return key + ':timestampCapturedDuringRecording'
+        });
+      };
+
+    http.get('http://zombo.com/', nockDone); // respond body "Ok"
+
+  });
+
+  nockWith('someFixture.json', function (nockDone) {
+
+    http.get('http://zombo.com/'); // respond body "Ok"
+    http.get('http://zombo.com/', nockDone); // throws exeption because someFixture.json only had one call
+
+  });
+
+```
+
+### Options
+
+As an optional second parameter you can pass the following options
+
+- `assert`: overrides whatever global `nockWith.assert` is set to for this test
+- `record`: if `true` force recording regardless of fixture existance
+- `define`: if false don't use nock.load instead use nock.loadDefs for this.scopes **Note:** if you are using `assert` functionality and set `{ define: false }`, it is your responsibility to set `this.scopes = nock.define(this.scopes)`
+
 # How does it work?
 
 Nock works by overriding Node's `http.request` function. Also, it overrides `http.ClientRequest` too to cover for modules that use it directly.
