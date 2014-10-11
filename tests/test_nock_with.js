@@ -5,6 +5,8 @@ var nockWith = require('../.').nockWith
   , fs      = require('fs')
   , exists  = fs.existsSync;
 
+var originalMode = nockWith.currentMode;
+
 tap.test('nockWith tests', function (nw) {
   nockWith.setMode('record');
 
@@ -104,6 +106,6 @@ tap.test('nockWith tests', function (nw) {
 })
 .on('end', function () {
 
-  nockWith.setMode('wild');
+  nockWith.setMode(originalMode);
 
 });
