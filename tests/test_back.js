@@ -96,6 +96,8 @@ tap.test('nockBack tests', function (nw) {
 
     nockBack('goodRequest.json', function (done) {
       t.true(this.scopes.length > 0);
+      http.get('http://www.google.com').end();
+      this.assertScopesFinished();
       done();
       t.end();
     });
