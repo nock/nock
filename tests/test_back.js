@@ -1,19 +1,19 @@
 
-var nockWith = require('../.').nockWith
+var nockBack = require('../.').back
   , tap     = require('tap')
   , http    = require('http')
   , fs      = require('fs')
   , exists  = fs.existsSync;
 
-var originalMode = nockWith.currentMode;
+var originalMode = nockBack.currentMode;
 
-tap.test('nockWith tests', function (nw) {
-  nockWith.setMode('record');
+tap.test('nockBack tests', function (nw) {
+  nockBack.setMode('record');
 
-  nw.test('nockWith throw an execption when fixtures is not set', function (t) {
+  nw.test('nockBack throw an execption when fixtures is not set', function (t) {
 
     try {
-      nockWith();
+      nockBack();
     } catch (e) {
       t.ok(true, 'excpected exception');
       t.end();
@@ -25,18 +25,18 @@ tap.test('nockWith tests', function (nw) {
   });
 
   nw.test('it records when configured correctly', function (t) {
-    nockWith.fixtures = __dirname + '/fixtures';
+    nockBack.fixtures = __dirname + '/fixtures';
 
     var options = {
       host: 'www.google.com', method: 'GET', path: '/', port: 80
     };
 
     var fixture = 'someFixture.json';
-    var fixtureLoc = nockWith.fixtures + '/' + fixture;
+    var fixtureLoc = nockBack.fixtures + '/' + fixture;
 
     t.false(exists(fixtureLoc));
 
-    nockWith(fixture, function (done) {
+    nockBack(fixture, function (done) {
       http.request(options).end();
       done();
 
@@ -51,16 +51,16 @@ tap.test('nockWith tests', function (nw) {
   //Adding this test because there was an issue when not calling
   //nock.activate() after calling nock.restore()
   nw.test('it can record twice', function (t) {
-    nockWith.fixtures = __dirname + '/fixtures';
+    nockBack.fixtures = __dirname + '/fixtures';
 
     var options = {
       host: 'www.google.com', method: 'GET', path: '/', port: 80
     };
     var fixture = 'someFixture2.json';
-    var fixtureLoc = nockWith.fixtures + '/' + fixture;
+    var fixtureLoc = nockBack.fixtures + '/' + fixture;
     t.false(exists(fixtureLoc));
 
-    nockWith(fixture, function (done) {
+    nockBack(fixture, function (done) {
       http.request(options).end();
       done();
 
@@ -77,7 +77,7 @@ tap.test('nockWith tests', function (nw) {
 
     var fixture = 'wrongUri.json';
 
-    nockWith(fixture, function (done) {
+    nockBack(fixture, function (done) {
 
       http.get('http://www.amazon.com', function(res) {
         throw "should not request this";
@@ -94,7 +94,7 @@ tap.test('nockWith tests', function (nw) {
 
   nw.test('it loads your recorded tests', function (t) {
 
-    nockWith('goodRequest.json', function (done) {
+    nockBack('goodRequest.json', function (done) {
       t.true(this.scopes.length > 0);
       done();
       t.end();
@@ -106,6 +106,6 @@ tap.test('nockWith tests', function (nw) {
 })
 .on('end', function () {
 
-  nockWith.setMode(originalMode);
+  nockBack.setMode(originalMode);
 
 });
