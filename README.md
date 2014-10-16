@@ -644,7 +644,7 @@ nock.removeInterceptor({
 });
 ```
 
-# With
+# Nock Back
 
 fixture recording support and playback
 
@@ -655,55 +655,60 @@ fixture recording support and playback
 In your test helper
 
 ```javascript
-var nockWith = require('nock').nockWith;
+var nockBack = require('nock').back;
 
-nockWith.fixtures = '/path/to/fixtures/';
-nockWith.assert   = true;   //not required, enables and disables using assert
+nockBack.fixtures = '/path/to/fixtures/';
+nockBack.setMode('record');
 ```
 
 ### Options
 
-- `nockWith.fixtures` : path to fixture directory
-- `nockWith.assert` : whether or not to assert that all nocks have been satisfied in the callback
+- `nockBack.fixtures` : path to fixture directory
+- `nockBack.setMode()` : the mode to use
 
 
 ## Usage
 
-By default if the fixture doesn't exist, nockWith will create a new fixture and save the recorded output
+By default if the fixture doesn't exist, a `nockBack` will create a new fixture and save the recorded output
 for you. The next time you run the test, if the fixture exists, it will be loaded in.
-
-If you want to force recording regardless of the existsance of the fixture, pass in
-`{ record: true }` as an option to the second parameter.
 
 The `this` context of the call back function will be have a property `scopes` to access all of the loaded
 nock scopes
 
 ```javascript
-  var nockWith = require('nock').nockWith;
+  var nockBack = require('nock').back;
 
-  nockWith.fixtures = '/path/to/fixtures/'; //this only needs to be set once in your test helper
+  nockBack.fixtures = '/path/to/fixtures/'; //this only needs to be set once in your test helper
 
-  nockWith('someFixture.json', function (nockDone) {
+  var before = function (scope) {
+    scope.filteringRequestBody = function(body) {
+      if(typeof(body) !== 'string') {
+        return body;
+      }
 
-    this.scopes.forEach(function(scope) {
-      scope.filteringRequestBody = function(body) {
-        if(typeof(body) !== 'string') {
-          return body;
-        }
+      return body.replace(/(timestamp):([0-9]+)/g, function(match, key, value) {
+        return key + ':timestampCapturedDuringRecording'
+      });
 
-        return body.replace(/(timestamp):([0-9]+)/g, function(match, key, value) {
-          return key + ':timestampCapturedDuringRecording'
-        });
-      };
+    }
+  }
 
-    http.get('http://zombo.com/', nockDone); // respond body "Ok"
+  nockBack('someFixture.json', {before: before}, function (nockDone) {
+
+    http.get('http://zombo.com/').end(); // respond body "Ok"
+    this.assertScopesFinished(); //throws an exception if all nocks in fixture were not satisfied
+
+    nockDone();
 
   });
 
-  nockWith('someFixture.json', function (nockDone) {
+  nockBack('someFixture.json', function (nockDone) {
 
-    http.get('http://zombo.com/'); // respond body "Ok"
-    http.get('http://zombo.com/', nockDone); // throws exeption because someFixture.json only had one call
+    http.get('http://zombo.com/').end(); // respond body "Ok"
+    http.get('http://zombo.com/').end(); // throws exeption because someFixture.json only had one call
+
+    //never gets here
+    nockDone();
 
   });
 
@@ -713,9 +718,21 @@ nock scopes
 
 As an optional second parameter you can pass the following options
 
-- `assert`: overrides whatever global `nockWith.assert` is set to for this test
-- `record`: if `true` force recording regardless of fixture existance
-- `define`: if false don't use nock.load instead use nock.loadDefs for this.scopes **Note:** if you are using `assert` functionality and set `{ define: false }`, it is your responsibility to set `this.scopes = nock.define(this.scopes)`
+- `before`: a preprocessing function, gets called before nock.define
+- `after`: a postprocessing function, gets called after nock.define
+
+
+### Modes
+
+to set the mode call `nockBack.setMode(mode)` or run the tests with the `NOCK_BACK_MODE` environment variable set before loading nock. If the mode needs to be changed programatically, the following is valid: `nockBack.setMode(nockBack.currentMode)`
+
+- wild: all requests go out to the internet, dont replay anything, doesnt record anything
+
+- dryrun: The default, use recorded nocks, allow http calls, doesnt record anything, useful for writing new tests
+
+- record: use recorded nocks, record new nocks
+
+- lockdown: use recorded nocks, disables all http calls even when not nocked, doesnt record
 
 # How does it work?
 
