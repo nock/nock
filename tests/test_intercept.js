@@ -1,3 +1,4 @@
+'use strict';
 
 var fs      = require('fs');
 var nock    = require('../.');
@@ -9,12 +10,17 @@ var stream  = require('stream');
 var test    = require('tap').test;
 var mikealRequest = require('request');
 var superagent = require('superagent');
-var _       = require('lodash');
 var needle  = require("needle");
 var restify = require('restify');
 var domain  = require('domain');
 var hyperquest = require('hyperquest');
 
+var globalCount;
+
+test("setup", function(t) {
+  globalCount = Object.keys(global).length;
+  t.end();
+});
 
 test("double activation throws exception", function(t) {
   nock.restore();
@@ -54,16 +60,16 @@ test("allow override works (2)", function(t) {
 });
 
 test("get gets mocked", function(t) {
-  var dataCalled = false
+  var dataCalled = false;
 
   var scope = nock('http://www.google.com')
     .get('/')
     .reply(200, "Hello World!");
 
   var req = http.request({
-      host: "www.google.com"
-    , path: '/'
-    , port: 80
+      host: "www.google.com",
+      path: '/',
+      port: 80
   }, function(res) {
 
     t.equal(res.statusCode, 200);
@@ -83,45 +89,6 @@ test("get gets mocked", function(t) {
   req.end();
 });
 
-test("not mocked should work in http", function(t) {
-  var dataCalled = false;
-
-  var req = http.request({
-      host: "www.amazon.com"
-    , path: '/'
-    , port: 80
-  }, function(res) {
-
-    t.equal(res.statusCode, 200);
-    res.on('end', function() {
-      var doneFails = false;
-
-      t.ok(dataCalled);
-      try {
-        scope.done();
-      } catch(err) {
-        doneFails = true;
-      }
-      t.ok(doneFails);
-      t.end();
-    });
-
-    res.on('data', function(data) {
-      dataCalled = true;
-    });
-
-  });
-
-  req.on('error', function(err) {
-    if (err.code !== 'ECONNREFUSED') {
-      throw err;
-    }
-    t.end();
-  });
-
-  req.end();
-});
-
 test("post", function(t) {
   var dataCalled = false;
 
@@ -130,10 +97,10 @@ test("post", function(t) {
      .reply(201, "OK!");
 
    var req = http.request({
-       host: "www.google.com"
-     , method: 'POST'
-     , path: '/form'
-     , port: 80
+       host: "www.google.com",
+       method: 'POST',
+       path: '/form',
+       port: 80
    }, function(res) {
 
      t.equal(res.statusCode, 201);
@@ -161,10 +128,10 @@ test("post with empty response body", function(t) {
      .reply(200);
 
    var req = http.request({
-       host: "www.google.com"
-     , method: 'POST'
-     , path: '/form'
-     , port: 80
+       host: "www.google.com",
+       method: 'POST',
+       path: '/form',
+       port: 80
    }, function(res) {
 
      t.equal(res.statusCode, 200);
@@ -172,8 +139,8 @@ test("post with empty response body", function(t) {
        scope.done();
        t.end();
      });
-     res.on('data', function(data) {
-       t.fail("No body should be returned")
+     res.on('data', function() {
+       t.fail("No body should be returned");
      });
 
    });
@@ -188,11 +155,10 @@ test("post, lowercase", function(t) {
      .reply(200, "OK!");
 
    var req = http.request({
-       host: "www.google.com"
-     , method: 'post'
-     , method: 'POST'
-     , path: '/form'
-     , port: 80
+       host: "www.google.com",
+       method: 'POST',
+       path: '/form',
+       port: 80
    }, function(res) {
 
      t.equal(res.statusCode, 200);
@@ -201,7 +167,7 @@ test("post, lowercase", function(t) {
        scope.done();
        t.end();
      });
-     res.on('data', function(data) {
+     res.on('data', function() {
        dataCalled = true;
        t.end();
      });
@@ -218,9 +184,9 @@ test("get with reply callback", function(t) {
      });
 
   var req = http.request({
-     host: "www.google.com"
-    , path: '/'
-    , port: 80
+    host: "www.google.com",
+    path: '/',
+    port: 80
   }, function(res) {
     res.on('end', function() {
       scope.done();
@@ -234,7 +200,8 @@ test("get with reply callback", function(t) {
   req.end();
 });
 
-test("get to different subdomain with reply callback and filtering scope", function(t) {
+test("get to different subdomain with reply callback and filtering scope",
+function(t) {
   //  We scope for www.google.com but through scope filtering we
   //  will accept any <subdomain>.google.com
   var scope = nock('http://www.google.com', {
@@ -248,9 +215,9 @@ test("get to different subdomain with reply callback and filtering scope", funct
     });
 
   var req = http.request({
-     host: "any-subdomain-will-do.google.com"
-    , path: '/'
-    , port: 80
+     host: "any-subdomain-will-do.google.com",
+     path: '/',
+     port: 80
   }, function(res) {
     res.on('end', function() {
       scope.done();
@@ -272,16 +239,17 @@ test("get with reply callback returning object", function(t) {
      });
 
   var req = http.request({
-     host: "www.googlezzzz.com"
-    , path: '/'
-    , port: 80
+    host: "www.googlezzzz.com",
+    path: '/',
+    port: 80
   }, function(res) {
     res.on('end', function() {
       scope.done();
       t.end();
     });
     res.on('data', function(data) {
-      t.equal(data.toString(), JSON.stringify({ message: 'OK!' }), 'response should match');
+      t.equal(data.toString(), JSON.stringify({ message: 'OK!' }),
+        'response should match');
     });
   });
 
@@ -731,9 +699,6 @@ test("body data is differentiating", function(t) {
 
    function done(t) {
      doneCount += 1;
-     if (doneCount === 2) {
-       scope.di
-     }
      t.end();
    };
 
@@ -1918,6 +1883,7 @@ test('post with object', function(t) {
 });
 
 test('accept string as request target', function(t) {
+  var dataCalled = false;
   var scope = nock('http://www.example.com')
     .get('/')
     .reply(200, "Hello World!");
@@ -2161,7 +2127,7 @@ test('allow string json spec', function(t) {
 
 test('has a req property on the response', function(t) {
   var scope = nock('http://wtfjs.org').get('/like-wtf').reply(200);
-  req = http.request('http://wtfjs.org/like-wtf', function(res) {
+  var req = http.request('http://wtfjs.org/like-wtf', function(res) {
     res.on('end', function() {
       t.ok(res.req, "req property doesn't exist");
       scope.done();
@@ -3041,7 +3007,7 @@ test('test request timeout option', function(t) {
 
 
 test('done fails when specified request header is missing', function(t) {
-  scope = nock('http://example.com', {
+  var scope = nock('http://example.com', {
     reqheaders: {
       "X-App-Token": "apptoken",
       "X-Auth-Token": "apptoken"
@@ -3050,7 +3016,7 @@ test('done fails when specified request header is missing', function(t) {
   .post('/resource')
   .reply(200, { status: "ok" });
 
-  d = domain.create();
+  var d = domain.create();
 
   d.run(function() {
     mikealRequest({
@@ -3069,7 +3035,7 @@ test('done fails when specified request header is missing', function(t) {
 });
 
 test('done does not fail when specified request header is not missing', function(t) {
-  scope = nock('http://example.com', {
+  var scope = nock('http://example.com', {
     reqheaders: {
       "X-App-Token": "apptoken",
       "X-Auth-Token": "apptoken"
@@ -3094,7 +3060,7 @@ test('done does not fail when specified request header is not missing', function
 });
 
 test('mikeal/request with delayConnection and request.timeout', function(t) {
-  endpoint = nock("http://some-server.com")
+  var endpoint = nock("http://some-server.com")
     .post("/")
     .delayConnection(1000)
     .reply(200, {});
@@ -3147,7 +3113,7 @@ test("get correct filtering with scope and request headers filtering", function(
 });
 
 test('mocking succeeds even when mocked and specified request header names have different cases', function(t) {
-  scope = nock('http://example.com', {
+  var scope = nock('http://example.com', {
     reqheaders: {
       "x-app-token": "apptoken",
       "x-auth-token": "apptoken"
@@ -3172,7 +3138,7 @@ test('mocking succeeds even when mocked and specified request header names have 
 });
 
 test('mocking succeeds even when host request header is not specified', function(t) {
-  scope = nock('http://example.com')
+  var scope = nock('http://example.com')
     .post('/resource')
     .reply(200, { status: "ok" });
 
@@ -3192,7 +3158,7 @@ test('mocking succeeds even when host request header is not specified', function
 });
 
 test('mikeal/request with strictSSL: true', function(t) {
-  scope = nock('https://strictssl.com')
+  var scope = nock('https://strictssl.com')
     .post('/what')
     .reply(200, { status: "ok" });
 
@@ -3209,7 +3175,7 @@ test('mikeal/request with strictSSL: true', function(t) {
 });
 
 test('response readable pull stream works as expected', function(t) {
-  scope = nock('http://streamingalltheway.com')
+  var scope = nock('http://streamingalltheway.com')
     .get('/ssstream')
     .reply(200, "this is the response body yeah");
 
@@ -3367,7 +3333,7 @@ test('hyperquest works', function(t) {
 });
 
 test('remove interceptor for GET resource', function(t) {
-  scope = nock('http://example.org')
+  var scope = nock('http://example.org')
     .get('/somepath')
     .reply(200, 'hey');
 
@@ -3456,4 +3422,11 @@ test('you must setup an interceptor for each request', function(t) {
       t.end();
     });
   });
+});
+
+test("teardown", function(t) {
+  t.deepEqual(Object.keys(global)
+    .splice(globalCount, Number.MAX_VALUE),
+    [], 'No leaks');
+  t.end();
 });

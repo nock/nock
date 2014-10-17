@@ -106,14 +106,21 @@
   "devDependencies": {
     "aws-sdk": "^2.0.15",
     "hyperquest": "^0.3.0",
+    "jshint": "^2.5.6",
     "needle": "^0.7.1",
+    "pre-commit": "0.0.9",
     "request": "*",
     "restify": "^2.8.1",
     "superagent": "~0.15.7",
     "tap": "*"
   },
   "scripts": {
-    "test": "node node_modules/tap/bin/tap.js --dd tests"
+    "test": "node node_modules/tap/bin/tap.js --dd tests",
+    "jshint": "jshint lib/*.js"
   },
+  "pre-commit": [
+    "jshint",
+    "test"
+  ],
   "license": "MIT"
 }
