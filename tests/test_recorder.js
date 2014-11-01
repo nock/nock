@@ -486,24 +486,87 @@ tap.test('records request headers except user-agent if enable_reqheaders_recordi
 });
 
 tap.test('includes query parameters from superagent', function(t) {
-    nock.restore();
-    nock.recorder.clear();
-    t.equal(nock.recorder.play().length, 0);
+  nock.restore();
+  nock.recorder.clear();
+  t.equal(nock.recorder.play().length, 0);
 
-    nock.recorder.rec({
-        dont_print: true,
-        output_objects: true
+  nock.recorder.rec({
+    dont_print: true,
+    output_objects: true
+  });
+
+  superagent.get('http://google.com')
+    .query({q: 'test search' })
+    .end(function(res) {
+      nock.restore();
+      var ret = nock.recorder.play();
+      t.true(ret.length >= 1);
+      t.equal(ret[0].path, '/?q=test%20search');
+      t.end();
+    });
+});
+
+tap.test('works with clients listening for readable', function(t) {
+  nock.restore();
+  nock.recorder.clear();
+  t.equal(nock.recorder.play().length, 0);
+
+  var REQUEST_BODY = 'ABCDEF';
+  var RESPONSE_BODY = '012345';
+
+  //  Create test http server and perform the tests while it's up.
+  var testServer = http.createServer(function (req, res) {
+    res.write(RESPONSE_BODY);
+    res.end();
+  }).listen(8081, function(err) {
+
+    t.equal(err, undefined);
+
+    var options = { host:'localhost'
+                  , port:testServer.address().port
+                  , path:'/' }
+    ;
+
+    var rec_options = {
+      dont_print: true,
+      output_objects: true
+    };
+
+    nock.recorder.rec(rec_options);
+
+    var req = http.request(options, function(res) {
+      var readableCount = 0;
+      var chunkCount = 0;
+      res.on('readable', function() {
+        ++readableCount;
+        var chunk;
+        while (null !== (chunk = res.read())) {
+          ++chunkCount;
+        }
+      });
+      res.once('end', function() {
+        nock.restore();
+        var ret = nock.recorder.play();
+        t.equal(ret.length, 1);
+        ret = ret[0];
+        t.type(ret, 'object');
+        t.equal(readableCount, 1);
+        t.equal(chunkCount, 1);
+        t.equal(ret.scope, "http://localhost:" + options.port);
+        t.equal(ret.method, "GET");
+        t.equal(ret.body, REQUEST_BODY);
+        t.equal(ret.status, 200);
+        t.equal(ret.response, RESPONSE_BODY);
+        t.end();
+
+        //  Close the test server, we are done with it.
+        testServer.close();
+      });
     });
 
-    superagent.get('http://google.com')
-        .query({q: 'test search' })
-        .end(function(res) {
-            nock.restore();
-            var ret = nock.recorder.play();
-            t.true(ret.length >= 1);
-            t.equal(ret[0].path, '/?q=test%20search');
-            t.end();
-        });
+    req.end(REQUEST_BODY);
+  });
+
 });
 
 tap.test("teardown", function(t) {
