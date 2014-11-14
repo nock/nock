@@ -279,7 +279,7 @@ var scope = nock('http://myapp.iriscouch.com')
 
 You can filter the scope (protocol, domain and port through) of a nock through a function. This filtering functions is defined at the moment of defining the nock's scope through its optional `options` parameters:
 
-This can be useful, for instance, if you have a node moduel that randomly changes subdomains to which it sends requests (e.g. Dropbox node module is like that)
+This can be useful, for instance, if you have a node module that randomly changes subdomains to which it sends requests (e.g. Dropbox node module is like that)
 
 ```js
 var scope = nock('https://api.dropbox.com', {
