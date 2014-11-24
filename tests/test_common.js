@@ -1,6 +1,14 @@
-
 var common  = require('../lib/common')
-  , tap     = require('tap');
+  , tap     = require('tap')
+  , matchBody = require('../lib/match_body');
+
+tap.test('matchBody ignores new line characters from strings', function(t) {
+  var str1 = "something //here is something more \n";
+  var str2 = "something //here is something more \n\r";
+  var matched = matchBody(str1, str2);
+  t.true(matched);
+  t.end()
+});
 
 tap.test('isBinaryBuffer works', function(t) {
 
