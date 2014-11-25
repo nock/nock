@@ -648,6 +648,9 @@ nock.removeInterceptor({
 
 Nock works by overriding Node's `http.request` function. Also, it overrides `http.ClientRequest` too to cover for modules that use it directly.
 
+#Debugging
+Nock uses debug, so just run with enviromental variable DEBUG set to nock.*
+
 # PROTIP
 
 If you don't want to match the request body you can use this trick (by @theycallmeswift):
