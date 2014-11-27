@@ -133,14 +133,14 @@ Per [HTTP/1.1 4.2 Message Headers](http://www.w3.org/Protocols/rfc2616/rfc2616-s
 
 You can specify the request headers like this:
 
-```
+```js
 var scope = nock('http://www.example.com', {
-  reqheaders: {
-    'authorization': 'Basic Auth'
-  }
-})
-   .get('/')
-   .reply(200);
+      reqheaders: {
+        'authorization': 'Basic Auth'
+      }
+    })
+    .get('/')
+    .reply(200);
 ```
 
 If `reqheaders` is not specified or if `host` is not part of it, Nock will automatically add `host` value to request header.
