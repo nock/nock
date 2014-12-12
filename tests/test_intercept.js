@@ -89,6 +89,36 @@ test("get gets mocked", function(t) {
   req.end();
 });
 
+test("get gets mocked with relative base path", function(t) {
+  var dataCalled = false;
+
+  var scope = nock('http://www.google.com/abc')
+    .get('/def')
+    .reply(200, "Hello World!");
+
+  var req = http.request({
+      host: "www.google.com",
+      path: '/abc/def',
+      port: 80
+  }, function(res) {
+
+    t.equal(res.statusCode, 200);
+    res.on('end', function() {
+      t.ok(dataCalled);
+      scope.done();
+      t.end();
+    });
+    res.on('data', function(data) {
+      dataCalled = true;
+      t.ok(data instanceof Buffer, "data should be buffer");
+      t.equal(data.toString(), "Hello World!", "response should match");
+    });
+
+  });
+
+  req.end();
+});
+
 test("post", function(t) {
   var dataCalled = false;
 
