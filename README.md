@@ -465,6 +465,7 @@ You can restore the HTTP interceptor to the normal unmocked behaviour by calling
 ```js
 nock.restore();
 ```
+**note**: restore does not clear the interceptor list. Use [nock.cleanAll()](#cleanall) if you expect the interceptor list to be empty.
 
 # Turning Nock Off (experimental!)
 
