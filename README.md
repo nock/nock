@@ -7,8 +7,6 @@ Nock can be used to test modules that perform HTTP requests in isolation.
 
 For instance, if a module performs HTTP requests to a CouchDB server or makes HTTP requests to the Amazon API, you can test that module in isolation.
 
-This does NOT work with Browserify, only node.js
-
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc/generate-toc again -->
 **Table of Contents**
 
