@@ -9,6 +9,52 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
 
 This does NOT work with Browserify, only node.js
 
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc/generate-toc again -->
+**Table of Contents**
+
+- [Install](#install)
+- [Use](#use)
+    - [READ THIS](#read-this)
+    - [Specifying request body](#specifying-request-body)
+    - [Specifying replies](#specifying-replies)
+    - [Specifying headers](#specifying-headers)
+        - [Header field names are case-insensitive](#header-field-names-are-case-insensitive)
+        - [Specifying Request Headers](#specifying-request-headers)
+        - [Specifying Reply Headers](#specifying-reply-headers)
+        - [Default Reply Headers](#default-reply-headers)
+    - [HTTP Verbs](#http-verbs)
+    - [Support for HTTP and HTTPS](#support-for-http-and-https)
+    - [Non-standard ports](#non-standard-ports)
+    - [Repeat response n times](#repeat-response-n-times)
+    - [Delay the response](#delay-the-response)
+    - [Delay the connection](#delay-the-connection)
+    - [Chaining](#chaining)
+    - [Scope filtering](#scope-filtering)
+    - [Path filtering](#path-filtering)
+    - [Request Body filtering](#request-body-filtering)
+    - [Request Headers Matching](#request-headers-matching)
+    - [Allow __unmocked__ requests on a mocked hostname](#allow-unmocked-requests-on-a-mocked-hostname)
+- [Expectations](#expectations)
+    - [.isDone()](#isdone)
+    - [.cleanAll()](#cleanall)
+    - [.persist()](#persist)
+    - [.pendingMocks()](#pendingmocks)
+- [Logging](#logging)
+- [Restoring](#restoring)
+- [Turning Nock Off (experimental!)](#turning-nock-off-experimental)
+- [Enable/Disable real HTTP request](#enabledisable-real-http-request)
+- [Recording](#recording)
+    - [`dont_print` option](#dontprint-option)
+    - [`output_objects` option](#outputobjects-option)
+    - [`enable_reqheaders_recording` option](#enablereqheadersrecording-option)
+    - [.removeInterceptor()](#removeinterceptor)
+- [How does it work?](#how-does-it-work)
+- [Debugging](#debugging)
+- [PROTIP](#protip)
+- [License](#license)
+
+<!-- markdown-toc end -->
+
 
 # Install
 
