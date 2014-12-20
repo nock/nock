@@ -1,6 +1,6 @@
 var nock = require('../');
 var AWS = require('aws-sdk');
-var test    = require('tap').test;
+var test = require('tap').test;
 
 test('works with dynamodb', function(t) {
   var done = false;
