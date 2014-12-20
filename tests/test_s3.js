@@ -62,6 +62,5 @@ test('works with s3, body >= 1024 ^ 2', function (t) {
       if (err) throw err;
       t.deepEqual(resp, {});
       t.end();
-      setTimeout(process.exit, 10);
     });
 });
