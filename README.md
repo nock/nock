@@ -106,7 +106,17 @@ var scope = nock('http://myapp.iriscouch.com')
                 });
 ```
 
-The request body can be a string or a JSON object.
+The request body can be a string, a RegExp, or a JSON object.
+
+```js
+var scope = nock('http://myapp.iriscouch.com')
+                .post('/users', /email=.?@gmail.com/gi)
+                .reply(201, {
+                  ok: true,
+                  id: '123ABC',
+                  rev: '946B7D1C'
+                });
+```
 
 ## Specifying replies
 
