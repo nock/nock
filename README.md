@@ -699,6 +699,96 @@ nock.removeInterceptor({
 });
 ```
 
+# Nock Back
+
+fixture recording support and playback
+
+## Setup
+
+**You must specify a fixture directory before using, for example:
+
+In your test helper
+
+```javascript
+var nockBack = require('nock').back;
+
+nockBack.fixtures = '/path/to/fixtures/';
+nockBack.setMode('record');
+```
+
+### Options
+
+- `nockBack.fixtures` : path to fixture directory
+- `nockBack.setMode()` : the mode to use
+
+
+## Usage
+
+By default if the fixture doesn't exist, a `nockBack` will create a new fixture and save the recorded output
+for you. The next time you run the test, if the fixture exists, it will be loaded in.
+
+The `this` context of the call back function will be have a property `scopes` to access all of the loaded
+nock scopes
+
+```javascript
+  var nockBack = require('nock').back;
+
+  nockBack.fixtures = '/path/to/fixtures/'; //this only needs to be set once in your test helper
+
+  var before = function (scope) {
+    scope.filteringRequestBody = function(body) {
+      if(typeof(body) !== 'string') {
+        return body;
+      }
+
+      return body.replace(/(timestamp):([0-9]+)/g, function(match, key, value) {
+        return key + ':timestampCapturedDuringRecording'
+      });
+
+    }
+  }
+
+  nockBack('someFixture.json', {before: before}, function (nockDone) {
+
+    http.get('http://zombo.com/').end(); // respond body "Ok"
+    this.assertScopesFinished(); //throws an exception if all nocks in fixture were not satisfied
+
+    nockDone();
+
+  });
+
+  nockBack('someFixture.json', function (nockDone) {
+
+    http.get('http://zombo.com/').end(); // respond body "Ok"
+    http.get('http://zombo.com/').end(); // throws exeption because someFixture.json only had one call
+
+    //never gets here
+    nockDone();
+
+  });
+
+```
+
+### Options
+
+As an optional second parameter you can pass the following options
+
+- `before`: a preprocessing function, gets called before nock.define
+- `after`: a postprocessing function, gets called after nock.define
+
+
+### Modes
+
+to set the mode call `nockBack.setMode(mode)` or run the tests with the `NOCK_BACK_MODE` environment variable set before loading nock. If the mode needs to be changed programatically, the following is valid: `nockBack.setMode(nockBack.currentMode)`
+
+- wild: all requests go out to the internet, dont replay anything, doesnt record anything
+
+- dryrun: The default, use recorded nocks, allow http calls, doesnt record anything, useful for writing new tests
+
+- record: use recorded nocks, record new nocks
+
+- lockdown: use recorded nocks, disables all http calls even when not nocked, doesnt record
+
 # How does it work?
 
 Nock works by overriding Node's `http.request` function. Also, it overrides `http.ClientRequest` too to cover for modules that use it directly.

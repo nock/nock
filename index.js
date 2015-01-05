@@ -1,4 +1,4 @@
-var recorder = require('./lib/recorder')
+var recorder = require('./lib/recorder');
 module.exports = require('./lib/scope');
 
 module.exports.recorder = {
@@ -6,4 +6,6 @@ module.exports.recorder = {
   , clear   : recorder.clear
   , play : recorder.outputs
 };
+
+module.exports.back = require('./lib/back');
 module.exports.restore = recorder.restore;
