@@ -117,6 +117,7 @@
     "needle": "^0.7.1",
     "pre-commit": "0.0.9",
     "request": "*",
+    "restler": "3.2.2",
     "restify": "^2.8.1",
     "superagent": "~0.15.7",
     "tap": "*"
