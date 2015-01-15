@@ -132,8 +132,6 @@ var scope = nock('http://myapp.iriscouch.com')
 
 ```
 
-
-
 ## Specifying replies
 
 You can specify the return status code for a path on the first argument of reply like this:
