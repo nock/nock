@@ -340,6 +340,34 @@ test("post with regexp as spec", function(t) {
     req.end();
 });
 
+test("post with function as spec", function(t) {
+    var scope = nock('http://www.google.com')
+        .post('/echo', function(body) {
+          return body === 'key=val';
+        })
+        .reply(200, function(uri, body) {
+            return ['OK', uri, body].join(' ');
+        });
+
+    var req = http.request({
+        host: "www.google.com"
+        , method: 'POST'
+        , path: '/echo'
+        , port: 80
+    }, function(res) {
+        res.on('end', function() {
+            scope.done();
+            t.end();
+        });
+        res.on('data', function(data) {
+            t.equal(data.toString(), 'OK /echo key=val' , 'response should match');
+        });
+    });
+
+    req.write('key=val');
+    req.end();
+});
+
 test("post with chaining on call", function(t) {
   var input = 'key=val';
 
