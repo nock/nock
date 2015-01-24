@@ -1063,6 +1063,7 @@ test("reply with JSON", function(t) {
 
     res.setEncoding('utf8');
     t.equal(res.statusCode, 200);
+    t.notOk(res.headers['content-length']);
     t.equal(res.headers['content-type'], 'application/json');
     res.on('end', function() {
       t.ok(dataCalled);
@@ -1078,6 +1079,25 @@ test("reply with JSON", function(t) {
 
   req.end();
 
+});
+
+test("reply with content-length header", function(t){
+  var scope = nock('http://www.jsonreplier.com')
+    .replyContentLength()
+    .get('/')
+    .reply(200, {hello: "world"});
+
+  var req = http.get({
+      host: "www.jsonreplier.com"
+    , path: '/'
+    , port: 80
+  }, function(res) {
+    t.equal(res.headers['content-length'], 17);
+    res.on('end', function() {
+      scope.done();
+      t.end();
+    });
+  });
 });
 
 test("filter path with function", function(t) {
