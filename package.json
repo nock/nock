@@ -116,7 +116,7 @@
     "jshint": "^2.5.6",
     "needle": "^0.7.1",
     "pre-commit": "0.0.9",
-    "request": "*",
+    "request": "2.51.0",
     "restler": "3.2.2",
     "restify": "^2.8.1",
     "superagent": "~0.15.7",
