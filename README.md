@@ -241,6 +241,32 @@ var scope = nock('http://www.headdy.com')
   .reply(200, 'The default headers should come too');
 ```
 
+### Including Content-Length Header Automatically
+
+When using `scope.reply()` to set a response body manually, you can have the
+`Content-Length` header calculated automatically.
+
+```js
+var scope = nock('http://www.headdy.com')
+  .replyContentLength()
+  .get('/')
+  .reply(200, { hello: 'world' });
+```
+
+**NOTE:** this does not work with streams or other advanced means of specifying
+the reply body.
+
+### Including Date Header Automatically
+
+You can automatically append a `Date` header to your mock reply:
+
+```js
+var scope = nock('http://www.headdy.com')
+  .replyDate(new Date(2015, 0, 1)) // defaults to now, must use a Date object
+  .get('/')
+  .reply(200, { hello: 'world' });
+```
+
 ## HTTP Verbs
 
 Nock supports any HTTP verb, and it has convenience methods for the GET, POST, PUT, HEAD, DELETE, PATCH and MERGE HTTP verbs.
