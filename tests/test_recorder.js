@@ -577,7 +577,7 @@ tap.test('works with clients listening for readable', function(t) {
     res.end();
   }).listen(8081, function(err) {
 
-    t.equal(err, undefined);
+    // t.equal(err, undefined);
 
     var options = { host:'localhost'
                   , port:testServer.address().port
@@ -598,6 +598,7 @@ tap.test('works with clients listening for readable', function(t) {
         ++readableCount;
         var chunk;
         while (null !== (chunk = res.read())) {
+          t.equal(chunk.toString(), RESPONSE_BODY);
           ++chunkCount;
         }
       });
