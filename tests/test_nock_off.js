@@ -20,9 +20,8 @@ test('NOCK_OFF=true works for https', function(t) {
     t.notOk(err);
     t.notDeepEqual(body, '{"foo":"bar"}');
     scope.done();
-    t.end();
     process.env.NOCK_OFF = original;
-    return console.log(resp.statusCode, 'body length: ', body.length);
+    t.end();
   });
 });
 

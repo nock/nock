@@ -17,6 +17,8 @@ var hyperquest = require('hyperquest');
 
 var globalCount;
 
+nock.enableNetConnect();
+
 test("setup", function(t) {
   globalCount = Object.keys(global).length;
   t.end();

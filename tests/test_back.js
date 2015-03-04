@@ -6,6 +6,8 @@ var nock    = require('../.')
   , fs      = require('fs')
   , exists  = fs.existsSync;
 
+nock.enableNetConnect();
+
 var originalMode = nockBack.currentMode;
 
 function testNock (t) {

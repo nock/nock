@@ -123,7 +123,7 @@
     "tap": "*"
   },
   "scripts": {
-    "test": "node node_modules/tap/bin/tap.js --dd tests",
+    "test": "node tests/test_common && node tests/test_intercept && node tests/test_aws_dynamo && node tests/test_back && node tests/test_https_allowunmocked && node tests/test_net_connect && node tests/test_nock_off && node tests/test_recorder && node tests/test_redirects && node tests/test_s3 && node tests/test_url_encoding",
     "jshint": "jshint lib/*.js"
   },
   "pre-commit": [
