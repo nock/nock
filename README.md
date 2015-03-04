@@ -634,6 +634,8 @@ nock.recorder.rec();
 // those calls will be outputted to console
 ```
 
+**ATTENTION!:** when recording is enabled, nock does no validation.
+
 ## `dont_print` option
 
 If you just want to capture the generated code into a var as an array you can use:
