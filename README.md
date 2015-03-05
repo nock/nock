@@ -740,6 +740,18 @@ nock.recorder.rec({
 });
 ```
 
+## `use_separator` option
+
+By default, nock will wrap it's output with the separator string `<<<<<<-- cut here -->>>>>>` before and after anything it prints, whether to the console or a custom log function given with the `logging` option.
+
+To disable this, set `use_separator` to false.
+
+```js
+nock.recorder.rec({
+  use_separator: false
+});
+```
+
 ## .removeInterceptor()
 This allows removing a specific interceptor for a url. It's useful when there's a list of common interceptors but one test requires one of them to behave differently.
 
