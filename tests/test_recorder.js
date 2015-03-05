@@ -511,6 +511,7 @@ tap.test('doesn\'t record request headers by default', function(t) {
 
 
 tap.test('will call a custom logging function', function(t) {
+  // This also tests that use_separator is on by default.
   nock.restore();
   nock.recorder.clear();
   t.equal(nock.recorder.play().length, 0);
@@ -537,6 +538,42 @@ tap.test('will call a custom logging function', function(t) {
         t.equal(record.length, 1)
         var ret = record[0]
         t.type(ret, 'string');
+        t.end();
+      });
+    }
+  );
+  req.end();
+});
+
+
+tap.test('use_separator:false is respected', function(t) {
+  nock.restore();
+  nock.recorder.clear();
+  t.equal(nock.recorder.play().length, 0);
+
+  var record = [];
+  var arrayLog = function(content) {
+    record.push(content);
+  }
+
+  nock.recorder.rec({
+    logging: arrayLog,
+    output_objects: true,
+    use_separator: false,
+  });
+
+  var req = http.request({
+      hostname: 'www.example.com',
+      path: '/',
+      method: 'GET',
+      auth: 'foo:bar'
+    }, function(res) {
+      res.resume();
+      res.once('end', function() {
+        nock.restore();
+        t.equal(record.length, 1)
+        var ret = record[0];
+        t.type(ret, 'object'); // this is still an object, because the "cut here" strings have not been appended
         t.end();
       });
     }
