@@ -727,6 +727,19 @@ nock.recorder.rec({
 
 Note that even when request headers recording is enabled Nock will never record `user-agent` headers. `user-agent` values change with the version of Node and underlying operating system and are thus useless for matching as all that they can indicate is that the user agent isn't the one that was used to record the tests.
 
+## `logging` option
+
+Nock will print using `console.log` by default (assuming that `dont_print` is `false`).  If a different function is passed into `logging`, nock will send the log string (or object, when using `output_objects`) to that function.  Here's a basic example.
+
+```js
+var appendLogToFile = function(content) {
+  fs.appendFile('record.txt', content);
+}
+nock.recorder.rec({
+  logging: appendLogToFile,
+});
+```
+
 ## .removeInterceptor()
 This allows removing a specific interceptor for a url. It's useful when there's a list of common interceptors but one test requires one of them to behave differently.
 
