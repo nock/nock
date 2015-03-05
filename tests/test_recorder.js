@@ -509,6 +509,42 @@ tap.test('doesn\'t record request headers by default', function(t) {
   req.end();
 });
 
+
+tap.test('will call a custom logging function', function(t) {
+  nock.restore();
+  nock.recorder.clear();
+  t.equal(nock.recorder.play().length, 0);
+
+  var record = [];
+  var arrayLog = function(content) {
+    record.push(content);
+  }
+
+  nock.recorder.rec({
+    logging: arrayLog
+  });
+
+  var req = http.request({
+      hostname: 'www.example.com',
+      path: '/',
+      method: 'GET',
+      auth: 'foo:bar'
+    }, function(res) {
+      res.resume();
+      res.once('end', function() {
+        nock.restore();
+
+        t.equal(record.length, 1)
+        var ret = record[0]
+        t.type(ret, 'string');
+        t.end();
+      });
+    }
+  );
+  req.end();
+});
+
+
 tap.test('records request headers except user-agent if enable_reqheaders_recording is set to true', function(t) {
   nock.restore();
   nock.recorder.clear();
