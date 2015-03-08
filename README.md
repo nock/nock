@@ -634,6 +634,8 @@ nock.recorder.rec();
 // those calls will be outputted to console
 ```
 
+Recording relies on intercepting real requests and answers and then persisting them for later use.
+
 **ATTENTION!:** when recording is enabled, nock does no validation.
 
 ## `dont_print` option
