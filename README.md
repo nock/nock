@@ -12,7 +12,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
 
 - [Install](#install)
 - [Use](#use)
-    - [READ THIS](#read-this)
+    - [READ THIS](#read-this-1---about-interceptors)
     - [Specifying request body](#specifying-request-body)
     - [Specifying replies](#specifying-replies)
     - [Specifying headers](#specifying-headers)
