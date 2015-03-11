@@ -317,7 +317,7 @@ http.get('http://zombo.com/'); // respond body "Ok"
 http.get('http://zombo.com/'); // respond with zombo.com result
 ```
 
-Sugar sintaxe
+Sugar syntax
 
 ```js
 nock('http://zombo.com').get('/').once().reply(200, 'Ok');
