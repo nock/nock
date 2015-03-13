@@ -61,6 +61,38 @@ test("allow override works (2)", function(t) {
   });
 });
 
+test("reply can take a callback", function(t) {
+  var dataCalled = false;
+
+  var scope = nock('http://www.google.com')
+    .get('/')
+    .reply(200, function(path, requestBody, callback) {
+      callback("Hello World!");
+    });
+
+  var req = http.request({
+      host: "www.google.com",
+      path: '/',
+      port: 80
+  }, function(res) {
+
+    t.equal(res.statusCode, 200, "Status code is 200");
+    res.on('end', function() {
+      t.ok(dataCalled, "data handler was called");
+      scope.done();
+      t.end();
+    });
+    res.on('data', function(data) {
+      dataCalled = true;
+      t.ok(data instanceof Buffer, "data should be buffer");
+      t.equal(data.toString(), "Hello World!", "response should match");
+    });
+
+  });
+
+  req.end();
+});
+
 test("get gets mocked", function(t) {
   var dataCalled = false;
 
@@ -74,9 +106,9 @@ test("get gets mocked", function(t) {
       port: 80
   }, function(res) {
 
-    t.equal(res.statusCode, 200);
+    t.equal(res.statusCode, 200, "Status code is 200");
     res.on('end', function() {
-      t.ok(dataCalled);
+      t.ok(dataCalled, "data handler was called");
       scope.done();
       t.end();
     });
