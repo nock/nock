@@ -357,7 +357,7 @@ You are able to specify the number of milliseconds that your connection should b
 ```js
 nock('http://my.server.com')
   .get('/')
-  .socketTimeout(2000) // 2 seconds
+  .socketDelay(2000) // 2 seconds
   .reply(200, '<html></html>')
 ```
 

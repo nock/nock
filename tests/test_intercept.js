@@ -3553,10 +3553,10 @@ test('you must setup an interceptor for each request', function(t) {
   });
 });
 
-test('calling socketTimeout will emit a timeout', function (t) {
+test('calling socketDelay will emit a timeout', function (t) {
     nock('http://www.example.com')
         .get('/')
-        .socketTimeout(10000)
+        .socketDelay(10000)
         .reply(200, 'OK');
 
     var req = http.request('http://www.example.com', function (res) {
@@ -3582,10 +3582,10 @@ test('calling socketTimeout will emit a timeout', function (t) {
     req.end();
 });
 
-test('calling socketTimeout not emit a timeout if not idle for long enough', function (t) {
+test('calling socketDelay not emit a timeout if not idle for long enough', function (t) {
     nock('http://www.example.com')
         .get('/')
-        .socketTimeout(10000)
+        .socketDelay(10000)
         .reply(200, 'OK');
 
     var req = http.request('http://www.example.com', function (res) {
