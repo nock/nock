@@ -229,7 +229,7 @@ tap.test('nockBack record tests', function (nw) {
       http.get('http://www.amazon.com', function(res) {
         throw "should not request this";
       }).on('error', function(err) {
-        t.equal(err.message, 'Nock: Not allow net connect for "www.amazon.com:80"');
+        t.equal(err.message, 'Nock: Not allow net connect for "www.amazon.com:80/"');
         done();
         t.end();
       });
@@ -285,7 +285,7 @@ tap.test('nockBack lockdown tests', function (nw) {
 
 
     req.on('error', function (err) {
-      t.equal(err.message.trim(), 'Nock: Not allow net connect for "google.com:80"');
+      t.equal(err.message.trim(), 'Nock: Not allow net connect for "google.com:80/"');
       t.end();
     });
 
