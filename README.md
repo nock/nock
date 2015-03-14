@@ -26,6 +26,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
     - [Repeat response n times](#repeat-response-n-times)
     - [Delay the response](#delay-the-response)
     - [Delay the connection](#delay-the-connection)
+    - [Socket timeout](#socket-timeout)
     - [Chaining](#chaining)
     - [Scope filtering](#scope-filtering)
     - [Path filtering](#path-filtering)
@@ -348,6 +349,31 @@ nock('http://my.server.com')
   .delayConnection(2000) // 2 seconds
   .reply(200, '<html></html>')
 ```
+
+## Socket timeout
+
+You are able to specify the number of milliseconds that your connection should be idle, to simulate a socket timeout.
+
+```js
+nock('http://my.server.com')
+  .get('/')
+  .socketTimeout(2000) // 2 seconds
+  .reply(200, '<html></html>')
+```
+
+To test a request like the following:
+
+```js
+req = http.request('http://my.server.com', function(res) {
+  ...
+});
+req.setTimeout(1000, function() {
+  req.abort();
+});
+req.end();
+```
+
+NOTE: the timeout will be fired immediately, and will not leave the simulated connection idle for the specified period of time.
 
 ## Chaining
 
