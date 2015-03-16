@@ -1,5 +1,6 @@
-# Nock [![Build Status](https://secure.travis-ci.org/pgte/nock.png)](http://travis-ci.org/pgte/nock)
-[![Gitter chat](https://badges.gitter.im/pgte/nock.png)](https://gitter.im/pgte/nock)
+# Nock
+
+[![By](https://img.shields.io/badge/made%20by-yld!-32bbee.svg?style=flat-square)](http://yld.io/contact?source=github-nano)[![Build Status](https://secure.travis-ci.org/pgte/nock.png)](http://travis-ci.org/pgte/nock)[![Chat](https://img.shields.io/badge/help-gitter-eb9348.svg?style=flat-square)](https://gitter.im/pgte/nock)
 
 Nock is an HTTP mocking and expectations library for Node.js
 
