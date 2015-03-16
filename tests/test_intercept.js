@@ -3553,6 +3553,64 @@ test('you must setup an interceptor for each request', function(t) {
   });
 });
 
+test('calling socketDelay will emit a timeout', function (t) {
+    nock('http://www.example.com')
+        .get('/')
+        .socketDelay(10000)
+        .reply(200, 'OK');
+
+    var req = http.request('http://www.example.com', function (res) {
+        res.setEncoding('utf8');
+
+        var body = '';
+
+        res.on('data', function(chunk) {
+            body += chunk;
+        });
+
+        res.once('end', function() {
+            t.fail('socket did not timeout when idle');
+            t.end();
+        });
+    });
+
+    req.setTimeout(5000, function () {
+        t.ok(true);
+        t.end();
+    });
+
+    req.end();
+});
+
+test('calling socketDelay not emit a timeout if not idle for long enough', function (t) {
+    nock('http://www.example.com')
+        .get('/')
+        .socketDelay(10000)
+        .reply(200, 'OK');
+
+    var req = http.request('http://www.example.com', function (res) {
+        res.setEncoding('utf8');
+
+        var body = '';
+
+        res.on('data', function(chunk) {
+            body += chunk;
+        });
+
+        res.once('end', function() {
+            t.equal(body, 'OK');
+            t.end();
+        });
+    });
+
+    req.setTimeout(60000, function () {
+        t.fail('socket timed out unexpectedly');
+        t.end();
+    });
+
+    req.end();
+});
+
 test("teardown", function(t) {
   var leaks = Object.keys(global)
     .splice(globalCount, Number.MAX_VALUE);

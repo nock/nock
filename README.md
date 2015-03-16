@@ -12,7 +12,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
 
 - [Install](#install)
 - [Use](#use)
-    - [READ THIS](#read-this)
+    - [READ THIS](#read-this-1---about-interceptors)
     - [Specifying request body](#specifying-request-body)
     - [Specifying replies](#specifying-replies)
     - [Specifying headers](#specifying-headers)
@@ -26,6 +26,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
     - [Repeat response n times](#repeat-response-n-times)
     - [Delay the response](#delay-the-response)
     - [Delay the connection](#delay-the-connection)
+    - [Socket timeout](#socket-timeout)
     - [Chaining](#chaining)
     - [Scope filtering](#scope-filtering)
     - [Path filtering](#path-filtering)
@@ -317,7 +318,7 @@ http.get('http://zombo.com/'); // respond body "Ok"
 http.get('http://zombo.com/'); // respond with zombo.com result
 ```
 
-Sugar sintaxe
+Sugar syntax
 
 ```js
 nock('http://zombo.com').get('/').once().reply(200, 'Ok');
@@ -348,6 +349,31 @@ nock('http://my.server.com')
   .delayConnection(2000) // 2 seconds
   .reply(200, '<html></html>')
 ```
+
+## Socket timeout
+
+You are able to specify the number of milliseconds that your connection should be idle, to simulate a socket timeout.
+
+```js
+nock('http://my.server.com')
+  .get('/')
+  .socketDelay(2000) // 2 seconds
+  .reply(200, '<html></html>')
+```
+
+To test a request like the following:
+
+```js
+req = http.request('http://my.server.com', function(res) {
+  ...
+});
+req.setTimeout(1000, function() {
+  req.abort();
+});
+req.end();
+```
+
+NOTE: the timeout will be fired immediately, and will not leave the simulated connection idle for the specified period of time.
 
 ## Chaining
 
@@ -634,6 +660,8 @@ nock.recorder.rec();
 // those calls will be outputted to console
 ```
 
+Recording relies on intercepting real requests and answers and then persisting them for later use.
+
 **ATTENTION!:** when recording is enabled, nock does no validation.
 
 ## `dont_print` option
@@ -886,7 +914,7 @@ var scope = nock('http://api.myservice.com')
 
 (The MIT License)
 
-Copyright (c) 2011 Pedro Teixeira. http://about.me/pedroteixeira
+Copyright (c) 2011-2015 Pedro Teixeira. http://about.me/pedroteixeira
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the 'Software'), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
