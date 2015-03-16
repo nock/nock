@@ -196,7 +196,7 @@ var scope = nock('http://www.google.com')
    .filteringRequestBody(/.*/, '*')
    .post('/echo', '*')
    .reply(201, function(uri, requestBody, cb) {
-     fs.readFile('cat-poems.txt', cb); // Error-first callback
+     fs.readFile('cat-poems.txt' , cb); // Error-first callback
    });
 ```
 
