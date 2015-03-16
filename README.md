@@ -189,6 +189,17 @@ var scope = nock('http://www.google.com')
    });
 ```
 
+An asychronous function that gets an error-first callback as last argument also works:
+
+```js
+var scope = nock('http://www.google.com')
+   .filteringRequestBody(/.*/, '*')
+   .post('/echo', '*')
+   .reply(201, function(uri, requestBody, cb) {
+     fs.readFile('cat-poems.txt', cb); // Error-first callback
+   });
+```
+
 
 A Stream works too:
 ```js
@@ -198,6 +209,7 @@ var scope = nock('http://www.google.com')
      return fs.createReadStream('cat-poems.txt');
    });
 ```
+
 
 ## Specifying headers
 
