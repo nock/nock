@@ -121,18 +121,22 @@
   },
   "devDependencies": {
     "aws-sdk": "^2.0.15",
+    "coveralls": "^2.11.2",
     "hyperquest": "^0.3.0",
+    "istanbul": "^0.3.8",
     "jshint": "^2.5.6",
     "needle": "^0.7.1",
     "pre-commit": "0.0.9",
     "request": "2.51.0",
-    "restler": "3.2.2",
     "restify": "^2.8.1",
+    "restler": "3.2.2",
     "superagent": "~0.15.7",
     "tap": "*"
   },
   "scripts": {
-    "test": "node tests/test_common && node tests/test_intercept && node tests/test_aws_dynamo && node tests/test_back && node tests/test_https_allowunmocked && node tests/test_net_connect && node tests/test_nock_off && node tests/test_recorder && node tests/test_redirects && node tests/test_s3 && node tests/test_url_encoding",
+    "test": "node tests/test.js",
+    "coverage": "istanbul cover tests/test.js",
+    "coveralls": "istanbul cover tests/test.js && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage",
     "jshint": "jshint lib/*.js"
   },
   "pre-commit": [
