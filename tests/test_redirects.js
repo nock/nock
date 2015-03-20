@@ -5,7 +5,8 @@ var test    = require('tap').test;
 var mikealRequest = require('request');
 var nock    = require('../');
 
-test("follows refirects", function(t) {
+test("follows redirects", function(t) {
+
   nock('http://redirecter.com')
     .get('/YourAccount')
     .reply(302, undefined, {
@@ -20,7 +21,6 @@ test("follows refirects", function(t) {
     }
 
     assert.equal(res.statusCode, 200);
-
     assert.equal(body, 'Here is the login page');
     t.end();
   });
