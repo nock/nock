@@ -135,13 +135,13 @@
   },
   "scripts": {
     "test": "node tests/test.js",
-    "coverage": "istanbul cover tests/test.js",
+    "coverage": "istanbul cover tests/test.js && istanbul check-coverage",
     "coveralls": "istanbul cover tests/test.js && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage",
     "jshint": "jshint lib/*.js"
   },
   "pre-commit": [
     "jshint",
-    "test"
+    "coverage"
   ],
   "license": "MIT"
 }
