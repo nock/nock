@@ -2,7 +2,7 @@
 
 [![By](https://img.shields.io/badge/made%20by-yld!-32bbee.svg?style=flat-square)](http://yld.io/contact?source=github-nano)
 [![Build Status](https://secure.travis-ci.org/pgte/nock.png)](http://travis-ci.org/pgte/nock)
-[![Coverage Status](https://coveralls.io/repos/justincy/nock/badge.svg?branch=coverage)](https://coveralls.io/r/justincy/nock?branch=coverage)
+[![Coverage Status](https://coveralls.io/repos/pgte/nock/badge.svg?branch=master)](https://coveralls.io/r/pgte/nock?branch=master)
 [![Chat](https://img.shields.io/badge/help-gitter-eb9348.svg?style=flat-square)](https://gitter.im/pgte/nock)
 
 Nock is an HTTP mocking and expectations library for Node.js
