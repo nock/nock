@@ -4,7 +4,7 @@ var mikealRequest = require('request');
 var assert = require('assert');
 
 test('disable net connect is default', function (t) {
-
+  nock.disableNetConnect();
   nock('http://somethingelsecompletelyunrelated.com').get('/').reply(200);
 
   mikealRequest('https://google.com/', function(err, res) {
