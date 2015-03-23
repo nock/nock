@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.2.1
+
+### Fixed
+- Reset file read stream after first request (Benjamin Urban) - https://github.com/pgte/nock/pull/286
+
+
 ## 1.2.0
 
 ### Added
