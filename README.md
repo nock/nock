@@ -238,6 +238,18 @@ If `reqheaders` is not specified or if `host` is not part of it, Nock will autom
 
 If no request headers are specified for mocking then Nock will automatically skip matching of request headers. Since `host` header is a special case which may get automatically inserted by Nock, its matching is skipped unless it was *also* specified in the request being mocked.
 
+Basic authentication can be specified as follows:
+
+```js
+var scope = nock('http://www.example.com')
+    .get('/')
+    .basicAuth({
+      user: 'john',
+      pass: 'doe'
+    })
+    .reply(200);
+```
+
 ### Specifying Reply Headers
 
 You can specify the reply headers like this:
