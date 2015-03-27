@@ -7,9 +7,13 @@
     "testing",
     "isolation"
   ],
-  "version": "1.2.1",
+  "version": "1.3.0",
   "author": "Pedro Teixeira <pedro.teixeira@gmail.com>",
   "contributors": [
+    {
+      "name": "José F. Romaniello",
+      "url": "https://github.com/jfromaniello"
+    },
     {
       "name": "Benjamin Urban",
       "url": "https://github.com/benurb"
