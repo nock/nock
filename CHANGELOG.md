@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.3.0
+
+### Added
+
+- add syntax sugar for basic auth (José F. Romaniello) - https://github.com/pgte/nock/pull/293
+
+
 ## 1.2.1
 
 ### Fixed
