@@ -595,7 +595,6 @@ test("reply headers work with function", function(t) {
   }, function(res) {
     t.equivalent(res.headers, {'x-my-headers': 'My custom header value'});
     scope.done();
-    nock.enableNetConnect();
     t.end();
 
   });
