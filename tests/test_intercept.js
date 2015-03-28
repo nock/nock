@@ -580,6 +580,27 @@ test("headers work", function(t) {
 
 });
 
+test("reply headers work with function", function(t) {
+
+  var scope = nock('http://replyheadersworkwithfunction.xxx')
+     .get('/')
+     .reply(200, function() {
+       return 'ABC';
+     }, {'X-My-Headers': 'My custom header value'});
+
+  var req = http.get({
+     host: "replyheadersworkwithfunction.xxx",
+     path: '/',
+     port: 80
+  }, function(res) {
+    t.equivalent(res.headers, {'x-my-headers': 'My custom header value'});
+    scope.done();
+    nock.enableNetConnect();
+    t.end();
+
+  });
+});
+
 test("match headers", function(t) {
   var scope = nock('http://www.headdy.com')
      .get('/')
