@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.4.0
+
+### Added
+
+- setting 404 as status code in no match errors to help some server defaults (Pedro Teixeira)
+
 ## 1.3.0
 
 ### Added
