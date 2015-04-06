@@ -488,11 +488,11 @@ var scope = nock('http://api.myservice.com')
                 .reply(201, 'OK');
 ```
 
-Or you can use a function:
+Or you can use a function to transform the body:
 
 ```js
 var scope = nock('http://api.myservice.com')
-                .filteringRequestBody(function(path) {
+                .filteringRequestBody(function(body) {
                    return 'ABC';
                  })
                 .post('/', 'ABC')
@@ -931,7 +931,7 @@ If you don't want to match the request body you can use this trick (by @theycall
 
 ```js
 var scope = nock('http://api.myservice.com')
-  .filteringRequestBody(function(path) {
+  .filteringRequestBody(function(body) {
     return '*';
   })
   .post('/some_uri', '*')
