@@ -1,5 +1,6 @@
 require('./test_common');
 require('./test_intercept');
+require('./test_dynamic_mock');
 require('./test_redirects');
 require('./test_basic_auth');
 require('./test_aws_dynamo');

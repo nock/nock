@@ -203,6 +203,29 @@ var scope = nock('http://www.google.com')
    });
 ```
 
+You can also return the status code and body using just one function:
+
+```js
+var scope = nock('http://www.google.com')
+   .filteringRequestBody(/.*/, '*')
+   .post('/echo', '*')
+   .reply(function(uri, requestBody) {
+     return [201, 'THIS IS THE REPLY BODY'];
+   });
+```
+
+or, using a combination of this last pattarn and the callback pattern:
+
+```js
+var scope = nock('http://www.google.com')
+   .filteringRequestBody(/.*/, '*')
+   .post('/echo', '*')
+   .reply(function(uri, requestBody, cb) {
+     setTimeout(function() {
+       cb(null, [201, 'THIS IS THE REPLY BODY'])
+     }, 1e3);
+   });
+```
 
 A Stream works too:
 ```js
