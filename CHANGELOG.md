@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.5.0
+
+### Added
+
+- fully dynamic replies using one function (Pedro Teixeira) - https://github.com/pgte/nock/pull/297
+
 ## 1.4.0
 
 ### Added
