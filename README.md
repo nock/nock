@@ -214,7 +214,7 @@ var scope = nock('http://www.google.com')
    });
 ```
 
-or, using a combination of this last pattarn and the callback pattern:
+or, use an error-first callback that also gets the status code:
 
 ```js
 var scope = nock('http://www.google.com')
