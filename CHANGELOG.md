@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.6.0
+
+### Added
+
+- Mocking Network Errors (Douglas Eggleton) - https://github.com/pgte/nock/pull/298
+
 ## 1.5.0
 
 ### Added
