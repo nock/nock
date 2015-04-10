@@ -3695,6 +3695,27 @@ test('calling socketDelay not emit a timeout if not idle for long enough', funct
     req.end();
 });
 
+test("replyWithError returns an error on request", function(t) {
+    var scope = nock('http://www.google.com')
+        .post('/echo')
+        .replyWithError('Service not found');
+
+    var req = http.request({
+        host: "www.google.com"
+        , method: 'POST'
+        , path: '/echo'
+        , port: 80
+    });
+
+    // An error should have have been raised
+    req.on('error', function(e) {
+      t.equal(e.message, 'Service not found');
+      t.end();
+    });
+
+    req.end();
+});
+
 test("teardown", function(t) {
   var leaks = Object.keys(global)
     .splice(globalCount, Number.MAX_VALUE);
