@@ -236,6 +236,16 @@ var scope = nock('http://www.google.com')
    });
 ```
 
+### Replying with errors
+
+You can reply with an error like this:
+
+```js
+nock('http://www.google.com')
+   .get('/cat-poems')
+   .replyWithError('something awful happened');
+```
+
 
 ## Specifying headers
 
