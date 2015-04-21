@@ -31,7 +31,7 @@ test('recording', function(t) {
         fixtureContent = fixtureContent[0];
         t.equal(fixtureContent.method, 'GET');
         t.equal(fixtureContent.path, '/');
-        t.equal(fixtureContent.status, 302);
+        t.ok(fixtureContent.status == 302 || fixtureContent.status == 301);
         t.end();
       });
     });
