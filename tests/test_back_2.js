@@ -8,7 +8,7 @@ var fs = require('fs');
 var originalMode;
 var fixture;
 
-test('setup', function() {
+test('setup', function(t) {
   originalMode = nockBack.currentMode;
 
   nock.enableNetConnect();
@@ -17,6 +17,7 @@ test('setup', function() {
   rimraf.sync(fixture);
 
   nockBack.setMode("record");
+  t.end();
 });
 
 
