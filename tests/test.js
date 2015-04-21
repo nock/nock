@@ -5,6 +5,7 @@ require('./test_redirects');
 require('./test_basic_auth');
 require('./test_aws_dynamo');
 require('./test_back');
+require('./test_back_2');
 require('./test_https_allowunmocked');
 require('./test_net_connect');
 require('./test_s3');
