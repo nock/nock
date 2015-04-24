@@ -59,3 +59,36 @@ test('one asynchronous function returning the status code and body defines a ful
     t.end();
   });
 });
+
+test('asynchronous function gets request headers', function(t) {
+  var scope = nock('http://someheadersarein.io')
+    .get('/yo')
+    .reply(200, function(path, reqBody, cb) {
+      t.equal(this.req.path, '/yo');
+      t.deepEqual(this.req.headers, {
+        'x-my-header': 'some-value',
+        'x-my-other-header': 'some-other-value',
+        'host': 'someheadersarein.io'
+      });
+      setTimeout(function() {
+        cb(null, [201, 'GHI']);
+      }, 1e3);
+
+    });
+
+  request({
+    method: 'GET',
+    uri: 'http://someheadersarein.io/yo',
+    headers: {
+      'x-my-header': 'some-value',
+      'x-my-other-header': 'some-other-value'
+    }}, function(err, resp, body) {
+    if (err) {
+      throw err;
+    }
+    t.equal(resp.statusCode, 201);
+    t.equal(body, 'GHI');
+    t.end();
+  });
+
+});

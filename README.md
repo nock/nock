@@ -236,6 +236,20 @@ var scope = nock('http://www.google.com')
    });
 ```
 
+#### Access original request and headers
+
+If you're using the reply callback style, you can access the original client request using `this.req`  like this:
+
+```js
+var scope = nock('http://www.google.com')
+   .get('/cat-poems')
+   .reply(function(uri, requestBody) {
+     console.log('path:', this.req.path);
+     console.log('headers:', this.req.headers);
+     // ...
+   });
+```
+
 ### Replying with errors
 
 You can reply with an error like this:
