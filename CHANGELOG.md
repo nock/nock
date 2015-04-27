@@ -1,5 +1,21 @@
 # Change Log
 
+
+## 1.7.1
+
+### Fixed
+
+- removing interceptors when replying with error (Pedro Teixeira) - #307
+- reply status code must always be a number (Pedro Teixeira) - #308
+
+
+## 1.7.0
+
+### Added
+
+- access request headers from within the reply callback (Pedro Teixeira)
+
+
 ## 1.6.0
 
 ### Added
