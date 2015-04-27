@@ -3709,12 +3709,14 @@ test("replyWithError returns an error on request", function(t) {
 
     // An error should have have been raised
     req.on('error', function(e) {
+      scope.done();
       t.equal(e.message, 'Service not found');
       t.end();
     });
 
     req.end();
 });
+
 
 test("teardown", function(t) {
   var leaks = Object.keys(global)
