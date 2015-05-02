@@ -3272,6 +3272,31 @@ test('done does not fail when specified request header is not missing', function
 
 });
 
+test('done fails when specified bad request header is present', function (t) {
+  var scope = nock('http://example.com', {
+    badheaders: ['cookie']
+  })
+  .post('/resource')
+  .reply(200, { status: 'ok' });
+
+  var d = domain.create();
+
+  d.run(function() {
+    mikealRequest({
+      method: 'POST',
+      uri: 'http://example.com/resource',
+      headers: {
+        'Cookie': 'cookie'
+      }
+    });
+  });
+
+  d.once('error', function (err) {
+    t.ok(err.message.match(/No match/));
+    t.end();
+  });
+});
+
 test('mikeal/request with delayConnection and request.timeout', function(t) {
   var endpoint = nock("http://some-server.com")
     .post("/")
