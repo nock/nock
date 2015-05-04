@@ -285,6 +285,18 @@ If `reqheaders` is not specified or if `host` is not part of it, Nock will autom
 
 If no request headers are specified for mocking then Nock will automatically skip matching of request headers. Since `host` header is a special case which may get automatically inserted by Nock, its matching is skipped unless it was *also* specified in the request being mocked.
 
+You can also have Nock fail the request if certain headers are present:
+
+```js
+var scope = nock('http://www.example.com', {
+    badheaders: ['cookie', 'x-forwarded-for']
+  })
+  .get('/')
+  .reply(200);
+```
+
+When invoked with this option, Nock will not match the request if any of the `badheaders` are present.
+
 Basic authentication can be specified as follows:
 
 ```js

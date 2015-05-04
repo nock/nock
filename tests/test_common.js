@@ -57,6 +57,30 @@ tap.test('headersFieldNamesToLowerCase throws on conflicting keys', function(t) 
 
 });
 
+tap.test('headersFieldsArrayToLowerCase works on arrays', function (t) {
+  var headers = ['HoSt', 'Content-typE'];
+
+  var lowerCaseHeaders = common.headersFieldsArrayToLowerCase(headers);
+
+  // Order doesn't matter.
+  lowerCaseHeaders.sort();
+
+  t.deepEqual(lowerCaseHeaders, ['content-type', 'host']);
+  t.end();
+});
+
+tap.test('headersFieldsArrayToLowerCase deduplicates arrays', function (t) {
+  var headers = ['hosT', 'HoSt', 'Content-typE', 'conTenT-tYpe'];
+
+  var lowerCaseHeaders = common.headersFieldsArrayToLowerCase(headers);
+
+  // Order doesn't matter.
+  lowerCaseHeaders.sort();
+
+  t.deepEqual(lowerCaseHeaders, ['content-type', 'host']);
+  t.end();
+});
+
 tap.test('deleteHeadersField deletes fields with case-insensitive field names', function(t) {
 
   var headers = {
