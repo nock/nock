@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.8.0
+
+### Added
+
+- feature: fail when specified bad header is present (Ken Sheeldo) - https://github.com/pgte/nock/pull/310
+
 
 ## 1.7.1
 
