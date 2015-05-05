@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.9.0
+
+### Added
+
+- Add more output for "bodies don't match" (Hidenari Nozaki) - https://github.com/pgte/nock/pull/312
+
+
 ## 1.8.0
 
 ### Added
