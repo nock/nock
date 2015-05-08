@@ -338,7 +338,8 @@ tap.test('records and replays gzipped nocks correctly', function(t) {
     nock.recorder.clear();
     nock.activate();
 
-    t.equal(nockDefs.length, 3);
+    // Original bit.ly request is redirected to the target page.
+    t.true(nockDefs.length > 1);
     var nocks = nock.define(nockDefs);
 
     debug('make request to mock');
@@ -394,7 +395,8 @@ tap.test('records and replays gzipped nocks correctly when gzip is returned as a
     nock.recorder.clear();
     nock.activate();
 
-    t.equal(nockDefs.length, 3);
+    // Original bit.ly request is redirected to the target page.
+    t.true(nockDefs.length > 1);
     var nocks = nock.define(nockDefs);
 
     debug('make request to mock');
@@ -455,7 +457,8 @@ tap.test('records and replays nocks correctly', function(t) {
     nock.recorder.clear();
     nock.activate();
 
-    t.equal(nockDefs.length, 3);
+    // Original bit.ly request is redirected to the target page.
+    t.true(nockDefs.length > 1);
     var nocks = nock.define(nockDefs);
 
     debug('make request to mock');
