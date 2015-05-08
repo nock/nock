@@ -375,8 +375,17 @@ tap.test('records and replays gzipped nocks correctly when gzip is returned as a
   });
 
   var makeRequest = function(callback) {
-    rest.get('http://bit.ly/1hKHiTe', {'headers':{'Accept-Encoding':'gzip, deflate'}})
-      .on('fail', function(error, response){t.ok(!error);})
+    rest.get('http://bit.ly/1hKHiTe', {'headers':{'Accept-Encoding':'gzip'}})
+      .on('fail', function(data, response){
+        debug('request failed with code ' + response.statusCode);
+        t.ok(false);
+        t.end();
+      })
+      .on('error', function (error, response){
+        debug('request error ' + error.stack);
+        t.ok(false);
+        t.end();
+      })
       .on('success', callback);
   };
 

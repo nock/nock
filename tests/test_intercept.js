@@ -252,21 +252,23 @@ test("post, lowercase", function(t) {
 
    var req = http.request({
        host: "www.google.com",
-       method: 'POST',
+       method: 'post',
        path: '/form',
        port: 80
    }, function(res) {
 
      t.equal(res.statusCode, 200);
      res.on('end', function() {
-       t.notOk(dataCalled);
+       t.ok(dataCalled);
        scope.done();
        t.end();
      });
-     res.on('data', function() {
+     res.on('data', function(data) {
        dataCalled = true;
-       t.end();
+       t.ok(data instanceof Buffer, "data should be buffer");
+       t.equal(data.toString(), "OK!", "response should match");
      });
+
    });
 
    req.end();
@@ -513,6 +515,9 @@ test("isDone", function(t) {
       scope.done();
       t.end();
     });
+    // Streams start in 'paused' mode and must be started.
+    // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+    res.resume();
   });
 
   req.end();
@@ -551,6 +556,9 @@ test("request headers exposed", function(t) {
       scope.done();
       t.end();
     });
+    // Streams start in 'paused' mode and must be started.
+    // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+    res.resume();
   });
 
   t.equivalent(req._headers, {'x-my-headers': 'My custom Header value', 'host': 'www.headdy.com'});
@@ -574,6 +582,9 @@ test("headers work", function(t) {
      scope.done();
      t.end();
    });
+   // Streams start in 'paused' mode and must be started.
+   // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+   res.resume();
   });
 
   req.end();
@@ -824,6 +835,9 @@ test("header manipulation", function(t) {
       scope.done();
       t.end();
     });
+    // Streams start in 'paused' mode and must be started.
+    // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+    res.resume();
   });
 
   req.setHeader('X-Custom-Header', 'My Value');
@@ -854,6 +868,9 @@ test("head", function(t) {
        scope.done();
        t.end();
      });
+     // Streams start in 'paused' mode and must be started.
+     // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+     res.resume();
    });
 
    req.end();
@@ -1184,6 +1201,9 @@ test("reply with content-length header", function(t){
       scope.done();
       t.end();
     });
+    // Streams start in 'paused' mode and must be started.
+    // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+    res.resume();
   });
 });
 
@@ -1206,6 +1226,9 @@ test("reply with date header", function(t){
       scope.done();
       t.end();
     });
+    // Streams start in 'paused' mode and must be started.
+    // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+    res.resume();
   });
 });
 
@@ -1228,6 +1251,9 @@ test("filter path with function", function(t) {
      scope.done();
      t.end();
    });
+   // Streams start in 'paused' mode and must be started.
+   // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+   res.resume();
   });
 
   req.end();
@@ -1250,6 +1276,9 @@ test("filter path with regexp", function(t) {
      scope.done();
      t.end();
    });
+   // Streams start in 'paused' mode and must be started.
+   // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+   res.resume();
   });
 
   req.end();
@@ -1275,6 +1304,9 @@ test("filter body with function", function(t) {
      scope.done();
      t.end();
    });
+   // Streams start in 'paused' mode and must be started.
+   // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+   res.resume();
   });
 
   req.end('mamma mia');
@@ -1297,6 +1329,9 @@ test("filter body with regexp", function(t) {
      scope.done();
      t.end();
    });
+   // Streams start in 'paused' mode and must be started.
+   // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+   res.resume();
   });
 
   req.end('mamma mia');
@@ -1362,9 +1397,12 @@ test("pause response before data", function(t) {
 });
 
 test("pause response after data", function(t) {
+  var response = new stream.PassThrough();
   var scope = nock('http://pauseme.com')
     .get('/')
-    .reply(200, 'nobody');
+    // Node does not pause the 'end' event so we need to use a stream to simulate
+    // multiple 'data' events.
+    .reply(200, response);
 
   var req = http.get({
     host: 'pauseme.com'
@@ -1377,7 +1415,6 @@ test("pause response after data", function(t) {
     }, 500);
 
     res.on('data', function(data) {
-      t.false(waited);
       res.pause();
     });
 
@@ -1386,6 +1423,13 @@ test("pause response after data", function(t) {
       scope.done();
       t.end();
     });
+  });
+
+  // Manually simulate multiple 'data' events.
+  response.emit("data", "one");
+  process.nextTick(function () {
+    response.emit("data", "two");
+    response.end();
   });
 });
 
@@ -1578,6 +1622,9 @@ test("can use hostname instead of host", function(t) {
       scope.done();
       t.end();
     });
+    // Streams start in 'paused' mode and must be started.
+    // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+    res.resume();
   });
 
   req.end();
@@ -1619,6 +1666,9 @@ test("can take a port", function(t) {
       scope.done();
       t.end();
     });
+    // Streams start in 'paused' mode and must be started.
+    // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+    res.resume();
   });
 
   req.end();
@@ -1827,6 +1877,9 @@ test("scopes are independent", function(t) {
       t.ok(! scope2.isDone()); // fails
       t.end();
     });
+    // Streams start in 'paused' mode and must be started.
+    // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+    res.resume();
   });
 
   req.end();
@@ -1856,6 +1909,9 @@ test("two scopes with the same request are consumed", function(t) {
       , port: 80
     }, function(res) {
       res.on('end', done);
+      // Streams start in 'paused' mode and must be started.
+      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+      res.resume();
     });
 
     req.end();
@@ -1903,6 +1959,9 @@ test("allow unmocked option works", function(t) {
     , port: 80
     }, function(res) {
       res.on('end', firstIsDone);
+      // Streams start in 'paused' mode and must be started.
+      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+      res.resume();
     }
   ).end();
 });
@@ -2248,6 +2307,9 @@ test("allow unmocked option works with https", function(t) {
     , path: "/abc"
   }, function(res) {
     res.on('end', firstIsDone);
+    // Streams start in 'paused' mode and must be started.
+    // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+    res.resume();
   }).end();
 });
 
@@ -2346,6 +2408,9 @@ test('has a req property on the response', function(t) {
       scope.done();
       t.end();
     });
+    // Streams start in 'paused' mode and must be started.
+    // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+    res.resume();
   });
   req.end();
 });
@@ -2576,6 +2641,26 @@ test('response is streams2 compatible', function(t) {
 
 });
 
+test('response is an http.IncomingMessage instance', function(t) {
+  var responseText = 'incoming message!';
+  nock('http://example.com')
+    .get('/somepath')
+    .reply(200, responseText);
+
+
+  http.request({
+      host: "example.com"
+    , path: "/somepath"
+  }, function(res) {
+
+    res.resume();
+    t.true(res instanceof http.IncomingMessage);
+    t.end();
+
+  }).end();
+
+});
+
 function checkDuration(t, ms) {
   var _end = t.end;
   var start = process.hrtime();
@@ -2697,6 +2782,9 @@ test("finish event fired before end event (bug-139)", function(t) {
 			scope.done();
 			t.end();
 		});
+		// Streams start in 'paused' mode and must be started.
+		// See https://nodejs.org/api/stream.html#stream_class_stream_readable
+		res.resume();
 	});
 
 	req.on('finish', function() {
@@ -2857,6 +2945,9 @@ test('define() is backward compatible', function(t) {
     res.once('end', function() {
       t.end();
     });
+    // Streams start in 'paused' mode and must be started.
+    // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+    res.resume();
   });
 
   req.on('error', function(err) {
@@ -3019,6 +3110,9 @@ test('define() uses reqheaders', function(t) {
       t.equivalent(res.req._headers, nockDef.reqheaders);
       t.end();
     });
+    // Streams start in 'paused' mode and must be started.
+    // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+    res.resume();
   });
   req.end();
 
@@ -3455,6 +3549,9 @@ test(".setNoDelay", function(t) {
 
     t.equal(res.statusCode, 200);
     res.on('end', t.end.bind(t));
+    // Streams start in 'paused' mode and must be started.
+    // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+    res.resume();
 
   });
 
@@ -3629,6 +3726,9 @@ test('isDone() must consider repeated responses', function(t) {
     }, function(res) {
       t.equal(res.statusCode, 204);
       res.on('end', callback);
+      // Streams start in 'paused' mode and must be started.
+      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+      res.resume();
     });
     req.end();
   }
