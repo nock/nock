@@ -260,6 +260,14 @@ nock('http://www.google.com')
    .replyWithError('something awful happened');
 ```
 
+JSON error responses are allowed too:
+
+```js
+nock('http://www.google.com')
+  .get('/cat-poems')
+  .replyWithError({'message': 'something awful happened', 'code': 'AWFUL_ERROR'});
+```
+
 
 ## Specifying headers
 

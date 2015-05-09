@@ -3842,6 +3842,29 @@ test("replyWithError returns an error on request", function(t) {
     req.end();
 });
 
+test("replyWithError allows json response", function(t) {
+    var scope = nock('http://www.google.com')
+        .post('/echo')
+        .replyWithError({message: "Service not found", code: 'test'});
+
+    var req = http.request({
+        host: "www.google.com"
+        , method: 'POST'
+        , path: '/echo'
+        , port: 80
+    });
+
+    // An error should have have been raised
+    req.on('error', function(e) {
+      scope.done();
+      t.equal(e.message, 'Service not found');
+      t.equal(e.code, 'test');
+      t.end();
+    });
+
+    req.end();
+});
+
 
 test("teardown", function(t) {
   var leaks = Object.keys(global)
