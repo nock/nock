@@ -156,7 +156,7 @@
     "restler": "3.2.2",
     "rimraf": "^2.3.2",
     "superagent": "~0.15.7",
-    "tap": "*"
+    "tap": "^0.7.1"
   },
   "scripts": {
     "test": "node tests/test.js",

@@ -34,6 +34,9 @@ test('recording', function(t) {
         t.ok(fixtureContent.status == 302 || fixtureContent.status == 301);
         t.end();
       });
+      // Streams start in 'paused' mode and must be started.
+      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+      res.resume();
     });
   });
 }).once('end', function() {
