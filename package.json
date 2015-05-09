@@ -7,9 +7,13 @@
     "testing",
     "isolation"
   ],
-  "version": "1.9.0",
+  "version": "2.0.0",
   "author": "Pedro Teixeira <pedro.teixeira@gmail.com>",
   "contributors": [
+    {
+      "name": "Jeffrey Jagoda",
+      "url": "https://github.com/jagoda"
+    },
     {
       "name": "Hidenari Nozaki",
       "url": "https://github.com/ghiden"
