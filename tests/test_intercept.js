@@ -611,6 +611,24 @@ test("reply headers work with function", function(t) {
   });
 });
 
+test("reply headers as function work", function(t) {
+  var scope = nock('http://example.com')
+  .get('/')
+  .reply(200, 'boo!', {
+    'X-My-Headers': function (req, res, body) {
+      return body.toString();
+    }
+  });
+
+  var req = http.get({
+    host: 'example.com',
+    path: '/'
+  }, function (res) {
+    t.equivalent(res.headers, { 'x-my-headers': 'boo!' });
+    t.end();
+  });
+});
+
 test("match headers", function(t) {
   var scope = nock('http://www.headdy.com')
      .get('/')
@@ -1981,6 +1999,44 @@ test("default reply headers work", function(t) {
       host: 'default.reply.headers.com'
     , path: '/'
   }, done).end();
+});
+
+test("default reply headers as functions work", function(t) {
+  var date = (new Date()).toUTCString();
+  var message = 'A message.';
+
+  var scope = nock('http://default.reply.headers.com')
+    .defaultReplyHeaders({
+      'Content-Length' : function (req, res, body) {
+        return body.length;
+      },
+
+      'Date': function () {
+        return date;
+      },
+
+      'Foo': function () {
+        return 'foo';
+      }
+    })
+    .get('/')
+    .reply(200, message, {foo: 'bar'});
+
+  http.request({
+      host: 'default.reply.headers.com',
+      path: '/'
+    }, function (res) {
+      t.deepEqual(
+        res.headers,
+        {
+          'content-length': message.length,
+          'date': date,
+          'foo': 'bar'
+        }
+      );
+      t.end();
+    }
+  ).end();
 });
 
 test("JSON encoded replies set the content-type header", function(t) {
