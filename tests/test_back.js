@@ -99,19 +99,46 @@ tap.test('nockBack wild tests', function (nw) {
 
 
 tap.test('nockBack dryrun tests', function (nw) {
+
+  //  Manually disable net connectivity to confirm that dryrun enables it.
+  nock.disableNetConnect();
+  
   nockBack.fixtures = __dirname + '/fixtures';
   nockBack.setMode('dryrun');
+
+  nw.test('goes to internet even when no nockBacks are running', function(t) {
+    var req = http.request({
+        host: "www.amazon.com"
+      , path: '/'
+      , port: 80
+      }, function(res) {
+
+        t.equal(res.statusCode, 200);
+        t.end();
+
+      });
+
+    req.on('error', function(err) {
+
+      //  This should never happen.
+      t.assert(false);
+      t.end();
+
+    });
+
+    req.end();
+  });
 
   nw.test('normal nocks work', function (t) {
     testNock(t);
   });
-
 
   nw.test('uses recorded fixtures', function (t) {
     nockBackWithFixture(t, true);
   });
 
   nw.test('goes it internet, doesn\'t recorded new fixtures', function (t) {
+
     var dataCalled = false;
 
     var fixture = 'someDryrunFixture.json';
