@@ -329,6 +329,20 @@ var scope = nock('http://www.headdy.com')
    });
 ```
 
+Or you can use a function to generate the headers values. The function will be
+passed the request, response, and body (if available). The body will be either a
+buffer, a stream, or undefined.
+
+```js
+var scope = nock('http://www.headdy.com')
+   .get('/')
+   .reply(200, 'Hello World!', {
+     'X-My-Headers': function (req, res, body) {
+       return body.toString();
+     }
+   });
+```
+
 ### Default Reply Headers
 
 You can also specify default reply headers for all responses like this:
@@ -338,6 +352,19 @@ var scope = nock('http://www.headdy.com')
   .defaultReplyHeaders({
     'X-Powered-By': 'Rails',
     'Content-Type': 'application/json'
+  })
+  .get('/')
+  .reply(200, 'The default headers should come too');
+```
+
+Or you can use a function to generate the default headers values:
+
+```js
+var scope = nock('http://www.headdy.com')
+  .defaultReplyHeaders({
+    'Content-Length': function (req, res, body) {
+      return body.length;
+    }
   })
   .get('/')
   .reply(200, 'The default headers should come too');
