@@ -10,6 +10,14 @@ tap.test('matchBody ignores new line characters from strings', function(t) {
   t.end()
 });
 
+tap.test('matchBody uses strict equality for deep comparisons', function(t) {
+  var spec = { number: 1 };
+  var body = '{"number": "1"}';
+  var matched = matchBody(spec, body);
+  t.false(matched);
+  t.end()
+});
+
 tap.test('isBinaryBuffer works', function(t) {
 
   //  Returns false for non-buffers.
