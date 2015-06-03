@@ -96,7 +96,7 @@ It also means that you must setup one interceptor for each request you are going
 
 ## READ THIS! (2) - About enableNetConnect
 
-By the time you require nock, it will disable all HTTP requests, except for the ones that you specifically create a nock scope for.
+By the time you define a nock mock, nock will disable all HTTP requests, except for the ones that you specifically create a nock scope for.
 
 To allow all HTTP requests, call [`nock.enableNetConnect`](#enabledisable-real-http-request).
 
