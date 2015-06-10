@@ -92,6 +92,126 @@ tap.test('records objects', function(t) {
   req.end('012345');
 });
 
+tap.test('records and replays objects correctly', function(t) {
+
+  nock.restore();
+  nock.recorder.clear();
+  t.equal(nock.recorder.play().length, 0);
+
+  nock.recorder.rec({
+    dont_print: true,
+    output_objects: true
+  });
+
+  var makeRequest = function(callback) {
+    superagent
+      .post('http://google.com')
+      .send('test')
+      .end(callback);
+  };
+
+  debug('make request to record');
+
+  makeRequest(function(err, resp) {
+
+    debug('recorded request finished');
+
+    t.ok(!err);
+    t.ok(resp);
+    t.ok(resp.headers);
+
+    nock.restore();
+    var nockDefs = nock.recorder.play();
+    nock.recorder.clear();
+    nock.activate();
+
+    t.equal(nockDefs.length, 1);
+    var nocks = nock.define(nockDefs);
+
+    debug('make request to mock');
+
+    makeRequest(function(mockedErr, mockedResp) {
+
+      debug('mocked request finished');
+
+      t.equal(err, mockedErr);
+      t.equal(mockedResp.body, mockedResp.body);
+
+      _.each(nocks, function(nock) {
+        nock.done();
+      });
+
+      t.end();
+
+    });
+  });
+
+});
+
+tap.test('records and replays correctly with filteringRequestBody', function(t) {
+
+  nock.restore();
+  nock.recorder.clear();
+  t.equal(nock.recorder.play().length, 0);
+
+  nock.recorder.rec({
+    dont_print: true,
+    output_objects: true
+  });
+
+  var makeRequest = function(callback) {
+    superagent
+      .post('http://google.com')
+      .send('test')
+      .end(callback);
+  };
+
+  debug('make request to record');
+
+  makeRequest(function(err, resp) {
+
+    debug('recorded request finished');
+
+    t.ok(!err);
+    t.ok(resp);
+    t.ok(resp.headers);
+
+    nock.restore();
+    var nockDefs = nock.recorder.play();
+    nock.recorder.clear();
+    nock.activate();
+
+    t.equal(nockDefs.length, 1);
+    var nockDef = _.first(nockDefs);
+    var filteringRequestBodyCounter = 0;
+    nockDef.filteringRequestBody = function(body, aRecodedBody) {
+      ++filteringRequestBodyCounter;
+      t.strictEqual(body, aRecodedBody);
+      return body;
+    };
+    var nocks = nock.define(nockDefs);
+
+    debug('make request to mock');
+
+    makeRequest(function(mockedErr, mockedResp) {
+
+      debug('mocked request finished');
+
+      t.equal(err, mockedErr);
+      t.equal(mockedResp.body, mockedResp.body);
+
+      _.each(nocks, function(nock) {
+        nock.done();
+      });
+
+      t.strictEqual(filteringRequestBodyCounter, 1);
+      t.end();
+
+    });
+  });
+
+});
+
 tap.test('checks if callback is specified', function(t) {
   var options = {
     host: 'www.google.com', method: 'GET', path: '/', port: 80
