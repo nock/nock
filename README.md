@@ -565,7 +565,7 @@ var scope = nock('http://api.myservice.com')
                 .reply(200, 'user');
 ```
 
-Note that `scope.filteringPath` is not cummulative: it should only be used once per scope.
+Note that `scope.filteringPath` is not cumulative: it should only be used once per scope.
 
 ## Request Body filtering
 
@@ -983,7 +983,7 @@ nock scopes
   nockBack('someFixture.json', function (nockDone) {
 
     http.get('http://zombo.com/').end(); // respond body "Ok"
-    http.get('http://zombo.com/').end(); // throws exeption because someFixture.json only had one call
+    http.get('http://zombo.com/').end(); // throws exception because someFixture.json only had one call
 
     //never gets here
     nockDone();
@@ -1017,7 +1017,7 @@ to set the mode call `nockBack.setMode(mode)` or run the tests with the `NOCK_BA
 Nock works by overriding Node's `http.request` function. Also, it overrides `http.ClientRequest` too to cover for modules that use it directly.
 
 #Debugging
-Nock uses debug, so just run with enviromental variable DEBUG set to nock.*
+Nock uses debug, so just run with environmental variable DEBUG set to nock.*
 
 # PROTIP
 
