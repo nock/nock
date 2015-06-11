@@ -954,42 +954,45 @@ The `this` context of the call back function will be have a property `scopes` to
 nock scopes
 
 ```javascript
-  var nockBack = require('nock').back;
+var nockBack = require('nock').back;
+var request = require('request');
+nockBack.setMode('record');
 
-  nockBack.fixtures = '/path/to/fixtures/'; //this only needs to be set once in your test helper
+nockBack.fixtures = __dirname + '/nockFixtures'; //this only needs to be set once in your test helper
 
-  var before = function (scope) {
-    scope.filteringRequestBody = function(body) {
-      if(typeof(body) !== 'string') {
-        return body;
-      }
 
-      return body.replace(/(timestamp):([0-9]+)/g, function(match, key, value) {
-        return key + ':timestampCapturedDuringRecording'
-      });
 
+var before = function(scope) {
+  scope.filteringRequestBody = function(body) {
+    if (typeof(body) !== 'string') {
+      return body;
     }
-  }
 
-  nockBack('someFixture.json', {before: before}, function (nockDone) {
+    return body.replace(/(timestamp):([0-9]+)/g, function(match, key, value) {
+      return key + ':timestampCapturedDuringRecording';
+    });
 
-    http.get('http://zombo.com/').end(); // respond body "Ok"
-    this.assertScopesFinished(); //throws an exception if all nocks in fixture were not satisfied
+  };
+};
 
+
+// recording of the fixture
+nockBack('zomboFixture.json', function(nockDone) { 
+  request.get('http://zombo.com', function(err, res, body) {
     nockDone();
 
+
+    // usage of the created fixture
+    nockBack('zomboFixture.json', function (nockDone) {
+      http.get('http://zombo.com/').end(); // respond body "Ok"
+
+      this.assertScopesFinished(); //throws an exception if all nocks in fixture were not satisfied
+      http.get('http://zombo.com/').end(); // throws exception because someFixture.json only had one call
+      
+      nockDone(); //never gets here
+    });
   });
-
-  nockBack('someFixture.json', function (nockDone) {
-
-    http.get('http://zombo.com/').end(); // respond body "Ok"
-    http.get('http://zombo.com/').end(); // throws exeption because someFixture.json only had one call
-
-    //never gets here
-    nockDone();
-
-  });
-
+});
 ```
 
 ### Options
