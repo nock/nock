@@ -832,13 +832,19 @@ If you save this as a JSON file, you can load them directly through `nock.load(p
 ```js
 nocks = nock.load(pathToJson);
 nocks.forEach(function(nock) {
-  nock.filteringRequestBody = function(body) {
-    if(typeof(body) !== 'string') {
+  nock.filteringRequestBody = function(body, aRecordedBody) {
+    if (typeof(body) !== 'string' || typeof(aRecordedBody) !== 'string') {
       return body;
     }
 
+    var recordedBodyResult = /timestamp:([0-9]+)/.exec(aRecodedBody);
+    if (!recodedBodyResult) {
+      return body;
+    }
+
+    var recordedTimestamp = recodedBodyResult[1];
     return body.replace(/(timestamp):([0-9]+)/g, function(match, key, value) {
-      return key + ':timestampCapturedDuringRecording'
+      return key + ':' + recordedTimestamp;
     });
   };
 });
@@ -960,21 +966,23 @@ nockBack.setMode('record');
 
 nockBack.fixtures = __dirname + '/nockFixtures'; //this only needs to be set once in your test helper
 
-
-
 var before = function(scope) {
-  scope.filteringRequestBody = function(body) {
-    if (typeof(body) !== 'string') {
+  scope.filteringRequestBody = function(body, aRecordedBody) {
+    if (typeof(body) !== 'string' || typeof(aRecordedBody) !== 'string') {
       return body;
     }
 
+    var recordedBodyResult = /timestamp:([0-9]+)/.exec(aRecodedBody);
+    if (!recodedBodyResult) {
+      return body;
+    }
+
+    var recordedTimestamp = recodedBodyResult[1];
     return body.replace(/(timestamp):([0-9]+)/g, function(match, key, value) {
-      return key + ':timestampCapturedDuringRecording';
+      return key + ':' + recordedTimestamp;
     });
-
   };
-};
-
+}
 
 // recording of the fixture
 nockBack('zomboFixture.json', function(nockDone) { 

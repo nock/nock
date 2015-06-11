@@ -1303,9 +1303,12 @@ test("filter path with regexp", function(t) {
 });
 
 test("filter body with function", function(t) {
+  var filteringRequestBodyCounter = 0;
+
   var scope = nock('http://www.filterboddiez.com')
      .filteringRequestBody(function(body) {
-       t.equal(body, 'mamma mia');
+        ++filteringRequestBodyCounter;
+        t.equal(body, 'mamma mia');
         return 'mamma tua';
       })
      .post('/', 'mamma tua')
@@ -1320,6 +1323,7 @@ test("filter body with function", function(t) {
    t.equal(res.statusCode, 200);
    res.on('end', function() {
      scope.done();
+     t.equal(filteringRequestBodyCounter, 1);
      t.end();
    });
    // Streams start in 'paused' mode and must be started.
