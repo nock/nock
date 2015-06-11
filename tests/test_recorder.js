@@ -110,11 +110,7 @@ tap.test('records and replays objects correctly', function(t) {
       .end(callback);
   };
 
-  debug('make request to record');
-
   makeRequest(function(err, resp) {
-
-    debug('recorded request finished');
 
     t.ok(!err);
     t.ok(resp);
@@ -128,14 +124,10 @@ tap.test('records and replays objects correctly', function(t) {
     t.equal(nockDefs.length, 1);
     var nocks = nock.define(nockDefs);
 
-    debug('make request to mock');
-
     makeRequest(function(mockedErr, mockedResp) {
 
-      debug('mocked request finished');
-
       t.equal(err, mockedErr);
-      t.equal(mockedResp.body, mockedResp.body);
+      t.deepEqual(mockedResp.body, resp.body);
 
       _.each(nocks, function(nock) {
         nock.done();
@@ -166,11 +158,7 @@ tap.test('records and replays correctly with filteringRequestBody', function(t) 
       .end(callback);
   };
 
-  debug('make request to record');
-
   makeRequest(function(err, resp) {
-
-    debug('recorded request finished');
 
     t.ok(!err);
     t.ok(resp);
@@ -191,14 +179,10 @@ tap.test('records and replays correctly with filteringRequestBody', function(t) 
     };
     var nocks = nock.define(nockDefs);
 
-    debug('make request to mock');
-
     makeRequest(function(mockedErr, mockedResp) {
 
-      debug('mocked request finished');
-
       t.equal(err, mockedErr);
-      t.equal(mockedResp.body, mockedResp.body);
+      t.deepEqual(mockedResp.body, resp.body);
 
       _.each(nocks, function(nock) {
         nock.done();
@@ -442,11 +426,7 @@ tap.test('records and replays gzipped nocks correctly', function(t) {
     superagent.get('https://bit.ly/1hKHiTe', callback);
   };
 
-  debug('make request to record');
-
   makeRequest(function(err, resp) {
-
-    debug('recorded request finished');
 
     t.ok(!err);
     t.ok(resp);
@@ -462,14 +442,10 @@ tap.test('records and replays gzipped nocks correctly', function(t) {
     t.true(nockDefs.length > 1);
     var nocks = nock.define(nockDefs);
 
-    debug('make request to mock');
-
     makeRequest(function(mockedErr, mockedResp) {
 
-      debug('mocked request finished');
-
       t.equal(err, mockedErr);
-      t.equal(mockedResp.body, mockedResp.body);
+      t.deepEqual(mockedResp.body, resp.body);
       t.equal(mockedResp.headers['content-encoding'], 'gzip');
 
       _.each(nocks, function(nock) {
@@ -497,23 +473,17 @@ tap.test('records and replays gzipped nocks correctly when gzip is returned as a
   var makeRequest = function(callback) {
     rest.get('http://bit.ly/1hKHiTe', {'headers':{'Accept-Encoding':'gzip'}})
       .on('fail', function(data, response){
-        debug('request failed with code ' + response.statusCode);
         t.ok(false);
         t.end();
       })
       .on('error', function (error, response){
-        debug('request error ' + error.stack);
         t.ok(false);
         t.end();
       })
       .on('success', callback);
   };
 
-  debug('make request to record');
-
   makeRequest(function(err, resp) {
-
-    debug('recorded request finished');
 
     t.ok(resp);
     t.ok(resp.headers);
@@ -528,14 +498,10 @@ tap.test('records and replays gzipped nocks correctly when gzip is returned as a
     t.true(nockDefs.length > 1);
     var nocks = nock.define(nockDefs);
 
-    debug('make request to mock');
-
     makeRequest(function(mockedErr, mockedResp) {
 
-      debug('mocked request finished');
-
       t.equal(err, mockedErr);
-      t.equal(mockedResp.body, mockedResp.body);
+      t.deepEqual(mockedResp.body, resp.body);
       t.equal(mockedResp.headers['content-encoding'], 'gzip');
 
       _.each(nocks, function(nock) {
@@ -571,11 +537,7 @@ tap.test('records and replays nocks correctly', function(t) {
 
   };
 
-  debug('make request to record');
-
   makeRequest(function(err, resp, body) {
-
-    debug('recorded request finished');
 
     t.ok(!err);
     t.ok(resp);
@@ -590,11 +552,7 @@ tap.test('records and replays nocks correctly', function(t) {
     t.true(nockDefs.length > 1);
     var nocks = nock.define(nockDefs);
 
-    debug('make request to mock');
-
     makeRequest(function(mockedErr, mockedResp, mockedBody) {
-
-      debug('mocked request finished');
 
       t.equal(err, mockedErr);
       t.equal(body, mockedBody);

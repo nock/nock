@@ -833,7 +833,7 @@ If you save this as a JSON file, you can load them directly through `nock.load(p
 nocks = nock.load(pathToJson);
 nocks.forEach(function(nock) {
   nock.filteringRequestBody = function(body, aRecordedBody) {
-    if(typeof(body) !== 'string' || typeof(aRecordedBody) !== 'string') {
+    if (typeof(body) !== 'string' || typeof(aRecordedBody) !== 'string') {
       return body;
     }
 
@@ -968,7 +968,7 @@ nockBack.fixtures = __dirname + '/nockFixtures'; //this only needs to be set onc
 
 var before = function(scope) {
   scope.filteringRequestBody = function(body, aRecordedBody) {
-    if(typeof(body) !== 'string' || typeof(aRecordedBody) !== 'string') {
+    if (typeof(body) !== 'string' || typeof(aRecordedBody) !== 'string') {
       return body;
     }
 
