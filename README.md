@@ -130,6 +130,7 @@ var scope = nock('http://myapp.iriscouch.com')
 ```
 
 If the request body is a function, return true if it should be considered a match:
+
 ```js
 var scope = nock('http://myapp.iriscouch.com')
                 .post('/users', function(body) {
@@ -685,6 +686,8 @@ var scope = nock('http://persisssists.con')
   .get('/')
   .reply(200, 'Persisting all the way');
 ```
+
+Note that while a persisted scope will always intercept the requests, it is considered "done" after the first interception.
 
 ## .pendingMocks()
 
