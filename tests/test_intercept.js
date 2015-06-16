@@ -2261,10 +2261,11 @@ test('persists interceptors', function(t) {
     .get('/')
     .reply(200, "Persisting all the way");
 
+  t.ok(!scope.isDone());
   http.get('http://persisssists.con/', function(res) {
-    t.ok(! scope.isDone());
+    t.ok(scope.isDone());
     http.get('http://persisssists.con/', function(res) {
-      t.ok(! scope.isDone());
+      t.ok(scope.isDone());
       t.end();
     }).end();
   }).end();

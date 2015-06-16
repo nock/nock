@@ -130,6 +130,7 @@ var scope = nock('http://myapp.iriscouch.com')
 ```
 
 If the request body is a function, return true if it should be considered a match:
+
 ```js
 var scope = nock('http://myapp.iriscouch.com')
                 .post('/users', function(body) {
@@ -686,6 +687,8 @@ var scope = nock('http://persisssists.con')
   .reply(200, 'Persisting all the way');
 ```
 
+Note that while a persisted scope will always intercept the requests, it is considered "done" after the first interception.
+
 ## .pendingMocks()
 
 If a scope is not done, you can inspect the scope to infer which ones are still pending using the `scope.pendingMocks()` function:
@@ -1015,13 +1018,13 @@ As an optional second parameter you can pass the following options
 
 to set the mode call `nockBack.setMode(mode)` or run the tests with the `NOCK_BACK_MODE` environment variable set before loading nock. If the mode needs to be changed programatically, the following is valid: `nockBack.setMode(nockBack.currentMode)`
 
-- wild: all requests go out to the internet, dont replay anything, doesnt record anything
+- wild: all requests go out to the internet, don't replay anything, doesn't record anything
 
-- dryrun: The default, use recorded nocks, allow http calls, doesnt record anything, useful for writing new tests
+- dryrun: The default, use recorded nocks, allow http calls, doesn't record anything, useful for writing new tests
 
 - record: use recorded nocks, record new nocks
 
-- lockdown: use recorded nocks, disables all http calls even when not nocked, doesnt record
+- lockdown: use recorded nocks, disables all http calls even when not nocked, doesn't record
 
 # How does it work?
 
