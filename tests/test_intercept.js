@@ -3926,6 +3926,32 @@ test("replyWithError allows json response", function(t) {
     req.end();
 });
 
+test('no content type provided', function(t) {
+  var scope = nock('http://nocontenttype.com')
+    .replyContentLength()
+    .post('/httppost', function() {
+      return true
+    })
+    .reply(401, "");
+
+  var req = http.request({
+      host: "nocontenttype.com",
+      path: '/httppost',
+      method: 'POST',
+      headers: {}
+  }, function(res) {
+    console.log('haz response');
+    res.on('data', function() {});
+    res.once('end', function() {
+      console.log('response ended');
+      scope.done();
+      t.ok(true);
+      t.end();
+    });
+  }).end('WHAA');
+
+});
+
 
 test("teardown", function(t) {
   var leaks = Object.keys(global)
