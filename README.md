@@ -144,6 +144,18 @@ var scope = nock('http://myapp.iriscouch.com')
 
 ```
 
+## Specifying request query string
+
+Nock understands query strings. Instead of placing the entire URL, you can specify the query part as an object:
+
+```js
+nock('http://example.com')
+  .get('/users')
+  .query({name: 'pedro', surname: 'teixeira'})
+  .reply({results: [{id: 'pgte'}]});
+```
+
+
 ## Specifying replies
 
 You can specify the return status code for a path on the first argument of reply like this:
