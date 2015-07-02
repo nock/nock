@@ -3952,6 +3952,132 @@ test('no content type provided', function(t) {
 
 });
 
+test('query() matches a query string of the same name=value', function (t) {
+  var scope = nock('http://google.com')
+    .get('/')
+    .query({foo:'bar'})
+    .reply(200);
+
+  mikealRequest('http://google.com/?foo=bar', function(err, res) {
+    if (err) throw err;
+    t.equal(res.statusCode, 200);
+    t.end();
+  })
+});
+
+test('query() matches multiple query strings of the same name=value', function (t) {
+  var scope = nock('http://google.com')
+    .get('/')
+    .query({foo:'bar',baz:'foz'})
+    .reply(200);
+
+  mikealRequest('http://google.com/?foo=bar&baz=foz', function(err, res) {
+    if (err) throw err;
+    t.equal(res.statusCode, 200);
+    t.end();
+  })
+});
+
+test('query() matches multiple query strings of the same name=value regardless of order', function (t) {
+  var scope = nock('http://google.com')
+    .get('/')
+    .query({foo:'bar',baz:'foz'})
+    .reply(200);
+
+  mikealRequest('http://google.com/?baz=foz&foo=bar', function(err, res) {
+    if (err) throw err;
+    t.equal(res.statusCode, 200);
+    t.end();
+  })
+});
+
+test('query() matches a query string using regexp', function (t) {
+  var scope = nock('http://google.com')
+    .get('/')
+    .query({foo:/.*/})
+    .reply(200);
+
+  mikealRequest('http://google.com/?foo=bar', function(err, res) {
+    if (err) throw err;
+    t.equal(res.statusCode, 200);
+    t.end();
+  })
+});
+
+test('query() matches a query string that is url encoded', function (t) {
+  var scope = nock('http://google.com')
+    .get('/')
+    .query({foo:'[1]'})
+    .reply(200);
+
+  mikealRequest('http://google.com/?foo=[1]', function(err, res) {
+    if (err) throw err;
+    t.equal(res.statusCode, 200);
+    t.end();
+  })
+});
+
+test('query() with "true" will allow all query strings to pass', function (t) {
+  var scope = nock('http://google.com')
+    .get('/')
+    .query(true)
+    .reply(200);
+
+  mikealRequest('http://google.com/?foo=bar&a=1&b=2', function(err, res) {
+    if (err) throw err;
+    t.equal(res.statusCode, 200);
+    t.end();
+  })
+});
+
+test('query() will not match when there is no query string in the request', function (t) {
+  var scope = nock('https://d.com')
+    .get('/a')
+    .query({foo:'bar'})
+    .reply(200);
+
+  mikealRequest('https://d.com/a', function(err, res) {
+    t.equal(err.message.trim(), 'Nock: No match for request GET https://d.com/a');
+    t.end();
+  })
+});
+
+test('query() will not match when a query string does not match name=value', function (t) {
+  var scope = nock('https://c.com')
+    .get('/b')
+    .query({foo:'bar'})
+    .reply(200);
+
+  mikealRequest('https://c.com/b?foo=baz', function(err, res) {
+    t.equal(err.message.trim(), 'Nock: No match for request GET https://c.com/b?foo=baz');
+    t.end();
+  })
+});
+
+test('query() will not match when a query string is present that was not registered', function (t) {
+  var scope = nock('https://b.com')
+    .get('/c')
+    .query({foo:'bar'})
+    .reply(200);
+
+  mikealRequest('https://b.com/c?foo=bar&baz=foz', function(err, res) {
+    t.equal(err.message.trim(), 'Nock: No match for request GET https://b.com/c?foo=bar&baz=foz');
+    t.end();
+  })
+});
+
+test('query() will not match when a query string is malformed', function (t) {
+  var scope = nock('https://a.com')
+    .get('/d')
+    .query({foo:'bar'})
+    .reply(200);
+
+  mikealRequest('https://a.com/d?foobar', function(err, res) {
+    t.equal(err.message.trim(), 'Nock: No match for request GET https://a.com/d?foobar');
+    t.end();
+  })
+});
+
 
 test("teardown", function(t) {
   var leaks = Object.keys(global)
