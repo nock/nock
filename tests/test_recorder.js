@@ -790,6 +790,60 @@ tap.test('works with clients listening for readable', function(t) {
 
 });
 
+tap.test('outputs query string parameters using query()', function(t) {
+  nock.restore();
+  nock.recorder.clear();
+  t.equal(nock.recorder.play().length, 0);
+
+  nock.recorder.rec(true);
+
+  var makeRequest = function(callback) {
+    superagent
+      .get('https://domain.com/tx')
+      .query({'param1':1,'param2':2})
+      .end(callback);
+  };
+
+  makeRequest(function(err, resp) {
+
+    t.ok(!err);
+    t.ok(resp);
+    t.ok(resp.headers);
+
+    var ret = nock.recorder.play();
+    t.equal(ret.length, 1);
+    t.type(ret[0], 'string');
+    t.equal(ret[0].indexOf("\nnock('https://domain.com:443')\n  .get('/tx')\n  .query({\"param1\":\"1\",\"param2\":\"2\"})\n  .reply("), 0);
+    t.end();
+  });
+});
+
+tap.test('removes query params from from that path and puts them in query()', function(t) {
+  nock.restore();
+  nock.recorder.clear();
+  t.equal(nock.recorder.play().length, 0);
+  var options = { method: 'POST'
+                , host:'google.com'
+                , port:80
+                , path:'/?param1=1&param2=2' }
+  ;
+
+  nock.recorder.rec(true);
+  var req = http.request(options, function(res) {
+    res.resume();
+    var ret;
+    res.once('end', function() {
+      nock.restore();
+      ret = nock.recorder.play();
+      t.equal(ret.length, 1);
+      t.type(ret[0], 'string');
+      t.equal(ret[0].indexOf("\nnock('http://google.com:80')\n  .post('/', \"ABCDEF\")\n  .query({\"param1\":\"1\",\"param2\":\"2\"})\n  .reply("), 0);
+      t.end();
+    });
+  });
+  req.end('ABCDEF');
+});
+
 tap.test("teardown", function(t) {
   var leaks = Object.keys(global)
     .splice(globalCount, Number.MAX_VALUE);
