@@ -1449,10 +1449,10 @@ test("pause response after data", function(t) {
 
   // Manually simulate multiple 'data' events.
   response.emit("data", "one");
-  process.nextTick(function () {
+  setTimeout(function () {
     response.emit("data", "two");
     response.end();
-  });
+  }, 0);
 });
 
 test("response pipe", function(t) {
@@ -3985,6 +3985,19 @@ test('query() matches multiple query strings of the same name=value regardless o
     .reply(200);
 
   mikealRequest('http://google.com/?baz=foz&foo=bar', function(err, res) {
+    if (err) throw err;
+    t.equal(res.statusCode, 200);
+    t.end();
+  })
+});
+
+test('query() matches query values regardless of their type of declaration', function (t) {
+  var scope = nock('http://google.com')
+    .get('/')
+    .query({num:1,bool:true,empty:null,str:'fou'})
+    .reply(200);
+
+  mikealRequest('http://google.com/?num=1&bool=true&empty=&str=fou', function(err, res) {
     if (err) throw err;
     t.equal(res.statusCode, 200);
     t.end();
