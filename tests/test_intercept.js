@@ -4020,13 +4020,13 @@ test('query() matches a query string using regexp', function (t) {
 test('query() matches a query string that is url encoded', function (t) {
   var scope = nock('http://google.com')
     .get('/')
-    .query({foo:'hello&world'})
+    .query({'foo&bar':'hello&world'})
     .reply(200);
 
   var options = {
     uri: 'http://google.com/',
     qs: {
-      foo: 'hello&world'
+      'foo&bar': 'hello&world'
     }
   };
 
