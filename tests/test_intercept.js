@@ -4020,10 +4020,17 @@ test('query() matches a query string using regexp', function (t) {
 test('query() matches a query string that is url encoded', function (t) {
   var scope = nock('http://google.com')
     .get('/')
-    .query({foo:'[1]'})
+    .query({foo:'hello&world'})
     .reply(200);
 
-  mikealRequest('http://google.com/?foo=[1]', function(err, res) {
+  var options = {
+    uri: 'http://google.com/',
+    qs: {
+      foo: 'hello&world'
+    }
+  };
+
+  mikealRequest(options, function(err, res) {
     if (err) throw err;
     t.equal(res.statusCode, 200);
     t.end();
