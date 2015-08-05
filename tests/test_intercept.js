@@ -627,7 +627,7 @@ test("reply headers as function work", function(t) {
     path: '/'
   }, function (res) {
     t.equivalent(res.headers, {'x-my-headers': 'boo!'});
-    // t.equivalent(res.rawHeaders, ['x-my-headers', 'boo!']);
+    t.equivalent(res.rawHeaders, ['x-my-headers', 'boo!']);
     t.end();
   });
 });
