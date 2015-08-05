@@ -105,7 +105,7 @@ tap.test('nockBack dryrun tests', function (nw) {
 
   //  Manually disable net connectivity to confirm that dryrun enables it.
   nock.disableNetConnect();
-  
+
   nockBack.fixtures = __dirname + '/fixtures';
   nockBack.setMode('dryrun');
 
@@ -116,7 +116,7 @@ tap.test('nockBack dryrun tests', function (nw) {
       , port: 80
       }, function(res) {
 
-        t.equal(res.statusCode, 200);
+        t.equal(res.statusCode, 302);
         t.end();
 
       });
@@ -156,7 +156,7 @@ tap.test('nockBack dryrun tests', function (nw) {
         , port: 80
         }, function(res) {
 
-          t.equal(res.statusCode, 200);
+          t.equal(res.statusCode, 302);
           res.on('end', function() {
             var doneFails = false;
 
