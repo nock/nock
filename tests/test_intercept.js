@@ -579,6 +579,7 @@ test("headers work", function(t) {
    t.equal(res.statusCode, 200);
    res.on('end', function() {
      t.equivalent(res.headers, {'x-my-headers': 'My Header value'});
+     t.equivalent(res.rawHeaders, ['x-my-headers', 'My Header value']);
      scope.done();
      t.end();
    });
@@ -605,6 +606,7 @@ test("reply headers work with function", function(t) {
      port: 80
   }, function(res) {
     t.equivalent(res.headers, {'x-my-headers': 'My custom header value'});
+    t.equivalent(res.rawHeaders, ['x-my-headers', 'My custom header value']);
     scope.done();
     t.end();
 
@@ -624,7 +626,8 @@ test("reply headers as function work", function(t) {
     host: 'example.com',
     path: '/'
   }, function (res) {
-    t.equivalent(res.headers, { 'x-my-headers': 'boo!' });
+    t.equivalent(res.headers, {'x-my-headers': 'boo!'});
+    // t.equivalent(res.rawHeaders, ['x-my-headers', 'boo!']);
     t.end();
   });
 });
