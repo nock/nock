@@ -152,7 +152,7 @@ Nock understands query strings. Instead of placing the entire URL, you can speci
 nock('http://example.com')
   .get('/users')
   .query({name: 'pedro', surname: 'teixeira'})
-  .reply({results: [{id: 'pgte'}]});
+  .reply(200, {results: [{id: 'pgte'}]});
 ```
 
 To mock the entire url regardless of the passed query string:
@@ -161,7 +161,7 @@ To mock the entire url regardless of the passed query string:
 nock('http://example.com')
   .get('/users')
   .query(true)
-  .reply({results: [{id: 'pgte'}]});
+  .reply(200, {results: [{id: 'pgte'}]});
 ```
 
 ## Specifying replies
