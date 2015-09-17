@@ -3225,7 +3225,7 @@ test('fix #146 - resume() is automatically invoked when the response is drained'
     t.notOk(err);
     t.ok(res);
     t.ok(buffer);
-    t.equal(buffer, replyBuffer);
+    t.same(buffer, replyBuffer);
     t.end();
   });
 });

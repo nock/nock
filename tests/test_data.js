@@ -1,5 +1,4 @@
 var nock = require('../');
-var assert = require('assert');
 var http = require('http');
 
 var tap = require('tap')
@@ -19,7 +18,7 @@ tap.test('data emits', function(t) {
     });
 
     res.on('end', function() {
-      assert.deepEqual(JSON.parse(body), reqBody);
+      t.same(JSON.parse(body), reqBody);
       t.end();
     });
 

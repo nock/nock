@@ -4,8 +4,6 @@ var test = require('tap').test;
 var nock = require('../.');
 var request = require('request');
 
-nock.disableNetConnect();
-
 test('one function returning the body defines a full mock', function(t) {
   var scope = nock('http://acompleteandfullmock.io')
     .get('/abc')
