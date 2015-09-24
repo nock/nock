@@ -4099,7 +4099,7 @@ test('query() will not match when a query string is malformed', function (t) {
   })
 });
 
-test('query() will not match when a query string has fewer correct values than passed', function (t) {
+test('query() will not match when a query string has fewer correct values than expected', function (t) {
   var scope = nock('http://google.com')
     .get('/')
     .query({
