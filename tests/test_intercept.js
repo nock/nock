@@ -4111,7 +4111,6 @@ test('query() will not match when a query string has fewer correct values than e
     .reply(200);
 
   mikealRequest('http://google.com/?num=1str=fou', function(err, res) {
-    if (err) throw err;
     t.equal(err.message.trim(), 'Nock: No match for request GET http://google.com/?num=1str=fou');
     t.end();
   })
