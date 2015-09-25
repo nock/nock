@@ -4099,6 +4099,23 @@ test('query() will not match when a query string is malformed', function (t) {
   })
 });
 
+test('query() will not match when a query string has fewer correct values than expected', function (t) {
+  var scope = nock('http://google.com')
+    .get('/')
+    .query({
+      num:1,
+      bool:true,
+      empty:null,
+      str:'fou'
+    })
+    .reply(200);
+
+  mikealRequest('http://google.com/?num=1str=fou', function(err, res) {
+    t.equal(err.message.trim(), 'Nock: No match for request GET http://google.com/?num=1str=fou');
+    t.end();
+  })
+});
+
 
 test("teardown", function(t) {
   var leaks = Object.keys(global)
