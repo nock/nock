@@ -3403,6 +3403,112 @@ test('done fails when specified request header is missing', function(t) {
   });
 });
 
+
+test('matches request header with regular expression', function(t) {
+  var scope = nock('http://example.com', {
+    reqheaders: {
+      "X-My-Super-Power": /.+/
+    }
+  })
+  .post('/superpowers')
+  .reply(200, { status: "ok" });
+
+
+    mikealRequest({
+      method: 'POST',
+      uri: 'http://example.com/superpowers',
+      headers: {
+          "X-My-Super-Power": "mullet growing"
+      }
+    }, function(err, res, body) {
+        t.strictEqual(err, null);
+        t.equal(body, '{"status":"ok"}');
+        t.end();
+    });
+});
+
+
+test('request header satisfies the header function', function(t) {
+  var scope = nock('http://example.com', {
+    reqheaders: {
+      "X-My-Super-Power": function(value) {
+          return value === "mullet growing";
+      }
+    }
+  })
+  .post('/superpowers')
+  .reply(200, { status: "ok" });
+
+
+    mikealRequest({
+      method: 'POST',
+      uri: 'http://example.com/superpowers',
+      headers: {
+          "X-My-Super-Power": "mullet growing"
+      }
+    }, function(err, res, body) {
+        t.strictEqual(err, null);
+        t.equal(body, '{"status":"ok"}');
+        t.end();
+    });
+});
+
+test('done fails when specified request header doesn\'t match regular expression', function(t) {
+    var scope = nock('http://example.com', {
+        reqheaders: {
+            "X-My-Super-Power": /Mullet.+/
+        }
+    })
+        .post('/resource')
+        .reply(200, { status: "ok" });
+
+    var d = domain.create();
+
+    d.run(function() {
+        mikealRequest({
+            method: 'POST',
+            uri: 'http://example.com/superpowers',
+            headers: {
+                "X-My-Super-Power": "mullet growing"
+            }
+        });
+    });
+
+    d.once('error', function(err) {
+        t.ok(err.message.match(/No match/));
+        t.end();
+    });
+});
+
+test('done fails when specified request header doesn\'t satisfy the header function', function(t) {
+    var scope = nock('http://example.com', {
+        reqheaders: {
+            "X-My-Super-Power": function (value) {
+                return value === 'Mullet Growing';
+            }
+        }
+    })
+        .post('/resource')
+        .reply(200, { status: "ok" });
+
+    var d = domain.create();
+
+    d.run(function() {
+        mikealRequest({
+            method: 'POST',
+            uri: 'http://example.com/superpowers',
+            headers: {
+                "X-My-Super-Power": "mullet growing"
+            }
+        });
+    });
+
+    d.once('error', function(err) {
+        t.ok(err.message.match(/No match/));
+        t.end();
+    });
+});
+
 test('done does not fail when specified request header is not missing', function(t) {
   var scope = nock('http://example.com', {
     reqheaders: {
