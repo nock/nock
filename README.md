@@ -310,6 +310,25 @@ var scope = nock('http://www.example.com', {
     .reply(200);
 ```
 
+Or you can use a Regular Expression or Function check the header values. The function will be
+passed the header value.
+
+```js
+var scope = nock('http://www.example.com', {
+      reqheaders: {
+        'X-My-Headers': function (headerValue) {
+           if (headerValue) {
+             return true;
+           }
+           return false;
+         },
+         'X-My-Awesome-Header': /Awesome/i
+      }
+    })
+    .get('/')
+    .reply(200);
+```
+
 If `reqheaders` is not specified or if `host` is not part of it, Nock will automatically add `host` value to request header.
 
 If no request headers are specified for mocking then Nock will automatically skip matching of request headers. Since `host` header is a special case which may get automatically inserted by Nock, its matching is skipped unless it was *also* specified in the request being mocked.
