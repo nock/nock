@@ -1027,7 +1027,7 @@ var before = function(scope) {
 }
 
 // recording of the fixture
-nockBack('zomboFixture.json', function(nockDone) { 
+nockBack('zomboFixture.json', function(nockDone) {
   request.get('http://zombo.com', function(err, res, body) {
     nockDone();
 
@@ -1038,7 +1038,7 @@ nockBack('zomboFixture.json', function(nockDone) {
 
       this.assertScopesFinished(); //throws an exception if all nocks in fixture were not satisfied
       http.get('http://zombo.com/').end(); // throws exception because someFixture.json only had one call
-      
+
       nockDone(); //never gets here
     });
   });
@@ -1051,6 +1051,7 @@ As an optional second parameter you can pass the following options
 
 - `before`: a preprocessing function, gets called before nock.define
 - `after`: a postprocessing function, gets called after nock.define
+- `afterRecord`: a postprocessing function, gets called after recording. Is passed the array of scopes recorded and should return the array scopes to save to the fixture
 
 
 ### Modes
