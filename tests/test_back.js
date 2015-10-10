@@ -281,6 +281,41 @@ tap.test('nockBack record tests', function (nw) {
 
   });
 
+
+  nw.test('it can filter after recording', function (t) {
+    nockBack.fixtures = __dirname + '/fixtures';
+
+    var options = {
+      host: 'www.google.com', method: 'GET', path: '/', port: 80
+    };
+
+    var fixture = 'filteredFixture.json';
+    var fixtureLoc = nockBack.fixtures + '/' + fixture;
+
+    t.false(exists(fixtureLoc));
+
+    var afterRecord = function(scopes) {
+       // You would do some filtering here, but for this test we'll just return an empty array
+      return [];
+    }
+
+    nockBack(fixture, {afterRecord: afterRecord}, function (done) {
+      http.request(options).end();
+      done();
+
+      t.true(exists(fixtureLoc));
+
+      nockBack(fixture, function (done) {
+        t.true(this.scopes.length == 0);
+        done();
+
+        fs.unlinkSync(fixtureLoc);
+        t.end();
+      });
+    });
+
+  });
+
   nw.end();
 })
 .on('end', function () {
