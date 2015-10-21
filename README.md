@@ -684,6 +684,8 @@ var scope = nock('http://my.existing.service.com', options)
  // GET /other/url => actually makes request to the server
 ```
 
+Applying `{allowUnmocked: true}` like this, so that you actually make a request to the server, means the interceptor is not used and will not removed from the interceptor list.
+
 # Expectations
 
 Every time an HTTP request is performed for a scope that is mocked, Nock expects to find a handler for it. If it doesn't, it will throw an error.
