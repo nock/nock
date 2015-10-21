@@ -684,7 +684,7 @@ var scope = nock('http://my.existing.service.com', options)
  // GET /other/url => actually makes request to the server
 ```
 
-Applying `{allowUnmocked: true}` like this, so that you actually make a request to the server, means the interceptor is not used and will not removed from the interceptor list.
+> Bear in mind that, when applying `{allowUnmocked: true}` if the request is made to the real server, no interceptor is removed.
 
 # Expectations
 
