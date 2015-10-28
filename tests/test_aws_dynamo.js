@@ -1,3 +1,5 @@
+'use strict';
+
 var nock = require('../');
 var AWS = require('aws-sdk');
 var test = require('tap').test;

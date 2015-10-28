@@ -1,3 +1,5 @@
+'use strict';
+
 var common  = require('../lib/common')
   , tap     = require('tap')
   , matchBody = require('../lib/match_body');
