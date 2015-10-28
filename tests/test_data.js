@@ -1,6 +1,7 @@
+'use strict';
+
 var nock = require('../');
 var http = require('http');
-
 var tap = require('tap')
 
 tap.test('data emits', function(t) {
