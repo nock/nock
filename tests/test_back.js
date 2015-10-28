@@ -1,3 +1,4 @@
+'use strict';
 
 var nock    = require('../.')
   , nockBack= nock.back
@@ -306,7 +307,7 @@ tap.test('nockBack record tests', function (nw) {
       t.true(exists(fixtureLoc));
 
       nockBack(fixture, function (done) {
-        t.true(this.scopes.length == 0);
+        t.true(this.scopes.length === 0);
         done();
 
         fs.unlinkSync(fixtureLoc);
