@@ -2130,7 +2130,7 @@ test('is done works', function(t) {
     .get('/nonexistent')
     .reply(200);
 
-  t.ok(!scope.isDone());
+  t.ok(!nock.isDone());
 
   var req = http.get({host: 'amazon.com', path: '/nonexistent'}, function(res) {
     t.assert(res.statusCode === 200, "should mock before cleanup");
