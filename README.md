@@ -708,7 +708,21 @@ setTimeout(function() {
 
 ## .isDone()
 
-You can also call `isDone()`, which will return a boolean saying if all the expectations are met or not (instead of throwing an exception);
+You can call `isDone()` on a single expectation to determine if the expectation was met:
+
+```js
+var scope = nock('http://google.com')
+  .get('/')
+  .reply(200);
+
+scope.isDone(); // will return false
+```
+
+It is also available in the global scope, which will determine if all expectations have been met:
+
+```js
+nock.isDone();
+```
 
 ## .cleanAll()
 

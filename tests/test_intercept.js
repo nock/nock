@@ -2125,6 +2125,20 @@ test('clean all works', function(t) {
 
 });
 
+test('is done works', function(t) {
+  var scope = nock('http://amazon.com')
+    .get('/nonexistent')
+    .reply(200);
+
+  t.ok(!scope.isDone());
+
+  var req = http.get({host: 'amazon.com', path: '/nonexistent'}, function(res) {
+    t.assert(res.statusCode === 200, "should mock before cleanup");
+    t.ok(nock.isDone());
+    t.end();
+  });
+});
+
 test('username and password works', function(t) {
   var scope = nock('http://passwordyy.com')
     .get('/')
