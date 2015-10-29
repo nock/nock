@@ -754,6 +754,12 @@ if (!scope.isDone()) {
 }
 ```
 
+It is also available in the global scope:
+
+```js
+console.error('pending mocks: %j', nock.pendingMocks());
+```
+
 # Logging
 
 Nock can log matches if you pass in a log function like this:

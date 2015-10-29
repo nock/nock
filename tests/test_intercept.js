@@ -2139,6 +2139,20 @@ test('is done works', function(t) {
   });
 });
 
+test('pending mocks works', function(t) {
+  var scope = nock('http://amazon.com')
+    .get('/nonexistent')
+    .reply(200);
+
+  t.deepEqual(nock.pendingMocks(), ['GET http://amazon.com:80/nonexistent']);
+
+  var req = http.get({host: 'amazon.com', path: '/nonexistent'}, function(res) {
+    t.assert(res.statusCode === 200, "should mock before cleanup");
+    t.deepEqual(nock.pendingMocks(), []);
+    t.end();
+  });
+});
+
 test('username and password works', function(t) {
   var scope = nock('http://passwordyy.com')
     .get('/')
