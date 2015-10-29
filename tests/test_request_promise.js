@@ -6,8 +6,7 @@ var rp = require('request-promise');
 
 test("IPV6 URL in request-promise get gets mocked", function(t) {
   var payload = 'somedata'
-  //var target = 'http://[2607:f0d0:1002:51::4]:8080';
-  var target = 'http://192.168.1.2:8080';
+  var target = 'http://[2607:f0d0:1002:51::4]:8080';
 
   var scope = nock(target)
     .post('/update')
