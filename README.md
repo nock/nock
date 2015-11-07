@@ -793,13 +793,13 @@ $ NOCK_OFF=true node my_test.js
 
 As default, if you do not mock a host, a real HTTP request will do, but sometimes you should not permit real HTTP request, so...
 
-For disable real http request.
+For disabling real http requests.
 
 ```js
 nock.disableNetConnect();
 ```
 
-So, if you try to request any host not 'nocked', it will thrown an NetConnectNotAllowedError.
+So, if you try to request any host not 'nocked', it will thrown an `NetConnectNotAllowedError`.
 
 ```js
 nock.disableNetConnect();
@@ -808,7 +808,7 @@ http.get('http://google.com/');
 // Nock: Not allow net connect for "google.com:80"
 ```
 
-For enabled real HTTP requests.
+For enabling real HTTP requests.
 
 ```js
 nock.enableNetConnect();
@@ -830,6 +830,18 @@ http.get('http://github.com/'); // only for second example
 http.get('http://google.com/');
 // this will throw NetConnectNotAllowedError with message:
 // Nock: Not allow net connect for "google.com:80"
+```
+
+A common use case when testing local endpoints would be to disable all but local host, then adding in additional nocks for external requests:
+
+```js
+nock.disableNetConnect();
+nock.enableNetConnect('127.0.0.1'); //Allow localhost connections so we can test local routes and mock servers.
+```
+Then when you're done with the test, you probably want to set everything back to normal:
+
+```js
+nock.enableNetConnect();
 ```
 
 # Recording
