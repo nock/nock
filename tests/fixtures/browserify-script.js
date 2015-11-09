@@ -1,23 +1,19 @@
+var assert = require('assert');
 var http = require('http');
 var nock = require('../../');
 
-document.getElementById('content').innerHTML = 'boop';
+nock.disableNetConnect();
+nock('http://browserifyland.com').get('/beep').reply(200, 'boop');
 
-//
-//
-// var assert = require('assert');
-
-// nock.disableNetConnect();
-// nock('http://browserifyland.com').get('/beep').reply('boop');
-
-// http.get('http://browserifyland.com/beep', function(res) {
-//   res.setEncoding('utf8');
-//   var body = '';
-//   res
-//     .on('data', function(d) {
-//       body += d;
-//     })
-//     .once('end', function() {
-//       document.findElementById('content').innerHTML = body;
-//     });
-// });
+http.get('http://browserifyland.com/beep', function(res) {
+  res.setEncoding('utf8');
+  var body = '';
+  res
+    .on('data', function(d) {
+      body += d;
+    })
+    .once('end', function() {
+      assert.equal(body, 'boop');
+      document.getElementById('content').innerHTML = body;
+    });
+});

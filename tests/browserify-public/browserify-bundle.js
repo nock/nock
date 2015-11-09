@@ -677,7 +677,8 @@ var RequestOverrider = require('./request_overrider'),
     parse            = require('url').parse,
     _                = require('lodash'),
     debug            = require('debug')('nock.intercept'),
-    timers           = require('timers');
+    timers           = require('timers'),
+    EventEmitter     = require('events').EventEmitter;
 
 
 /**
@@ -925,7 +926,7 @@ function removeInterceptor(options) {
 var originalClientRequest;
 
 function ErroringClientRequest(error) {
-  http.OutgoingMessage.call(this);
+  if (http.OutgoingMessage) http.OutgoingMessage.call(this);
   process.nextTick(function() {
     this.emit('error', error);
   }.bind(this));
@@ -938,8 +939,6 @@ if (http.ClientRequest) {
 function overrideClientRequest() {
   debug('Overriding ClientRequest');
 
-  if (! http.ClientRequest) return;
-
   if(originalClientRequest) {
     throw new Error('Nock already overrode http.ClientRequest');
   }
@@ -948,7 +947,7 @@ function overrideClientRequest() {
 
   //  Define the overriding client request that nock uses internally.
   function OverriddenClientRequest(options, cb) {
-    http.OutgoingMessage.call(this);
+    if (http.OutgoingMessage) http.OutgoingMessage.call(this);
 
     if (isOn() && hasHadInterceptors(options)) {
 
@@ -969,7 +968,7 @@ function overrideClientRequest() {
 
       //  Fallback to original ClientRequest if nock is off or the net connection is enabled.
       if(isOff() || isEnabledForNetConnect(options)) {
-        originalClientRequest.apply(this, arguments);
+        http.request.apply(this, arguments);
       } else {
         timers.setImmediate(function () {
           var error = new NetConnectNotAllowedError(options.host, options.path);
@@ -978,7 +977,11 @@ function overrideClientRequest() {
       }
     }
   }
-  inherits(OverriddenClientRequest, http.ClientRequest);
+  if (http.ClientRequest) {
+    inherits(OverriddenClientRequest, http.ClientRequest);
+  } else {
+    inherits(OverriddenClientRequest, EventEmitter);
+  }
 
   //  Override the http module's request but keep the original so that we can use it and later restore it.
   //  NOTE: We only override http.ClientRequest as https module also uses it.
@@ -1112,7 +1115,7 @@ module.exports.overrideClientRequest = overrideClientRequest;
 module.exports.restoreOverriddenClientRequest = restoreOverriddenClientRequest;
 
 }).call(this,require('_process'))
-},{"./common":3,"./request_overrider":9,"_process":25,"debug":91,"http":44,"lodash":97,"timers":50,"url":51,"util":54}],6:[function(require,module,exports){
+},{"./common":3,"./request_overrider":9,"_process":25,"debug":91,"events":19,"http":44,"lodash":97,"timers":50,"url":51,"util":54}],6:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -1627,7 +1630,8 @@ var EventEmitter     = require('events').EventEmitter,
     Socket           = require('./socket'),
     _                = require('lodash'),
     debug            = require('debug')('nock.request_overrider'),
-    timers           = require('timers');
+    timers           = require('timers'),
+    ReadableStream   = require('stream').Readable;
 
 function getHeader(request, name) {
   if (!request._headers) {
@@ -1702,8 +1706,15 @@ function setRequestHeaders(req, options, interceptor) {
 
 function RequestOverrider(req, options, interceptors, remove, cb) {
 
-  var response = new IncomingMessage(new EventEmitter()),
-      requestBodyBuffers = [],
+  var response;
+  if (IncomingMessage) {
+    response = new IncomingMessage(new EventEmitter());
+  } else {
+    response = new ReadableStream();
+    response._read = function() {};
+  }
+
+  var requestBodyBuffers = [],
       originalInterceptors = interceptors,
       aborted,
       emitError,
@@ -2096,7 +2107,7 @@ function RequestOverrider(req, options, interceptors, remove, cb) {
 module.exports = RequestOverrider;
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"./common":3,"./delayed_body":4,"./socket":11,"_process":25,"buffer":15,"debug":91,"events":19,"http":44,"lodash":97,"propagate":99,"timers":50}],10:[function(require,module,exports){
+},{"./common":3,"./delayed_body":4,"./socket":11,"_process":25,"buffer":15,"debug":91,"events":19,"http":44,"lodash":97,"propagate":99,"stream":43,"timers":50}],10:[function(require,module,exports){
 (function (Buffer){
 /* jshint strict:false */
 /**
@@ -24185,27 +24196,23 @@ function explicitPropagate(events, source, dest) {
   }
 }
 },{}],100:[function(require,module,exports){
+var assert = require('assert');
 var http = require('http');
 var nock = require('../../');
 
-document.getElementById('content').innerHTML = 'boop';
+nock.disableNetConnect();
+nock('http://browserifyland.com').get('/beep').reply(200, 'boop');
 
-//
-//
-// var assert = require('assert');
-
-// nock.disableNetConnect();
-// nock('http://browserifyland.com').get('/beep').reply('boop');
-
-// http.get('http://browserifyland.com/beep', function(res) {
-//   res.setEncoding('utf8');
-//   var body = '';
-//   res
-//     .on('data', function(d) {
-//       body += d;
-//     })
-//     .once('end', function() {
-//       document.findElementById('content').innerHTML = body;
-//     });
-// });
-},{"../../":1,"http":44}]},{},[100]);
+http.get('http://browserifyland.com/beep', function(res) {
+  res.setEncoding('utf8');
+  var body = '';
+  res
+    .on('data', function(d) {
+      body += d;
+    })
+    .once('end', function() {
+      assert.equal(body, 'boop');
+      document.getElementById('content').innerHTML = body;
+    });
+});
+},{"../../":1,"assert":13,"http":44}]},{},[100]);
