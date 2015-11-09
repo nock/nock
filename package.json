@@ -186,8 +186,8 @@
     "zombie": "^4.2.1"
   },
   "scripts": {
-    "test": "node tests/test.js",
-    "coverage": "istanbul cover tests/test.js && istanbul check-coverage",
+    "test": "node --harmony tests/test.js",
+    "coverage": "node --harmony node_modules/istanbul/lib/cli.js cover tests/test.js && istanbul check-coverage",
     "coveralls": "cat ./coverage/lcov.info | coveralls && rm -rf ./coverage",
     "jshint": "jshint lib/*.js"
   },
