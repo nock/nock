@@ -168,19 +168,22 @@
   },
   "devDependencies": {
     "aws-sdk": "^2.0.15",
+    "browserify": "^12.0.1",
     "coveralls": "^2.11.2",
     "hyperquest": "^0.3.0",
     "istanbul": "^0.3.8",
     "jshint": "^2.5.6",
     "needle": "^0.7.1",
+    "node-static": "^0.7.7",
     "pre-commit": "0.0.9",
     "request": "2.61.0",
+    "request-promise": "^0.4.3",
     "restify": "^2.8.1",
     "restler": "3.2.2",
     "rimraf": "^2.3.2",
     "superagent": "~0.15.7",
-    "request-promise": "^0.4.3",
-    "tap": "^0.7.1"
+    "tap": "^0.7.1",
+    "zombie": "^4.2.1"
   },
   "scripts": {
     "test": "node tests/test.js",
