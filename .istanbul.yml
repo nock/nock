@@ -1,3 +1,5 @@
+instrumentation:
+    excludes: ['tests/**/*.js']
 check:
     global:
         lines: 90
