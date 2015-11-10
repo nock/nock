@@ -1,5 +1,5 @@
 instrumentation:
-    excludes: ['tests/**/*.js']
+    excludes: ['tests/**/*.js', 'examples/**/*.js']
 check:
     global:
         lines: 90
