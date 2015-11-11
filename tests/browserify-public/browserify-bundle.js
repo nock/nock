@@ -1645,6 +1645,7 @@ function getHeader(request, name) {
 
 function setHeader(request, name, value) {
   debug('setHeader', name, value);
+
   var key = name.toLowerCase();
 
   request._headers = request._headers || {};
@@ -2316,6 +2317,9 @@ function startScope(basePath, options) {
 
         var reqHeader = this.reqheaders[key];
         var header = options.headers[key];
+        if (header && (typeof header !== 'string') && header.toString) {
+          header = header.toString();
+        }
 
         //  We skip 'host' header comparison unless it's available in both mock and actual request.
         //  This because 'host' may get inserted by Nock itself and then get recorder.
