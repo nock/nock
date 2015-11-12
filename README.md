@@ -16,7 +16,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
 
 - [Install](#install)
 - [Use](#use)
-    - [READ THIS](#read-this-1---about-interceptors)
+    - [READ THIS](#read-this---about-interceptors)
     - [Specifying request body](#specifying-request-body)
     - [Specifying replies](#specifying-replies)
     - [Specifying headers](#specifying-headers)
@@ -88,17 +88,11 @@ It will intercept an HTTP GET request to '/users/1' and reply with a status 200,
 
 Then the test can call the module, and the module will do the HTTP requests.
 
-## READ THIS! (1) - About interceptors
+## READ THIS! - About interceptors
 
 When you setup an interceptor for an URL and that interceptor is used, it is removed from the interceptor list.
 This means that you can intercept 2 or more calls to the same URL and return different things on each of them.
 It also means that you must setup one interceptor for each request you are going to have, otherwise nock will throw an error because that URL was not present in the interceptor list.
-
-## READ THIS! (2) - About enableNetConnect
-
-By the time you define a nock mock, nock will disable all HTTP requests, except for the ones that you specifically create a nock scope for.
-
-To allow all HTTP requests, call [`nock.enableNetConnect`](#enabledisable-real-http-request).
 
 ## Specifying request body
 
@@ -808,13 +802,13 @@ http.get('http://google.com/');
 // Nock: Not allow net connect for "google.com:80"
 ```
 
-For enabling real HTTP requests.
+For enabling real HTTP requests (the default behaviour).
 
 ```js
 nock.enableNetConnect();
 ```
 
-You could restrict real HTTP request...
+You could allow real HTTP request for certain host names by providing a string or a regular expression for the hostname:
 
 ```js
 // using a string
