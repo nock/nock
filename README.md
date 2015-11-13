@@ -1101,6 +1101,10 @@ Nock works by overriding Node's `http.request` function. Also, it overrides `htt
 #Debugging
 Nock uses debug, so just run with environmental variable DEBUG set to nock.*
 
+```js
+$ DEBUG=nock.* node my_test.js
+```
+
 # PROTIP
 
 If you don't want to match the request body you can use this trick (by @theycallmeswift):
