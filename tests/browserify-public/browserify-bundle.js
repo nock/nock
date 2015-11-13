@@ -18,7 +18,6 @@ module.exports.restore = recorder.restore;
 var nock = require('./scope');
 var recorder = require('./recorder');
 
-var fs = require('fs');
 var format = require('util').format;
 var mkdirp = require('mkdirp');
 var path = require('path');
@@ -26,6 +25,14 @@ var expect = require('chai').expect;
 var debug = require('debug')('nock.back');
 
 var _mode = null;
+
+var fs;
+
+try {
+  fs = require('fs');
+} catch(err) {
+  // do nothing, probably in browser
+}
 
 
 
@@ -151,6 +158,9 @@ var record = {
 
 
   start: function (fixture, options) {
+    if (! fs) {
+      throw new Error('no fs');
+    }
     var context = load(fixture, options);
 
     if( !context.isLoaded ) {
@@ -257,6 +267,10 @@ function applyHook(scopes, fn) {
 
 
 function fixtureExists(fixture) {
+  if (! fs) {
+    throw new Error('no fs');
+  }
+
   return fs.existsSync(fixture);
 }
 
