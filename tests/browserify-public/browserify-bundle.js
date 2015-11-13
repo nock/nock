@@ -2114,8 +2114,7 @@ module.exports = RequestOverrider;
 /**
  * @module nock/scope
  */
-var fs              = require('fs')
-  , globalIntercept = require('./intercept')
+var globalIntercept = require('./intercept')
   , mixin           = require('./mixin')
   , matchBody       = require('./match_body')
   , common          = require('./common')
@@ -2123,6 +2122,14 @@ var fs              = require('fs')
   , url             = require('url')
   , _               = require('lodash')
   , debug           = require('debug')('nock.scope');
+
+var fs;
+
+try {
+  fs = require('fs');
+} catch(err) {
+  // do nothing, we're in the browser
+}
 
 function isStream(obj) {
   return (typeof obj !== 'undefined') &&
@@ -2259,6 +2266,9 @@ function startScope(basePath, options) {
     }
 
     function replyWithFile(statusCode, filePath, headers) {
+      if (! fs) {
+        throw new Error('No fs');
+      }
       var readStream = fs.createReadStream(filePath);
       readStream.pause();
       this.filePath = filePath;
@@ -2825,6 +2835,10 @@ function cleanAll() {
 }
 
 function loadDefs(path) {
+  if (! fs) {
+    throw new Error('No fs');
+  }
+
   var contents = fs.readFileSync(path);
   return JSON.parse(contents);
 }
