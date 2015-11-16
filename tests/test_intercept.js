@@ -4185,18 +4185,6 @@ test('query() with "true" will allow all query strings to pass', function (t) {
   })
 });
 
-test('query() will not match when there is no query string in the request', function (t) {
-  var scope = nock('https://d.com')
-    .get('/a')
-    .query({foo:'bar'})
-    .reply(200);
-
-  mikealRequest('https://d.com/a', function(err, res) {
-    t.equal(err.message.trim(), 'Nock: No match for request GET https://d.com/a');
-    t.end();
-  })
-});
-
 test('query() will not match when a query string does not match name=value', function (t) {
   var scope = nock('https://c.com')
     .get('/b')
@@ -4246,6 +4234,20 @@ test('query() will not match when a query string has fewer correct values than e
 
   mikealRequest('http://google.com/?num=1str=fou', function(err, res) {
     t.equal(err.message.trim(), 'Nock: No match for request GET http://google.com/?num=1str=fou');
+    t.end();
+  })
+});
+
+test('query(true) will match when the path has no query', function (t) {
+  var scope = nock('http://google.com')
+    .get('/')
+    .query(true)
+    .reply(200);
+
+  mikealRequest('http://google.com', function(err, res) {
+    t.ok(!err, 'no error');
+    t.ok(res);
+    t.equal(res.statusCode, 200);
     t.end();
   })
 });
