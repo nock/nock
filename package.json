@@ -182,7 +182,7 @@
     "restify": "^2.8.1",
     "restler": "3.2.2",
     "rimraf": "^2.3.2",
-    "superagent": "~0.15.7",
+    "superagent": "^1.4.0",
     "tap": "^0.7.1",
     "zombie": "^4.2.1"
   },
