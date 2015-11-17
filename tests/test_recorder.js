@@ -105,8 +105,7 @@ tap.test('records and replays objects correctly', function(t) {
 
   var makeRequest = function(callback) {
     superagent
-      .post('http://google.com')
-      .send('test')
+      .get('http://google.com')
       .end(callback);
   };
 
@@ -121,7 +120,7 @@ tap.test('records and replays objects correctly', function(t) {
     nock.recorder.clear();
     nock.activate();
 
-    t.equal(nockDefs.length, 1);
+    t.equal(nockDefs.length, 2);
     var nocks = nock.define(nockDefs);
 
     makeRequest(function(mockedErr, mockedResp) {
@@ -153,8 +152,7 @@ tap.test('records and replays correctly with filteringRequestBody', function(t) 
 
   var makeRequest = function(callback) {
     superagent
-      .post('http://google.com')
-      .send('test')
+      .get('http://google.com')
       .end(callback);
   };
 
@@ -169,7 +167,7 @@ tap.test('records and replays correctly with filteringRequestBody', function(t) 
     nock.recorder.clear();
     nock.activate();
 
-    t.equal(nockDefs.length, 1);
+    t.equal(nockDefs.length, 2);
     var nockDef = _.first(nockDefs);
     var filteringRequestBodyCounter = 0;
     nockDef.filteringRequestBody = function(body, aRecodedBody) {
