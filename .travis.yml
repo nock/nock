@@ -4,6 +4,7 @@ node_js:
   - "0.11"
   - "0.12"
   - 4
+  - 5
 script: "npm run coverage"
 sudo: false
 after_success: "npm run coveralls"
