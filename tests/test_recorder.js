@@ -799,21 +799,21 @@ tap.test('outputs query string parameters using query()', function(t) {
 
   var makeRequest = function(callback) {
     superagent
-      .get('https://domain.com/tx')
+      .get('https://example.com/')
       .query({'param1':1,'param2':2})
       .end(callback);
   };
 
   makeRequest(function(err, resp) {
-
-    t.ok(!err);
-    t.ok(resp);
-    t.ok(resp.headers);
+    t.ok(!err, err && err.message || 'no error');
+    t.ok(resp, 'have response');
+    t.ok(resp.headers, 'have headers');
 
     var ret = nock.recorder.play();
     t.equal(ret.length, 1);
     t.type(ret[0], 'string');
-    t.equal(ret[0].indexOf("\nnock('https://domain.com:443')\n  .get('/tx')\n  .query({\"param1\":\"1\",\"param2\":\"2\"})\n  .reply("), 0);
+    var match = "\nnock('https://example.com:443')\n  .get('/')\n  .query({\"param1\":\"1\",\"param2\":\"2\"})\n  .reply(";
+    t.equal(ret[0].substring(0, match.length), match);
     t.end();
   });
 });
