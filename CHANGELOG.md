@@ -1,3 +1,15 @@
+3.1.1 / 2015-11-19
+==================
+
+  * [fix] delay now works with replyWithError. Fixes [#411](https://github.com/pgte/nock/issues/411)
+  * generated change log
+  * changelog script. fixes [#287](https://github.com/pgte/nock/issues/287)
+  * added node v5 to be tested in travis
+  * added node v0.10 to travis tests
+  * reinstated recorder tests (related to [#404](https://github.com/pgte/nock/issues/404))
+  * Merge branch 'ierceg-fix-issue-404'
+  * Fix [#404](https://github.com/pgte/nock/issues/404) replace bad POST with GET requests
+
 3.1.0 / 2015-11-17
 ==================
 
@@ -158,10 +170,3 @@
   * fix recording body of form-data
   * In README.md, several .reply calls were missing status so body wasn't returned
   * Merge branch 'ZephyrHealth-chai'
-  * update chai semver to support versions < 4.0.0 (FIX [#361](https://github.com/pgte/nock/issues/361))
-
-2.10.0 / 2015-08-05
-===================
-
-  * v2.10.0
-  * added support for res.rawHeaders. fixed [#354](https://github.com/pgte/nock/issues/354)
