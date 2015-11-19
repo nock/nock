@@ -2853,6 +2853,23 @@ test('delay works with when you return a generic stream from the reply callback'
   }).end('OK');
 });
 
+test('delay works with replyWithError', function (t) {
+  nock('http://errorland')
+    .get('/')
+    .delay(100)
+    .replyWithError('this is an error message');
+
+  setTimeout(function() {
+    req.once('error', function(err) {
+      t.equal(err.message, 'this is an error message');
+      t.end();
+    });
+  }, 100);
+
+  var req = http.get('http://errorland/');
+
+});
+
 test("finish event fired before end event (bug-139)", function(t) {
 	var scope = nock('http://www.filterboddiezregexp.com')
 		.filteringRequestBody(/mia/, 'nostra')
