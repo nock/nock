@@ -54,7 +54,7 @@ tap.test('records', function(t) {
       ret = nock.recorder.play();
       t.equal(ret.length, 1);
       t.type(ret[0], 'string');
-      t.equal(ret[0].indexOf("\nnock('http://google.com:80')\n  .post('/', \"ABCDEF\")\n  .reply("), 0);
+      t.equal(ret[0].indexOf("\nnock('http://google.com:80', {\"encodedQueryParams\":true})\n  .post('/', \"ABCDEF\")\n  .reply("), 0);
       t.end();
     });
   });
@@ -227,7 +227,7 @@ tap.test('when request body is json, it goes unstringified', function(t) {
       var ret = nock.recorder.play();
       t.ok(ret.length >= 1);
       ret = ret[1] || ret[0];
-      t.equal(ret.indexOf("\nnock('http://www.google.com:80')\n  .post('/', {\"a\":1,\"b\":true})\n  .reply("), 0);
+      t.equal(ret.indexOf("\nnock('http://www.google.com:80', {\"encodedQueryParams\":true})\n  .post('/', {\"a\":1,\"b\":true})\n  .reply("), 0);
       t.end();
     });
   });
@@ -810,7 +810,7 @@ tap.test('outputs query string parameters using query()', function(t) {
     var ret = nock.recorder.play();
     t.equal(ret.length, 1);
     t.type(ret[0], 'string');
-    var match = "\nnock('https://example.com:443')\n  .get('/')\n  .query({\"param1\":\"1\",\"param2\":\"2\"})\n  .reply(";
+    var match = "\nnock('https://example.com:443', {\"encodedQueryParams\":true})\n  .get('/')\n  .query({\"param1\":\"1\",\"param2\":\"2\"})\n  .reply(";
     t.equal(ret[0].substring(0, match.length), match);
     t.end();
   });
@@ -835,7 +835,7 @@ tap.test('removes query params from from that path and puts them in query()', fu
       ret = nock.recorder.play();
       t.equal(ret.length, 1);
       t.type(ret[0], 'string');
-      t.equal(ret[0].indexOf("\nnock('http://google.com:80')\n  .post('/', \"ABCDEF\")\n  .query({\"param1\":\"1\",\"param2\":\"2\"})\n  .reply("), 0);
+      t.equal(ret[0].indexOf("\nnock('http://google.com:80', {\"encodedQueryParams\":true})\n  .post('/', \"ABCDEF\")\n  .query({\"param1\":\"1\",\"param2\":\"2\"})\n  .reply("), 0);
       t.end();
     });
   });
