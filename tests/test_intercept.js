@@ -4169,7 +4169,7 @@ test('query() matches a query string using regexp', function (t) {
   })
 });
 
-test('query() matches a query string that is url encoded', function (t) {
+test('query() matches a query string that contains special RFC3986 characters', function (t) {
   var scope = nock('http://google.com')
     .get('/')
     .query({'foo&bar':'hello&world'})
@@ -4183,6 +4183,31 @@ test('query() matches a query string that is url encoded', function (t) {
   };
 
   mikealRequest(options, function(err, res) {
+    if (err) throw err;
+    t.equal(res.statusCode, 200);
+    t.end();
+  })
+});
+
+test('query() expects unencoded query params', function (t) {
+  var scope = nock('http://google.com')
+    .get('/')
+    .query({'foo':'hello%20world'})
+    .reply(200);
+
+  mikealRequest('http://google.com?foo=hello%20world', function(err, res) {
+    t.similar(err.toString(), /Error: Nock: No match for request/);
+    t.end();
+  });
+});
+
+test('query() matches a query string with pre-encoded values', function (t) {
+  var scope = nock('http://google.com', { encodedQueryParams: true })
+    .get('/')
+    .query({'foo':'hello%20world'})
+    .reply(200);
+
+  mikealRequest('http://google.com?foo=hello%20world', function(err, res) {
     if (err) throw err;
     t.equal(res.statusCode, 200);
     t.end();
