@@ -1328,7 +1328,9 @@ function generateRequestAndResponse(req, bodyChunks, options, res, dataChunks) {
   var ret = [];
   ret.push('\nnock(\'');
   ret.push(getScope(options));
-  ret.push('\')\n');
+  ret.push('\', ');
+  ret.push(JSON.stringify({ encodedQueryParams: true }));
+  ret.push(')\n');
   ret.push('  .');
   ret.push(getMethod(options).toLowerCase());
   ret.push('(\'');
@@ -2549,11 +2551,11 @@ function startScope(basePath, options) {
             value = '';
             break;
           case _.isString(value):
-            value = encodeURIComponent(value);
+            if (!scopeOptions.encodedQueryParams) value = encodeURIComponent(value);
             break;
           }
 
-          q = encodeURIComponent(q);
+          if (!scopeOptions.encodedQueryParams) q = encodeURIComponent(q);
 
           // everything else, incl. Strings and RegExp values are used 'as-is'
           this.queries[q] = value;
