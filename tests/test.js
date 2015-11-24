@@ -23,3 +23,4 @@ if (process.versions.node >= '0.11' ) {
 if (process.versions.node >= '0.11' ) {
   require('./test_browserify');
 }
+require('./test_encode_querystring');

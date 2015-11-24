@@ -574,6 +574,14 @@ var deleteHeadersField = function(headers, fieldNameToDelete) {
 
 };
 
+function specialEncodeURIComponent(str) {
+  return encodeURIComponent(str).replace(/[!'()*]/g, _encodeParens);
+}
+
+function _encodeParens(c) {
+  return '%' + c.charCodeAt(0).toString(16).toUpperCase();
+}
+
 exports.normalizeRequestOptions = normalizeRequestOptions;
 exports.isBinaryBuffer = isBinaryBuffer;
 exports.mergeChunks = mergeChunks;
@@ -584,6 +592,7 @@ exports.isContentEncoded = isContentEncoded;
 exports.headersFieldNamesToLowerCase = headersFieldNamesToLowerCase;
 exports.headersFieldsArrayToLowerCase = headersFieldsArrayToLowerCase;
 exports.deleteHeadersField = deleteHeadersField;
+exports.encodeURIComponent = specialEncodeURIComponent;
 
 }).call(this,require("buffer").Buffer)
 },{"buffer":15,"debug":91,"http":44,"https":20,"lodash":97}],4:[function(require,module,exports){
@@ -2551,11 +2560,11 @@ function startScope(basePath, options) {
             value = '';
             break;
           case _.isString(value):
-            if (!scopeOptions.encodedQueryParams) value = encodeURIComponent(value);
+            if (!scopeOptions.encodedQueryParams) value = common.encodeURIComponent(value);
             break;
           }
 
-          if (!scopeOptions.encodedQueryParams) q = encodeURIComponent(q);
+          if (!scopeOptions.encodedQueryParams) q = common.encodeURIComponent(q);
 
           // everything else, incl. Strings and RegExp values are used 'as-is'
           this.queries[q] = value;
