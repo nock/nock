@@ -328,7 +328,7 @@ Back.setMode(process.env.NOCK_BACK_MODE || 'dryrun');
 module.exports = exports = Back;
 
 }).call(this,require('_process'))
-},{"./recorder":8,"./scope":10,"_process":25,"chai":56,"debug":91,"fs":12,"mkdirp":98,"path":24,"util":54}],3:[function(require,module,exports){
+},{"./recorder":8,"./scope":10,"_process":25,"chai":56,"debug":91,"fs":12,"mkdirp":99,"path":24,"util":54}],3:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -593,7 +593,7 @@ exports.deleteHeadersField = deleteHeadersField;
 exports.percentEncode = percentEncode;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":15,"debug":91,"http":44,"https":20,"lodash":97}],4:[function(require,module,exports){
+},{"buffer":15,"debug":91,"http":44,"https":20,"lodash":98}],4:[function(require,module,exports){
 (function (Buffer,process){
 'use strict';
 
@@ -1136,7 +1136,7 @@ module.exports.overrideClientRequest = overrideClientRequest;
 module.exports.restoreOverriddenClientRequest = restoreOverriddenClientRequest;
 
 }).call(this,require('_process'))
-},{"./common":3,"./request_overrider":9,"_process":25,"debug":91,"events":19,"http":44,"lodash":97,"timers":50,"url":51,"util":54}],6:[function(require,module,exports){
+},{"./common":3,"./request_overrider":9,"_process":25,"debug":91,"events":19,"http":44,"lodash":98,"timers":50,"url":51,"util":54}],6:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -1207,7 +1207,7 @@ function mixin(a, b) {
 
 module.exports = mixin;
 
-},{"lodash":97}],8:[function(require,module,exports){
+},{"lodash":98}],8:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -1639,7 +1639,7 @@ exports.restore = restore;
 exports.clear = clear;
 
 }).call(this,require("buffer").Buffer)
-},{"./common":3,"./intercept":5,"buffer":15,"debug":91,"lodash":97,"stream":43,"url":51,"util":54}],9:[function(require,module,exports){
+},{"./common":3,"./intercept":5,"buffer":15,"debug":91,"lodash":98,"stream":43,"url":51,"util":54}],9:[function(require,module,exports){
 (function (process,Buffer){
 'use strict';
 
@@ -2131,7 +2131,7 @@ function RequestOverrider(req, options, interceptors, remove, cb) {
 module.exports = RequestOverrider;
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"./common":3,"./delayed_body":4,"./socket":11,"_process":25,"buffer":15,"debug":91,"events":19,"http":44,"lodash":97,"propagate":99,"stream":43,"timers":50}],10:[function(require,module,exports){
+},{"./common":3,"./delayed_body":4,"./socket":11,"_process":25,"buffer":15,"debug":91,"events":19,"http":44,"lodash":98,"propagate":100,"stream":43,"timers":50}],10:[function(require,module,exports){
 (function (Buffer){
 /* jshint strict:false */
 /**
@@ -2144,7 +2144,8 @@ var globalIntercept = require('./intercept')
   , assert          = require('assert')
   , url             = require('url')
   , _               = require('lodash')
-  , debug           = require('debug')('nock.scope');
+  , debug           = require('debug')('nock.scope')
+  , stringify       = require('json-stringify-safe');
 
 var fs;
 
@@ -2266,7 +2267,7 @@ function startScope(basePath, options) {
             !Buffer.isBuffer(body) &&
             !isStream(body)) {
           try {
-            body = JSON.stringify(body);
+            body = stringify(body);
             if (!this.headers) {
               this.headers = {};
             }
@@ -2307,7 +2308,7 @@ function startScope(basePath, options) {
     };
 
     function match(options, body, hostNameOnly) {
-      debug('match %j, body = %j', options, body);
+      debug('match %s, body = %s', stringify(options), stringify(body));
       if (hostNameOnly) {
         return options.hostname === urlParts.hostname;
       }
@@ -2458,7 +2459,7 @@ function startScope(basePath, options) {
       // special logger for query()
       if (queryIndex !== -1) {
         logger('matching ' + matchKey + '?' + queries.join('&') + ' to ' + this._key +
-               ' with query(' + JSON.stringify(this.queries) + '): ' + matches);
+               ' with query(' + stringify(this.queries) + '): ' + matches);
       } else {
         logger('matching ' + matchKey + ' to ' + this._key + ': ' + matches);
       }
@@ -2980,7 +2981,7 @@ module.exports.loadDefs = loadDefs;
 module.exports.define = define;
 
 }).call(this,require("buffer").Buffer)
-},{"./common":3,"./intercept":5,"./match_body":6,"./mixin":7,"assert":13,"buffer":15,"debug":91,"fs":12,"lodash":97,"url":51}],11:[function(require,module,exports){
+},{"./common":3,"./intercept":5,"./match_body":6,"./mixin":7,"assert":13,"buffer":15,"debug":91,"fs":12,"json-stringify-safe":97,"lodash":98,"url":51}],11:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -17315,6 +17316,35 @@ function shim (obj) {
 }
 
 },{}],97:[function(require,module,exports){
+exports = module.exports = stringify
+exports.getSerialize = serializer
+
+function stringify(obj, replacer, spaces, cycleReplacer) {
+  return JSON.stringify(obj, serializer(replacer, cycleReplacer), spaces)
+}
+
+function serializer(replacer, cycleReplacer) {
+  var stack = [], keys = []
+
+  if (cycleReplacer == null) cycleReplacer = function(key, value) {
+    if (stack[0] === value) return "[Circular ~]"
+    return "[Circular ~." + keys.slice(0, stack.indexOf(value)).join(".") + "]"
+  }
+
+  return function(key, value) {
+    if (stack.length > 0) {
+      var thisPos = stack.indexOf(this)
+      ~thisPos ? stack.splice(thisPos + 1) : stack.push(this)
+      ~thisPos ? keys.splice(thisPos, Infinity, key) : keys.push(key)
+      if (~stack.indexOf(value)) value = cycleReplacer.call(this, key, value)
+    }
+    else stack.push(value)
+
+    return replacer == null ? value : replacer.call(this, key, value)
+  }
+}
+
+},{}],98:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -24103,7 +24133,7 @@ function shim (obj) {
 }.call(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],98:[function(require,module,exports){
+},{}],99:[function(require,module,exports){
 (function (process){
 var path = require('path');
 var fs = require('fs');
@@ -24205,7 +24235,7 @@ mkdirP.sync = function sync (p, opts, made) {
 };
 
 }).call(this,require('_process'))
-},{"_process":25,"fs":12,"path":24}],99:[function(require,module,exports){
+},{"_process":25,"fs":12,"path":24}],100:[function(require,module,exports){
 function propagate(events, source, dest) {
   if (arguments.length < 3) {
     dest = source;
@@ -24268,7 +24298,7 @@ function explicitPropagate(events, source, dest) {
     listeners.forEach(unregister);
   }
 }
-},{}],100:[function(require,module,exports){
+},{}],101:[function(require,module,exports){
 var assert = require('assert');
 var http = require('http');
 var nock = require('../../');
@@ -24288,4 +24318,4 @@ http.get('http://browserifyland.com/beep', function(res) {
       document.getElementById('content').innerHTML = body;
     });
 });
-},{"../../":1,"assert":13,"http":44}]},{},[100]);
+},{"../../":1,"assert":13,"http":44}]},{},[101]);
