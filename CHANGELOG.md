@@ -1,3 +1,10 @@
+3.3.0 / 2015-11-24
+==================
+
+  * changelog
+  * v3.3.0
+  * query string encode correctluy encodes parens. fixes [#416](https://github.com/pgte/nock/issues/416)
+
 3.2.0 / 2015-11-23
 ==================
 
@@ -165,13 +172,3 @@
   * Fix authentication using username only
     When using just an username for authentication, the password
     `undefined` would be used instead of `''`.
-  * Use travis container infrastructure
-  * Add support for node 4.0.0+
-
-2.11.0 / 2015-09-14
-===================
-
-  * v2.11.0
-  * removed node 4
-  * added node 4.0
-  * Merge branch 'pwmckenna-propagatedataevents'
