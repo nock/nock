@@ -530,7 +530,7 @@ var headersFieldNamesToLowerCase = function(headers) {
   //  For each key in the headers, delete its value and reinsert it with lower-case key.
   //  Keys represent headers field names.
   var lowerCaseHeaders = {};
-  _(headers).keys().each(function(fieldName) {
+  _.each(_.keys(headers), function(fieldName) {
     var lowerCaseFieldName = fieldName.toLowerCase();
     if(!_.isUndefined(lowerCaseHeaders[lowerCaseFieldName])) {
       throw new Error('Failed to convert header keys to lower case due to field name conflict: ' + lowerCaseFieldName);
