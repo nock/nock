@@ -1,3 +1,13 @@
+3.3.1 / 2015-11-25
+==================
+
+  * changelog
+  * v3.3.1
+  * browserify bundle update
+  * Merge branch 'dukedorje-master'
+  * The underscore wrapped version reads better, only it doesn't work.
+  * encodeURIComponent -> percentEncode
+
 3.3.0 / 2015-11-24
 ==================
 
@@ -162,13 +172,3 @@
   * Remove throw error statement from test (copy paste error)
   * Test wording change
   * Add query param length check to prevent false positives
-  * added @ruimarinho as contributor
-
-2.12.0 / 2015-09-17
-===================
-
-  * v2.12.0
-  * Merge branch 'seegno-forks-bugfix/auth-with-username-only'
-  * Fix authentication using username only
-    When using just an username for authentication, the password
-    `undefined` would be used instead of `''`.
