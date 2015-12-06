@@ -1118,6 +1118,17 @@ var scope = nock('http://api.myservice.com')
   .reply(200, 'OK');
 ```
 
+
+# Generate Changelog
+
+```
+$ npm install changelog -g
+```
+
+```
+$ npm run changelog
+```
+
 # License
 
 (The MIT License)
