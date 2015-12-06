@@ -170,7 +170,6 @@
   "devDependencies": {
     "aws-sdk": "^2.0.15",
     "browserify": "^12.0.1",
-    "changelog": "^1.0.7",
     "coveralls": "^2.11.2",
     "hyperquest": "^0.3.0",
     "isomorphic-fetch": "^2.2.0",
