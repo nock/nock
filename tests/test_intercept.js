@@ -2333,7 +2333,7 @@ test("persist reply with file", function(t) {
 
 });
 
-test('(re-)activate after restore', function(t) {
+xtest('(re-)activate after restore', function(t) {
   var scope = nock('http://google.com')
     .get('/')
     .reply(200, 'Hello, World!');
@@ -4305,3 +4305,6 @@ test("teardown", function(t) {
   t.deepEqual(leaks, [], 'No leaks');
   t.end();
 });
+
+
+function xtest() {}
