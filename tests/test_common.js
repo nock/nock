@@ -22,6 +22,36 @@ tap.test('matchBody should not throw, when headers come node-fetch style as arra
   t.end()
 });
 
+tap.test('matchBody should not ignore new line characters from strings when Content-Type contains \'multipart\'', function(t) {
+  var str1 = "something //here is something more \nHello";
+  var str2 = "something //here is something more \nHello";
+  var testThis = {
+    headers: {
+      'Content-Type': "multipart/form-data;"
+    }
+  }
+  var matched = matchBody.call(testThis, function (body) {
+    return body === str1;
+  }, str2);
+  t.true(matched);
+  t.end()
+});
+
+tap.test('matchBody should not ignore new line characters from strings when Content-Type contains \'multipart\' (arrays come node-fetch style as array)', function(t) {
+  var str1 = "something //here is something more \nHello";
+  var str2 = "something //here is something more \nHello";
+  var testThis = {
+    headers: {
+      'Content-Type': ["multipart/form-data;"]
+    }
+  }
+  var matched = matchBody.call(testThis, function (body) {
+    return body === str1;
+  }, str2);
+  t.true(matched);
+  t.end()
+});
+
 tap.test('matchBody uses strict equality for deep comparisons', function(t) {
   var spec = { number: 1 };
   var body = '{"number": "1"}';
