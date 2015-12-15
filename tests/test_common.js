@@ -12,6 +12,16 @@ tap.test('matchBody ignores new line characters from strings', function(t) {
   t.end()
 });
 
+tap.test('matchBody should not throw, when headers come node-fetch style as array', function(t) {
+  var testThis = {
+    headers: {
+      'Content-Type': ["multipart/form-data;"]
+    }
+  }
+  matchBody.call(testThis, {}, "test");
+  t.end()
+});
+
 tap.test('matchBody uses strict equality for deep comparisons', function(t) {
   var spec = { number: 1 };
   var body = '{"number": "1"}';
