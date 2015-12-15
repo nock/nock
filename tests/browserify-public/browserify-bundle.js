@@ -328,7 +328,7 @@ Back.setMode(process.env.NOCK_BACK_MODE || 'dryrun');
 module.exports = exports = Back;
 
 }).call(this,require('_process'))
-},{"./recorder":8,"./scope":10,"_process":25,"chai":56,"debug":91,"fs":12,"mkdirp":99,"path":24,"util":54}],3:[function(require,module,exports){
+},{"./recorder":8,"./scope":10,"_process":25,"chai":56,"debug":92,"fs":12,"mkdirp":100,"path":24,"util":54}],3:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -593,7 +593,7 @@ exports.deleteHeadersField = deleteHeadersField;
 exports.percentEncode = percentEncode;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":15,"debug":91,"http":44,"https":20,"lodash":98}],4:[function(require,module,exports){
+},{"buffer":15,"debug":92,"http":44,"https":20,"lodash":99}],4:[function(require,module,exports){
 (function (Buffer,process){
 'use strict';
 
@@ -1136,7 +1136,7 @@ module.exports.overrideClientRequest = overrideClientRequest;
 module.exports.restoreOverriddenClientRequest = restoreOverriddenClientRequest;
 
 }).call(this,require('_process'))
-},{"./common":3,"./request_overrider":9,"_process":25,"debug":91,"events":19,"http":44,"lodash":98,"timers":50,"url":51,"util":54}],6:[function(require,module,exports){
+},{"./common":3,"./request_overrider":9,"_process":25,"debug":92,"events":19,"http":44,"lodash":99,"timers":50,"url":51,"util":54}],6:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -1191,7 +1191,7 @@ function matchBody(spec, body) {
 };
 
 }).call(this,{"isBuffer":require("../node_modules/browserify/node_modules/insert-module-globals/node_modules/is-buffer/index.js")})
-},{"../node_modules/browserify/node_modules/insert-module-globals/node_modules/is-buffer/index.js":22,"deep-equal":94,"querystring":29}],7:[function(require,module,exports){
+},{"../node_modules/browserify/node_modules/insert-module-globals/node_modules/is-buffer/index.js":22,"deep-equal":95,"querystring":29}],7:[function(require,module,exports){
 'use strict';
 var _ = require("lodash");
 
@@ -1207,7 +1207,7 @@ function mixin(a, b) {
 
 module.exports = mixin;
 
-},{"lodash":98}],8:[function(require,module,exports){
+},{"lodash":99}],8:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -1639,7 +1639,7 @@ exports.restore = restore;
 exports.clear = clear;
 
 }).call(this,require("buffer").Buffer)
-},{"./common":3,"./intercept":5,"buffer":15,"debug":91,"lodash":98,"stream":43,"url":51,"util":54}],9:[function(require,module,exports){
+},{"./common":3,"./intercept":5,"buffer":15,"debug":92,"lodash":99,"stream":43,"url":51,"util":54}],9:[function(require,module,exports){
 (function (process,Buffer){
 'use strict';
 
@@ -2131,7 +2131,7 @@ function RequestOverrider(req, options, interceptors, remove, cb) {
 module.exports = RequestOverrider;
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"./common":3,"./delayed_body":4,"./socket":11,"_process":25,"buffer":15,"debug":91,"events":19,"http":44,"lodash":98,"propagate":100,"stream":43,"timers":50}],10:[function(require,module,exports){
+},{"./common":3,"./delayed_body":4,"./socket":11,"_process":25,"buffer":15,"debug":92,"events":19,"http":44,"lodash":99,"propagate":101,"stream":43,"timers":50}],10:[function(require,module,exports){
 (function (Buffer){
 /* jshint strict:false */
 /**
@@ -2423,6 +2423,9 @@ function startScope(basePath, options) {
       var queries;
       if (this.queries && (queryIndex = matchKey.indexOf('?')) !== -1) {
         queries = matchKey.slice(queryIndex + 1).split('&');
+        queries = queries.filter(function(str) {
+          return str.length > 0;
+        });
 
         // Only check for query string matches if this.queries is an object
         if (_.isObject(this.queries)) {
@@ -2433,6 +2436,8 @@ function startScope(basePath, options) {
           // passed query params is equal to the length of expected keys will prevent
           // us from doing any value checking BEFORE we know if they have all the proper
           // params
+          debug('this.queries: %j', this.queries);
+          debug('queries: %j', queries);
           if (Object.keys(this.queries).length !== queries.length) {
             matchQueries = false;
           } else {
@@ -2448,6 +2453,7 @@ function startScope(basePath, options) {
               matchQueries = matchQueries && !!isMatch;
             }
           }
+          debug('matchQueries: %j', matchQueries);
         }
 
         // Remove the query string from the matchKey
@@ -2981,7 +2987,7 @@ module.exports.loadDefs = loadDefs;
 module.exports.define = define;
 
 }).call(this,require("buffer").Buffer)
-},{"./common":3,"./intercept":5,"./match_body":6,"./mixin":7,"assert":13,"buffer":15,"debug":91,"fs":12,"json-stringify-safe":97,"lodash":98,"url":51}],11:[function(require,module,exports){
+},{"./common":3,"./intercept":5,"./match_body":6,"./mixin":7,"assert":13,"buffer":15,"debug":92,"fs":12,"json-stringify-safe":98,"lodash":99,"url":51}],11:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -3035,7 +3041,7 @@ function getPeerCertificate() {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":15,"debug":91,"events":19}],12:[function(require,module,exports){
+},{"buffer":15,"debug":92,"events":19}],12:[function(require,module,exports){
 
 },{}],13:[function(require,module,exports){
 // http://wiki.commonjs.org/wiki/Unit_Testing/1.0
@@ -3412,7 +3418,7 @@ arguments[4][12][0].apply(exports,arguments)
 
 var base64 = require('base64-js')
 var ieee754 = require('ieee754')
-var isArray = require('is-array')
+var isArray = require('isarray')
 
 exports.Buffer = Buffer
 exports.SlowBuffer = SlowBuffer
@@ -4869,7 +4875,7 @@ function utf8ToBytes (string, units) {
       }
 
       // valid surrogate pair
-      codePoint = leadSurrogate - 0xD800 << 10 | codePoint - 0xDC00 | 0x10000
+      codePoint = (leadSurrogate - 0xD800 << 10 | codePoint - 0xDC00) + 0x10000
     } else if (leadSurrogate) {
       // valid bmp char, but last char was a lead
       if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
@@ -4948,7 +4954,7 @@ function blitBuffer (src, dst, offset, length) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"base64-js":16,"ieee754":17,"is-array":18}],16:[function(require,module,exports){
+},{"base64-js":16,"ieee754":17,"isarray":18}],16:[function(require,module,exports){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 ;(function (exports) {
@@ -5161,38 +5167,10 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 }
 
 },{}],18:[function(require,module,exports){
+var toString = {}.toString;
 
-/**
- * isArray
- */
-
-var isArray = Array.isArray;
-
-/**
- * toString
- */
-
-var str = Object.prototype.toString;
-
-/**
- * Whether or not the given `val`
- * is an array.
- *
- * example:
- *
- *        isArray([]);
- *        // > true
- *        isArray(arguments);
- *        // > false
- *        isArray('');
- *        // > false
- *
- * @param {mixed} val
- * @return {bool}
- */
-
-module.exports = isArray || function (val) {
-  return !! val && '[object Array]' == str.call(val);
+module.exports = Array.isArray || function (arr) {
+  return toString.call(arr) == '[object Array]';
 };
 
 },{}],19:[function(require,module,exports){
@@ -5883,7 +5861,7 @@ process.umask = function() { return 0; };
 
 },{}],26:[function(require,module,exports){
 (function (global){
-/*! https://mths.be/punycode v1.3.2 by @mathias */
+/*! https://mths.be/punycode v1.4.0 by @mathias */
 ;(function(root) {
 
 	/** Detect free variables */
@@ -5949,7 +5927,7 @@ process.umask = function() { return 0; };
 	 * @returns {Error} Throws a `RangeError` with the applicable error message.
 	 */
 	function error(type) {
-		throw RangeError(errors[type]);
+		throw new RangeError(errors[type]);
 	}
 
 	/**
@@ -6096,7 +6074,7 @@ process.umask = function() { return 0; };
 
 	/**
 	 * Bias adaptation function as per section 3.4 of RFC 3492.
-	 * http://tools.ietf.org/html/rfc3492#section-3.4
+	 * https://tools.ietf.org/html/rfc3492#section-3.4
 	 * @private
 	 */
 	function adapt(delta, numPoints, firstTime) {
@@ -6401,14 +6379,17 @@ process.umask = function() { return 0; };
 			return punycode;
 		});
 	} else if (freeExports && freeModule) {
-		if (module.exports == freeExports) { // in Node.js or RingoJS v0.8.0+
+		if (module.exports == freeExports) {
+			// in Node.js, io.js, or RingoJS v0.8.0+
 			freeModule.exports = punycode;
-		} else { // in Narwhal or RingoJS v0.7.0-
+		} else {
+			// in Narwhal or RingoJS v0.7.0-
 			for (key in punycode) {
 				punycode.hasOwnProperty(key) && (freeExports[key] = punycode[key]);
 			}
 		}
-	} else { // in Rhino or a web browser
+	} else {
+		// in Rhino or a web browser
 		root.punycode = punycode;
 	}
 
@@ -8440,8 +8421,12 @@ function endWritable(stream, state, cb) {
 
 // NOTE: These type checking functions intentionally don't use `instanceof`
 // because it is fragile and can be easily faked with `Object.create()`.
-function isArray(ar) {
-  return Array.isArray(ar);
+
+function isArray(arg) {
+  if (Array.isArray) {
+    return Array.isArray(arg);
+  }
+  return objectToString(arg) === '[object Array]';
 }
 exports.isArray = isArray;
 
@@ -8481,7 +8466,7 @@ function isUndefined(arg) {
 exports.isUndefined = isUndefined;
 
 function isRegExp(re) {
-  return isObject(re) && objectToString(re) === '[object RegExp]';
+  return objectToString(re) === '[object RegExp]';
 }
 exports.isRegExp = isRegExp;
 
@@ -8491,13 +8476,12 @@ function isObject(arg) {
 exports.isObject = isObject;
 
 function isDate(d) {
-  return isObject(d) && objectToString(d) === '[object Date]';
+  return objectToString(d) === '[object Date]';
 }
 exports.isDate = isDate;
 
 function isError(e) {
-  return isObject(e) &&
-      (objectToString(e) === '[object Error]' || e instanceof Error);
+  return (objectToString(e) === '[object Error]' || e instanceof Error);
 }
 exports.isError = isError;
 
@@ -8516,19 +8500,24 @@ function isPrimitive(arg) {
 }
 exports.isPrimitive = isPrimitive;
 
-function isBuffer(arg) {
-  return Buffer.isBuffer(arg);
-}
-exports.isBuffer = isBuffer;
+exports.isBuffer = Buffer.isBuffer;
 
 function objectToString(o) {
   return Object.prototype.toString.call(o);
 }
+
 }).call(this,{"isBuffer":require("../../../../insert-module-globals/node_modules/is-buffer/index.js")})
 },{"../../../../insert-module-globals/node_modules/is-buffer/index.js":22}],37:[function(require,module,exports){
 (function (process){
 'use strict';
-module.exports = nextTick;
+
+if (!process.version ||
+    process.version.indexOf('v0.') === 0 ||
+    process.version.indexOf('v1.') === 0 && process.version.indexOf('v1.8.') !== 0) {
+  module.exports = nextTick;
+} else {
+  module.exports = process.nextTick;
+}
 
 function nextTick(fn) {
   var args = new Array(arguments.length - 1);
@@ -11087,7 +11076,7 @@ var used = []
  * Chai version
  */
 
-exports.version = '3.2.0';
+exports.version = '3.4.1';
 
 /*!
  * Assertion Error
@@ -11168,7 +11157,7 @@ exports.use(should);
 var assert = require('./chai/interface/assert');
 exports.use(assert);
 
-},{"./chai/assertion":58,"./chai/config":59,"./chai/core/assertions":60,"./chai/interface/assert":61,"./chai/interface/expect":62,"./chai/interface/should":63,"./chai/utils":76,"assertion-error":84}],58:[function(require,module,exports){
+},{"./chai/assertion":58,"./chai/config":59,"./chai/core/assertions":60,"./chai/interface/assert":61,"./chai/interface/expect":62,"./chai/interface/should":63,"./chai/utils":77,"assertion-error":85}],58:[function(require,module,exports){
 /*!
  * chai
  * http://chaijs.com
@@ -11259,8 +11248,8 @@ module.exports = function (_chai, util) {
    *
    * @name assert
    * @param {Philosophical} expression to be tested
-   * @param {String or Function} message or function that returns message to display if expression fails
-   * @param {String or Function} negatedMessage or function that returns negatedMessage to display if negated expression fails
+   * @param {String|Function} message or function that returns message to display if expression fails
+   * @param {String|Function} negatedMessage or function that returns negatedMessage to display if negated expression fails
    * @param {Mixed} expected value (remember to check for negation)
    * @param {Mixed} actual (optional) will default to `this.obj`
    * @param {Boolean} showDiff (optional) when set to `true`, assert will display a diff in addition to the message if expression fails
@@ -11497,6 +11486,7 @@ module.exports = function (chai, _) {
    *     expect({ foo: 'bar' }).to.be.an('object');
    *     expect(null).to.be.a('null');
    *     expect(undefined).to.be.an('undefined');
+   *     expect(new Error).to.be.an('error');
    *     expect(new Promise).to.be.a('promise');
    *     expect(new Float32Array()).to.be.a('float32array');
    *     expect(Symbol()).to.be.a('symbol');
@@ -11556,9 +11546,12 @@ module.exports = function (chai, _) {
   }
 
   function include (val, msg) {
+    _.expectTypes(this, ['array', 'object', 'string']);
+
     if (msg) flag(this, 'message', msg);
     var obj = flag(this, 'object');
     var expected = false;
+
     if (_.type(obj) === 'array' && _.type(val) === 'object') {
       for (var i in obj) {
         if (_.eql(obj[i], val)) {
@@ -11575,7 +11568,7 @@ module.exports = function (chai, _) {
       for (var k in val) subset[k] = obj[k];
       expected = _.eql(subset, val);
     } else {
-      expected = obj && ~obj.indexOf(val);
+      expected = (obj != undefined) && ~obj.indexOf(val);
     }
     this.assert(
         expected
@@ -11593,7 +11586,7 @@ module.exports = function (chai, _) {
    *
    * Asserts that the target is truthy.
    *
-   *     expect('everthing').to.be.ok;
+   *     expect('everything').to.be.ok;
    *     expect(1).to.be.ok;
    *     expect(false).to.not.be.ok;
    *     expect(undefined).to.not.be.ok;
@@ -12468,7 +12461,7 @@ module.exports = function (chai, _) {
    *
    * @name keys
    * @alias key
-   * @param {String...|Array|Object} keys
+   * @param {...String|Array|Object} keys
    * @api public
    */
 
@@ -12571,7 +12564,6 @@ module.exports = function (chai, _) {
    *     expect(fn).to.not.throw('good function');
    *     expect(fn).to.throw(ReferenceError, /bad function/);
    *     expect(fn).to.throw(err);
-   *     expect(fn).to.not.throw(new RangeError('Out of range.'));
    *
    * Please note that when a throw expectation is negated, it will check each
    * parameter independently, starting with error constructor type. The appropriate way
@@ -12613,9 +12605,9 @@ module.exports = function (chai, _) {
       constructor = null;
       errMsg = null;
     } else if (typeof constructor === 'function') {
-      name = constructor.prototype.name || constructor.name;
-      if (name === 'Error' && constructor !== Error) {
-        name = (new constructor()).name;
+      name = constructor.prototype.name;
+      if (!name || (name === 'Error' && constructor !== Error)) {
+        name = constructor.name || (new constructor()).name;
       }
     } else {
       constructor = null;
@@ -12799,7 +12791,7 @@ module.exports = function (chai, _) {
       , result
     );
   }
-  
+
   Assertion.addMethod('satisfy', satisfy);
   Assertion.addMethod('satisfies', satisfy);
 
@@ -12811,19 +12803,20 @@ module.exports = function (chai, _) {
    *     expect(1.5).to.be.closeTo(1, 0.5);
    *
    * @name closeTo
+   * @alias approximately
    * @param {Number} expected
    * @param {Number} delta
    * @param {String} message _optional_
    * @api public
    */
 
-  Assertion.addMethod('closeTo', function (expected, delta, msg) {
+  function closeTo(expected, delta, msg) {
     if (msg) flag(this, 'message', msg);
     var obj = flag(this, 'object');
 
     new Assertion(obj, msg).is.a('number');
     if (_.type(expected) !== 'number' || _.type(delta) !== 'number') {
-      throw new Error('the arguments to closeTo must be numbers');
+      throw new Error('the arguments to closeTo or approximately must be numbers');
     }
 
     this.assert(
@@ -12831,7 +12824,10 @@ module.exports = function (chai, _) {
       , 'expected #{this} to be close to ' + expected + ' +/- ' + delta
       , 'expected #{this} not to be close to ' + expected + ' +/- ' + delta
     );
-  });
+  }
+
+  Assertion.addMethod('closeTo', closeTo);
+  Assertion.addMethod('approximately', closeTo);
 
   function isSubsetOf(subset, superset, cmp) {
     return subset.every(function(elem) {
@@ -12892,6 +12888,44 @@ module.exports = function (chai, _) {
         , subset
     );
   });
+
+  /**
+   * ### .oneOf(list)
+   *
+   * Assert that a value appears somewhere in the top level of array `list`.
+   *
+   *     expect('a').to.be.oneOf(['a', 'b', 'c']);
+   *     expect(9).to.not.be.oneOf(['z']);
+   *     expect([3]).to.not.be.oneOf([1, 2, [3]]);
+   *
+   *     var three = [3];
+   *     // for object-types, contents are not compared
+   *     expect(three).to.not.be.oneOf([1, 2, [3]]);
+   *     // comparing references works
+   *     expect(three).to.be.oneOf([1, 2, three]);
+   *
+   * @name oneOf
+   * @param {Array<*>} list
+   * @param {String} message _optional_
+   * @api public
+   */
+
+  function oneOf (list, msg) {
+    if (msg) flag(this, 'message', msg);
+    var expected = flag(this, 'object');
+    new Assertion(list).to.be.an('array');
+
+    this.assert(
+        list.indexOf(expected) > -1
+      , 'expected #{this} to be one of #{exp}'
+      , 'expected #{this} to not be one of #{exp}'
+      , list
+      , expected
+    );
+  }
+
+  Assertion.addMethod('oneOf', oneOf);
+
 
   /**
    * ### .change(function)
@@ -13009,7 +13043,7 @@ module.exports = function (chai, _) {
   /**
    * ### .extensible
    *
-   * Asserts that the target is extensible (can have new properties added to 
+   * Asserts that the target is extensible (can have new properties added to
    * it).
    *
    *     var nonExtensibleObject = Object.preventExtensions({});
@@ -13028,8 +13062,22 @@ module.exports = function (chai, _) {
   Assertion.addProperty('extensible', function() {
     var obj = flag(this, 'object');
 
+    // In ES5, if the argument to this method is not an object (a primitive), then it will cause a TypeError.
+    // In ES6, a non-object argument will be treated as if it was a non-extensible ordinary object, simply return false.
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/isExtensible
+    // The following provides ES6 behavior when a TypeError is thrown under ES5.
+
+    var isExtensible;
+
+    try {
+      isExtensible = Object.isExtensible(obj);
+    } catch (err) {
+      if (err instanceof TypeError) isExtensible = false;
+      else throw err;
+    }
+
     this.assert(
-      Object.isExtensible(obj)
+      isExtensible
       , 'expected #{this} to be extensible'
       , 'expected #{this} to not be extensible'
     );
@@ -13055,8 +13103,22 @@ module.exports = function (chai, _) {
   Assertion.addProperty('sealed', function() {
     var obj = flag(this, 'object');
 
+    // In ES5, if the argument to this method is not an object (a primitive), then it will cause a TypeError.
+    // In ES6, a non-object argument will be treated as if it was a sealed ordinary object, simply return true.
+    // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/isSealed
+    // The following provides ES6 behavior when a TypeError is thrown under ES5.
+
+    var isSealed;
+
+    try {
+      isSealed = Object.isSealed(obj);
+    } catch (err) {
+      if (err instanceof TypeError) isSealed = true;
+      else throw err;
+    }
+
     this.assert(
-      Object.isSealed(obj)
+      isSealed
       , 'expected #{this} to be sealed'
       , 'expected #{this} to not be sealed'
     );
@@ -13080,13 +13142,26 @@ module.exports = function (chai, _) {
   Assertion.addProperty('frozen', function() {
     var obj = flag(this, 'object');
 
+    // In ES5, if the argument to this method is not an object (a primitive), then it will cause a TypeError.
+    // In ES6, a non-object argument will be treated as if it was a frozen ordinary object, simply return true.
+    // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/isFrozen
+    // The following provides ES6 behavior when a TypeError is thrown under ES5.
+
+    var isFrozen;
+
+    try {
+      isFrozen = Object.isFrozen(obj);
+    } catch (err) {
+      if (err instanceof TypeError) isFrozen = true;
+      else throw err;
+    }
+
     this.assert(
-      Object.isFrozen(obj)
+      isFrozen
       , 'expected #{this} to be frozen'
       , 'expected #{this} to not be frozen'
     );
   });
-
 };
 
 },{}],61:[function(require,module,exports){
@@ -13317,24 +13392,6 @@ module.exports = function (chai, util) {
     new Assertion(act, msg).to.not.eql(exp);
   };
 
-  /**
-   * ### .isTrue(value, [message])
-   *
-   * Asserts that `value` is true.
-   *
-   *     var teaServed = true;
-   *     assert.isTrue(teaServed, 'the tea has been served');
-   *
-   * @name isTrue
-   * @param {Mixed} value
-   * @param {String} message
-   * @api public
-   */
-
-  assert.isAbove = function (val, abv, msg) {
-    new Assertion(val, msg).to.be.above(abv);
-  };
-
    /**
    * ### .isAbove(valueToCheck, valueToBeAbove, [message])
    *
@@ -13349,8 +13406,27 @@ module.exports = function (chai, util) {
    * @api public
    */
 
-  assert.isBelow = function (val, blw, msg) {
-    new Assertion(val, msg).to.be.below(blw);
+  assert.isAbove = function (val, abv, msg) {
+    new Assertion(val, msg).to.be.above(abv);
+  };
+
+   /**
+   * ### .isAtLeast(valueToCheck, valueToBeAtLeast, [message])
+   *
+   * Asserts `valueToCheck` is greater than or equal to (>=) `valueToBeAtLeast`
+   *
+   *     assert.isAtLeast(5, 2, '5 is greater or equal to 2');
+   *     assert.isAtLeast(3, 3, '3 is greater or equal to 3');
+   *
+   * @name isAtLeast
+   * @param {Mixed} valueToCheck
+   * @param {Mixed} valueToBeAtLeast
+   * @param {String} message
+   * @api public
+   */
+
+  assert.isAtLeast = function (val, atlst, msg) {
+    new Assertion(val, msg).to.be.least(atlst);
   };
 
    /**
@@ -13367,8 +13443,63 @@ module.exports = function (chai, util) {
    * @api public
    */
 
+  assert.isBelow = function (val, blw, msg) {
+    new Assertion(val, msg).to.be.below(blw);
+  };
+
+   /**
+   * ### .isAtMost(valueToCheck, valueToBeAtMost, [message])
+   *
+   * Asserts `valueToCheck` is less than or equal to (<=) `valueToBeAtMost`
+   *
+   *     assert.isAtMost(3, 6, '3 is less than or equal to 6');
+   *     assert.isAtMost(4, 4, '4 is less than or equal to 4');
+   *
+   * @name isAtMost
+   * @param {Mixed} valueToCheck
+   * @param {Mixed} valueToBeAtMost
+   * @param {String} message
+   * @api public
+   */
+
+  assert.isAtMost = function (val, atmst, msg) {
+    new Assertion(val, msg).to.be.most(atmst);
+  };
+
+  /**
+   * ### .isTrue(value, [message])
+   *
+   * Asserts that `value` is true.
+   *
+   *     var teaServed = true;
+   *     assert.isTrue(teaServed, 'the tea has been served');
+   *
+   * @name isTrue
+   * @param {Mixed} value
+   * @param {String} message
+   * @api public
+   */
+
   assert.isTrue = function (val, msg) {
     new Assertion(val, msg).is['true'];
+  };
+
+  /**
+   * ### .isNotTrue(value, [message])
+   *
+   * Asserts that `value` is not true.
+   *
+   *     var tea = 'tasty chai';
+   *     assert.isNotTrue(tea, 'great, time for tea!');
+   *
+   * @name isNotTrue
+   * @param {Mixed} value
+   * @param {String} message
+   * @api public
+   */
+
+  assert.isNotTrue = function (val, msg) {
+    new Assertion(val, msg).to.not.equal(true);
   };
 
   /**
@@ -13387,6 +13518,24 @@ module.exports = function (chai, util) {
 
   assert.isFalse = function (val, msg) {
     new Assertion(val, msg).is['false'];
+  };
+
+  /**
+   * ### .isNotFalse(value, [message])
+   *
+   * Asserts that `value` is not false.
+   *
+   *     var tea = 'tasty chai';
+   *     assert.isNotFalse(tea, 'great, time for tea!');
+   *
+   * @name isNotFalse
+   * @param {Mixed} value
+   * @param {String} message
+   * @api public
+   */
+
+  assert.isNotFalse = function (val, msg) {
+    new Assertion(val, msg).to.not.equal(false);
   };
 
   /**
@@ -14038,7 +14187,7 @@ module.exports = function (chai, util) {
    * Asserts that `object` has a `length` property with the expected value.
    *
    *     assert.lengthOf([1,2,3], 3, 'array has length of 3');
-   *     assert.lengthOf('foobar', 5, 'string has length of 6');
+   *     assert.lengthOf('foobar', 6, 'string has length of 6');
    *
    * @name lengthOf
    * @param {Mixed} object
@@ -14185,6 +14334,25 @@ module.exports = function (chai, util) {
   };
 
   /**
+   * ### .approximately(actual, expected, delta, [message])
+   *
+   * Asserts that the target is equal `expected`, to within a +/- `delta` range.
+   *
+   *     assert.approximately(1.5, 1, 0.5, 'numbers are close');
+   *
+   * @name approximately
+   * @param {Number} actual
+   * @param {Number} expected
+   * @param {Number} delta
+   * @param {String} message
+   * @api public
+   */
+
+  assert.approximately = function (act, exp, delta, msg) {
+    new Assertion(act, msg).to.be.approximately(exp, delta);
+  };
+
+  /**
    * ### .sameMembers(set1, set2, [message])
    *
    * Asserts that `set1` and `set2` have the same members.
@@ -14239,6 +14407,24 @@ module.exports = function (chai, util) {
 
   assert.includeMembers = function (superset, subset, msg) {
     new Assertion(superset, msg).to.include.members(subset);
+  }
+
+  /**
+   * ### .oneOf(inList, list, [message])
+   *
+   * Asserts that non-object, non-array value `inList` appears in the flat array `list`.
+   *
+   *     assert.oneOf(1, [ 2, 1 ], 'Not found in list');
+   *
+   * @name oneOf
+   * @param {*} inList
+   * @param {Array<*>} list
+   * @param {String} message
+   * @api public
+   */
+
+  assert.oneOf = function (inList, list, msg) {
+    new Assertion(inList, msg).to.be.oneOf(list);
   }
 
    /**
@@ -14777,7 +14963,7 @@ module.exports = function (ctx, name, method, chainingBehavior) {
   });
 };
 
-},{"../config":59,"./flag":67,"./transferFlags":83}],65:[function(require,module,exports){
+},{"../config":59,"./flag":68,"./transferFlags":84}],65:[function(require,module,exports){
 /*!
  * Chai - addMethod utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -14822,12 +15008,15 @@ module.exports = function (ctx, name, method) {
   };
 };
 
-},{"../config":59,"./flag":67}],66:[function(require,module,exports){
+},{"../config":59,"./flag":68}],66:[function(require,module,exports){
 /*!
  * Chai - addProperty utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
  * MIT Licensed
  */
+
+var config = require('../config');
+var flag = require('./flag');
 
 /**
  * ### addProperty (ctx, name, getter)
@@ -14856,7 +15045,11 @@ module.exports = function (ctx, name, method) {
 
 module.exports = function (ctx, name, getter) {
   Object.defineProperty(ctx, name,
-    { get: function () {
+    { get: function addProperty() {
+        var old_ssfi = flag(this, 'ssfi');
+        if (old_ssfi && config.includeStack === false)
+          flag(this, 'ssfi', addProperty);
+
         var result = getter.call(this);
         return result === undefined ? this : result;
       }
@@ -14864,7 +15057,50 @@ module.exports = function (ctx, name, getter) {
   });
 };
 
-},{}],67:[function(require,module,exports){
+},{"../config":59,"./flag":68}],67:[function(require,module,exports){
+/*!
+ * Chai - expectTypes utility
+ * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
+ * MIT Licensed
+ */
+
+/**
+ * ### expectTypes(obj, types)
+ *
+ * Ensures that the object being tested against is of a valid type.
+ *
+ *     utils.expectTypes(this, ['array', 'object', 'string']);
+ *
+ * @param {Mixed} obj constructed Assertion
+ * @param {Array} type A list of allowed types for this assertion
+ * @name expectTypes
+ * @api public
+ */
+
+var AssertionError = require('assertion-error');
+var flag = require('./flag');
+var type = require('type-detect');
+
+module.exports = function (obj, types) {
+  var obj = flag(obj, 'object');
+  types = types.map(function (t) { return t.toLowerCase(); });
+  types.sort();
+
+  // Transforms ['lorem', 'ipsum'] into 'a lirum, or an ipsum'
+  var str = types.map(function (t, index) {
+    var art = ~[ 'a', 'e', 'i', 'o', 'u' ].indexOf(t.charAt(0)) ? 'an' : 'a';
+    var or = types.length > 1 && index === types.length - 1 ? 'or ' : '';
+    return or + art + ' ' + t;
+  }).join(', ');
+
+  if (!types.some(function (expected) { return type(obj) === expected; })) {
+    throw new AssertionError(
+      'object tested must be ' + str + ', but ' + type(obj) + ' given'
+    );
+  }
+};
+
+},{"./flag":68,"assertion-error":85,"type-detect":90}],68:[function(require,module,exports){
 /*!
  * Chai - flag utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -14898,7 +15134,7 @@ module.exports = function (obj, key, value) {
   }
 };
 
-},{}],68:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 /*!
  * Chai - getActual utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -14918,7 +15154,7 @@ module.exports = function (obj, args) {
   return args.length > 4 ? args[4] : obj._obj;
 };
 
-},{}],69:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 /*!
  * Chai - getEnumerableProperties utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -14945,7 +15181,7 @@ module.exports = function getEnumerableProperties(object) {
   return result;
 };
 
-},{}],70:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
 /*!
  * Chai - message composition utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -14997,7 +15233,7 @@ module.exports = function (obj, args) {
   return flagMsg ? flagMsg + ': ' + msg : msg;
 };
 
-},{"./flag":67,"./getActual":68,"./inspect":77,"./objDisplay":78}],71:[function(require,module,exports){
+},{"./flag":68,"./getActual":69,"./inspect":78,"./objDisplay":79}],72:[function(require,module,exports){
 /*!
  * Chai - getName utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -15019,7 +15255,7 @@ module.exports = function (func) {
   return match && match[1] ? match[1] : "";
 };
 
-},{}],72:[function(require,module,exports){
+},{}],73:[function(require,module,exports){
 /*!
  * Chai - getPathInfo utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -15131,7 +15367,7 @@ function _getPathValue (parsed, obj, index) {
   return res;
 }
 
-},{"./hasProperty":75}],73:[function(require,module,exports){
+},{"./hasProperty":76}],74:[function(require,module,exports){
 /*!
  * Chai - getPathValue utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -15175,7 +15411,7 @@ module.exports = function(path, obj) {
   return info.value;
 }; 
 
-},{"./getPathInfo":72}],74:[function(require,module,exports){
+},{"./getPathInfo":73}],75:[function(require,module,exports){
 /*!
  * Chai - getProperties utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -15212,7 +15448,7 @@ module.exports = function getProperties(object) {
   return result;
 };
 
-},{}],75:[function(require,module,exports){
+},{}],76:[function(require,module,exports){
 /*!
  * Chai - hasProperty utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -15277,7 +15513,7 @@ module.exports = function hasProperty(name, obj) {
   return name in obj;
 };
 
-},{"type-detect":89}],76:[function(require,module,exports){
+},{"type-detect":90}],77:[function(require,module,exports){
 /*!
  * chai
  * Copyright(c) 2011 Jake Luer <jake@alogicalparadox.com>
@@ -15301,6 +15537,11 @@ exports.test = require('./test');
  */
 
 exports.type = require('type-detect');
+
+/*!
+ * expectTypes utility
+ */
+exports.expectTypes = require('./expectTypes');
 
 /*!
  * message utility
@@ -15404,8 +15645,7 @@ exports.addChainableMethod = require('./addChainableMethod');
 
 exports.overwriteChainableMethod = require('./overwriteChainableMethod');
 
-
-},{"./addChainableMethod":64,"./addMethod":65,"./addProperty":66,"./flag":67,"./getActual":68,"./getMessage":70,"./getName":71,"./getPathInfo":72,"./getPathValue":73,"./hasProperty":75,"./inspect":77,"./objDisplay":78,"./overwriteChainableMethod":79,"./overwriteMethod":80,"./overwriteProperty":81,"./test":82,"./transferFlags":83,"deep-eql":85,"type-detect":89}],77:[function(require,module,exports){
+},{"./addChainableMethod":64,"./addMethod":65,"./addProperty":66,"./expectTypes":67,"./flag":68,"./getActual":69,"./getMessage":71,"./getName":72,"./getPathInfo":73,"./getPathValue":74,"./hasProperty":76,"./inspect":78,"./objDisplay":79,"./overwriteChainableMethod":80,"./overwriteMethod":81,"./overwriteProperty":82,"./test":83,"./transferFlags":84,"deep-eql":86,"type-detect":90}],78:[function(require,module,exports){
 // This is (almost) directly from Node.js utils
 // https://github.com/joyent/node/blob/f8c335d0caf47f16d31413f89aa28eda3878e3aa/lib/util.js
 
@@ -15740,7 +15980,7 @@ function objectToString(o) {
   return Object.prototype.toString.call(o);
 }
 
-},{"./getEnumerableProperties":69,"./getName":71,"./getProperties":74}],78:[function(require,module,exports){
+},{"./getEnumerableProperties":70,"./getName":72,"./getProperties":75}],79:[function(require,module,exports){
 /*!
  * Chai - flag utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -15791,7 +16031,7 @@ module.exports = function (obj) {
   }
 };
 
-},{"../config":59,"./inspect":77}],79:[function(require,module,exports){
+},{"../config":59,"./inspect":78}],80:[function(require,module,exports){
 /*!
  * Chai - overwriteChainableMethod utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -15846,7 +16086,7 @@ module.exports = function (ctx, name, method, chainingBehavior) {
   };
 };
 
-},{}],80:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 /*!
  * Chai - overwriteMethod utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -15899,7 +16139,7 @@ module.exports = function (ctx, name, method) {
   }
 };
 
-},{}],81:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 /*!
  * Chai - overwriteProperty utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -15955,7 +16195,7 @@ module.exports = function (ctx, name, getter) {
   });
 };
 
-},{}],82:[function(require,module,exports){
+},{}],83:[function(require,module,exports){
 /*!
  * Chai - test utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -15983,7 +16223,7 @@ module.exports = function (obj, args) {
   return negate ? !expr : expr;
 };
 
-},{"./flag":67}],83:[function(require,module,exports){
+},{"./flag":68}],84:[function(require,module,exports){
 /*!
  * Chai - transferFlags utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -16029,7 +16269,7 @@ module.exports = function (assertion, object, includeAll) {
   }
 };
 
-},{}],84:[function(require,module,exports){
+},{}],85:[function(require,module,exports){
 /*!
  * assertion-error
  * Copyright(c) 2013 Jake Luer <jake@qualiancy.com>
@@ -16143,10 +16383,10 @@ AssertionError.prototype.toJSON = function (stack) {
   return props;
 };
 
-},{}],85:[function(require,module,exports){
+},{}],86:[function(require,module,exports){
 module.exports = require('./lib/eql');
 
-},{"./lib/eql":86}],86:[function(require,module,exports){
+},{"./lib/eql":87}],87:[function(require,module,exports){
 /*!
  * deep-eql
  * Copyright(c) 2013 Jake Luer <jake@alogicalparadox.com>
@@ -16405,10 +16645,10 @@ function objectEqual(a, b, m) {
   return true;
 }
 
-},{"buffer":15,"type-detect":87}],87:[function(require,module,exports){
+},{"buffer":15,"type-detect":88}],88:[function(require,module,exports){
 module.exports = require('./lib/type');
 
-},{"./lib/type":88}],88:[function(require,module,exports){
+},{"./lib/type":89}],89:[function(require,module,exports){
 /*!
  * type-detect
  * Copyright(c) 2013 jake luer <jake@alogicalparadox.com>
@@ -16552,9 +16792,9 @@ Library.prototype.test = function (obj, type) {
   }
 };
 
-},{}],89:[function(require,module,exports){
-arguments[4][87][0].apply(exports,arguments)
-},{"./lib/type":90,"dup":87}],90:[function(require,module,exports){
+},{}],90:[function(require,module,exports){
+arguments[4][88][0].apply(exports,arguments)
+},{"./lib/type":91,"dup":88}],91:[function(require,module,exports){
 /*!
  * type-detect
  * Copyright(c) 2013 jake luer <jake@alogicalparadox.com>
@@ -16690,7 +16930,7 @@ Library.prototype.test = function(obj, type) {
   }
 };
 
-},{}],91:[function(require,module,exports){
+},{}],92:[function(require,module,exports){
 
 /**
  * This is the web browser implementation of `debug()`.
@@ -16860,7 +17100,7 @@ function localstorage(){
   } catch (e) {}
 }
 
-},{"./debug":92}],92:[function(require,module,exports){
+},{"./debug":93}],93:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -17059,7 +17299,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":93}],93:[function(require,module,exports){
+},{"ms":94}],94:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -17186,7 +17426,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
 
-},{}],94:[function(require,module,exports){
+},{}],95:[function(require,module,exports){
 var pSlice = Array.prototype.slice;
 var objectKeys = require('./lib/keys.js');
 var isArguments = require('./lib/is_arguments.js');
@@ -17282,7 +17522,7 @@ function objEquiv(a, b, opts) {
   return typeof a === typeof b;
 }
 
-},{"./lib/is_arguments.js":95,"./lib/keys.js":96}],95:[function(require,module,exports){
+},{"./lib/is_arguments.js":96,"./lib/keys.js":97}],96:[function(require,module,exports){
 var supportsArgumentsClass = (function(){
   return Object.prototype.toString.call(arguments)
 })() == '[object Arguments]';
@@ -17304,7 +17544,7 @@ function unsupported(object){
     false;
 };
 
-},{}],96:[function(require,module,exports){
+},{}],97:[function(require,module,exports){
 exports = module.exports = typeof Object.keys === 'function'
   ? Object.keys : shim;
 
@@ -17315,7 +17555,7 @@ function shim (obj) {
   return keys;
 }
 
-},{}],97:[function(require,module,exports){
+},{}],98:[function(require,module,exports){
 exports = module.exports = stringify
 exports.getSerialize = serializer
 
@@ -17344,7 +17584,7 @@ function serializer(replacer, cycleReplacer) {
   }
 }
 
-},{}],98:[function(require,module,exports){
+},{}],99:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -24133,7 +24373,7 @@ function serializer(replacer, cycleReplacer) {
 }.call(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],99:[function(require,module,exports){
+},{}],100:[function(require,module,exports){
 (function (process){
 var path = require('path');
 var fs = require('fs');
@@ -24235,7 +24475,7 @@ mkdirP.sync = function sync (p, opts, made) {
 };
 
 }).call(this,require('_process'))
-},{"_process":25,"fs":12,"path":24}],100:[function(require,module,exports){
+},{"_process":25,"fs":12,"path":24}],101:[function(require,module,exports){
 function propagate(events, source, dest) {
   if (arguments.length < 3) {
     dest = source;
@@ -24298,7 +24538,7 @@ function explicitPropagate(events, source, dest) {
     listeners.forEach(unregister);
   }
 }
-},{}],101:[function(require,module,exports){
+},{}],102:[function(require,module,exports){
 var assert = require('assert');
 var http = require('http');
 var nock = require('../../');
@@ -24318,4 +24558,4 @@ http.get('http://browserifyland.com/beep', function(res) {
       document.getElementById('content').innerHTML = body;
     });
 });
-},{"../../":1,"assert":13,"http":44}]},{},[101]);
+},{"../../":1,"assert":13,"http":44}]},{},[102]);
