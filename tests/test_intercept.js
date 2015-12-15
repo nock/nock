@@ -2333,7 +2333,7 @@ test("persist reply with file", function(t) {
 
 });
 
-xtest('(re-)activate after restore', function(t) {
+test('(re-)activate after restore', function(t) {
   var scope = nock('http://google.com')
     .get('/')
     .reply(200, 'Hello, World!');
@@ -4227,6 +4227,19 @@ test('query() with "true" will allow all query strings to pass', function (t) {
   })
 });
 
+test('query() with "{}" will allow a match against ending in ?', function (t) {
+  var scope = nock('http://querystringmatchland.com')
+    .get('/noquerystring')
+    .query({})
+    .reply(200);
+
+  mikealRequest('http://querystringmatchland.com/noquerystring?', function(err, res) {
+    if (err) throw err;
+    t.equal(res.statusCode, 200);
+    t.end();
+  })
+});
+
 test('query() will not match when a query string does not match name=value', function (t) {
   var scope = nock('https://c.com')
     .get('/b')
@@ -4305,6 +4318,3 @@ test("teardown", function(t) {
   t.deepEqual(leaks, [], 'No leaks');
   t.end();
 });
-
-
-function xtest() {}
