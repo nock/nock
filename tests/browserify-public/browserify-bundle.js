@@ -1154,8 +1154,16 @@ function matchBody(spec, body) {
     body = body.toString();
   }
 
+  var contentType = options.headers && (options.headers['Content-Type'] ||
+                                        options.headers['content-type']);
+
+  var isMultipart = contentType && contentType.toString().match(/multipart/);
+
   //strip line endings from both so that we get a match no matter what OS we are running on
-  body = body.replace(/\r?\n|\r/g, '');
+  //if Content-Type does not contains 'multipart'
+  if (!isMultipart) {
+    body = body.replace(/\r?\n|\r/g, '');
+  }
 
   if (spec instanceof RegExp) {
     return body.match(spec);
@@ -1171,16 +1179,11 @@ function matchBody(spec, body) {
     try { json = JSON.parse(body);} catch(err) {}
     if (json !== undefined) {
       body = json;
-    }
-    else
-      if (options.headers) {
-        var contentType = options.headers['Content-Type'] ||
-                          options.headers['content-type'];
-
-        if (contentType && contentType.match(/application\/x-www-form-urlencoded/)) {
-          body = qs.parse(body);
-        }
+    } else {
+      if (contentType && contentType.toString().match(/application\/x-www-form-urlencoded/)) {
+        body = qs.parse(body);
       }
+    }
   }
 
   if (typeof spec === "function") {
