@@ -1,3 +1,46 @@
+3.6.0 / 2015-12-23
+==================
+
+  * Merge pull request [#430](https://github.com/pgte/nock/issues/430) from jeffomatic/fix-request-again
+    Update [#158](https://github.com/pgte/nock/issues/158) fix for request module and strict SSL
+  * Update [#158](https://github.com/pgte/nock/issues/158) fix for request module and strict SSL
+    Commit 48e8be5 added a compatibility fix for users of the request
+    NPM module and strict SSL cert checking. The request module has
+    since been updated (see https://github.com/request/request/pull/1615
+    for more details), and a corresponding change should be made in
+    nock to ensure compatibility.
+
+3.5.0 / 2015-12-16
+==================
+
+  * v3.5.0
+  * Merge branch 'aronwoost-multipart-fix'
+  * Merge branch 'multipart-fix' of git://github.com/aronwoost/nock into aronwoost-multipart-fix
+
+3.4.1 / 2015-12-15
+==================
+
+  * v3.4.1
+  * removing empty query string parts before matching. Should fix [#426](https://github.com/pgte/nock/issues/426)
+  * testing empty query string match
+  * removing broken test
+  * Fix matchBody for multipart requests
+  * Fix matchBody throwing when headers come as array (node-fetch style)
+
+3.4.0 / 2015-12-06
+==================
+
+  * v3.4.0
+  * added instructions on how to generate the changelog in the README
+  * removed changelog dependency
+
+3.3.2 / 2015-11-25
+==================
+
+  * changelog
+  * v3.3.2
+  * stringify safe. should fix [#420](https://github.com/pgte/nock/issues/420)
+
 3.3.1 / 2015-11-25
 ==================
 
@@ -142,33 +185,3 @@
   * test files use strict consistent
   * add missing strict to testcase
   * ipv6 url in test
-  * clarified allowUnmocked option
-  * Merge pull request [#383](https://github.com/pgte/nock/issues/383) from izaakrogan/master
-    addition to allow-unmocked section of README
-  * addition to allow-unmocked section of readme
-
-2.15.0 / 2015-10-10
-===================
-
-  * v2.15.0
-  * added Matt Oakes as contributor
-  * Merge branch 'matto1990-feature_after_record'
-  * Allow filtering nock back recording before saving
-    An `afterRecord` option can be passed in which will be called with the
-    array of scopes as a paramter. The function can then filter these as
-    it wishes an return the array of scopes that will be saved to the
-    fixture.
-    This fixes [#300](https://github.com/pgte/nock/issues/300).
-  * removed change log
-  * v2.14.0
-  * Merge branch 'DavidTPate-reqheader-regex-function'
-  * Add the ability (and positive + negative tests around the functionality) to specify a regular expression or function to check incoming request headers. Also add documentation around it and add myself to the contributors list.
-
-2.13.0 / 2015-09-25
-===================
-
-  * v2.13.0
-  * Merge branch 'jshcrowthe-master'
-  * Remove throw error statement from test (copy paste error)
-  * Test wording change
-  * Add query param length check to prevent false positives
