@@ -2054,6 +2054,12 @@ function RequestOverrider(req, options, interceptors, remove, cb) {
         authorized: true
       });
 
+      // Account for updates to Node.js response interface
+      // cf https://github.com/request/request/pull/1615
+      response.socket = _.extend(response.socket || {}, {
+        authorized: true
+      });
+
       // Evaluate functional headers.
       Object.keys(response.headers).forEach(function (key) {
         var value = response.headers[key];
@@ -2204,6 +2210,7 @@ function startScope(basePath, options) {
   function intercept(uri, method, requestBody, interceptorOptions) {
     var interceptorMatchHeaders = [];
     var key = method.toUpperCase() + ' ' + basePath + basePathname + uri;
+    var baseUri = method.toUpperCase() + ' ' + basePath + basePathname;
 
     function replyWithError(errorMessage) {
       this.errorMessage = errorMessage;
@@ -2463,7 +2470,13 @@ function startScope(basePath, options) {
         matchKey = matchKey.substr(0, queryIndex);
       }
 
-      matches = matchKey === this._key && matchQueries;
+      if (typeof uri === 'function') {
+        matches = matchQueries &&
+          method.toUpperCase() + ' ' + proto + '://' + options.host === baseUri &&
+          uri.call(this, path);
+      } else {
+        matches = matchKey === this._key && matchQueries;
+      }
 
       // special logger for query()
       if (queryIndex !== -1) {
@@ -6759,8 +6772,9 @@ var StringDecoder;
 
 util.inherits(Readable, Stream);
 
+var Duplex;
 function ReadableState(options, stream) {
-  var Duplex = require('./_stream_duplex');
+  Duplex = Duplex || require('./_stream_duplex');
 
   options = options || {};
 
@@ -6826,8 +6840,9 @@ function ReadableState(options, stream) {
   }
 }
 
+var Duplex;
 function Readable(options) {
-  var Duplex = require('./_stream_duplex');
+  Duplex = Duplex || require('./_stream_duplex');
 
   if (!(this instanceof Readable))
     return new Readable(options);
@@ -7928,8 +7943,9 @@ function WriteReq(chunk, encoding, cb) {
   this.next = null;
 }
 
+var Duplex;
 function WritableState(options, stream) {
-  var Duplex = require('./_stream_duplex');
+  Duplex = Duplex || require('./_stream_duplex');
 
   options = options || {};
 
@@ -8037,8 +8053,9 @@ Object.defineProperty(WritableState.prototype, 'buffer', {
 }catch(_){}}());
 
 
+var Duplex;
 function Writable(options) {
-  var Duplex = require('./_stream_duplex');
+  Duplex = Duplex || require('./_stream_duplex');
 
   // Writable ctor is applied to Duplexes, though they're not
   // instanceof Writable, they're instanceof Readable.
