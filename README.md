@@ -300,6 +300,8 @@ nock('http://www.google.com')
   .replyWithError({'message': 'something awful happened', 'code': 'AWFUL_ERROR'});
 ```
 
+> NOTE: This will emit an `error` event on the `request` object, not the reply.
+
 
 ## Specifying headers
 
