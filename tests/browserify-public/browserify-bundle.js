@@ -580,6 +580,14 @@ function percentEncode(str) {
   });
 }
 
+function matchStringOrRegexp(target, pattern) {
+  if (pattern instanceof RegExp) {
+    return target.toString().match(pattern);
+  } else {
+    return target === pattern;
+  }
+}
+
 exports.normalizeRequestOptions = normalizeRequestOptions;
 exports.isBinaryBuffer = isBinaryBuffer;
 exports.mergeChunks = mergeChunks;
@@ -591,6 +599,7 @@ exports.headersFieldNamesToLowerCase = headersFieldNamesToLowerCase;
 exports.headersFieldsArrayToLowerCase = headersFieldsArrayToLowerCase;
 exports.deleteHeadersField = deleteHeadersField;
 exports.percentEncode = percentEncode;
+exports.matchStringOrRegexp = matchStringOrRegexp;
 
 }).call(this,require("buffer").Buffer)
 },{"buffer":15,"debug":92,"http":44,"https":20,"lodash":99}],4:[function(require,module,exports){
@@ -779,7 +788,7 @@ function isOff() {
 
 function add(key, interceptor, scope, scopeOptions, host) {
   if (! allInterceptors.hasOwnProperty(key)) {
-    allInterceptors[key] = [];
+    allInterceptors[key] = { key: key, scopes: [] };
   }
   interceptor.__nock_scope = scope;
 
@@ -790,11 +799,10 @@ function add(key, interceptor, scope, scopeOptions, host) {
   interceptor.__nock_scopeHost = host;
   interceptor.interceptionCounter = 0;
 
-  allInterceptors[key].push(interceptor);
+  allInterceptors[key].scopes.push(interceptor);
 }
 
 function remove(interceptor) {
-
   if (interceptor.__nock_scope.shouldPersist()) {
     return;
   }
@@ -807,7 +815,7 @@ function remove(interceptor) {
   var key          = interceptor._key.split(' '),
       u            = url.parse(key[1]),
       hostKey      = u.protocol + '//' + u.host,
-      interceptors = allInterceptors[hostKey],
+      interceptors = allInterceptors[hostKey] && allInterceptors[hostKey].scopes,
       thisInterceptor;
 
   if (interceptors) {
@@ -826,53 +834,9 @@ function removeAll() {
   allInterceptors = {};
 }
 
-function hasHadInterceptors(options) {
-  var basePath,
-      isBasePathMatched,
-      isScopedMatched;
-
-  debug('hasHadInterceptors', options.host, options.hostname);
-  common.normalizeRequestOptions(options);
-
-  basePath = options.proto + '://' + options.host;
-
-  debug('looking for interceptors for basepath %j', basePath);
-
-  _.each(allInterceptors, function(interceptor, key) {
-    if (key === basePath) {
-      isBasePathMatched = true;
-
-      // false to short circuit the .each
-      return false;
-    }
-
-    _.each(interceptor, function(scope) {
-      var filteringScope = scope.__nock_scopeOptions.filteringScope;
-
-      //  If scope filtering function is defined and returns a truthy value
-      //  then we have to treat this as a match.
-      if (filteringScope && filteringScope(basePath)) {
-        debug('found matching scope interceptor');
-
-        //  Keep the filtered scope (its key) to signal the rest of the module
-        //  that this wasn't an exact but filtered match.
-        scope.__nock_filteredScope = scope.__nock_scopeKey;
-        isScopedMatched = true;
-        //  Break out of _.each for scopes.
-        return false;
-      }
-    });
-
-    //  Returning falsy value here (which will happen if we have found our matching interceptor)
-    //  will break out of _.each for all interceptors.
-    return !isScopedMatched;
-  });
-
-  return (isScopedMatched || isBasePathMatched);
-}
-
 function interceptorsFor(options) {
-  var basePath;
+  var basePath,
+      matchingInterceptor;
 
   common.normalizeRequestOptions(options);
 
@@ -883,9 +847,8 @@ function interceptorsFor(options) {
   debug('filtering interceptors for basepath', basePath);
 
   //  First try to use filteringScope if any of the interceptors has it defined.
-  var matchingInterceptor;
-  _.each(allInterceptors, function(interceptor, key) {
-    _.each(interceptor, function(scope) {
+  _.each(allInterceptors, function(interceptor, k) {
+    _.each(interceptor.scopes, function(scope) {
       var filteringScope = scope.__nock_scopeOptions.filteringScope;
 
       //  If scope filtering function is defined and returns a truthy value
@@ -896,22 +859,24 @@ function interceptorsFor(options) {
         //  Keep the filtered scope (its key) to signal the rest of the module
         //  that this wasn't an exact but filtered match.
         scope.__nock_filteredScope = scope.__nock_scopeKey;
-        matchingInterceptor = interceptor;
+        matchingInterceptor = interceptor.scopes;
         //  Break out of _.each for scopes.
         return false;
       }
     });
+
+    if (!matchingInterceptor && common.matchStringOrRegexp(basePath, interceptor.key)) {
+      matchingInterceptor = interceptor.scopes;
+      // false to short circuit the .each
+      return false;
+    }
 
     //  Returning falsy value here (which will happen if we have found our matching interceptor)
     //  will break out of _.each for all interceptors.
     return !matchingInterceptor;
   });
 
-  if(matchingInterceptor) {
-    return matchingInterceptor;
-  }
-
-  return allInterceptors[basePath] || [];
+  return matchingInterceptor;
 }
 
 function removeInterceptor(options) {
@@ -922,19 +887,19 @@ function removeInterceptor(options) {
   common.normalizeRequestOptions(options);
   baseUrl = proto + '://' + options.host;
 
-  if (allInterceptors[baseUrl] && allInterceptors[baseUrl].length > 0) {
+  if (allInterceptors[baseUrl] && allInterceptors[baseUrl].scopes.length > 0) {
     if (options.path) {
       method = options.method && options.method.toUpperCase() || 'GET';
       key = method + ' ' + baseUrl + (options.path || '/');
 
-      for (var i = 0; i < allInterceptors[baseUrl].length; i++) {
-        if (allInterceptors[baseUrl][i]._key === key) {
-          allInterceptors[baseUrl].splice(i, 1);
+      for (var i = 0; i < allInterceptors[baseUrl].scopes.length; i++) {
+        if (allInterceptors[baseUrl].scopes[i]._key === key) {
+          allInterceptors[baseUrl].scopes.splice(i, 1);
           break;
         }
       }
     } else {
-      allInterceptors[baseUrl].length = 0;
+      allInterceptors[baseUrl].scopes.length = 0;
     }
 
     return true;
@@ -970,11 +935,10 @@ function overrideClientRequest() {
   function OverriddenClientRequest(options, cb) {
     if (http.OutgoingMessage) http.OutgoingMessage.call(this);
 
-    if (isOn() && hasHadInterceptors(options)) {
+    //  Filter the interceptors per request options.
+    var interceptors = interceptorsFor(options)
 
-      //  Filter the interceptors per request options.
-      var interceptors = interceptorsFor(options);
-
+    if (isOn() && interceptors) {
       debug('using', interceptors.length, 'interceptors');
 
       //  Use filtered interceptors to intercept requests.
@@ -1036,7 +1000,7 @@ function isActive() {
 
 function isDone() {
   return _.every(allInterceptors, function(interceptors) {
-    return _.every(interceptors, function(interceptor) {
+    return _.every(interceptors.scopes, function(interceptor) {
       return interceptor.__nock_scope.isDone();
     });
   });
@@ -1044,8 +1008,8 @@ function isDone() {
 
 function pendingMocks() {
   return _.reduce(allInterceptors, function(result, interceptors) {
-    for (var interceptor in interceptors) {
-      result = result.concat(interceptors[interceptor].__nock_scope.pendingMocks());
+    for (var interceptor in interceptors.scopes) {
+      result = result.concat(interceptors.scopes[interceptor].__nock_scope.pendingMocks());
     }
 
     return result;
@@ -1063,9 +1027,7 @@ function activate() {
   // ----- Overriding http.request and https.request:
 
   common.overrideRequests(function(proto, overriddenRequest, options, callback) {
-
     //  NOTE: overriddenRequest is already bound to its module.
-
     var req,
         res;
 
@@ -1074,13 +1036,11 @@ function activate() {
     }
     options.proto = proto;
 
-    if (isOn() && hasHadInterceptors(options)) {
+    var interceptors = interceptorsFor(options)
 
-      var interceptors,
-          matches = false,
+    if (isOn() && interceptors) {
+      var matches = false,
           allowUnmocked = false;
-
-      interceptors = interceptorsFor(options);
 
       interceptors.forEach(function(interceptor) {
         if (! allowUnmocked && interceptor.options.allowUnmocked) { allowUnmocked = true; }
@@ -1732,7 +1692,6 @@ function setRequestHeaders(req, options, interceptor) {
 }
 
 function RequestOverrider(req, options, interceptors, remove, cb) {
-
   var response;
   if (IncomingMessage) {
     response = new IncomingMessage(new EventEmitter());
@@ -2054,6 +2013,12 @@ function RequestOverrider(req, options, interceptors, remove, cb) {
         authorized: true
       });
 
+      // Account for updates to Node.js response interface
+      // cf https://github.com/request/request/pull/1615
+      response.socket = _.extend(response.socket || {}, {
+        authorized: true
+      });
+
       // Evaluate functional headers.
       Object.keys(response.headers).forEach(function (key) {
         var value = response.headers[key];
@@ -2173,14 +2138,19 @@ function startScope(basePath, options) {
       matchHeaders = [],
       logger = debug,
       scopeOptions = options || {},
-      urlParts = url.parse(basePath),
-      port = urlParts.port || ((urlParts.protocol === 'http:') ? 80 : 443),
+      urlParts = {},
       persist = false,
       contentLen = false,
       date = null,
-      basePathname = urlParts.pathname.replace(/\/$/, '');
+      basePathname = '',
+      port;
 
-  basePath = urlParts.protocol + '//' + urlParts.hostname + ':' + port;
+  if (!(basePath instanceof RegExp)) {
+    urlParts = url.parse(basePath);
+    port = urlParts.port || ((urlParts.protocol === 'http:') ? 80 : 443);
+    basePathname = urlParts.pathname.replace(/\/$/, '');
+    basePath = urlParts.protocol + '//' + urlParts.hostname + ':' + port;
+  }
 
   function add(key, interceptor, scope) {
     if (! interceptors.hasOwnProperty(key)) {
@@ -2302,23 +2272,16 @@ function startScope(basePath, options) {
       return reply.call(this, statusCode, readStream, headers);
     }
 
-    var matchStringOrRegexp = function(target, pattern) {
-      if (pattern instanceof RegExp) {
-        return target.toString().match(pattern);
-      } else {
-        return target === pattern;
-      }
-    };
-
     function match(options, body, hostNameOnly) {
       debug('match %s, body = %s', stringify(options), stringify(body));
       if (hostNameOnly) {
         return options.hostname === urlParts.hostname;
       }
 
-      var method = options.method || 'GET'
+      var method = (options.method || 'GET').toUpperCase()
         , path = options.path
         , matches
+        , matchKey
         , proto = options.proto;
 
       if (transformPathFunction) {
@@ -2335,7 +2298,7 @@ function startScope(basePath, options) {
         if (_.isFunction(header.value)) {
           return header.value(options.getHeader(header.name));
         }
-        return matchStringOrRegexp(options.getHeader(header.name), header.value);
+        return common.matchStringOrRegexp(options.getHeader(header.name), header.value);
       };
 
       if (!matchHeaders.every(checkHeaders) ||
@@ -2371,7 +2334,7 @@ function startScope(basePath, options) {
         if (reqHeader && header) {
           if (_.isFunction(reqHeader)) {
             return reqHeader(header);
-          } else if (matchStringOrRegexp(header, reqHeader)) {
+          } else if (common.matchStringOrRegexp(header, reqHeader)) {
             return true;
           }
         }
@@ -2400,16 +2363,14 @@ function startScope(basePath, options) {
         return false;
       }
 
-      var matchKey = method.toUpperCase() + ' ';
-
       //  If we have a filtered scope then we use it instead reconstructing
       //  the scope from the request options (proto, host and port) as these
       //  two won't necessarily match and we have to remove the scope that was
       //  matched (vs. that was defined).
       if (this.__nock_filteredScope) {
-        matchKey += this.__nock_filteredScope;
+        matchKey = this.__nock_filteredScope;
       } else {
-        matchKey += proto + '://' + options.host;
+        matchKey = proto + '://' + options.host;
         if (
              options.port && options.host.indexOf(':') < 0 &&
              (options.port !== 80 || options.proto !== 'http') &&
@@ -2418,14 +2379,14 @@ function startScope(basePath, options) {
           matchKey += ":" + options.port;
         }
       }
-      matchKey += path;
 
       // Match query strings when using query()
       var matchQueries = true;
       var queryIndex = -1;
       var queries;
-      if (this.queries && (queryIndex = matchKey.indexOf('?')) !== -1) {
-        queries = matchKey.slice(queryIndex + 1).split('&');
+
+      if (this.queries && (queryIndex = path.indexOf('?')) !== -1) {
+        queries = path.slice(queryIndex + 1).split('&');
         queries = queries.filter(function(str) {
           return str.length > 0;
         });
@@ -2452,18 +2413,22 @@ function startScope(basePath, options) {
                 break;
               }
 
-              var isMatch = matchStringOrRegexp(query[1], this.queries[ query[0] ]);
+              var isMatch = common.matchStringOrRegexp(query[1], this.queries[ query[0] ]);
               matchQueries = matchQueries && !!isMatch;
             }
           }
           debug('matchQueries: %j', matchQueries);
         }
 
-        // Remove the query string from the matchKey
-        matchKey = matchKey.substr(0, queryIndex);
+        // Remove the query string from the path
+        path = path.substr(0, queryIndex);
       }
 
-      matches = matchKey === this._key && matchQueries;
+      matches = method === this.method &&
+                common.matchStringOrRegexp(matchKey, this.basePath) &&
+                path === this.path  &&
+                matchQueries;
+
 
       // special logger for query()
       if (queryIndex !== -1) {
@@ -2484,7 +2449,7 @@ function startScope(basePath, options) {
     }
 
     function matchIndependentOfBody(options) {
-      var method = options.method || 'GET'
+      var method = (options.method || 'GET').toUpperCase()
         , path = options.path
         , proto = options.proto;
 
@@ -2493,7 +2458,7 @@ function startScope(basePath, options) {
       }
 
       var checkHeaders = function(header) {
-        return options.getHeader && matchStringOrRegexp(options.getHeader(header.name), header.value);
+        return options.getHeader && common.matchStringOrRegexp(options.getHeader(header.name), header.value);
       };
 
       if (!matchHeaders.every(checkHeaders) ||
@@ -2672,6 +2637,9 @@ function startScope(basePath, options) {
 
     var interceptor = {
         _key: key
+      , method: method.toUpperCase()
+      , basePath: basePath
+      , path: basePathname + uri
       , counter: 1
       , _requestBody: requestBody
       //  We use lower-case header field names throughout Nock.
