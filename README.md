@@ -17,6 +17,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
 - [Install](#install)
 - [Use](#use)
     - [READ THIS](#read-this---about-interceptors)
+    - [Specifying domain](#specifying-domain)
     - [Specifying request body](#specifying-request-body)
     - [Specifying replies](#specifying-replies)
     - [Specifying headers](#specifying-headers)
@@ -93,6 +94,22 @@ Then the test can call the module, and the module will do the HTTP requests.
 When you setup an interceptor for an URL and that interceptor is used, it is removed from the interceptor list.
 This means that you can intercept 2 or more calls to the same URL and return different things on each of them.
 It also means that you must setup one interceptor for each request you are going to have, otherwise nock will throw an error because that URL was not present in the interceptor list.
+
+## Specifying domain
+
+The request domain can be a string or a RegExp
+
+```js
+var scope = nock('http://www.example.com')
+    .get('/resource')
+    .reply(200, 'domain matched');
+```
+
+```js
+var scope = nock(/example\.com/)
+    .get('/resource')
+    .reply(200, 'domain regex matched');
+```
 
 ## Specifying request body
 

@@ -3880,6 +3880,20 @@ test('hyperquest works', function(t) {
   });
 });
 
+test('match domain using regexp', function (t) {
+  var scope = nock(/regexexample\.com/)
+    .get('/resources')
+    .reply(200, 'Match regex');
+
+  mikealRequest.get('http://www.regexexample.com/resources', function(err, res, body) {
+    t.type(err, 'null');
+    t.equal(res.statusCode, 200);
+    t.equal(body, 'Match regex');
+
+    t.end();
+  });
+});
+
 test('remove interceptor for GET resource', function(t) {
   var scope = nock('http://example.org')
     .get('/somepath')
