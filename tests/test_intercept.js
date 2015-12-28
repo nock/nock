@@ -3894,6 +3894,20 @@ test('match domain using regexp', function (t) {
   });
 });
 
+test('match path using regexp', function (t) {
+  var scope = nock('http://www.pathregex.com')
+    .get(/regex$/)
+    .reply(200, 'Match regex');
+
+  mikealRequest.get('http://www.pathregex.com/resources/regex', function(err, res, body) {
+    t.type(err, 'null');
+    t.equal(res.statusCode, 200);
+    t.equal(body, 'Match regex');
+
+    t.end();
+  });
+});
+
 test('remove interceptor for GET resource', function(t) {
   var scope = nock('http://example.org')
     .get('/somepath')
