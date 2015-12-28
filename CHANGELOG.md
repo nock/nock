@@ -1,3 +1,19 @@
+4.0.0 / 2015-12-28
+==================
+
+  * changelog updated
+  * v4.0.0
+  * browserify bundle updated
+  * Merge branch 'master' of git://github.com/ericsaboia/nock
+  * [feature] allow specifying path using regex
+  * [doc] clarified error-first callback behavior
+  * updated browserify bundle
+  * clarifying that replyWithError will emit an error on the request object, not the response
+  * Merge branch 'ericsaboia-master'
+  * Merge branch 'master' of git://github.com/ericsaboia/nock into ericsaboia-master
+  * add ability to match domain using regex
+  * updated changelog
+
 3.6.0 / 2015-12-23
 ==================
 
@@ -169,6 +185,3 @@
   * Merge branch 'neophob-request-promise-testcase'
   * support for IPv6 addresses. fixes [#386](https://github.com/pgte/nock/issues/386)
   * Merge branch 'request-promise-testcase' of git://github.com/neophob/nock into neophob-request-promise-testcase
-  * Merge branch 'neophob-use-strict-for-testcases'
-  * Merge branch 'use-strict-for-testcases' of git://github.com/neophob/nock into neophob-use-strict-for-testcases
-  * add request-promise to requred dev packages
