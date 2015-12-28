@@ -1,6 +1,7 @@
 3.6.0 / 2015-12-23
 ==================
 
+  * v3.6.0
   * Merge pull request [#430](https://github.com/pgte/nock/issues/430) from jeffomatic/fix-request-again
     Update [#158](https://github.com/pgte/nock/issues/158) fix for request module and strict SSL
   * Update [#158](https://github.com/pgte/nock/issues/158) fix for request module and strict SSL
@@ -171,17 +172,3 @@
   * Merge branch 'neophob-use-strict-for-testcases'
   * Merge branch 'use-strict-for-testcases' of git://github.com/neophob/nock into neophob-use-strict-for-testcases
   * add request-promise to requred dev packages
-  * add request-promise test case - does not work if ipv6 address gets enabled
-  * Merge branch 'seegno-forks-bugfix/improve-is-done-code-coverage'
-  * Merge branch 'bugfix/improve-is-done-code-coverage' of git://github.com/seegno-forks/nock into seegno-forks-bugfix/improve-is-done-code-coverage
-  * Improve code coverage for `isDone` method
-
-2.16.0 / 2015-10-28
-===================
-
-  * v2.16.0
-  * Merge branch 'seegno-forks-enhancement/add-global-is-done'
-  * Add `isDone()` to global scope
-  * test files use strict consistent
-  * add missing strict to testcase
-  * ipv6 url in test
