@@ -2426,9 +2426,8 @@ function startScope(basePath, options) {
 
       matches = method === this.method &&
                 common.matchStringOrRegexp(matchKey, this.basePath) &&
-                path === this.path  &&
+                common.matchStringOrRegexp(path, this.path) &&
                 matchQueries;
-
 
       // special logger for query()
       if (queryIndex !== -1) {
@@ -2639,7 +2638,7 @@ function startScope(basePath, options) {
         _key: key
       , method: method.toUpperCase()
       , basePath: basePath
-      , path: basePathname + uri
+      , path: (typeof uri === 'string') ? basePathname + uri : uri
       , counter: 1
       , _requestBody: requestBody
       //  We use lower-case header field names throughout Nock.
