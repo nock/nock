@@ -18,6 +18,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
 - [Use](#use)
     - [READ THIS](#read-this---about-interceptors)
     - [Specifying domain](#specifying-domain)
+    - [Specifying path](#specifying-path)
     - [Specifying request body](#specifying-request-body)
     - [Specifying replies](#specifying-replies)
     - [Specifying headers](#specifying-headers)
@@ -109,6 +110,22 @@ var scope = nock('http://www.example.com')
 var scope = nock(/example\.com/)
     .get('/resource')
     .reply(200, 'domain regex matched');
+```
+
+## Specifying path
+
+The request path can be a string or a RegExp and you can use any [HTTP verb](#http-verbs).
+
+```js
+var scope = nock('http://www.pathregex.com')
+    .get('resource')
+    .reply(200, 'path matched');
+```
+
+```js
+var scope = nock('http://www.pathregex.com')
+    .get(/source$/)
+    .reply(200, 'path using regex matched');
 ```
 
 ## Specifying request body
