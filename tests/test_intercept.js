@@ -3894,6 +3894,26 @@ test('match domain using regexp', function (t) {
   });
 });
 
+test('match domain using intercept callback', function (t) {
+  var validUrl = [
+    '/cats',
+    '/dogs'
+  ];
+
+  nock('http://www.interceptexample.com')
+    .get(function(uri) {
+      return validUrl.indexOf(uri) >= 0;
+    })
+    .reply(200, 'Match intercept');
+
+  mikealRequest.get('http://www.interceptexample.com/cats', function(err, res, body) {
+    t.type(err, 'null');
+    t.equal(res.statusCode, 200);
+    t.equal(body, 'Match intercept');
+    t.end();
+  });
+});
+
 test('match path using regexp', function (t) {
   var scope = nock('http://www.pathregex.com')
     .get(/regex$/)
@@ -3903,7 +3923,6 @@ test('match path using regexp', function (t) {
     t.type(err, 'null');
     t.equal(res.statusCode, 200);
     t.equal(body, 'Match regex');
-
     t.end();
   });
 });
