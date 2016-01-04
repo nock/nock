@@ -1150,8 +1150,24 @@ function matchBody(spec, body) {
     return spec.call(this, body);
   }
 
-  return deepEqual(spec, body, { strict: true });
+  return deepEqualExtended(spec, body);
 };
+
+function deepEqualExtended(spec, body) {
+  if (spec && spec.constructor === RegExp) {
+    return spec.test(body);
+  }
+  if (spec && spec.constructor === Object && body) {
+    var keys = Object.keys(spec);
+    for (var i = 0; i < keys.length; i++) {
+      if (!deepEqualExtended(spec[keys[i]], body[keys[i]])) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return deepEqual(spec, body, { strict: true });
+}
 
 }).call(this,{"isBuffer":require("../node_modules/browserify/node_modules/insert-module-globals/node_modules/is-buffer/index.js")})
 },{"../node_modules/browserify/node_modules/insert-module-globals/node_modules/is-buffer/index.js":22,"deep-equal":95,"querystring":29}],7:[function(require,module,exports){

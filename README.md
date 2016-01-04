@@ -157,6 +157,22 @@ var scope = nock('http://myapp.iriscouch.com')
                 });
 ```
 
+If the request body is a JSON object, a RegExp can be used to match an attribute value.
+
+```js
+var scope = nock('http://myapp.iriscouch.com')
+                .post('/users', {
+                  username: 'pgte',
+                  password: /a.+/,
+                  email: 'pedro.teixeira@gmail.com'
+                })
+                .reply(201, {
+                  ok: true,
+                  id: '123ABC',
+                  rev: '946B7D1C'
+                });
+```
+
 If the request body is a function, return true if it should be considered a match:
 
 ```js
