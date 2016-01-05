@@ -489,7 +489,7 @@ var restoreOverriddenRequests = function() {
       override.module.request = override.request;
       debug('- restored request for', proto);
     }
-  });
+  }).value();
   requestOverride = [];
 };
 
@@ -570,7 +570,7 @@ var deleteHeadersField = function(headers, fieldNameToDelete) {
       //  We don't stop here but continue in order to remove *all* matching field names
       //  (even though if seen regorously there shouldn't be any)
     }
-  });
+  }).value();
 
 };
 
