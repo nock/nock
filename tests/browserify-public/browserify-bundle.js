@@ -2703,6 +2703,8 @@ function startScope(basePath, options) {
       , socketDelay: socketDelay
     };
 
+    scope.interceptors.push(interceptor);
+
     return interceptor;
   }
 
@@ -2861,6 +2863,7 @@ function startScope(basePath, options) {
     , pendingMocks: pendingMocks
     , replyContentLength: replyContentLength
     , replyDate: replyDate
+    , interceptors: [],
   };
 
   return scope;
