@@ -1808,6 +1808,8 @@ function RequestOverrider(req, options, interceptors, remove, cb) {
     response.emit('close', err);
 
     req.socket.destroy();
+
+    req.emit('abort');
   };
 
   // restify listens for a 'socket' event to
@@ -1840,6 +1842,8 @@ function RequestOverrider(req, options, interceptors, remove, cb) {
         responseBody,
         responseBuffers,
         interceptor;
+
+    var continued = false;
 
     //  When request body is a binary buffer we internally use in its hexadecimal representation.
     var requestBodyBuffer = common.mergeChunks(requestBodyBuffers);
@@ -1970,10 +1974,15 @@ function RequestOverrider(req, options, interceptors, remove, cb) {
     return continueWithResponseBody(null, responseBody);
 
     function continueWithResponseBody(err, responseBody) {
+
+      if (continued) {
+        return;
+      }
+      continued = true;
+
       if (err) {
         response.statusCode = 500;
         responseBody = err.stack;
-
       }
 
       //  Transform the response body if it exists (it may not exist
@@ -2052,8 +2061,25 @@ function RequestOverrider(req, options, interceptors, remove, cb) {
       }
 
 
-      process.nextTick(function() {
-        var respond = function() {
+      process.nextTick(respond);
+
+      function respond() {
+
+        if (aborted) { return; }
+
+        if (interceptor.socketDelayInMs && interceptor.socketDelayInMs > 0) {
+          req.socket._checkTimeout(interceptor.socketDelayInMs);
+        }
+
+        if (interceptor.delayConnectionInMs && interceptor.delayConnectionInMs > 0) {
+          setTimeout(_respond, interceptor.delayConnectionInMs);
+        } else {
+          _respond();
+        }
+
+        function _respond() {
+          if (aborted) { return; }
+
           debug('emitting response');
 
           if (typeof cb === 'function') {
@@ -2096,16 +2122,7 @@ function RequestOverrider(req, options, interceptors, remove, cb) {
           }
         };
 
-        if (interceptor.socketDelayInMs && interceptor.socketDelayInMs > 0) {
-          req.socket._checkTimeout(interceptor.socketDelayInMs);
-        }
-
-        if (interceptor.delayConnectionInMs && interceptor.delayConnectionInMs > 0) {
-          setTimeout(respond, interceptor.delayConnectionInMs);
-        } else {
-          respond();
-        }
-      });
+      }
     }
   };
 

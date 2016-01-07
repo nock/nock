@@ -25,3 +25,4 @@ if (process.versions.node >= '0.11' ) {
 }
 require('./test_encode_querystring');
 require('./test_body_match');
+require('./test_abort');
