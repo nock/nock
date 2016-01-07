@@ -1,3 +1,34 @@
+5.2.0 / 2016-01-07
+==================
+
+  * scope now exposes interceptors
+
+5.1.0 / 2016-01-07
+==================
+
+  * v5.1.0
+  * abort behaves. somehow addresses [#439](https://github.com/pgte/nock/issues/439)
+
+5.0.0 / 2016-01-05
+==================
+
+  * v5.0.0
+  * Merge branch 'xavierchow-master'
+  * browserify bundle update
+  * Merge branch 'master' of git://github.com/xavierchow/nock into xavierchow-master
+  * Upgrade to lodash 3.0, fix [#423](https://github.com/pgte/nock/issues/423)
+
+4.1.0 / 2016-01-04
+==================
+
+  * v4.1.0
+  * [docs] some readme clarifications on hostname and path matching
+  * Merge branch 'feature/match-url-using-callback' of git://github.com/hyzhak/nock into hyzhak-feature/match-url-using-callback
+  * Merge branch 'yinrong-master'
+  * browserify bundle updated
+  * [feature] allow matching body with RegExp
+  * changelog update
+
 4.0.0 / 2015-12-28
 ==================
 
@@ -11,6 +42,8 @@
   * clarifying that replyWithError will emit an error on the request object, not the response
   * Merge branch 'ericsaboia-master'
   * Merge branch 'master' of git://github.com/ericsaboia/nock into ericsaboia-master
+  * fix typo
+  * match uri using callback
   * add ability to match domain using regex
   * updated changelog
 
@@ -157,31 +190,3 @@
     Browserify support - alpha
   * removing node v0.10 from travis tests
   * harmony flags on istanbul coverage tests
-  * trying to make it work with browserify
-  * Merge branch 'master' of github.com:pgte/nock
-  * travis badge is just master status
-  * added browserify test to collection of tests
-  * browserify test dependencies
-  * make nock work on browserify. fixes [#150](https://github.com/pgte/nock/issues/150)
-  * browserify tests
-  * Merge pull request [#396](https://github.com/pgte/nock/issues/396) from four43/patch-1
-    Added localhost enableNetConnect to README
-  * Added localhost enableNetConnect to README
-    I'm just getting picky here but I didn't put together the `enableNetConnect` and localhost when I was testing my express server, after "CTRL+F" ing my way through the README I came across: https://github.com/pgte/nock/issues/239 
-    Thanks
-  * Adding example for debug environment variable
-
-2.17.0 / 2015-10-29
-===================
-
-  * v2.17.0
-  * Merge branch 'seegno-forks-enhancement/add-global-pending-mocks'
-  * Add `pendingMocks()` to global scope
-
-2.16.1 / 2015-10-29
-===================
-
-  * v2.16.1
-  * Merge branch 'neophob-request-promise-testcase'
-  * support for IPv6 addresses. fixes [#386](https://github.com/pgte/nock/issues/386)
-  * Merge branch 'request-promise-testcase' of git://github.com/neophob/nock into neophob-request-promise-testcase
