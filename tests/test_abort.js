@@ -8,12 +8,10 @@ function assertEvents(assert, done) {
   var gotAbort = false
   var req = http.get('http://localhost:16829/status')
     .on('abort', function () {
-      console.log('got abort');
       // Should trigger first
       gotAbort = true
     })
     .on('error', function (err) {
-      console.log('got error', err.message);
       // Should trigger last
       assert.equal(err.code, 'ECONNRESET')
       if (gotAbort) {
@@ -50,4 +48,27 @@ test('[actual] req.abort() should cause "abort" and "error" to be emitted', func
   assertEvents(t, function(){
     t.end();
   });
+});
+
+test("abort is emitted after delay time", function(t) {
+  nock('http://test.example.com')
+        .get('/status')
+        .delayConnection(500)
+        .reply(204);
+
+  var tstart = Date.now();
+  var req = http.get('http://test.example.com/status')
+  // Don't bother with the response
+  .once('abort', function() {
+    var actual = Date.now() - tstart;
+    t.ok(actual < 250, 'abort took only ' + actual + ' ms');
+    t.end();
+  })
+  .once('error', function(err) {
+    // don't care
+  });
+
+  setTimeout(function() {
+    req.abort();
+  }, 10);
 });
