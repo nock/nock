@@ -1381,6 +1381,10 @@ test("abort request", function(t) {
       t.true(false, 'this should never execute');
     });
 
+    req.once('error', function(err) {
+      t.equal(err.code, 'ECONNRESET');
+    });
+
     req.abort();
   });
 
