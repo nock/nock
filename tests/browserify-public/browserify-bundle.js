@@ -1895,6 +1895,13 @@ function RequestOverrider(req, options, interceptors, remove, cb) {
 
     interceptor = interceptors.shift();
 
+    //  We again set request headers, now for our matched interceptor.
+    setRequestHeaders(req, options, interceptor);
+    interceptor.req = req;
+    req.headers = req._headers;
+
+    interceptor.scope.emit('request', req, interceptor);
+
     if (typeof interceptor.errorMessage !== 'undefined') {
       interceptor.interceptionCounter++;
       remove(interceptor);
@@ -1914,10 +1921,6 @@ function RequestOverrider(req, options, interceptors, remove, cb) {
     response.rawHeaders = interceptor.rawHeaders || [];
     debug('response.rawHeaders:', response.rawHeaders);
 
-    //  We again set request headers, now for our matched interceptor.
-    setRequestHeaders(req, options, interceptor);
-    interceptor.req = req;
-    req.headers = req._headers;
 
     if (typeof interceptor.body === 'function') {
       // In case we are waiting for a callback
@@ -2118,6 +2121,7 @@ function RequestOverrider(req, options, interceptors, remove, cb) {
               else {
                 debug('ending response stream');
                 response.push(null);
+                interceptor.scope.emit('replied', req, interceptor);
               }
             });
           }
@@ -2146,7 +2150,9 @@ var globalIntercept = require('./intercept')
   , url             = require('url')
   , _               = require('lodash')
   , debug           = require('debug')('nock.scope')
-  , stringify       = require('json-stringify-safe');
+  , stringify       = require('json-stringify-safe')
+  , EventEmitter    = require('events').EventEmitter
+  , extend          = require('util')._extend;
 
 var fs;
 
@@ -2701,6 +2707,7 @@ function startScope(basePath, options) {
       , delay: delay
       , delayConnection: delayConnection
       , socketDelay: socketDelay
+      , scope: scope
     };
 
     scope.interceptors.push(interceptor);
@@ -2841,8 +2848,9 @@ function startScope(basePath, options) {
     return this;
   }
 
+  scope = new EventEmitter();
 
-  scope = {
+  extend(scope, {
       get: get
     , post: post
     , delete: _delete
@@ -2864,7 +2872,7 @@ function startScope(basePath, options) {
     , replyContentLength: replyContentLength
     , replyDate: replyDate
     , interceptors: [],
-  };
+  });
 
   return scope;
 }
@@ -3000,7 +3008,7 @@ module.exports.loadDefs = loadDefs;
 module.exports.define = define;
 
 }).call(this,require("buffer").Buffer)
-},{"./common":3,"./intercept":5,"./match_body":6,"./mixin":7,"assert":13,"buffer":15,"debug":92,"fs":12,"json-stringify-safe":98,"lodash":99,"url":51}],11:[function(require,module,exports){
+},{"./common":3,"./intercept":5,"./match_body":6,"./mixin":7,"assert":13,"buffer":15,"debug":92,"events":19,"fs":12,"json-stringify-safe":98,"lodash":99,"url":51,"util":54}],11:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
