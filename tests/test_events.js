@@ -4,7 +4,7 @@ var nock    = require('../.');
 var http    = require('http');
 var test    = require('tap').test;
 
-test("abort is emitted before delay time", function(t) {
+test('emits request and replied events', function(t) {
   var scope = nock('http://eventland')
         .get('/please')
         .reply(200);
