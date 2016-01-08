@@ -1075,6 +1075,15 @@ A scope emits the following events:
 * `emit('request', function(req, interceptor))`;
 * `emit('replied', function(req, interceptor))`;
 
+## Global no match event
+
+You can also listen for no match events like this:
+
+```js
+nock.emitter.on('no match', function(req) {
+  
+});
+```
 
 # Nock Back
 
