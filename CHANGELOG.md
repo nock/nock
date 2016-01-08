@@ -1,6 +1,7 @@
 5.2.0 / 2016-01-07
 ==================
 
+  * v5.2.0
   * scope now exposes interceptors
 
 5.1.0 / 2016-01-07
@@ -188,5 +189,3 @@
   * v2.18.0-alpha.1
   * Merge pull request [#397](https://github.com/pgte/nock/issues/397) from pgte/browserify
     Browserify support - alpha
-  * removing node v0.10 from travis tests
-  * harmony flags on istanbul coverage tests
