@@ -1942,10 +1942,7 @@ function RequestOverrider(req, options, interceptors, remove, cb) {
 
         var buffers = interceptor.body;
         if(!_.isArray(buffers)) {
-          emitError(
-            new Error(
-              'content-encoded response must be an array of binary buffers and not ' + typeof(buffers)));
-          return;
+          buffers = [buffers];
         }
 
         responseBuffers = _.map(buffers, function(buffer) {
