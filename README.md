@@ -1068,6 +1068,14 @@ nock.removeInterceptor({
 });
 ```
 
+# Events
+
+A scope emits the following events:
+
+* `emit('request', function(req, interceptor))`;
+* `emit('replied', function(req, interceptor))`;
+
+
 # Nock Back
 
 fixture recording support and playback

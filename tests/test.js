@@ -27,3 +27,4 @@ require('./test_encode_querystring');
 require('./test_body_match');
 require('./test_abort');
 require('./test_scope_interceptors');
+require('./test_events');
