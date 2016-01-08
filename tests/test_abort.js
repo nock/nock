@@ -35,7 +35,7 @@ test('[actual] req.abort() should cause "abort" and "error" to be emitted', func
   assertEvents(t);
 });
 
-test("abort is emitted after delay time", function(t) {
+test("abort is emitted before delay time", function(t) {
   nock('http://test.example.com')
         .get('/status')
         .delayConnection(500)
