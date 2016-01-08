@@ -1810,6 +1810,10 @@ function RequestOverrider(req, options, interceptors, remove, cb) {
     req.socket.destroy();
 
     req.emit('abort');
+
+    var connResetError = new Error('socket hang up');
+    connResetError.code = 'ECONNRESET';
+    emitError(connResetError);
   };
 
   // restify listens for a 'socket' event to
@@ -2120,8 +2124,7 @@ function RequestOverrider(req, options, interceptors, remove, cb) {
               }
             });
           }
-        };
-
+        }
       }
     }
   };
