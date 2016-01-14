@@ -195,8 +195,6 @@
     "changelog": "changelog nock all -m > CHANGELOG.md"
   },
   "pre-commit": [
-    "jshint",
-    "coverage"
   ],
   "license": "MIT"
 }
