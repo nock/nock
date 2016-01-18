@@ -354,6 +354,35 @@ test("get with reply callback returning object", function(t) {
   req.end();
 });
 
+test("get with reply callback returning array with headers", function(t) {
+  var scope = nock('http://replyheaderland')
+     .get('/')
+     .reply(function() {
+        return [202, 'body', {'x-key': 'value', 'x-key-2': 'value 2'}];
+     });
+
+  http.get({
+    host: "replyheaderland",
+    path: '/',
+    port: 80,
+  }, function(res) {
+    res.setEncoding('utf8');
+    t.equal(res.statusCode, 202);
+    console.log('res.heades:', res.headers);
+    t.deepEqual(res.headers, {
+      'x-key': 'value',
+      'x-key-2': 'value 2',
+    });
+    t.deepEqual(res.rawHeaders, [
+      'x-key', 'value',
+      'x-key-2', 'value 2']);
+    res.on('data', function(data) {
+      t.equal(data, 'body');
+      res.once('end', t.end.bind(t));
+    });
+  });
+});
+
 test("post with reply callback, uri, and request body", function(t) {
   var input = 'key=val';
 

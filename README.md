@@ -293,7 +293,11 @@ var scope = nock('http://www.google.com')
    .filteringRequestBody(/.*/, '*')
    .post('/echo', '*')
    .reply(function(uri, requestBody) {
-     return [201, 'THIS IS THE REPLY BODY'];
+     return [
+       201,
+       'THIS IS THE REPLY BODY',
+       {'header': 'value'} // optional headers
+     ];
    });
 ```
 
