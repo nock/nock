@@ -1,3 +1,50 @@
+5.5.0 / 2016-01-19
+==================
+
+  * v5.5.0
+  * Merge branch 'BinChang-parse_json_content'
+  * clean up tests
+  * parse requestBody if it is JSON content.
+
+5.4.0 / 2016-01-18
+==================
+
+  * v5.4.0
+  * callback reply with array can now contain headers. fixes [#449](https://github.com/pgte/nock/issues/449)
+  * skip test if node 0.10
+
+5.3.1 / 2016-01-08
+==================
+
+  * browserify bundle update
+  * Merge branch 'master' of github.com:pgte/nock
+
+5.3.0 / 2016-01-08
+==================
+
+  * v5.3.0
+  * buffer may not be an array
+  * Merge pull request [#445](https://github.com/pgte/nock/issues/445) from pgte/emit-events
+    no match emitted globally. fixes [#442](https://github.com/pgte/nock/issues/442)
+  * no match emitted globally. fixes [#442](https://github.com/pgte/nock/issues/442)
+  * Merge pull request [#443](https://github.com/pgte/nock/issues/443) from pgte/emit-events
+    emit request and replied events
+  * fixed test name
+  * added event tests to test list
+  * documented events
+  * emit request and replied events
+  * corrected test name
+  * removed node test event sequence on abort, it's too inconsistent
+  * reinstated delay test check. related to [#439](https://github.com/pgte/nock/issues/439)
+
+5.2.1 / 2016-01-08
+==================
+
+  * changelog update
+  * v5.2.1
+  * browserify bundle update
+  * emitting error on request abort. fixes [#439](https://github.com/pgte/nock/issues/439)
+
 5.2.0 / 2016-01-07
 ==================
 
@@ -139,53 +186,3 @@
   * v3.1.0
   * taking out the tests that dont run in node v0.10
   * updated browserify bundle
-  * fixed nock hanging on node v0.10. fixes [#402](https://github.com/pgte/nock/issues/402)
-  * removed recorder from coverage tests
-  * [fix] updated debug version (see [#403](https://github.com/pgte/nock/issues/403))
-  * [fix] fixed recorder test because of failing domain.com url
-  * removed recorder tests for now. (see [#404](https://github.com/pgte/nock/issues/404))
-  * using latest superagent
-
-3.0.0 / 2015-11-16
-==================
-
-  * browserify bundle update
-  * query(true) matches no query string
-  * Merge branch 'master' of github.com:pgte/nock
-
-2.18.2 / 2015-11-13
-===================
-
-  * v2.18.2
-  * browserify bundle
-  * no presumption we have fs because of browserify. another attempt at trying to fix [#150](https://github.com/pgte/nock/issues/150)
-
-2.18.1 / 2015-11-13
-===================
-
-  * v2.18.1
-  * no presumption we have fs because of browserify. trying to fix [#150](https://github.com/pgte/nock/issues/150)
-  * Merge pull request [#395](https://github.com/pgte/nock/issues/395) from ryanmurakami/master
-    Adding example for debug environment variable
-  * [doc] clarifying net connect behaviour, fixes [#401](https://github.com/pgte/nock/issues/401)
-  * net connect examples
-
-2.18.0 / 2015-11-11
-===================
-
-  * v2.18.0
-
-2.18.0-alpha.2 / 2015-11-11
-===========================
-
-  * v2.18.0-alpha.2
-  * more generic treatment for arrays
-  * isomorphic fetch
-  * examples for several types of delay and timeout
-
-2.18.0-alpha.1 / 2015-11-09
-===========================
-
-  * v2.18.0-alpha.1
-  * Merge pull request [#397](https://github.com/pgte/nock/issues/397) from pgte/browserify
-    Browserify support - alpha
