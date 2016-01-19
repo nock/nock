@@ -128,7 +128,7 @@ test('query with object which contains pre-encoded values', function(t) {
     });
 });
 
-test.only('query with array and regexp', function(t) {
+test('query with array and regexp', function(t) {
     var expectQuery = {
         list: [123, 456, 789],
         foo: /.*/,

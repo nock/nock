@@ -29,3 +29,4 @@ require('./test_abort');
 require('./test_scope_interceptors');
 require('./test_content_encoding');
 require('./test_events');
+require('./test_complex_querystring');
