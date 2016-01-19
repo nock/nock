@@ -72,8 +72,6 @@ test("reply callback's requestBody should automatically parse to JSON", function
         .post('/endpoint')
         .reply(200, function(uri, requestBody) {
             t.deepEqual(requestBody, requestBodyFixture);
-            //console.log("====requestBody==", requestBody);
-            //requestBody = JSON.parse(requestBody);
             requestBody.id = 'overwrite';
 
             return requestBody;
@@ -95,51 +93,6 @@ test("reply callback's requestBody should automatically parse to JSON", function
         t.deepEqual(expect, body);
         t.end();
     });
-
-    //var scope = nock('http://www.google.com')
-    //    .get('/test')
-    //    .reply(200, function(path, requestBody) {
-    //        console.log("===requestBody==", requestBody);
-    //        requestBody = JSON.parse(requestBody);
-    //        requestBody.id = 'overwrite';
-    //
-    //        return requestBody;
-    //    });
-    //
-    //var options = {
-    //    method: "GET",
-    //    url: "http://www.google.com/test",
-    //    json: true
-    //};
-    //
-    //mikealRequest(options, function(err, resp, body) {
-    //    scope.done();
-    //    console.log(resp.statusCode, body);
-    //    t.end();
-    //});
-    //
-    //var req = http.request({
-    //    host: "www.google.com",
-    //    path: '/',
-    //    port: 80
-    //}, function(res) {
-    //
-    //    t.equal(res.statusCode, 200, "Status code is 200");
-    //    res.on('end', function() {
-    //        t.ok(dataCalled, "data handler was called");
-    //        scope.done();
-    //        t.end();
-    //    });
-    //    res.on('data', function(data) {
-    //        dataCalled = true;
-    //        t.ok(data instanceof Buffer, "data should be buffer");
-    //        var result =
-    //        t.equal(data.toString(), "Hello World!", "response should match");
-    //    });
-    //
-    //});
-    //
-    //req.end();
 });
 
 test("reply can take a callback", function(t) {
