@@ -14,6 +14,7 @@ var needle  = require("needle");
 var restify = require('restify');
 var domain  = require('domain');
 var hyperquest = require('hyperquest');
+var _ = require('lodash');
 
 var globalCount;
 
@@ -59,6 +60,39 @@ test("allow override works (2)", function(t) {
     t.end();
     return console.log(resp.statusCode, body);
   });
+});
+
+test("reply callback's requestBody should automatically parse to JSON", function(t) {
+    var requestBodyFixture = {
+        id: 1,
+        name: 'bob'
+    };
+
+    var scope = nock('http://service')
+        .post('/endpoint')
+        .reply(200, function(uri, requestBody) {
+            t.deepEqual(requestBody, requestBodyFixture);
+            requestBody.id = 'overwrite';
+
+            return requestBody;
+        });
+
+    var options = {
+        method: "POST",
+        url: "http://service/endpoint",
+        body: requestBodyFixture,
+        json: true
+    };
+
+    mikealRequest(options, function(err, resp, body) {
+        scope.done();
+        t.equal(resp.statusCode, 200);
+        var expect = _.defaults({
+            id: 'overwrite'
+        }, requestBodyFixture);
+        t.deepEqual(expect, body);
+        t.end();
+    });
 });
 
 test("reply can take a callback", function(t) {
