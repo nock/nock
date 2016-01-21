@@ -1,3 +1,14 @@
+6.0.0 / 2016-01-21
+==================
+
+  * v6.0.0
+  * Merge branch 'BinChang-complex_query_string'
+  * add qs into package dependency block.
+  * add test_complex_querystring into test list
+  * minor update
+  * support complex GET query based the behavior of request module.
+  * changelog update
+
 5.5.0 / 2016-01-19
 ==================
 
@@ -175,14 +186,3 @@
   * generated change log
   * changelog script. fixes [#287](https://github.com/pgte/nock/issues/287)
   * added node v5 to be tested in travis
-  * added node v0.10 to travis tests
-  * reinstated recorder tests (related to [#404](https://github.com/pgte/nock/issues/404))
-  * Merge branch 'ierceg-fix-issue-404'
-  * Fix [#404](https://github.com/pgte/nock/issues/404) replace bad POST with GET requests
-
-3.1.0 / 2015-11-17
-==================
-
-  * v3.1.0
-  * taking out the tests that dont run in node v0.10
-  * updated browserify bundle
