@@ -215,6 +215,21 @@ nock('http://example.com')
   .reply(200, {results: [{id: 'pgte'}]});
 ```
 
+Nock supports array-style/object-style query parameters. The encoding format matches with request module.
+
+```js
+nock('http://example.com')
+  .get('/users')
+  .query({
+      names: ['alice', 'bob'],
+      tags: {
+        alice: ['admin', 'tester'],
+        bob: ['tester']
+      }
+  })
+  .reply(200, {results: [{id: 'pgte'}]});
+```
+
 To mock the entire url regardless of the passed query string:
 
 ```js
