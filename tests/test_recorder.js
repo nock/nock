@@ -140,7 +140,6 @@ tap.test('records and replays objects correctly', function(t) {
 });
 
 tap.test('records and replays correctly with filteringRequestBody', function(t) {
-//test.only('records and replays correctly with filteringRequestBody', function(t) {
 
   nock.restore();
   nock.recorder.clear();
