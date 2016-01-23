@@ -693,6 +693,58 @@ test("reply headers as function work", function(t) {
   });
 });
 
+test("reply headers as function are evaluated only once per request", function(t) {
+  var counter = 0;
+  var scope = nock('http://example.com')
+  .get('/')
+  .reply(200, 'boo!', {
+    'X-My-Headers': function (req, res, body) {
+      ++counter;
+      return body.toString();
+    }
+  });
+
+  var req = http.get({
+    host: 'example.com',
+    path: '/'
+  }, function (res) {
+    t.equivalent(res.headers, { 'x-my-headers': 'boo!' });
+    t.equivalent(res.rawHeaders, ['x-my-headers', 'boo!']);
+    t.equal(counter, 1);
+    t.end();
+  });
+});
+
+test("reply headers as function are evaluated on each request", function(t) {
+  var counter = 0;
+  var scope = nock('http://example.com')
+  .get('/')
+  .times(2)
+  .reply(200, 'boo!', {
+    'X-My-Headers': function (req, res, body) {
+      return ++counter + '';
+    }
+  });
+
+  var req = http.get({
+    host: 'example.com',
+    path: '/'
+  }, function (res) {
+    t.equivalent(res.headers, { 'x-my-headers': '1' });
+    t.equivalent(res.rawHeaders, ['x-my-headers', '1']);
+    t.equal(counter, 1);
+    http.get({
+      host: 'example.com',
+      path: '/'
+    }, function (res) {
+      t.equivalent(res.headers, { 'x-my-headers': '2' });
+      t.equivalent(res.rawHeaders, ['x-my-headers', '2']);
+      t.equal(counter, 2);
+      t.end();
+    });
+  });
+});
+
 test("match headers", function(t) {
   var scope = nock('http://www.headdy.com')
      .get('/')
