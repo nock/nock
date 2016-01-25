@@ -1,3 +1,8 @@
+6.0.1 / 2016-01-25
+==================
+
+  * changelog update
+
 6.0.0 / 2016-01-21
 ==================
 
@@ -185,4 +190,3 @@
   * [fix] delay now works with replyWithError. Fixes [#411](https://github.com/pgte/nock/issues/411)
   * generated change log
   * changelog script. fixes [#287](https://github.com/pgte/nock/issues/287)
-  * added node v5 to be tested in travis
