@@ -11,7 +11,7 @@ module.exports.recorder = {
 module.exports.back = require('./lib/back');
 module.exports.restore = recorder.restore;
 
-},{"./lib/back":2,"./lib/recorder":9,"./lib/scope":11}],2:[function(require,module,exports){
+},{"./lib/back":2,"./lib/recorder":10,"./lib/scope":12}],2:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -328,7 +328,7 @@ Back.setMode(process.env.NOCK_BACK_MODE || 'dryrun');
 module.exports = exports = Back;
 
 }).call(this,require('_process'))
-},{"./recorder":9,"./scope":11,"_process":26,"chai":57,"debug":93,"fs":13,"mkdirp":101,"path":25,"util":55}],3:[function(require,module,exports){
+},{"./recorder":10,"./scope":12,"_process":27,"chai":58,"debug":94,"fs":14,"mkdirp":102,"path":26,"util":56}],3:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -655,7 +655,7 @@ exports.matchStringOrRegexp = matchStringOrRegexp;
 exports.formatQueryValue = formatQueryValue;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":16,"debug":93,"http":45,"https":21,"lodash":100}],4:[function(require,module,exports){
+},{"buffer":17,"debug":94,"http":46,"https":22,"lodash":101}],4:[function(require,module,exports){
 (function (Buffer,process){
 'use strict';
 
@@ -744,11 +744,11 @@ DelayedBody.prototype._transform = function (chunk, encoding, cb) {
   process.nextTick(cb);
 };
 }).call(this,{"isBuffer":require("../node_modules/browserify/node_modules/insert-module-globals/node_modules/is-buffer/index.js")},require('_process'))
-},{"../node_modules/browserify/node_modules/insert-module-globals/node_modules/is-buffer/index.js":23,"_process":26,"events":20,"stream":44,"timers":51,"util":55}],5:[function(require,module,exports){
+},{"../node_modules/browserify/node_modules/insert-module-globals/node_modules/is-buffer/index.js":24,"_process":27,"events":21,"stream":45,"timers":52,"util":56}],5:[function(require,module,exports){
 var EventEmitter = require('events').EventEmitter
 
 module.exports = new EventEmitter();
-},{"events":20}],6:[function(require,module,exports){
+},{"events":21}],6:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -1156,7 +1156,515 @@ module.exports.overrideClientRequest = overrideClientRequest;
 module.exports.restoreOverriddenClientRequest = restoreOverriddenClientRequest;
 
 }).call(this,require('_process'))
-},{"./common":3,"./global_emitter":5,"./request_overrider":10,"_process":26,"debug":93,"events":20,"http":45,"lodash":100,"timers":51,"url":52,"util":55}],7:[function(require,module,exports){
+},{"./common":3,"./global_emitter":5,"./request_overrider":11,"_process":27,"debug":94,"events":21,"http":46,"lodash":101,"timers":52,"url":53,"util":56}],7:[function(require,module,exports){
+(function (Buffer){
+'use strict';
+
+var mixin           = require('./mixin')
+    , matchBody       = require('./match_body')
+    , common          = require('./common')
+    , _               = require('lodash')
+    , debug           = require('debug')('nock.scope')
+    , stringify       = require('json-stringify-safe')
+    , util            = require('util')
+    , qs              = require('qs');
+
+var fs;
+
+try {
+    fs = require('fs');
+} catch(err) {
+    // do nothing, we're in the browser
+}
+
+module.exports = Interceptor;
+
+function Interceptor(scope, uri, method, requestBody, interceptorOptions) {
+    this.scope = scope;
+    this.interceptorMatchHeaders = [];
+    this.method = method.toUpperCase();
+    this.uri = uri;
+    this._key = this.method + ' ' + scope.basePath + scope.basePathname + uri;
+    this.basePath = this.scope.basePath;
+    this.path = (typeof uri === 'string') ? scope.basePathname + uri : uri;
+
+    this.baseUri = this.method + ' ' + scope.basePath + scope.basePathname;
+    this.options = interceptorOptions || {};
+    this.counter = 1;
+    this._requestBody = requestBody;
+
+    //  We use lower-case header field names throughout Nock.
+    this.reqheaders = common.headersFieldNamesToLowerCase((scope.scopeOptions && scope.scopeOptions.reqheaders) || {});
+    this.badheaders = common.headersFieldsArrayToLowerCase((scope.scopeOptions && scope.scopeOptions.badheaders) || []);
+}
+
+Interceptor.prototype.replyWithError = function replyWithError(errorMessage) {
+    this.errorMessage = errorMessage;
+
+    for (var opt in this.scope.scopeOptions) {
+        if (_.isUndefined(this.options[opt])) {
+            this.options[opt] = this.scope.scopeOptions[opt];
+        }
+    }
+
+    this.scope.add(this._key, this, this.scope, this.scopeOptions);
+    return this.scope;
+};
+
+Interceptor.prototype.reply = function reply(statusCode, body, headers) {
+    if (arguments.length <= 2 && _.isFunction(statusCode)) {
+        body = statusCode;
+        statusCode = 200;
+    }
+
+    this.statusCode = statusCode;
+
+    //  We use lower-case headers throughout Nock.
+    headers = common.headersFieldNamesToLowerCase(headers);
+
+    for (var opt in this.scope.scopeOptions) {
+        if (_.isUndefined(this.options[opt])) {
+            this.options[opt] = this.scope.scopeOptions[opt];
+        }
+    }
+
+    if (this.scope._defaultReplyHeaders) {
+        headers = headers || {};
+        headers = mixin(this.scope._defaultReplyHeaders, headers);
+    }
+
+    if (this.scope.date) {
+        headers = headers || {};
+        headers['date'] = this.scope.date.toUTCString();
+    }
+
+    if (headers !== undefined) {
+        this.headers = {};
+        this.rawHeaders = [];
+
+        // makes sure all keys in headers are in lower case
+        for (var key2 in headers) {
+            if (headers.hasOwnProperty(key2)) {
+                this.headers[key2.toLowerCase()] = headers[key2];
+                this.rawHeaders.push(key2);
+                this.rawHeaders.push(headers[key2]);
+            }
+        }
+        debug('reply.rawHeaders:', this.rawHeaders);
+    }
+
+    //  If the content is not encoded we may need to transform the response body.
+    //  Otherwise we leave it as it is.
+    if (!common.isContentEncoded(headers)) {
+        if (body && typeof(body) !== 'string' &&
+            typeof(body) !== 'function' &&
+            !Buffer.isBuffer(body) &&
+            !isStream(body)) {
+            try {
+                body = stringify(body);
+                if (!this.headers) {
+                    this.headers = {};
+                }
+                if (!this.headers['content-type']) {
+                    this.headers['content-type'] = 'application/json';
+                }
+                if (this.scope.contentLen) {
+                    this.headers['content-length'] = body.length;
+                }
+            } catch(err) {
+                throw new Error('Error encoding response body into JSON');
+            }
+        }
+    }
+
+    this.body = body;
+
+    this.scope.add(this._key, this, this.scope, this.scopeOptions);
+    return this.scope;
+};
+
+Interceptor.prototype.replyWithFile = function replyWithFile(statusCode, filePath, headers) {
+    if (! fs) {
+        throw new Error('No fs');
+    }
+    var readStream = fs.createReadStream(filePath);
+    readStream.pause();
+    this.filePath = filePath;
+    return this.reply(statusCode, readStream, headers);
+};
+
+Interceptor.prototype.replyWithFile = function replyWithFile(statusCode, filePath, headers) {
+    if (! fs) {
+        throw new Error('No fs');
+    }
+    var readStream = fs.createReadStream(filePath);
+    readStream.pause();
+    this.filePath = filePath;
+    return this.reply(statusCode, readStream, headers);
+};
+
+
+// Also match request headers
+// https://github.com/pgte/nock/issues/163
+Interceptor.prototype.reqheaderMatches = function reqheaderMatches(options, key) {
+    //  We don't try to match request headers if these weren't even specified in the request.
+    if (! options.headers) {
+        return true;
+    }
+
+    var reqHeader = this.reqheaders[key];
+    var header = options.headers[key];
+    if (header && (typeof header !== 'string') && header.toString) {
+        header = header.toString();
+    }
+
+    //  We skip 'host' header comparison unless it's available in both mock and actual request.
+    //  This because 'host' may get inserted by Nock itself and then get recorder.
+    //  NOTE: We use lower-case header field names throughout Nock.
+    if (key === 'host' &&
+        (_.isUndefined(header) ||
+        _.isUndefined(reqHeader)))
+    {
+        return true;
+    }
+
+    if (reqHeader && header) {
+        if (_.isFunction(reqHeader)) {
+            return reqHeader(header);
+        } else if (common.matchStringOrRegexp(header, reqHeader)) {
+            return true;
+        }
+    }
+
+    debug('request header field doesn\'t match:', key, header, reqHeader);
+    return false;
+};
+
+Interceptor.prototype.match = function match(options, body, hostNameOnly) {
+    debug('match %s, body = %s', stringify(options), stringify(body));
+    if (hostNameOnly) {
+        return options.hostname === this.scope.urlParts.hostname;
+    }
+
+    var method = (options.method || 'GET').toUpperCase()
+        , path = options.path
+        , matches
+        , matchKey
+        , proto = options.proto;
+
+    if (this.scope.transformPathFunction) {
+        path = this.scope.transformPathFunction(path);
+    }
+    if (typeof(body) !== 'string') {
+        body = body.toString();
+    }
+    if (this.scope.transformRequestBodyFunction) {
+        body = this.scope.transformRequestBodyFunction(body, this._requestBody);
+    }
+
+    var checkHeaders = function(header) {
+        if (_.isFunction(header.value)) {
+            return header.value(options.getHeader(header.name));
+        }
+        return common.matchStringOrRegexp(options.getHeader(header.name), header.value);
+    };
+
+    if (!this.scope.matchHeaders.every(checkHeaders) ||
+        !this.interceptorMatchHeaders.every(checkHeaders)) {
+        this.scope.logger('headers don\'t match');
+        return false;
+    }
+
+    var reqHeadersMatch =
+        ! this.reqheaders ||
+        Object.keys(this.reqheaders).every(this.reqheaderMatches.bind(this, options));
+
+    if (!reqHeadersMatch) {
+        return false;
+    }
+
+    function reqheaderContains(header) {
+        return _.has(options.headers, header);
+    }
+
+    var reqContainsBadHeaders =
+        this.badheaders &&
+        _.some(this.badheaders, reqheaderContains);
+
+    if (reqContainsBadHeaders) {
+        return false;
+    }
+
+    //  If we have a filtered scope then we use it instead reconstructing
+    //  the scope from the request options (proto, host and port) as these
+    //  two won't necessarily match and we have to remove the scope that was
+    //  matched (vs. that was defined).
+    if (this.__nock_filteredScope) {
+        matchKey = this.__nock_filteredScope;
+    } else {
+        matchKey = proto + '://' + options.host;
+        if (
+            options.port && options.host.indexOf(':') < 0 &&
+            (options.port !== 80 || options.proto !== 'http') &&
+            (options.port !== 443 || options.proto !== 'https')
+        ) {
+            matchKey += ":" + options.port;
+        }
+    }
+
+    // Match query strings when using query()
+    var matchQueries = true;
+    var queryIndex = -1;
+    var queryString;
+    var queries;
+
+    if (this.queries && (queryIndex = path.indexOf('?')) !== -1) {
+        queryString = path.slice(queryIndex + 1);
+        queries = qs.parse(queryString);
+
+        // Only check for query string matches if this.queries is an object
+        if (_.isObject(this.queries)) {
+            // Make sure that you have an equal number of keys. We are
+            // looping through the passed query params and not the expected values
+            // if the user passes fewer query params than expected but all values
+            // match this will throw a false positive. Testing that the length of the
+            // passed query params is equal to the length of expected keys will prevent
+            // us from doing any value checking BEFORE we know if they have all the proper
+            // params
+            debug('this.queries: %j', this.queries);
+            debug('queries: %j', queries);
+            if (_.size(this.queries) !== _.size(queries)) {
+                matchQueries = false;
+            } else {
+                var self = this;
+                _.forOwn(queries, function matchOneKeyVal(val, key) {
+                    var expVal = self.queries[key];
+                    var isMatch = true;
+                    if (val === undefined || expVal === undefined) {
+                        isMatch = false;
+                    } else if (expVal instanceof RegExp) {
+                        isMatch = common.matchStringOrRegexp(val, expVal);
+                    } else if (_.isArray(expVal) || _.isObject(expVal)) {
+                        isMatch = _.isEqual(val, expVal);
+                    } else {
+                        isMatch = common.matchStringOrRegexp(val, expVal);
+                    }
+                    matchQueries = matchQueries && !!isMatch;
+                });
+            }
+            debug('matchQueries: %j', matchQueries);
+        }
+
+        // Remove the query string from the path
+        path = path.substr(0, queryIndex);
+    }
+
+    if (typeof this.uri === 'function') {
+        matches = matchQueries &&
+        method.toUpperCase() + ' ' + proto + '://' + options.host === this.baseUri &&
+        this.uri.call(this, path);
+    } else {
+        matches = method === this.method &&
+        common.matchStringOrRegexp(matchKey, this.basePath) &&
+        common.matchStringOrRegexp(path, this.path) &&
+        matchQueries;
+    }
+
+    // special logger for query()
+    if (queryIndex !== -1) {
+        this.scope.logger('matching ' + matchKey + '?' + queryString + ' to ' + this._key +
+        ' with query(' + stringify(this.queries) + '): ' + matches);
+    } else {
+        this.scope.logger('matching ' + matchKey + ' to ' + this._key + ': ' + matches);
+    }
+
+    if (matches) {
+        matches = (matchBody.call(options, this._requestBody, body));
+        if (!matches) {
+            this.scope.logger('bodies don\'t match: \n', this._requestBody, '\n', body);
+        }
+    }
+
+    return matches;
+};
+
+Interceptor.prototype.matchIndependentOfBody = function matchIndependentOfBody(options) {
+    var method = (options.method || 'GET').toUpperCase()
+        , path = options.path
+        , proto = options.proto;
+
+    if (this.scope.transformPathFunction) {
+        path = this.scope.transformPathFunction(path);
+    }
+
+    var checkHeaders = function(header) {
+        return options.getHeader && common.matchStringOrRegexp(options.getHeader(header.name), header.value);
+    };
+
+    if (!this.scope.matchHeaders.every(checkHeaders) ||
+        !this.interceptorMatchHeaders.every(checkHeaders)) {
+        return false;
+    }
+
+    var matchKey = method + ' ' + proto + '://' + options.host + path;
+    return this._key === matchKey;
+};
+
+Interceptor.prototype.filteringPath = function filteringPath() {
+    if (_.isFunction(arguments[0])) {
+        this.scope.transformFunction = arguments[0];
+    }
+    return this;
+};
+
+Interceptor.prototype.discard = function discard() {
+    if ((this.scope.shouldPersist() || this.counter > 0) && this.filePath) {
+        this.body = fs.createReadStream(this.filePath);
+        this.body.pause();
+    }
+
+    if (!this.scope.shouldPersist() && this.counter < 1) {
+        this.scope.remove(this._key, this);
+    }
+};
+
+Interceptor.prototype.matchHeader = function matchHeader(name, value) {
+    this.interceptorMatchHeaders.push({ name: name, value: value });
+    return this;
+};
+
+Interceptor.prototype.basicAuth = function basicAuth(options) {
+    var username = options['user'];
+    var password = options['pass'] || '';
+    var name = 'authorization';
+    var value = 'Basic ' + new Buffer(username + ':' + password).toString('base64');
+    this.interceptorMatchHeaders.push({ name: name, value: value });
+    return this;
+};
+
+/**
+ * Set query strings for the interceptor
+ * @name query
+ * @param Object Object of query string name,values (accepts regexp values)
+ * @public
+ * @example
+ * // Will match 'http://zombo.com/?q=t'
+ * nock('http://zombo.com').get('/').query({q: 't'});
+ */
+Interceptor.prototype.query = function query(queries) {
+    this.queries = this.queries || {};
+    // Allow all query strings to match this route
+    if (queries === true) {
+        this.queries = queries;
+    }
+
+    for (var q in queries) {
+        if (_.isUndefined(this.queries[q])) {
+            var value = queries[q];
+            var formatedPair = common.formatQueryValue(q, value, this.scope.scopeOptions);
+            this.queries[formatedPair[0]] = formatedPair[1];
+        }
+    }
+
+    return this;
+};
+
+/**
+ * Set number of times will repeat the interceptor
+ * @name times
+ * @param Integer Number of times to repeat (should be > 0)
+ * @public
+ * @example
+ * // Will repeat mock 5 times for same king of request
+ * nock('http://zombo.com).get('/').times(5).reply(200, 'Ok');
+ */
+Interceptor.prototype.times = function times(newCounter) {
+    if (newCounter < 1) {
+        return this;
+    }
+
+    this.counter = newCounter;
+
+    return this;
+};
+
+/**
+ * An sugar syntax for times(1)
+ * @name once
+ * @see {@link times}
+ * @public
+ * @example
+ * nock('http://zombo.com).get('/').once.reply(200, 'Ok');
+ */
+Interceptor.prototype.once = function once() {
+    return this.times(1);
+};
+
+/**
+ * An sugar syntax for times(2)
+ * @name twice
+ * @see {@link times}
+ * @public
+ * @example
+ * nock('http://zombo.com).get('/').twice.reply(200, 'Ok');
+ */
+Interceptor.prototype.twice = function twice() {
+    return this.times(2);
+};
+
+/**
+ * An sugar syntax for times(3).
+ * @name thrice
+ * @see {@link times}
+ * @public
+ * @example
+ * nock('http://zombo.com).get('/').thrice.reply(200, 'Ok');
+ */
+Interceptor.prototype.thrice = function thrice() {
+    return this.times(3);
+};
+
+/**
+ * Delay the response by a certain number of ms.
+ *
+ * @param  {integer} ms - Number of milliseconds to wait
+ * @return {scope} - the current scope for chaining
+ */
+Interceptor.prototype.delay = function delay(ms) {
+    this.delayInMs = ms;
+    return this;
+};
+
+/**
+ * Delay the connection by a certain number of ms.
+ *
+ * @param  {integer} ms - Number of milliseconds to wait
+ * @return {scope} - the current scope for chaining
+ */
+Interceptor.prototype.delayConnection = function delayConnection(ms) {
+    this.delayConnectionInMs = ms;
+    return this;
+};
+
+/**
+ * Make the socket idle for a certain number of ms (simulated).
+ *
+ * @param  {integer} ms - Number of milliseconds to wait
+ * @return {scope} - the current scope for chaining
+ */
+Interceptor.prototype.socketDelay = function socketDelay(ms) {
+    this.socketDelayInMs = ms;
+    return this;
+};
+
+function isStream(obj) {
+    return (typeof obj !== 'undefined') &&
+        (typeof a !== 'string') &&
+        (! Buffer.isBuffer(obj)) &&
+        _.isFunction(obj.setEncoding);
+}
+}).call(this,require("buffer").Buffer)
+},{"./common":3,"./match_body":8,"./mixin":9,"buffer":17,"debug":94,"fs":14,"json-stringify-safe":100,"lodash":101,"qs":104,"util":56}],8:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -1230,7 +1738,7 @@ function deepEqualExtended(spec, body) {
 }
 
 }).call(this,{"isBuffer":require("../node_modules/browserify/node_modules/insert-module-globals/node_modules/is-buffer/index.js")})
-},{"../node_modules/browserify/node_modules/insert-module-globals/node_modules/is-buffer/index.js":23,"deep-equal":96,"querystring":30}],8:[function(require,module,exports){
+},{"../node_modules/browserify/node_modules/insert-module-globals/node_modules/is-buffer/index.js":24,"deep-equal":97,"querystring":31}],9:[function(require,module,exports){
 'use strict';
 var _ = require("lodash");
 
@@ -1246,7 +1754,7 @@ function mixin(a, b) {
 
 module.exports = mixin;
 
-},{"lodash":100}],9:[function(require,module,exports){
+},{"lodash":101}],10:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -1678,7 +2186,7 @@ exports.restore = restore;
 exports.clear = clear;
 
 }).call(this,require("buffer").Buffer)
-},{"./common":3,"./intercept":6,"buffer":16,"debug":93,"lodash":100,"stream":44,"url":52,"util":55}],10:[function(require,module,exports){
+},{"./common":3,"./intercept":6,"buffer":17,"debug":94,"lodash":101,"stream":45,"url":53,"util":56}],11:[function(require,module,exports){
 (function (process,Buffer){
 'use strict';
 
@@ -2148,7 +2656,7 @@ function RequestOverrider(req, options, interceptors, remove, cb) {
         if (aborted) { return; }
 
         if (interceptor.socketDelayInMs && interceptor.socketDelayInMs > 0) {
-          req.socket._checkTimeout(interceptor.socketDelayInMs);
+          req.socket.applyDelay(interceptor.socketDelayInMs);
         }
 
         if (interceptor.delayConnectionInMs && interceptor.delayConnectionInMs > 0) {
@@ -2212,15 +2720,12 @@ function RequestOverrider(req, options, interceptors, remove, cb) {
 module.exports = RequestOverrider;
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"./common":3,"./delayed_body":4,"./global_emitter":5,"./socket":12,"_process":26,"buffer":16,"debug":93,"events":20,"http":45,"lodash":100,"propagate":102,"stream":44,"timers":51}],11:[function(require,module,exports){
-(function (Buffer){
+},{"./common":3,"./delayed_body":4,"./global_emitter":5,"./socket":13,"_process":27,"buffer":17,"debug":94,"events":21,"http":46,"lodash":101,"propagate":103,"stream":45,"timers":52}],12:[function(require,module,exports){
 /* jshint strict:false */
 /**
  * @module nock/scope
  */
 var globalIntercept = require('./intercept')
-  , mixin           = require('./mixin')
-  , matchBody       = require('./match_body')
   , common          = require('./common')
   , assert          = require('assert')
   , url             = require('url')
@@ -2230,7 +2735,8 @@ var globalIntercept = require('./intercept')
   , EventEmitter    = require('events').EventEmitter
   , extend          = require('util')._extend
   , globalEmitter   = require('./global_emitter')
-  , qs              = require('qs');
+  , util            = require('util')
+  , Interceptor     = require('./interceptor') ;
 
 var fs;
 
@@ -2240,705 +2746,208 @@ try {
   // do nothing, we're in the browser
 }
 
-function isStream(obj) {
-  return (typeof obj !== 'undefined') &&
-         (typeof a !== 'string') &&
-         (! Buffer.isBuffer(obj)) &&
-         _.isFunction(obj.setEncoding);
+function startScope(basePath, options) {
+  return new Scope(basePath, options);
 }
 
-function startScope(basePath, options) {
-  var interceptors = {},
-      scope,
-      transformPathFunction,
-      transformRequestBodyFunction,
-      matchHeaders = [],
-      logger = debug,
-      scopeOptions = options || {},
-      urlParts = {},
-      persist = false,
-      contentLen = false,
-      date = null,
-      basePathname = '',
-      port;
+function Scope(basePath, options) {
+  if (!(this instanceof Scope)) {
+    return new Scope(basePath, options);
+  }
+
+  EventEmitter.apply(this);
+  this.keyedInterceptors = {};
+  this.interceptors = [];
+  this.transformPathFunction = null;
+  this.transformRequestBodyFunction = null;
+  this.matchHeaders = [];
+  this.logger = debug;
+  this.scopeOptions = options || {};
+  this.urlParts = {};
+  this._persist = false;
+  this.contentLen = false;
+  this.date = null;
+  this.basePath = basePath;
+  this.basePathname = '';
+  this.port = null;
 
   if (!(basePath instanceof RegExp)) {
-    urlParts = url.parse(basePath);
-    port = urlParts.port || ((urlParts.protocol === 'http:') ? 80 : 443);
-    basePathname = urlParts.pathname.replace(/\/$/, '');
-    basePath = urlParts.protocol + '//' + urlParts.hostname + ':' + port;
+    this.urlParts = url.parse(basePath);
+    this.port = this.urlParts.port || ((this.urlParts.protocol === 'http:') ? 80 : 443);
+    this.basePathname = this.urlParts.pathname.replace(/\/$/, '');
+    this.basePath = this.urlParts.protocol + '//' + this.urlParts.hostname + ':' + this.port;
   }
+}
 
-  function add(key, interceptor, scope) {
-    if (! interceptors.hasOwnProperty(key)) {
-      interceptors[key] = [];
-    }
-    interceptors[key].push(interceptor);
-    globalIntercept(basePath, interceptor, scope, scopeOptions, urlParts.hostname);
+util.inherits(Scope, EventEmitter);
+
+Scope.prototype.add = function add(key, interceptor, scope) {
+  if (! this.keyedInterceptors.hasOwnProperty(key)) {
+    this.keyedInterceptors[key] = [];
   }
+  this.keyedInterceptors[key].push(interceptor);
+  globalIntercept(this.basePath,
+      interceptor,
+      this,
+      this.scopeOptions,
+      this.urlParts.hostname);
+};
 
-  function remove(key, interceptor) {
-    if (persist) {
-      return;
-    }
-    var arr = interceptors[key];
-    if (arr) {
-      arr.splice(arr.indexOf(interceptor), 1);
-      if (arr.length === 0) { delete interceptors[key]; }
+Scope.prototype.remove = function remove(key, interceptor) {
+  if (this._persist) {
+    return;
+  }
+  var arr = this.keyedInterceptors[key];
+  if (arr) {
+    arr.splice(arr.indexOf(interceptor), 1);
+    if (arr.length === 0) {
+      delete this.keyedInterceptors[key];
     }
   }
-
-  function intercept(uri, method, requestBody, interceptorOptions) {
-    var interceptorMatchHeaders = [];
-    var key = method.toUpperCase() + ' ' + basePath + basePathname + uri;
-    var baseUri = method.toUpperCase() + ' ' + basePath + basePathname;
-
-    function replyWithError(errorMessage) {
-      this.errorMessage = errorMessage;
-
-      this.options = interceptorOptions || {};
-      for (var opt in scopeOptions) {
-        if (_.isUndefined(this.options[opt])) {
-          this.options[opt] = scopeOptions[opt];
-        }
-      }
-
-      add(key, this, scope, scopeOptions);
-      return scope;
-    }
-
-    function reply(statusCode, body, headers) {
-      if (arguments.length <= 2 && _.isFunction(statusCode)) {
-        body = statusCode;
-        statusCode = 200;
-      }
-
-      this.statusCode = statusCode;
-
-      //  We use lower-case headers throughout Nock.
-      headers = common.headersFieldNamesToLowerCase(headers);
-
-      this.options = interceptorOptions || {};
-      for (var opt in scopeOptions) {
-        if (_.isUndefined(this.options[opt])) {
-          this.options[opt] = scopeOptions[opt];
-        }
-      }
-
-      if (scope._defaultReplyHeaders) {
-        headers = headers || {};
-        headers = mixin(scope._defaultReplyHeaders, headers);
-      }
-
-      if (date) {
-        headers = headers || {};
-        headers['date'] = date.toUTCString();
-      }
-
-      if (headers !== undefined) {
-        this.headers = {};
-        this.rawHeaders = [];
-
-        // makes sure all keys in headers are in lower case
-        for (var key2 in headers) {
-          if (headers.hasOwnProperty(key2)) {
-            this.headers[key2.toLowerCase()] = headers[key2];
-            this.rawHeaders.push(key2);
-            this.rawHeaders.push(headers[key2]);
-          }
-        }
-        debug('reply.rawHeaders:', this.rawHeaders);
-      }
-
-      //  If the content is not encoded we may need to transform the response body.
-      //  Otherwise we leave it as it is.
-      if (!common.isContentEncoded(headers)) {
-        if (body && typeof(body) !== 'string' &&
-            typeof(body) !== 'function' &&
-            !Buffer.isBuffer(body) &&
-            !isStream(body)) {
-          try {
-            body = stringify(body);
-            if (!this.headers) {
-              this.headers = {};
-            }
-            if (!this.headers['content-type']) {
-              this.headers['content-type'] = 'application/json';
-            }
-            if (contentLen) {
-              this.headers['content-length'] = body.length;
-            }
-          } catch(err) {
-            throw new Error('Error encoding response body into JSON');
-          }
-        }
-      }
-
-      this.body = body;
-
-      add(key, this, scope, scopeOptions);
-      return scope;
-    }
-
-    function replyWithFile(statusCode, filePath, headers) {
-      if (! fs) {
-        throw new Error('No fs');
-      }
-      var readStream = fs.createReadStream(filePath);
-      readStream.pause();
-      this.filePath = filePath;
-      return reply.call(this, statusCode, readStream, headers);
-    }
-
-    function match(options, body, hostNameOnly) {
-      debug('match %s, body = %s', stringify(options), stringify(body));
-      if (hostNameOnly) {
-        return options.hostname === urlParts.hostname;
-      }
-
-      var method = (options.method || 'GET').toUpperCase()
-        , path = options.path
-        , matches
-        , matchKey
-        , proto = options.proto;
-
-      if (transformPathFunction) {
-        path = transformPathFunction(path);
-      }
-      if (typeof(body) !== 'string') {
-        body = body.toString();
-      }
-      if (transformRequestBodyFunction) {
-        body = transformRequestBodyFunction(body, this._requestBody);
-      }
-
-      var checkHeaders = function(header) {
-        if (_.isFunction(header.value)) {
-          return header.value(options.getHeader(header.name));
-        }
-        return common.matchStringOrRegexp(options.getHeader(header.name), header.value);
-      };
-
-      if (!matchHeaders.every(checkHeaders) ||
-          !interceptorMatchHeaders.every(checkHeaders)) {
-        logger('headers don\'t match');
-        return false;
-      }
-
-      // Also match request headers
-      // https://github.com/pgte/nock/issues/163
-      function reqheaderMatches(key) {
-        //  We don't try to match request headers if these weren't even specified in the request.
-        if (! options.headers) {
-          return true;
-        }
-
-        var reqHeader = this.reqheaders[key];
-        var header = options.headers[key];
-        if (header && (typeof header !== 'string') && header.toString) {
-          header = header.toString();
-        }
-
-        //  We skip 'host' header comparison unless it's available in both mock and actual request.
-        //  This because 'host' may get inserted by Nock itself and then get recorder.
-        //  NOTE: We use lower-case header field names throughout Nock.
-        if (key === 'host' &&
-          (_.isUndefined(header) ||
-           _.isUndefined(reqHeader)))
-        {
-          return true;
-        }
-
-        if (reqHeader && header) {
-          if (_.isFunction(reqHeader)) {
-            return reqHeader(header);
-          } else if (common.matchStringOrRegexp(header, reqHeader)) {
-            return true;
-          }
-        }
-
-        debug('request header field doesn\'t match:', key, header, reqHeader);
-        return false;
-      }
-
-      var reqHeadersMatch =
-        ! this.reqheaders ||
-        Object.keys(this.reqheaders).every(reqheaderMatches.bind(this));
-
-      if (!reqHeadersMatch) {
-        return false;
-      }
-
-      function reqheaderContains(header) {
-        return _.has(options.headers, header);
-      }
-
-      var reqContainsBadHeaders =
-        this.badheaders &&
-        _.some(this.badheaders, reqheaderContains);
-
-      if (reqContainsBadHeaders) {
-        return false;
-      }
-
-      //  If we have a filtered scope then we use it instead reconstructing
-      //  the scope from the request options (proto, host and port) as these
-      //  two won't necessarily match and we have to remove the scope that was
-      //  matched (vs. that was defined).
-      if (this.__nock_filteredScope) {
-        matchKey = this.__nock_filteredScope;
-      } else {
-        matchKey = proto + '://' + options.host;
-        if (
-             options.port && options.host.indexOf(':') < 0 &&
-             (options.port !== 80 || options.proto !== 'http') &&
-             (options.port !== 443 || options.proto !== 'https')
-           ) {
-          matchKey += ":" + options.port;
-        }
-      }
-
-      // Match query strings when using query()
-      var matchQueries = true;
-      var queryIndex = -1;
-      var queryString;
-      var queries;
-
-      if (this.queries && (queryIndex = path.indexOf('?')) !== -1) {
-        queryString = path.slice(queryIndex + 1);
-        queries = qs.parse(queryString);
-
-        // Only check for query string matches if this.queries is an object
-        if (_.isObject(this.queries)) {
-          // Make sure that you have an equal number of keys. We are
-          // looping through the passed query params and not the expected values
-          // if the user passes fewer query params than expected but all values
-          // match this will throw a false positive. Testing that the length of the
-          // passed query params is equal to the length of expected keys will prevent
-          // us from doing any value checking BEFORE we know if they have all the proper
-          // params
-          debug('this.queries: %j', this.queries);
-          debug('queries: %j', queries);
-          if (_.size(this.queries) !== _.size(queries)) {
-            matchQueries = false;
-          } else {
-            var self = this;
-            _.forOwn(queries, function matchOneKeyVal(val, key) {
-              var expVal = self.queries[key];
-              var isMatch = true;
-              if (val === undefined || expVal === undefined) {
-                isMatch = false;
-              } else if (expVal instanceof RegExp) {
-                isMatch = common.matchStringOrRegexp(val, expVal);
-              } else if (_.isArray(expVal) || _.isObject(expVal)) {
-                isMatch = _.isEqual(val, expVal);
-              } else {
-                isMatch = common.matchStringOrRegexp(val, expVal);
-              }
-              matchQueries = matchQueries && !!isMatch;
-            });
-          }
-          debug('matchQueries: %j', matchQueries);
-        }
-
-        // Remove the query string from the path
-        path = path.substr(0, queryIndex);
-      }
-
-      if (typeof uri === 'function') {
-        matches = matchQueries &&
-          method.toUpperCase() + ' ' + proto + '://' + options.host === baseUri &&
-          uri.call(this, path);
-      } else {
-        matches = method === this.method &&
-                  common.matchStringOrRegexp(matchKey, this.basePath) &&
-                  common.matchStringOrRegexp(path, this.path) &&
-                  matchQueries;
-      }
-
-      // special logger for query()
-      if (queryIndex !== -1) {
-        logger('matching ' + matchKey + '?' + queryString + ' to ' + this._key +
-               ' with query(' + stringify(this.queries) + '): ' + matches);
-      } else {
-        logger('matching ' + matchKey + ' to ' + this._key + ': ' + matches);
-      }
-
-      if (matches) {
-        matches = (matchBody.call(options, this._requestBody, body));
-        if (!matches) {
-          logger('bodies don\'t match: \n', this._requestBody, '\n', body);
-        }
-      }
-
-      return matches;
-    }
-
-    function matchIndependentOfBody(options) {
-      var method = (options.method || 'GET').toUpperCase()
-        , path = options.path
-        , proto = options.proto;
-
-      if (transformPathFunction) {
-        path = transformPathFunction(path);
-      }
-
-      var checkHeaders = function(header) {
-        return options.getHeader && common.matchStringOrRegexp(options.getHeader(header.name), header.value);
-      };
-
-      if (!matchHeaders.every(checkHeaders) ||
-          !interceptorMatchHeaders.every(checkHeaders)) {
-        return false;
-      }
-
-      var matchKey = method + ' ' + proto + '://' + options.host + path;
-      return this._key === matchKey;
-    }
-
-    function filteringPath() {
-      if (_.isFunction(arguments[0])) {
-        this.transformFunction = arguments[0];
-      }
-      return this;
-    }
-
-    function discard() {
-      if ((persist || this.counter > 0) && this.filePath) {
-        this.body = fs.createReadStream(this.filePath);
-        this.body.pause();
-      }
-
-      if (!persist && this.counter < 1) {
-        remove(this._key, this);
-      }
-    }
-
-    function matchHeader(name, value) {
-      interceptorMatchHeaders.push({ name: name, value: value });
-      return this;
-    }
-
-    function basicAuth(options) {
-      var username = options['user'];
-      var password = options['pass'] || '';
-      var name = 'authorization';
-      var value = 'Basic ' + new Buffer(username + ':' + password).toString('base64');
-      interceptorMatchHeaders.push({ name: name, value: value });
-      return this;
-    }
-
-    /**
-     * Set query strings for the interceptor
-     * @name query
-     * @param Object Object of query string name,values (accepts regexp values)
-     * @public
-     * @example
-     * // Will match 'http://zombo.com/?q=t'
-     * nock('http://zombo.com').get('/').query({q: 't'});
-     */
-    function query(queries) {
-      this.queries = this.queries || {};
-      // Allow all query strings to match this route
-      if (queries === true) {
-        this.queries = queries;
-      }
-
-      for (var q in queries) {
-        if (_.isUndefined(this.queries[q])) {
-          var value = queries[q];
-          var formatedPair = common.formatQueryValue(q, value, scopeOptions);
-          this.queries[formatedPair[0]] = formatedPair[1];
-        }
-      }
-
-      return this;
-    }
-
-    /**
-     * Set number of times will repeat the interceptor
-     * @name times
-     * @param Integer Number of times to repeat (should be > 0)
-     * @public
-     * @example
-     * // Will repeat mock 5 times for same king of request
-     * nock('http://zombo.com).get('/').times(5).reply(200, 'Ok');
-    */
-    function times(newCounter) {
-      if (newCounter < 1) {
-        return this;
-      }
-
-      this.counter = newCounter;
-
-      return this;
-    }
-
-    /**
-     * An sugar syntax for times(1)
-     * @name once
-     * @see {@link times}
-     * @public
-     * @example
-     * nock('http://zombo.com).get('/').once.reply(200, 'Ok');
-    */
-    function once() {
-      return this.times(1);
-    }
-
-    /**
-     * An sugar syntax for times(2)
-     * @name twice
-     * @see {@link times}
-     * @public
-     * @example
-     * nock('http://zombo.com).get('/').twice.reply(200, 'Ok');
-    */
-    function twice() {
-      return this.times(2);
-    }
-
-    /**
-     * An sugar syntax for times(3).
-     * @name thrice
-     * @see {@link times}
-     * @public
-     * @example
-     * nock('http://zombo.com).get('/').thrice.reply(200, 'Ok');
-    */
-    function thrice() {
-      return this.times(3);
-    }
-
-    /**
-     * Delay the response by a certain number of ms.
-     *
-     * @param  {integer} ms - Number of milliseconds to wait
-     * @return {scope} - the current scope for chaining
-     */
-    function delay(ms) {
-      this.delayInMs = ms;
-      return this;
-    }
-
-    /**
-     * Delay the connection by a certain number of ms.
-     *
-     * @param  {integer} ms - Number of milliseconds to wait
-     * @return {scope} - the current scope for chaining
-     */
-    function delayConnection(ms) {
-      this.delayConnectionInMs = ms;
-      return this;
-    }
-
-    /**
-     * Make the socket idle for a certain number of ms (simulated).
-     *
-     * @param  {integer} ms - Number of milliseconds to wait
-     * @return {scope} - the current scope for chaining
-     */
-    function socketDelay(ms) {
-      this.socketDelayInMs = ms;
-      return this;
-    }
-
-    var interceptor = {
-        _key: key
-      , method: method.toUpperCase()
-      , basePath: basePath
-      , path: (typeof uri === 'string') ? basePathname + uri : uri
-      , counter: 1
-      , _requestBody: requestBody
-      //  We use lower-case header field names throughout Nock.
-      , reqheaders: common.headersFieldNamesToLowerCase((options && options.reqheaders) || {})
-      , badheaders: common.headersFieldsArrayToLowerCase((options && options.badheaders) || [])
-      , reply: reply
-      , replyWithError: replyWithError
-      , replyWithFile: replyWithFile
-      , discard: discard
-      , match: match
-      , matchIndependentOfBody: matchIndependentOfBody
-      , filteringPath: filteringPath
-      , matchHeader: matchHeader
-      , basicAuth: basicAuth
-      , query: query
-      , times: times
-      , once: once
-      , twice: twice
-      , thrice: thrice
-      , delay: delay
-      , delayConnection: delayConnection
-      , socketDelay: socketDelay
-      , scope: scope
-    };
-
-    scope.interceptors.push(interceptor);
-
-    return interceptor;
-  }
-
-  function get(uri, requestBody, options) {
-    return intercept(uri, 'GET', requestBody, options);
-  }
-
-  function post(uri, requestBody, options) {
-    return intercept(uri, 'POST', requestBody, options);
-  }
-
-  function put(uri, requestBody, options) {
-    return intercept(uri, 'PUT', requestBody, options);
-  }
-
-  function head(uri, requestBody, options) {
-    return intercept(uri, 'HEAD', requestBody, options);
-  }
-
-  function patch(uri, requestBody, options) {
-    return intercept(uri, 'PATCH', requestBody, options);
-  }
-
-  function merge(uri, requestBody, options) {
-    return intercept(uri, 'MERGE', requestBody, options);
-  }
-
-  function _delete(uri, requestBody, options) {
-    return intercept(uri, 'DELETE', requestBody, options);
-  }
-
-  function pendingMocks() {
-    return Object.keys(interceptors);
-  }
-
-  function isDone() {
-
-    // if nock is turned off, it always says it's done
-    if (! globalIntercept.isOn()) { return true; }
-
-    var keys = Object.keys(interceptors);
-    if (keys.length === 0) {
-      return true;
-    } else {
-      var doneHostCount = 0;
-
-      keys.forEach(function(key) {
-        var doneInterceptorCount = 0;
-
-        interceptors[key].forEach(function(interceptor) {
-          var isRequireDoneDefined = !_.isUndefined(interceptor.options.requireDone);
-          if (isRequireDoneDefined && interceptor.options.requireDone === false) {
-            doneInterceptorCount += 1;
-          } else if (persist && interceptor.interceptionCounter > 0) {
-            doneInterceptorCount += 1;
-          }
-        });
-
-        if (doneInterceptorCount === interceptors[key].length ) {
-          doneHostCount += 1;
+};
+
+Scope.prototype.intercept = function intercept(uri, method, requestBody, interceptorOptions) {
+  var ic = new Interceptor(this, uri, method, requestBody, interceptorOptions);
+
+  this.interceptors.push(ic);
+  return ic;
+};
+
+Scope.prototype.get = function get(uri, requestBody, options) {
+  return this.intercept(uri, 'GET', requestBody, options);
+};
+
+Scope.prototype.post = function post(uri, requestBody, options) {
+  return this.intercept(uri, 'POST', requestBody, options);
+};
+
+Scope.prototype.put = function put(uri, requestBody, options) {
+  return this.intercept(uri, 'PUT', requestBody, options);
+};
+
+Scope.prototype.head = function head(uri, requestBody, options) {
+  return this.intercept(uri, 'HEAD', requestBody, options);
+};
+
+Scope.prototype.patch = function patch(uri, requestBody, options) {
+  return this.intercept(uri, 'PATCH', requestBody, options);
+};
+
+Scope.prototype.merge = function merge(uri, requestBody, options) {
+  return this.intercept(uri, 'MERGE', requestBody, options);
+};
+
+Scope.prototype.delete = function _delete(uri, requestBody, options) {
+  return this.intercept(uri, 'DELETE', requestBody, options);
+};
+
+Scope.prototype.pendingMocks = function pendingMocks() {
+  return Object.keys(this.keyedInterceptors);
+};
+
+Scope.prototype.isDone = function isDone() {
+  var self = this;
+  // if nock is turned off, it always says it's done
+  if (! globalIntercept.isOn()) { return true; }
+
+  var keys = Object.keys(this.keyedInterceptors);
+  if (keys.length === 0) {
+    return true;
+  } else {
+    var doneHostCount = 0;
+
+    keys.forEach(function(key) {
+      var doneInterceptorCount = 0;
+
+      self.keyedInterceptors[key].forEach(function(interceptor) {
+        var isRequireDoneDefined = !_.isUndefined(interceptor.options.requireDone);
+        if (isRequireDoneDefined && interceptor.options.requireDone === false) {
+          doneInterceptorCount += 1;
+        } else if (self._persist && interceptor.interceptionCounter > 0) {
+          doneInterceptorCount += 1;
         }
       });
-      return (doneHostCount === keys.length);
-    }
+
+      if (doneInterceptorCount === self.keyedInterceptors[key].length ) {
+        doneHostCount += 1;
+      }
+    });
+    return (doneHostCount === keys.length);
   }
+};
 
-  function done() {
-    assert.ok(isDone(), "Mocks not yet satisfied:\n" + pendingMocks().join("\n"));
+Scope.prototype.done = function done() {
+  assert.ok(this.isDone(), "Mocks not yet satisfied:\n" + this.pendingMocks().join("\n"));
+};
+
+Scope.prototype.buildFilter = function buildFilter() {
+  var filteringArguments = arguments;
+
+  if (arguments[0] instanceof RegExp) {
+    return function(candidate) {
+      if (candidate) {
+        candidate = candidate.replace(filteringArguments[0], filteringArguments[1]);
+      }
+      return candidate;
+    };
+  } else if (_.isFunction(arguments[0])) {
+    return arguments[0];
   }
+};
 
-  function buildFilter() {
-    var filteringArguments = arguments;
-
-    if (arguments[0] instanceof RegExp) {
-      return function(candidate) {
-        if (candidate) {
-          candidate = candidate.replace(filteringArguments[0], filteringArguments[1]);
-        }
-        return candidate;
-      };
-    } else if (_.isFunction(arguments[0])) {
-      return arguments[0];
-    }
+Scope.prototype.filteringPath = function filteringPath() {
+  this.transformPathFunction = this.buildFilter.apply(this, arguments);
+  if (!this.transformPathFunction) {
+    throw new Error('Invalid arguments: filtering path should be a function or a regular expression');
   }
+  return this;
+};
 
-  function filteringPath() {
-    transformPathFunction = buildFilter.apply(undefined, arguments);
-    if (!transformPathFunction) {
-      throw new Error('Invalid arguments: filtering path should be a function or a regular expression');
-    }
-    return this;
+Scope.prototype.filteringRequestBody = function filteringRequestBody() {
+  this.transformRequestBodyFunction = this.buildFilter.apply(this, arguments);
+  if (!this.transformRequestBodyFunction) {
+    throw new Error('Invalid arguments: filtering request body should be a function or a regular expression');
   }
+  return this;
+};
 
-  function filteringRequestBody() {
-    transformRequestBodyFunction = buildFilter.apply(undefined, arguments);
-    if (!transformRequestBodyFunction) {
-      throw new Error('Invalid arguments: filtering request body should be a function or a regular expression');
-    }
-    return this;
-  }
+Scope.prototype.matchHeader = function matchHeader(name, value) {
+  //  We use lower-case header field names throughout Nock.
+  this.matchHeaders.push({ name: name.toLowerCase(), value: value });
+  return this;
+};
 
-  function matchHeader(name, value) {
-    //  We use lower-case header field names throughout Nock.
-    matchHeaders.push({ name: name.toLowerCase(), value: value });
-    return this;
-  }
+Scope.prototype.defaultReplyHeaders = function defaultReplyHeaders(headers) {
+  this._defaultReplyHeaders = common.headersFieldNamesToLowerCase(headers);
+  return this;
+};
 
-  function defaultReplyHeaders(headers) {
-    this._defaultReplyHeaders = common.headersFieldNamesToLowerCase(headers);
-    return this;
-  }
+Scope.prototype.log = function log(newLogger) {
+  this.logger = newLogger;
+  return this;
+};
 
-  function log(newLogger) {
-    logger = newLogger;
-    return this;
-  }
+Scope.prototype.persist = function persist() {
+  this._persist = true;
+  return this;
+};
 
-  function _persist() {
-    persist = true;
-    return this;
-  }
+Scope.prototype.shouldPersist = function shouldPersist() {
+  return this._persist;
+};
 
-  function shouldPersist() {
-    return persist;
-  }
+Scope.prototype.replyContentLength = function replyContentLength() {
+  this.contentLen = true;
+  return this;
+};
 
-  function replyContentLength() {
-    contentLen = true;
-    return this;
-  }
+Scope.prototype.replyDate = function replyDate(d) {
+  this.date = d || new Date();
+  return this;
+};
 
-  function replyDate(d) {
-    date = d || new Date();
-    return this;
-  }
 
-  scope = new EventEmitter();
 
-  extend(scope, {
-      get: get
-    , post: post
-    , delete: _delete
-    , put: put
-    , merge: merge
-    , patch: patch
-    , head: head
-    , intercept: intercept
-    , done: done
-    , isDone: isDone
-    , filteringPath: filteringPath
-    , filteringRequestBody: filteringRequestBody
-    , matchHeader: matchHeader
-    , defaultReplyHeaders: defaultReplyHeaders
-    , log: log
-    , persist: _persist
-    , shouldPersist: shouldPersist
-    , pendingMocks: pendingMocks
-    , replyContentLength: replyContentLength
-    , replyDate: replyDate
-    , interceptors: [],
-  });
-
-  return scope;
-}
 
 function cleanAll() {
   globalIntercept.removeAll();
@@ -3069,64 +3078,77 @@ module.exports = extend(startScope, {
   emitter: globalEmitter,
 });
 
-}).call(this,require("buffer").Buffer)
-},{"./common":3,"./global_emitter":5,"./intercept":6,"./match_body":7,"./mixin":8,"assert":14,"buffer":16,"debug":93,"events":20,"fs":13,"json-stringify-safe":99,"lodash":100,"qs":103,"url":52,"util":55}],12:[function(require,module,exports){
+},{"./common":3,"./global_emitter":5,"./intercept":6,"./interceptor":7,"assert":15,"debug":94,"events":21,"fs":14,"json-stringify-safe":100,"lodash":101,"url":53,"util":56}],13:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
-var EventEmitter = require('events').EventEmitter,
-    debug        = require('debug')('nock.socket');
+var EventEmitter = require('events').EventEmitter;
+var debug        = require('debug')('nock.socket');
+var util = require('util');
 
 module.exports = Socket;
 
 function Socket(options) {
-  var socket = new EventEmitter();
+  if (!(this instanceof Socket)) {
+    return new Socket(options);
+  }
+
+  EventEmitter.apply(this);
 
   options = options || {};
 
   if (options.proto === 'https') {
-    socket.authorized = true;
+    this.authorized = true;
   }
 
-  socket.writable = true;
-  socket.readable = true;
+  this.writable = true;
+  this.readable = true;
 
-  socket.setNoDelay = noop;
-  socket.setTimeout = function(timeout, fn) {
-    this.timeout = timeout;
-    this.timeoutFunction = fn;
-  }
-  socket._checkTimeout = function(delay) {
-    if (this.timeout && delay > this.timeout) {
-      debug('socket timeout');
-      if (this.timeoutFunction) {
-        this.timeoutFunction();
-      }
-      else {
-        this.emit('timeout');
-      }
+  this.setNoDelay = noop;
+  this.setKeepAlive = noop;
+  this.destroy = noop;
+  this.resume = noop;
+
+  // totalDelay that has already been applied to the current
+  // request/connection, timeout error will be generated if
+  // it is timed-out.
+  this.totalDelayMs = 0;
+  // Maximum allowed delay. Null means unlimited.
+  this.timeoutMs = null;
+}
+util.inherits(Socket, EventEmitter);
+
+Socket.prototype.setTimeout = function setTimeout(timeoutMs, fn) {
+  this.timeoutMs = timeoutMs;
+  this.timeoutFunction = fn;
+};
+
+Socket.prototype.applyDelay = function applyDelay(delayMs) {
+  this.totalDelayMs += delayMs;
+
+  if (this.timeoutMs && this.totalDelayMs > this.timeoutMs) {
+    debug('socket timeout');
+    if (this.timeoutFunction) {
+      this.timeoutFunction();
+    }
+    else {
+      this.emit('timeout');
     }
   }
 
-  socket.setKeepAlive = noop;
-  socket.destroy = noop;
-  socket.resume = noop;
+};
 
-  socket.getPeerCertificate = getPeerCertificate;
-
-  return socket;
-}
+Socket.prototype.getPeerCertificate = function getPeerCertificate() {
+  return new Buffer((Math.random() * 10000 + Date.now()).toString()).toString('base64');
+};
 
 function noop() {}
 
-function getPeerCertificate() {
-  return new Buffer((Math.random() * 10000 + Date.now()).toString()).toString('base64');
-}
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":16,"debug":93,"events":20}],13:[function(require,module,exports){
+},{"buffer":17,"debug":94,"events":21,"util":56}],14:[function(require,module,exports){
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 // http://wiki.commonjs.org/wiki/Unit_Testing/1.0
 //
 // THIS IS NOT TESTED NOR LIKELY TO WORK OUTSIDE V8!
@@ -3487,9 +3509,9 @@ var objectKeys = Object.keys || function (obj) {
   return keys;
 };
 
-},{"util/":55}],15:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13}],16:[function(require,module,exports){
+},{"util/":56}],16:[function(require,module,exports){
+arguments[4][14][0].apply(exports,arguments)
+},{"dup":14}],17:[function(require,module,exports){
 (function (global){
 /*!
  * The buffer module from node.js, for the browser.
@@ -5037,7 +5059,7 @@ function blitBuffer (src, dst, offset, length) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"base64-js":17,"ieee754":18,"isarray":19}],17:[function(require,module,exports){
+},{"base64-js":18,"ieee754":19,"isarray":20}],18:[function(require,module,exports){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 ;(function (exports) {
@@ -5163,7 +5185,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 	exports.fromByteArray = uint8ToBase64
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = nBytes * 8 - mLen - 1
@@ -5249,14 +5271,14 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 var toString = {}.toString;
 
 module.exports = Array.isArray || function (arr) {
   return toString.call(arr) == '[object Array]';
 };
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -5556,7 +5578,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 var http = require('http');
 
 var https = module.exports;
@@ -5572,7 +5594,7 @@ https.request = function (params, cb) {
     return http.request.call(this, params, cb);
 }
 
-},{"http":45}],22:[function(require,module,exports){
+},{"http":46}],23:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -5597,7 +5619,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 /**
  * Determine if an object is Buffer
  *
@@ -5616,12 +5638,12 @@ module.exports = function (obj) {
     ))
 }
 
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 module.exports = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -5849,7 +5871,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require('_process'))
-},{"_process":26}],26:[function(require,module,exports){
+},{"_process":27}],27:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -5942,7 +5964,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/punycode v1.4.0 by @mathias */
 ;(function(root) {
@@ -6479,7 +6501,7 @@ process.umask = function() { return 0; };
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -6565,7 +6587,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -6652,16 +6674,16 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":28,"./encode":29}],31:[function(require,module,exports){
+},{"./decode":29,"./encode":30}],32:[function(require,module,exports){
 module.exports = require("./lib/_stream_duplex.js")
 
-},{"./lib/_stream_duplex.js":32}],32:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":33}],33:[function(require,module,exports){
 // a duplex stream is just a stream that is both readable and writable.
 // Since JS doesn't have multiple prototypal inheritance, this class
 // prototypally inherits from Readable, and then parasitically from
@@ -6745,7 +6767,7 @@ function forEach (xs, f) {
   }
 }
 
-},{"./_stream_readable":34,"./_stream_writable":36,"core-util-is":37,"inherits":22,"process-nextick-args":38}],33:[function(require,module,exports){
+},{"./_stream_readable":35,"./_stream_writable":37,"core-util-is":38,"inherits":23,"process-nextick-args":39}],34:[function(require,module,exports){
 // a passthrough stream.
 // basically just the most minimal sort of Transform stream.
 // Every written chunk gets output as-is.
@@ -6774,7 +6796,7 @@ PassThrough.prototype._transform = function(chunk, encoding, cb) {
   cb(null, chunk);
 };
 
-},{"./_stream_transform":35,"core-util-is":37,"inherits":22}],34:[function(require,module,exports){
+},{"./_stream_transform":36,"core-util-is":38,"inherits":23}],35:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -7751,7 +7773,7 @@ function indexOf (xs, x) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_duplex":32,"_process":26,"buffer":16,"core-util-is":37,"events":20,"inherits":22,"isarray":24,"process-nextick-args":38,"string_decoder/":50,"util":15}],35:[function(require,module,exports){
+},{"./_stream_duplex":33,"_process":27,"buffer":17,"core-util-is":38,"events":21,"inherits":23,"isarray":25,"process-nextick-args":39,"string_decoder/":51,"util":16}],36:[function(require,module,exports){
 // a transform stream is a readable/writable stream where you do
 // something with the data.  Sometimes it's called a "filter",
 // but that's not a great name for it, since that implies a thing where
@@ -7950,7 +7972,7 @@ function done(stream, er) {
   return stream.push(null);
 }
 
-},{"./_stream_duplex":32,"core-util-is":37,"inherits":22}],36:[function(require,module,exports){
+},{"./_stream_duplex":33,"core-util-is":38,"inherits":23}],37:[function(require,module,exports){
 // A bit simpler than readable streams.
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
@@ -8479,7 +8501,7 @@ function endWritable(stream, state, cb) {
   state.ended = true;
 }
 
-},{"./_stream_duplex":32,"buffer":16,"core-util-is":37,"events":20,"inherits":22,"process-nextick-args":38,"util-deprecate":39}],37:[function(require,module,exports){
+},{"./_stream_duplex":33,"buffer":17,"core-util-is":38,"events":21,"inherits":23,"process-nextick-args":39,"util-deprecate":40}],38:[function(require,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -8590,7 +8612,7 @@ function objectToString(o) {
 }
 
 }).call(this,{"isBuffer":require("../../../../insert-module-globals/node_modules/is-buffer/index.js")})
-},{"../../../../insert-module-globals/node_modules/is-buffer/index.js":23}],38:[function(require,module,exports){
+},{"../../../../insert-module-globals/node_modules/is-buffer/index.js":24}],39:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -8614,7 +8636,7 @@ function nextTick(fn) {
 }
 
 }).call(this,require('_process'))
-},{"_process":26}],39:[function(require,module,exports){
+},{"_process":27}],40:[function(require,module,exports){
 (function (global){
 
 /**
@@ -8685,10 +8707,10 @@ function config (name) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 module.exports = require("./lib/_stream_passthrough.js")
 
-},{"./lib/_stream_passthrough.js":33}],41:[function(require,module,exports){
+},{"./lib/_stream_passthrough.js":34}],42:[function(require,module,exports){
 var Stream = (function (){
   try {
     return require('st' + 'ream'); // hack to fix a circular dependency issue when used with browserify
@@ -8702,13 +8724,13 @@ exports.Duplex = require('./lib/_stream_duplex.js');
 exports.Transform = require('./lib/_stream_transform.js');
 exports.PassThrough = require('./lib/_stream_passthrough.js');
 
-},{"./lib/_stream_duplex.js":32,"./lib/_stream_passthrough.js":33,"./lib/_stream_readable.js":34,"./lib/_stream_transform.js":35,"./lib/_stream_writable.js":36}],42:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":33,"./lib/_stream_passthrough.js":34,"./lib/_stream_readable.js":35,"./lib/_stream_transform.js":36,"./lib/_stream_writable.js":37}],43:[function(require,module,exports){
 module.exports = require("./lib/_stream_transform.js")
 
-},{"./lib/_stream_transform.js":35}],43:[function(require,module,exports){
+},{"./lib/_stream_transform.js":36}],44:[function(require,module,exports){
 module.exports = require("./lib/_stream_writable.js")
 
-},{"./lib/_stream_writable.js":36}],44:[function(require,module,exports){
+},{"./lib/_stream_writable.js":37}],45:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -8837,7 +8859,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":20,"inherits":22,"readable-stream/duplex.js":31,"readable-stream/passthrough.js":40,"readable-stream/readable.js":41,"readable-stream/transform.js":42,"readable-stream/writable.js":43}],45:[function(require,module,exports){
+},{"events":21,"inherits":23,"readable-stream/duplex.js":32,"readable-stream/passthrough.js":41,"readable-stream/readable.js":42,"readable-stream/transform.js":43,"readable-stream/writable.js":44}],46:[function(require,module,exports){
 var ClientRequest = require('./lib/request')
 var extend = require('xtend')
 var statusCodes = require('builtin-status-codes')
@@ -8912,7 +8934,7 @@ http.METHODS = [
 	'UNLOCK',
 	'UNSUBSCRIBE'
 ]
-},{"./lib/request":47,"builtin-status-codes":49,"url":52,"xtend":56}],46:[function(require,module,exports){
+},{"./lib/request":48,"builtin-status-codes":50,"url":53,"xtend":57}],47:[function(require,module,exports){
 (function (global){
 exports.fetch = isFunction(global.fetch) && isFunction(global.ReadableByteStream)
 
@@ -8956,7 +8978,7 @@ function isFunction (value) {
 xhr = null // Help gc
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 (function (process,global,Buffer){
 // var Base64 = require('Base64')
 var capability = require('./capability')
@@ -9235,7 +9257,7 @@ var unsafeHeaders = [
 ]
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"./capability":46,"./response":48,"_process":26,"buffer":16,"inherits":22,"stream":44}],48:[function(require,module,exports){
+},{"./capability":47,"./response":49,"_process":27,"buffer":17,"inherits":23,"stream":45}],49:[function(require,module,exports){
 (function (process,global,Buffer){
 var capability = require('./capability')
 var inherits = require('inherits')
@@ -9411,7 +9433,7 @@ IncomingMessage.prototype._onXHRProgress = function () {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"./capability":46,"_process":26,"buffer":16,"inherits":22,"stream":44}],49:[function(require,module,exports){
+},{"./capability":47,"_process":27,"buffer":17,"inherits":23,"stream":45}],50:[function(require,module,exports){
 module.exports = {
   "100": "Continue",
   "101": "Switching Protocols",
@@ -9472,7 +9494,7 @@ module.exports = {
   "511": "Network Authentication Required"
 }
 
-},{}],50:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -9695,7 +9717,7 @@ function base64DetectIncompleteChar(buffer) {
   this.charLength = this.charReceived ? 3 : 0;
 }
 
-},{"buffer":16}],51:[function(require,module,exports){
+},{"buffer":17}],52:[function(require,module,exports){
 var nextTick = require('process/browser.js').nextTick;
 var apply = Function.prototype.apply;
 var slice = Array.prototype.slice;
@@ -9772,7 +9794,7 @@ exports.setImmediate = typeof setImmediate === "function" ? setImmediate : funct
 exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate : function(id) {
   delete immediateIds[id];
 };
-},{"process/browser.js":26}],52:[function(require,module,exports){
+},{"process/browser.js":27}],53:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -10506,7 +10528,7 @@ Url.prototype.parseHost = function() {
   if (host) this.hostname = host;
 };
 
-},{"./util":53,"punycode":27,"querystring":30}],53:[function(require,module,exports){
+},{"./util":54,"punycode":28,"querystring":31}],54:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -10524,14 +10546,14 @@ module.exports = {
   }
 };
 
-},{}],54:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],55:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -11121,7 +11143,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":54,"_process":26,"inherits":22}],56:[function(require,module,exports){
+},{"./support/isBuffer":55,"_process":27,"inherits":23}],57:[function(require,module,exports){
 module.exports = extend
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -11142,10 +11164,10 @@ function extend() {
     return target
 }
 
-},{}],57:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 module.exports = require('./lib/chai');
 
-},{"./lib/chai":58}],58:[function(require,module,exports){
+},{"./lib/chai":59}],59:[function(require,module,exports){
 /*!
  * chai
  * Copyright(c) 2011-2014 Jake Luer <jake@alogicalparadox.com>
@@ -11240,7 +11262,7 @@ exports.use(should);
 var assert = require('./chai/interface/assert');
 exports.use(assert);
 
-},{"./chai/assertion":59,"./chai/config":60,"./chai/core/assertions":61,"./chai/interface/assert":62,"./chai/interface/expect":63,"./chai/interface/should":64,"./chai/utils":78,"assertion-error":86}],59:[function(require,module,exports){
+},{"./chai/assertion":60,"./chai/config":61,"./chai/core/assertions":62,"./chai/interface/assert":63,"./chai/interface/expect":64,"./chai/interface/should":65,"./chai/utils":79,"assertion-error":87}],60:[function(require,module,exports){
 /*!
  * chai
  * http://chaijs.com
@@ -11373,7 +11395,7 @@ module.exports = function (_chai, util) {
   });
 };
 
-},{"./config":60}],60:[function(require,module,exports){
+},{"./config":61}],61:[function(require,module,exports){
 module.exports = {
 
   /**
@@ -11430,7 +11452,7 @@ module.exports = {
 
 };
 
-},{}],61:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 /*!
  * chai
  * http://chaijs.com
@@ -13247,7 +13269,7 @@ module.exports = function (chai, _) {
   });
 };
 
-},{}],62:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 /*!
  * chai
  * Copyright(c) 2011-2014 Jake Luer <jake@alogicalparadox.com>
@@ -14798,7 +14820,7 @@ module.exports = function (chai, util) {
   ('isNotFrozen', 'notFrozen');
 };
 
-},{}],63:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 /*!
  * chai
  * Copyright(c) 2011-2014 Jake Luer <jake@alogicalparadox.com>
@@ -14833,7 +14855,7 @@ module.exports = function (chai, util) {
   };
 };
 
-},{}],64:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 /*!
  * chai
  * Copyright(c) 2011-2014 Jake Luer <jake@alogicalparadox.com>
@@ -14933,7 +14955,7 @@ module.exports = function (chai, util) {
   chai.Should = loadShould;
 };
 
-},{}],65:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 /*!
  * Chai - addChainingMethod utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -15046,7 +15068,7 @@ module.exports = function (ctx, name, method, chainingBehavior) {
   });
 };
 
-},{"../config":60,"./flag":69,"./transferFlags":85}],66:[function(require,module,exports){
+},{"../config":61,"./flag":70,"./transferFlags":86}],67:[function(require,module,exports){
 /*!
  * Chai - addMethod utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -15091,7 +15113,7 @@ module.exports = function (ctx, name, method) {
   };
 };
 
-},{"../config":60,"./flag":69}],67:[function(require,module,exports){
+},{"../config":61,"./flag":70}],68:[function(require,module,exports){
 /*!
  * Chai - addProperty utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -15140,7 +15162,7 @@ module.exports = function (ctx, name, getter) {
   });
 };
 
-},{"../config":60,"./flag":69}],68:[function(require,module,exports){
+},{"../config":61,"./flag":70}],69:[function(require,module,exports){
 /*!
  * Chai - expectTypes utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -15183,7 +15205,7 @@ module.exports = function (obj, types) {
   }
 };
 
-},{"./flag":69,"assertion-error":86,"type-detect":91}],69:[function(require,module,exports){
+},{"./flag":70,"assertion-error":87,"type-detect":92}],70:[function(require,module,exports){
 /*!
  * Chai - flag utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -15217,7 +15239,7 @@ module.exports = function (obj, key, value) {
   }
 };
 
-},{}],70:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
 /*!
  * Chai - getActual utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -15237,7 +15259,7 @@ module.exports = function (obj, args) {
   return args.length > 4 ? args[4] : obj._obj;
 };
 
-},{}],71:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 /*!
  * Chai - getEnumerableProperties utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -15264,7 +15286,7 @@ module.exports = function getEnumerableProperties(object) {
   return result;
 };
 
-},{}],72:[function(require,module,exports){
+},{}],73:[function(require,module,exports){
 /*!
  * Chai - message composition utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -15316,7 +15338,7 @@ module.exports = function (obj, args) {
   return flagMsg ? flagMsg + ': ' + msg : msg;
 };
 
-},{"./flag":69,"./getActual":70,"./inspect":79,"./objDisplay":80}],73:[function(require,module,exports){
+},{"./flag":70,"./getActual":71,"./inspect":80,"./objDisplay":81}],74:[function(require,module,exports){
 /*!
  * Chai - getName utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -15338,7 +15360,7 @@ module.exports = function (func) {
   return match && match[1] ? match[1] : "";
 };
 
-},{}],74:[function(require,module,exports){
+},{}],75:[function(require,module,exports){
 /*!
  * Chai - getPathInfo utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -15450,7 +15472,7 @@ function _getPathValue (parsed, obj, index) {
   return res;
 }
 
-},{"./hasProperty":77}],75:[function(require,module,exports){
+},{"./hasProperty":78}],76:[function(require,module,exports){
 /*!
  * Chai - getPathValue utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -15494,7 +15516,7 @@ module.exports = function(path, obj) {
   return info.value;
 }; 
 
-},{"./getPathInfo":74}],76:[function(require,module,exports){
+},{"./getPathInfo":75}],77:[function(require,module,exports){
 /*!
  * Chai - getProperties utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -15531,7 +15553,7 @@ module.exports = function getProperties(object) {
   return result;
 };
 
-},{}],77:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 /*!
  * Chai - hasProperty utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -15596,7 +15618,7 @@ module.exports = function hasProperty(name, obj) {
   return name in obj;
 };
 
-},{"type-detect":91}],78:[function(require,module,exports){
+},{"type-detect":92}],79:[function(require,module,exports){
 /*!
  * chai
  * Copyright(c) 2011 Jake Luer <jake@alogicalparadox.com>
@@ -15728,7 +15750,7 @@ exports.addChainableMethod = require('./addChainableMethod');
 
 exports.overwriteChainableMethod = require('./overwriteChainableMethod');
 
-},{"./addChainableMethod":65,"./addMethod":66,"./addProperty":67,"./expectTypes":68,"./flag":69,"./getActual":70,"./getMessage":72,"./getName":73,"./getPathInfo":74,"./getPathValue":75,"./hasProperty":77,"./inspect":79,"./objDisplay":80,"./overwriteChainableMethod":81,"./overwriteMethod":82,"./overwriteProperty":83,"./test":84,"./transferFlags":85,"deep-eql":87,"type-detect":91}],79:[function(require,module,exports){
+},{"./addChainableMethod":66,"./addMethod":67,"./addProperty":68,"./expectTypes":69,"./flag":70,"./getActual":71,"./getMessage":73,"./getName":74,"./getPathInfo":75,"./getPathValue":76,"./hasProperty":78,"./inspect":80,"./objDisplay":81,"./overwriteChainableMethod":82,"./overwriteMethod":83,"./overwriteProperty":84,"./test":85,"./transferFlags":86,"deep-eql":88,"type-detect":92}],80:[function(require,module,exports){
 // This is (almost) directly from Node.js utils
 // https://github.com/joyent/node/blob/f8c335d0caf47f16d31413f89aa28eda3878e3aa/lib/util.js
 
@@ -16063,7 +16085,7 @@ function objectToString(o) {
   return Object.prototype.toString.call(o);
 }
 
-},{"./getEnumerableProperties":71,"./getName":73,"./getProperties":76}],80:[function(require,module,exports){
+},{"./getEnumerableProperties":72,"./getName":74,"./getProperties":77}],81:[function(require,module,exports){
 /*!
  * Chai - flag utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -16114,7 +16136,7 @@ module.exports = function (obj) {
   }
 };
 
-},{"../config":60,"./inspect":79}],81:[function(require,module,exports){
+},{"../config":61,"./inspect":80}],82:[function(require,module,exports){
 /*!
  * Chai - overwriteChainableMethod utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -16169,7 +16191,7 @@ module.exports = function (ctx, name, method, chainingBehavior) {
   };
 };
 
-},{}],82:[function(require,module,exports){
+},{}],83:[function(require,module,exports){
 /*!
  * Chai - overwriteMethod utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -16222,7 +16244,7 @@ module.exports = function (ctx, name, method) {
   }
 };
 
-},{}],83:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
 /*!
  * Chai - overwriteProperty utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -16278,7 +16300,7 @@ module.exports = function (ctx, name, getter) {
   });
 };
 
-},{}],84:[function(require,module,exports){
+},{}],85:[function(require,module,exports){
 /*!
  * Chai - test utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -16306,7 +16328,7 @@ module.exports = function (obj, args) {
   return negate ? !expr : expr;
 };
 
-},{"./flag":69}],85:[function(require,module,exports){
+},{"./flag":70}],86:[function(require,module,exports){
 /*!
  * Chai - transferFlags utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
@@ -16352,7 +16374,7 @@ module.exports = function (assertion, object, includeAll) {
   }
 };
 
-},{}],86:[function(require,module,exports){
+},{}],87:[function(require,module,exports){
 /*!
  * assertion-error
  * Copyright(c) 2013 Jake Luer <jake@qualiancy.com>
@@ -16466,10 +16488,10 @@ AssertionError.prototype.toJSON = function (stack) {
   return props;
 };
 
-},{}],87:[function(require,module,exports){
+},{}],88:[function(require,module,exports){
 module.exports = require('./lib/eql');
 
-},{"./lib/eql":88}],88:[function(require,module,exports){
+},{"./lib/eql":89}],89:[function(require,module,exports){
 /*!
  * deep-eql
  * Copyright(c) 2013 Jake Luer <jake@alogicalparadox.com>
@@ -16728,10 +16750,10 @@ function objectEqual(a, b, m) {
   return true;
 }
 
-},{"buffer":16,"type-detect":89}],89:[function(require,module,exports){
+},{"buffer":17,"type-detect":90}],90:[function(require,module,exports){
 module.exports = require('./lib/type');
 
-},{"./lib/type":90}],90:[function(require,module,exports){
+},{"./lib/type":91}],91:[function(require,module,exports){
 /*!
  * type-detect
  * Copyright(c) 2013 jake luer <jake@alogicalparadox.com>
@@ -16875,9 +16897,9 @@ Library.prototype.test = function (obj, type) {
   }
 };
 
-},{}],91:[function(require,module,exports){
-arguments[4][89][0].apply(exports,arguments)
-},{"./lib/type":92,"dup":89}],92:[function(require,module,exports){
+},{}],92:[function(require,module,exports){
+arguments[4][90][0].apply(exports,arguments)
+},{"./lib/type":93,"dup":90}],93:[function(require,module,exports){
 /*!
  * type-detect
  * Copyright(c) 2013 jake luer <jake@alogicalparadox.com>
@@ -17013,7 +17035,7 @@ Library.prototype.test = function(obj, type) {
   }
 };
 
-},{}],93:[function(require,module,exports){
+},{}],94:[function(require,module,exports){
 
 /**
  * This is the web browser implementation of `debug()`.
@@ -17183,7 +17205,7 @@ function localstorage(){
   } catch (e) {}
 }
 
-},{"./debug":94}],94:[function(require,module,exports){
+},{"./debug":95}],95:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -17382,7 +17404,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":95}],95:[function(require,module,exports){
+},{"ms":96}],96:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -17509,7 +17531,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
 
-},{}],96:[function(require,module,exports){
+},{}],97:[function(require,module,exports){
 var pSlice = Array.prototype.slice;
 var objectKeys = require('./lib/keys.js');
 var isArguments = require('./lib/is_arguments.js');
@@ -17605,7 +17627,7 @@ function objEquiv(a, b, opts) {
   return typeof a === typeof b;
 }
 
-},{"./lib/is_arguments.js":97,"./lib/keys.js":98}],97:[function(require,module,exports){
+},{"./lib/is_arguments.js":98,"./lib/keys.js":99}],98:[function(require,module,exports){
 var supportsArgumentsClass = (function(){
   return Object.prototype.toString.call(arguments)
 })() == '[object Arguments]';
@@ -17627,7 +17649,7 @@ function unsupported(object){
     false;
 };
 
-},{}],98:[function(require,module,exports){
+},{}],99:[function(require,module,exports){
 exports = module.exports = typeof Object.keys === 'function'
   ? Object.keys : shim;
 
@@ -17638,7 +17660,7 @@ function shim (obj) {
   return keys;
 }
 
-},{}],99:[function(require,module,exports){
+},{}],100:[function(require,module,exports){
 exports = module.exports = stringify
 exports.getSerialize = serializer
 
@@ -17667,7 +17689,7 @@ function serializer(replacer, cycleReplacer) {
   }
 }
 
-},{}],100:[function(require,module,exports){
+},{}],101:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -30022,7 +30044,7 @@ function serializer(replacer, cycleReplacer) {
 }.call(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],101:[function(require,module,exports){
+},{}],102:[function(require,module,exports){
 (function (process){
 var path = require('path');
 var fs = require('fs');
@@ -30124,7 +30146,7 @@ mkdirP.sync = function sync (p, opts, made) {
 };
 
 }).call(this,require('_process'))
-},{"_process":26,"fs":13,"path":25}],102:[function(require,module,exports){
+},{"_process":27,"fs":14,"path":26}],103:[function(require,module,exports){
 function propagate(events, source, dest) {
   if (arguments.length < 3) {
     dest = source;
@@ -30187,7 +30209,7 @@ function explicitPropagate(events, source, dest) {
     listeners.forEach(unregister);
   }
 }
-},{}],103:[function(require,module,exports){
+},{}],104:[function(require,module,exports){
 'use strict';
 
 var Stringify = require('./stringify');
@@ -30198,7 +30220,7 @@ module.exports = {
     parse: Parse
 };
 
-},{"./parse":104,"./stringify":105}],104:[function(require,module,exports){
+},{"./parse":105,"./stringify":106}],105:[function(require,module,exports){
 'use strict';
 
 var Utils = require('./utils');
@@ -30364,7 +30386,7 @@ module.exports = function (str, opts) {
     return Utils.compact(obj);
 };
 
-},{"./utils":106}],105:[function(require,module,exports){
+},{"./utils":107}],106:[function(require,module,exports){
 'use strict';
 
 var Utils = require('./utils');
@@ -30496,7 +30518,7 @@ module.exports = function (object, opts) {
     return keys.join(delimiter);
 };
 
-},{"./utils":106}],106:[function(require,module,exports){
+},{"./utils":107}],107:[function(require,module,exports){
 'use strict';
 
 var hexTable = (function () {
@@ -30660,7 +30682,7 @@ exports.isBuffer = function (obj) {
     return !!(obj.constructor && obj.constructor.isBuffer && obj.constructor.isBuffer(obj));
 };
 
-},{}],107:[function(require,module,exports){
+},{}],108:[function(require,module,exports){
 var assert = require('assert');
 var http = require('http');
 var nock = require('../../');
@@ -30680,4 +30702,4 @@ http.get('http://browserifyland.com/beep', function(res) {
       document.getElementById('content').innerHTML = body;
     });
 });
-},{"../../":1,"assert":14,"http":45}]},{},[107]);
+},{"../../":1,"assert":15,"http":46}]},{},[108]);
