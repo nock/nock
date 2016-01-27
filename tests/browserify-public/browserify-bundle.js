@@ -642,7 +642,7 @@ function formatQueryValue(key, value, options) {
 }
 
 function isStream(obj) {
-  return (typeof obj !== 'undefined') &&
+  return obj &&
       (typeof a !== 'string') &&
       (! Buffer.isBuffer(obj)) &&
       _.isFunction(obj.setEncoding);
