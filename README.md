@@ -924,6 +924,7 @@ nock.enableNetConnect('127.0.0.1'); //Allow localhost connections so we can test
 Then when you're done with the test, you probably want to set everything back to normal:
 
 ```js
+nock.cleanAll();
 nock.enableNetConnect();
 ```
 
