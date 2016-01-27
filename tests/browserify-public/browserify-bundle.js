@@ -520,6 +520,9 @@ function isContentEncoded(headers) {
 
 function isJSONContent(headers) {
   var contentType = _.get(headers, 'content-type');
+  if (Array.isArray(contentType)) {
+    contentType = contentType[0];
+  }
   contentType = (contentType || '').toLocaleLowerCase();
 
   return contentType === 'application/json';
@@ -638,6 +641,13 @@ function formatQueryValue(key, value, options) {
   return [key, value];
 }
 
+function isStream(obj) {
+  return (typeof obj !== 'undefined') &&
+      (typeof a !== 'string') &&
+      (! Buffer.isBuffer(obj)) &&
+      _.isFunction(obj.setEncoding);
+}
+
 exports.normalizeRequestOptions = normalizeRequestOptions;
 exports.isBinaryBuffer = isBinaryBuffer;
 exports.mergeChunks = mergeChunks;
@@ -653,6 +663,8 @@ exports.percentEncode = percentEncode;
 exports.percentDecode = percentDecode;
 exports.matchStringOrRegexp = matchStringOrRegexp;
 exports.formatQueryValue = formatQueryValue;
+exports.isStream = isStream;
+
 
 }).call(this,require("buffer").Buffer)
 },{"buffer":17,"debug":94,"http":46,"https":22,"lodash":101}],4:[function(require,module,exports){
@@ -673,12 +685,7 @@ var Transform = require('stream').Transform;
 var EventEmitter = require('events').EventEmitter;
 var noop = function () {};
 var util = require('util');
-var timers = require('timers');
-
-function isStream(obj) {
-  var is = obj && (typeof a !== 'string') && (! Buffer.isBuffer(obj)) && (typeof obj.setEncoding === 'function');
-  return is;
-}
+var common = require('./common');
 
 if (!Transform) {
   // for barebones compatibility for node < 0.10
@@ -715,7 +722,7 @@ function DelayedBody(ms, body) {
   var data = '';
   var ended = false;
 
-  if (isStream(body)) {
+  if (common.isStream(body)) {
     body.on('data', function (chunk) {
       data += Buffer.isBuffer(chunk) ? chunk.toString() : chunk;
     });
@@ -728,7 +735,7 @@ function DelayedBody(ms, body) {
   }
 
   setTimeout(function () {
-    if (isStream(body) && !ended) {
+    if (common.isStream(body) && !ended) {
       body.once('end', function () {
         self.end(data);
       });
@@ -744,7 +751,7 @@ DelayedBody.prototype._transform = function (chunk, encoding, cb) {
   process.nextTick(cb);
 };
 }).call(this,{"isBuffer":require("../node_modules/browserify/node_modules/insert-module-globals/node_modules/is-buffer/index.js")},require('_process'))
-},{"../node_modules/browserify/node_modules/insert-module-globals/node_modules/is-buffer/index.js":24,"_process":27,"events":21,"stream":45,"timers":52,"util":56}],5:[function(require,module,exports){
+},{"../node_modules/browserify/node_modules/insert-module-globals/node_modules/is-buffer/index.js":24,"./common":3,"_process":27,"events":21,"stream":45,"util":56}],5:[function(require,module,exports){
 var EventEmitter = require('events').EventEmitter
 
 module.exports = new EventEmitter();
@@ -1259,7 +1266,7 @@ Interceptor.prototype.reply = function reply(statusCode, body, headers) {
         if (body && typeof(body) !== 'string' &&
             typeof(body) !== 'function' &&
             !Buffer.isBuffer(body) &&
-            !isStream(body)) {
+            !common.isStream(body)) {
             try {
                 body = stringify(body);
                 if (!this.headers) {
@@ -1657,12 +1664,6 @@ Interceptor.prototype.socketDelay = function socketDelay(ms) {
     return this;
 };
 
-function isStream(obj) {
-    return (typeof obj !== 'undefined') &&
-        (typeof a !== 'string') &&
-        (! Buffer.isBuffer(obj)) &&
-        _.isFunction(obj.setEncoding);
-}
 }).call(this,require("buffer").Buffer)
 },{"./common":3,"./match_body":8,"./mixin":9,"buffer":17,"debug":94,"fs":14,"json-stringify-safe":100,"lodash":101,"qs":104,"util":56}],8:[function(require,module,exports){
 (function (Buffer){
@@ -1689,7 +1690,7 @@ function matchBody(spec, body) {
 
   //strip line endings from both so that we get a match no matter what OS we are running on
   //if Content-Type does not contains 'multipart'
-  if (!isMultipart) {
+  if (!isMultipart && typeof body === "string") {
     body = body.replace(/\r?\n|\r/g, '');
   }
 
@@ -2234,11 +2235,6 @@ function setHeader(request, name, value) {
   }
 }
 
-function isStream(obj) {
-  var is = obj && (typeof obj !== 'string') && (!Buffer.isBuffer(obj)) && (typeof obj.setEncoding === 'function');
-  return is;
-}
-
 //  Sets request headers of the given request. This is needed during both matching phase
 //  (in case header filters were specified) and mocking phase (to correctly pass mocked
 //  request headers).
@@ -2507,7 +2503,7 @@ function RequestOverrider(req, options, interceptors, remove, cb) {
       //  of response buffers which should be mocked one by one.
       //  (otherwise decompressions after the first one fails as unzip expects to receive
       //  buffer by buffer and not one single merged buffer)
-      if(common.isContentEncoded(response.headers) && ! isStream(interceptor.body)) {
+      if(common.isContentEncoded(response.headers) && ! common.isStream(interceptor.body)) {
 
         if (interceptor.delayInMs) {
           emitError(new Error('Response delay is currently not supported with content-encoded responses.'));
@@ -2590,7 +2586,7 @@ function RequestOverrider(req, options, interceptors, remove, cb) {
           responseBody = new DelayedBody(interceptor.delayInMs, responseBody);
         }
 
-        if (isStream(responseBody)) {
+        if (common.isStream(responseBody)) {
           debug('response body is a stream');
           responseBody.pause();
           responseBody.on('data', function(d) {
@@ -2682,7 +2678,7 @@ function RequestOverrider(req, options, interceptors, remove, cb) {
             req.emit('response', response);
           }
 
-          if (isStream(responseBody)) {
+          if (common.isStream(responseBody)) {
             debug('resuming response stream');
             responseBody.resume();
           }
