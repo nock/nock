@@ -2887,6 +2887,123 @@ function checkDuration(t, ms) {
   };
 }
 
+test('calling delay could cause mikealRequest timeout error', function(t) {
+    var scope = nock('http://funk')
+        .get('/')
+        .delay({
+            head: 300
+        })
+        .reply(200, 'OK');
+
+    mikealRequest({
+        uri: 'http://funk',
+        method: 'GET',
+        timeout: 100
+    }, function (err) {
+        scope.done();
+        t.equal(err && err.code, "ETIMEDOUT");
+        t.end();
+    });
+});
+
+test('Body delay does not have impact on timeoput', function(t) {
+    var scope = nock('http://funk')
+        .get('/')
+        .delay({
+            head: 300,
+            body: 300
+        })
+        .reply(200, 'OK');
+
+    mikealRequest({
+        uri: 'http://funk',
+        method: 'GET',
+        timeout: 500
+    }, function (err, r, body) {
+        t.equal(err, null);
+        t.equal(body, 'OK');
+        t.equal(r.statusCode, 200);
+        scope.done();
+        t.end();
+    });
+});
+
+test('calling delay with "body" and "head" delays the response', function (t) {
+    checkDuration(t, 600);
+
+    nock('http://funk')
+        .get('/')
+        .delay({
+            head: 300,
+            body: 300
+        })
+        .reply(200, 'OK');
+
+    http.get('http://funk/', function (res) {
+        res.setEncoding('utf8');
+
+        var body = '';
+
+        res.on('data', function(chunk) {
+            body += chunk;
+        });
+
+        res.once('end', function() {
+            t.equal(body, 'OK');
+            t.end();
+        });
+    });
+});
+test('calling delay with "body" delays the response body', function (t) {
+    checkDuration(t, 100);
+
+    nock('http://funk')
+        .get('/')
+        .delay({
+            body: 100
+        })
+        .reply(200, 'OK');
+
+    http.get('http://funk/', function (res) {
+        res.setEncoding('utf8');
+
+        var body = '';
+
+        res.on('data', function(chunk) {
+            body += chunk;
+        });
+
+        res.once('end', function() {
+            t.equal(body, 'OK');
+            t.end();
+        });
+    });
+});
+
+test('calling delayBody delays the response', function (t) {
+    checkDuration(t, 100);
+
+    nock('http://funk')
+        .get('/')
+        .delayBody(100)
+        .reply(200, 'OK');
+
+    http.get('http://funk/', function (res) {
+        res.setEncoding('utf8');
+
+        var body = '';
+
+        res.on('data', function(chunk) {
+            body += chunk;
+        });
+
+        res.once('end', function() {
+            t.equal(body, 'OK');
+            t.end();
+        });
+    });
+});
+
 test('calling delay delays the response', function (t) {
   checkDuration(t, 100);
 

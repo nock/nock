@@ -30,6 +30,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
     - [Support for HTTP and HTTPS](#support-for-http-and-https)
     - [Non-standard ports](#non-standard-ports)
     - [Repeat response n times](#repeat-response-n-times)
+    - [Delay the response body](#delay-the-response-body)
     - [Delay the response](#delay-the-response)
     - [Delay the connection](#delay-the-connection)
     - [Socket timeout](#socket-timeout)
@@ -571,6 +572,20 @@ nock('http://zombo.com').get('/').twice().reply(200, 'Ok');
 nock('http://zombo.com').get('/').thrice().reply(200, 'Ok');
 ```
 
+## Delay the response body
+You are able to specify the number of milliseconds that the response body should be delayed. Response header will be replied immediately.
+`delayBody(1000)` is equivalent to `delay({body: 1000})`.
+
+
+```js
+nock('http://my.server.com')
+  .get('/')
+  .delayBody(2000) // 2 seconds
+  .reply(200, '<html></html>')
+```
+
+NOTE: the [`'response'`](http://nodejs.org/api/http.html#http_event_response) event will occur immediately, but the [IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage) not emit it's `'end'` event until after the delay.
+
 ## Delay the response
 
 You are able to specify the number of milliseconds that your reply should be delayed.
@@ -578,22 +593,34 @@ You are able to specify the number of milliseconds that your reply should be del
 ```js
 nock('http://my.server.com')
   .get('/')
-  .delay(2000) // 2 seconds
+  .delay(2000) // 2 seconds delay will be applied to the response header.
   .reply(200, '<html></html>')
 ```
 
-NOTE: the [`'response'`](http://nodejs.org/api/http.html#http_event_response) event will occur immediately, but the [IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage) not emit it's `'end'` event until after the delay.
+`delay()` could also be used as
 
-## Delay the connection
+ ```
+ delay({
+    head: headDelayInMs,
+    body: bodyDelayInMs
+ }
+ ```
 
-You are able to specify the number of milliseconds that your connection should be delayed.
+ for example
 
 ```js
 nock('http://my.server.com')
   .get('/')
-  .delayConnection(2000) // 2 seconds
+  .delay({
+    head: 2000, // header will be delayed for 2 seconds, i.e. the whole response will be delayed for 2 seconds.
+    body: 3000  // body will be delayed for another 3 seconds after header is sent out.
+  })
   .reply(200, '<html></html>')
 ```
+
+## Delay the connection
+
+`delayConnection(1000)` is equivalent to `delay({head: 1000})`.
 
 ## Socket timeout
 
