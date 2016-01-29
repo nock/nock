@@ -1203,6 +1203,10 @@ function Interceptor(scope, uri, method, requestBody, interceptorOptions) {
     //  We use lower-case header field names throughout Nock.
     this.reqheaders = common.headersFieldNamesToLowerCase((scope.scopeOptions && scope.scopeOptions.reqheaders) || {});
     this.badheaders = common.headersFieldsArrayToLowerCase((scope.scopeOptions && scope.scopeOptions.badheaders) || []);
+
+
+    this.delayInMs = 0;
+    this.delayConnectionInMs = 0;
 }
 
 Interceptor.prototype.replyWithError = function replyWithError(errorMessage) {
@@ -1634,11 +1638,35 @@ Interceptor.prototype.thrice = function thrice() {
 /**
  * Delay the response by a certain number of ms.
  *
- * @param  {integer} ms - Number of milliseconds to wait
- * @return {scope} - the current scope for chaining
+ * @param {(integer|object)} opts - Number of milliseconds to wait, or an object
+ * @param {integer} [opts.head] - Number of milliseconds to wait before response is sent
+ * @param {integer} [opts.body] - Number of milliseconds to wait before response body is sent
+ * @return {interceptor} - the current interceptor for chaining
  */
-Interceptor.prototype.delay = function delay(ms) {
-    this.delayInMs = ms;
+Interceptor.prototype.delay = function delay(opts) {
+    var headDelay = 0;
+    var bodyDelay = 0;
+    if (_.isNumber(opts)) {
+        headDelay = opts;
+    } else if (_.isObject(opts)) {
+        headDelay = opts.head || 0;
+        bodyDelay = opts.body || 0;
+    } else {
+        throw new Error("Unexpected input opts" + opts);
+    }
+
+    return this.delayConnection(headDelay)
+        .delayBody(bodyDelay);
+};
+
+/**
+ * Delay the response body by a certain number of ms.
+ *
+ * @param {integer} ms - Number of milliseconds to wait before response is sent
+ * @return {interceptor} - the current interceptor for chaining
+ */
+Interceptor.prototype.delayBody = function delayBody(ms) {
+    this.delayInMs += ms;
     return this;
 };
 
@@ -1646,18 +1674,22 @@ Interceptor.prototype.delay = function delay(ms) {
  * Delay the connection by a certain number of ms.
  *
  * @param  {integer} ms - Number of milliseconds to wait
- * @return {scope} - the current scope for chaining
+ * @return {interceptor} - the current interceptor for chaining
  */
 Interceptor.prototype.delayConnection = function delayConnection(ms) {
-    this.delayConnectionInMs = ms;
+    this.delayConnectionInMs += ms;
     return this;
+};
+
+Interceptor.prototype.getTotalDelay =function getTotalDelay() {
+    return this.delayInMs + this.delayConnectionInMs;
 };
 
 /**
  * Make the socket idle for a certain number of ms (simulated).
  *
  * @param  {integer} ms - Number of milliseconds to wait
- * @return {scope} - the current scope for chaining
+ * @return {interceptor} - the current interceptor for chaining
  */
 Interceptor.prototype.socketDelay = function socketDelay(ms) {
     this.socketDelayInMs = ms;
@@ -2474,7 +2506,7 @@ function RequestOverrider(req, options, interceptors, remove, cb) {
       } else {
         error = new Error(interceptor.errorMessage);
       }
-      timers.setTimeout(emitError, interceptor.delayInMs || 0, error);
+      timers.setTimeout(emitError, interceptor.getTotalDelay(), error);
       return;
     }
     response.statusCode = Number(interceptor.statusCode) || 200;
@@ -2583,7 +2615,9 @@ function RequestOverrider(req, options, interceptors, remove, cb) {
 
         if (interceptor.delayInMs) {
           debug('delaying the response for', interceptor.delayInMs, 'milliseconds');
-          responseBody = new DelayedBody(interceptor.delayInMs, responseBody);
+          // Because setTimeout is called immediately in DelayedBody(), so we
+          // need count in the delayConnectionInMs.
+          responseBody = new DelayedBody(interceptor.getTotalDelay(), responseBody);
         }
 
         if (common.isStream(responseBody)) {
