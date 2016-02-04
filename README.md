@@ -1024,12 +1024,12 @@ nocks.forEach(function(nock) {
       return body;
     }
 
-    var recordedBodyResult = /timestamp:([0-9]+)/.exec(aRecodedBody);
-    if (!recodedBodyResult) {
+    var recordedBodyResult = /timestamp:([0-9]+)/.exec(aRecordedBody);
+    if (!recordedBodyResult) {
       return body;
     }
 
-    var recordedTimestamp = recodedBodyResult[1];
+    var recordedTimestamp = recordedBodyResult[1];
     return body.replace(/(timestamp):([0-9]+)/g, function(match, key, value) {
       return key + ':' + recordedTimestamp;
     });
