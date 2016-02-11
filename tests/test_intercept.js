@@ -4140,13 +4140,22 @@ test('match domain using intercept callback', function (t) {
     .get(function(uri) {
       return validUrl.indexOf(uri) >= 0;
     })
-    .reply(200, 'Match intercept');
+    .reply(200, 'Match intercept')
+    .get('/cats')
+    .reply(200, 'Match intercept 2');
 
   mikealRequest.get('http://www.interceptexample.com/cats', function(err, res, body) {
     t.type(err, 'null');
     t.equal(res.statusCode, 200);
     t.equal(body, 'Match intercept');
-    t.end();
+
+    // This one should match the second .get()
+    mikealRequest.get('http://www.interceptexample.com/cats', function(err, res, body) {
+      t.type(err, 'null');
+      t.equal(res.statusCode, 200);
+      t.equal(body, 'Match intercept 2');
+      t.end();
+    });
   });
 });
 
