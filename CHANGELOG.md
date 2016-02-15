@@ -1,6 +1,26 @@
+7.2.1 / 2016-02-15
+==================
+
+  * v7.2.1
+  * Merge branch 'owiber-oliver-callbackfix'
+  * Merge branch 'oliver-callbackfix' of git://github.com/owiber/nock into owiber-oliver-callbackfix
+
+7.2.0 / 2016-02-15
+==================
+
+  * v7.2.0
+  * Merge branch 'master' of github.com:pgte/nock
+  * mkdirp is optional because browsers. addresses [#475](https://github.com/pgte/nock/issues/475)
+  * fix key when interceptor path is specified with callback
+  * Merge pull request [#465](https://github.com/pgte/nock/issues/465) from JemiloII/patch-1
+  * Fixing typos
+  * added @BinChang as contributor
+  * changelog update
+
 7.1.0 / 2016-01-29
 ==================
 
+  * v7.1.0
   * Merge branch 'BinChang-delayBody'
   * add a new api delayBody() and update the syntax of delay().
   * Merge pull request [#462](https://github.com/pgte/nock/issues/462) from four43/patch-2
@@ -151,33 +171,3 @@
   * Merge branch 'master' of git://github.com/ericsaboia/nock into ericsaboia-master
   * fix typo
   * match uri using callback
-  * add ability to match domain using regex
-  * updated changelog
-
-3.6.0 / 2015-12-23
-==================
-
-  * v3.6.0
-  * Merge pull request [#430](https://github.com/pgte/nock/issues/430) from jeffomatic/fix-request-again
-    Update [#158](https://github.com/pgte/nock/issues/158) fix for request module and strict SSL
-  * Update [#158](https://github.com/pgte/nock/issues/158) fix for request module and strict SSL
-    Commit 48e8be5 added a compatibility fix for users of the request
-    NPM module and strict SSL cert checking. The request module has
-    since been updated (see https://github.com/request/request/pull/1615
-    for more details), and a corresponding change should be made in
-    nock to ensure compatibility.
-
-3.5.0 / 2015-12-16
-==================
-
-  * v3.5.0
-  * Merge branch 'aronwoost-multipart-fix'
-  * Merge branch 'multipart-fix' of git://github.com/aronwoost/nock into aronwoost-multipart-fix
-
-3.4.1 / 2015-12-15
-==================
-
-  * v3.4.1
-  * removing empty query string parts before matching. Should fix [#426](https://github.com/pgte/nock/issues/426)
-  * testing empty query string match
-  * removing broken test
