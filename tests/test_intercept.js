@@ -2540,6 +2540,23 @@ test('allow unmocked post with json data', function(t) {
   });
 });
 
+test('allow unmocked passthrough with mismatched bodies', function(t) {
+  var scope = nock('http://httpbin.org', { allowUnmocked: true }).
+    post("/post", {some: 'otherdata'}).
+    reply(404, "Hey!");
+
+  var options = {
+    method: 'POST',
+    uri: 'http://httpbin.org/post',
+    json: { some: 'data' }
+  };
+
+  mikealRequest(options, function(err, resp, body) {
+    t.equal(200, resp.statusCode)
+    t.end();
+  });
+});
+
 test('allow unordered body with json encoding', function(t) {
   var scope =
   nock('http://wtfjs.org')
