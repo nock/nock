@@ -19,7 +19,6 @@ var nock = require('./scope');
 var recorder = require('./recorder');
 
 var format = require('util').format;
-var mkdirp = require('mkdirp');
 var path = require('path');
 var expect = require('chai').expect;
 var debug = require('debug')('nock.back');
@@ -34,6 +33,12 @@ try {
   // do nothing, probably in browser
 }
 
+var mkdirp;
+try {
+  mkdirp = require('mkdirp');
+} catch(err) {
+  // do nothing, probably in browser
+}
 
 
 /**
