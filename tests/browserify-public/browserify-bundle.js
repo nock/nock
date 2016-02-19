@@ -1112,9 +1112,12 @@ function activate() {
       var matches = false,
           allowUnmocked = false;
 
-      interceptors.forEach(function(interceptor) {
-        if (! allowUnmocked && interceptor.options.allowUnmocked) { allowUnmocked = true; }
-        if (interceptor.matchIndependentOfBody(options)) { matches = true; }
+      matches = !! _.find(interceptors, function(interceptor) {
+        return interceptor.matchIndependentOfBody(options);
+      });
+        
+      allowUnmocked = !! _.find(interceptors, function(interceptor) {
+        return interceptor.options.allowUnmocked;
       });
 
       if (! matches && allowUnmocked) {
@@ -1196,7 +1199,7 @@ function Interceptor(scope, uri, method, requestBody, interceptorOptions) {
     this.interceptorMatchHeaders = [];
     this.method = method.toUpperCase();
     this.uri = uri;
-    this._key = this.method + ' ' + scope.basePath + scope.basePathname + uri;
+    this._key = this.method + ' ' + scope.basePath + scope.basePathname + (typeof uri === 'string' ? '' : '/') + uri;
     this.basePath = this.scope.basePath;
     this.path = (typeof uri === 'string') ? scope.basePathname + uri : uri;
 
@@ -1217,11 +1220,7 @@ function Interceptor(scope, uri, method, requestBody, interceptorOptions) {
 Interceptor.prototype.replyWithError = function replyWithError(errorMessage) {
     this.errorMessage = errorMessage;
 
-    for (var opt in this.scope.scopeOptions) {
-        if (_.isUndefined(this.options[opt])) {
-            this.options[opt] = this.scope.scopeOptions[opt];
-        }
-    }
+    _.defaults(this.options, this.scope.scopeOptions);
 
     this.scope.add(this._key, this, this.scope, this.scopeOptions);
     return this.scope;
@@ -1238,11 +1237,7 @@ Interceptor.prototype.reply = function reply(statusCode, body, headers) {
     //  We use lower-case headers throughout Nock.
     headers = common.headersFieldNamesToLowerCase(headers);
 
-    for (var opt in this.scope.scopeOptions) {
-        if (_.isUndefined(this.options[opt])) {
-            this.options[opt] = this.scope.scopeOptions[opt];
-        }
-    }
+    _.defaults(this.options, this.scope.scopeOptions);
 
     if (this.scope._defaultReplyHeaders) {
         headers = headers || {};
@@ -1357,7 +1352,10 @@ Interceptor.prototype.reqheaderMatches = function reqheaderMatches(options, key)
 };
 
 Interceptor.prototype.match = function match(options, body, hostNameOnly) {
-    debug('match %s, body = %s', stringify(options), stringify(body));
+    if (debug.enabled) {
+        debug('match %s, body = %s', stringify(options), stringify(body));
+    }
+
     if (hostNameOnly) {
         return options.hostname === this.scope.urlParts.hostname;
     }
@@ -2318,7 +2316,6 @@ function RequestOverrider(req, options, interceptors, remove, cb) {
   }
 
   var requestBodyBuffers = [],
-      originalInterceptors = interceptors,
       aborted,
       emitError,
       end,
@@ -2459,21 +2456,23 @@ function RequestOverrider(req, options, interceptors, remove, cb) {
     /// because bad behaving agents like superagent
     /// like to change request.path in mid-flight.
     options.path = req.path;
-    interceptors = interceptors.filter(function(interceptor) {
+
+    interceptors.forEach(function(interceptor) {
       //  For correct matching we need to have correct request headers - if these were specified.
       setRequestHeaders(req, options, interceptor);
-
+    });
+      
+    interceptor = _.find(interceptors, function(interceptor) {
       return interceptor.match(options, requestBody);
     });
 
-    if (interceptors.length < 1) {
+    if (!interceptor) {
       globalEmitter.emit('no match', req, options, requestBody);
       // Try to find a hostname match
-      interceptors = originalInterceptors.filter(function(interceptor) {
+      interceptor = _.find(interceptors, function(interceptor) {
         return interceptor.match(options, requestBody, true);
       });
-      if (interceptors.length && req instanceof ClientRequest) {
-        interceptor = interceptors[0];
+      if (interceptor && req instanceof ClientRequest) {
         if (interceptor.options.allowUnmocked) {
           var newReq = new ClientRequest(options, cb);
           propagate(newReq, req);
@@ -2490,8 +2489,6 @@ function RequestOverrider(req, options, interceptors, remove, cb) {
     }
 
     debug('interceptor identified, starting mocking');
-
-    interceptor = interceptors.shift();
 
     //  We again set request headers, now for our matched interceptor.
     setRequestHeaders(req, options, interceptor);
