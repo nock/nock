@@ -1,3 +1,15 @@
+7.2.2 / 2016-02-19
+==================
+
+  * v7.2.2
+  * browserify bundle update
+  * Merge branch 'mdlavin-v7-performance-improvement'
+  * Increase test coverage of allowUnmocked when only mismatch is the body
+  * Reuse _.defaults where possible to reduce code
+  * Do not stringify request options unless they will be logged
+  * Optimize for large number of interceptors
+  * changelog update
+
 7.2.1 / 2016-02-15
 ==================
 
@@ -163,11 +175,3 @@
   * v4.0.0
   * browserify bundle updated
   * Merge branch 'master' of git://github.com/ericsaboia/nock
-  * [feature] allow specifying path using regex
-  * [doc] clarified error-first callback behavior
-  * updated browserify bundle
-  * clarifying that replyWithError will emit an error on the request object, not the response
-  * Merge branch 'ericsaboia-master'
-  * Merge branch 'master' of git://github.com/ericsaboia/nock into ericsaboia-master
-  * fix typo
-  * match uri using callback
