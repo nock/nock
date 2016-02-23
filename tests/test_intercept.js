@@ -3124,34 +3124,34 @@ test('delay works with replyWithError', function (t) {
 });
 
 test("finish event fired before end event (bug-139)", function(t) {
-	var scope = nock('http://www.filterboddiezregexp.com')
-		.filteringRequestBody(/mia/, 'nostra')
-		.post('/', 'mamma nostra')
-		.reply(200, "Hello World!");
+  var scope = nock('http://www.filterboddiezregexp.com')
+    .filteringRequestBody(/mia/, 'nostra')
+    .post('/', 'mamma nostra')
+    .reply(200, "Hello World!");
 
-	var finishCalled = false;
-	var req = http.request({
-													 host: "www.filterboddiezregexp.com"
-													 , method: 'POST'
-													 , path: '/'
-													 , port: 80
-												 }, function(res) {
-		t.equal(finishCalled, true);
-		t.equal(res.statusCode, 200);
-		res.on('end', function() {
-			scope.done();
-			t.end();
-		});
-		// Streams start in 'paused' mode and must be started.
-		// See https://nodejs.org/api/stream.html#stream_class_stream_readable
-		res.resume();
-	});
+  var finishCalled = false;
+  var req = http.request({
+                           host: "www.filterboddiezregexp.com"
+                           , method: 'POST'
+                           , path: '/'
+                           , port: 80
+                         }, function(res) {
+    t.equal(finishCalled, true);
+    t.equal(res.statusCode, 200);
+    res.on('end', function() {
+      scope.done();
+      t.end();
+    });
+    // Streams start in 'paused' mode and must be started.
+    // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+    res.resume();
+  });
 
-	req.on('finish', function() {
-		finishCalled = true;
-	});
+  req.on('finish', function() {
+    finishCalled = true;
+  });
 
-	req.end('mamma mia');
+  req.end('mamma mia');
 
 });
 
@@ -4210,6 +4210,106 @@ test('remove interceptor for GET resource', function(t) {
   http.get({
     host: 'example.org',
     path : '/somepath'
+  }, function(res) {
+    res.setEncoding('utf8');
+    t.equal(res.statusCode, 202);
+
+    res.on('data', function(data) {
+      t.equal(data, 'other-content');
+    });
+
+    res.on('end', function() {
+      t.end();
+    });
+  });
+});
+
+test('remove interceptor removes given interceptor', function(t) {
+  var givenInterceptor = nock('http://example.org')
+    .get('/somepath');
+  var scope = givenInterceptor
+    .reply(200, 'hey');
+
+  var mocks = scope.pendingMocks();
+  t.deepEqual(mocks, ['GET http://example.org:80/somepath']);
+
+  var result = nock.removeInterceptor(givenInterceptor);
+  t.ok(result, 'result should be true');
+
+  nock('http://example.org')
+    .get('/somepath')
+    .reply(202, 'other-content');
+
+  http.get({
+    host: 'example.org',
+    path : '/somepath'
+  }, function(res) {
+    res.setEncoding('utf8');
+    t.equal(res.statusCode, 202);
+
+    res.on('data', function(data) {
+      t.equal(data, 'other-content');
+    });
+
+    res.on('end', function() {
+      t.end();
+    });
+  });
+});
+
+
+test('remove interceptor removes given interceptor for https', function(t) {
+  var givenInterceptor = nock('https://example.org')
+    .get('/somepath');
+  var scope = givenInterceptor
+    .reply(200, 'hey');
+
+  var mocks = scope.pendingMocks();
+  t.deepEqual(mocks, ['GET https://example.org:443/somepath']);
+
+  var result = nock.removeInterceptor(givenInterceptor);
+  t.ok(result, 'result should be true');
+
+  nock('https://example.org')
+    .get('/somepath')
+    .reply(202, 'other-content');
+
+  https.get({
+    host: 'example.org',
+    path : '/somepath'
+  }, function(res) {
+    res.setEncoding('utf8');
+    t.equal(res.statusCode, 202);
+
+    res.on('data', function(data) {
+      t.equal(data, 'other-content');
+    });
+
+    res.on('end', function() {
+      t.end();
+    });
+  });
+});
+
+test('remove interceptor removes given interceptor for regex path', function(t) {
+  var givenInterceptor = nock('http://example.org')
+    .get(/somePath$/);
+  var scope = givenInterceptor
+    .reply(200, 'hey');
+
+  var mocks = scope.pendingMocks();
+  t.deepEqual(mocks, ['GET http://example.org:80//somePath$/']);
+
+  var result = nock.removeInterceptor(givenInterceptor);
+  t.ok(result, 'result should be true');
+
+  nock('http://example.org')
+    .get(/somePath$/)
+    .reply(202, 'other-content');
+
+  http.get({
+    host: 'example.org',
+    path : '/get-somePath'
   }, function(res) {
     res.setEncoding('utf8');
     t.equal(res.statusCode, 202);

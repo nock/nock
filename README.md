@@ -1096,7 +1096,7 @@ nock.recorder.rec({
 ```
 
 ## .removeInterceptor()
-This allows removing a specific interceptor for a url. It's useful when there's a list of common interceptors but one test requires one of them to behave differently.
+This allows removing a specific interceptor. This can be either an interceptor instance or options for a url. It's useful when there's a list of common interceptors shared between tests, where an individual test requires one of the shared interceptors to behave differently.
 
 Examples:
 ```js
@@ -1113,6 +1113,12 @@ nock.removeInterceptor({
   method: 'POST'
   proto : 'https'
 });
+```
+
+```js
+var interceptor = nock('http://example.org')
+  .get('somePath');
+nock.removeInterceptor(interceptor);
 ```
 
 # Events
