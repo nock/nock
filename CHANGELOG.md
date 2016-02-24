@@ -1,3 +1,18 @@
+7.3.0 / 2016-02-24
+==================
+
+  * v7.3.0
+  * browserify bundle update
+  * Merge branch 'Limess-remove-interceptor-by-instance'
+  * Call removeInterceptor() with instance
+    Previously removeInterceptor() only took an options object. This was
+    inconvenient if the client didn't wish to expose urls directly in their
+    tests.
+    removeInterceptor now also takes an instance of `Interceptor` and uses
+    the instance variables `baseUrl` and `_key` to filter for removal.
+    Added 3 test cases to cover http, https and regex path matching.
+  * changelog update
+
 7.2.2 / 2016-02-19
 ==================
 
@@ -166,12 +181,3 @@
   * Merge branch 'yinrong-master'
   * browserify bundle updated
   * [feature] allow matching body with RegExp
-  * changelog update
-
-4.0.0 / 2015-12-28
-==================
-
-  * changelog updated
-  * v4.0.0
-  * browserify bundle updated
-  * Merge branch 'master' of git://github.com/ericsaboia/nock
