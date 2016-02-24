@@ -772,6 +772,7 @@ var RequestOverrider = require('./request_overrider'),
     common           = require('./common'),
     url              = require('url'),
     inherits         = require('util').inherits,
+    Interceptor      = require('./interceptor'),
     http             = require('http'),
     parse            = require('url').parse,
     _                = require('lodash'),
@@ -951,17 +952,20 @@ function interceptorsFor(options) {
 
 function removeInterceptor(options) {
   var baseUrl, key, method, proto;
+  if (options instanceof Interceptor) {
+    baseUrl = options.basePath;
+    key = options._key;
+  } else {
+    proto = options.proto ? options.proto : 'http';
 
-  proto = options.proto ? options.proto : 'http';
-
-  common.normalizeRequestOptions(options);
-  baseUrl = proto + '://' + options.host;
+    common.normalizeRequestOptions(options);
+    baseUrl = proto + '://' + options.host;
+    method = options.method && options.method.toUpperCase() || 'GET';
+    key = method + ' ' + baseUrl + (options.path || '/');
+  }
 
   if (allInterceptors[baseUrl] && allInterceptors[baseUrl].scopes.length > 0) {
-    if (options.path) {
-      method = options.method && options.method.toUpperCase() || 'GET';
-      key = method + ' ' + baseUrl + (options.path || '/');
-
+    if (key) {
       for (var i = 0; i < allInterceptors[baseUrl].scopes.length; i++) {
         if (allInterceptors[baseUrl].scopes[i]._key === key) {
           allInterceptors[baseUrl].scopes.splice(i, 1);
@@ -1115,7 +1119,7 @@ function activate() {
       matches = !! _.find(interceptors, function(interceptor) {
         return interceptor.matchIndependentOfBody(options);
       });
-        
+
       allowUnmocked = !! _.find(interceptors, function(interceptor) {
         return interceptor.options.allowUnmocked;
       });
@@ -1171,7 +1175,7 @@ module.exports.overrideClientRequest = overrideClientRequest;
 module.exports.restoreOverriddenClientRequest = restoreOverriddenClientRequest;
 
 }).call(this,require('_process'))
-},{"./common":3,"./global_emitter":5,"./request_overrider":11,"_process":27,"debug":94,"events":21,"http":46,"lodash":101,"timers":52,"url":53,"util":56}],7:[function(require,module,exports){
+},{"./common":3,"./global_emitter":5,"./interceptor":7,"./request_overrider":11,"_process":27,"debug":94,"events":21,"http":46,"lodash":101,"timers":52,"url":53,"util":56}],7:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
