@@ -127,6 +127,43 @@ test("reply can take a callback", function(t) {
   req.end();
 });
 
+test("reply takes a callback for status code", function(t) {
+  t.plan(3);
+
+  var statusCode = 202;
+  var responseBody = "Hello, world!";
+  var headers = {
+    'X-Custom-Header': 'abcdef'
+  };
+
+  var scope = nock("http://www.google.com")
+    .get("/test-path/")
+    .reply(function(path, requestBody, cb) {
+      setTimeout(function() {
+        cb(null, [statusCode, responseBody, headers]);
+      }, 1);
+    });
+
+  var req = http.request({
+    host: "www.google.com",
+    path: "/test-path/",
+    port: 80
+  }, function(res) {
+
+    t.equal(res.statusCode, statusCode, "sends status code");
+    t.deepEqual(res.headers, headers, "sends headers");
+    res.on('data', function(data) {
+      t.equal(data.toString(), responseBody, "sends request body");
+    });
+    res.on('end', function() {
+      scope.done();
+    });
+
+  });
+
+  req.end();
+});
+
 test("reply should throw on error on the callback", function(t) {
   var dataCalled = false;
 
