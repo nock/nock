@@ -140,7 +140,7 @@ Using a function:
 ```js
 var scope = nock('http://www.example.com')
     .get(function(uri) {
-      return url.indexOf('cats') >= 0;
+      return uri.indexOf('cats') >= 0;
     })
     .reply(200, 'path using regex matched');
 ```
