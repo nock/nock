@@ -3095,6 +3095,24 @@ test('using reply callback with delay provides proper arguments', function (t) {
   http.request('http://localhost/', function () {}).end('OK');
 });
 
+test('using reply callback with delay can reply JSON', function (t) {
+  nock('http://delayfunctionreplyjson')
+    .get('/')
+    .delay(100)
+    .reply(200, function (path, requestBody) {
+      return {a:1};
+    });
+
+  mikealRequest.get({
+      url: 'http://delayfunctionreplyjson/',
+      json: true,
+    }, function (err, res, body) {
+    t.equals(res.headers['content-type'], 'application/json');
+    t.deepEqual(body, {a:1});
+    t.end();
+  });
+});
+
 test('delay works with replyWithFile', function (t) {
   checkDuration(t, 100);
   nock('http://localhost')
