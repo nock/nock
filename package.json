@@ -153,10 +153,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "http://github.com/pgte/nock.git"
+    "url": "http://github.com/node-nock/nock.git"
   },
   "bugs": {
-    "url": "http://github.com/pgte/nock/issues"
+    "url": "http://github.com/node-nock/nock/issues"
   },
   "engines": [
     "node >= 0.10.0"
