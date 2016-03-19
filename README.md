@@ -912,8 +912,12 @@ So, if you try to request any host not 'nocked', it will thrown an `NetConnectNo
 
 ```js
 nock.disableNetConnect();
-http.get('http://google.com/');
-// this code throw NetConnectNotAllowedError with message:
+var req = http.get('http://google.com/');
+req.on('error', function(err){
+    console.log(err);
+});
+// The returned `http.ClientRequest` will emit an error event (or throw if you're not listening for it)
+// This code will log a NetConnectNotAllowedError with message:
 // Nock: Not allow net connect for "google.com:80"
 ```
 
