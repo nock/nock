@@ -1,3 +1,35 @@
+7.5.0 / 2016-03-20
+==================
+
+  * v7.5.0
+  * Merge branch 'satazor-back-recorder-options'
+  * Merge branch 'back-recorder-options' of git://github.com/satazor/nock into satazor-back-recorder-options
+  * Merge branch 'satazor-request-promise'
+  * Add ability to pass options to recorder from nodeback.
+  * Do not automatically consume responses, respect original consumer.
+  * Merge pull request [#480](https://github.com/node-nock/nock/issues/480) from JemiloII/patch-1
+    Use lodash size function
+  * coveralls badge url
+  * switched repo token
+  * pgte -> node-nock
+  * Merge branch 'master' of github.com:pgte/nock
+  * testing for [#496](https://github.com/node-nock/nock/issues/496)
+  * Merge pull request [#494](https://github.com/node-nock/nock/issues/494) from mihar/patch-1
+    README.md: Fix typo
+  * README.md: Fix typo
+  * v7.4.0
+
+7.4.0 / 2016-03-04
+==================
+
+  * Merge branch 'swashcap-bug/[#489](https://github.com/node-nock/nock/issues/489)-reply-callback'
+  * browserify bundle update
+  * Merge branch 'bug/[#489](https://github.com/node-nock/nock/issues/489)-reply-callback' of git://github.com/swashcap/nock into swashcap-bug/[#489](https://github.com/node-nock/nock/issues/489)-reply-callback
+  * Add support for full callback `reply()`.
+    This addresses a bug with the `reply()` function where a request without
+    a body caused full callbacks to error. (See pgte/nock[#489](https://github.com/node-nock/nock/issues/489))
+  * changelog update
+
 7.3.0 / 2016-02-24
 ==================
 
@@ -11,6 +43,8 @@
     removeInterceptor now also takes an instance of `Interceptor` and uses
     the instance variables `baseUrl` and `_key` to filter for removal.
     Added 3 test cases to cover http, https and regex path matching.
+  * Use lodash size function
+    You cannot effectively compare anything to an empty object declaration. {} === {} will always equal false. This is to address the attended purpose by the comment provided.
   * changelog update
 
 7.2.2 / 2016-02-19
@@ -37,9 +71,9 @@
 
   * v7.2.0
   * Merge branch 'master' of github.com:pgte/nock
-  * mkdirp is optional because browsers. addresses [#475](https://github.com/pgte/nock/issues/475)
+  * mkdirp is optional because browsers. addresses [#475](https://github.com/node-nock/nock/issues/475)
   * fix key when interceptor path is specified with callback
-  * Merge pull request [#465](https://github.com/pgte/nock/issues/465) from JemiloII/patch-1
+  * Merge pull request [#465](https://github.com/node-nock/nock/issues/465) from JemiloII/patch-1
   * Fixing typos
   * added @BinChang as contributor
   * changelog update
@@ -50,7 +84,7 @@
   * v7.1.0
   * Merge branch 'BinChang-delayBody'
   * add a new api delayBody() and update the syntax of delay().
-  * Merge pull request [#462](https://github.com/pgte/nock/issues/462) from four43/patch-2
+  * Merge pull request [#462](https://github.com/node-nock/nock/issues/462) from four43/patch-2
     Add clean all to example about being done with the test
   * Add clean all to example about being done with the test
 
@@ -64,7 +98,7 @@
 ==================
 
   * v7.0.1
-  * for when content type header is an array. should fix [#460](https://github.com/pgte/nock/issues/460)
+  * for when content type header is an array. should fix [#460](https://github.com/node-nock/nock/issues/460)
   * Merge branch 'BinChang-common_is_stream'
   * remove isStream to the common lib.
 
@@ -116,7 +150,7 @@
 ==================
 
   * v5.4.0
-  * callback reply with array can now contain headers. fixes [#449](https://github.com/pgte/nock/issues/449)
+  * callback reply with array can now contain headers. fixes [#449](https://github.com/node-nock/nock/issues/449)
   * skip test if node 0.10
 
 5.3.1 / 2016-01-08
@@ -130,10 +164,10 @@
 
   * v5.3.0
   * buffer may not be an array
-  * Merge pull request [#445](https://github.com/pgte/nock/issues/445) from pgte/emit-events
-    no match emitted globally. fixes [#442](https://github.com/pgte/nock/issues/442)
-  * no match emitted globally. fixes [#442](https://github.com/pgte/nock/issues/442)
-  * Merge pull request [#443](https://github.com/pgte/nock/issues/443) from pgte/emit-events
+  * Merge pull request [#445](https://github.com/node-nock/nock/issues/445) from pgte/emit-events
+    no match emitted globally. fixes [#442](https://github.com/node-nock/nock/issues/442)
+  * no match emitted globally. fixes [#442](https://github.com/node-nock/nock/issues/442)
+  * Merge pull request [#443](https://github.com/node-nock/nock/issues/443) from pgte/emit-events
     emit request and replied events
   * fixed test name
   * added event tests to test list
@@ -141,43 +175,3 @@
   * emit request and replied events
   * corrected test name
   * removed node test event sequence on abort, it's too inconsistent
-  * reinstated delay test check. related to [#439](https://github.com/pgte/nock/issues/439)
-
-5.2.1 / 2016-01-08
-==================
-
-  * changelog update
-  * v5.2.1
-  * browserify bundle update
-  * emitting error on request abort. fixes [#439](https://github.com/pgte/nock/issues/439)
-
-5.2.0 / 2016-01-07
-==================
-
-  * v5.2.0
-  * scope now exposes interceptors
-
-5.1.0 / 2016-01-07
-==================
-
-  * v5.1.0
-  * abort behaves. somehow addresses [#439](https://github.com/pgte/nock/issues/439)
-
-5.0.0 / 2016-01-05
-==================
-
-  * v5.0.0
-  * Merge branch 'xavierchow-master'
-  * browserify bundle update
-  * Merge branch 'master' of git://github.com/xavierchow/nock into xavierchow-master
-  * Upgrade to lodash 3.0, fix [#423](https://github.com/pgte/nock/issues/423)
-
-4.1.0 / 2016-01-04
-==================
-
-  * v4.1.0
-  * [docs] some readme clarifications on hostname and path matching
-  * Merge branch 'feature/match-url-using-callback' of git://github.com/hyzhak/nock into hyzhak-feature/match-url-using-callback
-  * Merge branch 'yinrong-master'
-  * browserify bundle updated
-  * [feature] allow matching body with RegExp
