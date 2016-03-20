@@ -279,7 +279,7 @@ tap.test('records nonstandard ports', function(t) {
   var RESPONSE_BODY = '012345';
 
   //  Create test http server and perform the tests while it's up.
-  var testServer = http.createServer(function (req, res) {
+  var testServer = http.createServer(function(req, res) {
     res.write(RESPONSE_BODY);
     res.end();
   }).listen(8081, function(err) {
@@ -474,7 +474,7 @@ tap.test('records and replays gzipped nocks correctly when gzip is returned as a
         t.ok(false);
         t.end();
       })
-      .on('error', function (error, response){
+      .on('error', function(error, response) {
         t.ok(false);
         t.end();
       })
@@ -733,7 +733,7 @@ tap.test('works with clients listening for readable', function(t) {
   var RESPONSE_BODY = '012345';
 
   //  Create test http server and perform the tests while it's up.
-  var testServer = http.createServer(function (req, res) {
+  var testServer = http.createServer(function(req, res) {
     res.write(RESPONSE_BODY);
     res.end();
   }).listen(8081, function(err) {
@@ -840,6 +840,51 @@ tap.test('removes query params from from that path and puts them in query()', fu
     });
   });
   req.end('ABCDEF');
+});
+
+tap.test("respects http.request() consumers", function(t) {
+  //  Create test http server and perform the tests while it's up.
+  var testServer = http.createServer(function(req, res) {
+    res.write('foo');
+    setTimeout(function() {
+      res.end('bar');
+    }, 25);
+  }).listen(8082, function(err) {
+    t.equal(err, undefined);
+
+    nock.restore();
+    nock.recorder.clear();
+    nock.recorder.rec({
+      dont_print: true,
+      output_objects: true
+    });
+
+
+    var options = { host:'localhost'
+                  , port:testServer.address().port
+                  , path:'/' }
+    ;
+    var req = http.request(options, function (res) {
+      var buffer = new Buffer('');
+
+      setTimeout(function () {
+        res
+          .on('data', function(data) {
+            buffer = Buffer.concat([buffer, data]);
+          })
+          .on('end', function() {
+            nock.restore();
+            t.equal(buffer.toString(), 'foobar');
+            t.end();
+
+            //  Close the test server, we are done with it.
+            testServer.close();
+          });
+      });
+    }, 50);
+
+    req.end();
+  });
 });
 
 tap.test("teardown", function(t) {
