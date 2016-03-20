@@ -43,5 +43,29 @@ test('recording', function(t) {
   });
 }).once('end', function() {
   rimraf.sync(fixture);
+});
+
+test('passes custom options to recorder', function(t) {
+  nockBack('recording_test.json', { recorder: { enable_reqheaders_recording: true } }, function(nockDone) {
+    http.get('http://google.com', function(res) {
+      res.once('end', function() {
+        nockDone();
+        var fixtureContent = JSON.parse(fs.readFileSync(fixture, {encoding: 'utf8'}));
+        t.equal(fixtureContent.length, 1);
+        fixtureContent = fixtureContent[0];
+        t.ok(fixtureContent.reqheaders);
+        t.end();
+      });
+      // Streams start in 'paused' mode and must be started.
+      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+      res.resume();
+    });
+  })
+}).once('end', function() {
+  rimraf.sync(fixture);
+});
+
+test('teardown', function(t) {
   nockBack.setMode(originalMode);
+  t.end();
 });
