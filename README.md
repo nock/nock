@@ -141,7 +141,7 @@ var scope = nock('http://www.example.com')
     .get(function(uri) {
       return uri.indexOf('cats') >= 0;
     })
-    .reply(200, 'path using regex matched');
+    .reply(200, 'path using function matched');
 ```
 
 ## Specifying request body
