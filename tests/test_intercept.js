@@ -4172,6 +4172,23 @@ test('socket setKeepAlive', function(t) {
   });
 });
 
+test('abort destroys socket', function(t) {
+  var scope = nock('http://socketdestroyer.com')
+     .get('/')
+     .reply(200, "hey");
+
+  var req = http.get('http://socketdestroyer.com');
+  req.once('error', function() {
+    // ignore
+  });
+  req.once('socket', function(socket) {
+    req.abort();
+    t.ok(socket.destroyed);
+    t.end();
+  });
+
+});
+
 test('hyperquest works', function(t) {
   nock('http://hyperquest.com')
     .get('/somepath')
