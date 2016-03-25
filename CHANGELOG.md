@@ -1,3 +1,47 @@
+7.7.2 / 2016-03-25
+==================
+
+  * v7.7.2
+  * v7.7.1
+  * Merge branch 'master' of github.com:node-nock/nock
+
+7.7.0 / 2016-03-25
+==================
+
+  * v7.7.0
+  * Merge pull request [#514](https://github.com/node-nock/nock/issues/514) from kevinburkeshyp/fix-req-no-match
+    Fix nock.emitter.on('no match') undefined argument
+  * Merge pull request [#512](https://github.com/node-nock/nock/issues/512) from kevinburkeshyp/fix-typo
+    Fix typo in tests
+  * browserify bundle update
+  * request abort destroys socket. fixes [#511](https://github.com/node-nock/nock/issues/511)
+  * Fix nock.emitter.on('no match') undefined argument
+    Previously if you disabled net connect via `nock.disableNetConnect`,
+    `nock.emitter.on('no match')` would return undefined for its first argument,
+    since `req` is never initialized. Replaces `req` with `options`, which is
+    present and set to a Url instance.
+    Fixes the global nock.emitter.on event listener to remove all event listeners
+    at the end of each test, otherwise an event listener registered in one test
+    might bleed over into the next.
+    (This might not be the right fix, I'm happy to change as necessary).
+  * Fix typo in tests
+
+7.6.0 / 2016-03-25
+==================
+
+  * v7.6.0
+  * Merge pull request [#509](https://github.com/node-nock/nock/issues/509) from mihar/patch-2
+    Update README.md
+  * Merge pull request [#510](https://github.com/node-nock/nock/issues/510) from RedCattleWealth/master
+    query accept a function to determine if the query is matched
+  * update README
+  * query accept a function to determin if the query is matched
+    for some case object compare is not enough
+  * Update README.md
+  * Merge pull request [#501](https://github.com/node-nock/nock/issues/501) from reconbot/patch-1
+    Make the source of NetConnectNotAllowedError clear
+  * changelog update
+
 7.5.0 / 2016-03-20
 ==================
 
@@ -7,6 +51,7 @@
   * Merge branch 'satazor-request-promise'
   * Add ability to pass options to recorder from nodeback.
   * Do not automatically consume responses, respect original consumer.
+  * Make the source of NetConnectNotAllowedError clear
   * Merge pull request [#480](https://github.com/node-nock/nock/issues/480) from JemiloII/patch-1
     Use lodash size function
   * coveralls badge url
@@ -142,36 +187,3 @@
 ==================
 
   * v5.5.0
-  * Merge branch 'BinChang-parse_json_content'
-  * clean up tests
-  * parse requestBody if it is JSON content.
-
-5.4.0 / 2016-01-18
-==================
-
-  * v5.4.0
-  * callback reply with array can now contain headers. fixes [#449](https://github.com/node-nock/nock/issues/449)
-  * skip test if node 0.10
-
-5.3.1 / 2016-01-08
-==================
-
-  * browserify bundle update
-  * Merge branch 'master' of github.com:pgte/nock
-
-5.3.0 / 2016-01-08
-==================
-
-  * v5.3.0
-  * buffer may not be an array
-  * Merge pull request [#445](https://github.com/node-nock/nock/issues/445) from pgte/emit-events
-    no match emitted globally. fixes [#442](https://github.com/node-nock/nock/issues/442)
-  * no match emitted globally. fixes [#442](https://github.com/node-nock/nock/issues/442)
-  * Merge pull request [#443](https://github.com/node-nock/nock/issues/443) from pgte/emit-events
-    emit request and replied events
-  * fixed test name
-  * added event tests to test list
-  * documented events
-  * emit request and replied events
-  * corrected test name
-  * removed node test event sequence on abort, it's too inconsistent
