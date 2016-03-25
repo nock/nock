@@ -4704,6 +4704,62 @@ test('query() with "{}" will allow a match against ending in ?', function (t) {
   })
 });
 
+test('query() with a function, function called with actual queryObject',function(t){
+  var queryObject;
+
+  var queryValidator = function(qs){
+    queryObject= qs;
+    return true;
+  };
+
+  var scope = nock('http://google.com')
+    .get('/')
+    .query(queryValidator)
+    .reply(200);
+
+  mikealRequest('http://google.com/?foo=bar&a=1&b=2', function(err, res) {
+    if (err) throw err;
+    t.deepEqual(queryObject,{foo:'bar',a:'1',b:'2'});
+    t.equal(res.statusCode, 200);
+    t.end();
+  })
+});
+
+test('query() with a function, function return true the query treat as matched',function(t){
+  var alwasyTrue = function(){
+    return true;
+  };
+
+  var scope = nock('http://google.com')
+    .get('/')
+    .query(alwasyTrue)
+    .reply(200);
+
+  mikealRequest('http://google.com/?igore=the&actual=query', function(err, res) {
+    if (err) throw err;
+    t.equal(res.statusCode, 200);
+    t.end();
+  })
+});
+
+test('query() with a function, function return false the query treat as Un-matched',function(t){
+
+  var alwayFalse = function(){
+    return false;
+  };
+
+  var scope = nock('http://google.com')
+    .get('/')
+    .query(alwayFalse)
+    .reply(200);
+
+  mikealRequest('http://google.com/?i=should&pass=?', function(err, res) {
+    t.equal(err.message.trim(), 'Nock: No match for request GET http://google.com/?i=should&pass=?');
+    t.end();
+  })
+});
+
+
 test('query() will not match when a query string does not match name=value', function (t) {
   var scope = nock('https://c.com')
     .get('/b')
