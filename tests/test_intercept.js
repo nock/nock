@@ -439,7 +439,7 @@ test("get with reply callback returning array with headers", function(t) {
   }, function(res) {
     res.setEncoding('utf8');
     t.equal(res.statusCode, 202);
-    console.log('res.heades:', res.headers);
+    console.log('res.headers:', res.headers);
     t.deepEqual(res.headers, {
       'x-key': 'value',
       'x-key-2': 'value 2',
