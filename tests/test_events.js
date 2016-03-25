@@ -1,8 +1,8 @@
 'use strict';
 
-var nock    = require('../.');
-var http    = require('http');
-var test    = require('tap').test;
+var nock = require('../.');
+var http = require('http');
+var test = require('tap').test;
 
 test('emits request and replied events', function(t) {
   var scope = nock('http://eventland')
@@ -38,13 +38,26 @@ test('emits no match when no match and mocked', function(t) {
     .reply('howdy');
 
 
-  nock.emitter.on('no match', function(req) {
+  var assertion = function(req) {
     t.equal(req.path, '/definitelymaybe');
+    nock.emitter.removeAllListeners('no match');
     t.end();
-  });
+  }
+  var result = nock.emitter.on('no match', assertion);
 
   http.get('http://itmayormaynotexistidontknowreally/definitelymaybe')
     .once('error', ignore);
+});
+
+test('emits no match when netConnect is disabled', function(t) {
+  nock.disableNetConnect();
+  nock.emitter.on('no match', function(req) {
+    t.equal(req.hostname, 'jsonip.com')
+    nock.emitter.removeAllListeners('no match');
+    nock.enableNetConnect();
+    t.end();
+  });
+  http.get('http://jsonip.com').once('error', ignore);
 });
 
 function ignore() {}
