@@ -230,6 +230,20 @@ nock('http://example.com')
   .reply(200, {results: [{id: 'pgte'}]});
 ```
 
+Nock supports passing a function to query. The function determines if the actual query matches or not.
+
+```js
+nock('http://example.com')
+  .get('/users')
+  .query(function(actualQueryObject){
+    // do some compare with the actual Query Object
+    // return true for matched
+    // return false for not matched
+    return true;
+  })
+  .reply(200, {results: [{id: 'pgte'}]});
+```
+
 To mock the entire url regardless of the passed query string:
 
 ```js
