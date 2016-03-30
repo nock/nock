@@ -302,7 +302,7 @@ var scope = nock('http://www.google.com')
    });
 ```
 
-An asychronous function that gets an error-first callback as last argument also works:
+An asynchronous function that gets an error-first callback as last argument also works:
 
 ```js
 var scope = nock('http://www.google.com')
