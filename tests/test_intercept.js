@@ -4219,6 +4219,28 @@ test('match domain using regexp', function (t) {
   });
 });
 
+test('match multiple interceptors with regexp domain (issue-508)', function (t) {
+  var scope = nock(/chainregex/)
+    .get('/')
+    .reply(200, 'Match regex')
+    .get('/')
+    .reply(500, 'Match second intercept');
+
+  mikealRequest.get('http://www.chainregex.com', function(err, res, body) {
+    t.type(err, 'null');
+    t.equal(res.statusCode, 200);
+    t.equal(body, 'Match regex');
+
+    mikealRequest.get('http://www.chainregex.com', function(err, res, body) {
+      t.type(err, 'null');
+      t.equal(res.statusCode, 500);
+      t.equal(body, 'Match second intercept');
+
+      t.end();
+    });
+  });
+});
+
 test('match domain using intercept callback', function (t) {
   var validUrl = [
     '/cats',
