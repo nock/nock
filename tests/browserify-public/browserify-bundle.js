@@ -875,31 +875,16 @@ function add(key, interceptor, scope, scopeOptions, host) {
 }
 
 function remove(interceptor) {
-  if (interceptor.__nock_scope.shouldPersist()) {
+  if (interceptor.__nock_scope.shouldPersist() || --interceptor.counter > 0) {
     return;
   }
 
-  interceptor.counter -= 1;
-  if (interceptor.counter > 0) {
-    return;
-  }
+  var basePath = interceptor.basePath;
+  var interceptors = allInterceptors[basePath] && allInterceptors[basePath].scopes || [];
 
-  var key          = interceptor._key.split(' '),
-      u            = url.parse(key[1]),
-      hostKey      = u.protocol + '//' + u.host,
-      interceptors = allInterceptors[hostKey] && allInterceptors[hostKey].scopes,
-      thisInterceptor;
-
-  if (interceptors) {
-    for(var i = 0; i < interceptors.length; i++) {
-      thisInterceptor = interceptors[i];
-      if (thisInterceptor === interceptor) {
-        interceptors.splice(i, 1);
-        break;
-      }
-    }
-
-  }
+  interceptors.some(function (thisInterceptor, i) {
+    return (thisInterceptor === interceptor) ? interceptors.splice(i, 1) : false;
+  });
 }
 
 function removeAll() {
@@ -1011,7 +996,7 @@ function overrideClientRequest() {
     if (http.OutgoingMessage) http.OutgoingMessage.call(this);
 
     //  Filter the interceptors per request options.
-    var interceptors = interceptorsFor(options)
+    var interceptors = interceptorsFor(options);
 
     if (isOn() && interceptors) {
       debug('using', interceptors.length, 'interceptors');
@@ -1148,7 +1133,7 @@ function activate() {
       }
       return req;
     } else {
-      globalEmitter.emit('no match', req);
+      globalEmitter.emit('no match', options);
       if (isOff() || isEnabledForNetConnect(options)) {
         return overriddenRequest(options, callback);
       } else {
@@ -2410,7 +2395,7 @@ function RequestOverrider(req, options, interceptors, remove, cb) {
       //  For correct matching we need to have correct request headers - if these were specified.
       setRequestHeaders(req, options, interceptor);
     });
-      
+
     interceptor = _.find(interceptors, function(interceptor) {
       return interceptor.match(options, requestBody);
     });
