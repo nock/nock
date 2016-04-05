@@ -183,7 +183,7 @@
     "needle": "^0.7.1",
     "node-static": "^0.7.7",
     "pre-commit": "0.0.9",
-    "request": "2.61.0",
+    "request": "2.70.0",
     "request-promise": "^0.4.3",
     "restify": "^2.8.1",
     "restler": "3.2.2",
