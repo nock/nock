@@ -1,3 +1,30 @@
+8.0.0 / 2016-04-06
+==================
+
+  * added missing dep
+  * Merge branch 'greenkeeper-request-2.70.0'
+  * Merge branch 'master' into greenkeeper-request-2.70.0
+  * making the latest version of lodash work
+  * Merge pull request [#521](https://github.com/node-nock/nock/issues/521) from node-nock/greenkeeper-update-all
+    Update all dependencies 🌴
+  * fixes for latest tap version
+  * chore(package): update request to version 2.70.0
+    http://greenkeeper.io/
+  * chore(package): update dependencies
+    http://greenkeeper.io/
+
+7.7.3 / 2016-04-04
+==================
+
+  * v7.7.3
+  * Merge pull request [#520](https://github.com/node-nock/nock/issues/520) from ericsaboia/master
+    properly remove interceptor with regex domain from the list after used
+  * properly remove interceptor with regex domain from the list after used
+  * Merge pull request [#519](https://github.com/node-nock/nock/issues/519) from Byron-TW/patch-1
+    Fix typo
+  * Fix typo
+  * changelog update
+
 7.7.2 / 2016-03-25
 ==================
 
@@ -164,26 +191,3 @@
   * v6.0.1
   * Merge branch 'alekbarszczewski-reply-headers-fix'
   * browserify bundle update
-  * dont execute `replace` on a non-string 
-    recorded bodies can be an object (json).  dont try to use a string function on them.
-  * rebase with master
-  * move interceptor to its own file.
-  * split scope and intercept
-  * Fixed issue with header function evaluation + added 2 tests
-  * changelog update
-
-6.0.0 / 2016-01-21
-==================
-
-  * v6.0.0
-  * Merge branch 'BinChang-complex_query_string'
-  * add qs into package dependency block.
-  * add test_complex_querystring into test list
-  * minor update
-  * support complex GET query based the behavior of request module.
-  * changelog update
-
-5.5.0 / 2016-01-19
-==================
-
-  * v5.5.0
