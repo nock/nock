@@ -10,6 +10,12 @@ var fs = require('fs');
 var originalMode;
 var fixture;
 
+function rimrafOnEnd(t) {
+  t.once('end', function() {
+    rimraf.sync(fixture);
+  });
+}
+
 test('setup', function(t) {
   originalMode = nockBack.currentMode;
 
@@ -41,8 +47,8 @@ test('recording', function(t) {
       res.resume();
     });
   });
-}).once('end', function() {
-  rimraf.sync(fixture);
+
+  rimrafOnEnd(t);
 });
 
 test('passes custom options to recorder', function(t) {
@@ -60,9 +66,8 @@ test('passes custom options to recorder', function(t) {
       // See https://nodejs.org/api/stream.html#stream_class_stream_readable
       res.resume();
     });
-  })
-}).once('end', function() {
-  rimraf.sync(fixture);
+  });
+  rimrafOnEnd(t);
 });
 
 test('teardown', function(t) {

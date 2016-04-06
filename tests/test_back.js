@@ -25,7 +25,7 @@ function testNock (t) {
     }, function(res) {
 
       t.equal(res.statusCode, 200);
-      res.on('end', function() {
+      res.once('end', function() {
           t.ok(dataCalled);
           scope.done();
           t.end();
@@ -55,6 +55,11 @@ function nockBackWithFixture (t, scopesLoaded) {
   });
 }
 
+function setOriginalModeOnEnd(t, nockBack) {
+  t.once('end', function() {
+    nockBack.setMode(originalMode);
+  });
+}
 
 
 
@@ -87,20 +92,14 @@ tap.test('nockBack wild tests', function (nw) {
     testNock(t);
   });
 
-
   nw.test('nock back doesn\'t do anything', function (t) {
     nockBackWithFixture(t, false);
   });
 
-})
-.on('end', function () {
+  setOriginalModeOnEnd(nw, nockBack);
 
-  nockBack.setMode(originalMode);
-
+  nw.end();
 });
-
-
-
 
 tap.test('nockBack dryrun tests', function (nw) {
 
@@ -179,7 +178,7 @@ tap.test('nockBack dryrun tests', function (nw) {
 
         });
 
-      req.on('error', function(err) {
+      req.once('error', function(err) {
         if (err.code !== 'ECONNREFUSED') {
           throw err;
         }
@@ -189,15 +188,11 @@ tap.test('nockBack dryrun tests', function (nw) {
       req.end();
     });
   });
-})
-.on('end', function () {
 
-  nockBack.setMode(originalMode);
+  setOriginalModeOnEnd(nw, nockBack);
 
+  nw.end();
 });
-
-
-
 
 tap.test('nockBack record tests', function (nw) {
   nockBack.setMode('record');
@@ -318,15 +313,9 @@ tap.test('nockBack record tests', function (nw) {
   });
 
   nw.end();
-})
-.on('end', function () {
 
-  nockBack.setMode(originalMode);
-
+  setOriginalModeOnEnd(nw, nockBack);
 });
-
-
-
 
 tap.test('nockBack lockdown tests', function (nw) {
   nockBack.fixtures = __dirname + '/fixtures';
@@ -358,9 +347,8 @@ tap.test('nockBack lockdown tests', function (nw) {
 
     req.end();
   });
-})
-.on('end', function () {
 
-  nockBack.setMode(originalMode);
+  setOriginalModeOnEnd(nw, nockBack);
 
+  nw.end();
 });
