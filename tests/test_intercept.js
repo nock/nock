@@ -22,7 +22,8 @@ var globalCount;
 nock.enableNetConnect();
 
 globalCount = Object.keys(global).length;
-var acceptableLeaks = ['_key', '__core-js_shared__', 'fetch'];
+var acceptableLeaks = [
+  '_key', '__core-js_shared__', 'fetch', 'Response', 'Headers', 'Request'];
 
 test("double activation throws exception", function(t) {
   nock.restore();
