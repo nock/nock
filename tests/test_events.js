@@ -23,7 +23,7 @@ test('emits request and replied events', function(t) {
 });
 
 test('emits no match when no match and no mock', function(t) {
-  nock.emitter.on('no match', function(req) {
+  nock.emitter.once('no match', function(req) {
     t.end();
   });
 

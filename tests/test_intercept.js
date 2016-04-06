@@ -15,15 +15,14 @@ var restify = require('restify');
 var domain  = require('domain');
 var hyperquest = require('hyperquest');
 var _ = require('lodash');
+var async = require('async');
 
 var globalCount;
 
 nock.enableNetConnect();
 
-test("setup", function(t) {
-  globalCount = Object.keys(global).length;
-  t.end();
-});
+globalCount = Object.keys(global).length;
+var acceptableLeaks = ['_key', '__core-js_shared__', 'fetch'];
 
 test("double activation throws exception", function(t) {
   nock.restore();
@@ -286,7 +285,6 @@ test("post", function(t) {
 
    req.end();
 });
-
 
 
 test("post with empty response body", function(t) {
@@ -1107,6 +1105,8 @@ test("body data is differentiating", function(t) {
     req.end('def');
   });
 
+  t.end();
+
 });
 
 test("chaining", function(t) {
@@ -1117,41 +1117,30 @@ test("chaining", function(t) {
      .post('/form')
      .reply(201, "OK!");
 
-   function endOne(t) {
-     repliedCount += 1;
-     if (t === 2) {
-       scope.done();
-     }
-     t.end();
-   }
+  t.tearDown(scope.done.bind(scope));
 
-   t.test("post", function(t) {
-     var dataCalled;
-     var req = http.request({
-         host: "www.spiffy.com"
-       , method: 'POST'
-       , path: '/form'
-       , port: 80
-     }, function(res) {
+  t.test("post", function(t) {
+   var req = http.request({
+       host: "www.spiffy.com"
+     , method: 'POST'
+     , path: '/form'
+     , port: 80
+   }, function(res) {
 
-       t.equal(res.statusCode, 201);
-       res.on('end', function() {
-         t.ok(dataCalled);
-         endOne(t);
-       });
-       res.on('data', function(data) {
-         dataCalled = true;
-         t.ok(data instanceof Buffer, "data should be buffer");
-         t.equal(data.toString(), "OK!", "response should match");
-       });
+     t.equal(res.statusCode, 201);
+     res.once('data', function(data) {
+       t.ok(data instanceof Buffer, "data should be buffer");
+       t.equal(data.toString(), "OK!", "response should match");
 
+       res.once('end', t.end.bind(t));
      });
 
-     req.end();
    });
 
+   req.end();
+  });
+
    t.test("get", function(t) {
-     var dataCalled;
      var req = http.request({
          host: "www.spiffy.com"
        , method: 'GET'
@@ -1160,21 +1149,19 @@ test("chaining", function(t) {
      }, function(res) {
 
        t.equal(res.statusCode, 200);
-       res.on('end', function() {
-         t.ok(dataCalled);
-         scope.done();
-         t.end();
-       });
-       res.on('data', function(data) {
-         dataCalled = true;
+       res.once('data', function(data) {
          t.ok(data instanceof Buffer, "data should be buffer");
          t.equal(data.toString(), "Hello World!", "response should match");
+
+         res.once('end', t.end.bind(t));
        });
 
      });
 
      req.end();
    });
+
+   t.end();
 });
 
 test("encoding", function(t) {
@@ -1526,7 +1513,6 @@ test("abort request", function(t) {
     res.on('close', function(err) {
       t.equal(err.code, 'aborted');
       scope.done();
-      t.end();
     });
 
     res.on('end', function() {
@@ -1535,6 +1521,7 @@ test("abort request", function(t) {
 
     req.once('error', function(err) {
       t.equal(err.code, 'ECONNRESET');
+      t.end();
     });
 
     req.abort();
@@ -2457,8 +2444,6 @@ test('persists interceptors', function(t) {
 });
 
 test("persist reply with file", function(t) {
-  var dataCalled = false
-
   var scope = nock('http://www.filereplier.com')
     .persist()
     .get('/')
@@ -2466,7 +2451,8 @@ test("persist reply with file", function(t) {
     .get('/test')
     .reply(200, 'Yay!');
 
-  for (var i=0; i < 2; i++) {
+  async.each([1,2], function(_, cb) {
+    var dataCalled = false;
     var req = http.request({
         host: "www.filereplier.com"
       , path: '/'
@@ -2474,8 +2460,9 @@ test("persist reply with file", function(t) {
     }, function(res) {
 
       t.equal(res.statusCode, 200);
-      res.on('end', function() {
+      res.once('end', function() {
         t.ok(dataCalled);
+        cb();
       });
       res.on('data', function(data) {
         dataCalled = true;
@@ -2484,10 +2471,9 @@ test("persist reply with file", function(t) {
 
     });
     req.end();
-  }
-  t.end();
-
+  }, t.end.bind(t));
 });
+
 
 test('(re-)activate after restore', function(t) {
   var scope = nock('http://google.com')
@@ -2728,9 +2714,9 @@ test('enable real HTTP request only for google.com, via string', function(t) {
     throw "should not deliver this request"
   }).on('error', function (err) {
     t.equal(err.message, 'Nock: Not allow net connect for "www.amazon.com:80/"');
+    t.end();
   });
 
-  t.end();
   nock.enableNetConnect();
 });
 
@@ -2761,10 +2747,10 @@ test('repeating once', function(t) {
 
   http.get('http://zombo.com', function(res) {
     t.equal(200, res.statusCode, 'first request');
+    t.end();
   });
 
   nock.cleanAll()
-  t.end();
 
   nock.enableNetConnect();
 });
@@ -2777,16 +2763,12 @@ test('repeating twice', function(t) {
     .twice()
     .reply(200, "Hello World!");
 
-  for (var i=0; i < 2; i++) {
+  async.each([1,2], function(_, cb) {
     http.get('http://zombo.com', function(res) {
-      t.equal(200, res.statusCode, 'first request');
+      t.equal(200, res.statusCode);
+      cb();
     });
-  };
-
-  nock.cleanAll()
-  t.end();
-
-  nock.enableNetConnect();
+  }, t.end.bind(t));
 });
 
 test('repeating thrice', function(t) {
@@ -2797,16 +2779,12 @@ test('repeating thrice', function(t) {
     .thrice()
     .reply(200, "Hello World!");
 
-  for (var i=0; i < 3; i++) {
+  async.each([1,2,3], function(_, cb) {
     http.get('http://zombo.com', function(res) {
-      t.equal(200, res.statusCode, 'first request');
+      t.equal(200, res.statusCode);
+      cb();
     });
-  };
-
-  nock.cleanAll()
-  t.end();
-
-  nock.enableNetConnect();
+  }, t.end.bind(t));
 });
 
 test('repeating response 4 times', function(t) {
@@ -2817,18 +2795,13 @@ test('repeating response 4 times', function(t) {
     .times(4)
     .reply(200, "Hello World!");
 
-  for (var i=0; i < 4; i++) {
+  async.each([1,2,3,4], function(_, cb) {
     http.get('http://zombo.com', function(res) {
       t.equal(200, res.statusCode, 'first request');
+      cb();
     });
-  };
-
-  nock.cleanAll()
-  t.end();
-
-  nock.enableNetConnect();
+  }, t.end.bind(t));
 });
-
 
 test('superagent works', function(t) {
   var responseText = 'Yay superagent!';
@@ -2927,7 +2900,10 @@ test('response is an http.IncomingMessage instance', function(t) {
 function checkDuration(t, ms) {
   var _end = t.end;
   var start = process.hrtime();
+  var ended = false;
   t.end = function () {
+    if (ended) return;
+    ended = true;
     var fin = process.hrtime(start);
     var finMs =
       (fin[0] * 1e+9) +  // seconds -> ms
@@ -2942,72 +2918,65 @@ function checkDuration(t, ms) {
 }
 
 test('calling delay could cause mikealRequest timeout error', function(t) {
-    var scope = nock('http://funk')
-        .get('/')
-        .delay({
-            head: 300
-        })
-        .reply(200, 'OK');
+  var scope = nock('http://funk')
+    .get('/')
+    .delay({
+        head: 300
+    })
+    .reply(200, 'OK');
 
-    mikealRequest({
-        uri: 'http://funk',
-        method: 'GET',
-        timeout: 100
-    }, function (err) {
-        scope.done();
-        t.equal(err && err.code, "ETIMEDOUT");
-        t.end();
-    });
+  mikealRequest({
+    uri: 'http://funk',
+    method: 'GET',
+    timeout: 100
+  }, function (err) {
+    scope.done();
+    t.equal(err && err.code, "ETIMEDOUT");
+    t.end();
+  });
 });
 
-test('Body delay does not have impact on timeoput', function(t) {
-    var scope = nock('http://funk')
-        .get('/')
-        .delay({
-            head: 300,
-            body: 300
-        })
-        .reply(200, 'OK');
+test('Body delay does not have impact on timeout', function(t) {
+  var scope = nock('http://funk')
+    .get('/')
+    .delay({
+        head: 300,
+        body: 300
+    })
+    .reply(200, 'OK');
 
-    mikealRequest({
-        uri: 'http://funk',
-        method: 'GET',
-        timeout: 500
-    }, function (err, r, body) {
-        t.equal(err, null);
-        t.equal(body, 'OK');
-        t.equal(r.statusCode, 200);
-        scope.done();
-        t.end();
-    });
+  mikealRequest({
+    uri: 'http://funk',
+    method: 'GET',
+    timeout: 500
+  }, function (err, r, body) {
+    t.equal(err, null);
+    t.equal(body, 'OK');
+    t.equal(r.statusCode, 200);
+    scope.done();
+    t.end();
+  });
 });
 
 test('calling delay with "body" and "head" delays the response', function (t) {
-    checkDuration(t, 600);
+  checkDuration(t, 600);
 
-    nock('http://funk')
-        .get('/')
-        .delay({
-            head: 300,
-            body: 300
-        })
-        .reply(200, 'OK');
+  nock('http://funk')
+    .get('/')
+    .delay({
+        head: 300,
+        body: 300
+    })
+    .reply(200, 'OK');
 
-    http.get('http://funk/', function (res) {
-        res.setEncoding('utf8');
-
-        var body = '';
-
-        res.on('data', function(chunk) {
-            body += chunk;
-        });
-
-        res.once('end', function() {
-            t.equal(body, 'OK');
-            t.end();
-        });
+  http.get('http://funk/', function (res) {
+    res.once('data', function(data) {
+      t.equal(data.toString(), 'OK');
+      res.once('end', t.end.bind(t));
     });
+  });
 });
+
 test('calling delay with "body" delays the response body', function (t) {
     checkDuration(t, 100);
 
@@ -3469,6 +3438,7 @@ test('define() works with binary buffers', function(t) {
 });
 
 test('issue #163 - Authorization header isn\'t mocked', function(t) {
+  nock.enableNetConnect();
   function makeRequest(cb) {
     var r = http.request(
       {
@@ -4038,6 +4008,7 @@ test('response readable pull stream works as expected', function(t) {
       , port: 80
     }, function(res) {
 
+      var ended = false;
       var responseBody = '';
       t.equal(res.statusCode, 200);
       res.on('readable', function() {
@@ -4045,7 +4016,8 @@ test('response readable pull stream works as expected', function(t) {
         while (null !== (chunk = res.read())) {
           responseBody += chunk.toString();
         }
-        if (chunk === null) {
+        if (chunk === null && ! ended) {
+          ended = true;
           t.equal(responseBody, "this is the response body yeah");
           t.end();
         }
@@ -4408,7 +4380,7 @@ test('remove interceptor removes given interceptor for regex path', function(t) 
     res.setEncoding('utf8');
     t.equal(res.statusCode, 202);
 
-    res.on('data', function(data) {
+    res.once('data', function(data) {
       t.equal(data, 'other-content');
     });
 
@@ -4480,28 +4452,37 @@ test('you must setup an interceptor for each request', function(t) {
 
 test('calling socketDelay will emit a timeout', function (t) {
     nock('http://www.example.com')
-        .get('/')
-        .socketDelay(10000)
-        .reply(200, 'OK');
+      .get('/')
+      .socketDelay(10000)
+      .reply(200, 'OK');
+
+    var timedout = false;
+    var ended = false;
 
     var req = http.request('http://www.example.com', function (res) {
-        res.setEncoding('utf8');
+      res.setEncoding('utf8');
 
-        var body = '';
+      var body = '';
 
-        res.on('data', function(chunk) {
-            body += chunk;
-        });
+      res.on('data', function(chunk) {
+        body += chunk;
+      });
 
-        res.once('end', function() {
-            t.fail('socket did not timeout when idle');
-            t.end();
-        });
+      res.once('end', function() {
+        ended = true;
+        if (! timedout) {
+          t.fail('socket did not timeout when idle');
+          t.end();
+        }
+      });
     });
 
     req.setTimeout(5000, function () {
+      timedout = true;
+      if (! ended) {
         t.ok(true);
         t.end();
+      }
     });
 
     req.end();
@@ -4871,9 +4852,10 @@ test("teardown", function(t) {
   var leaks = Object.keys(global)
     .splice(globalCount, Number.MAX_VALUE);
 
-  if (leaks.length == 1 && leaks[0] == '_key') {
-    leaks = [];
-  }
+  leaks = leaks.filter(function(key) {
+    return acceptableLeaks.indexOf(key) == -1;
+  });
+
   t.deepEqual(leaks, [], 'No leaks');
   t.end();
 });
