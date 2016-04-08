@@ -15,7 +15,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
 
 - [Install](#install)
 - [Use](#use)
-    - [READ THIS](#read-this---about-interceptors)
+    - [READ THIS! - About interceptors](#read-this---about-interceptors)
     - [Specifying hostname](#specifying-hostname)
     - [Specifying path](#specifying-path)
     - [Specifying request body](#specifying-request-body)
