@@ -1271,7 +1271,7 @@ to set the mode call `nockBack.setMode(mode)` or run the tests with the `NOCK_BA
 
 Nock works by overriding Node's `http.request` function. Also, it overrides `http.ClientRequest` too to cover for modules that use it directly.
 
-#Debugging
+# Debugging
 Nock uses debug, so just run with environmental variable DEBUG set to nock.*
 
 ```js
