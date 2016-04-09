@@ -15,16 +15,20 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
 
 - [Install](#install)
 - [Use](#use)
-    - [READ THIS](#read-this---about-interceptors)
-    - [Specifying domain](#specifying-domain)
+    - [READ THIS! - About interceptors](#read-this---about-interceptors)
+    - [Specifying hostname](#specifying-hostname)
     - [Specifying path](#specifying-path)
     - [Specifying request body](#specifying-request-body)
+    - [Specifying request query string](#specifying-request-query-string)
     - [Specifying replies](#specifying-replies)
+        - [Replying with errors](#replying-with-errors)
     - [Specifying headers](#specifying-headers)
         - [Header field names are case-insensitive](#header-field-names-are-case-insensitive)
         - [Specifying Request Headers](#specifying-request-headers)
         - [Specifying Reply Headers](#specifying-reply-headers)
         - [Default Reply Headers](#default-reply-headers)
+        - [Including Content-Length Header Automatically](#including-content-length-header-automatically)
+        - [Including Date Header Automatically](#including-date-header-automatically)
     - [HTTP Verbs](#http-verbs)
     - [Support for HTTP and HTTPS](#support-for-http-and-https)
     - [Non-standard ports](#non-standard-ports)
@@ -52,10 +56,21 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
     - [`dont_print` option](#dontprint-option)
     - [`output_objects` option](#outputobjects-option)
     - [`enable_reqheaders_recording` option](#enablereqheadersrecording-option)
+    - [`logging` option](#logging-option)
+    - [`use_separator` option](#useseparator-option)
     - [.removeInterceptor()](#removeinterceptor)
+- [Events](#events)
+    - [Global no match event](#global-no-match-event)
+- [Nock Back](#nock-back)
+    - [Setup](#setup)
+        - [Options](#options)
+    - [Usage](#usage)
+        - [Options](#options)
+        - [Modes](#modes)
 - [How does it work?](#how-does-it-work)
 - [Debugging](#debugging)
 - [PROTIP](#protip)
+- [Generate Changelog](#generate-changelog)
 - [License](#license)
 
 <!-- markdown-toc end -->
@@ -1256,7 +1271,7 @@ to set the mode call `nockBack.setMode(mode)` or run the tests with the `NOCK_BA
 
 Nock works by overriding Node's `http.request` function. Also, it overrides `http.ClientRequest` too to cover for modules that use it directly.
 
-#Debugging
+# Debugging
 Nock uses debug, so just run with environmental variable DEBUG set to nock.*
 
 ```js
