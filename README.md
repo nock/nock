@@ -328,7 +328,7 @@ or even as a file:
 ```js
 var scope = nock('http://myapp.iriscouch.com')
                 .get('/')
-                .replyWithFile(200, __dirname + '/replies/user.json');
+                .replyWithFile(200, __dirname + '/replies/user.json', { 'Content-Type': 'application/json' });
 ```
 
 Instead of an object or a buffer you can also pass in a callback to be evaluated for the value of the response body:
