@@ -690,6 +690,33 @@ test("headers work", function(t) {
 
 });
 
+test("headers as arrays work", function(t) {
+
+  var scope = nock('http://www.headdy.com')
+     .get('/')
+     .reply(200, "Hello World!", {'Set-Cookie': ['cookie1=foo', 'cookie2=bar']});
+
+  var req = http.request({
+     host: "www.headdy.com"
+    , method: 'GET'
+    , path: '/'
+    , port: 80
+  }, function(res) {
+   t.equal(res.statusCode, 200);
+   res.on('end', function() {
+     t.equivalent(res.headers, {'set-cookie': ['cookie1=foo', 'cookie2=bar']});
+     scope.done();
+     t.end();
+   });
+   // Streams start in 'paused' mode and must be started.
+   // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+   res.resume();
+  });
+
+  req.end();
+
+});
+
 test("reply headers work with function", function(t) {
 
   var scope = nock('http://replyheadersworkwithfunction.xxx')
