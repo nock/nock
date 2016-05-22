@@ -26,3 +26,26 @@ test('match body with regex', function (t) {
   });
 
 });
+
+test('match body with contentType x-www-form-urlencoded', function (t) {
+
+  nock('http://encodingsareus.com')
+    .post('/', {auth: {passwd: 'abc'}})
+    .reply(200);
+
+  mikealRequest({
+    url: 'http://encodingsareus.com/',
+    method: 'post',
+    //`form` set the conent-type to application/x-www-form-urlencoded
+    form: {
+      auth: {
+        passwd: 'abc'
+      }
+    },
+  }, function(err, res) {
+    if (err) throw err;
+    assert.equal(res.statusCode, 200);
+    t.end();
+  });
+
+});
