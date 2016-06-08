@@ -158,3 +158,17 @@ tap.test('matchStringOrRegexp', function (t) {
   t.false(common.matchStringOrRegexp('to match', /not/), 'false if pattern is regex and target doesn\'t match');
   t.end();
 });
+
+tap.test('stringifyRequest', function (t) {
+  var mockOptions = {
+    port: 81,
+    proto: 'http',
+    hostname: 'www.example.com',
+    path: '/path/1'
+  };
+  var body = '{"foo": "bar"}';
+
+  t.equal(common.stringifyRequest(mockOptions, body), 'GET http://www.example.com:81/path/1 {"foo": "bar"}');
+
+  t.end();
+});
