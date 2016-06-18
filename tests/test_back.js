@@ -115,6 +115,10 @@ tap.test('nockBack dryrun tests', function (nw) {
       , path: '/'
       , port: 80
       }, function(res) {
+
+        res.on('data', function() {
+          //node v 0.10 requires this listener
+        });
         t.ok([200, 301, 302].indexOf(res.statusCode) >= 0);
         t.end();
 
