@@ -115,8 +115,7 @@ tap.test('nockBack dryrun tests', function (nw) {
       , path: '/'
       , port: 80
       }, function(res) {
-
-        t.ok([200, 302].indexOf(res.statusCode) >= 0);
+        t.ok([200, 301, 302].indexOf(res.statusCode) >= 0);
         t.end();
 
       });
@@ -156,7 +155,7 @@ tap.test('nockBack dryrun tests', function (nw) {
         , port: 80
         }, function(res) {
 
-          t.ok([200, 302].indexOf(res.statusCode) >= 0);
+          t.ok([200, 301, 302].indexOf(res.statusCode) >= 0);
           res.on('end', function() {
             var doneFails = false;
 
