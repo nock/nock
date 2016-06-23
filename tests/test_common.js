@@ -164,11 +164,19 @@ tap.test('stringifyRequest', function (t) {
     port: 81,
     proto: 'http',
     hostname: 'www.example.com',
-    path: '/path/1'
+    path: '/path/1',
+    headers: {
+      cookie: 'fiz=baz'
+    }
   };
   var body = '{"foo": "bar"}';
 
-  t.equal(common.stringifyRequest(mockOptions, body), 'GET http://www.example.com:81/path/1 {"foo": "bar"}');
+  t.equal(common.stringifyRequest(mockOptions, body),
+    '{"method":"GET",'
+    + '"url":"http://www.example.com:81/path/1",'
+    + '"headers":{"cookie":"fiz=baz"},'
+    + '"body":"{\\"foo\\": \\"bar\\"}"}'
+  );
 
   t.end();
 });
