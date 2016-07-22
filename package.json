@@ -188,7 +188,7 @@
     "request-promise": "^2.0.1",
     "restify": "^4.0.4",
     "restler": "3.4.0",
-    "rimraf": "^2.3.2",
+    "rimraf": "^2.5.4",
     "superagent": "^1.4.0",
     "tap": "^5.7.0",
     "zombie": "^4.2.1"
