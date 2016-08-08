@@ -181,7 +181,7 @@
     "isomorphic-fetch": "^2.2.0",
     "istanbul": "^0.4.2",
     "jshint": "^2.5.6",
-    "needle": "^1.0.0",
+    "needle": "^1.1.0",
     "node-static": "^0.7.7",
     "pre-commit": "1.1.2",
     "request": "2.71.0",
