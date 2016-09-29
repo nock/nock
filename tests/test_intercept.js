@@ -4725,6 +4725,18 @@ test('query() with "{}" will allow a match against ending in ?', function (t) {
   })
 });
 
+test('query() will not match when there is no query string in the request', function (t) {
+  var scope = nock('https://d.com')
+    .get('/a')
+    .query({foo: 'bar'})
+    .reply(200);
+
+  mikealRequest('https://d.com/a', function(err, res) {
+    t.equal(err.message.trim(), 'Nock: No match for request GET https://d.com/a');
+    t.end();
+  })
+});
+
 test('query() with a function, function called with actual queryObject',function(t){
   var queryObject;
 
@@ -4747,13 +4759,13 @@ test('query() with a function, function called with actual queryObject',function
 });
 
 test('query() with a function, function return true the query treat as matched',function(t){
-  var alwasyTrue = function(){
+  var alwaysTrue = function(){
     return true;
   };
 
   var scope = nock('http://google.com')
     .get('/')
-    .query(alwasyTrue)
+    .query(alwaysTrue)
     .reply(200);
 
   mikealRequest('http://google.com/?igore=the&actual=query', function(err, res) {
@@ -4764,22 +4776,20 @@ test('query() with a function, function return true the query treat as matched',
 });
 
 test('query() with a function, function return false the query treat as Un-matched',function(t){
-
-  var alwayFalse = function(){
+  var alwaysFalse = function(){
     return false;
   };
 
   var scope = nock('http://google.com')
     .get('/')
-    .query(alwayFalse)
+    .query(alwaysFalse)
     .reply(200);
 
-  mikealRequest('http://google.com/?i=should&pass=?', function(err, res) {
-    t.equal(err.message.trim(), 'Nock: No match for request GET http://google.com/?i=should&pass=?');
+  mikealRequest('http://google.com/?i=should&pass=', function(err, res) {
+    t.equal(err.message.trim(), 'Nock: No match for request GET http://google.com/?i=should&pass=');
     t.end();
   })
 });
-
 
 test('query() will not match when a query string does not match name=value', function (t) {
   var scope = nock('https://c.com')
