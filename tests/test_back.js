@@ -109,7 +109,7 @@ tap.test('nockBack dryrun tests', function (nw) {
   nockBack.fixtures = __dirname + '/fixtures';
   nockBack.setMode('dryrun');
 
-  nw.test('goes to internet even when no nockBacks are running', function(t) {
+  nw.test('goes to internet even when no nockBacks are running', {todo: true}, function(t) {
     var req = http.request({
         host: "www.amazon.com"
       , path: '/'
@@ -140,7 +140,7 @@ tap.test('nockBack dryrun tests', function (nw) {
     nockBackWithFixture(t, true);
   });
 
-  nw.test('goes it internet, doesn\'t recorded new fixtures', function (t) {
+  nw.test('goes it internet, doesn\'t recorded new fixtures', {todo: true}, function (t) {
 
     var dataCalled = false;
 
