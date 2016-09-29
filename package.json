@@ -183,6 +183,7 @@
     "jshint": "^2.5.6",
     "needle": "^1.0.0",
     "node-static": "^0.7.7",
+    "nyc": "^8.3.0",
     "pre-commit": "1.1.2",
     "request": "2.71.0",
     "request-promise": "^2.0.1",
@@ -194,9 +195,9 @@
     "zombie": "^4.2.1"
   },
   "scripts": {
-    "test": "node --harmony tests/test.js",
-    "coverage": "node --harmony node_modules/istanbul/lib/cli.js cover tests/test.js && istanbul check-coverage",
-    "coveralls": "cat ./coverage/lcov.info | coveralls && rm -rf ./coverage",
+    "test": "tap ./tests/test_*.js",
+    "coverage": "nyc --reporter=lcov tap ./tests/test_*.js",
+    "coveralls": "cat ./coverage/lcov.info | coveralls",
     "jshint": "jshint lib/*.js",
     "changelog": "changelog nock all -m > CHANGELOG.md"
   },
