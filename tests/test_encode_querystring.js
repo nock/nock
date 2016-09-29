@@ -26,7 +26,15 @@ test('encode query string', function(t) {
     }, function(error, response, body) {
       t.type(error, Error, 'expect an error');
       t.match(error.message, 'No match for request');
-      t.end();
+
+      request({
+        url: 'https://encodeland.com/test',
+        method: 'GET'
+      }, function(error, response, body) {
+        t.type(error, Error, 'expect an error');
+        t.match(error.message, 'No match for request');
+        t.end();
+      });
     });
   });
 });
