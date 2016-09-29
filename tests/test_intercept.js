@@ -4844,6 +4844,7 @@ test('query() will not match when a query string has fewer correct values than e
 });
 
 test('query() will not match when the path has no query', function (t) {
+  nock.cleanAll();
   var scope = nock('http://google.com')
     .get('/')
     .query({ foo: 'bar' })
