@@ -724,7 +724,7 @@ test("reply headers as function work", function(t) {
     path: '/'
   }, function (res) {
     t.equivalent(res.headers, { 'x-my-headers': 'boo!' });
-    t.equivalent(res.rawHeaders, ['x-my-headers', 'boo!']);  // 67
+    t.equivalent(res.rawHeaders, ['X-My-Headers', 'boo!']);  // 67
     t.end();
   });
 });
@@ -745,7 +745,7 @@ test("reply headers as function are evaluated only once per request", function(t
     path: '/'
   }, function (res) {
     t.equivalent(res.headers, { 'x-my-headers': 'boo!' });
-    t.equivalent(res.rawHeaders, ['x-my-headers', 'boo!']);
+    t.equivalent(res.rawHeaders, ['X-My-Headers', 'boo!']);
     t.equal(counter, 1);
     t.end();
   });
@@ -767,14 +767,14 @@ test("reply headers as function are evaluated on each request", function(t) {
     path: '/'
   }, function (res) {
     t.equivalent(res.headers, { 'x-my-headers': '1' });
-    t.equivalent(res.rawHeaders, ['x-my-headers', '1']);
+    t.equivalent(res.rawHeaders, ['X-My-Headers', '1']);
     t.equal(counter, 1);
     http.get({
       host: 'example.com',
       path: '/'
     }, function (res) {
       t.equivalent(res.headers, { 'x-my-headers': '2' });
-      t.equivalent(res.rawHeaders, ['x-my-headers', '2']);
+      t.equivalent(res.rawHeaders, ['X-My-Headers', '2']);
       t.equal(counter, 2);
       t.end();
     });
