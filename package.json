@@ -195,8 +195,8 @@
     "zombie": "^4.2.1"
   },
   "scripts": {
-    "test": "tap ./tests/test_*.js",
-    "coverage": "nyc --reporter=lcov tap ./tests/test_*.js",
+    "test": "tap --harmony ./tests/test_*.js",
+    "coverage": "nyc --reporter=lcov tap --harmony ./tests/test_*.js",
     "coveralls": "cat ./coverage/lcov.info | coveralls",
     "jshint": "jshint lib/*.js",
     "changelog": "changelog nock all -m > CHANGELOG.md"
