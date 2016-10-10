@@ -1,6 +1,46 @@
+8.1.0 / 2016-10-10
+==================
+
+  * 8.1.0
+  * Enable harmony mode when running tests
+  * Remove duplicated Interceptor.replyWithFile function
+  * Merge pull request [#710](https://github.com/node-nock/nock/issues/710) from hugoduraes/master
+    Leave rawHeaders case untouched on nock's replies
+  * Leave rawHeaders case untouched on nock's replies
+  * Re-enable previously skipped tests
+  * Merge pull request [#586](https://github.com/node-nock/nock/issues/586) from Elergy/master
+    Fix some broken tests
+  * Add nodejs v6 to travis config
+  * use public TravisCI badge icon, which shows failing tests.
+  * Skip a couple of failing specs (until we get them fixed)
+  * Remove tests/test.js
+    Also:
+    - Use nyc as the CLI of istanbul
+    - Use tap binary directly for running tests
+  * Fix some issues to run library with Node v0.10:
+    1. Set lodash version to ~4.9.0
+    2. Add data-event listener for http's res message
+  * Tests that depends on amazon.com's statusCode are fixed
+    Symbol with charCode 160 is replaced to space
+  * Merge pull request [#531](https://github.com/node-nock/nock/issues/531) from node-nock/greenkeeper-request-2.71.0
+    Update request to version 2.71.0 🚀
+  * Merge branch 'master' of github.com:node-nock/nock
+  * added snyk vulerabilities badge
+  * chore(package): update request to version 2.71.0
+    http://greenkeeper.io/
+  * Merge pull request [#528](https://github.com/node-nock/nock/issues/528) from mooyoul/improve-readme-toc
+    Improved Table of Contents section of README
+  * Changed `About Interceptors` title of TOC
+    ... just to clarify
+  * Lint README.md
+  * Added some missing TOC entries
+  * Fixed broken TOC link
+  * changelog update
+
 8.0.0 / 2016-04-06
 ==================
 
+  * v8.0.0
   * added missing dep
   * Merge branch 'greenkeeper-request-2.70.0'
   * Merge branch 'master' into greenkeeper-request-2.70.0
