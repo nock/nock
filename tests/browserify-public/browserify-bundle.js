@@ -967,8 +967,10 @@ function removeInterceptor(options) {
   if (allInterceptors[baseUrl] && allInterceptors[baseUrl].scopes.length > 0) {
     if (key) {
       for (var i = 0; i < allInterceptors[baseUrl].scopes.length; i++) {
-        if (allInterceptors[baseUrl].scopes[i]._key === key) {
+        var interceptor = allInterceptors[baseUrl].scopes[i];
+        if (interceptor._key === key) {
           allInterceptors[baseUrl].scopes.splice(i, 1);
+          interceptor.scope.remove(key, interceptor);
           break;
         }
       }
@@ -1310,17 +1312,6 @@ Interceptor.prototype.replyWithFile = function replyWithFile(statusCode, filePat
     this.filePath = filePath;
     return this.reply(statusCode, readStream, headers);
 };
-
-Interceptor.prototype.replyWithFile = function replyWithFile(statusCode, filePath, headers) {
-    if (! fs) {
-        throw new Error('No fs');
-    }
-    var readStream = fs.createReadStream(filePath);
-    readStream.pause();
-    this.filePath = filePath;
-    return this.reply(statusCode, readStream, headers);
-};
-
 
 // Also match request headers
 // https://github.com/pgte/nock/issues/163
