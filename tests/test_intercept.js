@@ -2444,6 +2444,28 @@ test('persists interceptors', function(t) {
   }).end();
 });
 
+test('Persisted interceptors are in pendingMocks initially', function(t) {
+  var scope = nock('http://example.com')
+    .get('/abc')
+    .reply(200, "Persisted reply")
+    .persist();
+
+  t.deepEqual(scope.pendingMocks(), ["GET http://example.com:80/abc"]);
+  t.end();
+});
+
+test('Persisted interceptors are not in pendingMocks after the first request', function(t) {
+  var scope = nock('http://example.com')
+    .get('/def')
+    .reply(200, "Persisted reply")
+    .persist();
+
+  http.get('http://example.com/def', function(res) {
+    t.deepEqual(scope.pendingMocks(), []);
+    t.end();
+  });
+});
+
 test("persist reply with file", function(t) {
   var scope = nock('http://www.filereplier.com')
     .persist()

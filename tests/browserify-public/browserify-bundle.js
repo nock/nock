@@ -1311,17 +1311,6 @@ Interceptor.prototype.replyWithFile = function replyWithFile(statusCode, filePat
     return this.reply(statusCode, readStream, headers);
 };
 
-Interceptor.prototype.replyWithFile = function replyWithFile(statusCode, filePath, headers) {
-    if (! fs) {
-        throw new Error('No fs');
-    }
-    var readStream = fs.createReadStream(filePath);
-    readStream.pause();
-    this.filePath = filePath;
-    return this.reply(statusCode, readStream, headers);
-};
-
-
 // Also match request headers
 // https://github.com/pgte/nock/issues/163
 Interceptor.prototype.reqheaderMatches = function reqheaderMatches(options, key) {
@@ -2828,7 +2817,19 @@ Scope.prototype.delete = function _delete(uri, requestBody, options) {
 };
 
 Scope.prototype.pendingMocks = function pendingMocks() {
-  return Object.keys(this.keyedInterceptors);
+  var self = this;
+
+  var pendingInterceptorKeys = Object.keys(this.keyedInterceptors).filter(function (key) {
+    var interceptorList = self.keyedInterceptors[key];
+    var pendingInterceptors = interceptorList.filter(function (interceptor) {
+      var persistedAndUsed = self._persist && interceptor.interceptionCounter > 0;
+      var requireDone = interceptor.requireDone === undefined || interceptor.requireDone === true;
+      return !persistedAndUsed && requireDone;
+    });
+    return pendingInterceptors.length > 0;
+  });
+
+  return pendingInterceptorKeys;
 };
 
 Scope.prototype.isDone = function isDone() {
@@ -2836,30 +2837,7 @@ Scope.prototype.isDone = function isDone() {
   // if nock is turned off, it always says it's done
   if (! globalIntercept.isOn()) { return true; }
 
-  var keys = Object.keys(this.keyedInterceptors);
-  if (keys.length === 0) {
-    return true;
-  } else {
-    var doneHostCount = 0;
-
-    keys.forEach(function(key) {
-      var doneInterceptorCount = 0;
-
-      self.keyedInterceptors[key].forEach(function(interceptor) {
-        var isRequireDoneDefined = !_.isUndefined(interceptor.options.requireDone);
-        if (isRequireDoneDefined && interceptor.options.requireDone === false) {
-          doneInterceptorCount += 1;
-        } else if (self._persist && interceptor.interceptionCounter > 0) {
-          doneInterceptorCount += 1;
-        }
-      });
-
-      if (doneInterceptorCount === self.keyedInterceptors[key].length ) {
-        doneHostCount += 1;
-      }
-    });
-    return (doneHostCount === keys.length);
-  }
+  return this.pendingMocks().length === 0;
 };
 
 Scope.prototype.done = function done() {
