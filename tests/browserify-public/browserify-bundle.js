@@ -1219,6 +1219,13 @@ function Interceptor(scope, uri, method, requestBody, interceptorOptions) {
 
     this.delayInMs = 0;
     this.delayConnectionInMs = 0;
+
+    this.optional = false;
+}
+
+Interceptor.prototype.optionally = function optionally() {
+    this.optional = true;
+    return this;
 }
 
 Interceptor.prototype.replyWithError = function replyWithError(errorMessage) {
@@ -2823,8 +2830,7 @@ Scope.prototype.pendingMocks = function pendingMocks() {
     var interceptorList = self.keyedInterceptors[key];
     var pendingInterceptors = interceptorList.filter(function (interceptor) {
       var persistedAndUsed = self._persist && interceptor.interceptionCounter > 0;
-      var requireDone = interceptor.requireDone === undefined || interceptor.requireDone === true;
-      return !persistedAndUsed && requireDone;
+      return !persistedAndUsed && !interceptor.optional;
     });
     return pendingInterceptors.length > 0;
   });

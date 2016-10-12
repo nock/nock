@@ -622,22 +622,6 @@ test("isDone", function(t) {
   req.end();
 });
 
-test("requireDone", function(t) {
-  var scope = nock('http://www.google.com')
-    .get('/', false, { requireDone: false })
-    .reply(200, "Hello World!");
-
-  t.ok(scope.isDone(), "done when a requireDone is set to false");
-
-  scope.get('/', false, { requireDone: true})
-       .reply(200, "Hello World!");
-
-  t.notOk(scope.isDone(), "not done when a requireDone is explicitly set to true");
-
-  nock.cleanAll()
-  t.end();
-});
-
 test("request headers exposed", function(t) {
 
   var scope = nock('http://www.headdy.com')
@@ -2295,6 +2279,39 @@ test('pending mocks works', function(t) {
     t.deepEqual(nock.pendingMocks(), []);
     t.end();
   });
+});
+
+test('pending mocks doesn\'t include optional mocks', function(t) {
+  var scope = nock('http://example.com')
+    .get('/nonexistent')
+    .optionally()
+    .reply(200);
+
+  t.deepEqual(nock.pendingMocks(), []);
+  t.end();
+});
+
+test('optional mocks are still functional', function(t) {
+  var scope = nock('http://example.com')
+    .get('/abc')
+    .optionally()
+    .reply(200);
+
+  var req = http.get({host: 'example.com', path: '/abc'}, function(res) {
+    t.assert(res.statusCode === 200, "should still mock requests");
+    t.deepEqual(nock.pendingMocks(), []);
+    t.end();
+  });
+});
+
+test('isDone is true with optional mocks outstanding', function(t) {
+  var scope = nock('http://example.com')
+    .get('/abc')
+    .optionally()
+    .reply(200);
+
+  t.ok(scope.isDone());
+  t.end();
 });
 
 test('username and password works', function(t) {
@@ -4423,7 +4440,6 @@ test('remove interceptor for not found resource', function(t) {
 });
 
 test('isDone() must consider repeated responses', function(t) {
-
   var scope = nock('http://www.example.com')
     .get('/')
     .times(2)
@@ -4453,7 +4469,6 @@ test('isDone() must consider repeated responses', function(t) {
       t.end();
     });
   });
-
 });
 
 test('you must setup an interceptor for each request', function(t) {
