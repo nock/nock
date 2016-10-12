@@ -173,7 +173,7 @@
     "qs": "^6.0.2"
   },
   "devDependencies": {
-    "async": "^1.5.2",
+    "async": "^2.1.0",
     "aws-sdk": "^2.0.15",
     "browserify": "^13.0.0",
     "coveralls": "^2.11.2",
