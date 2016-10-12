@@ -44,6 +44,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
     - [Path filtering](#path-filtering)
     - [Request Body filtering](#request-body-filtering)
     - [Request Headers Matching](#request-headers-matching)
+    - [Optional Requests](#optional-requests)
     - [Allow __unmocked__ requests on a mocked hostname](#allow-unmocked-requests-on-a-mocked-hostname)
 - [Expectations](#expectations)
     - [.isDone()](#isdone)
@@ -808,6 +809,23 @@ var scope = nock('http://api.myservice.com')
                 .reply(200, {
                   data: 'hello world'
                 })
+```
+
+## Optional Requests
+
+By default every mocked request is expected to be made exactly once, and until it is it'll appear in `scope.pendingMocks()`, and `scope.isDone()` will return false (see [expectations](#expectations)). In many cases this is fine, but in some (especially cross-test setup code) it's useful to be able to mock a request that may or may not happen. You can do this with `optionally()`. Optional requests do not appear in `pendingMocks()`, and `isDone()` will return true for scopes with only optional requests pending.
+
+```js
+var example = nock("http://example.com");
+example.pendingMocks() // []
+example.get("/pathA").reply(200);
+example.pendingMocks() // ["GET http://example.com:80/path"]
+
+// ...After a request to example.com/pathA:
+example.pendingMocks() // []
+
+example.get("/pathB").optionally().reply(200);
+example.pendingMocks() // []
 ```
 
 ## Allow __unmocked__ requests on a mocked hostname
