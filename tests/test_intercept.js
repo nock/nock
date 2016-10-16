@@ -4325,6 +4325,24 @@ test('remove interceptor removes given interceptor', function(t) {
 });
 
 
+test('remove interceptor removes interceptor from pending requests', function(t) {
+  var givenInterceptor = nock('http://example.org')
+    .get('/somepath');
+  var scope = givenInterceptor
+    .reply(200, 'hey');
+
+  var mocks = scope.pendingMocks();
+  t.deepEqual(mocks, ['GET http://example.org:80/somepath']);
+
+  var result = nock.removeInterceptor(givenInterceptor);
+  t.ok(result, 'result should be true');
+
+  var mocksAfterRemove = scope.pendingMocks();
+  t.deepEqual(mocksAfterRemove, [ ]);
+  t.end();
+});
+
+
 test('remove interceptor removes given interceptor for https', function(t) {
   var givenInterceptor = nock('https://example.org')
     .get('/somepath');
