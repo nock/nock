@@ -26,3 +26,24 @@ test('match body with regex', function (t) {
   });
 
 });
+
+test('match body with regex inside array', function (t) {
+
+  nock('http://encodingsareus.com')
+    .post('/', {items: [{name: /t.+/}]})
+    .reply(200);
+
+  mikealRequest({
+    url: 'http://encodingsareus.com/',
+    method: 'post',
+    json: {
+      items: [{
+        name: 'test'
+      }]
+    },
+  }, function(err, res) {
+    if (err) throw err;
+    assert.equal(res.statusCode, 200);
+    t.end();
+  });
+})
