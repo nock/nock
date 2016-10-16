@@ -191,7 +191,7 @@
     "restler": "3.4.0",
     "rimraf": "^2.3.2",
     "superagent": "^1.4.0",
-    "tap": "^5.7.0",
+    "tap": "^6.0.0",
     "zombie": "^4.2.1"
   },
   "scripts": {
