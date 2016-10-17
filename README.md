@@ -51,6 +51,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
     - [.cleanAll()](#cleanall)
     - [.persist()](#persist)
     - [.pendingMocks()](#pendingmocks)
+    - [.activeMocks()](#activemocks)    
 - [Logging](#logging)
 - [Restoring](#restoring)
 - [Turning Nock Off (experimental!)](#turning-nock-off-experimental)
@@ -916,6 +917,22 @@ It is also available in the global scope:
 
 ```js
 console.error('pending mocks: %j', nock.pendingMocks());
+```
+
+## .activeMocks()
+
+You can see every mock that is currently active (i.e. might potentially reply to requests) in a scope using `scope.activeMocks()`. A mock is active if it is pending, optional but not yet completed, or persisted. Mocks that have intercepted their requests and are no longer doing anything are the only mocks which won't appear here.
+
+You probably don't need to use this - it mainly exists as a mechanism to recreate the previous (now-changed) behavior of `pendingMocks()`.
+
+```js
+console.error('active mocks: %j', scope.activeMocks());
+```
+
+It is also available in the global scope:
+
+```js
+console.error('active mocks: %j', nock.activeMocks());
 ```
 
 # Logging

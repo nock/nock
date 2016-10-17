@@ -2354,6 +2354,56 @@ test('optional repeated mocks execute repeatedly, but never appear as pending', 
   });
 });
 
+test('activeMocks returns optional mocks only before they\'re completed', function(t) {
+  nock.cleanAll();
+  var scope = nock('http://example.com')
+    .get('/optional')
+    .optionally()
+    .reply(200);
+
+  t.deepEqual(nock.activeMocks(), ["GET http://example.com:80/optional"]);
+  var req = http.get({host: 'example.com', path: '/optional'}, function(res) {
+    t.deepEqual(nock.activeMocks(), []);
+    t.end();
+  });
+});
+
+test('activeMocks always returns persisted mocks', function(t) {
+  nock.cleanAll();
+  var scope = nock('http://example.com')
+    .get('/persisted')
+    .reply(200)
+    .persist();
+
+  t.deepEqual(nock.activeMocks(), ["GET http://example.com:80/persisted"]);
+  var req = http.get({host: 'example.com', path: '/persisted'}, function(res) {
+    t.deepEqual(nock.activeMocks(), ["GET http://example.com:80/persisted"]);
+    t.end();
+  });
+});
+
+test('activeMocks returns incomplete mocks', function(t) {
+  nock.cleanAll();
+  var scope = nock('http://example.com')
+    .get('/incomplete')
+    .reply(200);
+
+  t.deepEqual(nock.activeMocks(), ["GET http://example.com:80/incomplete"]);
+  t.end();
+});
+
+test('activeMocks doesn\'t return completed mocks', function(t) {
+  nock.cleanAll();
+  var scope = nock('http://example.com')
+    .get('/complete-me')
+    .reply(200);
+
+  var req = http.get({host: 'example.com', path: '/complete-me'}, function(res) {
+    t.deepEqual(nock.activeMocks(), []);
+    t.end();
+  });
+});
+
 test('username and password works', function(t) {
   var scope = nock('http://passwordyy.com')
     .get('/')
