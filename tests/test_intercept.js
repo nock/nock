@@ -2314,6 +2314,46 @@ test('isDone is true with optional mocks outstanding', function(t) {
   t.end();
 });
 
+test('optional but persisted mocks persist, but never appear as pending', function(t) {
+  var scope = nock('http://example.com')
+    .get('/123')
+    .optionally()
+    .reply(200)
+    .persist();
+
+  t.deepEqual(nock.pendingMocks(), []);
+  var req = http.get({host: 'example.com', path: '/123'}, function(res) {
+    t.assert(res.statusCode === 200, "should mock first request");
+    t.deepEqual(nock.pendingMocks(), []);
+
+    var req = http.get({host: 'example.com', path: '/123'}, function(res) {
+      t.assert(res.statusCode === 200, "should mock second request");
+      t.deepEqual(nock.pendingMocks(), []);
+      t.end();
+    });
+  });
+});
+
+test('optional repeated mocks execute repeatedly, but never appear as pending', function(t) {
+  var scope = nock('http://example.com')
+    .get('/456')
+    .optionally()
+    .times(2)
+    .reply(200);
+
+  t.deepEqual(nock.pendingMocks(), []);
+  var req = http.get({host: 'example.com', path: '/456'}, function(res) {
+    t.assert(res.statusCode === 200, "should mock first request");
+    t.deepEqual(nock.pendingMocks(), []);
+
+    var req = http.get({host: 'example.com', path: '/456'}, function(res) {
+      t.assert(res.statusCode === 200, "should mock second request");
+      t.deepEqual(nock.pendingMocks(), []);
+      t.end();
+    });
+  });
+});
+
 test('username and password works', function(t) {
   var scope = nock('http://passwordyy.com')
     .get('/')
