@@ -994,6 +994,36 @@ test("match all headers", function(t) {
 
 });
 
+
+test("match array of headers", function(t) {
+  var scope = nock('http://www.headdy.com')
+     .get('/')
+     .matchHeader('x-my-headers', 'foo,bar')
+     .reply(200, "Hello World!");
+
+  http.get({
+     host: "www.headdy.com"
+    , method: 'GET'
+    , path: '/'
+    , port: 80
+    , headers: {'X-My-Headers': ['foo', 'bar']}
+  }, function(res) {
+    res.setEncoding('utf8');
+    t.equal(res.statusCode, 200);
+
+    res.on('data', function(data) {
+      t.equal(data, 'Hello World!');
+    });
+
+    res.on('end', function() {
+      scope.done();
+      t.end();
+    });
+  });
+
+});
+
+
 test("header manipulation", function(t) {
   var scope = nock('http://example.com')
                 .get('/accounts')
