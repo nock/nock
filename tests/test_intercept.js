@@ -622,22 +622,6 @@ test("isDone", function(t) {
   req.end();
 });
 
-test("requireDone", function(t) {
-  var scope = nock('http://www.google.com')
-    .get('/', false, { requireDone: false })
-    .reply(200, "Hello World!");
-
-  t.ok(scope.isDone(), "done when a requireDone is set to false");
-
-  scope.get('/', false, { requireDone: true})
-       .reply(200, "Hello World!");
-
-  t.notOk(scope.isDone(), "not done when a requireDone is explicitly set to true");
-
-  nock.cleanAll()
-  t.end();
-});
-
 test("request headers exposed", function(t) {
 
   var scope = nock('http://www.headdy.com')
@@ -2297,6 +2281,129 @@ test('pending mocks works', function(t) {
   });
 });
 
+test('pending mocks doesn\'t include optional mocks', function(t) {
+  var scope = nock('http://example.com')
+    .get('/nonexistent')
+    .optionally()
+    .reply(200);
+
+  t.deepEqual(nock.pendingMocks(), []);
+  t.end();
+});
+
+test('optional mocks are still functional', function(t) {
+  var scope = nock('http://example.com')
+    .get('/abc')
+    .optionally()
+    .reply(200);
+
+  var req = http.get({host: 'example.com', path: '/abc'}, function(res) {
+    t.assert(res.statusCode === 200, "should still mock requests");
+    t.deepEqual(nock.pendingMocks(), []);
+    t.end();
+  });
+});
+
+test('isDone is true with optional mocks outstanding', function(t) {
+  var scope = nock('http://example.com')
+    .get('/abc')
+    .optionally()
+    .reply(200);
+
+  t.ok(scope.isDone());
+  t.end();
+});
+
+test('optional but persisted mocks persist, but never appear as pending', function(t) {
+  var scope = nock('http://example.com')
+    .get('/123')
+    .optionally()
+    .reply(200)
+    .persist();
+
+  t.deepEqual(nock.pendingMocks(), []);
+  var req = http.get({host: 'example.com', path: '/123'}, function(res) {
+    t.assert(res.statusCode === 200, "should mock first request");
+    t.deepEqual(nock.pendingMocks(), []);
+
+    var req = http.get({host: 'example.com', path: '/123'}, function(res) {
+      t.assert(res.statusCode === 200, "should mock second request");
+      t.deepEqual(nock.pendingMocks(), []);
+      t.end();
+    });
+  });
+});
+
+test('optional repeated mocks execute repeatedly, but never appear as pending', function(t) {
+  var scope = nock('http://example.com')
+    .get('/456')
+    .optionally()
+    .times(2)
+    .reply(200);
+
+  t.deepEqual(nock.pendingMocks(), []);
+  var req = http.get({host: 'example.com', path: '/456'}, function(res) {
+    t.assert(res.statusCode === 200, "should mock first request");
+    t.deepEqual(nock.pendingMocks(), []);
+
+    var req = http.get({host: 'example.com', path: '/456'}, function(res) {
+      t.assert(res.statusCode === 200, "should mock second request");
+      t.deepEqual(nock.pendingMocks(), []);
+      t.end();
+    });
+  });
+});
+
+test('activeMocks returns optional mocks only before they\'re completed', function(t) {
+  nock.cleanAll();
+  var scope = nock('http://example.com')
+    .get('/optional')
+    .optionally()
+    .reply(200);
+
+  t.deepEqual(nock.activeMocks(), ["GET http://example.com:80/optional"]);
+  var req = http.get({host: 'example.com', path: '/optional'}, function(res) {
+    t.deepEqual(nock.activeMocks(), []);
+    t.end();
+  });
+});
+
+test('activeMocks always returns persisted mocks', function(t) {
+  nock.cleanAll();
+  var scope = nock('http://example.com')
+    .get('/persisted')
+    .reply(200)
+    .persist();
+
+  t.deepEqual(nock.activeMocks(), ["GET http://example.com:80/persisted"]);
+  var req = http.get({host: 'example.com', path: '/persisted'}, function(res) {
+    t.deepEqual(nock.activeMocks(), ["GET http://example.com:80/persisted"]);
+    t.end();
+  });
+});
+
+test('activeMocks returns incomplete mocks', function(t) {
+  nock.cleanAll();
+  var scope = nock('http://example.com')
+    .get('/incomplete')
+    .reply(200);
+
+  t.deepEqual(nock.activeMocks(), ["GET http://example.com:80/incomplete"]);
+  t.end();
+});
+
+test('activeMocks doesn\'t return completed mocks', function(t) {
+  nock.cleanAll();
+  var scope = nock('http://example.com')
+    .get('/complete-me')
+    .reply(200);
+
+  var req = http.get({host: 'example.com', path: '/complete-me'}, function(res) {
+    t.deepEqual(nock.activeMocks(), []);
+    t.end();
+  });
+});
+
 test('username and password works', function(t) {
   var scope = nock('http://passwordyy.com')
     .get('/')
@@ -2442,6 +2549,28 @@ test('persists interceptors', function(t) {
       t.end();
     }).end();
   }).end();
+});
+
+test('Persisted interceptors are in pendingMocks initially', function(t) {
+  var scope = nock('http://example.com')
+    .get('/abc')
+    .reply(200, "Persisted reply")
+    .persist();
+
+  t.deepEqual(scope.pendingMocks(), ["GET http://example.com:80/abc"]);
+  t.end();
+});
+
+test('Persisted interceptors are not in pendingMocks after the first request', function(t) {
+  var scope = nock('http://example.com')
+    .get('/def')
+    .reply(200, "Persisted reply")
+    .persist();
+
+  http.get('http://example.com/def', function(res) {
+    t.deepEqual(scope.pendingMocks(), []);
+    t.end();
+  });
 });
 
 test("persist reply with file", function(t) {
@@ -4419,7 +4548,6 @@ test('remove interceptor for not found resource', function(t) {
 });
 
 test('isDone() must consider repeated responses', function(t) {
-
   var scope = nock('http://www.example.com')
     .get('/')
     .times(2)
@@ -4449,7 +4577,6 @@ test('isDone() must consider repeated responses', function(t) {
       t.end();
     });
   });
-
 });
 
 test('you must setup an interceptor for each request', function(t) {

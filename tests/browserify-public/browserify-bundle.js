@@ -1074,22 +1074,32 @@ function isActive() {
 
 }
 
-function isDone() {
-  return _.every(allInterceptors, function(interceptors) {
-    return _.every(interceptors.scopes, function(interceptor) {
-      return interceptor.__nock_scope.isDone();
-    });
-  });
-}
-
-function pendingMocks() {
+function interceptorScopes() {
   return _.reduce(allInterceptors, function(result, interceptors) {
     for (var interceptor in interceptors.scopes) {
-      result = result.concat(interceptors.scopes[interceptor].__nock_scope.pendingMocks());
+      result = result.concat(interceptors.scopes[interceptor].__nock_scope);
     }
 
     return result;
   }, []);
+}
+
+function isDone() {
+  return _.every(interceptorScopes(), function(scope) {
+    return scope.isDone();
+  });
+}
+
+function pendingMocks() {
+  return _.flatten(_.map(interceptorScopes(), function(scope) {
+    return scope.pendingMocks();
+  }));
+}
+
+function activeMocks() {
+  return _.flatten(_.map(interceptorScopes(), function(scope) {
+    return scope.activeMocks();
+  }));
 }
 
 function activate() {
@@ -1171,6 +1181,7 @@ module.exports.activate = activate;
 module.exports.isActive = isActive;
 module.exports.isDone = isDone;
 module.exports.pendingMocks = pendingMocks;
+module.exports.activeMocks = activeMocks;
 module.exports.enableNetConnect = enableNetConnect;
 module.exports.disableNetConnect = disableNetConnect;
 module.exports.overrideClientRequest = overrideClientRequest;
@@ -1221,6 +1232,13 @@ function Interceptor(scope, uri, method, requestBody, interceptorOptions) {
 
     this.delayInMs = 0;
     this.delayConnectionInMs = 0;
+
+    this.optional = false;
+}
+
+Interceptor.prototype.optionally = function optionally() {
+    this.optional = true;
+    return this;
 }
 
 Interceptor.prototype.replyWithError = function replyWithError(errorMessage) {
@@ -2819,38 +2837,35 @@ Scope.prototype.delete = function _delete(uri, requestBody, options) {
 };
 
 Scope.prototype.pendingMocks = function pendingMocks() {
-  return Object.keys(this.keyedInterceptors);
+  var self = this;
+
+  var pendingInterceptorKeys = Object.keys(this.keyedInterceptors).filter(function (key) {
+    var interceptorList = self.keyedInterceptors[key];
+    var pendingInterceptors = interceptorList.filter(function (interceptor) {
+      // TODO: This assumes that completed mocks are removed from the keyedInterceptors list
+      // (when persistence is off). We should change that (and this) in future.
+      var persistedAndUsed = self._persist && interceptor.interceptionCounter > 0;
+      return !persistedAndUsed && !interceptor.optional;
+    });
+    return pendingInterceptors.length > 0;
+  });
+
+  return pendingInterceptorKeys;
 };
+
+// Returns all keyedInterceptors that are active.
+// This incomplete interceptors, persisted but complete interceptors, and
+// optional interceptors, but not non-persisted and completed interceptors.
+Scope.prototype.activeMocks = function activeMocks() {
+  return Object.keys(this.keyedInterceptors);
+}
 
 Scope.prototype.isDone = function isDone() {
   var self = this;
   // if nock is turned off, it always says it's done
   if (! globalIntercept.isOn()) { return true; }
 
-  var keys = Object.keys(this.keyedInterceptors);
-  if (keys.length === 0) {
-    return true;
-  } else {
-    var doneHostCount = 0;
-
-    keys.forEach(function(key) {
-      var doneInterceptorCount = 0;
-
-      self.keyedInterceptors[key].forEach(function(interceptor) {
-        var isRequireDoneDefined = !_.isUndefined(interceptor.options.requireDone);
-        if (isRequireDoneDefined && interceptor.options.requireDone === false) {
-          doneInterceptorCount += 1;
-        } else if (self._persist && interceptor.interceptionCounter > 0) {
-          doneInterceptorCount += 1;
-        }
-      });
-
-      if (doneInterceptorCount === self.keyedInterceptors[key].length ) {
-        doneHostCount += 1;
-      }
-    });
-    return (doneHostCount === keys.length);
-  }
+  return this.pendingMocks().length === 0;
 };
 
 Scope.prototype.done = function done() {
@@ -3046,6 +3061,7 @@ module.exports = extend(startScope, {
   isActive: globalIntercept.isActive,
   isDone: globalIntercept.isDone,
   pendingMocks: globalIntercept.pendingMocks,
+  activeMocks: globalIntercept.activeMocks,
   removeInterceptor: globalIntercept.removeInterceptor,
   disableNetConnect: globalIntercept.disableNetConnect,
   enableNetConnect: globalIntercept.enableNetConnect,
