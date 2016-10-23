@@ -1787,7 +1787,7 @@ function deepEqualExtended(spec, body) {
   if (spec && spec.constructor === RegExp) {
     return spec.test(body);
   }
-  if (spec && spec.constructor === Object && body) {
+  if (spec && spec.constructor === Object || spec.constructor === Array && body) {
     var keys = Object.keys(spec);
     for (var i = 0; i < keys.length; i++) {
       if (!deepEqualExtended(spec[keys[i]], body[keys[i]])) {
@@ -2834,6 +2834,10 @@ Scope.prototype.merge = function merge(uri, requestBody, options) {
 
 Scope.prototype.delete = function _delete(uri, requestBody, options) {
   return this.intercept(uri, 'DELETE', requestBody, options);
+};
+
+Scope.prototype.options = function _options(uri, requestBody, options) {
+  return this.intercept(uri, 'OPTIONS', requestBody, options);
 };
 
 Scope.prototype.pendingMocks = function pendingMocks() {
