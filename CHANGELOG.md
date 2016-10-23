@@ -1,3 +1,11 @@
+9.0.0 / 2016-10-23
+==================
+
+  * 9.0.0
+  * Drop support for node versions 0.10, 0.11, 0.12 and 5
+  * Add section on node versions support
+  * Update CHANGELOG
+
 8.2.0 / 2016-10-23
 ==================
 
@@ -165,13 +173,3 @@
     README.md: Fix typo
   * README.md: Fix typo
   * v7.4.0
-
-7.4.0 / 2016-03-04
-==================
-
-  * Merge branch 'swashcap-bug/[#489](https://github.com/node-nock/nock/issues/489)-reply-callback'
-  * browserify bundle update
-  * Merge branch 'bug/[#489](https://github.com/node-nock/nock/issues/489)-reply-callback' of git://github.com/swashcap/nock into swashcap-bug/[#489](https://github.com/node-nock/nock/issues/489)-reply-callback
-  * Add support for full callback `reply()`.
-    This addresses a bug with the `reply()` function where a request without
-    a body caused full callbacks to error. (See pgte/nock[#489](https://github.com/node-nock/nock/issues/489))

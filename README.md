@@ -95,9 +95,9 @@ $ npm install nock
 | 0.10 | up to 8.x |
 | 0.11 | up to 8.x |
 | 0.12 | up to 8.x |
-| 4 | 8.x |
+| 4 | 9.x |
 | 5 | up to 8.x |
-| 6 | 8.x |
+| 6 | 9.x |
 
 # Use
 
