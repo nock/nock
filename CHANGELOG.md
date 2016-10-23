@@ -1,3 +1,37 @@
+8.2.0 / 2016-10-23
+==================
+
+  * 8.2.0
+  * Add changelog to the dev dependencies
+  * Ignore browserify-bundle.js
+  * Update browserify-bundle.js
+  * Merge pull request [#723](https://github.com/node-nock/nock/issues/723) from pimterry/optional-mocks
+    Add optionally() and make isDone and pendingMocks consistent.
+  * Include all review markup changes in browserify-bundle
+  * Add .activeMocks() to recreate previous .pendingMocks() behaviour
+  * Add times+optional and persist+optional tests
+  * Document assumption in pendingMocks()
+  * Clarify optional mock behaviour a little in README
+  * Merge pull request [#721](https://github.com/node-nock/nock/issues/721) from pimterry/removeInterceptor-from-pending
+    Update PendingMocks when an interceptor is removed
+  * Merge pull request [#722](https://github.com/node-nock/nock/issues/722) from Ginden/no-garbage-in-npm
+    Removed coverage folder from npm
+  * Merge pull request [#668](https://github.com/node-nock/nock/issues/668) from abdulito/master
+    Support http OPTIONS method
+  * Merge pull request [#725](https://github.com/node-nock/nock/issues/725) from node-nock/greenkeeper-async-2.1.1
+    Update async to version 2.1.1 🚀
+  * Merge pull request [#719](https://github.com/node-nock/nock/issues/719) from ltegman/fix/body-spec-regex-in-array
+    Handle arrays like objects in match_body
+  * Handle arrays like objects in match_body
+  * chore(package): update async to version 2.1.1
+    https://greenkeeper.io/
+  * Ad documentation for optionally()
+  * Add optionally(), to replace and improve the undocumented 'requireDone'
+  * Make pendingMocks and isDone behave consistently
+  * Removed coverage folder from npm
+  * Update PendingMocks when an interceptor is removed
+  * Update CHANGELOG
+
 8.1.0 / 2016-10-10
 ==================
 
@@ -17,6 +51,7 @@
     Also:
     - Use nyc as the CLI of istanbul
     - Use tap binary directly for running tests
+  * Support http OPTIONS method
   * Fix some issues to run library with Node v0.10:
     1. Set lodash version to ~4.9.0
     2. Add data-event listener for http's res message
@@ -140,94 +175,3 @@
   * Add support for full callback `reply()`.
     This addresses a bug with the `reply()` function where a request without
     a body caused full callbacks to error. (See pgte/nock[#489](https://github.com/node-nock/nock/issues/489))
-  * changelog update
-
-7.3.0 / 2016-02-24
-==================
-
-  * v7.3.0
-  * browserify bundle update
-  * Merge branch 'Limess-remove-interceptor-by-instance'
-  * Call removeInterceptor() with instance
-    Previously removeInterceptor() only took an options object. This was
-    inconvenient if the client didn't wish to expose urls directly in their
-    tests.
-    removeInterceptor now also takes an instance of `Interceptor` and uses
-    the instance variables `baseUrl` and `_key` to filter for removal.
-    Added 3 test cases to cover http, https and regex path matching.
-  * Use lodash size function
-    You cannot effectively compare anything to an empty object declaration. {} === {} will always equal false. This is to address the attended purpose by the comment provided.
-  * changelog update
-
-7.2.2 / 2016-02-19
-==================
-
-  * v7.2.2
-  * browserify bundle update
-  * Merge branch 'mdlavin-v7-performance-improvement'
-  * Increase test coverage of allowUnmocked when only mismatch is the body
-  * Reuse _.defaults where possible to reduce code
-  * Do not stringify request options unless they will be logged
-  * Optimize for large number of interceptors
-  * changelog update
-
-7.2.1 / 2016-02-15
-==================
-
-  * v7.2.1
-  * Merge branch 'owiber-oliver-callbackfix'
-  * Merge branch 'oliver-callbackfix' of git://github.com/owiber/nock into owiber-oliver-callbackfix
-
-7.2.0 / 2016-02-15
-==================
-
-  * v7.2.0
-  * Merge branch 'master' of github.com:pgte/nock
-  * mkdirp is optional because browsers. addresses [#475](https://github.com/node-nock/nock/issues/475)
-  * fix key when interceptor path is specified with callback
-  * Merge pull request [#465](https://github.com/node-nock/nock/issues/465) from JemiloII/patch-1
-  * Fixing typos
-  * added @BinChang as contributor
-  * changelog update
-
-7.1.0 / 2016-01-29
-==================
-
-  * v7.1.0
-  * Merge branch 'BinChang-delayBody'
-  * add a new api delayBody() and update the syntax of delay().
-  * Merge pull request [#462](https://github.com/node-nock/nock/issues/462) from four43/patch-2
-    Add clean all to example about being done with the test
-  * Add clean all to example about being done with the test
-
-7.0.2 / 2016-01-27
-==================
-
-  * v7.0.2
-  * isStream test fixed for null objects
-
-7.0.1 / 2016-01-27
-==================
-
-  * v7.0.1
-  * for when content type header is an array. should fix [#460](https://github.com/node-nock/nock/issues/460)
-  * Merge branch 'BinChang-common_is_stream'
-  * remove isStream to the common lib.
-
-7.0.0 / 2016-01-25
-==================
-
-  * v7.0.0
-  * Merge branch 'wprater-patch-1'
-  * Merge branch 'patch-1' of git://github.com/wprater/nock into wprater-patch-1
-  * Merge branch 'BinChang-scope_interceptor'
-  * updated broswerify bundle
-  * Merge branch 'scope_interceptor' of git://github.com/BinChang/nock into BinChang-scope_interceptor
-  * changelog update
-
-6.0.1 / 2016-01-25
-==================
-
-  * v6.0.1
-  * Merge branch 'alekbarszczewski-reply-headers-fix'
-  * browserify bundle update
