@@ -12,79 +12,92 @@ Nock can be used to test modules that perform HTTP requests in isolation.
 
 For instance, if a module performs HTTP requests to a CouchDB server or makes HTTP requests to the Amazon API, you can test that module in isolation.
 
-<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc/generate-toc again -->
 **Table of Contents**
 
+<!-- toc -->
+
 - [Install](#install)
+  * [Node version support](#node-version-support)
 - [Use](#use)
-    - [READ THIS! - About interceptors](#read-this---about-interceptors)
-    - [Specifying hostname](#specifying-hostname)
-    - [Specifying path](#specifying-path)
-    - [Specifying request body](#specifying-request-body)
-    - [Specifying request query string](#specifying-request-query-string)
-    - [Specifying replies](#specifying-replies)
-        - [Replying with errors](#replying-with-errors)
-    - [Specifying headers](#specifying-headers)
-        - [Header field names are case-insensitive](#header-field-names-are-case-insensitive)
-        - [Specifying Request Headers](#specifying-request-headers)
-        - [Specifying Reply Headers](#specifying-reply-headers)
-        - [Default Reply Headers](#default-reply-headers)
-        - [Including Content-Length Header Automatically](#including-content-length-header-automatically)
-        - [Including Date Header Automatically](#including-date-header-automatically)
-    - [HTTP Verbs](#http-verbs)
-    - [Support for HTTP and HTTPS](#support-for-http-and-https)
-    - [Non-standard ports](#non-standard-ports)
-    - [Repeat response n times](#repeat-response-n-times)
-    - [Delay the response body](#delay-the-response-body)
-    - [Delay the response](#delay-the-response)
-    - [Delay the connection](#delay-the-connection)
-    - [Socket timeout](#socket-timeout)
-    - [Chaining](#chaining)
-    - [Scope filtering](#scope-filtering)
-    - [Path filtering](#path-filtering)
-    - [Request Body filtering](#request-body-filtering)
-    - [Request Headers Matching](#request-headers-matching)
-    - [Optional Requests](#optional-requests)
-    - [Allow __unmocked__ requests on a mocked hostname](#allow-unmocked-requests-on-a-mocked-hostname)
+  * [READ THIS! - About interceptors](#read-this---about-interceptors)
+  * [Specifying hostname](#specifying-hostname)
+  * [Specifying path](#specifying-path)
+  * [Specifying request body](#specifying-request-body)
+  * [Specifying request query string](#specifying-request-query-string)
+  * [Specifying replies](#specifying-replies)
+      - [Access original request and headers](#access-original-request-and-headers)
+    + [Replying with errors](#replying-with-errors)
+  * [Specifying headers](#specifying-headers)
+    + [Header field names are case-insensitive](#header-field-names-are-case-insensitive)
+    + [Specifying Request Headers](#specifying-request-headers)
+    + [Specifying Reply Headers](#specifying-reply-headers)
+    + [Default Reply Headers](#default-reply-headers)
+    + [Including Content-Length Header Automatically](#including-content-length-header-automatically)
+    + [Including Date Header Automatically](#including-date-header-automatically)
+  * [HTTP Verbs](#http-verbs)
+  * [Support for HTTP and HTTPS](#support-for-http-and-https)
+  * [Non-standard ports](#non-standard-ports)
+  * [Repeat response n times](#repeat-response-n-times)
+  * [Delay the response body](#delay-the-response-body)
+  * [Delay the response](#delay-the-response)
+  * [Delay the connection](#delay-the-connection)
+  * [Socket timeout](#socket-timeout)
+  * [Chaining](#chaining)
+  * [Scope filtering](#scope-filtering)
+  * [Path filtering](#path-filtering)
+  * [Request Body filtering](#request-body-filtering)
+  * [Request Headers Matching](#request-headers-matching)
+  * [Optional Requests](#optional-requests)
+  * [Allow __unmocked__ requests on a mocked hostname](#allow-__unmocked__-requests-on-a-mocked-hostname)
 - [Expectations](#expectations)
-    - [.isDone()](#isdone)
-    - [.cleanAll()](#cleanall)
-    - [.persist()](#persist)
-    - [.pendingMocks()](#pendingmocks)
-    - [.activeMocks()](#activemocks)    
+  * [.isDone()](#isdone)
+  * [.cleanAll()](#cleanall)
+  * [.persist()](#persist)
+  * [.pendingMocks()](#pendingmocks)
+  * [.activeMocks()](#activemocks)
 - [Logging](#logging)
 - [Restoring](#restoring)
 - [Turning Nock Off (experimental!)](#turning-nock-off-experimental)
 - [Enable/Disable real HTTP request](#enabledisable-real-http-request)
 - [Recording](#recording)
-    - [`dont_print` option](#dontprint-option)
-    - [`output_objects` option](#outputobjects-option)
-    - [`enable_reqheaders_recording` option](#enablereqheadersrecording-option)
-    - [`logging` option](#logging-option)
-    - [`use_separator` option](#useseparator-option)
-    - [.removeInterceptor()](#removeinterceptor)
+  * [`dont_print` option](#dont_print-option)
+  * [`output_objects` option](#output_objects-option)
+  * [`enable_reqheaders_recording` option](#enable_reqheaders_recording-option)
+  * [`logging` option](#logging-option)
+  * [`use_separator` option](#use_separator-option)
+  * [.removeInterceptor()](#removeinterceptor)
 - [Events](#events)
-    - [Global no match event](#global-no-match-event)
+  * [Global no match event](#global-no-match-event)
 - [Nock Back](#nock-back)
-    - [Setup](#setup)
-        - [Options](#options)
-    - [Usage](#usage)
-        - [Options](#options)
-        - [Modes](#modes)
+  * [Setup](#setup)
+    + [Options](#options)
+  * [Usage](#usage)
+    + [Options](#options-1)
+    + [Modes](#modes)
 - [How does it work?](#how-does-it-work)
 - [Debugging](#debugging)
 - [PROTIP](#protip)
 - [Generate Changelog](#generate-changelog)
 - [License](#license)
 
-<!-- markdown-toc end -->
-
+<!-- tocstop -->
 
 # Install
 
 ```sh
 $ npm install nock
 ```
+
+## Node version support
+
+| node | nock |
+|---|---|
+| 0.10 | up to 8.x |
+| 0.11 | up to 8.x |
+| 0.12 | up to 8.x |
+| 4 | 8.x |
+| 5 | up to 8.x |
+| 6 | 8.x |
 
 # Use
 
@@ -1203,7 +1216,7 @@ You can also listen for no match events like this:
 
 ```js
 nock.emitter.on('no match', function(req) {
-  
+
 });
 ```
 
@@ -1330,10 +1343,6 @@ var scope = nock('http://api.myservice.com')
 
 
 # Generate Changelog
-
-```
-$ npm install changelog -g
-```
 
 ```
 $ npm run changelog
