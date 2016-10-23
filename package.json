@@ -176,6 +176,7 @@
     "async": "^2.1.1",
     "aws-sdk": "^2.0.15",
     "browserify": "^13.0.0",
+    "changelog": "^1.0.7",
     "coveralls": "^2.11.2",
     "hyperquest": "^1.3.0",
     "isomorphic-fetch": "^2.2.0",
