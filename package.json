@@ -159,7 +159,7 @@
     "url": "http://github.com/node-nock/nock/issues"
   },
   "engines": [
-    "node >= 0.10.0"
+    "node >= 4.0"
   ],
   "main": "./index",
   "dependencies": {
