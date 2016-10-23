@@ -1281,9 +1281,7 @@ test("reply with file with mikeal/request", function(t) {
 
   var options = { uri: 'http://www.files.com/', onResponse: true };
   mikealRequest('http://www.files.com/', function(err, res, body) {
-    if (err) {
-      throw err;
-    }
+    t.error(err);
 
     res.setEncoding('utf8');
     t.equal(res.statusCode, 200);
@@ -2837,7 +2835,7 @@ test('enable real HTTP request only for google.com, via string', function(t) {
   nock.enableNetConnect('google.com');
 
   http.get('http://google.com.br/').on('error', function(err) {
-    throw err;
+    t.error(err);
   });
 
   http.get('http://www.amazon.com', function(res) {
@@ -2854,7 +2852,7 @@ test('enable real HTTP request only for google.com, via regexp', function(t) {
   nock.enableNetConnect(/google\.com/);
 
   http.get('http://google.com.br/').on('error', function(err) {
-    throw err;
+    t.error(err);
   });
 
   http.get('http://www.amazon.com', function(res) {
@@ -4741,7 +4739,7 @@ test('query() matches a query string of the same name=value', function (t) {
     .reply(200);
 
   mikealRequest('http://google.com/?foo=bar', function(err, res) {
-    if (err) throw err;
+    t.error(err);
     t.equal(res.statusCode, 200);
     t.end();
   })
@@ -4754,7 +4752,7 @@ test('query() matches multiple query strings of the same name=value', function (
     .reply(200);
 
   mikealRequest('http://google.com/?foo=bar&baz=foz', function(err, res) {
-    if (err) throw err;
+    t.error(err);
     t.equal(res.statusCode, 200);
     t.end();
   })
@@ -4767,7 +4765,7 @@ test('query() matches multiple query strings of the same name=value regardless o
     .reply(200);
 
   mikealRequest('http://google.com/?baz=foz&foo=bar', function(err, res) {
-    if (err) throw err;
+    t.error(err);
     t.equal(res.statusCode, 200);
     t.end();
   })
@@ -4780,7 +4778,7 @@ test('query() matches query values regardless of their type of declaration', fun
     .reply(200);
 
   mikealRequest('http://google.com/?num=1&bool=true&empty=&str=fou', function(err, res) {
-    if (err) throw err;
+    t.error(err);
     t.equal(res.statusCode, 200);
     t.end();
   })
@@ -4793,7 +4791,7 @@ test('query() matches a query string using regexp', function (t) {
     .reply(200);
 
   mikealRequest('http://google.com/?foo=bar', function(err, res) {
-    if (err) throw err;
+    t.error(err);
     t.equal(res.statusCode, 200);
     t.end();
   })
@@ -4813,7 +4811,7 @@ test('query() matches a query string that contains special RFC3986 characters', 
   };
 
   mikealRequest(options, function(err, res) {
-    if (err) throw err;
+    t.error(err);
     t.equal(res.statusCode, 200);
     t.end();
   })
@@ -4838,7 +4836,7 @@ test('query() matches a query string with pre-encoded values', function (t) {
     .reply(200);
 
   mikealRequest('http://google.com?foo=hello%20world', function(err, res) {
-    if (err) throw err;
+    t.error(err);
     t.equal(res.statusCode, 200);
     t.end();
   })
@@ -4851,7 +4849,7 @@ test('query() with "true" will allow all query strings to pass', function (t) {
     .reply(200);
 
   mikealRequest('http://google.com/?foo=bar&a=1&b=2', function(err, res) {
-    if (err) throw err;
+    t.error(err);
     t.equal(res.statusCode, 200);
     t.end();
   })
@@ -4864,8 +4862,21 @@ test('query() with "{}" will allow a match against ending in ?', function (t) {
     .reply(200);
 
   mikealRequest('http://querystringmatchland.com/noquerystring?', function(err, res) {
-    if (err) throw err;
+    t.error(err);
     t.equal(res.statusCode, 200);
+    t.end();
+  })
+});
+
+test('query() will not match when there is no query string in the request', function (t) {
+  var scope = nock('https://d.com')
+    .get('/a')
+    .query({foo: 'bar'})
+    .reply(200);
+
+  mikealRequest('https://d.com/a', function(err, res) {
+    t.type(err, Error);
+    t.equal(err.message.trim(), 'Nock: No match for request GET https://d.com/a');
     t.end();
   })
 });
@@ -4884,7 +4895,7 @@ test('query() with a function, function called with actual queryObject',function
     .reply(200);
 
   mikealRequest('http://google.com/?foo=bar&a=1&b=2', function(err, res) {
-    if (err) throw err;
+    t.error(err);
     t.deepEqual(queryObject,{foo:'bar',a:'1',b:'2'});
     t.equal(res.statusCode, 200);
     t.end();
@@ -4892,39 +4903,37 @@ test('query() with a function, function called with actual queryObject',function
 });
 
 test('query() with a function, function return true the query treat as matched',function(t){
-  var alwasyTrue = function(){
+  var alwaysTrue = function(){
     return true;
   };
 
   var scope = nock('http://google.com')
     .get('/')
-    .query(alwasyTrue)
+    .query(alwaysTrue)
     .reply(200);
 
   mikealRequest('http://google.com/?igore=the&actual=query', function(err, res) {
-    if (err) throw err;
+    t.error(err);
     t.equal(res.statusCode, 200);
     t.end();
   })
 });
 
 test('query() with a function, function return false the query treat as Un-matched',function(t){
-
-  var alwayFalse = function(){
+  var alwaysFalse = function(){
     return false;
   };
 
   var scope = nock('http://google.com')
     .get('/')
-    .query(alwayFalse)
+    .query(alwaysFalse)
     .reply(200);
 
-  mikealRequest('http://google.com/?i=should&pass=?', function(err, res) {
-    t.equal(err.message.trim(), 'Nock: No match for request GET http://google.com/?i=should&pass=?');
+  mikealRequest('http://google.com/?i=should&pass=', function(err, res) {
+    t.equal(err.message.trim(), 'Nock: No match for request GET http://google.com/?i=should&pass=');
     t.end();
   })
 });
-
 
 test('query() will not match when a query string does not match name=value', function (t) {
   var scope = nock('https://c.com')
@@ -4975,6 +4984,20 @@ test('query() will not match when a query string has fewer correct values than e
 
   mikealRequest('http://google.com/?num=1str=fou', function(err, res) {
     t.equal(err.message.trim(), 'Nock: No match for request GET http://google.com/?num=1str=fou');
+    t.end();
+  })
+});
+
+test('query() will not match when the path has no query', function (t) {
+  nock.cleanAll();
+  var scope = nock('http://google.com')
+    .get('/')
+    .query({ foo: 'bar' })
+    .reply(200);
+
+  mikealRequest('http://google.com', function(err, res) {
+    t.type(err, Error);
+    t.match(err.message, 'Nock: No match for request');
     t.end();
   })
 });

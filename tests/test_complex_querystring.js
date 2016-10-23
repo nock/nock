@@ -5,6 +5,12 @@ var http    = require('http');
 
 test('query with array', function(t) {
     var query1 = { list: [123, 456, 789], a: 'b' };
+    var query2 = { list: [123, 456, 0], a: 'b' };
+
+    nock('https://array-query-string.com')
+        .get('/test')
+        .query(query1)
+        .reply(200, 'success');
 
     request({
         url: 'https://array-query-string.com/test',
@@ -13,17 +19,22 @@ test('query with array', function(t) {
     }, function(error, response, body) {
         t.ok(!error);
         t.deepEqual(body, 'success');
-        t.end();
-    });
 
-    nock('https://array-query-string.com')
-        .get('/test')
-        .query(query1)
-        .reply(200, 'success');
+        request({
+            url: 'https://array-query-string.com/test',
+            qs: query2,
+            method: 'GET'
+        }, function(error, response, body) {
+            t.type(error, Error, 'expect an error');
+            t.match(error.message, 'No match for request');
+            t.end();
+        });
+    });
 });
 
 test('query with array which contains unencoded value ', function(t) {
     var query1 = { list: ['hello%20world', '2hello%20world', 3], a: 'b' };
+    var query2 = { list: ['hello%20worldzz', '2hello%20world', 3], a: 'b' };
 
     nock('https://array-query-string.com')
         .get('/test')
@@ -37,7 +48,16 @@ test('query with array which contains unencoded value ', function(t) {
     }, function(error, response, body) {
         t.ok(!error);
         t.deepEqual(body, 'success');
-        t.end();
+
+        request({
+            url: 'https://array-query-string.com/test',
+            qs: query2,
+            method: 'GET'
+        }, function(error, response, body) {
+            t.type(error, Error, 'expect an error');
+            t.match(error.message, 'No match for request');
+            t.end();
+        });
     });
 });
 
@@ -55,7 +75,15 @@ test('query with array which contains pre-encoded values ', function(t) {
     }, function(error, response, body) {
         t.ok(!error);
         t.deepEqual(body, 'success');
-        t.end();
+
+        request({
+            url: 'https://array-query-string.com/test?list%5B0%5D=hello%20world&list%5B1%5D=2hello%20worldzz',
+            method: 'GET'
+        }, function(error, response, body) {
+            t.type(error, Error, 'expect an error');
+            t.match(error.message, 'No match for request');
+            t.end();
+        });
     });
 });
 
@@ -65,6 +93,13 @@ test('query with object', function(t) {
             b: ['c', 'd']
         },
         e: [1, 2, 3, 4]
+    };
+
+    var query2 = {
+        a: {
+            b: ['c', 'd']
+        },
+        e: [1, 2, 3, 4, 5]
     };
 
     nock('https://object-query-string.com')
@@ -79,7 +114,16 @@ test('query with object', function(t) {
     }, function(error, response, body) {
         t.ok(!error);
         t.deepEqual(body, 'success');
-        t.end();
+
+        request({
+            url: 'https://array-query-string.com/test',
+            qs: query2,
+            method: 'GET'
+        }, function(error, response, body) {
+            t.type(error, Error, 'expect an error');
+            t.match(error.message, 'No match for request');
+            t.end();
+        });
     });
 });
 
