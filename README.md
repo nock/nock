@@ -81,6 +81,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
   * [Generate Changelog](#generate-changelog)
   * [Generate README TOC](#generate-readme-toc)
   * [Running tests](#running-tests)
+    + [Airplane mode](#airplane-mode)
 - [License](#license)
 
 <!-- tocstop -->
@@ -1365,6 +1366,15 @@ $ npm run toc
 ## Running tests
 
 ```
+$ npm test
+```
+
+### Airplane mode
+
+Some of the tests depend on online connectivity. To skip them, set the `AIRPLANE` environment variable to some value.
+
+```
+$ export AIRPLANE=true
 $ npm test
 ```
 

@@ -45,7 +45,7 @@ test("allow override works (2)", function(t) {
   var scope =
   nock("https://httpbin.org",{allowUnmocked: true}).
     post("/post").
-    reply(200,"99problems");
+    reply(200, "99problems");
 
   var options = {
     method: "POST",
@@ -287,7 +287,6 @@ test("post", function(t) {
    req.end();
 });
 
-
 test("post with empty response body", function(t) {
   var scope = nock('http://www.google.com')
      .post('/form')
@@ -368,8 +367,7 @@ test("get with reply callback", function(t) {
   req.end();
 });
 
-test("get to different subdomain with reply callback and filtering scope",
-function(t) {
+test("get to different subdomain with reply callback and filtering scope", function(t) {
   //  We scope for www.google.com but through scope filtering we
   //  will accept any <subdomain>.google.com
   var scope = nock('http://www.google.com', {
@@ -1800,7 +1798,6 @@ test('hostname is case insensitive', function(t) {
   req.end();
 });
 
-
 test("can take a port", function(t) {
   var scope = nock('http://www.myserver.com:3333')
     .get('/')
@@ -2069,7 +2066,7 @@ test("two scopes with the same request are consumed", function(t) {
   }
 });
 
-test("allow unmocked option works", function(t) {
+test("allow unmocked option works", {skip: process.env.AIRPLANE}, function(t) {
   var scope = nock('http://www.google.com', {allowUnmocked: true})
     .get('/abc')
     .reply(200, 'Hey!')
@@ -2191,7 +2188,6 @@ test("JSON encoded replies set the content-type header", function(t) {
     , path: '/'
   }, done).end();
 });
-
 
 test("JSON encoded replies does not overwrite existing content-type header", function(t) {
   var scope = nock('http://localhost')
@@ -2419,7 +2415,6 @@ test('username and password works', function(t) {
   }).end();
 });
 
-
 test('works with mikeal/request and username and password', function(t) {
     var scope = nock('http://passwordyyyyy.com')
       .get('/abc')
@@ -2604,8 +2599,7 @@ test("persist reply with file", function(t) {
   }, t.end.bind(t));
 });
 
-
-test('(re-)activate after restore', function(t) {
+test('(re-)activate after restore', {skip: process.env.AIRPLANE}, function(t) {
   var scope = nock('http://google.com')
     .get('/')
     .reply(200, 'Hello, World!');
@@ -2631,7 +2625,7 @@ test('(re-)activate after restore', function(t) {
   }).end();
 });
 
-test("allow unmocked option works with https", function(t) {
+test("allow unmocked option works with https", {skip: process.env.AIRPLANE}, function(t) {
   t.plan(5)
   var scope = nock('https://www.google.com', {allowUnmocked: true})
     .get('/abc')
@@ -2675,8 +2669,7 @@ test("allow unmocked option works with https", function(t) {
   }).end();
 });
 
-
-test('allow unmocked post with json data', function(t) {
+test('allow unmocked post with json data', {skip: process.env.AIRPLANE}, function(t) {
   var scope = nock('https://httpbin.org', { allowUnmocked: true }).
     get("/abc").
     reply(200, "Hey!");
@@ -2693,7 +2686,7 @@ test('allow unmocked post with json data', function(t) {
   });
 });
 
-test('allow unmocked passthrough with mismatched bodies', function(t) {
+test('allow unmocked passthrough with mismatched bodies', {skip: process.env.AIRPLANE}, function(t) {
   var scope = nock('http://httpbin.org', { allowUnmocked: true }).
     post("/post", {some: 'otherdata'}).
     reply(404, "Hey!");
@@ -2755,7 +2748,6 @@ test('allow unordered body with form encoding', function(t) {
     t.end();
   });
 });
-
 
 test('allow string json spec', function(t) {
   var bodyObject = {bar: 'foo', foo: 'bar'};
@@ -2833,7 +2825,7 @@ test('NetConnectNotAllowedError exposes the stack', function(t) {
   nock.enableNetConnect();
 });
 
-test('enable real HTTP request only for google.com, via string', function(t) {
+test('enable real HTTP request only for google.com, via string', {skip: process.env.AIRPLANE}, function(t) {
   nock.enableNetConnect('google.com');
 
   http.get('http://google.com.br/').on('error', function(err) {
@@ -2850,7 +2842,7 @@ test('enable real HTTP request only for google.com, via string', function(t) {
   nock.enableNetConnect();
 });
 
-test('enable real HTTP request only for google.com, via regexp', function(t) {
+test('enable real HTTP request only for google.com, via regexp', {skip: process.env.AIRPLANE}, function(t) {
   nock.enableNetConnect(/google\.com/);
 
   http.get('http://google.com.br/').on('error', function(err) {
@@ -3565,7 +3557,7 @@ test('define() works with binary buffers', function(t) {
 
 });
 
-test('issue #163 - Authorization header isn\'t mocked', function(t) {
+test('issue #163 - Authorization header isn\'t mocked', {skip: process.env.AIRPLANE}, function(t) {
   nock.enableNetConnect();
   function makeRequest(cb) {
     var r = http.request(
@@ -3825,7 +3817,6 @@ test('test request timeout option', function(t) {
   });
 });
 
-
 test('done fails when specified request header is missing', function(t) {
   var scope = nock('http://example.com', {
     reqheaders: {
@@ -3854,7 +3845,6 @@ test('done fails when specified request header is missing', function(t) {
   });
 });
 
-
 test('matches request header with regular expression', function(t) {
   var scope = nock('http://example.com', {
     reqheaders: {
@@ -3877,7 +3867,6 @@ test('matches request header with regular expression', function(t) {
         t.end();
     });
 });
-
 
 test('request header satisfies the header function', function(t) {
   var scope = nock('http://example.com', {
@@ -4451,7 +4440,6 @@ test('remove interceptor removes given interceptor', function(t) {
   });
 });
 
-
 test('remove interceptor removes interceptor from pending requests', function(t) {
   var givenInterceptor = nock('http://example.org')
     .get('/somepath');
@@ -4468,7 +4456,6 @@ test('remove interceptor removes interceptor from pending requests', function(t)
   t.deepEqual(mocksAfterRemove, [ ]);
   t.end();
 });
-
 
 test('remove interceptor removes given interceptor for https', function(t) {
   var givenInterceptor = nock('https://example.org')
@@ -4889,7 +4876,7 @@ test('query() with a function, function called with actual queryObject',function
   })
 });
 
-test('query() with a function, function return true the query treat as matched',function(t){
+test('query() with a function, function return true the query treat as matched', function(t){
   var alwasyTrue = function(){
     return true;
   };
@@ -4906,7 +4893,7 @@ test('query() with a function, function return true the query treat as matched',
   })
 });
 
-test('query() with a function, function return false the query treat as Un-matched',function(t){
+test('query() with a function, function return false the query treat as Un-matched', function(t){
 
   var alwayFalse = function(){
     return false;
@@ -4922,7 +4909,6 @@ test('query() with a function, function return false the query treat as Un-match
     t.end();
   })
 });
-
 
 test('query() will not match when a query string does not match name=value', function (t) {
   var scope = nock('https://c.com')
@@ -4990,7 +4976,6 @@ test('query(true) will match when the path has no query', function (t) {
     t.end();
   })
 });
-
 
 test("teardown", function(t) {
   var leaks = Object.keys(global)
