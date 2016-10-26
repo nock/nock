@@ -3309,44 +3309,42 @@ test("finish event fired before end event (bug-139)", function(t) {
 
 });
 
-if (stream.Readable) {
-  test('when a stream is used for the response body, it will not be read until after the response event', function (t) {
-    var responseEvent = false;
-    var text = 'Hello World\n';
+test('when a stream is used for the response body, it will not be read until after the response event', {skip: !stream.Readable}, function (t) {
+  var responseEvent = false;
+  var text = 'Hello World\n';
 
-    function SimpleStream(opt) {
-      stream.Readable.call(this, opt);
-    }
-    util.inherits(SimpleStream, stream.Readable);
-    SimpleStream.prototype._read = function() {
-      t.ok(responseEvent);
-      this.push(text);
-      this.push(null);
-    };
+  function SimpleStream(opt) {
+    stream.Readable.call(this, opt);
+  }
+  util.inherits(SimpleStream, stream.Readable);
+  SimpleStream.prototype._read = function() {
+    t.ok(responseEvent);
+    this.push(text);
+    this.push(null);
+  };
 
-    nock('http://localhost')
-      .get('/')
-      .reply(200, function (path, reqBody) {
-        return new SimpleStream();
-      });
+  nock('http://localhost')
+    .get('/')
+    .reply(200, function (path, reqBody) {
+      return new SimpleStream();
+    });
 
-    http.get('http://localhost/', function (res) {
-      responseEvent = true;
-      res.setEncoding('utf8');
+  http.get('http://localhost/', function (res) {
+    responseEvent = true;
+    res.setEncoding('utf8');
 
-      var body = '';
+    var body = '';
 
-      res.on('data', function(chunk) {
-        body += chunk;
-      });
+    res.on('data', function(chunk) {
+      body += chunk;
+    });
 
-      res.once('end', function() {
-        t.equal(body, text);
-        t.end();
-      });
+    res.once('end', function() {
+      t.equal(body, text);
+      t.end();
     });
   });
-}
+});
 
 test('calling delayConnection delays the connection', function (t) {
   checkDuration(t, 100);
