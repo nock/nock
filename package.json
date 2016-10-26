@@ -201,7 +201,8 @@
     "coverage": "nyc --reporter=lcov tap --harmony ./tests/test_*.js",
     "coveralls": "cat ./coverage/lcov.info | coveralls",
     "jshint": "jshint lib/*.js",
-    "changelog": "changelog nock all -m > CHANGELOG.md"
+    "changelog": "changelog nock all -m > CHANGELOG.md",
+    "toc": "markdown-toc -i README.md"
   },
   "pre-commit": [
     "jshint",

@@ -77,7 +77,10 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
     + [Modes](#modes)
 - [Debugging](#debugging)
 - [PROTIP](#protip)
-- [Generate Changelog](#generate-changelog)
+- [Contributing](#contributing)
+  * [Generate Changelog](#generate-changelog)
+  * [Generate README TOC](#generate-readme-toc)
+  * [Running tests](#running-tests)
 - [License](#license)
 
 <!-- tocstop -->
@@ -1341,11 +1344,28 @@ var scope = nock('http://api.myservice.com')
   .reply(200, 'OK');
 ```
 
+# Contributing
 
-# Generate Changelog
+## Generate Changelog
+
+This should be done immediately after publishing a new version to npm.
 
 ```
 $ npm run changelog
+```
+
+## Generate README TOC
+
+Make sure to update the README's table of contents whenever you update the README using the following npm script.
+
+```
+$ npm run toc
+```
+
+## Running tests
+
+```
+$ npm test
 ```
 
 # License
