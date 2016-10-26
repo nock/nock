@@ -16,6 +16,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
 
 <!-- toc -->
 
+- [How does it work?](#how-does-it-work)
 - [Install](#install)
   * [Node version support](#node-version-support)
 - [Use](#use)
@@ -74,13 +75,16 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
   * [Usage](#usage)
     + [Options](#options-1)
     + [Modes](#modes)
-- [How does it work?](#how-does-it-work)
 - [Debugging](#debugging)
 - [PROTIP](#protip)
 - [Generate Changelog](#generate-changelog)
 - [License](#license)
 
 <!-- tocstop -->
+
+# How does it work?
+
+Nock works by overriding Node's `http.request` function. Also, it overrides `http.ClientRequest` too to cover for modules that use it directly.
 
 # Install
 
@@ -1316,10 +1320,6 @@ to set the mode call `nockBack.setMode(mode)` or run the tests with the `NOCK_BA
 - record: use recorded nocks, record new nocks
 
 - lockdown: use recorded nocks, disables all http calls even when not nocked, doesn't record
-
-# How does it work?
-
-Nock works by overriding Node's `http.request` function. Also, it overrides `http.ClientRequest` too to cover for modules that use it directly.
 
 # Debugging
 Nock uses debug, so just run with environmental variable DEBUG set to nock.*
