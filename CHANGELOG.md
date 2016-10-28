@@ -1,3 +1,8 @@
+9.0.2 / 2016-10-28
+==================
+
+  * Update CHANGELOG
+  * Implement AIRPLANE mode to skip internet-dependent tests
 
 9.0.1 / 2016-10-28
 ==================
