@@ -1,6 +1,6 @@
 'use strict';
 
-var test     = require('tap').test;
+var test = require('tap').test;
 var nock = require('../');
 var nockBack = nock.back;
 var http = require("http");
@@ -28,8 +28,7 @@ test('setup', function(t) {
   t.end();
 });
 
-
-test('recording', function(t) {
+test('recording', {skip: process.env.AIRPLANE}, function(t) {
   nockBack('recording_test.json', function(nockDone) {
     http.get('http://google.com', function(res) {
       res.once('end', function() {
@@ -51,7 +50,7 @@ test('recording', function(t) {
   rimrafOnEnd(t);
 });
 
-test('passes custom options to recorder', function(t) {
+test('passes custom options to recorder', {skip: process.env.AIRPLANE}, function(t) {
   nockBack('recording_test.json', { recorder: { enable_reqheaders_recording: true } }, function(nockDone) {
     http.get('http://google.com', function(res) {
       res.once('end', function() {

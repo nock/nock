@@ -16,6 +16,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
 
 <!-- toc -->
 
+- [How does it work?](#how-does-it-work)
 - [Install](#install)
   * [Node version support](#node-version-support)
 - [Use](#use)
@@ -74,13 +75,20 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
   * [Usage](#usage)
     + [Options](#options-1)
     + [Modes](#modes)
-- [How does it work?](#how-does-it-work)
 - [Debugging](#debugging)
 - [PROTIP](#protip)
-- [Generate Changelog](#generate-changelog)
+- [Contributing](#contributing)
+  * [Generate Changelog](#generate-changelog)
+  * [Generate README TOC](#generate-readme-toc)
+  * [Running tests](#running-tests)
+    + [Airplane mode](#airplane-mode)
 - [License](#license)
 
 <!-- tocstop -->
+
+# How does it work?
+
+Nock works by overriding Node's `http.request` function. Also, it overrides `http.ClientRequest` too to cover for modules that use it directly.
 
 # Install
 
@@ -1317,10 +1325,6 @@ to set the mode call `nockBack.setMode(mode)` or run the tests with the `NOCK_BA
 
 - lockdown: use recorded nocks, disables all http calls even when not nocked, doesn't record
 
-# How does it work?
-
-Nock works by overriding Node's `http.request` function. Also, it overrides `http.ClientRequest` too to cover for modules that use it directly.
-
 # Debugging
 Nock uses debug, so just run with environmental variable DEBUG set to nock.*
 
@@ -1341,11 +1345,37 @@ var scope = nock('http://api.myservice.com')
   .reply(200, 'OK');
 ```
 
+# Contributing
 
-# Generate Changelog
+## Generate Changelog
+
+This should be done immediately after publishing a new version to npm.
 
 ```
 $ npm run changelog
+```
+
+## Generate README TOC
+
+Make sure to update the README's table of contents whenever you update the README using the following npm script.
+
+```
+$ npm run toc
+```
+
+## Running tests
+
+```
+$ npm test
+```
+
+### Airplane mode
+
+Some of the tests depend on online connectivity. To skip them, set the `AIRPLANE` environment variable to some value.
+
+```
+$ export AIRPLANE=true
+$ npm test
 ```
 
 # License

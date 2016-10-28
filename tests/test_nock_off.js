@@ -3,7 +3,7 @@
 var test          = require('tap').test;
 var mikealRequest = require('request');
 
-test('NOCK_OFF=true works for https', function(t) {
+test('NOCK_OFF=true works for https', {skip: process.env.AIRPLANE}, function(t) {
   var original = process.env.NOCK_OFF;
   process.env.NOCK_OFF = 'true';
   var nock = require('../');
@@ -24,5 +24,3 @@ test('NOCK_OFF=true works for https', function(t) {
     t.end();
   });
 });
-
-
