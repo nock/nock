@@ -1,3 +1,14 @@
+
+9.0.1 / 2016-10-28
+==================
+
+  * 9.0.1
+  * Merge pull request [#734](https://github.com/node-nock/nock/issues/734) from RobertWHurst/master
+    Fixes regression introduced by [#719](https://github.com/node-nock/nock/issues/719)
+  * Fix [#731](https://github.com/node-nock/nock/issues/731)
+  * test for empty object in body
+  * Update README & CHANGELOG
+
 9.0.0 / 2016-10-23
 ==================
 
@@ -5,6 +16,15 @@
   * Drop support for node versions 0.10, 0.11, 0.12 and 5
   * Add section on node versions support
   * Update CHANGELOG
+
+8.2.1 / 2016-10-28
+==================
+
+  * 8.2.1
+  * Merge pull request [#734](https://github.com/node-nock/nock/issues/734) from RobertWHurst/master
+    Fixes regression introduced by [#719](https://github.com/node-nock/nock/issues/719)
+  * Fix [#731](https://github.com/node-nock/nock/issues/731)
+  * test for empty object in body
 
 8.2.0 / 2016-10-23
 ==================
