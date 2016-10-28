@@ -47,3 +47,22 @@ test('match body with regex inside array', function (t) {
     t.end();
   });
 })
+
+test('match body with empty object inside', function (t) {
+
+  nock('http://encodingsareus.com')
+    .post('/', { obj: {}})
+    .reply(200);
+
+  mikealRequest({
+    url: 'http://encodingsareus.com/',
+    method: 'post',
+    json: {
+      obj: {}
+    },
+  }, function(err, res) {
+    if (err) throw err;
+    assert.equal(res.statusCode, 200);
+    t.end();
+  });
+})
