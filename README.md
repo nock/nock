@@ -49,7 +49,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
   * [Request Body filtering](#request-body-filtering)
   * [Request Headers Matching](#request-headers-matching)
   * [Optional Requests](#optional-requests)
-  * [Allow __unmocked__ requests on a mocked hostname](#allow-__unmocked__-requests-on-a-mocked-hostname)
+  * [Allow __unmocked__ requests on a mocked hostname](#allow-unmocked-requests-on-a-mocked-hostname)
 - [Expectations](#expectations)
   * [.isDone()](#isdone)
   * [.cleanAll()](#cleanall)
