@@ -184,7 +184,7 @@
     "jshint": "^2.5.6",
     "markdown-toc": "^0.13.0",
     "needle": "^1.0.0",
-    "node-static": "^0.7.7",
+    "node-static": "^0.7.9",
     "nyc": "^8.3.0",
     "pre-commit": "1.1.2",
     "request": "2.71.0",
