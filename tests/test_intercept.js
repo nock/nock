@@ -41,7 +41,7 @@ test("double activation throws exception", function(t) {
   t.end();
 });
 
-test("allow override works (2)", function(t) {
+test("allow unmocked works (2)", function(t) {
   var scope =
   nock("https://httpbin.org",{allowUnmocked: true}).
     post("/post").
@@ -58,6 +58,24 @@ test("allow override works (2)", function(t) {
   mikealRequest(options, function(err, resp, body) {
     scope.done();
     t.end();
+  });
+});
+
+test("allow unmocked works after one interceptor is removed", function(t) {
+  var scope =
+  nock("https://example.org",{allowUnmocked: true}).
+    get("/").
+    reply(200, "Mocked");
+
+  mikealRequest("https://example.org", function(err, resp, body) {
+    t.error(err);
+    t.equal(body, 'Mocked');
+
+    mikealRequest("https://example.org/foo", function(err, resp, body) {
+      t.error(err);
+      t.assert(~body.indexOf('Example Domain'));
+      t.end();
+    });
   });
 });
 
