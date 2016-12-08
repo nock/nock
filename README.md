@@ -580,7 +580,7 @@ Nock supports any HTTP verb, and it has convenience methods for the GET, POST, P
 You can intercept any HTTP verb using `.intercept(path, verb [, requestBody [, options]])`:
 
 ```js
-scope('http://my.domain.com')
+var scope = nock('http://my.domain.com')
   .intercept('/path', 'PATCH')
   .reply(304);
 ```
