@@ -656,7 +656,7 @@ nock('http://my.server.com')
  delay({
     head: headDelayInMs,
     body: bodyDelayInMs
- }
+ })
  ```
 
  for example
