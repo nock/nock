@@ -637,7 +637,7 @@ nock('http://my.server.com')
   .reply(200, '<html></html>')
 ```
 
-NOTE: the [`'response'`](http://nodejs.org/api/http.html#http_event_response) event will occur immediately, but the [IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage) not emit it's `'end'` event until after the delay.
+NOTE: the [`'response'`](http://nodejs.org/api/http.html#http_event_response) event will occur immediately, but the [IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage) will not emit it's `'end'` event until after the delay.
 
 ## Delay the response
 
