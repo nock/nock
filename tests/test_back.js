@@ -96,7 +96,9 @@ tap.test('nockBack returns a promise when neither options nor nockbackFn are spe
 
   var promise = nockBack('test-promise-fixture.json');
   t.ok(promise);
-  promise.then(({nockDone, context}) => {
+  promise.then((params) => {
+    var nockDone = params.nockDone;
+    var context = params.context;
     t.assert(_.isFunction(nockDone));
     t.assert(_.isObject(context));
     t.end();
@@ -110,7 +112,9 @@ tap.test('nockBack returns a promise when nockbackFn is not specified', function
 
   var promise = nockBack('test-promise-fixture.json', {test: 'options'});
   t.ok(promise);
-  promise.then(({nockDone, context}) => {
+  promise.then((params) => {
+    var nockDone = params.nockDone;
+    var context = params.context;
     t.assert(_.isFunction(nockDone));
     t.assert(_.isObject(context));
     t.end();
