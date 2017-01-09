@@ -132,7 +132,7 @@ Then the test can call the module, and the module will do the HTTP requests.
 
 ## READ THIS! - About interceptors
 
-When you setup an interceptor for an URL and that interceptor is used, it is removed from the interceptor list.
+When you setup an interceptor for a URL and that interceptor is used, it is removed from the interceptor list.
 This means that you can intercept 2 or more calls to the same URL and return different things on each of them.
 It also means that you must setup one interceptor for each request you are going to have, otherwise nock will throw an error because that URL was not present in the interceptor list.
 
