@@ -1303,7 +1303,7 @@ nockBack('zomboFixture.json', function(nockDone) {
 });
 ```
 
-If you tests are using promises then use `nockBack` like this:
+If your tests are using promises then use `nockBack` like this:
 
 ```
 return nockBack('promisedFixture.json')
