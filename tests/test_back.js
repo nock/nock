@@ -5,7 +5,8 @@ var nock    = require('../.')
   , tap     = require('tap')
   , http    = require('http')
   , fs      = require('fs')
-  , exists  = fs.existsSync;
+  , exists  = fs.existsSync
+  , _       = require('lodash');
 
 nock.enableNetConnect();
 
@@ -69,6 +70,51 @@ tap.test('nockBack throws an exception when fixtures is not set', function (t) {
   }
 
   t.fail(true, false, 'test should have ended');
+
+});
+
+tap.test('nockBack throws an exception when fixtureName is not a string', function (t) {
+
+  nockBack.fixtures = __dirname + '/fixtures';
+
+  try {
+    nockBack();
+  } catch (e) {
+    t.ok(true, 'excpected exception');
+    t.equal(e.message, 'Parameter fixtureName must be a string');
+    t.end();
+    return;
+  }
+
+  t.fail(true, false, 'test should have ended');
+
+});
+
+tap.test('nockBack returns a promise when neither options nor nockbackFn are specified', function (t) {
+
+  nockBack.fixtures = __dirname + '/fixtures';
+
+  var promise = nockBack('test-promise-fixture.json');
+  t.ok(promise);
+  promise.then(({nockDone, context}) => {
+    t.assert(_.isFunction(nockDone));
+    t.assert(_.isObject(context));
+    t.end();
+  });
+
+});
+
+tap.test('nockBack returns a promise when nockbackFn is not specified', function (t) {
+
+  nockBack.fixtures = __dirname + '/fixtures';
+
+  var promise = nockBack('test-promise-fixture.json', {test: 'options'});
+  t.ok(promise);
+  promise.then(({nockDone, context}) => {
+    t.assert(_.isFunction(nockDone));
+    t.assert(_.isObject(context));
+    t.end();
+  });
 
 });
 
