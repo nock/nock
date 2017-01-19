@@ -160,22 +160,35 @@ tap.test('matchStringOrRegexp', function (t) {
 });
 
 tap.test('stringifyRequest', function (t) {
-  var mockOptions = {
-    port: 81,
-    proto: 'http',
-    hostname: 'www.example.com',
-    path: '/path/1',
-    headers: {
-      cookie: 'fiz=baz'
-    }
-  };
+  var getMockOptions = function () {
+    return {
+      method: "POST",
+      port: 81,
+      proto: 'http',
+      hostname: 'www.example.com',
+      path: '/path/1',
+      headers: {
+        cookie: 'fiz=baz'
+      }
+    };
+  }
   var body = '{"foo": "bar"}';
+  var postReqOptions = getMockOptions();
 
-  t.equal(common.stringifyRequest(mockOptions, body),
-    '{"method":"GET",'
+  t.equal(common.stringifyRequest(postReqOptions, body),
+    '{"method":"POST",'
     + '"url":"http://www.example.com:81/path/1",'
     + '"headers":{"cookie":"fiz=baz"},'
     + '"body":"{\\"foo\\": \\"bar\\"}"}'
+  );
+
+  var getReqOptions = getMockOptions();
+  getReqOptions.method = "GET";
+
+  t.equal(common.stringifyRequest(getReqOptions, body),
+    '{"method":"GET",'
+    + '"url":"http://www.example.com:81/path/1",'
+    + '"headers":{"cookie":"fiz=baz"}}'
   );
 
   t.end();
