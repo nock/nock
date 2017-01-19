@@ -172,23 +172,33 @@ tap.test('stringifyRequest', function (t) {
       }
     };
   }
-  var body = '{"foo": "bar"}';
+  var body = {"foo": "bar"};
   var postReqOptions = getMockOptions();
 
   t.equal(common.stringifyRequest(postReqOptions, body),
-    '{"method":"POST",'
-    + '"url":"http://www.example.com:81/path/1",'
-    + '"headers":{"cookie":"fiz=baz"},'
-    + '"body":"{\\"foo\\": \\"bar\\"}"}'
+    JSON.stringify({
+      "method":"POST",
+      "url":"http://www.example.com:81/path/1",
+      "headers":{
+        "cookie": "fiz=baz"
+      },
+      "body": {
+        "foo": "bar"
+      }
+    }, null, 2)
   );
 
   var getReqOptions = getMockOptions();
   getReqOptions.method = "GET";
 
-  t.equal(common.stringifyRequest(getReqOptions, body),
-    '{"method":"GET",'
-    + '"url":"http://www.example.com:81/path/1",'
-    + '"headers":{"cookie":"fiz=baz"}}'
+  t.equal(common.stringifyRequest(getReqOptions, null),
+    JSON.stringify({
+      "method":"GET",
+      "url":"http://www.example.com:81/path/1",
+      "headers":{
+        "cookie": "fiz=baz"
+      }
+    }, null, 2)
   );
 
   t.end();
