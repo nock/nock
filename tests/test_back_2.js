@@ -51,7 +51,7 @@ test('recording', {skip: process.env.AIRPLANE}, function(t) {
 });
 
 test('passes custom options to recorder', {skip: process.env.AIRPLANE}, function(t) {
-  nockBack('recording_test.json', { recorder: { enable_reqheaders_recording: true } }, function(nockDone) {
+  nockBack('recording_test.json', { recorder: { enable_reqheaders_recording: true, output_objects: true } }, function(nockDone) {
     http.get('http://google.com', function(res) {
       res.once('end', function() {
         nockDone();
@@ -74,30 +74,9 @@ test('recorder output_objects is false', {skip: process.env.AIRPLANE}, function(
     http.get('http://google.com', function(res) {
       res.once('end', function() {
         nockDone();
-        fs.readFile(fixture, {encoding: 'utf8' }, function(err, data) {
-          if(!err) {
-            t.assert(false); // should not get here. output_objects: false does not save obj
-          }
-          t.end();
-        });
-      });
-      res.resume();
-    });
-  });
-  rimrafOnEnd(t);
-});
-
-test('recorder output_objects is true', {skip: process.env.AIRPLANE}, function(t) {
-  nockBack('recording_test.json', { recorder: { output_objects: true } }, function(nockDone) {
-    http.get('http://google.com', function(res) {
-      res.once('end', function() {
-        nockDone();
-        fs.readFile(fixture, {encoding: 'utf8' }, function(err, data) {
-          if(err) {
-            t.assert(false);
-          }
-          t.end();
-        });
+        // expect to throw because we did not write result to disk
+        t.throws(function() { fs.readFileSync(fixture, { endcoding: 'utf8'})});
+        t.end();
       });
       res.resume();
     });
