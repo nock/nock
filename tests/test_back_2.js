@@ -87,6 +87,24 @@ test('recorder output_objects is false', {skip: process.env.AIRPLANE}, function(
   rimrafOnEnd(t);
 });
 
+test('recorder output_objects is true', {skip: process.env.AIRPLANE}, function(t) {
+  nockBack('recording_test.json', { recorder: { output_objects: true } }, function(nockDone) {
+    http.get('http://google.com', function(res) {
+      res.once('end', function() {
+        nockDone();
+        fs.readFile(fixture, {encoding: 'utf8' }, function(err, data) {
+          if(err) {
+            t.assert(false);
+          }
+          t.end();
+        });
+      });
+      res.resume();
+    });
+  });
+  rimrafOnEnd(t);
+});
+
 test('teardown', function(t) {
   nockBack.setMode(originalMode);
   t.end();
