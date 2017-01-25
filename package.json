@@ -187,7 +187,7 @@
     "node-static": "^0.7.7",
     "nyc": "^10.0.0",
     "pre-commit": "1.1.2",
-    "request": "2.71.0",
+    "request": "2.79.0",
     "request-promise": "^2.0.1",
     "restify": "^4.0.4",
     "restler": "3.4.0",
