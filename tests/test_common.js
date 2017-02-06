@@ -158,3 +158,48 @@ tap.test('matchStringOrRegexp', function (t) {
   t.false(common.matchStringOrRegexp('to match', /not/), 'false if pattern is regex and target doesn\'t match');
   t.end();
 });
+
+tap.test('stringifyRequest', function (t) {
+  var getMockOptions = function () {
+    return {
+      method: "POST",
+      port: 81,
+      proto: 'http',
+      hostname: 'www.example.com',
+      path: '/path/1',
+      headers: {
+        cookie: 'fiz=baz'
+      }
+    };
+  }
+  var body = {"foo": "bar"};
+  var postReqOptions = getMockOptions();
+
+  t.equal(common.stringifyRequest(postReqOptions, body),
+    JSON.stringify({
+      "method":"POST",
+      "url":"http://www.example.com:81/path/1",
+      "headers":{
+        "cookie": "fiz=baz"
+      },
+      "body": {
+        "foo": "bar"
+      }
+    }, null, 2)
+  );
+
+  var getReqOptions = getMockOptions();
+  getReqOptions.method = "GET";
+
+  t.equal(common.stringifyRequest(getReqOptions, null),
+    JSON.stringify({
+      "method":"GET",
+      "url":"http://www.example.com:81/path/1",
+      "headers":{
+        "cookie": "fiz=baz"
+      }
+    }, null, 2)
+  );
+
+  t.end();
+});
