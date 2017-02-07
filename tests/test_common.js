@@ -203,3 +203,40 @@ tap.test('stringifyRequest', function (t) {
 
   t.end();
 });
+
+
+tap.test('headersArrayToObject', function (t) {
+  var headers = [
+    "Content-Type",
+    "application/json; charset=utf-8",
+    "Last-Modified",
+    "foobar",
+    "Expires",
+    "fizbuzz"
+  ];
+
+  t.deepEqual(common.headersArrayToObject(headers), {
+    "Content-Type": "application/json; charset=utf-8",
+    "Last-Modified": "foobar",
+    "Expires": "fizbuzz"
+  });
+
+  var headersMultipleSetCookies = headers.concat([
+    "Set-Cookie",
+    "foo=bar; Domain=.github.com; Path=/",
+    "Set-Cookie",
+    "fiz=baz; Domain=.github.com; Path=/"
+  ]);
+
+  t.deepEqual(common.headersArrayToObject(headersMultipleSetCookies), {
+    "Content-Type": "application/json; charset=utf-8",
+    "Last-Modified": "foobar",
+    "Expires": "fizbuzz",
+    "Set-Cookie": [
+      "foo=bar; Domain=.github.com; Path=/",
+      "fiz=baz; Domain=.github.com; Path=/"
+    ]
+  });
+
+  t.end();
+});
