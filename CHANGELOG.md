@@ -1,8 +1,72 @@
+9.0.4 / 2017-02-07
+==================
+
+  * 9.0.4: Fix bug where only single set-cookie header would be returned
+  * Merge pull request [#820](https://github.com/node-nock/nock/issues/820) from node-nock/bug-818-multiple-set-cookie
+    Bug 818 multiple set cookie
+  * Merge pull request [#813](https://github.com/node-nock/nock/issues/813) from node-nock/greenkeeper-tap-10.0.0
+    Update tap to version 10.0.0 🚀
+  * Bug [#818](https://github.com/node-nock/nock/issues/818) Assert mutiple set-cookie headers are included in object
+  * Bug [#818](https://github.com/node-nock/nock/issues/818) Send back multiple headers if multiple present
+
+9.0.3 / 2017-02-06
+==================
+
+  * 9.0.3: Change error message for unmatched requests
+  * Merge pull request [#819](https://github.com/node-nock/nock/issues/819) from node-nock/chore-add-ian-contrib
+    Add Ian WS to contrib
+  * Add Ian WS to contrib
+  * Merge pull request [#597](https://github.com/node-nock/nock/issues/597) from ianwsperber/feature-better-unmatched-request-error
+    Better unmatched request error
+  * chore(package): update tap to version 10.0.0
+    https://greenkeeper.io/
+  * Merge pull request [#799](https://github.com/node-nock/nock/issues/799) from node-nock/greenkeeper-tap-9.0.3
+    Update tap to version 9.0.3 🚀
+  * Merge pull request [#797](https://github.com/node-nock/nock/issues/797) from Thebigbignooby/patch-1
+    Fix typo in README
+  * Use pretty JSON and no longer stringify body
+  * Only include body in stringified request for non-GET requests
+  * Update intercept tests for new stringified format
+  * Format stringified request as JSON and include headers
+  * Baseline test for common.stringifyRequest
+  * chore(package): update tap to version 9.0.3
+    https://greenkeeper.io/
+  * fix typo
+    URL begins with a hard u, pronounced "you" and so should be preceded by "a", not "an"
+  * Merge pull request [#757](https://github.com/node-nock/nock/issues/757) from node-nock/greenkeeper-tap-8.0.1
+    Update tap to version 8.0.1 🚀
+  * Add test for delay/timeout
+  * chore(package): update tap to version 8.0.1
+    https://greenkeeper.io/
+  * Merge pull request [#755](https://github.com/node-nock/nock/issues/755) from node-nock/greenkeeper-lodash-4.17.2
+    Update lodash to version 4.17.2 🚀
+  * chore(package): update lodash to version 4.17.2
+    https://greenkeeper.io/
+  * Merge pull request [#760](https://github.com/node-nock/nock/issues/760) from node-nock/greenkeeper-nyc-10.0.0
+    Update nyc to version 10.0.0 🚀
+  * chore(package): update nyc to version 10.0.0
+    https://greenkeeper.io/
+  * Merge pull request [#683](https://github.com/node-nock/nock/issues/683) from szdavid92/feat/gzip-content-type-decoder
+    Add gzip and deflate decoder for json content type
+  * Merge pull request [#743](https://github.com/node-nock/nock/issues/743) from node-nock/greenkeeper-zombie-5.0.1
+    Update zombie to version 5.0.1 🚀
+  * Merge pull request [#738](https://github.com/node-nock/nock/issues/738) from node-nock/greenkeeper-lodash-4.16.6
+    Update lodash to version 4.16.6 🚀
+  * chore(package): update zombie to version 5.0.1
+    https://greenkeeper.io/
+  * chore(package): update lodash to version 4.16.6
+    https://greenkeeper.io/
+  * fix wording
+  * add gzip and deflate decoder for json content type
+  * Add nodejs v7 to travis config
+  * Update CHANGELOG
+
 9.0.2 / 2016-10-28
 ==================
 
+  * 9.0.2
+  * Merge branch 'airplane'
   * Update CHANGELOG
-  * Implement AIRPLANE mode to skip internet-dependent tests
 
 9.0.1 / 2016-10-28
 ==================
@@ -10,6 +74,10 @@
   * 9.0.1
   * Merge pull request [#734](https://github.com/node-nock/nock/issues/734) from RobertWHurst/master
     Fixes regression introduced by [#719](https://github.com/node-nock/nock/issues/719)
+  * Implement AIRPLANE mode to skip internet-dependent tests
+  * Utilize tap's skip functionality to toggle tests based on available features
+  * Add more notes on contributing section
+  * Move "How does it work?" section to the top of the README
   * Fix [#731](https://github.com/node-nock/nock/issues/731)
   * test for empty object in body
   * Update README & CHANGELOG
@@ -21,15 +89,6 @@
   * Drop support for node versions 0.10, 0.11, 0.12 and 5
   * Add section on node versions support
   * Update CHANGELOG
-
-8.2.1 / 2016-10-28
-==================
-
-  * 8.2.1
-  * Merge pull request [#734](https://github.com/node-nock/nock/issues/734) from RobertWHurst/master
-    Fixes regression introduced by [#719](https://github.com/node-nock/nock/issues/719)
-  * Fix [#731](https://github.com/node-nock/nock/issues/731)
-  * test for empty object in body
 
 8.2.0 / 2016-10-23
 ==================
@@ -110,91 +169,3 @@
 
   * v8.0.0
   * added missing dep
-  * Merge branch 'greenkeeper-request-2.70.0'
-  * Merge branch 'master' into greenkeeper-request-2.70.0
-  * making the latest version of lodash work
-  * Merge pull request [#521](https://github.com/node-nock/nock/issues/521) from node-nock/greenkeeper-update-all
-    Update all dependencies 🌴
-  * fixes for latest tap version
-  * chore(package): update request to version 2.70.0
-    http://greenkeeper.io/
-  * chore(package): update dependencies
-    http://greenkeeper.io/
-
-7.7.3 / 2016-04-04
-==================
-
-  * v7.7.3
-  * Merge pull request [#520](https://github.com/node-nock/nock/issues/520) from ericsaboia/master
-    properly remove interceptor with regex domain from the list after used
-  * properly remove interceptor with regex domain from the list after used
-  * Merge pull request [#519](https://github.com/node-nock/nock/issues/519) from Byron-TW/patch-1
-    Fix typo
-  * Fix typo
-  * changelog update
-
-7.7.2 / 2016-03-25
-==================
-
-  * v7.7.2
-  * v7.7.1
-  * Merge branch 'master' of github.com:node-nock/nock
-
-7.7.0 / 2016-03-25
-==================
-
-  * v7.7.0
-  * Merge pull request [#514](https://github.com/node-nock/nock/issues/514) from kevinburkeshyp/fix-req-no-match
-    Fix nock.emitter.on('no match') undefined argument
-  * Merge pull request [#512](https://github.com/node-nock/nock/issues/512) from kevinburkeshyp/fix-typo
-    Fix typo in tests
-  * browserify bundle update
-  * request abort destroys socket. fixes [#511](https://github.com/node-nock/nock/issues/511)
-  * Fix nock.emitter.on('no match') undefined argument
-    Previously if you disabled net connect via `nock.disableNetConnect`,
-    `nock.emitter.on('no match')` would return undefined for its first argument,
-    since `req` is never initialized. Replaces `req` with `options`, which is
-    present and set to a Url instance.
-    Fixes the global nock.emitter.on event listener to remove all event listeners
-    at the end of each test, otherwise an event listener registered in one test
-    might bleed over into the next.
-    (This might not be the right fix, I'm happy to change as necessary).
-  * Fix typo in tests
-
-7.6.0 / 2016-03-25
-==================
-
-  * v7.6.0
-  * Merge pull request [#509](https://github.com/node-nock/nock/issues/509) from mihar/patch-2
-    Update README.md
-  * Merge pull request [#510](https://github.com/node-nock/nock/issues/510) from RedCattleWealth/master
-    query accept a function to determine if the query is matched
-  * update README
-  * query accept a function to determin if the query is matched
-    for some case object compare is not enough
-  * Update README.md
-  * Merge pull request [#501](https://github.com/node-nock/nock/issues/501) from reconbot/patch-1
-    Make the source of NetConnectNotAllowedError clear
-  * changelog update
-
-7.5.0 / 2016-03-20
-==================
-
-  * v7.5.0
-  * Merge branch 'satazor-back-recorder-options'
-  * Merge branch 'back-recorder-options' of git://github.com/satazor/nock into satazor-back-recorder-options
-  * Merge branch 'satazor-request-promise'
-  * Add ability to pass options to recorder from nodeback.
-  * Do not automatically consume responses, respect original consumer.
-  * Make the source of NetConnectNotAllowedError clear
-  * Merge pull request [#480](https://github.com/node-nock/nock/issues/480) from JemiloII/patch-1
-    Use lodash size function
-  * coveralls badge url
-  * switched repo token
-  * pgte -> node-nock
-  * Merge branch 'master' of github.com:pgte/nock
-  * testing for [#496](https://github.com/node-nock/nock/issues/496)
-  * Merge pull request [#494](https://github.com/node-nock/nock/issues/494) from mihar/patch-1
-    README.md: Fix typo
-  * README.md: Fix typo
-  * v7.4.0
