@@ -76,3 +76,29 @@ test("basicAuth match works", function (t) {
       throw err;
     });
 });
+
+test("matchHeader works", function (t) {
+  var authorizationHeader = 'Basic ' + new Buffer('username:password').toString('base64');
+
+  var scope = nock('http://isomorphicfetchland.com').
+    get('/path2').
+    matchHeader('authorization', authorizationHeader).
+    reply(200, 'somemoardata');
+
+  return fetch('http://isomorphicfetchland.com/path2', {
+    headers: {
+      'Authorization': authorizationHeader,
+    }
+  }).
+    then(function (res) {
+      return res.text();
+    }).
+    then(function (text) {
+      scope.done();
+      t.equal(text, 'somemoardata', "response should match");
+      t.end();
+    }).
+    catch(function (err) {
+      throw err;
+    });
+});
