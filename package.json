@@ -202,7 +202,7 @@
   },
   "scripts": {
     "test": "tap --harmony ./tests/test_*.js",
-    "coverage": "nyc --reporter=lcov tap --harmony ./tests/test_*.js",
+    "coverage": "nyc tap --harmony ./tests/test_*.js",
     "coveralls": "cat ./coverage/lcov.info | coveralls",
     "jshint": "jshint lib/*.js",
     "changelog": "changelog nock all -m > CHANGELOG.md",
@@ -212,5 +212,14 @@
     "jshint",
     "coverage"
   ],
+  "nyc": {
+    "reporter": [
+      "lcov",
+      "text-summary"
+    ],
+    "exclude": [
+      "tests/test_*.js"
+    ]
+  },
   "license": "MIT"
 }
