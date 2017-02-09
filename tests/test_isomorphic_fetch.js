@@ -32,7 +32,7 @@ test("string-based reqheaders match works", function(t) {
     get('/path2').
     reply(200, 'somemoardata');
 
-  fetch('http://isomorphicfetchland.com/path2', {
+  return fetch('http://isomorphicfetchland.com/path2', {
     headers: {
       'header': 'header value',
     }
@@ -46,6 +46,33 @@ test("string-based reqheaders match works", function(t) {
       t.end();
     }).
     catch(function(err) {
+      throw err;
+    });
+});
+
+test("basicAuth match works", function (t) {
+  var scope = nock('http://isomorphicfetchland.com').
+    get('/path2').
+    basicAuth({
+      user: 'username',
+      pass: 'password'
+    }).
+    reply(200, 'somemoardata');
+
+  return fetch('http://isomorphicfetchland.com/path2', {
+    headers: {
+      'Authorization': 'Basic ' + new Buffer('username:password').toString('base64'),
+    }
+  }).
+    then(function (res) {
+      return res.text();
+    }).
+    then(function (text) {
+      scope.done();
+      t.equal(text, 'somemoardata', "response should match");
+      t.end();
+    }).
+    catch(function (err) {
       throw err;
     });
 });
