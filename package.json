@@ -216,6 +216,9 @@
     "reporter": [
       "lcov",
       "text-summary"
+    ],
+    "exclude": [
+      "tests/test_*.js"
     ]
   },
   "license": "MIT"
