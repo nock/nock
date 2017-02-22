@@ -30,9 +30,7 @@ tap.test('matchBody should not ignore new line characters from strings when Cont
       'Content-Type': "multipart/form-data;"
     }
   }
-  var matched = matchBody.call(testThis, function (body) {
-    return body === str1;
-  }, str2);
+  var matched = matchBody.call(testThis, str1, str2);
   t.true(matched);
   t.end()
 });
@@ -45,9 +43,7 @@ tap.test('matchBody should not ignore new line characters from strings when Cont
       'Content-Type': ["multipart/form-data;"]
     }
   }
-  var matched = matchBody.call(testThis, function (body) {
-    return body === str1;
-  }, str2);
+  var matched = matchBody.call(testThis, str1, str2);
   t.true(matched);
   t.end()
 });
