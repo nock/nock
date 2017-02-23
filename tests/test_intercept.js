@@ -4772,6 +4772,24 @@ test('query() matches query values regardless of their type of declaration', fun
   })
 });
 
+test('query() doesn\'t match query values of requests without query string', function (t) {
+  var scope1 = nock('http://google.com')
+    .get('/')
+    .query({num:1,bool:true,empty:null,str:'fou'})
+    .reply(200, 'scope1');
+
+  var scope2 = nock('http://google.com')
+    .get('/')
+    .reply(200, 'scope2');
+
+  mikealRequest('http://google.com/', function(err, res) {
+    if (err) throw err;
+    t.equal(res.statusCode, 200);
+    t.equal(res.body, 'scope2');
+    t.end();
+  })
+});
+
 test('query() matches a query string using regexp', function (t) {
   var scope = nock('http://google.com')
     .get('/')
