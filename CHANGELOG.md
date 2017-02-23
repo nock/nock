@@ -1,3 +1,31 @@
+9.0.6 / 2017-02-13
+==================
+
+  * 9.0.6: Fix for [#827](https://github.com/node-nock/nock/issues/827)
+  * Merge pull request [#828](https://github.com/node-nock/nock/issues/828) from node-nock/bug-827-matchStringOrRegexp
+    Bug [#827](https://github.com/node-nock/nock/issues/827) Defensive coding around target
+  * Bug [#827](https://github.com/node-nock/nock/issues/827) Defensive coding around target
+  * Fail if interceptor has query parameters but not the query
+
+9.0.5 / 2017-02-10
+==================
+
+  * 9.0.5: Various bug fixes
+  * Merge pull request [#822](https://github.com/node-nock/nock/issues/822) from KingHenne/fix/isomorphic-fetch-basic-auth
+    Fix isomorphic fetch usage with basicAuth/matchHeader
+  * Merge pull request [#823](https://github.com/node-nock/nock/issues/823) from KingHenne/fix/nyc-config
+    Exclude test files from coverage reports
+  * Merge pull request [#769](https://github.com/node-nock/nock/issues/769) from RubenVerborgh/fix-socket-this
+    Fix this pointer on "socket" event
+  * exclude test files from coverage reports
+  * add text summary coverage reporter
+  * fix basicAuth/matchHeader interceptors with isomorphic-fetch
+  * add failing test for isomorphic-fetch and matchHeader
+  * add failing test for isomorphic-fetch and basicAuth
+  * Merge pull request [#821](https://github.com/node-nock/nock/issues/821) from node-nock/chore-changelog-v9.0.4
+    Update changelog using "npm run changelog"
+  * Update changelog using "npm run changelog"
+
 9.0.4 / 2017-02-07
 ==================
 
@@ -33,6 +61,9 @@
     https://greenkeeper.io/
   * fix typo
     URL begins with a hard u, pronounced "you" and so should be preceded by "a", not "an"
+  * Set `this` to request on socket event.
+    This makes behavior consistent with the Node.js HTTP module
+    (https://github.com/nodejs/node/blob/v6.0.0/lib/_http_client.js#L541).
   * Merge pull request [#757](https://github.com/node-nock/nock/issues/757) from node-nock/greenkeeper-tap-8.0.1
     Update tap to version 8.0.1 🚀
   * Add test for delay/timeout
@@ -138,34 +169,3 @@
     Fix some broken tests
   * Add nodejs v6 to travis config
   * use public TravisCI badge icon, which shows failing tests.
-  * Skip a couple of failing specs (until we get them fixed)
-  * Remove tests/test.js
-    Also:
-    - Use nyc as the CLI of istanbul
-    - Use tap binary directly for running tests
-  * Support http OPTIONS method
-  * Fix some issues to run library with Node v0.10:
-    1. Set lodash version to ~4.9.0
-    2. Add data-event listener for http's res message
-  * Tests that depends on amazon.com's statusCode are fixed
-    Symbol with charCode 160 is replaced to space
-  * Merge pull request [#531](https://github.com/node-nock/nock/issues/531) from node-nock/greenkeeper-request-2.71.0
-    Update request to version 2.71.0 🚀
-  * Merge branch 'master' of github.com:node-nock/nock
-  * added snyk vulerabilities badge
-  * chore(package): update request to version 2.71.0
-    http://greenkeeper.io/
-  * Merge pull request [#528](https://github.com/node-nock/nock/issues/528) from mooyoul/improve-readme-toc
-    Improved Table of Contents section of README
-  * Changed `About Interceptors` title of TOC
-    ... just to clarify
-  * Lint README.md
-  * Added some missing TOC entries
-  * Fixed broken TOC link
-  * changelog update
-
-8.0.0 / 2016-04-06
-==================
-
-  * v8.0.0
-  * added missing dep
