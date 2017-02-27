@@ -1,3 +1,26 @@
+9.0.8 / 2017-02-27
+==================
+
+  * 9.0.8: Fix for [#754](https://github.com/node-nock/nock/issues/754)
+  * Merge pull request [#836](https://github.com/node-nock/nock/issues/836) from node-nock/greenkeeper-superagent-3.5.0
+    Update superagent to version 3.5.0 🚀
+  * Merge pull request [#802](https://github.com/node-nock/nock/issues/802) from aleung/fix-754
+    Fix request timeout no working
+
+9.0.7 / 2017-02-23
+==================
+
+  * Changelog
+  * 9.0.7: Fix for [#610](https://github.com/node-nock/nock/issues/610)
+  * Merge pull request [#829](https://github.com/node-nock/nock/issues/829) from yodeyer/fixQs
+    Fix interceptor if query have no query strings
+  * chore(package): update superagent to version 3.5.0
+    https://greenkeeper.io/
+  * Test against request 2.79.0, with which timeout issue occured.
+  * Add Visual Studio Code folder into gitignore
+  * Update the failed test case
+  * Fix https://github.com/node-nock/nock/issues/754
+
 9.0.6 / 2017-02-13
 ==================
 
@@ -153,19 +176,3 @@
   * Make pendingMocks and isDone behave consistently
   * Removed coverage folder from npm
   * Update PendingMocks when an interceptor is removed
-  * Update CHANGELOG
-
-8.1.0 / 2016-10-10
-==================
-
-  * 8.1.0
-  * Enable harmony mode when running tests
-  * Remove duplicated Interceptor.replyWithFile function
-  * Merge pull request [#710](https://github.com/node-nock/nock/issues/710) from hugoduraes/master
-    Leave rawHeaders case untouched on nock's replies
-  * Leave rawHeaders case untouched on nock's replies
-  * Re-enable previously skipped tests
-  * Merge pull request [#586](https://github.com/node-nock/nock/issues/586) from Elergy/master
-    Fix some broken tests
-  * Add nodejs v6 to travis config
-  * use public TravisCI badge icon, which shows failing tests.
