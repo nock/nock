@@ -4234,12 +4234,12 @@ test('socket emits connect and secureConnect', function(t) {
 
   req.on('socket', function(socket) {
     socket.once('connect', function() {
-      req.end();
       t.ok(true);
     });
     socket.once('secureConnect', function() {
       t.ok(true);
     });
+    req.end();
   });
 
   req.once('response', function(res) {
