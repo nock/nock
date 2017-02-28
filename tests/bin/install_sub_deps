@@ -1,0 +1,89 @@
+#!/usr/bin/env node
+// vim: ft=javascript
+/* From: https://github.com/newrelic/node-newrelic/blob/master/test/bin/install_sub_deps */
+'use strict'
+
+var path = require('path')
+var glob = require('glob')
+var exec = require('child_process').exec
+
+var options = {
+}
+
+var folder
+if (process.argv.length > 2) {
+  folder = process.argv[2]
+}
+
+getPackages(folder, function(packages) {
+  var correctPackages = packages.filter(function (line) {
+    return !/node_modules|example/.test(line)
+  })
+  install(correctPackages)
+})
+
+var retries = 2
+function install(packages, retry) {
+  if (!retry) retry = 0
+
+  var failed = []
+  var counter = 0
+  packages.forEach(function (packageJsonPath) {
+    var packagePath = path.resolve(packageJsonPath).split('/').slice(0, -1).join('/')
+    console.log('installing deps in ' + packagePath)
+    exec('cd ' + packagePath + '&&rm -rf node_modules&&npm i',
+        {maxBuffer: 1024 * 500},
+        function (err, stdout, stderr) {
+
+      if (err || isErrorOutput(stderr)) {
+        printError(packageJsonPath, err || stderr)
+        if (retry < retries) {
+          failed.push(packageJsonPath)
+        }
+      }
+
+      if (++counter === packages.length) {
+        if (failed.length > 0 && retry < retries) {
+          console.log('%s package(s) failed to install, retrying...', failed.length)
+          exec('npm cache clean', function() {
+            install(failed, ++retry)
+          })
+        }
+      }
+    })
+  })
+}
+
+// determines if stderr contains errors
+function isErrorOutput(text) {
+  return (text && text.indexOf('npm ERR') > -1)
+}
+
+function getPackages(folder, callback) {
+  if (folder) {
+    getCommonPackages(function(commonPackages) {
+      glob('**/test/' + folder + '/**/package.json', options,
+          function getPackages(err, packages) {
+        callback(commonPackages.concat(packages))
+      })
+    })
+  } else {
+    glob('**/test/**/package.json', options, function getPackages(err, packages) {
+      callback(packages)
+    })
+  }
+}
+
+function getCommonPackages(callback) {
+  glob('**/test/lib/**/package.json', options, function getPackages(err, packages) {
+    packages.unshift('test/package.json', 'test/helpers/package.json')
+    callback(packages)
+  })
+}
+
+function printError(packagePath, error) {
+  console.log('-----------------------------------------------------------')
+  console.log(packagePath + ' failed installing with the following error:')
+  console.log(error)
+  console.log('-----------------------------------------------------------')
+}
