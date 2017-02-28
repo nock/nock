@@ -61,24 +61,15 @@ function isErrorOutput(text) {
 
 function getPackages(folder, callback) {
   if (folder) {
-    getCommonPackages(function(commonPackages) {
-      glob('**/test/' + folder + '/**/package.json', options,
-          function getPackages(err, packages) {
-        callback(commonPackages.concat(packages))
-      })
+    glob('**/tests/' + folder + '/**/package.json', options,
+        function getPackages(err, packages) {
+      callback(packages)
     })
   } else {
-    glob('**/test/**/package.json', options, function getPackages(err, packages) {
+    glob('**/tests/**/package.json', options, function getPackages(err, packages) {
       callback(packages)
     })
   }
-}
-
-function getCommonPackages(callback) {
-  glob('**/test/lib/**/package.json', options, function getPackages(err, packages) {
-    packages.unshift('test/package.json', 'test/helpers/package.json')
-    callback(packages)
-  })
 }
 
 function printError(packagePath, error) {
