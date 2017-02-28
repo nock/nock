@@ -3,4 +3,3 @@ npm-debug.log
 coverage
 .nyc_output/
 tests/browserify-public/browserify-bundle.js
-.vscode/
