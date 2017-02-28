@@ -1,3 +1,12 @@
+9.0.9 / 2017-02-28
+==================
+
+  * 9.0.9: Revert PR [#802](https://github.com/node-nock/nock/issues/802)
+  * Merge pull request [#840](https://github.com/node-nock/nock/issues/840) from node-nock/revert-802-fix-754
+    Revert "Fix request timeout no working"
+  * Revert "Fix request timeout no working"
+  * Changelog v9.0.8
+
 9.0.8 / 2017-02-27
 ==================
 
@@ -172,7 +181,3 @@
   * chore(package): update async to version 2.1.1
     https://greenkeeper.io/
   * Ad documentation for optionally()
-  * Add optionally(), to replace and improve the undocumented 'requireDone'
-  * Make pendingMocks and isDone behave consistently
-  * Removed coverage folder from npm
-  * Update PendingMocks when an interceptor is removed
