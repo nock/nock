@@ -1,0 +1,14 @@
+
+{
+  "name": "got-latest",
+  "version": "0.0.0",
+  "description": "Tests for got latest (>6)",
+  "main": "test.tap.js",
+  "scripts": {
+    "test": "tap test.tap.js"
+  },
+  "dependencies": {
+    "got": "^6"
+  },
+  "private": true
+}
