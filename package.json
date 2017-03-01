@@ -201,7 +201,10 @@
     "zombie": "^5.0.1"
   },
   "scripts": {
-    "test": "tap --harmony ./tests/test_*.js",
+    "unit": "tap --harmony ./tests/test_*.js",
+    "preintegration": "./tests/bin/install_sub_deps",
+    "integration": "tap --harmony ./tests/versioned/*/*.tap.js",
+    "test": "npm run unit && npm run integration",
     "coverage": "nyc tap --harmony ./tests/test_*.js",
     "coveralls": "cat ./coverage/lcov.info | coveralls",
     "jshint": "jshint lib/*.js",
