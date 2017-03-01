@@ -202,7 +202,7 @@
   },
   "scripts": {
     "unit": "tap --harmony ./tests/test_*.js",
-    "preintegration": "./tests/bin/install_sub_deps",
+    "preintegration": "./tests/bin/install_sub_deps versioned",
     "integration": "tap --harmony ./tests/versioned/*/*.tap.js",
     "test": "npm run unit && npm run integration",
     "coverage": "nyc tap --harmony ./tests/test_*.js",

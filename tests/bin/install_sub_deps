@@ -1,40 +1,36 @@
 #!/usr/bin/env node
-// vim: ft=javascript
-/* From: https://github.com/newrelic/node-newrelic/blob/master/test/bin/install_sub_deps */
+/* Modeled after: https://github.com/newrelic/node-newrelic/blob/master/test/bin/install_sub_deps */
 'use strict'
 
-var path = require('path')
-var glob = require('glob')
-var exec = require('child_process').exec
+const path = require('path')
+const glob = require('glob')
+const assert = require('assert')
+const exec = require('child_process').exec
 
-var options = {
-}
+const folder = process.argv[2];
+const retries = 2
 
-var folder
-if (process.argv.length > 2) {
-  folder = process.argv[2]
-}
+assert(folder, 'Missing folder!');
 
-getPackages(folder, function(packages) {
-  var correctPackages = packages.filter(function (line) {
-    return !/node_modules|example/.test(line)
-  })
-  install(correctPackages)
-})
+glob(`**/tests/${folder}/**/package.json`, {}, (err, packages) => {
+  if (err) { fail(err); }
 
-var retries = 2
-function install(packages, retry) {
+  install(packages.filter((line) => !/node_modules|example/.test(line)));
+});
+
+const install = (packages, retry)  => {
   if (!retry) retry = 0
 
-  var failed = []
-  var counter = 0
-  packages.forEach(function (packageJsonPath) {
-    var packagePath = path.resolve(packageJsonPath).split('/').slice(0, -1).join('/')
-    console.log('installing deps in ' + packagePath)
-    exec('cd ' + packagePath + '&&rm -rf node_modules&&npm i',
-        {maxBuffer: 1024 * 500},
-        function (err, stdout, stderr) {
+  const failed = []
+  let counter = 0
 
+  packages.forEach((packageJsonPath) => {
+    const packagePath = path.resolve(packageJsonPath).split('/').slice(0, -1).join('/');
+
+    console.log('installing deps in %s', packagePath)
+    exec(`cd ${packagePath} && rm -rf node_modules && npm i`, {
+      maxBuffer: 1024 * 500
+    }, (err, stdout, stderr) => {
       if (err || isErrorOutput(stderr)) {
         printError(packageJsonPath, err || stderr)
         if (retry < retries) {
@@ -45,9 +41,7 @@ function install(packages, retry) {
       if (++counter === packages.length) {
         if (failed.length > 0 && retry < retries) {
           console.log('%s package(s) failed to install, retrying...', failed.length)
-          exec('npm cache clean', function() {
-            install(failed, ++retry)
-          })
+          exec('npm cache clean', () => install(failed, ++retry));
         }
       }
     })
@@ -57,19 +51,6 @@ function install(packages, retry) {
 // determines if stderr contains errors
 function isErrorOutput(text) {
   return (text && text.indexOf('npm ERR') > -1)
-}
-
-function getPackages(folder, callback) {
-  if (folder) {
-    glob('**/tests/' + folder + '/**/package.json', options,
-        function getPackages(err, packages) {
-      callback(packages)
-    })
-  } else {
-    glob('**/tests/**/package.json', options, function getPackages(err, packages) {
-      callback(packages)
-    })
-  }
 }
 
 function printError(packagePath, error) {
