@@ -1,14 +1,14 @@
 
 {
-  "name": "got-latest",
+  "name": "request-latest",
   "version": "0.0.0",
-  "description": "Tests for got latest (>6)",
+  "description": "Tests for request latest (>2)",
   "main": "test.tap.js",
   "scripts": {
     "test": "tap test.tap.js"
   },
   "dependencies": {
-    "got": "^6"
+    "request": "^2"
   },
   "private": true
 }

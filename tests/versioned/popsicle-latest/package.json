@@ -1,14 +1,14 @@
 
 {
-  "name": "got-latest",
+  "name": "posicle-latest",
   "version": "0.0.0",
-  "description": "Tests for got latest (>6)",
+  "description": "Tests for popsicle latest (>9)",
   "main": "test.tap.js",
   "scripts": {
     "test": "tap test.tap.js"
   },
   "dependencies": {
-    "got": "^6"
+    "popsicle": "^9"
   },
   "private": true
 }

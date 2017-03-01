@@ -32,7 +32,7 @@ const runCommonTests = (makeRequest, name) => {
       .reply(200, 'OK');
 
     return makeRequest({
-        uri: 'www.example.com'
+        uri: 'http://www.example.com'
       })
       .then((res) => {
         t.equal(res.statusCode, 200);
