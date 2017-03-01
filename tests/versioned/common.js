@@ -42,35 +42,6 @@ const runCommonTests = (makeRequest, name) => {
       })
       .catch(t.threw);
   });
-
-  test('scope#socketDelay', (t) => {
-    const timeout = 100;
-    nock('http://www.example.com')
-      .get('/')
-      .socketDelay(timeout)
-      .reply(200, 'OK');
-
-    return makeRequest({
-        uri: 'www.example.com',
-        timeout: timeout / 2
-      })
-      .then((res) => {
-        const code = res.statusCode;
-        const err = code === 200
-          ? new Error('Unexpected success')
-          : new Error(`Unexpected failure (${code})`);
-
-        throw err;
-      })
-      .catch((error) => {
-        if (error.message.match('Unexpected')) {
-          t.fail(`No timeout: ${error.message}`);
-        }
-
-        t.end();
-      })
-      .catch(t.threw);
-  });
 };
 
 module.exports = {
