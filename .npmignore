@@ -1,3 +1,4 @@
 node_modules
 .gitignore
 coverage
+tests/browserify-public/browserify-bundle.js
