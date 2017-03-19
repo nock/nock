@@ -2249,6 +2249,23 @@ test('clean all works', function(t) {
 
 });
 
+test('clean all should remove pending mocks from all scopes', function(t) {
+  var scope1 = nock('http://example.org')
+    .get('/somepath')
+    .reply(200, 'hey');
+  t.deepEqual(scope1.pendingMocks(), ['GET http://example.org:80/somepath']);
+  var scope2 = nock('http://example.com')
+    .get('/somepath')
+    .reply(200, 'hey');
+  t.deepEqual(scope2.pendingMocks(), ['GET http://example.com:80/somepath']);
+
+  nock.cleanAll();
+
+  t.deepEqual(scope1.pendingMocks(), []);
+  t.deepEqual(scope2.pendingMocks(), []);
+  t.end();
+});
+
 test('is done works', function(t) {
   var scope = nock('http://amazon.com')
     .get('/nonexistent')
