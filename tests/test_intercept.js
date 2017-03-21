@@ -3110,7 +3110,7 @@ test('calling delay could cause mikealRequest timeout error', function(t) {
     timeout: 100
   }, function (err) {
     scope.done();
-    t.equal(err && err.code, "ETIMEDOUT");
+    t.equal(err && err.code, "ESOCKETTIMEDOUT");
     t.end();
   });
 });
@@ -4165,7 +4165,7 @@ test('mikeal/request with delayConnection and request.timeout', function(t) {
     },
     function (err) {
       t.type(err, 'Error');
-      t.equal(err && err.code, "ETIMEDOUT");
+      t.equal(err && err.code, "ESOCKETTIMEDOUT");
       t.end();
   });
 });

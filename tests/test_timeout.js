@@ -4,7 +4,7 @@ var nock    = require('../.');
 var test    = require('tap').test;
 var request = require('request');
 
-test('something', function (t) {
+test('request lib', function (t) {
     nock('http://google.com')
         .get('/')
         .delay(1000)
@@ -15,7 +15,7 @@ test('something', function (t) {
         timeout: 10
     }, function (err, response) {
         t.ok(err);
-        t.equal(err.code, 'ETIMEDOUT')
+        t.equal(err.code, 'ESOCKETTIMEDOUT');
         t.end();
     });
 });
