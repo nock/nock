@@ -196,6 +196,41 @@ test("reply should throw on error on the callback", function(t) {
   req.end();
 });
 
+test("reply should not cause an error on header conflict", function(t) {
+  var dataCalled = false;
+
+  var scope = nock('http://www.google.com')
+    .defaultReplyHeaders({
+      'content-type': 'application/json'
+    });
+
+  scope
+    .get('/')
+    .reply(200, '<html></html>', {
+      'Content-Type': 'application/xml'
+    });
+
+  var req = http.request({
+    host: "www.google.com",
+    path: '/',
+    port: 80
+  }, function(res) {
+    t.equal(res.statusCode, 200);
+    res.on('end', function() {
+      t.ok(dataCalled);
+      scope.done();
+      t.end();
+    });
+    res.on('data', function(data) {
+      dataCalled = true;
+      t.equal(res.headers['content-type'], "application/xml");
+      t.equal(data.toString(), "<html></html>", "response should match");
+    });
+  });
+
+  req.end();
+});
+
 test("get gets mocked", function(t) {
   var dataCalled = false;
 
