@@ -2249,7 +2249,7 @@ test('clean all works', function(t) {
 
 });
 
-test('clean all should remove pending mocks from all scopes', function(t) {
+test('cleanAll should remove pending mocks from all scopes', function(t) {
   var scope1 = nock('http://example.org')
     .get('/somepath')
     .reply(200, 'hey');
