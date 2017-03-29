@@ -66,3 +66,22 @@ test('match body with empty object inside', function (t) {
     t.end();
   });
 })
+
+test('match body with form multipart', function(t) {
+
+  nock('http://encodingsareus.com')
+    .post('/', "--fixboundary\r\nContent-Disposition: form-data; name=\"field\"\r\n\r\nvalue\r\n--fixboundary--\r\n")
+    .reply(200);
+
+  var r = mikealRequest({
+    url: 'http://encodingsareus.com/',
+    method: 'post',
+  }, function(err, res) {
+    if (err) throw err;
+    assert.equal(res.statusCode, 200);
+    t.end();
+  });
+  var form = r.form();
+  form._boundary = 'fixboundary';  // fix boundary so that request could match at all
+  form.append('field', 'value');
+});
