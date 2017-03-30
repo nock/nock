@@ -16,7 +16,6 @@ var domain  = require('domain');
 var hyperquest = require('hyperquest');
 var _ = require('lodash');
 var async = require('async');
-var stream = require('stream');
 
 var globalCount;
 
