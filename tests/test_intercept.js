@@ -16,6 +16,7 @@ var domain  = require('domain');
 var hyperquest = require('hyperquest');
 var _ = require('lodash');
 var async = require('async');
+var stream = require('stream');
 
 var globalCount;
 
@@ -960,6 +961,70 @@ test("match all headers", function(t) {
 
   http.get({
      host: "api.headdy.com"
+    , path: '/two'
+    , port: 80
+    , headers: {'accept': 'application/json'}
+  }, function(res) {
+    res.setEncoding('utf8');
+    t.equal(res.statusCode, 200);
+
+    res.on('data', function(data) {
+      t.equal(data, '{"a":1,"b":2,"c":3}');
+    });
+
+    res.on('end', callback);
+  });
+
+});
+
+
+
+
+test("match all headers with log", function(t) {
+
+  // Create a very simple expect function, to
+  // compare the results of the two log calls in this test
+  let step = 0;
+  function expect(s) {
+    if (step===0) t.equal(s,"matching http://api.headdy.com:80/one to GET http://api.headdy.com:80/one: true");
+    if (step===1) t.equal(s,"matching http://api.headdy.com:80/two to GET http://api.headdy.com:80/two: true");
+    step = step +1;
+  }
+  var scope = nock('http://api.headdy.com')
+    .matchHeader('accept', 'application/json')
+    .get('/one')
+    .reply(200, { hello: "world" })
+    .get('/two')
+    .reply(200, { a: 1, b: 2, c: 3 })
+    .log(expect);
+
+  var ended = 0;
+  function callback() {
+    ended += 1;
+    if (ended === 2) {
+      scope.done();
+      t.end();
+    }
+  }
+
+  http.get({
+    host: "api.headdy.com"
+    , path: '/one'
+    , port: 80
+    , headers: {'Accept': 'application/json'}
+  }, function(res) {
+    res.setEncoding('utf8');
+    t.equal(res.statusCode, 200);
+
+    res.on('data', function(data) {
+      t.equal(data, '{"hello":"world"}');
+    });
+
+    res.on('end', callback);
+  });
+
+  http.get({
+    host: "api.headdy.com"
     , path: '/two'
     , port: 80
     , headers: {'accept': 'application/json'}
