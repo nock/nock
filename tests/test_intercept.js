@@ -988,7 +988,7 @@ test("log different request types", function(t) {
     if (step===0) t.equal(s,"matching http://api.headdy.com:80/one to GET http://api.headdy.com:80/one: true");
     if (step===1) t.equal(s,"matching http://api.headdy.com:80/two to GET http://api.headdy.com:80//tw./: true");
     if (step===2) t.equal(s,"matching http://api.headdy.com:80/three to GET http://api.headdy.com:80/ function(): true");
-    if (step===3) t.equal(s,"matching http://api.headdy.com:80/matchmiss to GET http://api.headdy.com:80/missmatch: false");
+    if (step===3) t.equal(s,"matching http://api.headdy.com:80/matchmiss to GET http://api.headdy.com:80/mismatch: false");
     step = step +1;
   }
   var scope = nock('http://api.headdy.com')
@@ -1060,7 +1060,7 @@ test("log different request types", function(t) {
 });
 
 
-test('log a missmatch', function(t) {
+test('log a mismatch', function(t) {
   function log(text) {
     t.equal(text,"matching http://example.com:80/superpowers to POST http://example.com:80/resource: false");
   }
