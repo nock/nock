@@ -1,0 +1,14 @@
+
+{
+  "name": "request-latest",
+  "version": "0.0.0",
+  "description": "Tests for request latest (>2)",
+  "main": "test.tap.js",
+  "scripts": {
+    "test": "tap test.tap.js"
+  },
+  "dependencies": {
+    "request": "^2"
+  },
+  "private": true
+}

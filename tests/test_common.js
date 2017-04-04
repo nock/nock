@@ -30,9 +30,7 @@ tap.test('matchBody should not ignore new line characters from strings when Cont
       'Content-Type': "multipart/form-data;"
     }
   }
-  var matched = matchBody.call(testThis, function (body) {
-    return body === str1;
-  }, str2);
+  var matched = matchBody.call(testThis, str1, str2);
   t.true(matched);
   t.end()
 });
@@ -45,9 +43,7 @@ tap.test('matchBody should not ignore new line characters from strings when Cont
       'Content-Type': ["multipart/form-data;"]
     }
   }
-  var matched = matchBody.call(testThis, function (body) {
-    return body === str1;
-  }, str2);
+  var matched = matchBody.call(testThis, str1, str2);
   t.true(matched);
   t.end()
 });
@@ -156,5 +152,87 @@ tap.test('matchStringOrRegexp', function (t) {
 
   t.ok(common.matchStringOrRegexp('to match', /match/), 'match if pattern is regex and target matches');
   t.false(common.matchStringOrRegexp('to match', /not/), 'false if pattern is regex and target doesn\'t match');
+  t.end();
+});
+
+tap.test('stringifyRequest', function (t) {
+  var getMockOptions = function () {
+    return {
+      method: "POST",
+      port: 81,
+      proto: 'http',
+      hostname: 'www.example.com',
+      path: '/path/1',
+      headers: {
+        cookie: 'fiz=baz'
+      }
+    };
+  }
+  var body = {"foo": "bar"};
+  var postReqOptions = getMockOptions();
+
+  t.equal(common.stringifyRequest(postReqOptions, body),
+    JSON.stringify({
+      "method":"POST",
+      "url":"http://www.example.com:81/path/1",
+      "headers":{
+        "cookie": "fiz=baz"
+      },
+      "body": {
+        "foo": "bar"
+      }
+    }, null, 2)
+  );
+
+  var getReqOptions = getMockOptions();
+  getReqOptions.method = "GET";
+
+  t.equal(common.stringifyRequest(getReqOptions, null),
+    JSON.stringify({
+      "method":"GET",
+      "url":"http://www.example.com:81/path/1",
+      "headers":{
+        "cookie": "fiz=baz"
+      }
+    }, null, 2)
+  );
+
+  t.end();
+});
+
+
+tap.test('headersArrayToObject', function (t) {
+  var headers = [
+    "Content-Type",
+    "application/json; charset=utf-8",
+    "Last-Modified",
+    "foobar",
+    "Expires",
+    "fizbuzz"
+  ];
+
+  t.deepEqual(common.headersArrayToObject(headers), {
+    "Content-Type": "application/json; charset=utf-8",
+    "Last-Modified": "foobar",
+    "Expires": "fizbuzz"
+  });
+
+  var headersMultipleSetCookies = headers.concat([
+    "Set-Cookie",
+    "foo=bar; Domain=.github.com; Path=/",
+    "Set-Cookie",
+    "fiz=baz; Domain=.github.com; Path=/"
+  ]);
+
+  t.deepEqual(common.headersArrayToObject(headersMultipleSetCookies), {
+    "Content-Type": "application/json; charset=utf-8",
+    "Last-Modified": "foobar",
+    "Expires": "fizbuzz",
+    "Set-Cookie": [
+      "foo=bar; Domain=.github.com; Path=/",
+      "fiz=baz; Domain=.github.com; Path=/"
+    ]
+  });
+
   t.end();
 });

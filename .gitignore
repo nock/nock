@@ -1,4 +1,5 @@
 node_modules
 npm-debug.log
-.idea
 coverage
+.nyc_output/
+tests/browserify-public/browserify-bundle.js

@@ -3,7 +3,7 @@
 var test          = require('tap').test;
 var mikealRequest = require('request');
 
-test('allowUnmock for https', function(t) {
+test('allowUnmocked for https', {skip: process.env.AIRPLANE}, function(t) {
   var nock = require('../');
   nock.enableNetConnect();
   var scope = nock('https://www.google.com/', {allowUnmocked: true})

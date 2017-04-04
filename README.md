@@ -1,6 +1,6 @@
 # Nock
 
-[![Build Status](https://secure.travis-ci.org/node-nock/nock.svg?branch=master)](http://travis-ci.org/node-nock/nock?branch=master)
+[![Build Status](https://travis-ci.org/node-nock/nock.svg?branch=master)](https://travis-ci.org/node-nock/nock)
 [![Coverage Status](https://coveralls.io/repos/github/node-nock/nock/badge.svg?branch=master)](https://coveralls.io/github/node-nock/nock?branch=master)
 [![Known Vulnerabilities](https://snyk.io/test/npm/nock/badge.svg)](https://snyk.io/test/npm/nock)
 [![Chat](https://img.shields.io/badge/help-gitter-eb9348.svg?style=flat)](https://gitter.im/node-nock/nock)
@@ -12,77 +12,100 @@ Nock can be used to test modules that perform HTTP requests in isolation.
 
 For instance, if a module performs HTTP requests to a CouchDB server or makes HTTP requests to the Amazon API, you can test that module in isolation.
 
-<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc/generate-toc again -->
 **Table of Contents**
 
+<!-- toc -->
+
+- [How does it work?](#how-does-it-work)
 - [Install](#install)
+  * [Node version support](#node-version-support)
 - [Use](#use)
-    - [READ THIS! - About interceptors](#read-this---about-interceptors)
-    - [Specifying hostname](#specifying-hostname)
-    - [Specifying path](#specifying-path)
-    - [Specifying request body](#specifying-request-body)
-    - [Specifying request query string](#specifying-request-query-string)
-    - [Specifying replies](#specifying-replies)
-        - [Replying with errors](#replying-with-errors)
-    - [Specifying headers](#specifying-headers)
-        - [Header field names are case-insensitive](#header-field-names-are-case-insensitive)
-        - [Specifying Request Headers](#specifying-request-headers)
-        - [Specifying Reply Headers](#specifying-reply-headers)
-        - [Default Reply Headers](#default-reply-headers)
-        - [Including Content-Length Header Automatically](#including-content-length-header-automatically)
-        - [Including Date Header Automatically](#including-date-header-automatically)
-    - [HTTP Verbs](#http-verbs)
-    - [Support for HTTP and HTTPS](#support-for-http-and-https)
-    - [Non-standard ports](#non-standard-ports)
-    - [Repeat response n times](#repeat-response-n-times)
-    - [Delay the response body](#delay-the-response-body)
-    - [Delay the response](#delay-the-response)
-    - [Delay the connection](#delay-the-connection)
-    - [Socket timeout](#socket-timeout)
-    - [Chaining](#chaining)
-    - [Scope filtering](#scope-filtering)
-    - [Path filtering](#path-filtering)
-    - [Request Body filtering](#request-body-filtering)
-    - [Request Headers Matching](#request-headers-matching)
-    - [Allow __unmocked__ requests on a mocked hostname](#allow-unmocked-requests-on-a-mocked-hostname)
+  * [READ THIS! - About interceptors](#read-this---about-interceptors)
+  * [Specifying hostname](#specifying-hostname)
+  * [Specifying path](#specifying-path)
+  * [Specifying request body](#specifying-request-body)
+  * [Specifying request query string](#specifying-request-query-string)
+  * [Specifying replies](#specifying-replies)
+      - [Access original request and headers](#access-original-request-and-headers)
+    + [Replying with errors](#replying-with-errors)
+  * [Specifying headers](#specifying-headers)
+    + [Header field names are case-insensitive](#header-field-names-are-case-insensitive)
+    + [Specifying Request Headers](#specifying-request-headers)
+    + [Specifying Reply Headers](#specifying-reply-headers)
+    + [Default Reply Headers](#default-reply-headers)
+    + [Including Content-Length Header Automatically](#including-content-length-header-automatically)
+    + [Including Date Header Automatically](#including-date-header-automatically)
+  * [HTTP Verbs](#http-verbs)
+  * [Support for HTTP and HTTPS](#support-for-http-and-https)
+  * [Non-standard ports](#non-standard-ports)
+  * [Repeat response n times](#repeat-response-n-times)
+  * [Delay the response body](#delay-the-response-body)
+  * [Delay the response](#delay-the-response)
+  * [Delay the connection](#delay-the-connection)
+  * [Socket timeout](#socket-timeout)
+  * [Chaining](#chaining)
+  * [Scope filtering](#scope-filtering)
+  * [Path filtering](#path-filtering)
+  * [Request Body filtering](#request-body-filtering)
+  * [Request Headers Matching](#request-headers-matching)
+  * [Optional Requests](#optional-requests)
+  * [Allow __unmocked__ requests on a mocked hostname](#allow-__unmocked__-requests-on-a-mocked-hostname)
 - [Expectations](#expectations)
-    - [.isDone()](#isdone)
-    - [.cleanAll()](#cleanall)
-    - [.persist()](#persist)
-    - [.pendingMocks()](#pendingmocks)
+  * [.isDone()](#isdone)
+  * [.cleanAll()](#cleanall)
+  * [.persist()](#persist)
+  * [.pendingMocks()](#pendingmocks)
+  * [.activeMocks()](#activemocks)
 - [Logging](#logging)
 - [Restoring](#restoring)
 - [Turning Nock Off (experimental!)](#turning-nock-off-experimental)
 - [Enable/Disable real HTTP request](#enabledisable-real-http-request)
 - [Recording](#recording)
-    - [`dont_print` option](#dontprint-option)
-    - [`output_objects` option](#outputobjects-option)
-    - [`enable_reqheaders_recording` option](#enablereqheadersrecording-option)
-    - [`logging` option](#logging-option)
-    - [`use_separator` option](#useseparator-option)
-    - [.removeInterceptor()](#removeinterceptor)
+  * [`dont_print` option](#dont_print-option)
+  * [`output_objects` option](#output_objects-option)
+  * [`enable_reqheaders_recording` option](#enable_reqheaders_recording-option)
+  * [`logging` option](#logging-option)
+  * [`use_separator` option](#use_separator-option)
+  * [.removeInterceptor()](#removeinterceptor)
 - [Events](#events)
-    - [Global no match event](#global-no-match-event)
+  * [Global no match event](#global-no-match-event)
 - [Nock Back](#nock-back)
-    - [Setup](#setup)
-        - [Options](#options)
-    - [Usage](#usage)
-        - [Options](#options)
-        - [Modes](#modes)
-- [How does it work?](#how-does-it-work)
+  * [Setup](#setup)
+    + [Options](#options)
+  * [Usage](#usage)
+    + [Options](#options-1)
+    + [Modes](#modes)
 - [Debugging](#debugging)
 - [PROTIP](#protip)
-- [Generate Changelog](#generate-changelog)
+- [Contributing](#contributing)
+  * [Generate Changelog](#generate-changelog)
+  * [Generate README TOC](#generate-readme-toc)
+  * [Running tests](#running-tests)
+    + [Airplane mode](#airplane-mode)
 - [License](#license)
 
-<!-- markdown-toc end -->
+<!-- tocstop -->
 
+# How does it work?
+
+Nock works by overriding Node's `http.request` function. Also, it overrides `http.ClientRequest` too to cover for modules that use it directly.
 
 # Install
 
 ```sh
 $ npm install nock
 ```
+
+## Node version support
+
+| node | nock |
+|---|---|
+| 0.10 | up to 8.x |
+| 0.11 | up to 8.x |
+| 0.12 | up to 8.x |
+| 4 | 9.x |
+| 5 | up to 8.x |
+| 6 | 9.x |
 
 # Use
 
@@ -109,7 +132,7 @@ Then the test can call the module, and the module will do the HTTP requests.
 
 ## READ THIS! - About interceptors
 
-When you setup an interceptor for an URL and that interceptor is used, it is removed from the interceptor list.
+When you setup an interceptor for a URL and that interceptor is used, it is removed from the interceptor list.
 This means that you can intercept 2 or more calls to the same URL and return different things on each of them.
 It also means that you must setup one interceptor for each request you are going to have, otherwise nock will throw an error because that URL was not present in the interceptor list.
 
@@ -810,6 +833,23 @@ var scope = nock('http://api.myservice.com')
                 })
 ```
 
+## Optional Requests
+
+By default every mocked request is expected to be made exactly once, and until it is it'll appear in `scope.pendingMocks()`, and `scope.isDone()` will return false (see [expectations](#expectations)). In many cases this is fine, but in some (especially cross-test setup code) it's useful to be able to mock a request that may or may not happen. You can do this with `optionally()`. Optional requests are consumed just like normal ones once matched, but they do not appear in `pendingMocks()`, and `isDone()` will return true for scopes with only optional requests pending.
+
+```js
+var example = nock("http://example.com");
+example.pendingMocks() // []
+example.get("/pathA").reply(200);
+example.pendingMocks() // ["GET http://example.com:80/path"]
+
+// ...After a request to example.com/pathA:
+example.pendingMocks() // []
+
+example.get("/pathB").optionally().reply(200);
+example.pendingMocks() // []
+```
+
 ## Allow __unmocked__ requests on a mocked hostname
 
 If you need some request on the same host name to be mocked and some others to **really** go through the HTTP stack, you can use the `allowUnmocked` option like this:
@@ -898,6 +938,22 @@ It is also available in the global scope:
 
 ```js
 console.error('pending mocks: %j', nock.pendingMocks());
+```
+
+## .activeMocks()
+
+You can see every mock that is currently active (i.e. might potentially reply to requests) in a scope using `scope.activeMocks()`. A mock is active if it is pending, optional but not yet completed, or persisted. Mocks that have intercepted their requests and are no longer doing anything are the only mocks which won't appear here.
+
+You probably don't need to use this - it mainly exists as a mechanism to recreate the previous (now-changed) behavior of `pendingMocks()`.
+
+```js
+console.error('active mocks: %j', scope.activeMocks());
+```
+
+It is also available in the global scope:
+
+```js
+console.error('active mocks: %j', nock.activeMocks());
 ```
 
 # Logging
@@ -1168,7 +1224,7 @@ You can also listen for no match events like this:
 
 ```js
 nock.emitter.on('no match', function(req) {
-  
+
 });
 ```
 
@@ -1269,10 +1325,6 @@ to set the mode call `nockBack.setMode(mode)` or run the tests with the `NOCK_BA
 
 - lockdown: use recorded nocks, disables all http calls even when not nocked, doesn't record
 
-# How does it work?
-
-Nock works by overriding Node's `http.request` function. Also, it overrides `http.ClientRequest` too to cover for modules that use it directly.
-
 # Debugging
 Nock uses debug, so just run with environmental variable DEBUG set to nock.*
 
@@ -1293,15 +1345,37 @@ var scope = nock('http://api.myservice.com')
   .reply(200, 'OK');
 ```
 
+# Contributing
 
-# Generate Changelog
+## Generate Changelog
 
-```
-$ npm install changelog -g
-```
+This should be done immediately after publishing a new version to npm.
 
 ```
 $ npm run changelog
+```
+
+## Generate README TOC
+
+Make sure to update the README's table of contents whenever you update the README using the following npm script.
+
+```
+$ npm run toc
+```
+
+## Running tests
+
+```
+$ npm test
+```
+
+### Airplane mode
+
+Some of the tests depend on online connectivity. To skip them, set the `AIRPLANE` environment variable to some value.
+
+```
+$ export AIRPLANE=true
+$ npm test
 ```
 
 # License
