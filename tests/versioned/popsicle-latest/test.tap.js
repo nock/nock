@@ -1,6 +1,5 @@
 'use strict';
 
-const tap = require('tap');
 const popsicle = require('popsicle');
 const common = require('../common');
 

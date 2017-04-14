@@ -9,7 +9,10 @@ node_js:
 install:
   - travis_retry npm install
 
-script: npm run coverage && npm run integration
+script:
+  - npm run lint
+  - npm run coverage
+  - npm run integration
 after_success: npm run coveralls
 
 # Trigger a push build on master and greenkeeper branches + PRs build on every branches

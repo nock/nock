@@ -1,3 +1,5 @@
+'use strict';
+
 var recorder = require('./lib/recorder');
 module.exports = require('./lib/scope');
 

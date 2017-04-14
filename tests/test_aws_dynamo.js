@@ -5,7 +5,6 @@ var AWS = require('aws-sdk');
 var test = require('tap').test;
 
 test('works with dynamodb', function(t) {
-  var done = false;
   var REGION = 'us-east-1';
 
   AWS.config.update({

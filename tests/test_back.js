@@ -208,7 +208,6 @@ tap.test('nockBack dryrun tests', function (nw) {
             try {
               done();
               t.false(exists(fixtureLoc));
-              scope.done();
             } catch(err) {
               doneFails = true;
             }

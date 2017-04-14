@@ -5,7 +5,6 @@ var nock    = require('../.')
   , http    = require('http')
   , https   = require('https')
   , _       = require('lodash')
-  , debug   = require('debug')('nock.test_recorder')
   , mikealRequest = require('request')
   , superagent = require('superagent')
   , rest = require('restler');

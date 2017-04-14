@@ -11,7 +11,7 @@ tap.test('data emits', function(t) {
     .get('/api/3.0/search/venues.json?query=brudenell&apikey=XXXkeyXXX')
     .reply(200, reqBody);
 
-  var req = http.get('http://api.songkick.com/api/3.0/search/venues.json?query=brudenell&apikey=XXXkeyXXX', function(res) {
+  http.get('http://api.songkick.com/api/3.0/search/venues.json?query=brudenell&apikey=XXXkeyXXX', function(res) {
     var body = '';
 
     res.on('data', function(d) {

@@ -1,3 +1,5 @@
+'use strict';
+
 var zlib = require('zlib');
 var nock = require('../.');
 var http = require('http');
