@@ -8,8 +8,6 @@ var log = require('./_log');
 
 var events = ['socket', 'response', 'end', 'data', 'error'];
 
-var nock = require('../');
-
 var http = require('http');
 console.log('making request...')
 var req = http.get('http://www.google.com/', function(res) {

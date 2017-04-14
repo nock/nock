@@ -19,7 +19,7 @@ test('emits request and replied events', function(t) {
     });
   });
 
-  var req = http.get('http://eventland/please');
+  http.get('http://eventland/please');
 });
 
 test('emits no match when no match and no mock', function(t) {
@@ -43,7 +43,7 @@ test('emits no match when no match and mocked', function(t) {
     nock.emitter.removeAllListeners('no match');
     t.end();
   }
-  var result = nock.emitter.on('no match', assertion);
+  nock.emitter.on('no match', assertion);
 
   http.get('http://itmayormaynotexistidontknowreally/definitelymaybe')
     .once('error', ignore);

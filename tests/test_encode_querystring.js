@@ -1,3 +1,5 @@
+'use strict';
+
 var nock    = require('../.');
 var request = require('request');
 var test    = require('tap').test;

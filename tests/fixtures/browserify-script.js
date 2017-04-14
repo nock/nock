@@ -1,3 +1,7 @@
+/* eslint-env browser */
+
+'use strict';
+
 var assert = require('assert');
 var http = require('http');
 var nock = require('../../');

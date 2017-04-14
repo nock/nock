@@ -3,7 +3,6 @@
 var nock = require('../');
 var test = require('tap').test;
 var http = require('http');
-var assert = require('assert');
 var zlib = require('zlib');
 
 if (zlib.gzipSync && zlib.gunzipSync) {

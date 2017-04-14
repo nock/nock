@@ -1,7 +1,8 @@
+'use strict';
+
 var nock    = require('../.');
 var request = require('request');
 var test    = require('tap').test;
-var http    = require('http');
 
 test('query with array', function(t) {
     var query1 = { list: [123, 456, 789], a: 'b' };
