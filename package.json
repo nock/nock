@@ -194,7 +194,7 @@
     "pre-commit": "1.1.2",
     "request": "2.71.0",
     "request-promise": "^2.0.1",
-    "restify": "^4.0.4",
+    "restify": "^4.1.0",
     "restler": "3.4.0",
     "rimraf": "^2.3.2",
     "superagent": "^3.5.0",
