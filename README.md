@@ -1256,8 +1256,8 @@ nockBack.setMode('record');
 By default if the fixture doesn't exist, a `nockBack` will create a new fixture and save the recorded output
 for you. The next time you run the test, if the fixture exists, it will be loaded in.
 
-The `this` context of the call back function will be have a property `scopes` to access all of the loaded
-nock scopes
+The `this` context of the callback function will have a property `scopes` to access all of the loaded
+nock scopes.
 
 ```javascript
 var nockBack = require('nock').back;
@@ -1272,12 +1272,12 @@ var before = function(scope) {
       return body;
     }
 
-    var recordedBodyResult = /timestamp:([0-9]+)/.exec(aRecodedBody);
-    if (!recodedBodyResult) {
+    var recordedBodyResult = /timestamp:([0-9]+)/.exec(aRecordedBody);
+    if (!recordedBodyResult) {
       return body;
     }
 
-    var recordedTimestamp = recodedBodyResult[1];
+    var recordedTimestamp = recordedBodyResult[1];
     return body.replace(/(timestamp):([0-9]+)/g, function(match, key, value) {
       return key + ':' + recordedTimestamp;
     });
