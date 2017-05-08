@@ -213,8 +213,6 @@
     "toc": "markdown-toc -i README.md"
   },
   "pre-commit": [
-    "jshint",
-    "coverage"
   ],
   "nyc": {
     "reporter": [
