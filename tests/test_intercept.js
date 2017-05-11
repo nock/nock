@@ -2833,12 +2833,13 @@ test('NetConnectNotAllowedError is instance of Error', function(t) {
   nock.enableNetConnect();
 });
 
-test('NetConnectNotAllowedError exposes the stack', function(t) {
+test('NetConnectNotAllowedError exposes the stack and has a code', function(t) {
   nock.disableNetConnect();
 
   http.get('http://www.amazon.com', function(res) {
     throw "should not request this";
   }).on('error', function (err) {
+    t.equal(err.code, 'ENETUNREACH')
     t.notEqual(err.stack, undefined);
     t.end();
   });
