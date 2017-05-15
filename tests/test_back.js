@@ -3,6 +3,7 @@
 var nock    = require('../.')
   , nockBack= nock.back
   , tap     = require('tap')
+  , EventEmitter    = require('events')
   , http    = require('http')
   , fs      = require('fs')
   , exists  = fs.existsSync;
@@ -300,6 +301,59 @@ tap.test('nockBack record tests', function (nw) {
         t.end();
       });
     });
+  });
+
+  nw.test('it can modify recorded responses', {skip: process.env.AIRPLANE}, function (t) {
+    nockBack.fixtures = __dirname + '/fixtures';
+
+    var options = {
+      host: 'www.google.com', method: 'GET', path: '/', port: 80
+    };
+
+    var fixture = 'someFixture2.json';
+    var fixtureLoc = nockBack.fixtures + '/' + fixture;
+
+    t.false(exists(fixtureLoc));
+
+    var afterRecord = function(scopes) {
+      t.true(scopes.length > 0);
+      t.true(scopes[0].response === 'Hello World!');
+    }
+    var alterResponse = function(res) {
+      var newRes = new EventEmitter();
+      newRes.push = function(data){
+          newRes.emit('data', data);
+      }
+      var firstTime = true;
+
+      res.once('end', function(){
+        newRes.emit('end');
+      });
+      res.on('data', function(){
+        if(firstTime){
+          newRes.push('Hello World!');
+          firstTime = false;
+        }
+      });
+
+      return newRes;
+    }
+
+    nockBack(fixture, {alterResponse: alterResponse, afterRecord: afterRecord}, function (done) {
+      var nb = this;
+      http.request(options, function(res){
+        res.once('end', function(){
+          done();
+
+          t.true(exists(fixtureLoc));
+
+          fs.unlinkSync(fixtureLoc);
+          t.end();
+        });
+        res.on('data', function(data) {});
+      }).end();
+    });
+
   });
 
   nw.end();
