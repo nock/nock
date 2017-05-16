@@ -988,7 +988,7 @@ $ NOCK_OFF=true node my_test.js
 
 # Enable/Disable real HTTP request
 
-As default, if you do not mock a host, a real HTTP request will do, but sometimes you should not permit real HTTP request, so...
+By default, any requests made to a host that is not mocked will be executed normally. If you want to block these requests, nock allows you to do so. 
 
 For disabling real http requests.
 
