@@ -810,6 +810,34 @@ test('outputs query string parameters using query()', {skip: process.env.AIRPLAN
   });
 });
 
+test('outputs query string arrays correctly', {skip: process.env.AIRPLANE}, function(t) {
+  nock.restore();
+  nock.recorder.clear();
+  t.equal(nock.recorder.play().length, 0);
+
+  nock.recorder.rec(true);
+
+  var makeRequest = function(callback) {
+    superagent
+      .get('https://example.com/')
+      .query({'foo':['bar', 'baz']})
+      .end(callback);
+  };
+
+  makeRequest(function(err, resp) {
+    t.ok(!err, err && err.message || 'no error');
+    t.ok(resp, 'have response');
+    t.ok(resp.headers, 'have headers');
+
+    var ret = nock.recorder.play();
+    t.equal(ret.length, 1);
+    t.type(ret[0], 'string');
+    var match = "\nnock('https://example.com:443', {\"encodedQueryParams\":true})\n  .get('/')\n  .query({\"foo\":[\"bar\",\"baz\"]})\n  .reply(";
+    t.equal(ret[0].substring(0, match.length), match);
+    t.end();
+  });
+});
+
 test('removes query params from from that path and puts them in query()', {skip: process.env.AIRPLANE}, function(t) {
   nock.restore();
   nock.recorder.clear();
