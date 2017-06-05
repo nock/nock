@@ -280,8 +280,7 @@ test('records nonstandard ports', function(t) {
 
   //  Create test http server and perform the tests while it's up.
   var testServer = http.createServer(function(req, res) {
-    res.write(RESPONSE_BODY);
-    res.end();
+    res.end(RESPONSE_BODY);
   }).listen(8081, function(err) {
 
     t.equal(err, undefined);
@@ -731,8 +730,7 @@ test('works with clients listening for readable', {skip: process.env.AIRPLANE}, 
 
   //  Create test http server and perform the tests while it's up.
   var testServer = http.createServer(function(req, res) {
-    res.write(RESPONSE_BODY);
-    res.end();
+    res.end(RESPONSE_BODY);
   }).listen(8081, function(err) {
 
     // t.equal(err, undefined);
