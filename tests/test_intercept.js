@@ -58,7 +58,6 @@ test("allow override works (2)", function(t) {
   mikealRequest(options, function(err, resp, body) {
     scope.done();
     t.end();
-    return console.log(resp.statusCode, body);
   });
 });
 
@@ -436,7 +435,6 @@ test("get with reply callback returning array with headers", function(t) {
   }, function(res) {
     res.setEncoding('utf8');
     t.equal(res.statusCode, 202);
-    console.log('res.headers:', res.headers);
     t.deepEqual(res.headers, {
       'x-key': 'value',
       'x-key-2': 'value 2',
@@ -1361,7 +1359,6 @@ test("reply with date header", function(t){
     , path: '/'
     , port: 80
   }, function(res) {
-    console.error(res.headers);
     t.equal(res.headers['date'], date.toUTCString());
     res.on('end', function() {
       scope.done();
@@ -3472,7 +3469,6 @@ test('define() is backward compatible', function(t) {
   });
 
   req.on('error', function(err) {
-    console.error(err);
     //  This should never happen.
     t.ok(false, 'Error should never occur.');
     t.end();
@@ -3517,7 +3513,6 @@ test('define() works with non-JSON responses', function(t) {
   });
 
   req.on('error', function(err) {
-    console.error(err);
     //  This should never happen.
     t.ok(false, 'Error should never occur.');
     t.end();
@@ -3563,7 +3558,6 @@ test('define() works with binary buffers', function(t) {
   });
 
   req.on('error', function(err) {
-    console.error(err);
     //  This should never happen.
     t.ok(false, 'Error should never occur.');
     t.end();
@@ -4725,10 +4719,8 @@ test('no content type provided', function(t) {
       method: 'POST',
       headers: {}
   }, function(res) {
-    console.log('haz response');
     res.on('data', function() {});
     res.once('end', function() {
-      console.log('response ended');
       scope.done();
       t.ok(true);
       t.end();
