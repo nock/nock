@@ -1,12 +1,14 @@
 'use strict';
 
-var fs = require('fs');
-var path = require('path');
-var http = require('http');
-var browserify = require('browserify');
-var Static = require('node-static');
-var Browser = require('zombie');
+var semver = require('semver');
+if (semver.gt(process.versions.node, '7.9.0')) return
 
+var Browser = require('zombie');
+var Static = require('node-static');
+var browserify = require('browserify');
+var fs = require('fs');
+var http = require('http');
+var path = require('path');
 var test = require('tap').test;
 var before = test;
 var after  = test;
@@ -40,7 +42,7 @@ test('run bundle', function(t) {
   var browser = new Browser();
 
   browser.on('error', function(err) {
-    console.error('BROWSER ERROR: ' + err.stack);
+    throw err
   });
 
   browser.visit('/', function() {
