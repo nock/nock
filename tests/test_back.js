@@ -145,7 +145,7 @@ tap.test('nockBack dryrun tests', function (nw) {
 
     nockBack(fixture, function (done) {
       var req = http.request({
-          host: "www.amazon.com"
+          host: "amazon.com"
         , path: '/'
         , port: 80
         }, function(res) {
