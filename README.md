@@ -1077,7 +1077,7 @@ var nockCalls = nock.recorder.play();
 
 The `nockCalls` var will contain an array of strings representing the generated code you need.
 
-Copy and paste that code into your tests, customize at will, and you're done!
+Copy and paste that code into your tests, customize at will, and you're done! You can call `nock.recorder.reset()` to remove already recorded calls from the array that `nock.recorder.play()` returns.
 
 (Remember that you should do this one test at a time).
 
