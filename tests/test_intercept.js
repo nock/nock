@@ -3640,6 +3640,47 @@ test('define() uses reqheaders', function(t) {
 
 });
 
+test('define() uses badheaders', function(t) {
+  var nockDef = [{
+    "scope":"http://example.com",
+    "method":"GET",
+    "path":"/",
+    "status":401,
+    "badheaders": ['x-foo']
+  }, {
+    "scope":"http://example.com",
+    "method":"GET",
+    "path":"/",
+    "status":200,
+    "reqheaders": {
+      'x-foo': 'bar'
+    }
+  }];
+
+  var nocks = nock.define(nockDef);
+
+  t.ok(nocks);
+
+  var req = new http.request({
+    host: 'example.com',
+    method: 'GET',
+    path: '/',
+    headers: {
+      'x-foo': 'bar'
+    }
+  }, function(res) {
+    t.equal(res.statusCode, 200);
+
+    res.once('end', function() {
+      t.end();
+    });
+    // Streams start in 'paused' mode and must be started.
+    // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+    res.resume();
+  });
+  req.end();
+});
+
 test('sending binary and receiving JSON should work ', function(t) {
   var scope = nock('http://example.com')
     .filteringRequestBody(/.*/, '*')
