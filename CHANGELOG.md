@@ -1,3 +1,84 @@
+9.0.15 / 2017-09-18
+===================
+
+  * fix: `nock.define()` respects badheaders option
+  * test: `nock.define()` ignores badheaders option
+  * docs(README): document `nock.recorder.clear()`
+
+9.0.14 / 2017-07-17
+===================
+
+  * Fixes for Node 8
+  * Merge pull request [#948](https://github.com/node-nock/nock/issues/948) from martinkuba/master
+    Fix for [#947](https://github.com/node-nock/nock/issues/947)
+  * www.amazon.com does not return any data
+  * Merge pull request [#929](https://github.com/node-nock/nock/issues/929) from martinkuba/node8
+    Updates to unblock Node 8
+  * Merge pull request [#942](https://github.com/node-nock/nock/issues/942) from michaelnisi/browserify
+    Skip browserify test because zombie fails @7.10
+  * Skip browserify test because zombie fails @7.10
+  * wrap http.get on Node 8 only
+  * workaround for socket hang up
+  * fix recorder when calling res.end(data)
+  * use req.setHeader()
+  * override http.get
+  * added Node 8 to Travis
+  * Merge pull request [#667](https://github.com/node-nock/nock/issues/667) from ksmith97/master
+    Updated debug namespace to match file.
+
+9.0.13 / 2017-04-10
+===================
+
+  * 9.0.13: Revert [#863](https://github.com/node-nock/nock/issues/863)
+  * Merge pull request [#880](https://github.com/node-nock/nock/issues/880) from node-nock/revert-v9.0.12-issue-863
+    Revert "Merge branch 'fasterize-fix_match_body'"
+  * Revert "Merge branch 'fasterize-fix_match_body'"
+    This reverts commit 8333e3aef1e79dc2ed96dca819124f4a18f1af4d, reversing
+    changes made to 30881e2a72dbb950e771f912c5f9ddbcb91c0acd.
+
+9.0.12 / 2017-04-10
+===================
+
+  * 9.0.12: Use key length in array/object comparison
+  * Merge branch 'fasterize-fix_match_body'
+    * fasterize-fix_match_body:
+    [[#863](https://github.com/node-nock/nock/issues/863)] Fix matchBody for object and array comparison
+  * Merge branch 'fix_match_body' of https://github.com/fasterize/nock into fasterize-fix_match_body
+    * 'fix_match_body' of https://github.com/fasterize/nock:
+    [[#863](https://github.com/node-nock/nock/issues/863)] Fix matchBody for object and array comparison
+  * [[#863](https://github.com/node-nock/nock/issues/863)] Fix matchBody for object and array comparison
+
+9.0.11 / 2017-03-29
+===================
+
+  * 9.0.11: Fixes for [#856](https://github.com/node-nock/nock/issues/856) (pending mocks) and [#425](https://github.com/node-nock/nock/issues/425) (multipart forms)
+  * Merge pull request [#834](https://github.com/node-nock/nock/issues/834) from delijati/master
+    PR [#834](https://github.com/node-nock/nock/issues/834): Don't remove newlines from multipart form reqests
+  * Merge pull request [#857](https://github.com/node-nock/nock/issues/857) from disrupticons/fixing-issue-856
+    Fix [#856](https://github.com/node-nock/nock/issues/856): nock.cleanAll() should remove pending mocks
+  * fixing test description
+
+9.0.10 / 2017-03-28
+===================
+
+  * 9.0.10: Versioned tested and better .npmignore
+  * adding test for multipart match body
+  * Merge pull request [#858](https://github.com/node-nock/nock/issues/858) from fabiosantoscode/patch-1
+    Add some big folders to .npmignore
+  * Add some big folders to .npmignore
+  * Remove pending mocks from scopes on nock.cleanAll()
+  * Merge pull request [#842](https://github.com/node-nock/nock/issues/842) from node-nock/feature-832-versioned-tests
+    Feature [#832](https://github.com/node-nock/nock/issues/832): Versioned tests
+  * [#832](https://github.com/node-nock/nock/issues/832) Add glob as dev dep
+  * [#832](https://github.com/node-nock/nock/issues/832) Add integration tests to travis
+  * [#832](https://github.com/node-nock/nock/issues/832) Cleanup sub dep install script
+  * [#832](https://github.com/node-nock/nock/issues/832) Add tests for request & popsicle
+  * [#832](https://github.com/node-nock/nock/issues/832) Remove socketTimeout test
+  * [#832](https://github.com/node-nock/nock/issues/832) Run got tests using common test runner
+  * 832 Versioned tests for got module
+  * 832 Add sub dep install from NR
+  * Changelog v9.0.9
+
 9.0.9 / 2017-02-28
 ==================
 
@@ -25,6 +106,7 @@
     Fix interceptor if query have no query strings
   * chore(package): update superagent to version 3.5.0
     https://greenkeeper.io/
+  * fix for the "fix matchBody for multipart requests [#425](https://github.com/node-nock/nock/issues/425)"
   * Test against request 2.79.0, with which timeout issue occured.
   * Add Visual Studio Code folder into gitignore
   * Update the failed test case
@@ -93,6 +175,7 @@
     https://greenkeeper.io/
   * fix typo
     URL begins with a hard u, pronounced "you" and so should be preceded by "a", not "an"
+  * Updated debug namespace to match file.
   * Set `this` to request on socket event.
     This makes behavior consistent with the Node.js HTTP module
     (https://github.com/nodejs/node/blob/v6.0.0/lib/_http_client.js#L541).
@@ -107,77 +190,3 @@
     https://greenkeeper.io/
   * Merge pull request [#760](https://github.com/node-nock/nock/issues/760) from node-nock/greenkeeper-nyc-10.0.0
     Update nyc to version 10.0.0 🚀
-  * chore(package): update nyc to version 10.0.0
-    https://greenkeeper.io/
-  * Merge pull request [#683](https://github.com/node-nock/nock/issues/683) from szdavid92/feat/gzip-content-type-decoder
-    Add gzip and deflate decoder for json content type
-  * Merge pull request [#743](https://github.com/node-nock/nock/issues/743) from node-nock/greenkeeper-zombie-5.0.1
-    Update zombie to version 5.0.1 🚀
-  * Merge pull request [#738](https://github.com/node-nock/nock/issues/738) from node-nock/greenkeeper-lodash-4.16.6
-    Update lodash to version 4.16.6 🚀
-  * chore(package): update zombie to version 5.0.1
-    https://greenkeeper.io/
-  * chore(package): update lodash to version 4.16.6
-    https://greenkeeper.io/
-  * fix wording
-  * add gzip and deflate decoder for json content type
-  * Add nodejs v7 to travis config
-  * Update CHANGELOG
-
-9.0.2 / 2016-10-28
-==================
-
-  * 9.0.2
-  * Merge branch 'airplane'
-  * Update CHANGELOG
-
-9.0.1 / 2016-10-28
-==================
-
-  * 9.0.1
-  * Merge pull request [#734](https://github.com/node-nock/nock/issues/734) from RobertWHurst/master
-    Fixes regression introduced by [#719](https://github.com/node-nock/nock/issues/719)
-  * Implement AIRPLANE mode to skip internet-dependent tests
-  * Utilize tap's skip functionality to toggle tests based on available features
-  * Add more notes on contributing section
-  * Move "How does it work?" section to the top of the README
-  * Fix [#731](https://github.com/node-nock/nock/issues/731)
-  * test for empty object in body
-  * Update README & CHANGELOG
-
-9.0.0 / 2016-10-23
-==================
-
-  * 9.0.0
-  * Drop support for node versions 0.10, 0.11, 0.12 and 5
-  * Add section on node versions support
-  * Update CHANGELOG
-
-8.2.0 / 2016-10-23
-==================
-
-  * 8.2.0
-  * Add changelog to the dev dependencies
-  * Ignore browserify-bundle.js
-  * Update browserify-bundle.js
-  * Merge pull request [#723](https://github.com/node-nock/nock/issues/723) from pimterry/optional-mocks
-    Add optionally() and make isDone and pendingMocks consistent.
-  * Include all review markup changes in browserify-bundle
-  * Add .activeMocks() to recreate previous .pendingMocks() behaviour
-  * Add times+optional and persist+optional tests
-  * Document assumption in pendingMocks()
-  * Clarify optional mock behaviour a little in README
-  * Merge pull request [#721](https://github.com/node-nock/nock/issues/721) from pimterry/removeInterceptor-from-pending
-    Update PendingMocks when an interceptor is removed
-  * Merge pull request [#722](https://github.com/node-nock/nock/issues/722) from Ginden/no-garbage-in-npm
-    Removed coverage folder from npm
-  * Merge pull request [#668](https://github.com/node-nock/nock/issues/668) from abdulito/master
-    Support http OPTIONS method
-  * Merge pull request [#725](https://github.com/node-nock/nock/issues/725) from node-nock/greenkeeper-async-2.1.1
-    Update async to version 2.1.1 🚀
-  * Merge pull request [#719](https://github.com/node-nock/nock/issues/719) from ltegman/fix/body-spec-regex-in-array
-    Handle arrays like objects in match_body
-  * Handle arrays like objects in match_body
-  * chore(package): update async to version 2.1.1
-    https://greenkeeper.io/
-  * Ad documentation for optionally()
