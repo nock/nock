@@ -4129,6 +4129,29 @@ test('mocking succeeds even when mocked and specified request header names have 
 
 });
 
+test('mocking succeeds when mocked and specified request headers have falsy values (#966)', function(t) {
+  var scope = nock('http://example.com', {
+    reqheaders: {
+      "x-foo": 0
+    }
+  })
+    .post('/resource')
+    .reply(200, { status: "ok" });
+
+  mikealRequest({
+    method: 'POST',
+    uri: 'http://example.com/resource',
+    headers: {
+      "X-Foo": 0
+    }
+  }, function(err, res, body) {
+    t.error(err);
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+
+});
+
 test('mocking succeeds even when host request header is not specified', function(t) {
   var scope = nock('http://example.com')
     .post('/resource')
