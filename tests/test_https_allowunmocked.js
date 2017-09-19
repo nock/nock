@@ -20,6 +20,5 @@ test('allowUnmocked for https', {skip: process.env.AIRPLANE}, function(t) {
     t.true(typeof body !== 'undefined', 'body should not be undefined');
     t.true(body.length !== 0, 'body should not be empty');
     t.end();
-    return console.log(resp.statusCode, 'body length: ', body.length);
   });
 });
