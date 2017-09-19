@@ -4,5 +4,17 @@ node_js:
   - 4
   - 6
   - 8
-script: "npm run coverage && npm run integration"
-after_success: "npm run coveralls"
+
+# Retry install on fail to avoid failing a build on network/disk/external errors
+install:
+  - travis_retry npm install
+
+script: npm run coverage && npm run integration
+after_success: npm run coveralls
+
+# Trigger a push build on master and greenkeeper branches + PRs build on every branches
+# Avoid double build on PRs (See https://github.com/travis-ci/travis-ci/issues/1147)
+branches:
+  only:
+    - master
+    - /^greenkeeper.*$/
