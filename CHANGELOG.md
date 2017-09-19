@@ -1,6 +1,18 @@
+9.0.16 / 2017-09-18
+===================
+
+  * fix: match headers with falsy values
+  * test: match headers with falsy values
+  * chore(travis): don’t build twice for PRs and retry npm install
+  * chore(travis): don’t test in node v7
+    It’s no longer supported
+  * chore: remove console logs in tests
+  * docs(CHANGELOG): update for 9.0.15
+
 9.0.15 / 2017-09-18
 ===================
 
+  * 9.0.15
   * fix: `nock.define()` respects badheaders option
   * test: `nock.define()` ignores badheaders option
   * docs(README): document `nock.recorder.clear()`
@@ -176,17 +188,3 @@
   * fix typo
     URL begins with a hard u, pronounced "you" and so should be preceded by "a", not "an"
   * Updated debug namespace to match file.
-  * Set `this` to request on socket event.
-    This makes behavior consistent with the Node.js HTTP module
-    (https://github.com/nodejs/node/blob/v6.0.0/lib/_http_client.js#L541).
-  * Merge pull request [#757](https://github.com/node-nock/nock/issues/757) from node-nock/greenkeeper-tap-8.0.1
-    Update tap to version 8.0.1 🚀
-  * Add test for delay/timeout
-  * chore(package): update tap to version 8.0.1
-    https://greenkeeper.io/
-  * Merge pull request [#755](https://github.com/node-nock/nock/issues/755) from node-nock/greenkeeper-lodash-4.17.2
-    Update lodash to version 4.17.2 🚀
-  * chore(package): update lodash to version 4.17.2
-    https://greenkeeper.io/
-  * Merge pull request [#760](https://github.com/node-nock/nock/issues/760) from node-nock/greenkeeper-nyc-10.0.0
-    Update nyc to version 10.0.0 🚀
