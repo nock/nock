@@ -4384,6 +4384,20 @@ test('match domain using regexp', function (t) {
   });
 });
 
+test('match full domain using regexp', function (t) {
+  var scope = nock(/^http:\/\/.*\.fulldomainexample\.com:80$/, { allowUnmocked: true })
+    .get('/resources')
+    .reply(200, 'Match www');
+
+  mikealRequest.get('http://www.fulldomainexample.com/resources', function(err, res, body) {
+    t.type(err, 'null');
+    t.equal(res.statusCode, 200);
+    t.equal(body, 'Match www');
+
+    t.end();
+  });
+});
+
 test('match multiple interceptors with regexp domain (issue-508)', function (t) {
   var scope = nock(/chainregex/)
     .get('/')
