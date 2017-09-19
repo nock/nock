@@ -5069,6 +5069,60 @@ test('query(true) will match when the path has no query', function (t) {
   })
 });
 
+test('match domain and path using regexp (#835)', function (t) {
+  nock.cleanAll();
+  var imgResponse = 'Matched Images Page';
+
+  var scope = nock(/google/)
+    .get(/img/)
+    .reply(200, imgResponse);
+
+  mikealRequest.get('http://www.google.com/imghp?hl=en', function (err, res, body) {
+    scope.done();
+    t.type(err, 'null');
+    t.equal(res.statusCode, 200);
+    t.equal(body, imgResponse);
+    t.end();
+  });
+});
+
+test('match multiple paths to domain using regexp with allowUnmocked (#835)', function (t) {
+  nock.cleanAll();
+
+  var nockOpts = { allowUnmocked: true };
+  var searchResponse = 'Matched Google Search Results Page';
+  var imgResponse = 'Matched Google Images Page';
+
+  var scope1 = nock(/google/, nockOpts)
+    .get(/imghp/)
+    .reply(200, imgResponse);
+
+  var scope2 = nock(/google/, nockOpts)
+    .get(/search\?/)
+    .reply(200, searchResponse);
+
+
+  mikealRequest.get('http://www.google.com', function (err, res, body) {
+    t.type(err, 'null');
+    t.equal(res.statusCode, 200);
+
+    mikealRequest.get('http://www.google.com/imghp?hl=en', function (err, res, body) {
+      scope1.done();
+      t.type(err, 'null');
+      t.equal(res.statusCode, 200);
+      t.equal(body, imgResponse);
+
+      mikealRequest.get('http://www.google.com/search?q=pugs', function (err, res, body) {
+        scope2.done();
+        t.type(err, 'null');
+        t.equal(res.statusCode, 200);
+        t.equal(body, searchResponse);
+        t.end();
+      });
+    });
+  });
+});
+
 test("teardown", function(t) {
   var leaks = Object.keys(global)
     .splice(globalCount, Number.MAX_VALUE);
