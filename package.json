@@ -167,7 +167,7 @@
   ],
   "main": "./index",
   "dependencies": {
-    "chai": ">=1.9.2 <4.0.0",
+    "chai": ">=4.0.0",
     "debug": "^2.2.0",
     "deep-equal": "^1.0.0",
     "json-stringify-safe": "^5.0.1",
