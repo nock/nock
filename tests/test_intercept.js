@@ -974,6 +974,118 @@ test("match all headers", function(t) {
 
 });
 
+
+
+
+test("log different request types", function(t) {
+
+  // Create a very simple expect function, to
+  // compare the results of the two log calls in this test
+  let step = 0;
+  function expect(s) {
+    if (step===0) t.equal(s,"matching http://api.headdy.com:80/one to GET http://api.headdy.com:80/one: true");
+    if (step===1) t.equal(s,"matching http://api.headdy.com:80/two to GET http://api.headdy.com:80//tw./: true");
+    if (step===2) t.equal(s,'matching http://api.headdy.com:80/three to GET http://api.headdy.com:80/function (uri) { return uri.indexOf("three")>=0; }: true');
+    if (step===3) t.equal(s,"matching http://api.headdy.com:80/matchmiss to GET http://api.headdy.com:80/mismatch: false");
+    step = step +1;
+  }
+  var scope = nock('http://api.headdy.com')
+    .matchHeader('accept', 'application/json')
+    .get('/one')
+    .reply(200, { hello: "world" })
+    .get(/tw./)
+    .reply(200, { a: 1, b: 2, c: 3 })
+    .get(function(uri) { return uri.indexOf("three")>=0; })
+    .reply(200,{c:1})
+    .log(expect);
+
+  var ended = 0;
+  function callback() {
+    ended += 1;
+    if (ended === 3) {
+      scope.done();
+      t.end();
+    }
+  }
+
+  http.get({
+    host: "api.headdy.com"
+    , path: '/one'
+    , port: 80
+    , headers: {'Accept': 'application/json'}
+  }, function(res) {
+    res.setEncoding('utf8');
+    t.equal(res.statusCode, 200);
+
+    res.on('data', function(data) {
+      t.equal(data, '{"hello":"world"}');
+    });
+
+    res.on('end', callback);
+  });
+
+  http.get({
+    host: "api.headdy.com"
+    , path: '/two'
+    , port: 80
+    , headers: {'accept': 'application/json'}
+  }, function(res) {
+    res.setEncoding('utf8');
+    t.equal(res.statusCode, 200);
+
+    res.on('data', function(data) {
+      t.equal(data, '{"a":1,"b":2,"c":3}');
+    });
+
+
+
+    res.on('end', callback);
+  });
+  http.get({
+    host: "api.headdy.com"
+    , path: '/three'
+    , port: 80
+    , headers: {'accept': 'application/json'}
+  }, function(res) {
+    res.setEncoding('utf8');
+    t.equal(res.statusCode, 200);
+
+    res.on('data', function(data) {
+      t.equal(data, '{"c":1}');
+    });
+    res.on('end', callback);
+  });
+});
+
+
+test('log a mismatch', function(t) {
+  function log(text) {
+    t.equal(text,"matching http://example.com:80/superpowers to POST http://example.com:80/resource: false");
+  }
+  var scope = nock('http://example.com')
+    .post('/resource')
+    .reply(200, { status: "ok" })
+    .log(log);
+
+  var d = domain.create();
+
+  d.run(function() {
+    mikealRequest({
+      method: 'POST',
+      uri: 'http://example.com/superpowers'
+    });
+  });
+
+  d.once('error', function(err) {
+    t.ok(err.message.match(/No match/));
+    // Disable logger, as scope is still existing, as call failed
+    scope.log(function(){});
+
+    t.end();
+  });
+});
+
+
 test("header manipulation", function(t) {
   var scope = nock('http://example.com')
                 .get('/accounts')
