@@ -1,6 +1,25 @@
+9.0.17 / 2017-09-19
+===================
+
+  * 835 support regex for both host and port with allowUnmocked
+  * 835-added-fail-test-case
+  * docs(README) - fix info about mocking ([#971](https://github.com/node-nock/nock/issues/971))
+  * Document replyWithFile using Content-Type header
+  * fix readme typo
+    add missing closing paren
+  * fix grammar
+    change `the response event will occur immediately, but the IncomingMessage not it's end event until after the delay` -> `the response event will occur immediately, but the IncomingMessage will not emit it's end event until after the delay`
+  * Improve Match Logging
+    Currently, matching logging does not include the method or path of the request.  I have added these to make debugging non-matches easier.
+  * Update README.md
+    please review for accuracy. I actually don't know how it behaves but this section was very confusing to read.
+  * fix: printing recorded requests with output_objects resulted in output of [Object Object]
+  * chore(CHANGELOG): 9.0.16
+
 9.0.16 / 2017-09-18
 ===================
 
+  * 9.0.16
   * fix: match headers with falsy values
   * test: match headers with falsy values
   * chore(travis): don’t build twice for PRs and retry npm install
@@ -172,19 +191,3 @@
   * Add Ian WS to contrib
   * Merge pull request [#597](https://github.com/node-nock/nock/issues/597) from ianwsperber/feature-better-unmatched-request-error
     Better unmatched request error
-  * chore(package): update tap to version 10.0.0
-    https://greenkeeper.io/
-  * Merge pull request [#799](https://github.com/node-nock/nock/issues/799) from node-nock/greenkeeper-tap-9.0.3
-    Update tap to version 9.0.3 🚀
-  * Merge pull request [#797](https://github.com/node-nock/nock/issues/797) from Thebigbignooby/patch-1
-    Fix typo in README
-  * Use pretty JSON and no longer stringify body
-  * Only include body in stringified request for non-GET requests
-  * Update intercept tests for new stringified format
-  * Format stringified request as JSON and include headers
-  * Baseline test for common.stringifyRequest
-  * chore(package): update tap to version 9.0.3
-    https://greenkeeper.io/
-  * fix typo
-    URL begins with a hard u, pronounced "you" and so should be preceded by "a", not "an"
-  * Updated debug namespace to match file.
