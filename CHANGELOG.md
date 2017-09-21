@@ -1,6 +1,15 @@
+9.0.18 / 2017-09-20
+===================
+
+  * fix(recorder): don’t JSON.stringify output if output_objects is not enabled
+    This is a follow up fix for https://github.com/node-nock/nock/pull/959
+  * feat: promisify nock back ([#798](https://github.com/node-nock/nock/issues/798))
+  * chore(CHANGELOG) v9.0.17
+
 9.0.17 / 2017-09-19
 ===================
 
+  * 9.0.17
   * 835 support regex for both host and port with allowUnmocked
   * 835-added-fail-test-case
   * docs(README) - fix info about mocking ([#971](https://github.com/node-nock/nock/issues/971))
@@ -181,13 +190,3 @@
     Update tap to version 10.0.0 🚀
   * Bug [#818](https://github.com/node-nock/nock/issues/818) Assert mutiple set-cookie headers are included in object
   * Bug [#818](https://github.com/node-nock/nock/issues/818) Send back multiple headers if multiple present
-
-9.0.3 / 2017-02-06
-==================
-
-  * 9.0.3: Change error message for unmatched requests
-  * Merge pull request [#819](https://github.com/node-nock/nock/issues/819) from node-nock/chore-add-ian-contrib
-    Add Ian WS to contrib
-  * Add Ian WS to contrib
-  * Merge pull request [#597](https://github.com/node-nock/nock/issues/597) from ianwsperber/feature-better-unmatched-request-error
-    Better unmatched request error
