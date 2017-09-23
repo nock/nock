@@ -1,6 +1,26 @@
+9.0.19 / 2017-09-22
+===================
+
+  * Improve Nock Back documentation
+  * Fix file permissions of intercept test
+  * Fix allowUnmocked when last interceptor was removed.
+  * Do not abort a an already aborted request, do not emit an error twice
+    Fixes [#882](https://github.com/node-nock/nock/issues/882)
+    When a request is aborted, "nock" emits an "abort"-error.
+    If the client reacts on that error by aborting the request (this is what
+    "popsicle" does), the code will end in an endless loop.
+    This commit makes that the the "abort"-code is only executed, if the
+    request has not already been aborted.
+  * fix broken link: allow-unmocked-requests-on-a-mocked-hostname
+  * fix: Specified request body not properly enforced ([#921](https://github.com/node-nock/nock/issues/921))
+  * Minor change in example code `scope(` => `var scope = nock(`
+  * nockBack.setMode: Improve error message
+  * chore(CHANGELOG): v9.0.18
+
 9.0.18 / 2017-09-20
 ===================
 
+  * 9.0.18
   * fix(recorder): don’t JSON.stringify output if output_objects is not enabled
     This is a follow up fix for https://github.com/node-nock/nock/pull/959
   * feat: promisify nock back ([#798](https://github.com/node-nock/nock/issues/798))
@@ -173,20 +193,3 @@
     Fix this pointer on "socket" event
   * exclude test files from coverage reports
   * add text summary coverage reporter
-  * fix basicAuth/matchHeader interceptors with isomorphic-fetch
-  * add failing test for isomorphic-fetch and matchHeader
-  * add failing test for isomorphic-fetch and basicAuth
-  * Merge pull request [#821](https://github.com/node-nock/nock/issues/821) from node-nock/chore-changelog-v9.0.4
-    Update changelog using "npm run changelog"
-  * Update changelog using "npm run changelog"
-
-9.0.4 / 2017-02-07
-==================
-
-  * 9.0.4: Fix bug where only single set-cookie header would be returned
-  * Merge pull request [#820](https://github.com/node-nock/nock/issues/820) from node-nock/bug-818-multiple-set-cookie
-    Bug 818 multiple set cookie
-  * Merge pull request [#813](https://github.com/node-nock/nock/issues/813) from node-nock/greenkeeper-tap-10.0.0
-    Update tap to version 10.0.0 🚀
-  * Bug [#818](https://github.com/node-nock/nock/issues/818) Assert mutiple set-cookie headers are included in object
-  * Bug [#818](https://github.com/node-nock/nock/issues/818) Send back multiple headers if multiple present
