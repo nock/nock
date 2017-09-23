@@ -202,8 +202,6 @@ tap.test('nockBack dryrun tests', function (nw) {
 
           t.ok([200, 301, 302].indexOf(res.statusCode) >= 0);
           res.on('end', function() {
-            var doneFails = false;
-
             t.ok(dataCalled);
             t.false(exists(fixtureLoc));
             t.end();
