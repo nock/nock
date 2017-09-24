@@ -3605,7 +3605,7 @@ test('issue #163 - Authorization header isn\'t mocked', {skip: process.env.AIRPL
   });
 });
 
-test('define() uses reqheaders', function(t) {
+test('define() uses reqheaders', {only: true}, function(t) {
   var nockDef = {
     "scope":"http://example.com",
     "method":"GET",
@@ -5118,6 +5118,54 @@ test('match multiple paths to domain using regexp with allowUnmocked (#835)', fu
         t.equal(body, searchResponse);
         t.end();
       });
+    });
+  });
+});
+
+test('multiple interceptors override headers from unrelated request', {only: true}, function (t) {
+  nock.cleanAll();
+
+  nock.define([
+    {
+      scope: 'https://api.github.com:443',
+      method: 'get',
+      path: '/bar',
+      reqheaders: {
+        'x-foo': 'bar'
+      },
+      status: 200,
+      response: {}
+    },
+    {
+      scope: 'https://api.github.com:443',
+      method: 'get',
+      path: '/baz',
+      reqheaders: {
+        'x-foo': 'baz'
+      },
+      status: 200,
+      response: {}
+    }
+  ])
+
+  mikealRequest({
+    url: 'https://api.github.com/bar',
+    headers: {
+      'x-foo': 'bar'
+    }
+  }, function (err, res, body) {
+    t.error(err);
+    t.equal(res.statusCode, 200);
+
+    mikealRequest.get({
+      url: 'https://api.github.com/baz',
+      headers: {
+        'x-foo': 'baz'
+      }
+    }, function (err, res, body) {
+      t.error(err);
+      t.equal(res.statusCode, 200);
+      t.end();
     });
   });
 });

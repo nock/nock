@@ -206,7 +206,7 @@
     "unit": "tap --harmony ./tests/test_*.js",
     "preintegration": "./tests/bin/install_sub_deps versioned",
     "integration": "tap --harmony ./tests/versioned/*/*.tap.js",
-    "test": "npm run lint && npm run unit && npm run integration",
+    "test": "tap --only tests/test_intercept.js",
     "coverage": "nyc tap --harmony ./tests/test_*.js",
     "coveralls": "cat ./coverage/lcov.info | coveralls",
     "lint": "eslint '**/*.js'",

@@ -9,10 +9,6 @@ node_js:
 install:
   - travis_retry npm install
 
-script:
-  - npm run lint
-  - npm run unit
-  - npm run integration
 after_script:
   - npm run coverage
   - npm run coveralls
