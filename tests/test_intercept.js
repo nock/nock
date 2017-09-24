@@ -62,7 +62,6 @@ test("allow unmocked works (2)", function(t) {
 });
 
 test("allow unmocked works after one interceptor is removed", function(t) {
-  var scope =
   nock("https://example.org",{allowUnmocked: true}).
     get("/").
     reply(200, "Mocked");
