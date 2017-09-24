@@ -3605,7 +3605,7 @@ test('issue #163 - Authorization header isn\'t mocked', {skip: process.env.AIRPL
   });
 });
 
-test('define() uses reqheaders', {only: true}, function(t) {
+test('define() uses reqheaders', function(t) {
   var nockDef = {
     "scope":"http://example.com",
     "method":"GET",
@@ -5122,7 +5122,7 @@ test('match multiple paths to domain using regexp with allowUnmocked (#835)', fu
   });
 });
 
-test('multiple interceptors override headers from unrelated request', {only: true}, function (t) {
+test('multiple interceptors override headers from unrelated request', function (t) {
   nock.cleanAll();
 
   nock.define([
