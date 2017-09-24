@@ -70,7 +70,7 @@ test("allow unmocked works after one interceptor is removed", function(t) {
     t.error(err);
     t.equal(body, 'Mocked');
 
-    mikealRequest("https://example.org/foo", function(err, resp, body) {
+    mikealRequest("https://example.org/test", function(err, resp, body) {
       t.error(err);
       t.assert(~body.indexOf('Example Domain'));
       t.end();
