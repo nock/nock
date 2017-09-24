@@ -11,9 +11,11 @@ install:
 
 script:
   - npm run lint
-  - npm run coverage
+  - npm run unit
   - npm run integration
-after_success: npm run coveralls
+after_script:
+  - npm run coverage
+  - npm run coveralls
 
 # Trigger a push build on master and greenkeeper branches + PRs build on every branches
 # Avoid double build on PRs (See https://github.com/travis-ci/travis-ci/issues/1147)
