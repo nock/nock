@@ -1,6 +1,20 @@
+9.0.20 / 2017-09-24
+===================
+
+  * fix: match headers with falsy values (again)
+    follow up for https://github.com/node-nock/nock/pull/973/files#r140647611
+  * Switch from jshint to eslint ([#885](https://github.com/node-nock/nock/issues/885))
+    - Remove pre-commit hooks
+    - Fix a broken unit test (bug caught by lint)
+    - Minor lint + style cleanup
+    Closes [#868](https://github.com/node-nock/nock/issues/868)
+  * changed Real HTTP request documentation to be more readable
+  * docs(CHANGELOG): 9.0.19
+
 9.0.19 / 2017-09-22
 ===================
 
+  * 9.0.19
   * Improve Nock Back documentation
   * Fix file permissions of intercept test
   * Fix allowUnmocked when last interceptor was removed.
@@ -185,11 +199,3 @@
 ==================
 
   * 9.0.5: Various bug fixes
-  * Merge pull request [#822](https://github.com/node-nock/nock/issues/822) from KingHenne/fix/isomorphic-fetch-basic-auth
-    Fix isomorphic fetch usage with basicAuth/matchHeader
-  * Merge pull request [#823](https://github.com/node-nock/nock/issues/823) from KingHenne/fix/nyc-config
-    Exclude test files from coverage reports
-  * Merge pull request [#769](https://github.com/node-nock/nock/issues/769) from RubenVerborgh/fix-socket-this
-    Fix this pointer on "socket" event
-  * exclude test files from coverage reports
-  * add text summary coverage reporter
