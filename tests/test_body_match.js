@@ -67,6 +67,24 @@ test('match body with empty object inside', function (t) {
   });
 })
 
+test('doesn\'t match body with mismatching keys', function (t) {
+  nock('http://encodingsareus.com')
+    .post('/', { a: 'a' })
+    .reply(200);
+
+  mikealRequest({
+    url: 'http://encodingsareus.com/',
+    method: 'post',
+    json: {
+      a: 'a',
+      b: 'b'
+    }
+  }, function(err) {
+    assert.ok(err);
+    t.end();
+  });
+});
+
 test('match body with form multipart', function(t) {
 
   nock('http://encodingsareus.com')

@@ -57,3 +57,27 @@ test("abort is emitted before delay time", function(t) {
     req.abort();
   }, 10);
 });
+
+test("Aborting an aborted request should not emit an error", function(t) {
+  nock('http://test.example.com')
+    .get('/status')
+    .reply(200);
+
+  var errorCount = 0
+  var req = http.get('http://test.example.com/status')
+    .on('error', function(err) {
+      errorCount++;
+      if (errorCount < 3) {
+        // Abort 3 times at max, otherwise this would be an endless loop,
+        // if #882 pops up again.
+        req.abort();
+      }
+    });
+  req.abort();
+
+  // Give nock some time to fail
+  setTimeout(function() {
+    t.equal(errorCount, 1,"Only one error should be sent.");
+    t.end();
+  },10);
+});
