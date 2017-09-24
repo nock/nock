@@ -183,16 +183,15 @@
     "browserify": "^13.0.0",
     "changelog": "^1.0.7",
     "coveralls": "^2.11.2",
+    "eslint": "^3.19.0",
     "glob": "^7.1.1",
     "hyperquest": "^1.3.0",
     "isomorphic-fetch": "^2.2.0",
     "istanbul": "^0.4.2",
-    "jshint": "^2.5.6",
     "markdown-toc": "^0.13.0",
     "needle": "^1.0.0",
     "node-static": "^0.7.7",
     "nyc": "^10.0.0",
-    "pre-commit": "1.1.2",
     "request": "2.71.0",
     "request-promise": "^2.0.1",
     "restify": "^4.0.4",
@@ -207,17 +206,13 @@
     "unit": "tap --harmony ./tests/test_*.js",
     "preintegration": "./tests/bin/install_sub_deps versioned",
     "integration": "tap --harmony ./tests/versioned/*/*.tap.js",
-    "test": "npm run unit && npm run integration",
+    "test": "npm run lint && npm run unit && npm run integration",
     "coverage": "nyc tap --harmony ./tests/test_*.js",
     "coveralls": "cat ./coverage/lcov.info | coveralls",
-    "jshint": "jshint lib/*.js",
+    "lint": "eslint '**/*.js'",
     "changelog": "changelog nock all -m > CHANGELOG.md",
     "toc": "markdown-toc -i README.md"
   },
-  "pre-commit": [
-    "jshint",
-    "coverage"
-  ],
   "nyc": {
     "reporter": [
       "lcov",

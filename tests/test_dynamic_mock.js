@@ -5,7 +5,7 @@ var nock = require('../.');
 var request = require('request');
 
 test('one function returning the body defines a full mock', function(t) {
-  var scope = nock('http://acompleteandfullmock.io')
+  nock('http://acompleteandfullmock.io')
     .get('/abc')
     .reply(function() {
       return 'ABC';
@@ -22,7 +22,7 @@ test('one function returning the body defines a full mock', function(t) {
 });
 
 test('one function returning the status code and body defines a full mock', function(t) {
-  var scope = nock('http://acompleteandfullmock.io')
+  nock('http://acompleteandfullmock.io')
     .get('/def')
     .reply(function() {
       return [201, 'DEF'];
@@ -39,7 +39,7 @@ test('one function returning the status code and body defines a full mock', func
 });
 
 test('one asynchronous function returning the status code and body defines a full mock', function(t) {
-  var scope = nock('http://acompleteandfullmock.io')
+  nock('http://acompleteandfullmock.io')
     .get('/ghi')
     .reply(function(path, reqBody, cb) {
       setTimeout(function() {
@@ -59,7 +59,7 @@ test('one asynchronous function returning the status code and body defines a ful
 });
 
 test('asynchronous function gets request headers', function(t) {
-  var scope = nock('http://someheadersarein.io')
+  nock('http://someheadersarein.io')
     .get('/yo')
     .reply(200, function(path, reqBody, cb) {
       t.equal(this.req.path, '/yo');

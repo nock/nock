@@ -6,7 +6,7 @@ var mikealRequest = require('request');
 test('allowUnmocked for https', {skip: process.env.AIRPLANE}, function(t) {
   var nock = require('../');
   nock.enableNetConnect();
-  var scope = nock('https://www.google.com/', {allowUnmocked: true})
+  nock('https://www.google.com/', {allowUnmocked: true})
   .get('/pathneverhit')
   .reply(200, {foo: 'bar'});
 
