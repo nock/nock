@@ -5098,7 +5098,7 @@ test('match multiple paths to domain using regexp with allowUnmocked (#835)', fu
     .reply(200, imgResponse);
 
   var scope2 = nock(/google/, nockOpts)
-    .get(/search\?/)
+    .get(/search/)
     .reply(200, searchResponse);
 
 
@@ -5166,6 +5166,32 @@ test('multiple interceptors override headers from unrelated request', function (
     }, function (err, res, body) {
       t.error(err);
       t.equal(res.statusCode, 200);
+      t.end();
+    });
+  });
+});
+
+test('match when query is specified with allowUnmocked (#490)', function (t) {
+  nock.cleanAll();
+
+  var nockOpts = { allowUnmocked: true };
+  var searchResponse = 'Matched body';
+
+  var scope = nock('http://www.google.com/', nockOpts)
+    .get('/search')
+    .query({q: 'js'})
+    .reply(200, searchResponse);
+
+
+  mikealRequest.get('http://www.google.com', function (err, res, body) {
+    t.type(err, 'null');
+    t.equal(res.statusCode, 200);
+
+    mikealRequest.get('http://www.google.com/search?q=js', function (err, res, body) {
+      scope.done();
+      t.type(err, 'null');
+      t.equal(res.statusCode, 200);
+      t.equal(body, searchResponse);
       t.end();
     });
   });
