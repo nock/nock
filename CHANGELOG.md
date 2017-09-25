@@ -1,6 +1,18 @@
+9.0.21 / 2017-09-25
+===================
+
+  * fix: compare falsy header values & numbers correctly
+  * test: match number header values
+  * multiple interceptors override headers from unrelated requests
+  * Add an error code to NetConnectNotAllowedError
+    This is in line with nodejs error codes. I chose `ENETUNREACH` because it clearly defines the reason why the http request failed.
+    https://nodejs.org/api/all.html#errors_error_code
+  * chore(CHANGELOG): v9.0.20
+
 9.0.20 / 2017-09-24
 ===================
 
+  * 9.0.20
   * fix: match headers with falsy values (again)
     follow up for https://github.com/node-nock/nock/pull/973/files#r140647611
   * Switch from jshint to eslint ([#885](https://github.com/node-nock/nock/issues/885))
@@ -184,18 +196,3 @@
   * Test against request 2.79.0, with which timeout issue occured.
   * Add Visual Studio Code folder into gitignore
   * Update the failed test case
-  * Fix https://github.com/node-nock/nock/issues/754
-
-9.0.6 / 2017-02-13
-==================
-
-  * 9.0.6: Fix for [#827](https://github.com/node-nock/nock/issues/827)
-  * Merge pull request [#828](https://github.com/node-nock/nock/issues/828) from node-nock/bug-827-matchStringOrRegexp
-    Bug [#827](https://github.com/node-nock/nock/issues/827) Defensive coding around target
-  * Bug [#827](https://github.com/node-nock/nock/issues/827) Defensive coding around target
-  * Fail if interceptor has query parameters but not the query
-
-9.0.5 / 2017-02-10
-==================
-
-  * 9.0.5: Various bug fixes
