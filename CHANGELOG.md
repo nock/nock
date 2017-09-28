@@ -1,6 +1,15 @@
+9.0.22 / 2017-09-27
+===================
+
+  * fix: query string recording where value is an array ([#917](https://github.com/node-nock/nock/issues/917))
+  * docs(README): link to license file, link to contributors, update Copyright years
+  * chore(LICENSE): MIT
+  * chore(CHANGELOG): v9.0.21
+
 9.0.21 / 2017-09-25
 ===================
 
+  * 9.0.21
   * fix: compare falsy header values & numbers correctly
   * test: match number header values
   * multiple interceptors override headers from unrelated requests
@@ -190,9 +199,3 @@
   * 9.0.7: Fix for [#610](https://github.com/node-nock/nock/issues/610)
   * Merge pull request [#829](https://github.com/node-nock/nock/issues/829) from yodeyer/fixQs
     Fix interceptor if query have no query strings
-  * chore(package): update superagent to version 3.5.0
-    https://greenkeeper.io/
-  * fix for the "fix matchBody for multipart requests [#425](https://github.com/node-nock/nock/issues/425)"
-  * Test against request 2.79.0, with which timeout issue occured.
-  * Add Visual Studio Code folder into gitignore
-  * Update the failed test case
