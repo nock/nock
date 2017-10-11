@@ -3567,35 +3567,37 @@ test('define() works with binary buffers', function(t) {
 
 });
 
-test('issue #163 - Authorization header isn\'t mocked', function(t) {
-  nock.enableNetConnect();
-  function makeRequest(cb) {
-    var r = http.request(
-      {
-        hostname: 'www.example.com',
-        path: '/',
-        method: 'GET',
-        auth: 'foo:bar'
-      },
-      function(res) {
-        cb(res.req._headers);
-      }
-    );
-    r.end();
-  }
+if (process.versions.node >= '0.11' ) {
+  test('issue #163 - Authorization header isn\'t mocked', function(t) {
+    nock.enableNetConnect();
+    function makeRequest(cb) {
+      var r = http.request(
+        {
+          hostname: 'www.example.com',
+          path: '/',
+          method: 'GET',
+          auth: 'foo:bar'
+        },
+        function(res) {
+          cb(res.req._headers);
+        }
+      );
+      r.end();
+    }
 
-  makeRequest(function(headers) {
-    var n = nock('http://www.example.com', {
-      reqheaders: { 'authorization': 'Basic Zm9vOmJhcg==' }
-    }).get('/').reply(200);
+    makeRequest(function(headers) {
+      var n = nock('http://www.example.com', {
+        reqheaders: { 'authorization': 'Basic Zm9vOmJhcg==' }
+      }).get('/').reply(200);
 
-    makeRequest(function(nockHeader) {
-      n.done();
-      t.equivalent(headers, nockHeader);
-      t.end();
+      makeRequest(function(nockHeader) {
+        n.done();
+        t.equivalent(headers, nockHeader);
+        t.end();
+      });
     });
   });
-});
+}
 
 test('define() uses reqheaders', function(t) {
   var nockDef = {
