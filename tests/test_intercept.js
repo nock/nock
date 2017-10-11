@@ -4225,6 +4225,7 @@ test('request emits socket', function(t) {
 
   var req = http.get('http://gotzsocketz.com');
   req.once('socket', function(socket) {
+    t.equal(this, req);
     t.type(socket, Object);
     t.type(socket.getPeerCertificate(), 'string');
     t.end();
