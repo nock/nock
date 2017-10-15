@@ -1,3 +1,8 @@
+8.2.1 / 2017-10-15
+==================
+
+  * Set `this` to request on socket event. [#993](https://github.com/node-nock/nock/pull/993)
+
 8.2.0 / 2016-10-23
 ==================
 
