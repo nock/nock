@@ -1,9 +1,14 @@
 sudo: false
 language: node_js
+cache:
+  directories:
+    - ~/.npm
+notifications:
+  email: false
 node_js:
-  - 4
-  - 6
-  - 8
+  - '8'
+  - '6'
+  - '4'
 
 # Retry install on fail to avoid failing a build on network/disk/external errors
 install:
@@ -13,9 +18,10 @@ script:
   - npm run lint
   - npm run unit
   - npm run integration
-after_script:
+after_success:
   - npm run coverage
   - npm run coveralls
+  - npm run semantic-release
 
 # Trigger a push build on master and greenkeeper branches + PRs build on every branches
 # Avoid double build on PRs (See https://github.com/travis-ci/travis-ci/issues/1147)
