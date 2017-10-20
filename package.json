@@ -181,7 +181,6 @@
     "async": "^2.1.1",
     "aws-sdk": "^2.0.15",
     "browserify": "^13.0.0",
-    "changelog": "^1.0.7",
     "coveralls": "^2.11.2",
     "eslint": "^3.19.0",
     "glob": "^7.1.1",
@@ -211,7 +210,6 @@
     "coverage": "nyc tap --harmony ./tests/test_*.js",
     "coveralls": "cat ./coverage/lcov.info | coveralls",
     "lint": "eslint '**/*.js'",
-    "changelog": "changelog nock all -m > CHANGELOG.md",
     "toc": "markdown-toc -i README.md",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
