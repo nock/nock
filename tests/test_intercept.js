@@ -61,7 +61,7 @@ test("allow unmocked works (2)", function(t) {
   });
 });
 
-test("allow unmocked works after one interceptor is removed", function(t) {
+test("allow unmocked works after one interceptor is removed", {only: true}, function(t) {
   nock("https://example.org",{allowUnmocked: true}).
     get("/").
     reply(200, "Mocked");
@@ -70,8 +70,11 @@ test("allow unmocked works after one interceptor is removed", function(t) {
     t.error(err);
     t.equal(body, 'Mocked');
 
-    mikealRequest("https://example.org/test", function(err, resp, body) {
+    mikealRequest("https://example.org/unmocked", function(err, resp, body) {
       t.error(err);
+      console.log(`\nbody ==============================`)
+      console.log(body)
+
       t.assert(~body.indexOf('Example Domain'));
       t.end();
     });
