@@ -152,6 +152,9 @@ tap.test('matchStringOrRegexp', {only: true}, function (t) {
 
   t.true(common.matchStringOrRegexp(123, 123), 'true if pattern is number and target matches');
 
+  t.false(common.matchStringOrRegexp(undefined, 'to not match'), 'handle undefined target when pattern is string');
+  t.false(common.matchStringOrRegexp(undefined, /not/), 'handle undefined target when pattern is regex');
+
   t.ok(common.matchStringOrRegexp('to match', /match/), 'match if pattern is regex and target matches');
   t.false(common.matchStringOrRegexp('to match', /not/), 'false if pattern is regex and target doesn\'t match');
   t.end();
