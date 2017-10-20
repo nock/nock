@@ -12,6 +12,17 @@ tap.test('matchBody ignores new line characters from strings', function(t) {
   t.end()
 });
 
+tap.test('matchBody keeps new line characters if specs is a function', function(t) {
+  var body = "something //here is something more \n";
+  var bodyAsSpecParameter = null
+  var spec = function(bodyToTest) {
+    bodyAsSpecParameter = bodyToTest
+  }
+  matchBody(spec, body);
+  t.equal(bodyAsSpecParameter, body);
+  t.end()
+});
+
 tap.test('matchBody should not throw, when headers come node-fetch style as array', function(t) {
   var testThis = {
     headers: {
