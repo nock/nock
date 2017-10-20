@@ -80,7 +80,6 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
 - [Debugging](#debugging)
 - [PROTIP](#protip)
 - [Contributing](#contributing)
-  * [Generate Changelog](#generate-changelog)
   * [Generate README TOC](#generate-readme-toc)
   * [Running tests](#running-tests)
     + [Airplane mode](#airplane-mode)
@@ -1013,7 +1012,7 @@ $ NOCK_OFF=true node my_test.js
 
 # Enable/Disable real HTTP request
 
-By default, any requests made to a host that is not mocked will be executed normally. If you want to block these requests, nock allows you to do so. 
+By default, any requests made to a host that is not mocked will be executed normally. If you want to block these requests, nock allows you to do so.
 
 For disabling real http requests.
 
@@ -1384,13 +1383,26 @@ var scope = nock('http://api.myservice.com')
 
 # Contributing
 
-## Generate Changelog
+## Commit Message conventions
 
-This should be done immediately after publishing a new version to npm.
+`nock` releases are automated using [semantic-release](https://github.com/semantic-release/semantic-release).
+To automatically calculate the correct version number as well as changelogs,
+three commit message conventions need to be followed
 
-```
-$ npm run changelog
-```
+- Commit bug fixes with `fix: ...` or `fix(scope): ...` prefix in commit subject
+- Commit new features with `feat: ...` or `feat(scope): ...` prefix in commit subject
+- Commit breaking changes by adding `BREAKING CHANGE: ` in the commit body
+  (not the subject line)
+
+Other helpful conventions are
+
+- Commit test files with `test: ...` or `test(scope): ...` prefix
+- Commit changes to `package.json`, `.gitignore` and other meta files with
+  `chore(filename-without-ext): ...`
+- Commit changes to README files or comments with `docs: ...`
+- Code style changes with `style: standard`
+
+The commit message(s) of a pull request can be fixed using the `squash & merge` button.
 
 ## Generate README TOC
 
