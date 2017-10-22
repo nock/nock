@@ -59,7 +59,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
   * [.isActive()](#isactive)
 - [Logging](#logging)
 - [Restoring](#restoring)
-- [Activating](#activate)
+- [Activating](#activating)
 - [Turning Nock Off (experimental!)](#turning-nock-off-experimental)
 - [Enable/Disable real HTTP request](#enabledisable-real-http-request)
 - [Recording](#recording)
@@ -989,11 +989,11 @@ nock.restore();
 ```
 **note 1**: restore does not clear the interceptor list. Use [nock.cleanAll()](#cleanall) if you expect the interceptor list to be empty.
 
-**note 2**: restore will also remove the http interceptor itself. You need to run [nock.activate()](#activate) to re-activate the http interceptor. Without re-activation, nock will not intercept any calls.
+**note 2**: restore will also remove the http interceptor itself. You need to run [nock.activate()](#activating) to re-activate the http interceptor. Without re-activation, nock will not intercept any calls.
 
 # Activating
 
-Only for cases where nock has been deactivated using `nock.restore()`, you can reactivate the HTTP interceptor to start intercepting HTTP calls using:
+Only for cases where nock has been deactivated using [nock.restore()](#restoring), you can reactivate the HTTP interceptor to start intercepting HTTP calls using:
 
 ```js
 nock.activate();
