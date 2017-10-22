@@ -56,8 +56,10 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
   * [.persist()](#persist)
   * [.pendingMocks()](#pendingmocks)
   * [.activeMocks()](#activemocks)
+  * [.isActive()](#isactive)
 - [Logging](#logging)
 - [Restoring](#restoring)
+- [Activating](#activate)
 - [Turning Nock Off (experimental!)](#turning-nock-off-experimental)
 - [Enable/Disable real HTTP request](#enabledisable-real-http-request)
 - [Recording](#recording)
@@ -957,6 +959,17 @@ It is also available in the global scope:
 console.error('active mocks: %j', nock.activeMocks());
 ```
 
+## .isActive()
+
+Your tests may sometimes want to deactivate the nock interceptor.
+Once deactivated, nock needs to be re-activated to work.
+You can check if nock interceptor is active or not by using `nock.isActive()`.
+Sample:
+
+```js
+if (!nock.isActive()) nock.activate()
+```
+
 # Logging
 
 Nock can log matches if you pass in a log function like this:
@@ -974,7 +987,17 @@ You can restore the HTTP interceptor to the normal unmocked behaviour by calling
 ```js
 nock.restore();
 ```
-**note**: restore does not clear the interceptor list. Use [nock.cleanAll()](#cleanall) if you expect the interceptor list to be empty.
+**note 1**: restore does not clear the interceptor list. Use [nock.cleanAll()](#cleanall) if you expect the interceptor list to be empty.
+
+**note 2**: restore will also remove the http interceptor itself. You need to run [nock.activate()](#activate) to re-activate the http interceptor. Without re-activation, nock will not intercept any calls.
+
+# Activating
+
+Only for cases where nock has been deactivated using `nock.restore()`, you can reactivate the HTTP interceptor to start intercepting HTTP calls using:
+
+```js
+nock.activate();
+```
 
 # Turning Nock Off (experimental!)
 
