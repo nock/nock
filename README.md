@@ -999,7 +999,7 @@ Only for cases where nock has been deactivated using [nock.restore()](#restoring
 nock.activate();
 ```
 
-**note** To check if nock HTTP interceptor is active or deactive, use [nock.isActive()](#isactive).
+**note**: To check if nock HTTP interceptor is active or deactive, use [nock.isActive()](#isactive).
 
 # Turning Nock Off (experimental!)
 
