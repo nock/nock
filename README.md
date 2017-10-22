@@ -999,6 +999,8 @@ Only for cases where nock has been deactivated using [nock.restore()](#restoring
 nock.activate();
 ```
 
+**note** To check if nock HTTP interceptor is active or deactive, use [nock.isActive()](#isactive).
+
 # Turning Nock Off (experimental!)
 
 You can bypass Nock completely by setting `NOCK_OFF` environment variable to `"true"`.
