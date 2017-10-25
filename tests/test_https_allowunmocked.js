@@ -22,3 +22,24 @@ test('allowUnmocked for https', {skip: process.env.AIRPLANE}, function(t) {
     t.end();
   });
 });
+
+test('allowUnmocked for https with query test miss', {skip: process.env.AIRPLANE}, function(t) {
+  var nock = require('../');
+  nock.enableNetConnect();
+  nock('https://www.google.com', {allowUnmocked: true})
+  .get('/search')
+  .query(function() {return false;})
+  .reply(500);
+
+  var options = {
+    method: 'GET',
+    uri: 'https://www.google.com/search'
+  };
+
+  mikealRequest(options, function(err, resp, body) {
+    t.notOk(err, 'should be no error');
+    t.true(typeof body !== 'undefined', 'body should not be undefined');
+    t.true(body.length !== 0, 'body should not be empty');
+    t.end();
+  });
+});
