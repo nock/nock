@@ -5126,6 +5126,24 @@ test('match multiple paths to domain using regexp with allowUnmocked (#835)', fu
   });
 });
 
+test('match domain and path using regexp with query params and allow unmocked', function(t) {
+  nock.cleanAll();
+  var imgResponse = 'Matched Images Page';
+  var opts = { allowUnmocked: true };
+
+  var scope = nock(/google/, opts)
+    .get(/imghp\?hl=en/)
+    .reply(200, imgResponse);
+
+  mikealRequest.get('http://www.google.com/imghp?hl=en', function (err, res, body) {
+    scope.done();
+    t.type(err, 'null');
+    t.equal(res.statusCode, 200);
+    t.equal(body, imgResponse);
+    t.end();
+  });
+});
+
 test('multiple interceptors override headers from unrelated request', function (t) {
   nock.cleanAll();
 
