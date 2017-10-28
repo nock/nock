@@ -5218,6 +5218,23 @@ test('match when query is specified with allowUnmocked (#490)', function (t) {
   });
 });
 
+test('correctly parse request without specified path (#1003)', function(t) {
+  nock.cleanAll();
+
+  var scope1 = nock('https://example.com')
+    .get('')
+    .reply(200);
+
+  https.request({hostname: 'example.com'}, function(res) {
+    t.equal(res.statusCode, 200);
+    res.on('data', function() {});
+    res.on('end', function() {
+      scope1.done();
+      t.end();
+    });
+  }).end();
+});
+
 test("teardown", function(t) {
   var leaks = Object.keys(global)
     .splice(globalCount, Number.MAX_VALUE);
