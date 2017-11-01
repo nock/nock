@@ -1086,6 +1086,8 @@ nock.recorder.rec();
 
 Recording relies on intercepting real requests and answers and then persisting them for later use.
 
+In order to stop recording you should call `nock.restore()` and recording will stop.
+
 **ATTENTION!:** when recording is enabled, nock does no validation.
 
 ## `dont_print` option
