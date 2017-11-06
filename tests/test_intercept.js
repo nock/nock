@@ -5251,6 +5251,40 @@ test('data is sent with flushHeaders', function(t) {
   }).flushHeaders();
 });
 
+test('stop persisting a persistent nock', function(t) {
+  nock.cleanAll()
+  var scope = nock('http://persist.com')
+    .persist(true)
+    .get('/')
+    .reply(200, 'Persisting all the way');
+
+  t.ok(!scope.isDone());
+  http.get('http://persist.com/', function() {
+    t.ok(scope.isDone());
+    t.deepEqual(nock.activeMocks(), ['GET http://persist.com:80/']);
+    scope.persist(false);
+    http.get('http://persist.com/', function() {
+      t.equal(nock.activeMocks().length, 0);
+      t.ok(scope.isDone());
+      http.get('http://persist.com/')
+        .on('error', e => {
+          t.similar(e.toString(), /Error: Nock: No match for request/);
+          t.end();
+        })
+        .end();
+    }).end();
+  }).end();
+});
+
+test('should throw an error when persist flag isn\'t a boolean', function (t) {
+  try {
+    nock('http://persist.com').persist('string');
+  } catch (e) {
+    t.similar(e.toString(), /Invalid arguments: argument should be a boolean/);
+    t.end();
+  }
+})
+
 test("teardown", function(t) {
   var leaks = Object.keys(global)
     .splice(globalCount, Number.MAX_VALUE);

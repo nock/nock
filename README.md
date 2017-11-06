@@ -926,6 +926,14 @@ var scope = nock('http://persisssists.con')
 
 Note that while a persisted scope will always intercept the requests, it is considered "done" after the first interception.
 
+If you want to stop persisting a persistent nock you can call `persist(false)`:
+
+```js
+var scope = nock('http://example.com').persist().get('/').reply(200, 'ok');
+// do some tests ...
+scope.persist(false);
+```
+
 ## .pendingMocks()
 
 If a scope is not done, you can inspect the scope to infer which ones are still pending using the `scope.pendingMocks()` function:
