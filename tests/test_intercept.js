@@ -61,7 +61,7 @@ test("allow unmocked works (2)", function(t) {
   });
 });
 
-test("allow unmocked works after one interceptor is removed", {only: true}, function(t) {
+test("allow unmocked works after one interceptor is removed", function(t) {
   nock("https://example.org",{allowUnmocked: true}).
     get("/").
     reply(200, "Mocked");
@@ -72,9 +72,6 @@ test("allow unmocked works after one interceptor is removed", {only: true}, func
 
     mikealRequest("https://example.org/unmocked", function(err, resp, body) {
       t.error(err);
-      console.log(`\nbody ==============================`)
-      console.log(body)
-
       t.assert(~body.indexOf('Example Domain'));
       t.end();
     });
@@ -5233,6 +5230,25 @@ test('correctly parse request without specified path (#1003)', function(t) {
       t.end();
     });
   }).end();
+});
+
+test('data is sent with flushHeaders', function(t) {
+  nock.cleanAll();
+
+  var scope1 = nock('https://example.com')
+    .get('')
+    .reply(200, 'this is data');
+
+  https.request({hostname: 'example.com'}, function(res) {
+    t.equal(res.statusCode, 200);
+    res.on('data', function(data) {
+      t.equal(data.toString(), 'this is data');
+    });
+    res.on('end', function() {
+      scope1.done();
+      t.end();
+    });
+  }).flushHeaders();
 });
 
 test("teardown", function(t) {

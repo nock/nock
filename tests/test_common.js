@@ -157,7 +157,7 @@ tap.test('deleteHeadersField deletes fields with case-insensitive field names', 
 
 });
 
-tap.test('matchStringOrRegexp', {only: true}, function (t) {
+tap.test('matchStringOrRegexp', function (t) {
   t.true(common.matchStringOrRegexp('to match', 'to match'), 'true if pattern is string and target matches');
   t.false(common.matchStringOrRegexp('to match', 'not to match'), 'false if pattern is string and target doesn\'t match');
 
