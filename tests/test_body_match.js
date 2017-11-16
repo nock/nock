@@ -88,6 +88,27 @@ test('match body with empty object inside', function (t) {
   });
 })
 
+test('match body with nested object inside', function (t) {
+
+  nock('http://encodingsareus.com')
+    .post('/', /x/)
+    .reply(200);
+
+  mikealRequest({
+    url: 'http://encodingsareus.com/',
+    method: 'post',
+    json: {
+      obj: {
+        x: 1
+      },
+    },
+  }, function(err, res) {
+    if (err) throw err;
+    assert.equal(res.statusCode, 200);
+    t.end();
+  });
+})
+
 test('doesn\'t match body with mismatching keys', function (t) {
   nock('http://encodingsareus.com')
     .post('/', { a: 'a' })
