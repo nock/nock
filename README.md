@@ -1082,7 +1082,7 @@ nock.enableNetConnect();
 
 This is a cool feature:
 
-Guessing what the HTTP calls are is a mess, specially if you are introducing nock on your already-coded tests.
+Guessing what the HTTP calls are is a mess, especially if you are introducing nock on your already-coded tests.
 
 For these cases where you want to mock an existing live system you can record and playback the HTTP calls like this:
 
