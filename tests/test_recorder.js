@@ -719,6 +719,29 @@ test('includes query parameters from superagent', {skip: process.env.AIRPLANE}, 
     });
 });
 
+test('encodes the query parameters when not outputing objects', {skip: process.env.AIRPLANE}, function(t) {
+
+  nock.restore();
+  nock.recorder.clear();
+  t.equal(nock.recorder.play().length, 0);
+
+  nock.recorder.rec({
+    dont_print: true,
+    output_objects: false
+  });
+
+  superagent.get('http://google.com')
+    .query({q: 'test search++' })
+    .end(function(res) {
+      nock.restore();
+      var recording = nock.recorder.play();
+      t.true(recording.length >= 1);
+      t.true(recording[0].indexOf('test%20search%2B%2B') !== -1);
+      t.end();
+    });
+
+});
+
 test('works with clients listening for readable', {skip: process.env.AIRPLANE}, function(t) {
   nock.restore();
   nock.recorder.clear();
@@ -838,7 +861,7 @@ test('outputs query string arrays correctly', {skip: process.env.AIRPLANE}, func
   });
 });
 
-test('removes query params from from that path and puts them in query()', {skip: process.env.AIRPLANE}, function(t) {
+test('removes query params from that path and puts them in query()', {skip: process.env.AIRPLANE}, function(t) {
   nock.restore();
   nock.recorder.clear();
   t.equal(nock.recorder.play().length, 0);
