@@ -2,10 +2,11 @@
 
 var test          = require('tap').test;
 var mikealRequest = require('request');
+var nock          = require('../');
+
+nock.enableNetConnect();
 
 test('allowUnmocked for https', {skip: process.env.AIRPLANE}, function(t) {
-  var nock = require('../');
-  nock.enableNetConnect();
   nock('https://www.google.com/', {allowUnmocked: true})
   .get('/pathneverhit')
   .reply(200, {foo: 'bar'});
@@ -24,12 +25,11 @@ test('allowUnmocked for https', {skip: process.env.AIRPLANE}, function(t) {
 });
 
 test('allowUnmocked for https with query test miss', {skip: process.env.AIRPLANE}, function(t) {
-  var nock = require('../');
-  nock.enableNetConnect();
+  nock.cleanAll();
   nock('https://www.google.com', {allowUnmocked: true})
-  .get('/search')
-  .query(function() {return false;})
-  .reply(500);
+    .get('/search')
+    .query(function() {return false;})
+    .reply(500);
 
   var options = {
     method: 'GET',
