@@ -22,7 +22,7 @@ test('emits request and replied events', function(t) {
   http.get('http://eventland/please');
 });
 
-test('emits no match when no match and no mock', function(t) {
+test('emits global no match when no match and no mock', function(t) {
   nock.emitter.once('no match', function(req) {
     t.end();
   });
@@ -31,7 +31,7 @@ test('emits no match when no match and no mock', function(t) {
   req.once('error', ignore);
 });
 
-test('emits no match when no match and mocked', function(t) {
+test('emits global no match when no match and mocked', function(t) {
 
   nock('http://itmayormaynotexistidontknowreally')
     .get('/')
@@ -49,7 +49,7 @@ test('emits no match when no match and mocked', function(t) {
     .once('error', ignore);
 });
 
-test('emits no match when netConnect is disabled', function(t) {
+test('emits global no match when netConnect is disabled', function(t) {
   nock.disableNetConnect();
   nock.emitter.on('no match', function(req) {
     t.equal(req.hostname, 'jsonip.com')
@@ -58,6 +58,70 @@ test('emits no match when netConnect is disabled', function(t) {
     t.end();
   });
   http.get('http://jsonip.com').once('error', ignore);
+});
+
+test('emits global request when match and mock', function(t) {
+  nock('http://eventland')
+    .post('/please')
+    .reply(200);
+
+  nock.emitter.once('request', function(req, options, body) {
+    t.equal(options.path, '/please');
+    // var parsedBody = JSON.parse(body);
+    // t.same(parsedBody, { foo: 'bar'});
+    t.end();
+  });
+
+  var req = http.request({ hostname: 'eventland', path: '/please', method: 'POST' });
+  req.write(JSON.stringify({ foo: 'bar' }));
+  req.end();
+})
+
+test('emits global request when no match and no mock', function(t) {
+  nock.emitter.once('request', function(req, options, body) {
+    t.equal(options.path, '/abc');
+    // var parsedBody = JSON.parse(body);
+    // t.same(parsedBody, { foo: 'bar' });
+    t.end();
+  });
+
+  var req = http.request({ hostname: 'doesnotexistandneverexistedbefore', path: '/abc', method: 'POST' });
+  req.write(JSON.stringify({ foo: 'bar' }));
+  req.once('error', ignore);
+  req.end();
+});
+
+test('emits global request when no match and mocked', function(t) {
+  nock('http://itmayormaynotexistidontknowreally')
+    .get('/')
+    .reply('howdy');
+
+  nock.emitter.once('request', function(req, options, body) {
+    t.equal(options.path, '/definitelymaybe');
+    // var parsedBody = JSON.parse(body);
+    // t.same(parsedBody, { foo: 'bar' });
+    t.end();
+  });
+
+  var req = http.request({ hostname: 'itmayormaynotexistidontknowreally', path: '/definitelymaybe', method: 'POST' });
+  req.write(JSON.stringify({ foo: 'bar' }));
+  req.once('error', ignore);
+  req.end();
+});
+
+test('emits global request when netConnect is disabled', function(t) {
+  nock.disableNetConnect();
+  nock.emitter.once('request', function(req, options, body) {
+    t.equal(options.hostname, 'jsonip.com');
+    // var parsedBody = JSON.parse(body);
+    // t.same(parsedBody, { foo: 'bar' });
+    nock.enableNetConnect();
+    t.end();
+  });
+  var req = http.request({ hostname: 'jsonip.com', method: 'POST' });
+  req.write(JSON.stringify({ foo: 'bar' }));
+  req.once('error', ignore);
+  req.end();
 });
 
 function ignore() {}
