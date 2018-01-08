@@ -3297,6 +3297,65 @@ test('delay works with replyWithError', function (t) {
 
 });
 
+test("write callback called", function(t) {
+  var scope = nock('http://www.filterboddiezregexp.com')
+    .filteringRequestBody(/mia/, 'nostra')
+    .post('/', 'mamma nostra')
+    .reply(200, "Hello World!");
+
+  var callbackCalled = false;
+  var req = http.request({
+                           host: "www.filterboddiezregexp.com"
+                           , method: 'POST'
+                           , path: '/'
+                           , port: 80
+                         }, function(res) {
+    t.equal(callbackCalled, true);
+    t.equal(res.statusCode, 200);
+    res.on('end', function() {
+      scope.done();
+      t.end();
+    });
+    // Streams start in 'paused' mode and must be started.
+    // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+    res.resume();
+  });
+
+  req.write('mamma mia', null, function() {
+    callbackCalled = true;
+    req.end();
+  });
+});
+
+test("end callback called", function(t) {
+  var scope = nock('http://www.filterboddiezregexp.com')
+    .filteringRequestBody(/mia/, 'nostra')
+    .post('/', 'mamma nostra')
+    .reply(200, "Hello World!");
+
+  var callbackCalled = false;
+  var req = http.request({
+                           host: "www.filterboddiezregexp.com"
+                           , method: 'POST'
+                           , path: '/'
+                           , port: 80
+                         }, function(res) {
+    t.equal(callbackCalled, true);
+    t.equal(res.statusCode, 200);
+    res.on('end', function() {
+      scope.done();
+      t.end();
+    });
+    // Streams start in 'paused' mode and must be started.
+    // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+    res.resume();
+  });
+
+  req.end('mamma mia', null, function() {
+    callbackCalled = true;
+  });
+});
+
 test("finish event fired before end event (bug-139)", function(t) {
   var scope = nock('http://www.filterboddiezregexp.com')
     .filteringRequestBody(/mia/, 'nostra')
