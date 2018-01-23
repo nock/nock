@@ -1096,7 +1096,7 @@ Recording relies on intercepting real requests and answers and then persisting t
 
 In order to stop recording you should call `nock.restore()` and recording will stop.
 
-**ATTENTION!:** when recording is enabled, nock does no validation.
+**ATTENTION!:** when recording is enabled, nock does no validation, nor will any mocks be enabled.  Please be sure to turn off recording before attempting to use any mocks in your tests.
 
 ## `dont_print` option
 
