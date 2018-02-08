@@ -145,3 +145,32 @@ test('match body with form multipart', function(t) {
   form._boundary = 'fixboundary';  // fix boundary so that request could match at all
   form.append('field', 'value');
 });
+
+test('array like urlencoded form posts are correctly parsed', function(t) {
+
+  nock('http://encodingsareus.com')
+      .post('/',{
+        arrayLike: [
+          {
+            "fieldA": "0",
+            "fieldB": "data",
+            "fieldC": "value"
+          }
+        ]
+        })
+      .reply(200);
+
+  mikealRequest({
+    url: 'http://encodingsareus.com/',
+    method: 'post',
+    form: {
+      "arrayLike[0].fieldA": "0",
+      "arrayLike[0].fieldB": "data",
+      "arrayLike[0].fieldC": "value"
+    }
+  }, function(err, res) {
+    if (err) throw err;
+    assert.equal(res.statusCode, 200);
+    t.end();
+  });
+});
