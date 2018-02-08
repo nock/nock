@@ -2,6 +2,8 @@
 
 var nock = require('../.');
 var http = require('http');
+var Buffer = require('buffer').Buffer;
+var querystring = require('querystring');
 var test = require('tap').test;
 
 test('emits request and replied events', function(t) {
@@ -20,6 +22,40 @@ test('emits request and replied events', function(t) {
   });
 
   http.get('http://eventland/please');
+});
+
+test('emits request and request body', function(t) {
+  var data = querystring.stringify({
+    example: 123,
+  });
+
+  var scope = nock('http://eventland')
+    .post('/please')
+    .reply(200);
+
+  scope.on('request', function (req, interceptor, body) {
+    t.equal(req.path, '/please');
+    t.equal(interceptor.interceptionCounter, 0);
+    t.equal(body, data);
+    scope.on('replied', function (req, interceptor) {
+      t.equal(req.path, '/please');
+      t.equal(interceptor.interceptionCounter, 1);
+      t.end();
+    });
+  });
+
+  var req = http.request({
+    hostname: 'eventland',
+    method: 'POST',
+    path: '/please',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Content-Length': Buffer.byteLength(data)
+    }
+  });
+
+  req.write(data);
+  req.end();
 });
 
 test('emits no match when no match and no mock', function(t) {
