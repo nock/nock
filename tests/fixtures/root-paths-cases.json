@@ -1,0 +1,30 @@
+[
+  {
+    "root": "localhost",
+    "basePath": "http://localhost:80"
+  },
+  {
+    "root": "127.0.0.1",
+    "basePath": "http://127.0.0.1:80"
+  },
+  {
+    "root": "localhost:1234",
+    "basePath": "http://localhost:1234"
+  },
+  {
+    "root": "127.0.0.1:1234",
+    "basePath": "http://127.0.0.1:1234"
+  },
+  {
+    "root": "localhost:1234/url",
+    "basePath": "http://localhost:1234/url"
+  },
+  {
+    "root": "127.0.0.1:1234/url",
+    "basePath": "http://127.0.0.1:1234/url"
+  },
+  {
+    "root": "foo.com/api",
+    "basePath": "http://foo.com:80/api"
+  }
+]
