@@ -932,6 +932,92 @@ test("respects http.request() consumers", function(t) {
   });
 });
 
+test('records and replays binary response correctly', (t) => {
+  nock.restore()
+  nock.recorder.clear()
+  t.equal(nock.recorder.play().length, 0)
+
+  nock.recorder.rec({
+    output_objects: true,
+    dont_print: true
+  })
+
+  const transparentGifHex = '47494638396101000100800000000000ffffff21f90401000000002c000000000100010000020144003b'
+  const transparentGifBuffer = Buffer.from(transparentGifHex, 'hex')
+
+  // start server that always respondes with transparent gif at available port
+  const server = http.createServer(function (request, response) {
+    response.writeHead(201, {
+      'Content-Type': 'image/gif',
+      'Content-Length': transparentGifBuffer.length
+    })
+    response.write(transparentGifBuffer, 'binary')
+    response.end()
+  })
+
+  server.listen(0, (error) => {
+    t.error(error)
+
+    // send post request upload the same image to server
+    const postRequestOptions = {
+      method: 'PUT',
+      host: 'localhost',
+      port: server.address().port,
+      path: '/clear.gif',
+      headers: {
+        'Content-Type': 'image/gif',
+        'Content-Length': transparentGifBuffer.length
+      }
+    }
+    const postRequest1 = http.request(postRequestOptions, function (response) {
+      var data = []
+
+      response.on('data', function (chunk) {
+        data.push(chunk)
+      })
+
+      response.on('end', function () {
+        const result = Buffer.concat(data).toString('hex')
+        t.equal(result, transparentGifHex, 'received gif equals check value')
+
+        const recordedFixtures = nock.recorder.play()
+
+        // stope server, stope recording, start intercepting
+        server.close((error) => {
+          t.error(error)
+
+          nock.restore()
+          nock.activate()
+          nock.define(recordedFixtures)
+
+          // send same post request again
+          const postRequest2 = http.request(postRequestOptions, function (response) {
+            var data = []
+
+            response.on('data', function (chunk) {
+              data.push(chunk)
+            })
+
+            response.on('end', function () {
+              const result = Buffer.concat(data).toString('hex')
+
+              // expect same outcome, end tests
+              t.equal(result, transparentGifHex, 'received gif equals check value')
+              t.end()
+            })
+          })
+
+          postRequest2.write(transparentGifBuffer)
+          postRequest2.end()
+        })
+      })
+    })
+
+    postRequest1.write(transparentGifBuffer)
+    postRequest1.end()
+  })
+})
+
 test("teardown", function(t) {
   var leaks = Object.keys(global)
     .splice(globalCount, Number.MAX_VALUE);
