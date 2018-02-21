@@ -1909,10 +1909,7 @@ test("emits error if https route is missing", function(t) {
   // This listener is intentionally after the end call so make sure that
   // listeners added after the end will catch the error
   req.on('error', function (err) {
-    var headerOptions = JSON.stringify({"method":"GET","url":"https://google.com/abcdef892932"}, null, 2);
-    var expectedError = 'Nock: No match for request ' + headerOptions + ' Got instead ' + headerOptions
-
-    t.equal(err.message.trim(), expectedError);
+    t.equal(err.message.trim(), 'Nock: No match for request ' + JSON.stringify({"method":"GET","url":"https://google.com/abcdef892932"}, null, 2));
     t.end();
   });
 });
@@ -1935,10 +1932,7 @@ test("emits error if https route is missing", function(t) {
   // This listener is intentionally after the end call so make sure that
   // listeners added after the end will catch the error
   req.on('error', function (err) {
-    var headerOptions = JSON.stringify({"method":"GET","url":"https://google.com:123/dsadsads"}, null, 2);
-    var expectedError = 'Nock: No match for request ' + headerOptions + ' Got instead ' + headerOptions
-
-    t.equal(err.message.trim(), expectedError);
+    t.equal(err.message.trim(), 'Nock: No match for request ' + JSON.stringify({"method":"GET","url":"https://google.com:123/dsadsads"}, null, 2));
     t.end();
   });
 });
@@ -4756,10 +4750,7 @@ test('you must setup an interceptor for each request', function(t) {
     t.equal(body, 'First match', 'should match first request response body');
 
     mikealRequest.get('http://www.example.com/hey', function(error, res, body) {
-      var headerOptions = JSON.stringify({"method":"GET","url":"http://www.example.com/hey","headers":{"host":"www.example.com"}}, null, 2);
-      var expectedError = 'Error: Nock: No match for request ' + headerOptions + ' Got instead ' + headerOptions
-
-      t.equal(error && error.toString(), expectedError);
+      t.equal(error && error.toString(), 'Error: Nock: No match for request ' + JSON.stringify({"method":"GET","url":"http://www.example.com/hey","headers":{"host":"www.example.com"}}, null, 2));
       scope.done();
       t.end();
     });
@@ -5100,10 +5091,7 @@ test('query() with a function, function return false the query treat as Un-match
     .reply(200);
 
   mikealRequest('http://google.com/?i=should&pass=?', function(err, res) {
-    var headerOptions = JSON.stringify({"method":"GET","url":"http://google.com/?i=should&pass=?","headers":{"host":"google.com"}}, null, 2);
-    var expectedError = 'Nock: No match for request ' + headerOptions + ' Got instead ' + headerOptions
-
-    t.equal(err.message.trim(), expectedError);
+    t.equal(err.message.trim(), 'Nock: No match for request ' + JSON.stringify({"method":"GET","url":"http://google.com/?i=should&pass=?","headers":{"host":"google.com"}}, null, 2));
     t.end();
   })
 });
@@ -5115,10 +5103,7 @@ test('query() will not match when a query string does not match name=value', fun
     .reply(200);
 
   mikealRequest('https://c.com/b?foo=baz', function(err, res) {
-    var headerOptions = JSON.stringify({"method":"GET","url":"https://c.com/b?foo=baz","headers":{"host":"c.com"}}, null, 2);
-    var expectedError = 'Nock: No match for request ' + headerOptions + ' Got instead ' + headerOptions
-
-    t.equal(err.message.trim(), expectedError);
+    t.equal(err.message.trim(), 'Nock: No match for request ' + JSON.stringify({"method":"GET","url":"https://c.com/b?foo=baz","headers":{"host":"c.com"}}, null, 2));
     t.end();
   })
 });
@@ -5130,10 +5115,7 @@ test('query() will not match when a query string is present that was not registe
     .reply(200);
 
   mikealRequest('https://b.com/c?foo=bar&baz=foz', function(err, res) {
-    var headerOptions = JSON.stringify({"method":"GET","url":"https://b.com/c?foo=bar&baz=foz","headers":{"host":"b.com"}}, null, 2);
-    var expectedError = 'Nock: No match for request ' + headerOptions + ' Got instead ' + headerOptions
-
-    t.equal(err.message.trim(), expectedError);
+    t.equal(err.message.trim(), 'Nock: No match for request ' + JSON.stringify({"method":"GET","url":"https://b.com/c?foo=bar&baz=foz","headers":{"host":"b.com"}}, null, 2));
     t.end();
   })
 });
@@ -5145,10 +5127,7 @@ test('query() will not match when a query string is malformed', function (t) {
     .reply(200);
 
   mikealRequest('https://a.com/d?foobar', function(err, res) {
-    var headerOptions = JSON.stringify({"method":"GET","url":"https://a.com/d?foobar","headers":{"host":"a.com"}}, null, 2);
-    var expectedError = 'Nock: No match for request ' + headerOptions + ' Got instead ' + headerOptions
-
-    t.equal(err.message.trim(), expectedError);
+    t.equal(err.message.trim(), 'Nock: No match for request ' + JSON.stringify({"method":"GET","url":"https://a.com/d?foobar","headers":{"host":"a.com"}}, null, 2));
     t.end();
   })
 });
@@ -5165,10 +5144,7 @@ test('query() will not match when a query string has fewer correct values than e
     .reply(200);
 
   mikealRequest('http://google.com/?num=1str=fou', function(err, res) {
-    var headerOptions = JSON.stringify({"method":"GET","url":"http://google.com/?num=1str=fou","headers":{"host":"google.com"}}, null, 2);
-    var expectedError = 'Nock: No match for request ' + headerOptions + ' Got instead ' + headerOptions
-
-    t.equal(err.message.trim(), expectedError);
+    t.equal(err.message.trim(), 'Nock: No match for request ' + JSON.stringify({"method":"GET","url":"http://google.com/?num=1str=fou","headers":{"host":"google.com"}}, null, 2));
     t.end();
   })
 });
