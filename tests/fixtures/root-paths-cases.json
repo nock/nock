@@ -26,5 +26,21 @@
   {
     "root": "foo.com/api",
     "basePath": "http://foo.com:80/api"
+  },
+  {
+    "root": "http://foo.com:80/api",
+    "basePath": "http://foo.com:80/api"
+  },
+  {
+    "root": "http://foo.com:1234/api",
+    "basePath": "http://foo.com:1234/api"
+  },
+  {
+    "root": "https://foo.com:443/api",
+    "basePath": "http://foo.com:443/api"
+  },
+  {
+    "root": "https://foo.com:1234/api",
+    "basePath": "http://foo.com:1234/api"
   }
 ]
