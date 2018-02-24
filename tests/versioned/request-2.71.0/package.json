@@ -1,0 +1,14 @@
+
+{
+  "name": "request-2-71-0",
+  "version": "0.0.0",
+  "description": "Tests for request 2.71.0",
+  "main": "test.tap.js",
+  "scripts": {
+    "test": "tap test_*.js"
+  },
+  "dependencies": {
+    "request": "2.71.0"
+  },
+  "private": true
+}

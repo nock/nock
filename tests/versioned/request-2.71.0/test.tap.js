@@ -18,3 +18,5 @@ const makeRequest = (options) => {
 };
 
 common.runCommonTests(makeRequest, 'request@latest');
+
+require('./test_timeout.js')

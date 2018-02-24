@@ -1,6 +1,6 @@
 'use strict';
 
-var nock    = require('../.');
+var nock    = require('../../..');
 var test    = require('tap').test;
 var request = require('request');
 
