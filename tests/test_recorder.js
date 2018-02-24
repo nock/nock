@@ -6,8 +6,7 @@ var nock    = require('../.')
   , https   = require('https')
   , _       = require('lodash')
   , mikealRequest = require('request')
-  , superagent = require('superagent')
-  , rest = require('restler');
+  , superagent = require('superagent');
 
 var globalCount;
 
@@ -456,7 +455,6 @@ test('records and replays gzipped nocks correctly', {skip: process.env.AIRPLANE}
 });
 
 test('records and replays gzipped nocks correctly when gzip is returned as a string', {skip: process.env.AIRPLANE}, function(t) {
-
   nock.restore();
   nock.recorder.clear();
   t.equal(nock.recorder.play().length, 0);
@@ -467,23 +465,16 @@ test('records and replays gzipped nocks correctly when gzip is returned as a str
   });
 
   var makeRequest = function(callback) {
-    rest.get('http://bit.ly/1hKHiTe', {'headers':{'Accept-Encoding':'gzip'}})
-      .on('fail', function(data, response){
-        t.ok(false);
-        t.end();
-      })
-      .on('error', function(error, response) {
-        t.ok(false);
-        t.end();
-      })
-      .on('success', callback);
-  };
+    mikealRequest.get('http://bit.ly/1hKHiTe', {'headers': {'Accept-Encoding': 'gzip'}}, (error, response, body) => {
+      t.error(error);
+      callback(null, response, body);
+    });
+  }
 
-  makeRequest(function(err, resp) {
-
-    t.ok(resp);
-    t.ok(resp.headers);
-    t.equal(resp.headers['content-encoding'], 'gzip');
+  makeRequest(function(err, response, body) {
+    t.ok(response);
+    t.ok(response.headers);
+    t.equal(response.headers['content-encoding'], 'gzip');
 
     nock.restore();
     var nockDefs = nock.recorder.play();
@@ -494,21 +485,18 @@ test('records and replays gzipped nocks correctly when gzip is returned as a str
     t.true(nockDefs.length > 1);
     var nocks = nock.define(nockDefs);
 
-    makeRequest(function(mockedErr, mockedResp) {
-
+    makeRequest(function(mockedErr, mockedResponse, mockedBody) {
       t.equal(err, mockedErr);
-      t.deepEqual(mockedResp.body, resp.body);
-      t.equal(mockedResp.headers['content-encoding'], 'gzip');
+      t.deepEqual(mockedBody, body);
+      t.equal(mockedResponse.headers['content-encoding'], 'gzip');
 
       _.each(nocks, function(nock) {
         nock.done();
       });
 
       t.end();
-
     });
   });
-
 });
 
 test('records and replays nocks correctly', {skip: process.env.AIRPLANE}, function(t) {
