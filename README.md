@@ -1,11 +1,8 @@
 # Nock
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/node-nock/nock.svg)](https://greenkeeper.io/)
-
 [![Build Status](https://travis-ci.org/node-nock/nock.svg?branch=master)](https://travis-ci.org/node-nock/nock)
 [![Coverage Status](https://coveralls.io/repos/github/node-nock/nock/badge.svg?branch=master)](https://coveralls.io/github/node-nock/nock?branch=master)
-[![Known Vulnerabilities](https://snyk.io/test/npm/nock/badge.svg)](https://snyk.io/test/npm/nock)
-[![Chat](https://img.shields.io/badge/help-gitter-eb9348.svg?style=flat)](https://gitter.im/node-nock/nock)
+[![Greenkeeper](https://badges.greenkeeper.io/node-nock/nock.svg)](https://greenkeeper.io/)
 
 
 Nock is an HTTP mocking and expectations library for Node.js
