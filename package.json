@@ -178,26 +178,25 @@
     "semver": "^5.5.0"
   },
   "devDependencies": {
-    "async": "^2.1.1",
-    "aws-sdk": "^2.0.15",
-    "coveralls": "^2.11.2",
-    "eslint": "^3.19.0",
+    "async": "^2.6.0",
+    "aws-sdk": "^2.202.0",
+    "coveralls": "^3.0.0",
+    "eslint": "^4.18.1",
     "glob": "^7.1.1",
-    "hyperquest": "^1.3.0",
+    "hyperquest": "^2.1.3",
     "isomorphic-fetch": "^2.2.0",
     "istanbul": "^0.4.2",
-    "markdown-toc": "^0.13.0",
-    "needle": "^1.0.0",
-    "nyc": "^10.0.0",
+    "markdown-toc": "^1.2.0",
+    "needle": "^2.2.0",
+    "nyc": "^11.4.1",
     "request": "^2.83.0",
-    "request-promise": "^2.0.1",
-    "restify": "^4.0.4",
+    "request-promise": "^4.2.2",
+    "restify": "^4.3.1",
     "restler": "3.4.0",
-    "rimraf": "^2.3.2",
-    "semver": "^5.3.0",
-    "superagent": "^3.5.0",
-    "tap": "^10.0.0",
-    "semantic-release": "^8.2.0"
+    "rimraf": "^2.6.2",
+    "semantic-release": "^15.0.0",
+    "superagent": "^3.8.2",
+    "tap": "^11.1.1"
   },
   "scripts": {
     "unit": "tap --harmony ./tests/test_*.js",
@@ -207,7 +206,7 @@
     "coveralls": "cat ./coverage/lcov.info | coveralls",
     "lint": "eslint '**/*.js'",
     "toc": "markdown-toc -i README.md",
-    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
+    "semantic-release": "semantic-release"
   },
   "nyc": {
     "reporter": [
