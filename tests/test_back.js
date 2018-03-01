@@ -53,6 +53,40 @@ function nockBackWithFixture (t, scopesLoaded) {
   });
 }
 
+// this is a temporary as we get rid of all the {skip: process.env.AIRPLANE}
+// settings. When we are done with all, replace nockBackWithFixture and get
+// rid of this function and the goodRequestLocalhost.json fixtures
+function nockBackWithFixtureLocalhost (t, scopesLoaded) {
+  const scopesLength = scopesLoaded ? 1 : 0;
+
+  nockBack('goodRequestLocalhost.json', function (done) {
+    t.equals(this.scopes.length, scopesLength);
+
+    const server = http.createServer((request, response) => {
+      t.pass('server received a request');
+
+      response.writeHead(200);
+      response.end();
+    });
+
+    server.listen(() => {
+      const request = http.request({
+        host: 'localhost',
+        path: '/',
+        port: server.address().port
+      }, response => {
+        t.is(200, response.statusCode);
+        this.assertScopesFinished();
+        done();
+        server.close(t.end);
+      });
+
+      request.on('error', t.error);
+      request.end();
+    });
+  });
+}
+
 function setOriginalModeOnEnd(t, nockBack) {
   t.once('end', function() {
     nockBack.setMode(originalMode);
@@ -134,8 +168,8 @@ tap.test('nockBack wild tests', function (nw) {
     testNock(t);
   });
 
-  nw.test('nock back doesn\'t do anything', {skip: process.env.AIRPLANE}, function (t) {
-    nockBackWithFixture(t, false);
+  nw.test('nock back doesn\'t do anything', function (t) {
+    nockBackWithFixtureLocalhost(t, false);
   });
 
   setOriginalModeOnEnd(nw, nockBack);
