@@ -151,30 +151,32 @@ tap.test('nockBack dryrun tests', function (nw) {
   nockBack.fixtures = __dirname + '/fixtures';
   nockBack.setMode('dryrun');
 
-  nw.test('goes to internet even when no nockBacks are running', {skip: process.env.AIRPLANE}, function(t) {
-    var req = http.request({
-        host: "www.amazon.com"
-      , path: '/'
-      , port: 80
-      }, function(res) {
+  nw.test('goes to internet even when no nockBacks are running', function(t) {
 
-        res.on('data', function() {
-          //node v 0.10 requires this listener
-        });
-        t.ok([200, 301, 302].indexOf(res.statusCode) >= 0);
-        t.end();
+    t.plan(2);
 
-      });
+    const server = http.createServer((request, response) => {
+      t.pass('server received a request');
 
-    req.on('error', function(err) {
-
-      //  This should never happen.
-      t.assert(false);
-      t.end();
-
+      response.writeHead(200);
+      response.end();
     });
 
-    req.end();
+    server.listen(() => {
+      const request = http.request({
+        host: 'localhost',
+        path: '/',
+        port: server.address().port
+      }, response => {
+        t.is(200, response.statusCode);
+
+        server.close(t.end);
+      });
+
+      request.on('error', t.error);
+      request.end();
+    });
+
   });
 
   nw.test('normal nocks work', function (t) {
