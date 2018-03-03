@@ -221,44 +221,52 @@ tap.test('nockBack dryrun tests', function (nw) {
     nockBackWithFixture(t, true);
   });
 
-  nw.test('goes to internet, doesn\'t record new fixtures', {skip: process.env.AIRPLANE}, function (t) {
-    var dataCalled = false;
+  nw.test('goes to internet, doesn\'t record new fixtures', function (t) {
 
-    var fixture = 'someDryrunFixture.json';
-    var fixtureLoc = nockBack.fixtures + '/' + fixture;
+    t.plan(5)
 
-    t.false(exists(fixtureLoc));
+    let dataCalled = false
+
+    const fixture = 'someDryrunFixture.json'
+    const fixtureLoc = nockBack.fixtures + '/' + fixture
+
+    t.false(exists(fixtureLoc))
 
     nockBack(fixture, function (done) {
-      var req = http.request({
-          host: "amazon.com"
-        , path: '/'
-        , port: 80
-        }, function(res) {
+      const server = http.createServer((request, response) => {
+        t.pass('server received a request')
 
-          t.ok([200, 301, 302].indexOf(res.statusCode) >= 0);
-          res.on('end', function() {
-            t.ok(dataCalled);
-            t.false(exists(fixtureLoc));
-            t.end();
-          });
+        response.writeHead(200)
+        response.write('server served a response')
+        response.end()
+      })
 
-          res.on('data', function(data) {
-            dataCalled = true;
-          });
+      server.listen(() => {
+        const request = http.request({
+          host: 'localhost',
+          path: '/',
+          port: server.address().port
+        }, (response) => {
+          t.is(200, response.statusCode)
 
-        });
+          response.on('data', (data) => {
+            dataCalled = true
+          })
 
-      req.once('error', function(err) {
-        if (err.code !== 'ECONNREFUSED') {
-          throw err;
-        }
-        t.end();
-      });
+          response.on('end', () => {
+            t.ok(dataCalled)
+            t.false(exists(fixtureLoc))
 
-      req.end();
-    });
-  });
+            server.close(t.end)
+          })
+        })
+
+        request.on('error', t.error)
+        request.end()
+      })
+    })
+
+  })
 
   setOriginalModeOnEnd(nw, nockBack);
 
