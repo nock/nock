@@ -51,7 +51,7 @@ test('recording', {skip: process.env.AIRPLANE}, function(t) {
 });
 
 test('passes custom options to recorder', {skip: process.env.AIRPLANE}, function(t) {
-  nockBack('recording_test.json', { recorder: { enable_reqheaders_recording: true } }, function(nockDone) {
+  nockBack('recording_test.json', { recorder: { enable_reqheaders_recording: true, output_objects: true } }, function(nockDone) {
     http.get('http://google.com', function(res) {
       res.once('end', function() {
         nockDone();
@@ -63,6 +63,21 @@ test('passes custom options to recorder', {skip: process.env.AIRPLANE}, function
       });
       // Streams start in 'paused' mode and must be started.
       // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+      res.resume();
+    });
+  });
+  rimrafOnEnd(t);
+});
+
+test('recorder output_objects is false', {skip: process.env.AIRPLANE}, function(t) {
+  nockBack('recording_test.json', { recorder: { output_objects: false } }, function(nockDone) {
+    http.get('http://google.com', function(res) {
+      res.once('end', function() {
+        nockDone();
+        // expect to throw because we did not write result to disk
+        t.throws(function() { fs.readFileSync(fixture, { endcoding: 'utf8'})});
+        t.end();
+      });
       res.resume();
     });
   });
