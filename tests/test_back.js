@@ -321,8 +321,7 @@ tap.test('nockBack record tests', function (nw) {
 
   //Adding this test because there was an issue when not calling
   //nock.activate() after calling nock.restore()
-  nw.test('it can record twice', {skip: process.env.AIRPLANE}, function (t) {
-
+  nw.test('it can record twice', function (t) {
     t.plan(4)
 
     nockBack.fixtures = __dirname + '/fixtures';
@@ -361,7 +360,6 @@ tap.test('nockBack record tests', function (nw) {
         request.end()
       })
     });
-
   });
 
   nw.test('it shouldn\'t allow outside calls', function (t) {
