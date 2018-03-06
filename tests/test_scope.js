@@ -22,7 +22,7 @@ tap.test('Scope parsing of root url with trailing backslash is sanitized',
 function(t) {
   let domain = 'http://foo.com'
   let s = Scope(domain + '/');
-  assert.equal(s.basePath, domain);
+  assert.equal(s.basePath, domain + ':80');
   t.end();
 });
 

@@ -37,10 +37,10 @@
   },
   {
     "root": "https://foo.com:443/api",
-    "basePath": "http://foo.com:443/api"
+    "basePath": "https://foo.com:443/api"
   },
   {
     "root": "https://foo.com:1234/api",
-    "basePath": "http://foo.com:1234/api"
+    "basePath": "https://foo.com:1234/api"
   }
 ]
