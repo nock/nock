@@ -392,13 +392,8 @@ tap.test('nockBack record tests', function (nw) {
 
   });
 
-  nw.test('it can filter after recording', {skip: process.env.AIRPLANE}, function (t) {
+  nw.test('it can filter after recording', function (t) {
     nockBack.fixtures = __dirname + '/fixtures';
-
-    var options = {
-      host: 'www.google.com', method: 'GET', path: '/', port: 80
-    };
-
     var fixture = 'filteredFixture.json';
     var fixtureLoc = nockBack.fixtures + '/' + fixture;
 
@@ -410,24 +405,37 @@ tap.test('nockBack record tests', function (nw) {
     }
 
     nockBack(fixture, {afterRecord: afterRecord}, function (done) {
-      http.request(options).end();
-      done();
+      const server = http.createServer((request, response) => {
+        t.pass('server received a request')
 
-      t.true(exists(fixtureLoc));
+        response.writeHead(200)
+        response.write('server served a response')
+        response.end()
+      })
 
-      nockBack(fixture, function (done) {
-        t.true(this.scopes.length === 0);
-        done();
+      server.listen(() => {
+        const request = http.request({
+          host: 'localhost',
+          path: '/',
+          port: server.address().port
+        }, (response) => {
+          done()
 
-        fs.unlinkSync(fixtureLoc);
-        t.end();
-      });
+          t.is(200, response.statusCode)
+          t.true(exists(fixtureLoc))
+          t.true(this.scopes.length === 0)
+          fs.unlinkSync(fixtureLoc)
+
+          server.close(t.end)
+        })
+
+        request.on('error', t.error)
+        request.end()
+      })
     });
+    nw.end();
+    setOriginalModeOnEnd(nw, nockBack);
   });
-
-  nw.end();
-
-  setOriginalModeOnEnd(nw, nockBack);
 });
 
 tap.test('nockBack lockdown tests', function (nw) {
