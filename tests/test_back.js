@@ -319,6 +319,91 @@ tap.test('nockBack record tests', function (nw) {
 
   });
 
+  nw.test('it has the correct content-length on non-string JSON responses on playback', {timeout: 300}, function (t) {
+    nock.enableNetConnect();
+
+    t.plan(10)
+
+    nockBack.fixtures = __dirname + '/fixtures';
+
+    const fixture = 'somePlaybackFixture.txt'
+    const fixtureLoc = nockBack.fixtures + '/' + fixture
+
+    try{
+      fs.unlinkSync(fixtureLoc)
+    }
+    catch(err){
+    }
+    t.false(exists(fixtureLoc), 'fixture should not exist');
+
+    // This body has a space in it, which may get removed when re-serialized by
+    // nock, thus changing the true content-length.
+    const body = '{"foo": "bar"}';
+    let timesCalled = 0;
+
+    nockBack(fixture, function (done) {
+      const server = http.createServer((request, response) => {
+        timesCalled++;
+        if(timesCalled === 1){
+          t.pass('server received a request')
+
+          response.setHeader('content-length', body.length)
+          response.writeHead(200)
+          response.write(body)
+          response.end()
+        }
+        else{
+          response.writeHead(500)
+          response.end()
+        }
+      })
+
+      server.listen(() => {
+        const reqInfo = {
+          host: 'localhost',
+          path: '/',
+          port: server.address().port
+        };
+        const request = http.request(reqInfo, (response) => {
+          // done recording
+          done()
+
+          t.is(timesCalled, 1, 'server should have been called once')
+
+          t.is(response.statusCode, 200)
+          t.is(parseInt(response.headers['content-length']), body.length)
+          t.true(exists(fixtureLoc))
+
+          nockBack(fixture, function (done2) {
+            // playback
+            nock.disableNetConnect()
+            nockBack.setMode('dryrun')
+            const request2 = http.request(reqInfo, (response2) => {
+              t.is(timesCalled, 1, 'server should only be called once')
+
+              done2()
+
+              t.is(response2.statusCode, 200)
+              t.is(parseInt(response2.headers['content-length']), body.length)
+              t.true(exists(fixtureLoc))
+
+              fs.unlinkSync(fixtureLoc)
+
+              server.close(t.end)
+              nock.enableNetConnect();
+            })
+
+            request2.on('error', t.error)
+            request2.end()
+          })
+        })
+
+        request.on('error', t.error)
+        request.end()
+      })
+    });
+  });
+
   //Adding this test because there was an issue when not calling
   //nock.activate() after calling nock.restore()
   nw.test('it can record twice', function (t) {
