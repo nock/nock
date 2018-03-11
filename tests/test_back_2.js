@@ -28,46 +28,91 @@ test('setup', function(t) {
   t.end();
 });
 
-test('recording', {skip: process.env.AIRPLANE}, function(t) {
+test('recording', function(t) {
+  t.plan(5)
+
   nockBack('recording_test.json', function(nockDone) {
-    http.get('http://google.com', function(res) {
-      res.once('end', function() {
-        nockDone();
-        var fixtureContent = JSON.parse(fs.readFileSync(fixture, {encoding: 'utf8'}));
-        t.equal(fixtureContent.length, 1);
-        fixtureContent = fixtureContent[0];
-        t.equal(fixtureContent.method, 'GET');
-        t.equal(fixtureContent.path, '/');
-        t.ok(fixtureContent.status == 302 || fixtureContent.status == 301);
-        t.end();
-      });
-      // Streams start in 'paused' mode and must be started.
-      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
-      res.resume();
-    });
-  });
+    const server = http.createServer((request, response) => {
+        t.pass('server received a request')
 
-  rimrafOnEnd(t);
-});
+        response.writeHead(301)
+        response.write('server served a response')
+        response.end()
+      })
 
-test('passes custom options to recorder', {skip: process.env.AIRPLANE}, function(t) {
+    server.listen(() => {
+        const request = http.request({
+          host: 'localhost',
+          path: '/',
+          port: server.address().port,
+          method: 'GET'
+        }, (response) => {
+          response.once('end', () => {
+            nockDone()
+
+            let fixtureContent = JSON.parse(fs.readFileSync(fixture, {encoding: 'utf8'}))
+
+            t.equal(fixtureContent.length, 1)
+            fixtureContent = fixtureContent[0]
+            t.equal(fixtureContent.method, 'GET')
+            t.equal(fixtureContent.path, '/')
+            t.ok(fixtureContent.status == 301)
+
+            server.close(t.end)
+          })
+
+          response.resume()
+        })
+
+        request.on('error', t.error)
+        request.end()
+      })
+  })
+
+  rimrafOnEnd(t)
+})
+
+test('passes custom options to recorder', function(t) {
+  t.plan(3)
+
   nockBack('recording_test.json', { recorder: { enable_reqheaders_recording: true } }, function(nockDone) {
-    http.get('http://google.com', function(res) {
-      res.once('end', function() {
-        nockDone();
-        var fixtureContent = JSON.parse(fs.readFileSync(fixture, {encoding: 'utf8'}));
-        t.equal(fixtureContent.length, 1);
-        fixtureContent = fixtureContent[0];
-        t.ok(fixtureContent.reqheaders);
-        t.end();
-      });
-      // Streams start in 'paused' mode and must be started.
-      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
-      res.resume();
-    });
-  });
+    const server = http.createServer((request, response) => {
+        t.pass('server received a request')
+
+        response.writeHead(200)
+        response.write('server served a response')
+        response.end()
+      })
+
+    server.listen(() => {
+        const request = http.request({
+          host: 'localhost',
+          path: '/',
+          port: server.address().port,
+          method: 'GET'
+        }, (response) => {
+          response.once('end', () => {
+            nockDone()
+
+            let fixtureContent = JSON.parse(fs.readFileSync(fixture, {encoding: 'utf8'}));
+
+            t.equal(fixtureContent.length, 1);
+            fixtureContent = fixtureContent[0];
+            t.ok(fixtureContent.reqheaders);
+
+            server.close(t.end)
+          })
+
+          response.resume()
+        })
+
+        request.on('error', t.error)
+        request.end()
+      })
+  })
+
   rimrafOnEnd(t);
-});
+})
 
 test('teardown', function(t) {
   nockBack.setMode(originalMode);
