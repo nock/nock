@@ -223,7 +223,7 @@ nock('http://www.example.com')
   .reply(200, { id: '123ABC' });
 ```
 
-In case you need to perform a partial matching on a complex, nested request body you should have a look at libraries like `lodash.matches`. Indeed, partial matching can be achieved as:
+In case you need to perform a partial matching on a complex, nested request body you should have a look at libraries like [lodash.matches](https://lodash.com/docs/#matches). Indeed, partial matching can be achieved as:
 
 ```js
 nock('http://www.example.com')
