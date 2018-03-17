@@ -2,6 +2,7 @@
 
 var fs      = require('fs');
 var nock    = require('../.');
+var url     = require('url');
 var http    = require('http');
 var https   = require('https');
 var util    = require('util');
@@ -2105,53 +2106,82 @@ test("two scopes with the same request are consumed", function(t) {
   }
 });
 
-test("allow unmocked option works", {skip: process.env.AIRPLANE}, function(t) {
-  var scope = nock('http://www.google.com', {allowUnmocked: true})
-    .get('/abc')
-    .reply(200, 'Hey!')
-    .get('/wont/get/here')
-    .reply(200, 'Hi!');
+test("allow unmocked option works", function(t) {
+  const server = http.createServer((request, response) => {
+    t.pass('server received a request')
 
-  function secondIsDone() {
-    t.ok(! scope.isDone());
-    http.request({
-        host: "www.google.com"
-      , path: "/"
-      , port: 80
-      }, function(res) {
-        res.destroy();
-        t.assert(res.statusCode < 400 && res.statusCode >= 200, 'GET Google Home page');
-        t.end();
-      }
-    ).end();
-  }
+    switch (url.parse(request.url).pathname) {
+      case '/':
+        response.writeHead(200)
+        response.write('server served a response')
+        break
+      case '/not/available':
+        response.writeHead(404)
+        break
+      case '/abc':
+        response.writeHead(200)
+        response.write('server served a response')
+        break
+    }
 
-  function firstIsDone() {
-    t.ok(! scope.isDone());
-    http.request({
-        host: "www.google.com"
-      , path: "/does/not/exist/dskjsakdj"
-      , port: 80
-      }, function(res) {
-        t.assert(res.statusCode === 404, 'Google say it does not exist');
-        res.on('data', function() {});
-        res.on('end', secondIsDone);
-      }
-    ).end();
-  }
+    response.end()
+  })
 
-  http.request({
-      host: "www.google.com"
-    , path: "/abc"
-    , port: 80
-    }, function(res) {
-      res.on('end', firstIsDone);
+  server.listen(() => {
+    const scope = nock(`http://localhost:${server.address().port}`, {allowUnmocked: true})
+      .get('/abc')
+      .reply(301, 'served from our mock')
+      .get('/wont/get/here')
+      .reply(301, 'served from our mock')
+
+    function secondIsDone() {
+      t.ok(! scope.isDone())
+
+      http.request({
+        host: "localhost",
+        path: "/",
+        port: server.address().port
+      }, response => {
+        response.destroy()
+
+        t.assert(response.statusCode == 200, 'Do not intercept /');
+
+        server.close(t.end)
+      }).end()
+    }
+
+    function firstIsDone() {
+      t.ok(! scope.isDone())
+
+      http.request({
+        host: "localhost",
+        path: "/not/available",
+        port: server.address().port
+      }, response => {
+        t.assert(response.statusCode === 404, 'Server says it does not exist')
+
+        response.on('data', function() {})
+        response.on('end', secondIsDone)
+      }).end()
+    }
+
+    const request = http.request({
+      host: "localhost",
+      path: "/abc",
+      port: server.address().port
+    }, response => {
+      t.assert(response.statusCode == 301, 'Intercept /abc')
+
+      response.on('end', firstIsDone)
       // Streams start in 'paused' mode and must be started.
       // See https://nodejs.org/api/stream.html#stream_class_stream_readable
-      res.resume();
-    }
-  ).end();
-});
+      response.resume()
+    })
+
+    request.on('error', t.error)
+    request.end()
+  })
+})
 
 test("default reply headers work", function(t) {
   nock('http://default.reply.headers.com')
