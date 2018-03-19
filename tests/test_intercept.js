@@ -2107,6 +2107,8 @@ test("two scopes with the same request are consumed", function(t) {
 });
 
 test("allow unmocked option works", function(t) {
+  t.plan(7)
+
   const server = http.createServer((request, response) => {
     t.pass('server received a request')
 
@@ -2130,9 +2132,9 @@ test("allow unmocked option works", function(t) {
   server.listen(() => {
     const scope = nock(`http://localhost:${server.address().port}`, {allowUnmocked: true})
       .get('/abc')
-      .reply(301, 'served from our mock')
+      .reply(304, 'served from our mock')
       .get('/wont/get/here')
-      .reply(301, 'served from our mock')
+      .reply(304, 'served from our mock')
 
     function secondIsDone() {
       t.ok(! scope.isDone())
@@ -2170,7 +2172,7 @@ test("allow unmocked option works", function(t) {
       path: "/abc",
       port: server.address().port
     }, response => {
-      t.assert(response.statusCode == 301, 'Intercept /abc')
+      t.assert(response.statusCode == 304, 'Intercept /abc')
 
       response.on('end', firstIsDone)
       // Streams start in 'paused' mode and must be started.
