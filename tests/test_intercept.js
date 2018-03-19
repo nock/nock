@@ -2687,31 +2687,55 @@ test("persist reply with file", function(t) {
   }, t.end.bind(t));
 });
 
-test('(re-)activate after restore', {skip: process.env.AIRPLANE}, function(t) {
-  var scope = nock('http://google.com')
-    .get('/')
-    .reply(200, 'Hello, World!');
+test('(re-)activate after restore', function(t) {
+  t.plan(7)
 
-  nock.restore();
-  t.false(nock.isActive());
+  const server = http.createServer((request, response) => {
+    t.pass('server received a request')
 
-  http.get('http://google.com/', function(res) {
-    res.resume();
-    res.on('end', function() {
-      t.ok(!scope.isDone());
+    switch (url.parse(request.url).pathname) {
+      case '/':
+        response.writeHead(200)
+        response.write('server served a response')
+        break
+    }
 
-      nock.activate();
-      t.true(nock.isActive());
-      http.get('http://google.com', function(res) {
-        res.resume();
+    response.end()
+  })
+
+  server.listen(() => {
+    const scope = nock(`http://localhost:${server.address().port}`)
+      .get('/')
+      .reply(304, 'served from our mock')
+
+      nock.restore()
+      t.false(nock.isActive())
+
+      http.get(`http://localhost:${server.address().port}`, function(res) {
+        res.resume()
+
+        t.is(200, res.statusCode)
+
         res.on('end', function() {
-          t.ok(scope.isDone());
-          t.end();
-        });
-      }).end();
-    });
-  }).end();
-});
+          t.ok(!scope.isDone())
+
+          nock.activate()
+          t.true(nock.isActive())
+          http.get(`http://localhost:${server.address().port}`, function(res) {
+            res.resume()
+
+            t.is(304, res.statusCode)
+
+            res.on('end', function() {
+              t.ok(scope.isDone())
+
+              server.close(t.end)
+            });
+          })
+        })
+      })
+  })
+})
 
 test("allow unmocked option works with https", {skip: process.env.AIRPLANE}, function(t) {
   t.plan(5)
