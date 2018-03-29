@@ -1047,7 +1047,8 @@ test('match domain using regexp', t => {
   })
 })
 
-test('match domain using regexp with path as callback (issue-1137)', t => {
+// https://github.com/nock/nock/issues/1137
+test('match domain using regexp with path as callback', t => {
   nock(/.*/)
     .get(() => true)
     .reply(200, 'Match regex')
@@ -1060,7 +1061,8 @@ test('match domain using regexp with path as callback (issue-1137)', t => {
   })
 })
 
-test('match multiple interceptors with regexp domain (issue-508)', t => {
+// https://github.com/nock/nock/issues/508
+test('match multiple interceptors with regexp domain', t => {
   nock(/chainregex/)
     .get('/')
     .reply(200, 'Match regex')
@@ -1079,6 +1081,32 @@ test('match multiple interceptors with regexp domain (issue-508)', t => {
 
       t.end()
     })
+  })
+})
+
+// https://github.com/nock/nock/issues/1108
+test('match hostname as regex and string in tandem', t => {
+  const scope1 = nock(/.*/)
+    .get('/hello/world')
+    .reply(200, 'Success!')
+  const scope2 = nock('http://universe')
+    .get('/hello/planet')
+    .reply(200, 'Success!')
+
+  mikealRequest.get('http://universe/hello/world', function(err, res, body) {
+    scope1.done()
+    t.type(err, 'null')
+    t.equal(res.statusCode, 200)
+    t.equal(body, 'Success!')
+    t.end()
+  })
+
+  mikealRequest.get('http://universe/hello/planet', function(err, res, body) {
+    scope2.done()
+    t.type(err, 'null')
+    t.equal(res.statusCode, 200)
+    t.equal(body, 'Success!')
+    t.end()
   })
 })
 
