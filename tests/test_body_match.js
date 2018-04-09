@@ -174,3 +174,49 @@ test('array like urlencoded form posts are correctly parsed', function(t) {
     t.end();
   });
 });
+
+test('urlencoded form posts are matched with non-string values', function(t) {
+
+  nock('http://encodingsareus.com')
+      .post('/', {
+        boolean: true,
+        number: 1,
+        values: [false, -1, 'test']
+      })
+      .reply(200);
+
+  mikealRequest({
+    url: 'http://encodingsareus.com/',
+    method: 'post',
+    form: {
+      boolean: true,
+      number: 1,
+      values: [false, -1, 'test']
+    }
+  }, function(err, res) {
+    if (err) throw err;
+    assert.equal(res.statusCode, 200);
+    t.end();
+  });
+});
+
+test('urlencoded form posts are matched with regexp', function(t) {
+
+  nock('http://encodingsareus.com')
+      .post('/', {
+        regexp: /^xyz$/,
+      })
+      .reply(200);
+
+  mikealRequest({
+    url: 'http://encodingsareus.com/',
+    method: 'post',
+    form: {
+      regexp: 'xyz',
+    }
+  }, function(err, res) {
+    if (err) throw err;
+    assert.equal(res.statusCode, 200);
+    t.end();
+  });
+});
