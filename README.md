@@ -3,6 +3,8 @@
 [![Build Status](https://travis-ci.org/nock/nock.svg?branch=master)](https://travis-ci.org/nock/nock)
 [![Coverage Status](https://coveralls.io/repos/github/nock/nock/badge.svg?branch=master)](https://coveralls.io/github/nock/nock?branch=master)
 [![Greenkeeper](https://badges.greenkeeper.io/nock/nock.svg)](https://greenkeeper.io/)
+[![Backers on Open Collective](https://opencollective.com/nock/backers/badge.svg)](#backers) 
+[![Sponsors on Open Collective](https://opencollective.com/nock/sponsors/badge.svg)](#sponsors) 
 
 > HTTP server mocking and expectations library for Node.js
 
@@ -1411,7 +1413,79 @@ Thanks for wanting to contribute! Take a look at our [Contributing Guide](CONTRI
 Please note that this project is released with a [Contributor Code of Conduct](./CODE_OF_CONDUCT.md).
 By participating in this project you agree to abide by its terms.
 
-## License
+## Commit Message conventions
+
+`nock` releases are automated using [semantic-release](https://github.com/semantic-release/semantic-release).
+To automatically calculate the correct version number as well as changelogs,
+three commit message conventions need to be followed
+
+- Commit bug fixes with `fix: ...` or `fix(scope): ...` prefix in commit subject
+- Commit new features with `feat: ...` or `feat(scope): ...` prefix in commit subject
+- Commit breaking changes by adding `BREAKING CHANGE: ` in the commit body
+  (not the subject line)
+
+Other helpful conventions are
+
+- Commit test files with `test: ...` or `test(scope): ...` prefix
+- Commit changes to `package.json`, `.gitignore` and other meta files with
+  `chore(filename-without-ext): ...`
+- Commit changes to README files or comments with `docs: ...`
+- Code style changes with `style: standard`
+
+The commit message(s) of a pull request can be fixed using the `squash & merge` button.
+
+## Generate README TOC
+
+Make sure to update the README's table of contents whenever you update the README using the following npm script.
+
+```
+$ npm run toc
+```
+
+## Running tests
+
+```
+$ npm test
+```
+
+### Airplane mode
+
+Some of the tests depend on online connectivity. To skip them, set the `AIRPLANE` environment variable to some value.
+
+```
+$ export AIRPLANE=true
+$ npm test
+```
+
+## Contributors
+
+This project exists thanks to all the people who contribute. See guidelines above. 
+<a href="graphs/contributors"><img src="https://opencollective.com/nock/contributors.svg?width=890&button=false" /></a>
+
+
+## Backers
+
+Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/nock#backer)]
+
+<a href="https://opencollective.com/nock#backers" target="_blank"><img src="https://opencollective.com/nock/backers.svg?width=890"></a>
+
+
+## Sponsors
+
+Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [[Become a sponsor](https://opencollective.com/nock#sponsor)]
+
+<a href="https://opencollective.com/nock/sponsor/0/website" target="_blank"><img src="https://opencollective.com/nock/sponsor/0/avatar.svg"></a>
+<a href="https://opencollective.com/nock/sponsor/1/website" target="_blank"><img src="https://opencollective.com/nock/sponsor/1/avatar.svg"></a>
+<a href="https://opencollective.com/nock/sponsor/2/website" target="_blank"><img src="https://opencollective.com/nock/sponsor/2/avatar.svg"></a>
+<a href="https://opencollective.com/nock/sponsor/3/website" target="_blank"><img src="https://opencollective.com/nock/sponsor/3/avatar.svg"></a>
+<a href="https://opencollective.com/nock/sponsor/4/website" target="_blank"><img src="https://opencollective.com/nock/sponsor/4/avatar.svg"></a>
+<a href="https://opencollective.com/nock/sponsor/5/website" target="_blank"><img src="https://opencollective.com/nock/sponsor/5/avatar.svg"></a>
+<a href="https://opencollective.com/nock/sponsor/6/website" target="_blank"><img src="https://opencollective.com/nock/sponsor/6/avatar.svg"></a>
+<a href="https://opencollective.com/nock/sponsor/7/website" target="_blank"><img src="https://opencollective.com/nock/sponsor/7/avatar.svg"></a>
+<a href="https://opencollective.com/nock/sponsor/8/website" target="_blank"><img src="https://opencollective.com/nock/sponsor/8/avatar.svg"></a>
+<a href="https://opencollective.com/nock/sponsor/9/website" target="_blank"><img src="https://opencollective.com/nock/sponsor/9/avatar.svg"></a>
+
+# License
 
 [MIT](LICENSE)
 
