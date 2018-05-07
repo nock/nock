@@ -321,26 +321,45 @@ tap.test('nockBack record tests', function (nw) {
 
   //Adding this test because there was an issue when not calling
   //nock.activate() after calling nock.restore()
-  nw.test('it can record twice', {skip: process.env.AIRPLANE}, function (t) {
+  nw.test('it can record twice', function (t) {
+    t.plan(4)
+
     nockBack.fixtures = __dirname + '/fixtures';
 
-    var options = {
-      host: 'www.google.com', method: 'GET', path: '/', port: 80
-    };
-    var fixture = 'someFixture2.json';
-    var fixtureLoc = nockBack.fixtures + '/' + fixture;
+    const fixture = 'someFixture2.txt';
+    const fixtureLoc = nockBack.fixtures + '/' + fixture;
+
     t.false(exists(fixtureLoc));
 
     nockBack(fixture, function (done) {
-      http.request(options).end();
-      done();
+      const server = http.createServer((request, response) => {
+        t.pass('server received a request')
 
-      t.true(exists(fixtureLoc));
+        response.writeHead(200)
+        response.write('server served a response')
+        response.end()
+      })
 
-      fs.unlinkSync(fixtureLoc);
-      t.end();
+      server.listen(() => {
+        const request = http.request({
+          host: 'localhost',
+          path: '/',
+          port: server.address().port
+        }, (response) => {
+          done()
+
+          t.is(200, response.statusCode)
+          t.true(exists(fixtureLoc))
+
+          fs.unlinkSync(fixtureLoc)
+
+          server.close(t.end)
+        })
+
+        request.on('error', t.error)
+        request.end()
+      })
     });
-
   });
 
   nw.test('it shouldn\'t allow outside calls', function (t) {
@@ -373,13 +392,8 @@ tap.test('nockBack record tests', function (nw) {
 
   });
 
-  nw.test('it can filter after recording', {skip: process.env.AIRPLANE}, function (t) {
+  nw.test('it can filter after recording', function (t) {
     nockBack.fixtures = __dirname + '/fixtures';
-
-    var options = {
-      host: 'www.google.com', method: 'GET', path: '/', port: 80
-    };
-
     var fixture = 'filteredFixture.json';
     var fixtureLoc = nockBack.fixtures + '/' + fixture;
 
@@ -391,24 +405,37 @@ tap.test('nockBack record tests', function (nw) {
     }
 
     nockBack(fixture, {afterRecord: afterRecord}, function (done) {
-      http.request(options).end();
-      done();
+      const server = http.createServer((request, response) => {
+        t.pass('server received a request')
 
-      t.true(exists(fixtureLoc));
+        response.writeHead(200)
+        response.write('server served a response')
+        response.end()
+      })
 
-      nockBack(fixture, function (done) {
-        t.true(this.scopes.length === 0);
-        done();
+      server.listen(() => {
+        const request = http.request({
+          host: 'localhost',
+          path: '/',
+          port: server.address().port
+        }, (response) => {
+          done()
 
-        fs.unlinkSync(fixtureLoc);
-        t.end();
-      });
+          t.is(200, response.statusCode)
+          t.true(exists(fixtureLoc))
+          t.true(this.scopes.length === 0)
+          fs.unlinkSync(fixtureLoc)
+
+          server.close(t.end)
+        })
+
+        request.on('error', t.error)
+        request.end()
+      })
     });
+    nw.end();
+    setOriginalModeOnEnd(nw, nockBack);
   });
-
-  nw.end();
-
-  setOriginalModeOnEnd(nw, nockBack);
 });
 
 tap.test('nockBack lockdown tests', function (nw) {

@@ -187,63 +187,50 @@ var scope = nock('http://www.example.com')
 
 ## Specifying request body
 
-You can specify the request body to be matched as the second argument to the `get`, `post`, `put` or `delete` specifications like this:
+You can specify the request body to be matched as the second argument to the `get`, `post`, `put` or `delete` specifications. There are four types of second argument allowed:
+
+**String**: nock will exact match the stringified request body with the provided string
 
 ```js
-var scope = nock('http://myapp.iriscouch.com')
-                .post('/users', {
-                  username: 'pgte',
-                  email: 'pedro.teixeira@gmail.com'
-                })
-                .reply(201, {
-                  ok: true,
-                  id: '123ABC',
-                  rev: '946B7D1C'
-                });
+nock('http://www.example.com')
+  .post('/login', 'username=pgte&password=123456')
+  .reply(200, { id: '123ABC' });
 ```
 
-The request body can be a string, a RegExp, a JSON object or a function.
+**RegExp**: nock will test the stringified request body against the provided RegExp
 
 ```js
-var scope = nock('http://myapp.iriscouch.com')
-                .post('/users', /email=.?@gmail.com/gi)
-                .reply(201, {
-                  ok: true,
-                  id: '123ABC',
-                  rev: '946B7D1C'
-                });
+nock('http://www.example.com')
+  .post('/login', /username=\w+/gi)
+  .reply(200, { id: '123ABC' });
 ```
 
-If the request body is a JSON object, a RegExp can be used to match an attribute value.
+**JSON object**: nock will exact match the request body with the provided object. In order to increase flexibility, nock also supports RegExp as an attribute value for the keys:
 
 ```js
-var scope = nock('http://myapp.iriscouch.com')
-                .post('/users', {
-                  username: 'pgte',
-                  password: /a.+/,
-                  email: 'pedro.teixeira@gmail.com'
-                })
-                .reply(201, {
-                  ok: true,
-                  id: '123ABC',
-                  rev: '946B7D1C'
-                });
+nock('http://www.example.com')
+  .post('/login', { username: 'pgte', password: /.+/i })
+  .reply(200, { id: '123ABC' });
 ```
 
-If the request body is a function, return true if it should be considered a match:
+**Function**: nock will evaluate the function providing the request body object as first argument. Return true if it should be considered a match:
 
 ```js
-var scope = nock('http://myapp.iriscouch.com')
-                .post('/users', function(body) {
-                  return body.id === '123ABC';
-                })
-                .reply(201, {
-                  ok: true,
-                  id: '123ABC',
-                  rev: '946B7D1C'
-                });
-
+nock('http://www.example.com')
+  .post('/login', function(body) { 
+    return body.username && body.password;
+  })
+  .reply(200, { id: '123ABC' });
 ```
+
+In case you need to perform a partial matching on a complex, nested request body you should have a look at libraries like [lodash.matches](https://lodash.com/docs/#matches). Indeed, partial matching can be achieved as:
+
+```js
+nock('http://www.example.com')
+  .post('/user', _.matches({ address: { country: 'US' } }))
+  .reply(200, { id: '123ABC' });
+```
+
 
 ## Specifying request query string
 
