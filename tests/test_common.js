@@ -228,9 +228,9 @@ tap.test('headersArrayToObject', function (t) {
   ];
 
   t.deepEqual(common.headersArrayToObject(headers), {
-    "Content-Type": "application/json; charset=utf-8",
-    "Last-Modified": "foobar",
-    "Expires": "fizbuzz"
+    "content-type": "application/json; charset=utf-8",
+    "last-modified": "foobar",
+    "expires": "fizbuzz"
   });
 
   var headersMultipleSetCookies = headers.concat([
