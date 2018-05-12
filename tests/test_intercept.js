@@ -31,7 +31,7 @@ var sslServerOptions = {
   cert: fs.readFileSync(path.resolve(__dirname, './localhost.crt'))
 }
 
-const clientCA = {
+var clientCA = {
   ca: 'mocked',
   rejectUnauthorized: false
 }
