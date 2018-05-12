@@ -17,6 +17,7 @@ var domain  = require('domain');
 var hyperquest = require('hyperquest');
 var _ = require('lodash');
 var async = require('async');
+// var path = require('path');
 
 var globalCount;
 
@@ -26,15 +27,15 @@ globalCount = Object.keys(global).length;
 var acceptableLeaks = [
   '_key', '__core-js_shared__', 'fetch', 'Response', 'Headers', 'Request'];
 
-var sslServerOptions = {
-  key: fs.readFileSync(path.resolve(__dirname, './localhost.key')),
-  cert: fs.readFileSync(path.resolve(__dirname, './localhost.crt'))
-}
+// var sslServerOptions = {
+//   key: fs.readFileSync(path.resolve(__dirname, './localhost.key')),
+//   cert: fs.readFileSync(path.resolve(__dirname, './localhost.crt'))
+// }
 
-var clientCA = {
-  ca: 'mocked',
-  rejectUnauthorized: false
-}
+// var clientCA = {
+//   ca: 'mocked',
+//   rejectUnauthorized: false
+// }
 
 test("double activation throws exception", function(t) {
   nock.restore();
