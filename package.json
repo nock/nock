@@ -195,7 +195,7 @@
     "rimraf": "^2.6.2",
     "semantic-release": "^15.0.0",
     "superagent": "^3.8.2",
-    "tap": "^11.1.1"
+    "tap": "^12.0.0"
   },
   "scripts": {
     "unit": "tap --harmony ./tests/test_*.js",
