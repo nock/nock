@@ -30,7 +30,7 @@ jobs:
     - node_js: 6
       script: npm run unit
     - node_js: 4
-      before_script: npm install -g npm@3
+      before_install: npm install -g npm@3
       script: npm run unit
     - stage: release
       node_js: lts/*
