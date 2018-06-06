@@ -61,7 +61,7 @@ test("basicAuth match works", function (t) {
 
   return fetch('http://isomorphicfetchland.com/path2', {
     headers: {
-      'Authorization': 'Basic ' + new Buffer('username:password').toString('base64'),
+      'Authorization': 'Basic ' + Buffer.from('username:password').toString('base64'),
     }
   }).
     then(function (res) {
@@ -78,7 +78,7 @@ test("basicAuth match works", function (t) {
 });
 
 test("matchHeader works", function (t) {
-  var authorizationHeader = 'Basic ' + new Buffer('username:password').toString('base64');
+  var authorizationHeader = 'Basic ' + Buffer.from('username:password').toString('base64');
 
   var scope = nock('http://isomorphicfetchland.com').
     get('/path2').

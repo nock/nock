@@ -25,7 +25,7 @@ test('works with s3, body < 1024 ^ 2', function (t) {
 
   bucket.putObject({
       Key: 'key',
-      Body: new Buffer(1024 * 1024 - 1), // works
+      Body: Buffer.alloc(1024 * 1024 - 1), // works
       // Body: new Buffer(1024 * 1024), // doesn't work
       ContentType: 'binary/octet-stream'
     },
@@ -57,7 +57,7 @@ test('works with s3, body = 10 * 1024 ^ 2', function (t) {
 
   bucket.putObject({
       Key: 'key',
-      Body: new Buffer(10 * 1024 * 1024), // doesn't work
+      Body: Buffer.alloc(10 * 1024 * 1024), // doesn't work
       ContentType: 'binary/octet-stream'
     },
     function (err, resp) {
@@ -88,7 +88,7 @@ test('works with s3, body = 16 * 1024 ^ 2', function (t) {
 
   bucket.putObject({
       Key: 'key',
-      Body: new Buffer(16 * 1024 * 1024), // doesn't work
+      Body: Buffer.alloc(16 * 1024 * 1024), // doesn't work
       ContentType: 'binary/octet-stream'
     },
     function (err, resp) {
