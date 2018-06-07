@@ -1739,7 +1739,7 @@ test("response pipe", function(t) {
     function Constructor() {
       events.EventEmitter.call(this);
 
-      this.buffer = new Buffer(0);
+      this.buffer = Buffer.alloc(0);
       this.writable = true;
     }
 
@@ -1750,7 +1750,7 @@ test("response pipe", function(t) {
     };
 
     Constructor.prototype.write = function(chunk) {
-      var buf = new Buffer(this.buffer.length + chunk.length);
+      var buf = Buffer.alloc(this.buffer.length + chunk.length);
 
       this.buffer.copy(buf);
       chunk.copy(buf, this.buffer.length);
@@ -1790,7 +1790,7 @@ test("response pipe without implicit end", function(t) {
     function Constructor() {
       events.EventEmitter.call(this);
 
-      this.buffer = new Buffer(0);
+      this.buffer = Buffer.alloc(0);
       this.writable = true;
     }
 
@@ -1801,7 +1801,7 @@ test("response pipe without implicit end", function(t) {
     };
 
     Constructor.prototype.write = function(chunk) {
-      var buf = new Buffer(this.buffer.length + chunk.length);
+      var buf = Buffer.alloc(this.buffer.length + chunk.length);
 
       this.buffer.copy(buf);
       chunk.copy(buf, this.buffer.length);
@@ -3895,7 +3895,7 @@ test('define() works with binary buffers', function(t) {
     t.end();
   });
 
-  req.write(new Buffer(nockDef.body, 'hex'));
+  req.write(Buffer.from(nockDef.body, 'hex'));
   req.end();
 
 });
@@ -4018,7 +4018,7 @@ test('sending binary and receiving JSON should work ', function(t) {
   mikealRequest({
     method: 'POST',
     uri: 'http://example.com/some/path',
-    body: new Buffer('ffd8ffe000104a46494600010101006000600000ff', 'hex'),
+    body: Buffer.from('ffd8ffe000104a46494600010101006000600000ff', 'hex'),
     headers: { 'Accept': 'application/json', 'Content-Length': 23861 }
   }, function(err, res, body) {
       scope.done();
@@ -4041,7 +4041,7 @@ test('sending binary and receiving JSON should work ', function(t) {
 
 test('fix #146 - resume() is automatically invoked when the response is drained', function(t) {
   var replyLength = 1024 * 1024;
-  var replyBuffer = new Buffer((new Array(replyLength + 1)).join("."));
+  var replyBuffer = Buffer.from((new Array(replyLength + 1)).join("."));
   t.equal(replyBuffer.length, replyLength);
 
   nock("http://www.abc.com")
@@ -4579,7 +4579,7 @@ test("match basic authentication header", function(t) {
   var username = 'testuser'
     , password = 'testpassword'
     , authString = username + ":" + password
-    , encrypted = (new Buffer(authString)).toString( 'base64' );
+    , encrypted = (Buffer.from(authString)).toString( 'base64' );
 
   var scope = nock('http://www.headdy.com')
      .get('/')
