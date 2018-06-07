@@ -898,7 +898,7 @@ test("respects http.request() consumers", function(t) {
                   , path:'/' }
     ;
     var req = http.request(options, function (res) {
-      var buffer = Buffer.from('');
+      var buffer = new Buffer('');
 
       setTimeout(function () {
         res
