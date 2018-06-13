@@ -4569,7 +4569,22 @@ test('match domain using regexp', function (t) {
   });
 });
 
+test('match domain using regexp with path as callback (issue-1137)', function (t) {
+  nock.cleanAll();
+  nock(/.*/)
+    .get(() => true)
+    .reply(200, 'Match regex');
+
+  mikealRequest.get('http://www.regexexample.com/resources', function(err, res, body) {
+    t.type(err, 'null');
+    t.equal(res.statusCode, 200);
+    t.equal(body, 'Match regex');
+    t.end();
+  });
+});
+
 test('match multiple interceptors with regexp domain (issue-508)', function (t) {
+  nock.cleanAll();
   nock(/chainregex/)
     .get('/')
     .reply(200, 'Match regex')
