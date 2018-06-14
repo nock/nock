@@ -1,8 +1,8 @@
 # Nock
 
-[![Build Status](https://travis-ci.org/node-nock/nock.svg?branch=master)](https://travis-ci.org/node-nock/nock)
-[![Coverage Status](https://coveralls.io/repos/github/node-nock/nock/badge.svg?branch=master)](https://coveralls.io/github/node-nock/nock?branch=master)
-[![Greenkeeper](https://badges.greenkeeper.io/node-nock/nock.svg)](https://greenkeeper.io/)
+[![Build Status](https://travis-ci.org/nock/nock.svg?branch=master)](https://travis-ci.org/nock/nock)
+[![Coverage Status](https://coveralls.io/repos/github/nock/nock/badge.svg?branch=master)](https://coveralls.io/github/nock/nock?branch=master)
+[![Greenkeeper](https://badges.greenkeeper.io/nock/nock.svg)](https://greenkeeper.io/)
 
 
 Nock is an HTTP mocking and expectations library for Node.js
@@ -1430,4 +1430,4 @@ $ npm test
 
 [MIT](LICENSE)
 
-Copyright (c) 2011-2017 [Pedro Teixeira](http://about.me/pedroteixeira) and other [contributors](https://github.com/node-nock/nock/graphs/contributors).
+Copyright (c) 2011-2017 [Pedro Teixeira](http://about.me/pedroteixeira) and other [contributors](https://github.com/nock/nock/graphs/contributors).

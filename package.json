@@ -157,10 +157,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/node-nock/nock.git"
+    "url": "https://github.com/nock/nock.git"
   },
   "bugs": {
-    "url": "http://github.com/node-nock/nock/issues"
+    "url": "http://github.com/nock/nock/issues"
   },
   "engines": [
     "node >= 4.0"

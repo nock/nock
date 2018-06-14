@@ -2806,7 +2806,7 @@ test("allow unmocked option works with https", {skip: process.env.AIRPLANE}, fun
   }).end();
 });
 
-// TODO: remove skip as part of https://github.com/node-nock/nock/issues/1077
+// TODO: remove skip as part of https://github.com/nock/nock/issues/1077
 // test('allow unmocked post with json data', {skip: process.env.AIRPLANE}, function(t) {
 test('allow unmocked post with json data', {skip: true}, function(t) {
   nock('https://httpbin.org', { allowUnmocked: true }).
@@ -2825,7 +2825,7 @@ test('allow unmocked post with json data', {skip: true}, function(t) {
   });
 });
 
-// TODO: remove skip as part of https://github.com/node-nock/nock/issues/1077
+// TODO: remove skip as part of https://github.com/nock/nock/issues/1077
 // test('allow unmocked passthrough with mismatched bodies', {skip: process.env.AIRPLANE}, function(t) {
 test('allow unmocked passthrough with mismatched bodies', {skip: true}, function(t) {
   nock('http://httpbin.org', { allowUnmocked: true }).
