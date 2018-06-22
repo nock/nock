@@ -18,6 +18,8 @@ var hyperquest = require('hyperquest');
 var _ = require('lodash');
 var async = require('async');
 
+var ssl = require('./ssl')
+
 var globalCount;
 
 nock.enableNetConnect();
@@ -25,6 +27,7 @@ nock.enableNetConnect();
 globalCount = Object.keys(global).length;
 var acceptableLeaks = [
   '_key', '__core-js_shared__', 'fetch', 'Response', 'Headers', 'Request'];
+
 
 test("double activation throws exception", function(t) {
   nock.restore();
@@ -2762,48 +2765,64 @@ test('(re-)activate after restore', function(t) {
   })
 })
 
-test("allow unmocked option works with https", {skip: process.env.AIRPLANE}, function(t) {
-  t.plan(5)
-  var scope = nock('https://www.google.com', {allowUnmocked: true})
-    .get('/abc')
-    .reply(200, 'Hey!')
-    .get('/wont/get/here')
-    .reply(200, 'Hi!');
+test("allow unmocked option works with https", function(t) {
+  t.plan(6)
 
-  function secondIsDone() {
-    t.ok(! scope.isDone());
-    https.request({
-        host: "www.google.com"
-      , path: "/"
-    }, function(res) {
+  function middleware (request, response) {
+    if (request.url === '/does/not/exist') {
+      response.writeHead(404)
+      response.end()
+      return
+    }
+
+    response.writeHead(200)
+    response.end()
+  }
+
+  ssl.startServer(middleware, function (error, server) {
+    t.error(error)
+
+    var port = server.address().port
+    var requestOptions = {
+      host: "localhost",
+      port: port,
+      ca: ssl.ca
+    }
+
+    var scope = nock('https://localhost:' + port, {allowUnmocked: true})
+      .get('/abc')
+      .reply(200, 'Hey!')
+      .get('/wont/get/here')
+      .reply(200, 'Hi!');
+
+    function secondIsDone() {
+      t.ok(! scope.isDone());
+      https.request(_.merge({path: '/'}, requestOptions), function(res) {
+        res.resume();
+        t.ok(true, 'Google replied to /');
+        res.destroy();
+        t.assert(res.statusCode < 400 && res.statusCode >= 200, 'GET Google Home page');
+
+        server.close(t.end)
+      }).end();
+    }
+
+    function firstIsDone() {
+      t.ok(! scope.isDone(), 'scope is not done');
+      https.request(_.merge({path: '/does/not/exist'}, requestOptions), function(res) {
+        t.equal(404, res.statusCode, 'real google response status code');
+        res.on('data', function() {});
+        res.on('end', secondIsDone);
+      }).end();
+    }
+
+    https.request(_.merge({path: '/abc'}, requestOptions), function(res) {
+      res.on('end', firstIsDone);
+      // Streams start in 'paused' mode and must be started.
+      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
       res.resume();
-      t.ok(true, 'Google replied to /');
-      res.destroy();
-      t.assert(res.statusCode < 400 && res.statusCode >= 200, 'GET Google Home page');
     }).end();
-  }
-
-  function firstIsDone() {
-    t.ok(! scope.isDone(), 'scope is not done');
-    https.request({
-        host: "www.google.com"
-      , path: "/does/not/exist/dskjsakdj"
-    }, function(res) {
-      t.equal(404, res.statusCode, 'real google response status code');
-      res.on('data', function() {});
-      res.on('end', secondIsDone);
-    }).end();
-  }
-
-  https.request({
-      host: "www.google.com"
-    , path: "/abc"
-  }, function(res) {
-    res.on('end', firstIsDone);
-    // Streams start in 'paused' mode and must be started.
-    // See https://nodejs.org/api/stream.html#stream_class_stream_readable
-    res.resume();
-  }).end();
+  })
 });
 
 // TODO: remove skip as part of https://github.com/nock/nock/issues/1077
