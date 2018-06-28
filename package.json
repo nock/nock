@@ -1,6 +1,6 @@
 {
   "name": "nock",
-  "description": "HTTP Server mocking for Node.js",
+  "description": "HTTP server mocking and expectations library for Node.js",
   "tags": [
     "Mock",
     "HTTP",
@@ -204,7 +204,7 @@
     "coverage": "nyc tap --harmony ./tests/test_*.js",
     "coveralls": "cat ./coverage/lcov.info | coveralls",
     "lint": "eslint '**/*.js'",
-    "toc": "markdown-toc -i README.md",
+    "toc": "markdown-toc -i README.md && markdown-toc -i CONTRIBUTE.md ",
     "semantic-release": "semantic-release"
   },
   "nyc": {
