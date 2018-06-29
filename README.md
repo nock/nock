@@ -1236,7 +1236,7 @@ nock.removeInterceptor(interceptor);
 
 A scope emits the following events:
 
-* `emit('request', function(req, interceptor))`;
+* `emit('request', function(req, interceptor, body))`;
 * `emit('replied', function(req, interceptor))`;
 
 ## Global no match event
