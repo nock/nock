@@ -82,37 +82,73 @@ test("allow unmocked works after one interceptor is removed", function(t) {
   });
 });
 
-test("reply callback's requestBody should automatically parse to JSON", function(t) {
+test("reply callback's requestBody should automatically parse to JSON when content-type is json", function(t) {
     var requestBodyFixture = {
-        id: 1,
-        name: 'bob'
+      id: 1,
+      name: 'bob'
     };
 
     var scope = nock('http://service')
-        .post('/endpoint')
-        .reply(200, function(uri, requestBody) {
-            t.deepEqual(requestBody, requestBodyFixture);
-            requestBody.id = 'overwrite';
+      .post('/endpoint')
+      .reply(200, function(uri, requestBody) {
+        t.deepEqual(requestBody, requestBodyFixture)
 
-            return requestBody;
-        });
+        return 'overwrite';
+      });
 
-    var options = {
-        method: "POST",
-        url: "http://service/endpoint",
-        body: requestBodyFixture,
-        json: true
+    var req = http.request({
+      host: 'service',
+      method: 'POST',
+      path: '/endpoint',
+      port: 80
+    }, function(res) {
+      t.equal(res.statusCode, 200);
+      res.on('end', function() {
+        scope.done();
+        t.end();
+      });
+      res.on('data', function(data) {
+        t.equal(data.toString(), 'overwrite', 'response should match mocked value');
+      });
+    });
+
+   req.setHeader('Content-Type', 'application/json');
+   req.write(JSON.stringify(requestBodyFixture));
+   req.end();
+});
+
+test("reply callback's requestBody should not automatically parse to JSON", function(t) {
+    var requestBodyFixture = {
+      id: 1,
+      name: 'bob'
     };
 
-    mikealRequest(options, function(err, resp, body) {
+    var scope = nock('http://service')
+      .post('/endpoint')
+      .reply(200, function(uri, requestBody) {
+        t.deepEqual(requestBody, JSON.stringify(requestBodyFixture))
+
+        return 'overwrite';
+      });
+
+    var req = http.request({
+      host: "service",
+      method: 'POST',
+      path: '/endpoint',
+      port: 80
+    }, function(res) {
+      t.equal(res.statusCode, 200);
+      res.on('end', function() {
         scope.done();
-        t.equal(resp.statusCode, 200);
-        var expect = _.defaults({
-            id: 'overwrite'
-        }, requestBodyFixture);
-        t.deepEqual(expect, body);
         t.end();
+      });
+      res.on('data', function(data) {
+        t.equal(data.toString(), "overwrite", "response should match mocked value");
+      });
     });
+
+   req.write(JSON.stringify(requestBodyFixture));
+   req.end();
 });
 
 test("reply can take a callback", function(t) {
