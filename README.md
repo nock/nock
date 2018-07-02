@@ -1376,7 +1376,7 @@ var scope = nock('http://api.myservice.com')
 
 ## Contributing
 
-Thanks for wanting to contribute! Take a look at our [Contributing Guide](CONTIRBUTE.md) for notes on our commit message conventions and how to run tests.
+Thanks for wanting to contribute! Take a look at our [Contributing Guide](CONTRIBUTING.md) for notes on our commit message conventions and how to run tests.
 
 Please note that this project is released with a [Contributor Code of Conduct](./CODE_OF_CONDUCT.md).
 By participating in this project you agree to abide by its terms.

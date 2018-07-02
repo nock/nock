@@ -204,7 +204,7 @@
     "coverage": "nyc tap --harmony ./tests/test_*.js",
     "coveralls": "cat ./coverage/lcov.info | coveralls",
     "lint": "eslint '**/*.js'",
-    "toc": "markdown-toc -i README.md && markdown-toc -i CONTRIBUTE.md ",
+    "toc": "markdown-toc -i README.md && markdown-toc -i CONTRIBUTING.md ",
     "semantic-release": "semantic-release"
   },
   "nyc": {
