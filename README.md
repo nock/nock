@@ -4,8 +4,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/nock/nock/badge.svg?branch=master)](https://coveralls.io/github/nock/nock?branch=master)
 [![Greenkeeper](https://badges.greenkeeper.io/nock/nock.svg)](https://greenkeeper.io/)
 
-
-Nock is an HTTP server mocking and expectations library for Node.js.
+> HTTP server mocking and expectations library for Node.js
 
 Nock can be used to test modules that perform HTTP requests in isolation.
 
