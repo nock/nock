@@ -1,1 +1,23 @@
-# Feature request
+# 🚀 Feature request
+
+---
+name: 🚀 Feature request
+about: Let us know if you have feature request 💡
+
+---
+
+**Context**
+
+What are you trying to do and how would you want to do it differently? Is it something you currently you cannot do? Is this related to an issue/problem?
+
+**Alternatives**
+
+Can you achive the same result doing it in an alternative way? Is the alternative considerable?
+
+**Has the feature been requested before?**
+
+Please provide link to issue.
+
+**If feature is accepted, Would you be willing to submit a PR?**
+
+Yes / No _(Help can be provided if you need assistance submitting a pr)_
