@@ -4716,6 +4716,56 @@ test('match path using regexp with allowUnmocked', function (t) {
   });
 });
 
+test('match path using function', function (t) {
+  var path = '/match/uri/function';
+  var options = {
+    hostname: 'pathfunction.com',
+    path: path,
+  };
+  var uriFunction = function(uri) { return uri === path; };
+
+  nock('http://' + options.hostname)
+    .delete(uriFunction).reply(200, 'Match DELETE')
+    .get(uriFunction).reply(200, 'Match GET')
+    .head(uriFunction).reply(200, 'Match HEAD')
+    .merge(uriFunction).reply(200, 'Match MERGE')
+    .options(uriFunction).reply(200, 'Match OPTIONS')
+    .patch(uriFunction).reply(200, 'Match PATCH')
+    .post(uriFunction).reply(200, 'Match POST')
+    .put(uriFunction).reply(200, 'Match PUT');
+
+  options.method =  'POST';
+  http.request(options, function(res) {
+    res.setEncoding('utf8');
+    t.equal(res.statusCode, 200);
+    var body = "";
+    res.on('data', function(data) { body += data; });
+    res.on('end', function() {
+      t.equal(body, 'Match ' + options.method);
+
+      options.method =  'GET';
+      http.request(options, function(res) {
+        res.setEncoding('utf8');
+        t.equal(res.statusCode, 200);
+        var body = "";
+        res.on('data', function(data) { body += data; });
+        res.on('end', function() {
+          t.equal(body, 'Match ' + options.method);
+
+          options.method =  'OPTIONS';
+          options.path = '/no/match';
+          http.request(options)
+            .on('error', e => {
+              t.similar(e.toString(), /Error: Nock: No match for request/);
+              t.end();
+            })
+            .end();
+        });
+      }).end();
+    });
+  }).end();
+});
+
 test('remove interceptor for GET resource', function(t) {
   var scope = nock('http://example.org')
     .get('/somepath')
