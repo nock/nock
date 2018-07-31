@@ -4716,6 +4716,19 @@ test('match path using regexp with allowUnmocked', function (t) {
   });
 });
 
+test('match hostname using regexp with allowUnmocked (issue-1076)', function (t) {
+  nock(/localhost/, {allowUnmocked: true})
+  .get('/no/regex/here')
+  .reply(200, 'Match regex');
+
+  mikealRequest.get('http://localhost:3000/no/regex/here', function(err, res, body) {
+    t.type(err, 'null');
+    t.equal(res.statusCode, 200);
+    t.equal(body, 'Match regex');
+    t.end();
+  });
+});
+
 test('match path using function', function (t) {
   var path = '/match/uri/function';
   var options = {
