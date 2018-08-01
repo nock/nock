@@ -183,13 +183,21 @@ var scope = nock('http://www.example.com')
 
 ### Specifying request body
 
-You can specify the request body to be matched as the second argument to the `get`, `post`, `put` or `delete` specifications. There are four types of second argument allowed:
+You can specify the request body to be matched as the second argument to the `get`, `post`, `put` or `delete` specifications. There are five types of second argument allowed:
 
 **String**: nock will exact match the stringified request body with the provided string
 
 ```js
 nock('http://www.example.com')
   .post('/login', 'username=pgte&password=123456')
+  .reply(200, { id: '123ABC' });
+```
+
+**Buffer**: nock will exact match the stringified request body with the provided buffer
+
+```js
+nock('http://www.example.com')
+  .post('/login', Buffer.from([0xff, 0x11]))
   .reply(200, { id: '123ABC' });
 ```
 
