@@ -840,6 +840,19 @@ example.pendingMocks() // []
 
 example.get("/pathB").optionally().reply(200);
 example.pendingMocks() // []
+
+// You can also pass a boolean argument to `optionally()`. This
+// is useful if you want to conditionally make a mocked request
+// optional.
+var getMock = function(optional) {
+  return example.get("/pathC").optionally(optional).reply(200);
+}
+
+getMock(true);
+example.pendingMocks() // []
+getMock(false);
+example.pendingMocks() // ["GET http://example.com:80/pathC"]
+
 ```
 
 ### Allow __unmocked__ requests on a mocked hostname
