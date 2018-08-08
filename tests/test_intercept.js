@@ -2414,6 +2414,27 @@ test('pending mocks doesn\'t include optional mocks', function(t) {
   t.end();
 });
 
+test('calling optionally(true) on a mock makes it optional', function (t) {
+  nock('http://example.com')
+    .get('/nonexistent')
+    .optionally(true)
+    .reply(200);
+
+  t.deepEqual(nock.pendingMocks(), []);
+  t.end();
+});
+
+test('calling optionally(false) on a mock leaves it as required', function(t) {
+  nock('http://example.com')
+    .get('/nonexistent')
+    .optionally(false)
+    .reply(200);
+
+  t.notEqual(nock.pendingMocks(), []);
+  nock.cleanAll();
+  t.end();
+});
+
 test('optional mocks are still functional', function(t) {
   nock('http://example.com')
     .get('/abc')
