@@ -185,7 +185,7 @@
     "hyperquest": "^2.1.3",
     "isomorphic-fetch": "^2.2.0",
     "markdown-toc": "^1.2.0",
-    "needle": "^2.2.0",
+    "needle": "^2.2.2",
     "nyc": "^12.0.1",
     "request": "^2.83.0",
     "request-promise": "^4.2.2",
