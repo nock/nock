@@ -7,6 +7,7 @@ module.exports.recorder = {
     rec  : recorder.record
   , clear   : recorder.clear
   , play : recorder.outputs
+  , restore: recorder.restore
 };
 
 module.exports.back = require('./lib/back');
