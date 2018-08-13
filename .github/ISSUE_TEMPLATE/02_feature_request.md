@@ -16,8 +16,8 @@ Can you achive the same result doing it in an alternative way? Is the alternativ
 
 **Has the feature been requested before?**
 
-Please provide link to issue.
+Please provide a link to the issue.
 
-**If feature is accepted, Would you be willing to submit a PR?**
+**If feature is accepted, would you be willing to submit a PR?**
 
 Yes / No _(Help can be provided if you need assistance submitting a pr)_

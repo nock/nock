@@ -6,17 +6,15 @@ about: If something isn't working 🤕
 
 ---
 
-**Context**
+**What is the expected behaviour?**
 
-**What is the expected behaviour**
+**What is the actual behaviour?**
 
-**What is the actual behaviour**
-
-***Possible solution***
+**Possible solution**
  
-***How to reproduce the issue***
+**How to reproduce the issue**
 
-[Runkit link](https://runkit.com/gr2m/node-nock-nock-768)
+Runkit: *[Example link](https://runkit.com/gr2m/node-nock-nock-768)*
 
 _Having problem producing a test case? Try and ask the community for help. If test case cannot be reproduced, the Nock community might not be able to help you._
 
