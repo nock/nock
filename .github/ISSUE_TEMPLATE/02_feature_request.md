@@ -2,7 +2,7 @@
 
 ---
 name: 🚀 Feature request
-about: Let us know if you have feature request 💡
+about: Let us know if you have a feature request 💡
 
 ---
 
@@ -20,4 +20,4 @@ Please provide a link to the issue.
 
 **If feature is accepted, would you be willing to submit a PR?**
 
-Yes / No _(Help can be provided if you need assistance submitting a pr)_
+Yes / No _(Help can be provided if you need assistance submitting a PR)_

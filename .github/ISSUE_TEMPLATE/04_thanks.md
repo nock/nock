@@ -10,7 +10,7 @@ Click "Preview" for a nicer view!
 
 If you (or your company) are using Nock - please let us know. We'd love to hear from you!
 
-Nock is a community driven project, which means it's not maintained by a company. If you would like to help Nock - Any of the following is greatly appreciated.
+Nock is a community driven project, which means it's not maintained by a company. If you would like to help Nock - any of the following is greatly appreciated.
 
 - [ ] Give the repository a star ⭐️
 - [ ] Help out with issues

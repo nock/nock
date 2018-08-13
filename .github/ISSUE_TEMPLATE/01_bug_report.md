@@ -16,7 +16,7 @@ about: If something isn't working 🤕
 
 Runkit: *[Example link](https://runkit.com/gr2m/node-nock-nock-768)*
 
-_Having problem producing a test case? Try and ask the community for help. If test case cannot be reproduced, the Nock community might not be able to help you._
+_Having problem producing a test case? Try and ask the community for help. If the test case cannot be reproduced, the Nock community might not be able to help you._
 
 **Does the bug have a test case?**
 
