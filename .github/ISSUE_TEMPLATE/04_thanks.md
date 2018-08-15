@@ -1,12 +1,10 @@
-# ❤️ I'm using Nock
-
 ---
 name: 🤗 Support us
 about: If you want support our efforts in maintaining Nock
 
 ---
 
-Click "Preview" for a nicer view!
+# ❤️ I'm using Nock
 
 If you (or your company) are using Nock - please let us know. We'd love to hear from you!
 
