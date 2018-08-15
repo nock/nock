@@ -1,5 +1,3 @@
-# 🐛 Bug report
-
 ---
 name: 🐛 Bug report
 about: If something isn't working 🤕
