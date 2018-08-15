@@ -4,12 +4,12 @@ about: If something isn't working 🤕
 
 ---
 
-**What is the expected behaviour?**
+**What is the expected behavior?**
 
-**What is the actual behaviour?**
+**What is the actual behavior?**
 
 **Possible solution**
- 
+
 **How to reproduce the issue**
 
 Runkit: *[Example link](https://runkit.com/gr2m/node-nock-nock-768)*

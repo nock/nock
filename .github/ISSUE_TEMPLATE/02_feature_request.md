@@ -10,12 +10,12 @@ What are you trying to do and how would you want to do it differently? Is it som
 
 **Alternatives**
 
-Can you achive the same result doing it in an alternative way? Is the alternative considerable?
+Can you achieve the same result doing it in an alternative way? Is the alternative considerable?
 
 **Has the feature been requested before?**
 
 Please provide a link to the issue.
 
-**If feature is accepted, would you be willing to submit a PR?**
+**If the feature request is accepted, would you be willing to submit a PR?**
 
 Yes / No _(Help can be provided if you need assistance submitting a PR)_
