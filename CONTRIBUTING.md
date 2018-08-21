@@ -12,6 +12,7 @@ Please note that this project is released with a [Contributor Code of Conduct](.
 - [Generate README TOC](#generate-readme-toc)
 - [Running tests](#running-tests)
   * [Airplane mode](#airplane-mode)
+- [Release Process](#release-process)
 - [Becoming a maintainer](#becoming-a-maintainer)
 
 <!-- tocstop -->
@@ -59,6 +60,12 @@ Some of the tests depend on online connectivity. To skip them, set the `AIRPLANE
 $ export AIRPLANE=true
 $ npm test
 ```
+
+## Release Process
+
+All of our releases are automated using [semantic-release](https://github.com/semantic-release/semantic-release). The commit messages pushed to the master branch trigger new releases. Semantic-release requires that commits follow certain convetions, [described above](#commit-message-conventions). semantic-release creates a GitHub release, adds release notes and publishes the new version to npm. This is why we do not store release notes in the [`CHANGELOG`](CHANGELOG.md) file - they're already on GitHub.
+
+We use @nockbot as a separate account for releases, because npm tokens cannot be scoped to a single package. This improves our security model in case of a data breach involving npm tokens. @nockbot's credentials were set up by @gr2m; contact him if for any reason you need to change this in the future.
 
 ## Becoming a maintainer
 
