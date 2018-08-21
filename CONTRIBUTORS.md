@@ -1,3 +1,7 @@
+# Contributors
+
+This list has been generated to thank everyone here for their contribution. Nock wouldn't be what it is without the individuals who've given their time to it. In alphabetical order, here is a list of people who the maintainers think are worthy of being thanked publicly and permanently here.
+
 @4no0p https://github.com/4no0p
 @acooper-accusoft https://github.com/acooper-accusoft
 @Alex0007 https://github.com/Alex0007
