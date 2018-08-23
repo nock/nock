@@ -3009,7 +3009,7 @@ test('disabled real HTTP request', function(t) {
   http.get('http://www.amazon.com', function(res) {
     throw "should not request this";
   }).on('error', function(err) {
-    t.equal(err.message, 'Nock: Not allow net connect for "www.amazon.com:80/"');
+    t.equal(err.message, 'Nock: Disallowed net connect for "www.amazon.com:80/"');
     t.end();
   });
 
@@ -3053,7 +3053,7 @@ test('enable real HTTP request only for google.com, via string', {skip: process.
   http.get('http://www.amazon.com', function(res) {
     throw "should not deliver this request"
   }).on('error', function (err) {
-    t.equal(err.message, 'Nock: Not allow net connect for "www.amazon.com:80/"');
+    t.equal(err.message, 'Nock: Disallowed net connect for "www.amazon.com:80/"');
     t.end();
   });
 
@@ -3070,7 +3070,7 @@ test('enable real HTTP request only for google.com, via regexp', {skip: process.
   http.get('http://www.amazon.com', function(res) {
     throw "should not request this";
   }).on('error', function (err) {
-    t.equal(err.message, 'Nock: Not allow net connect for "www.amazon.com:80/"');
+    t.equal(err.message, 'Nock: Disallowed net connect for "www.amazon.com:80/"');
     t.end();
   });
 
