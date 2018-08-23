@@ -541,6 +541,48 @@ test("get with reply callback returning array with headers", function(t) {
   });
 });
 
+test("get with reply callback returning default statusCode without body", function(t) {
+  nock('http://replyheaderland')
+     .get('/')
+     .reply(function(uri, requestBody) {
+        return [401];
+     });
+
+  http.get({
+    host: "replyheaderland",
+    path: '/',
+    port: 80,
+  }, function(res) {
+    res.setEncoding('utf8');
+    t.equal(res.statusCode, 200);
+    res.on('data', function(data) {
+      t.equal(data, '[401]');
+      res.once('end', t.end.bind(t));
+    });
+  });
+});
+
+test("get with reply callback returning callback without headers", function(t) {
+  nock('http://replyheaderland')
+     .get('/')
+     .reply(function() {
+        return [401, 'This is a body'];
+     });
+
+  http.get({
+    host: "replyheaderland",
+    path: '/',
+    port: 80,
+  }, function(res) {
+    res.setEncoding('utf8');
+    t.equal(res.statusCode, 401);
+    res.on('data', function(data) {
+      t.equal(data, 'This is a body');
+      res.once('end', t.end.bind(t));
+    });
+  });
+});
+
 test("post with reply callback, uri, and request body", function(t) {
   var input = 'key=val';
 
