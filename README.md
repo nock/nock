@@ -59,7 +59,10 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
 - [Restoring](#restoring)
 - [Activating](#activating)
 - [Turning Nock Off (experimental!)](#turning-nock-off-experimental)
-- [Enable/Disable real HTTP request](#enabledisable-real-http-request)
+- [Enable/Disable real HTTP requests](#enabledisable-real-http-requests)
+  * [Disabling requests](#disabling-requests)
+  * [Enabling requests](#enabling-requests)
+  * [Resetting NetConnect](#resetting-netconnect)
 - [Recording](#recording)
   * [`dont_print` option](#dont_print-option)
   * [`output_objects` option](#output_objects-option)
@@ -1021,9 +1024,11 @@ This way you can have your tests hit the real servers just by switching on this 
 $ NOCK_OFF=true node my_test.js
 ```
 
-## Enable/Disable real HTTP request
+## Enable/Disable real HTTP requests
 
 By default, any requests made to a host that is not mocked will be executed normally. If you want to block these requests, nock allows you to do so.
+
+### Disabling requests
 
 For disabling real http requests.
 
@@ -1031,7 +1036,7 @@ For disabling real http requests.
 nock.disableNetConnect();
 ```
 
-So, if you try to request any host not 'nocked', it will thrown an `NetConnectNotAllowedError`.
+So, if you try to request any host not 'nocked', it will throw a `NetConnectNotAllowedError`.
 
 ```js
 nock.disableNetConnect();
@@ -1041,40 +1046,45 @@ req.on('error', function(err){
 });
 // The returned `http.ClientRequest` will emit an error event (or throw if you're not listening for it)
 // This code will log a NetConnectNotAllowedError with message:
-// Nock: Not allow net connect for "google.com:80"
+// Nock: Disallowed net connect for "google.com:80"
 ```
 
-For enabling real HTTP requests (the default behaviour).
+### Enabling requests
+
+For enabling any real HTTP requests (the default behavior):
 
 ```js
 nock.enableNetConnect();
 ```
 
-You could allow real HTTP request for certain host names by providing a string or a regular expression for the hostname:
+You could allow real HTTP requests for certain host names by providing a string or a regular expression for the hostname:
 
 ```js
-// using a string
+// Using a string
 nock.enableNetConnect('amazon.com');
 
-// or a RegExp
-nock.enableNetConnect(/(amazon|github).com/);
+// Or a RegExp
+nock.enableNetConnect(/(amazon|github)\.com/);
 
 http.get('http://www.amazon.com/');
-http.get('http://github.com/'); // only for second example
+http.get('http://github.com/');
 
-// This request will be done!
 http.get('http://google.com/');
-// this will throw NetConnectNotAllowedError with message:
-// Nock: Not allow net connect for "google.com:80"
+// This will throw NetConnectNotAllowedError with message:
+// Nock: Disallowed net connect for "google.com:80"
 ```
 
-A common use case when testing local endpoints would be to disable all but local host, then adding in additional nocks for external requests:
+A common use case when testing local endpoints would be to disable all but localhost, then add in additional nocks for external requests:
 
 ```js
 nock.disableNetConnect();
-nock.enableNetConnect('127.0.0.1'); //Allow localhost connections so we can test local routes and mock servers.
+// Allow localhost connections so we can test local routes and mock servers.
+nock.enableNetConnect('127.0.0.1');
 ```
-Then when you're done with the test, you probably want to set everything back to normal:
+
+### Resetting NetConnect
+
+When you're done with the test, you probably want to set everything back to normal:
 
 ```js
 nock.cleanAll();
