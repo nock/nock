@@ -183,6 +183,33 @@ test("reply can take a callback", function(t) {
   req.end();
 });
 
+test("reply should send correct statusCode with array-notation and without body", function(t) {
+  t.plan(1);
+
+  var statusCode = 202;
+
+  var scope = nock("http://www.google.com")
+    .get("/test-path/")
+    .reply(function(path, requestBody) {
+      return [statusCode]
+    });
+
+  var req = http.request({
+    host: "www.google.com",
+    path: "/test-path/",
+    port: 80
+  }, function(res) {
+
+    t.equal(res.statusCode, statusCode, "sends status code");
+    res.on('end', function() {
+      scope.done();
+    });
+
+  });
+
+  req.end();
+});
+
 test("reply takes a callback for status code", function(t) {
   t.plan(3);
 
