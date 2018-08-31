@@ -1457,12 +1457,6 @@ $ export AIRPLANE=true
 $ npm test
 ```
 
-## Contributors
-
-This project exists thanks to all the people who contribute. See guidelines above. 
-<a href="graphs/contributors"><img src="https://opencollective.com/nock/contributors.svg?width=890&button=false" /></a>
-
-
 ## Backers
 
 Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/nock#backer)]
