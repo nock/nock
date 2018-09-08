@@ -26,9 +26,9 @@ test('Nock with allowUnmocked and an url match', (test) => {
 
     const url = `https://127.0.0.1:${server.address().port}/urlMatch`
 
-    request(url, (error, { statusCode }, body) => {
+    request(url, (error, data, body) => {
       test.notOk(error, 'Should be no error')
-      test.true(statusCode === 201, 'statusCode should match')
+      test.true(data.statusCode === 201, 'statusCode should match')
       test.true(JSON.parse(body).status === 'intercepted', 'body should match')
       test.end()
     })
