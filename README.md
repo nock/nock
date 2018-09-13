@@ -1,12 +1,12 @@
 # Nock
 
+> HTTP server mocking and expectations library for Node.js
+
 [![Build Status](https://travis-ci.org/nock/nock.svg?branch=master)](https://travis-ci.org/nock/nock)
 [![Coverage Status](https://coveralls.io/repos/github/nock/nock/badge.svg?branch=master)](https://coveralls.io/github/nock/nock?branch=master)
 [![Greenkeeper](https://badges.greenkeeper.io/nock/nock.svg)](https://greenkeeper.io/)
 [![Backers on Open Collective](https://opencollective.com/nock/backers/badge.svg)](#backers) 
 [![Sponsors on Open Collective](https://opencollective.com/nock/sponsors/badge.svg)](#sponsors) 
-
-> HTTP server mocking and expectations library for Node.js
 
 Nock can be used to test modules that perform HTTP requests in isolation.
 
