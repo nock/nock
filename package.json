@@ -173,7 +173,6 @@
     "json-stringify-safe": "^5.0.1",
     "lodash": "^4.17.5",
     "mkdirp": "^0.5.0",
-    "opencollective": "^1.0.3",
     "propagate": "^1.0.0",
     "qs": "^6.5.1",
     "semver": "^5.5.0"
@@ -202,16 +201,9 @@
     "test": "npm run -s unit",
     "coverage": "nyc tap --harmony ./tests/test_*.js",
     "coveralls": "cat ./coverage/lcov.info | coveralls",
-<<<<<<< HEAD
     "lint": "eslint \"**/*.js\"",
     "toc": "markdown-toc -i README.md && markdown-toc -i CONTRIBUTING.md ",
     "semantic-release": "semantic-release"
-=======
-    "lint": "eslint '**/*.js'",
-    "toc": "markdown-toc -i README.md",
-    "semantic-release": "semantic-release",
-    "postinstall": "opencollective postinstall"
->>>>>>> Added call to donate after npm install (optional)
   },
   "nyc": {
     "reporter": [
@@ -222,9 +214,5 @@
       "tests/test_*.js"
     ]
   },
-  "license": "MIT",
-  "collective": {
-    "type": "opencollective",
-    "url": "https://opencollective.com/nock"
-  }
+  "license": "MIT"
 }
