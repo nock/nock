@@ -13,6 +13,7 @@ Please note that this project is released with a [Contributor Code of Conduct](.
 - [Running tests](#running-tests)
   * [Airplane mode](#airplane-mode)
 - [Release Process](#release-process)
+- [GitHub Apps](#github-apps)
 - [Becoming a maintainer](#becoming-a-maintainer)
 
 <!-- tocstop -->
@@ -66,6 +67,12 @@ $ npm test
 All of our releases are automated using [semantic-release](https://github.com/semantic-release/semantic-release). The commit messages pushed to the master branch trigger new releases. Semantic-release requires that commits follow certain convetions, [described above](#commit-message-conventions). semantic-release creates a GitHub release, adds release notes and publishes the new version to npm. This is why we do not store release notes in the [`CHANGELOG`](CHANGELOG.md) file - they're already on GitHub.
 
 We use @nockbot as a separate account for releases, because npm tokens cannot be scoped to a single package. This improves our security model in case of a data breach involving npm tokens. @nockbot's credentials were set up by @gr2m; contact him if for any reason you need to change this in the future.
+
+## GitHub Apps
+
+We use several GitHub apps to help maintain this repository. While we would like to address every issue and while we would like to be on hand to support every person, Nock is pretty much entirely volunteer run, and we simply don't have the time to do everything. Please don't be offended if an automated app posts in your issue! We're doing what we can with with we have.
+
+Currently, we use the [Stale](https://github.com/apps/stale) and [Lock](https://github.com/apps/lock) apps to mark old issues as stale, and to lock issues which have been closed to stop drive-by comments. You can see the configuration files for these in [.github/](.github).
 
 ## Becoming a maintainer
 
