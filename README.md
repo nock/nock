@@ -8,8 +8,6 @@
 [![Backers on Open Collective](https://opencollective.com/nock/backers/badge.svg)](#backers) 
 [![Sponsors on Open Collective](https://opencollective.com/nock/sponsors/badge.svg)](#sponsors) 
 
-Nock is an HTTP mocking and expectations library for Node.js
-
 Nock can be used to test modules that perform HTTP requests in isolation.
 
 For instance, if a module performs HTTP requests to a CouchDB server or makes HTTP requests to the Amazon API, you can test that module in isolation.
