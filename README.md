@@ -83,6 +83,12 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
 - [Debugging](#debugging)
 - [PROTIP](#protip)
 - [Contributing](#contributing)
+- [Commit Message conventions](#commit-message-conventions)
+- [Generate README TOC](#generate-readme-toc)
+- [Running tests](#running-tests)
+  * [Airplane mode](#airplane-mode)
+- [Backers](#backers)
+- [Sponsors](#sponsors)
 - [License](#license)
 
 <!-- tocstop -->
@@ -1479,7 +1485,7 @@ Support this project by becoming a sponsor. Your logo will show up here with a l
 <a href="https://opencollective.com/nock/sponsor/8/website" target="_blank"><img src="https://opencollective.com/nock/sponsor/8/avatar.svg"></a>
 <a href="https://opencollective.com/nock/sponsor/9/website" target="_blank"><img src="https://opencollective.com/nock/sponsor/9/avatar.svg"></a>
 
-# License
+## License
 
 [MIT](LICENSE)
 
