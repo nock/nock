@@ -1,6 +1,6 @@
 {
   "name": "nock",
-  "description": "HTTP Server mocking for Node.js",
+  "description": "HTTP server mocking and expectations library for Node.js",
   "tags": [
     "Mock",
     "HTTP",
@@ -157,10 +157,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/node-nock/nock.git"
+    "url": "https://github.com/nock/nock.git"
   },
   "bugs": {
-    "url": "http://github.com/node-nock/nock/issues"
+    "url": "http://github.com/nock/nock/issues"
   },
   "engines": [
     "node >= 4.0"
@@ -181,21 +181,19 @@
     "async": "^2.6.0",
     "aws-sdk": "^2.202.0",
     "coveralls": "^3.0.0",
-    "eslint": "^4.18.1",
-    "glob": "^7.1.1",
+    "eslint": "^5.0.0",
     "hyperquest": "^2.1.3",
     "isomorphic-fetch": "^2.2.0",
-    "istanbul": "^0.4.2",
     "markdown-toc": "^1.2.0",
-    "needle": "^2.2.0",
-    "nyc": "^11.4.1",
+    "needle": "^2.2.2",
+    "nyc": "^12.0.1",
     "request": "^2.83.0",
     "request-promise": "^4.2.2",
-    "restify-clients": "^2.0.0",
+    "restify-clients": "^2.2.0",
     "rimraf": "^2.6.2",
     "semantic-release": "^15.0.0",
     "superagent": "^3.8.2",
-    "tap": "^11.1.1"
+    "tap": "^12.0.0"
   },
   "scripts": {
     "unit": "tap --harmony ./tests/test_*.js",
@@ -203,8 +201,8 @@
     "test": "npm run -s unit",
     "coverage": "nyc tap --harmony ./tests/test_*.js",
     "coveralls": "cat ./coverage/lcov.info | coveralls",
-    "lint": "eslint '**/*.js'",
-    "toc": "markdown-toc -i README.md",
+    "lint": "eslint \"**/*.js\"",
+    "toc": "markdown-toc -i README.md && markdown-toc -i CONTRIBUTING.md ",
     "semantic-release": "semantic-release"
   },
   "nyc": {

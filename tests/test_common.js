@@ -228,25 +228,28 @@ tap.test('headersArrayToObject', function (t) {
   ];
 
   t.deepEqual(common.headersArrayToObject(headers), {
-    "Content-Type": "application/json; charset=utf-8",
-    "Last-Modified": "foobar",
-    "Expires": "fizbuzz"
+    "content-type": "application/json; charset=utf-8",
+    "last-modified": "foobar",
+    "expires": "fizbuzz"
   });
 
   var headersMultipleSetCookies = headers.concat([
     "Set-Cookie",
     "foo=bar; Domain=.github.com; Path=/",
     "Set-Cookie",
-    "fiz=baz; Domain=.github.com; Path=/"
+    "fiz=baz; Domain=.github.com; Path=/",
+    "set-cookie",
+    "foo=baz; Domain=.github.com; Path=/"
   ]);
 
   t.deepEqual(common.headersArrayToObject(headersMultipleSetCookies), {
-    "Content-Type": "application/json; charset=utf-8",
-    "Last-Modified": "foobar",
-    "Expires": "fizbuzz",
-    "Set-Cookie": [
+    "content-type": "application/json; charset=utf-8",
+    "last-modified": "foobar",
+    "expires": "fizbuzz",
+    "set-cookie": [
       "foo=bar; Domain=.github.com; Path=/",
-      "fiz=baz; Domain=.github.com; Path=/"
+      "fiz=baz; Domain=.github.com; Path=/",
+      "foo=baz; Domain=.github.com; Path=/"
     ]
   });
 

@@ -1,8 +1,10 @@
 # Nock
 
-[![Build Status](https://travis-ci.org/node-nock/nock.svg?branch=master)](https://travis-ci.org/node-nock/nock)
-[![Coverage Status](https://coveralls.io/repos/github/node-nock/nock/badge.svg?branch=master)](https://coveralls.io/github/node-nock/nock?branch=master)
-[![Greenkeeper](https://badges.greenkeeper.io/node-nock/nock.svg)](https://greenkeeper.io/)
+> HTTP server mocking and expectations library for Node.js
+
+[![Build Status](https://travis-ci.org/nock/nock.svg?branch=master)](https://travis-ci.org/nock/nock)
+[![Coverage Status](https://coveralls.io/repos/github/nock/nock/badge.svg?branch=master)](https://coveralls.io/github/nock/nock?branch=master)
+[![Greenkeeper](https://badges.greenkeeper.io/nock/nock.svg)](https://greenkeeper.io/)
 [![Backers on Open Collective](https://opencollective.com/nock/backers/badge.svg)](#backers) 
 [![Sponsors on Open Collective](https://opencollective.com/nock/sponsors/badge.svg)](#sponsors) 
 
@@ -19,7 +21,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
 - [How does it work?](#how-does-it-work)
 - [Install](#install)
   * [Node version support](#node-version-support)
-- [Use](#use)
+- [Usage](#usage)
   * [READ THIS! - About interceptors](#read-this---about-interceptors)
   * [Specifying hostname](#specifying-hostname)
   * [Specifying path](#specifying-path)
@@ -49,7 +51,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
   * [Request Body filtering](#request-body-filtering)
   * [Request Headers Matching](#request-headers-matching)
   * [Optional Requests](#optional-requests)
-  * [Allow __unmocked__ requests on a mocked hostname](#allow-unmocked-requests-on-a-mocked-hostname)
+  * [Allow __unmocked__ requests on a mocked hostname](#allow-__unmocked__-requests-on-a-mocked-hostname)
 - [Expectations](#expectations)
   * [.isDone()](#isdone)
   * [.cleanAll()](#cleanall)
@@ -61,7 +63,10 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
 - [Restoring](#restoring)
 - [Activating](#activating)
 - [Turning Nock Off (experimental!)](#turning-nock-off-experimental)
-- [Enable/Disable real HTTP request](#enabledisable-real-http-request)
+- [Enable/Disable real HTTP requests](#enabledisable-real-http-requests)
+  * [Disabling requests](#disabling-requests)
+  * [Enabling requests](#enabling-requests)
+  * [Resetting NetConnect](#resetting-netconnect)
 - [Recording](#recording)
   * [`dont_print` option](#dont_print-option)
   * [`output_objects` option](#output_objects-option)
@@ -74,30 +79,33 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
 - [Nock Back](#nock-back)
   * [Setup](#setup)
     + [Options](#options)
-  * [Usage](#usage)
+  * [Usage](#usage-1)
     + [Options](#options-1)
     + [Modes](#modes)
 - [Debugging](#debugging)
 - [PROTIP](#protip)
 - [Contributing](#contributing)
-  * [Generate README TOC](#generate-readme-toc)
-  * [Running tests](#running-tests)
-    + [Airplane mode](#airplane-mode)
+- [Commit Message conventions](#commit-message-conventions)
+- [Generate README TOC](#generate-readme-toc)
+- [Running tests](#running-tests)
+  * [Airplane mode](#airplane-mode)
+- [Backers](#backers)
+- [Sponsors](#sponsors)
 - [License](#license)
 
 <!-- tocstop -->
 
-# How does it work?
+## How does it work?
 
 Nock works by overriding Node's `http.request` function. Also, it overrides `http.ClientRequest` too to cover for modules that use it directly.
 
-# Install
+## Install
 
 ```sh
-$ npm install nock
+$ npm install --save nock
 ```
 
-## Node version support
+### Node version support
 
 | node | nock |
 |---|---|
@@ -108,7 +116,7 @@ $ npm install nock
 | 5 | up to 8.x |
 | 6 | 9.x |
 
-# Use
+## Usage
 
 On your test, you can setup your mocking object like this:
 
@@ -131,14 +139,14 @@ It will intercept an HTTP GET request to '/users/1' and reply with a status 200,
 
 Then the test can call the module, and the module will do the HTTP requests.
 
-## READ THIS! - About interceptors
+### READ THIS! - About interceptors
 
 When you setup an interceptor for a URL and that interceptor is used, it is removed from the interceptor list.
 This means that you can intercept 2 or more calls to the same URL and return different things on each of them.
 It also means that you must setup one interceptor for each request you are going to have, otherwise nock will throw an error because that URL was not present in the interceptor list.
 If you don’t want interceptors to be removed as they are used, you can use the [.persist()](#persist) method.
 
-## Specifying hostname
+### Specifying hostname
 
 The request hostname can be a string or a RegExp.
 
@@ -154,9 +162,9 @@ var scope = nock(/example\.com/)
     .reply(200, 'domain regex matched');
 ```
 
-> (You can choose to include or not the protocol in the hostname matching)
+> Note: You can choose to include or not the protocol in the hostname matching.
 
-## Specifying path
+### Specifying path
 
 The request path can be a string, a RegExp or a filter function and you can use any [HTTP verb](#http-verbs).
 
@@ -186,15 +194,23 @@ var scope = nock('http://www.example.com')
     .reply(200, 'path using function matched');
 ```
 
-## Specifying request body
+### Specifying request body
 
-You can specify the request body to be matched as the second argument to the `get`, `post`, `put` or `delete` specifications. There are four types of second argument allowed:
+You can specify the request body to be matched as the second argument to the `get`, `post`, `put` or `delete` specifications. There are five types of second argument allowed:
 
 **String**: nock will exact match the stringified request body with the provided string
 
 ```js
 nock('http://www.example.com')
   .post('/login', 'username=pgte&password=123456')
+  .reply(200, { id: '123ABC' });
+```
+
+**Buffer**: nock will exact match the stringified request body with the provided buffer
+
+```js
+nock('http://www.example.com')
+  .post('/login', Buffer.from([0xff, 0x11]))
   .reply(200, { id: '123ABC' });
 ```
 
@@ -233,7 +249,7 @@ nock('http://www.example.com')
 ```
 
 
-## Specifying request query string
+### Specifying request query string
 
 Nock understands query strings. Instead of placing the entire URL, you can specify the query part as an object:
 
@@ -282,7 +298,7 @@ nock('http://example.com')
   .reply(200, {results: [{id: 'pgte'}]});
 ```
 
-## Specifying replies
+### Specifying replies
 
 You can specify the return status code for a path on the first argument of reply like this:
 
@@ -381,7 +397,7 @@ var scope = nock('http://www.google.com')
    });
 ```
 
-#### Access original request and headers
+##### Access original request and headers
 
 If you're using the reply callback style, you can access the original client request using `this.req`  like this:
 
@@ -395,7 +411,7 @@ var scope = nock('http://www.google.com')
    });
 ```
 
-### Replying with errors
+#### Replying with errors
 
 You can reply with an error like this:
 
@@ -413,16 +429,16 @@ nock('http://www.google.com')
   .replyWithError({'message': 'something awful happened', 'code': 'AWFUL_ERROR'});
 ```
 
-> NOTE: This will emit an `error` event on the `request` object, not the reply.
+> Note: This will emit an `error` event on the `request` object, not the reply.
 
 
-## Specifying headers
+### Specifying headers
 
-### Header field names are case-insensitive
+#### Header field names are case-insensitive
 
 Per [HTTP/1.1 4.2 Message Headers](http://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2) specification, all message headers are case insensitive and thus internally Nock uses lower-case for all field names even if some other combination of cases was specified either in mocking specification or in mocked requests themselves.
 
-### Specifying Request Headers
+#### Specifying Request Headers
 
 You can specify the request headers like this:
 
@@ -483,7 +499,7 @@ var scope = nock('http://www.example.com')
     .reply(200);
 ```
 
-### Specifying Reply Headers
+#### Specifying Reply Headers
 
 You can specify the reply headers like this:
 
@@ -509,7 +525,7 @@ var scope = nock('http://www.headdy.com')
    });
 ```
 
-### Default Reply Headers
+#### Default Reply Headers
 
 You can also specify default reply headers for all responses like this:
 
@@ -536,7 +552,7 @@ var scope = nock('http://www.headdy.com')
   .reply(200, 'The default headers should come too');
 ```
 
-### Including Content-Length Header Automatically
+#### Including Content-Length Header Automatically
 
 When using `scope.reply()` to set a response body manually, you can have the
 `Content-Length` header calculated automatically.
@@ -551,7 +567,7 @@ var scope = nock('http://www.headdy.com')
 **NOTE:** this does not work with streams or other advanced means of specifying
 the reply body.
 
-### Including Date Header Automatically
+#### Including Date Header Automatically
 
 You can automatically append a `Date` header to your mock reply:
 
@@ -562,7 +578,7 @@ var scope = nock('http://www.headdy.com')
   .reply(200, { hello: 'world' });
 ```
 
-## HTTP Verbs
+### HTTP Verbs
 
 Nock supports any HTTP verb, and it has convenience methods for the GET, POST, PUT, HEAD, DELETE, PATCH and MERGE HTTP verbs.
 
@@ -574,7 +590,7 @@ var scope = nock('http://my.domain.com')
   .reply(304);
 ```
 
-## Support for HTTP and HTTPS
+### Support for HTTP and HTTPS
 
 By default nock assumes HTTP. If you need to use HTTPS you can specify the `https://` prefix like this:
 
@@ -583,7 +599,7 @@ var scope = nock('https://secure.my.server.com')
    // ...
 ```
 
-## Non-standard ports
+### Non-standard ports
 
 You are able to specify a non-standard port like this:
 
@@ -592,7 +608,7 @@ var scope = nock('http://my.server.com:8081')
   ...
 ```
 
-## Repeat response n times
+### Repeat response n times
 
 You are able to specify the number of times to repeat the same response.
 
@@ -614,7 +630,7 @@ nock('http://zombo.com').get('/').twice().reply(200, 'Ok');
 nock('http://zombo.com').get('/').thrice().reply(200, 'Ok');
 ```
 
-## Delay the response body
+### Delay the response body
 You are able to specify the number of milliseconds that the response body should be delayed. Response header will be replied immediately.
 `delayBody(1000)` is equivalent to `delay({body: 1000})`.
 
@@ -626,9 +642,9 @@ nock('http://my.server.com')
   .reply(200, '<html></html>')
 ```
 
-NOTE: the [`'response'`](http://nodejs.org/api/http.html#http_event_response) event will occur immediately, but the [IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage) will not emit it's `'end'` event until after the delay.
+NOTE: the [`'response'`](http://nodejs.org/api/http.html#http_event_response) event will occur immediately, but the [IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage) will not emit its `'end'` event until after the delay.
 
-## Delay the response
+### Delay the response
 
 You are able to specify the number of milliseconds that your reply should be delayed.
 
@@ -660,11 +676,11 @@ nock('http://my.server.com')
   .reply(200, '<html></html>')
 ```
 
-## Delay the connection
+### Delay the connection
 
 `delayConnection(1000)` is equivalent to `delay({head: 1000})`.
 
-## Socket timeout
+### Socket timeout
 
 You are able to specify the number of milliseconds that your connection should be idle, to simulate a socket timeout.
 
@@ -689,7 +705,7 @@ req.end();
 
 NOTE: the timeout will be fired immediately, and will not leave the simulated connection idle for the specified period of time.
 
-## Chaining
+### Chaining
 
 You can chain behaviour like this:
 
@@ -715,7 +731,7 @@ var scope = nock('http://myapp.iriscouch.com')
                 });
 ```
 
-## Scope filtering
+### Scope filtering
 
 You can filter the scope (protocol, domain or port) of nock through a function. The filtering function is accepted at the `filteringScope` field of the `options` argument.
 
@@ -731,7 +747,7 @@ var scope = nock('https://api.dropbox.com', {
   .reply(200);
 ```
 
-## Path filtering
+### Path filtering
 
 You can also filter the URLs based on a function.
 
@@ -759,7 +775,7 @@ var scope = nock('http://api.myservice.com')
 
 Note that `scope.filteringPath` is not cumulative: it should only be used once per scope.
 
-## Request Body filtering
+### Request Body filtering
 
 You can also filter the request body based on a function.
 
@@ -785,7 +801,7 @@ var scope = nock('http://api.myservice.com')
                 .reply(201, 'OK');
 ```
 
-## Request Headers Matching
+### Request Headers Matching
 
 If you need to match requests only if certain request headers match, you can.
 
@@ -822,7 +838,7 @@ var scope = nock('http://api.myservice.com')
                 })
 ```
 
-## Optional Requests
+### Optional Requests
 
 By default every mocked request is expected to be made exactly once, and until it is it'll appear in `scope.pendingMocks()`, and `scope.isDone()` will return false (see [expectations](#expectations)). In many cases this is fine, but in some (especially cross-test setup code) it's useful to be able to mock a request that may or may not happen. You can do this with `optionally()`. Optional requests are consumed just like normal ones once matched, but they do not appear in `pendingMocks()`, and `isDone()` will return true for scopes with only optional requests pending.
 
@@ -837,9 +853,22 @@ example.pendingMocks() // []
 
 example.get("/pathB").optionally().reply(200);
 example.pendingMocks() // []
+
+// You can also pass a boolean argument to `optionally()`. This
+// is useful if you want to conditionally make a mocked request
+// optional.
+var getMock = function(optional) {
+  return example.get("/pathC").optionally(optional).reply(200);
+}
+
+getMock(true);
+example.pendingMocks() // []
+getMock(false);
+example.pendingMocks() // ["GET http://example.com:80/pathC"]
+
 ```
 
-## Allow __unmocked__ requests on a mocked hostname
+### Allow __unmocked__ requests on a mocked hostname
 
 If you need some request on the same host name to be mocked and some others to **really** go through the HTTP stack, you can use the `allowUnmocked` option like this:
 
@@ -853,9 +882,9 @@ var scope = nock('http://my.existing.service.com', options)
  // GET /other/url => actually makes request to the server
 ```
 
-> Bear in mind that, when applying `{allowUnmocked: true}` if the request is made to the real server, no interceptor is removed.
+> Note: When applying `{allowUnmocked: true}`, if the request is made to the real server, no interceptor is removed.
 
-# Expectations
+## Expectations
 
 Every time an HTTP request is performed for a scope that is mocked, Nock expects to find a handler for it. If it doesn't, it will throw an error.
 
@@ -875,7 +904,7 @@ setTimeout(function() {
 }, 5000);
 ```
 
-## .isDone()
+### .isDone()
 
 You can call `isDone()` on a single expectation to determine if the expectation was met:
 
@@ -893,14 +922,14 @@ It is also available in the global scope, which will determine if all expectatio
 nock.isDone();
 ```
 
-## .cleanAll()
+### .cleanAll()
 
 You can cleanup all the prepared mocks (could be useful to cleanup some state after a failed test) like this:
 
 ```js
 nock.cleanAll();
 ```
-## .persist()
+### .persist()
 
 You can make all the interceptors for a scope persist by calling `.persist()` on it:
 
@@ -921,7 +950,7 @@ var scope = nock('http://example.com').persist().get('/').reply(200, 'ok');
 scope.persist(false);
 ```
 
-## .pendingMocks()
+### .pendingMocks()
 
 If a scope is not done, you can inspect the scope to infer which ones are still pending using the `scope.pendingMocks()` function:
 
@@ -937,7 +966,7 @@ It is also available in the global scope:
 console.error('pending mocks: %j', nock.pendingMocks());
 ```
 
-## .activeMocks()
+### .activeMocks()
 
 You can see every mock that is currently active (i.e. might potentially reply to requests) in a scope using `scope.activeMocks()`. A mock is active if it is pending, optional but not yet completed, or persisted. Mocks that have intercepted their requests and are no longer doing anything are the only mocks which won't appear here.
 
@@ -953,7 +982,7 @@ It is also available in the global scope:
 console.error('active mocks: %j', nock.activeMocks());
 ```
 
-## .isActive()
+### .isActive()
 
 Your tests may sometimes want to deactivate the nock interceptor.
 Once deactivated, nock needs to be re-activated to work.
@@ -964,7 +993,7 @@ Sample:
 if (!nock.isActive()) nock.activate()
 ```
 
-# Logging
+## Logging
 
 Nock can log matches if you pass in a log function like this:
 
@@ -974,7 +1003,7 @@ var google = nock('http://google.com')
                 ...
 ```
 
-# Restoring
+## Restoring
 
 You can restore the HTTP interceptor to the normal unmocked behaviour by calling:
 
@@ -985,7 +1014,7 @@ nock.restore();
 
 **note 2**: restore will also remove the http interceptor itself. You need to run [nock.activate()](#activating) to re-activate the http interceptor. Without re-activation, nock will not intercept any calls.
 
-# Activating
+## Activating
 
 Only for cases where nock has been deactivated using [nock.restore()](#restoring), you can reactivate the HTTP interceptor to start intercepting HTTP calls using:
 
@@ -995,7 +1024,7 @@ nock.activate();
 
 **note**: To check if nock HTTP interceptor is active or deactive, use [nock.isActive()](#isactive).
 
-# Turning Nock Off (experimental!)
+## Turning Nock Off (experimental!)
 
 You can bypass Nock completely by setting `NOCK_OFF` environment variable to `"true"`.
 
@@ -1005,9 +1034,11 @@ This way you can have your tests hit the real servers just by switching on this 
 $ NOCK_OFF=true node my_test.js
 ```
 
-# Enable/Disable real HTTP request
+## Enable/Disable real HTTP requests
 
 By default, any requests made to a host that is not mocked will be executed normally. If you want to block these requests, nock allows you to do so.
+
+### Disabling requests
 
 For disabling real http requests.
 
@@ -1015,7 +1046,7 @@ For disabling real http requests.
 nock.disableNetConnect();
 ```
 
-So, if you try to request any host not 'nocked', it will thrown an `NetConnectNotAllowedError`.
+So, if you try to request any host not 'nocked', it will throw a `NetConnectNotAllowedError`.
 
 ```js
 nock.disableNetConnect();
@@ -1025,47 +1056,52 @@ req.on('error', function(err){
 });
 // The returned `http.ClientRequest` will emit an error event (or throw if you're not listening for it)
 // This code will log a NetConnectNotAllowedError with message:
-// Nock: Not allow net connect for "google.com:80"
+// Nock: Disallowed net connect for "google.com:80"
 ```
 
-For enabling real HTTP requests (the default behaviour).
+### Enabling requests
+
+For enabling any real HTTP requests (the default behavior):
 
 ```js
 nock.enableNetConnect();
 ```
 
-You could allow real HTTP request for certain host names by providing a string or a regular expression for the hostname:
+You could allow real HTTP requests for certain host names by providing a string or a regular expression for the hostname:
 
 ```js
-// using a string
+// Using a string
 nock.enableNetConnect('amazon.com');
 
-// or a RegExp
-nock.enableNetConnect(/(amazon|github).com/);
+// Or a RegExp
+nock.enableNetConnect(/(amazon|github)\.com/);
 
 http.get('http://www.amazon.com/');
-http.get('http://github.com/'); // only for second example
+http.get('http://github.com/');
 
-// This request will be done!
 http.get('http://google.com/');
-// this will throw NetConnectNotAllowedError with message:
-// Nock: Not allow net connect for "google.com:80"
+// This will throw NetConnectNotAllowedError with message:
+// Nock: Disallowed net connect for "google.com:80"
 ```
 
-A common use case when testing local endpoints would be to disable all but local host, then adding in additional nocks for external requests:
+A common use case when testing local endpoints would be to disable all but localhost, then add in additional nocks for external requests:
 
 ```js
 nock.disableNetConnect();
-nock.enableNetConnect('127.0.0.1'); //Allow localhost connections so we can test local routes and mock servers.
+// Allow localhost connections so we can test local routes and mock servers.
+nock.enableNetConnect('127.0.0.1');
 ```
-Then when you're done with the test, you probably want to set everything back to normal:
+
+### Resetting NetConnect
+
+When you're done with the test, you probably want to set everything back to normal:
 
 ```js
 nock.cleanAll();
 nock.enableNetConnect();
 ```
 
-# Recording
+## Recording
 
 This is a cool feature:
 
@@ -1085,7 +1121,7 @@ In order to stop recording you should call `nock.restore()` and recording will s
 
 **ATTENTION!:** when recording is enabled, nock does no validation, nor will any mocks be enabled.  Please be sure to turn off recording before attempting to use any mocks in your tests.
 
-## `dont_print` option
+### `dont_print` option
 
 If you just want to capture the generated code into a var as an array you can use:
 
@@ -1103,7 +1139,7 @@ Copy and paste that code into your tests, customize at will, and you're done! Yo
 
 (Remember that you should do this one test at a time).
 
-## `output_objects` option
+### `output_objects` option
 
 In case you want to generate the code yourself or use the test data in some other way, you can pass the `output_objects` option to `rec`:
 
@@ -1166,9 +1202,9 @@ nockDefs.forEach(function(def) {
 var nocks = nock.define(nockDefs);
 ```
 
-## `enable_reqheaders_recording` option
+### `enable_reqheaders_recording` option
 
-Recording request headers by default is deemed more trouble than its worth as some of them depend on the timestamp or other values that may change after the tests have been recorder thus leading to complex postprocessing of recorded tests. Thus by default the request headers are not recorded.
+Recording request headers by default is deemed more trouble than it's worth as some of them depend on the timestamp or other values that may change after the tests have been recorder thus leading to complex postprocessing of recorded tests. Thus by default the request headers are not recorded.
 
 The genuine use cases for recording request headers (e.g. checking authorization) can be handled manually or by using `enable_reqheaders_recording` in `recorder.rec()` options.
 
@@ -1182,7 +1218,7 @@ nock.recorder.rec({
 
 Note that even when request headers recording is enabled Nock will never record `user-agent` headers. `user-agent` values change with the version of Node and underlying operating system and are thus useless for matching as all that they can indicate is that the user agent isn't the one that was used to record the tests.
 
-## `logging` option
+### `logging` option
 
 Nock will print using `console.log` by default (assuming that `dont_print` is `false`).  If a different function is passed into `logging`, nock will send the log string (or object, when using `output_objects`) to that function.  Here's a basic example.
 
@@ -1195,9 +1231,9 @@ nock.recorder.rec({
 });
 ```
 
-## `use_separator` option
+### `use_separator` option
 
-By default, nock will wrap it's output with the separator string `<<<<<<-- cut here -->>>>>>` before and after anything it prints, whether to the console or a custom log function given with the `logging` option.
+By default, nock will wrap its output with the separator string `<<<<<<-- cut here -->>>>>>` before and after anything it prints, whether to the console or a custom log function given with the `logging` option.
 
 To disable this, set `use_separator` to false.
 
@@ -1207,7 +1243,7 @@ nock.recorder.rec({
 });
 ```
 
-## .removeInterceptor()
+### .removeInterceptor()
 This allows removing a specific interceptor. This can be either an interceptor instance or options for a url. It's useful when there's a list of common interceptors shared between tests, where an individual test requires one of the shared interceptors to behave differently.
 
 Examples:
@@ -1233,14 +1269,14 @@ var interceptor = nock('http://example.org')
 nock.removeInterceptor(interceptor);
 ```
 
-# Events
+## Events
 
 A scope emits the following events:
 
-* `emit('request', function(req, interceptor))`;
+* `emit('request', function(req, interceptor, body))`;
 * `emit('replied', function(req, interceptor))`;
 
-## Global no match event
+### Global no match event
 
 You can also listen for no match events like this:
 
@@ -1250,11 +1286,11 @@ nock.emitter.on('no match', function(req) {
 });
 ```
 
-# Nock Back
+## Nock Back
 
 fixture recording support and playback
 
-## Setup
+### Setup
 
 **You must specify a fixture directory before using, for example:
 
@@ -1267,13 +1303,13 @@ nockBack.fixtures = '/path/to/fixtures/';
 nockBack.setMode('record');
 ```
 
-### Options
+#### Options
 
 - `nockBack.fixtures` : path to fixture directory
 - `nockBack.setMode()` : the mode to use
 
 
-## Usage
+### Usage
 
 By default if the fixture doesn't exist, a `nockBack` will create a new fixture and save the recorded output
 for you. The next time you run the test, if the fixture exists, it will be loaded in.
@@ -1336,7 +1372,7 @@ return nockBack('promisedFixture.json')
 });
 ```
 
-### Options
+#### Options
 
 As an optional second parameter you can pass the following options
 
@@ -1346,7 +1382,7 @@ As an optional second parameter you can pass the following options
 - `recorder`: custom options to pass to the recorder
 
 
-### Modes
+#### Modes
 
 to set the mode call `nockBack.setMode(mode)` or run the tests with the `NOCK_BACK_MODE` environment variable set before loading nock. If the mode needs to be changed programatically, the following is valid: `nockBack.setMode(nockBack.currentMode)`
 
@@ -1358,14 +1394,14 @@ to set the mode call `nockBack.setMode(mode)` or run the tests with the `NOCK_BA
 
 - lockdown: use recorded nocks, disables all http calls even when not nocked, doesn't record
 
-# Debugging
+## Debugging
 Nock uses debug, so just run with environmental variable DEBUG set to nock.*
 
 ```js
 $ DEBUG=nock.* node my_test.js
 ```
 
-# PROTIP
+## PROTIP
 
 If you don't want to match the request body you can use this trick (by @theycallmeswift):
 
@@ -1378,7 +1414,9 @@ var scope = nock('http://api.myservice.com')
   .reply(200, 'OK');
 ```
 
-# Contributing
+## Contributing
+
+Thanks for wanting to contribute! Take a look at our [Contributing Guide](CONTRIBUTING.md) for notes on our commit message conventions and how to run tests.
 
 Please note that this project is released with a [Contributor Code of Conduct](./CODE_OF_CONDUCT.md).
 By participating in this project you agree to abide by its terms.
@@ -1449,10 +1487,8 @@ Support this project by becoming a sponsor. Your logo will show up here with a l
 <a href="https://opencollective.com/nock/sponsor/8/website" target="_blank"><img src="https://opencollective.com/nock/sponsor/8/avatar.svg"></a>
 <a href="https://opencollective.com/nock/sponsor/9/website" target="_blank"><img src="https://opencollective.com/nock/sponsor/9/avatar.svg"></a>
 
-
-
-# License
+## License
 
 [MIT](LICENSE)
 
-Copyright (c) 2011-2017 [Pedro Teixeira](http://about.me/pedroteixeira) and other [contributors](https://github.com/node-nock/nock/graphs/contributors).
+Copyright (c) 2011-2017 [Pedro Teixeira](http://about.me/pedroteixeira) and other [contributors](https://github.com/nock/nock/graphs/contributors).

@@ -279,7 +279,7 @@ test('records nonstandard ports', function(t) {
   //  Create test http server and perform the tests while it's up.
   var testServer = http.createServer(function(req, res) {
     res.end(RESPONSE_BODY);
-  }).listen(8081, function(err) {
+  }).listen(8082, function(err) {
 
     t.equal(err, undefined);
 
@@ -741,7 +741,7 @@ test('works with clients listening for readable', {skip: process.env.AIRPLANE}, 
   //  Create test http server and perform the tests while it's up.
   var testServer = http.createServer(function(req, res) {
     res.end(RESPONSE_BODY);
-  }).listen(8081, function(err) {
+  }).listen(8082, function(err) {
 
     // t.equal(err, undefined);
 
@@ -882,7 +882,7 @@ test("respects http.request() consumers", function(t) {
     setTimeout(function() {
       res.end('bar');
     }, 25);
-  }).listen(8082, function(err) {
+  }).listen(8083, function(err) {
     t.equal(err, undefined);
 
     nock.restore();
