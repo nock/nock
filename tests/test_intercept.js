@@ -5711,3 +5711,22 @@ test("teardown", function(t) {
   t.deepEqual(leaks, [], 'No leaks');
   t.end();
 });
+
+test('setAllowUnmocked', function(t){
+
+  nock('http://bob.com/')
+    .get('/')
+    .reply(404);
+
+  nock.setAllowUnmocked(true);
+
+  mikealRequest('http://bob.com', function(err, res) {
+    t.equals(404, res.statusCode);
+  });
+
+  mikealRequest('http://bob.com', function(err, res) {
+    t.equals(200, res.statusCode);
+    t.end();
+  });
+
+});
