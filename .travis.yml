@@ -36,5 +36,5 @@ jobs:
     - node_js: lts/*
       env: coverage
       script:
-        - npm run coverage
-        - npm run coveralls
+        - npm run test
+        - npm run coverage:upload
