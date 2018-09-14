@@ -196,11 +196,11 @@
     "tap": "^12.0.0"
   },
   "scripts": {
-    "unit": "tap --harmony ./tests/test_*.js",
+    "unit": "tap --coverage ./tests/test_*.js",
     "pretest": "npm run -s lint",
     "test": "npm run -s unit",
-    "coverage": "nyc tap --harmony ./tests/test_*.js",
-    "coveralls": "cat ./coverage/lcov.info | coveralls",
+    "coverage": "tap --coverage-report=html && open coverage/lcov-report/index.html",
+    "coverage:upload": "tap --coverage-report=text-lcov | coveralls",
     "lint": "eslint \"**/*.js\"",
     "toc": "markdown-toc -i README.md && markdown-toc -i CONTRIBUTING.md ",
     "semantic-release": "semantic-release"
