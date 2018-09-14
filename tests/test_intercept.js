@@ -568,7 +568,7 @@ test("get with reply callback returning array with headers", function(t) {
   });
 });
 
-test("get with reply callback returning default statusCode without body", function(t) {
+test("get with reply callback returning default statusCode without body (skipped because #1222)", {skip: true}, function(t) {
   nock('http://replyheaderland')
      .get('/')
      .reply(function(uri, requestBody) {
