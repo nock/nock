@@ -105,14 +105,19 @@ $ npm install --save nock
 
 ### Node version support
 
+The latest version of nock supports all currently maintained Node versions, see [Node Release Schedule](https://github.com/nodejs/Release#release-schedule)
+
+Here is a list of past nock versions with respective node version support
+
 | node | nock |
 |---|---|
 | 0.10 | up to 8.x |
 | 0.11 | up to 8.x |
 | 0.12 | up to 8.x |
-| 4 | 9.x |
+| 4 | up to 9.x |
 | 5 | up to 8.x |
-| 6 | 9.x |
+| 7 | up to 9.x |
+| 9 | up to 9.x |
 
 ## Usage
 
