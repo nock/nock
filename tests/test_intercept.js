@@ -3897,7 +3897,6 @@ test('define() works with binary buffers', function(t) {
 
   req.write(Buffer.from(nockDef.body, 'hex'));
   req.end();
-
 });
 
 test('issue #163 - Authorization header isn\'t mocked', {skip: process.env.AIRPLANE}, function(t) {
