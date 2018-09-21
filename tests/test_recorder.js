@@ -90,6 +90,87 @@ test('records objects', {skip: process.env.AIRPLANE}, function(t) {
   req.end('012345');
 });
 
+/**
+ * The following 2 tests cannot pass at the same time
+ * 
+ * - The first test shows current behavior: store body as decoded JSON.
+ * - The second test shows desired behavior: store body as encoded JSON
+ *   so that JSON strings can be correctly matched at runtime. Because
+ *   headers are not stored in the recorder output, it is impossible for
+ *   the loader to differentiate a stored JSON string from a non-JSON body.
+ * 
+ * Remove this comment when the issue is resolved.
+ * */
+test('records objects and correctly stores JSON object in body', { skip: process.env.AIRPLANE }, function (t) {
+  nock.restore();
+  nock.recorder.clear();
+  t.equal(nock.recorder.play().length, 0);
+  var options = {
+    method: 'POST'
+    , host: 'google.com'
+    , path: '/'
+    , headers: { 'content-type': 'application/json' }
+  };
+  var body = { foo: 123 };
+
+  nock.recorder.rec({
+    dont_print: true,
+    output_objects: true
+  });
+  var req = http.request(options, function (res) {
+    res.resume();
+    res.once('end', function () {
+      nock.restore();
+      var ret = nock.recorder.play();
+      t.equal(ret.length, 1);
+      ret = ret[0];
+      t.type(ret, 'object');
+      t.equal(ret.scope, "http://google.com:80");
+      t.equal(ret.method, "POST");
+      t.same(ret.body, body);
+      t.ok(typeof (ret.status) !== 'undefined');
+      t.ok(typeof (ret.response) !== 'undefined');
+      t.end();
+    });
+  });
+  req.end(JSON.stringify(body));
+});
+test('records objects and correctly stores JSON string in body', { skip: process.env.AIRPLANE }, function (t) {
+  nock.restore();
+  nock.recorder.clear();
+  t.equal(nock.recorder.play().length, 0);
+  var options = {
+    method: 'POST'
+    , host: 'google.com'
+    , path: '/'
+    , headers: { 'content-type': 'application/json' }
+  };
+  var body = JSON.stringify('foo');
+
+  nock.recorder.rec({
+    dont_print: true,
+    output_objects: true
+  });
+  var req = http.request(options, function (res) {
+    res.resume();
+    res.once('end', function () {
+      nock.restore();
+      var ret = nock.recorder.play();
+      t.equal(ret.length, 1);
+      ret = ret[0];
+      t.type(ret, 'object');
+      t.equal(ret.scope, "http://google.com:80");
+      t.equal(ret.method, "POST");
+      t.equal(ret.body, body);
+      t.ok(typeof (ret.status) !== 'undefined');
+      t.ok(typeof (ret.response) !== 'undefined');
+      t.end();
+    });
+  });
+  req.end(body);
+});
+/** see comment above */
+
 test('records and replays objects correctly', {skip: process.env.AIRPLANE}, function(t) {
 
   nock.restore();
