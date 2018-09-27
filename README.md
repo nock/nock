@@ -1404,14 +1404,11 @@ to set the mode call `nockBack.setMode(mode)` or run the tests with the `NOCK_BA
 - lockdown: use recorded nocks, disables all http calls even when not nocked, doesn't record
 
 ## Debugging
-Nock uses debug, so just run with environmental variable DEBUG set to nock.*
+
+Nock uses [`debug`](https://github.com/visionmedia/debug), so just run with environmental variable `DEBUG` set to `nock.*`.
 
 ```js
 $ DEBUG=nock.* node my_test.js
-```
-
-
-```js
 ```
 
 ## Contributing
