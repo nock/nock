@@ -81,7 +81,6 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
     + [Options](#options-1)
     + [Modes](#modes)
 - [Debugging](#debugging)
-- [PROTIP](#protip)
 - [Contributing](#contributing)
 - [Commit Message conventions](#commit-message-conventions)
 - [Generate README TOC](#generate-readme-toc)
@@ -804,6 +803,17 @@ var scope = nock('http://api.myservice.com')
                 .reply(201, 'OK');
 ```
 
+If you don't want to match the request body you can return a wildcard match:
+
+```js
+var scope = nock('http://api.myservice.com')
+  .filteringRequestBody(function(body) {
+    return '*';
+  })
+  .post('/some_uri', '*')
+  .reply(200, 'OK');
+```
+
 ### Request Headers Matching
 
 If you need to match requests only if certain request headers match, you can.
@@ -1404,17 +1414,8 @@ Nock uses debug, so just run with environmental variable DEBUG set to nock.*
 $ DEBUG=nock.* node my_test.js
 ```
 
-## PROTIP
-
-If you don't want to match the request body you can use this trick (by @theycallmeswift):
 
 ```js
-var scope = nock('http://api.myservice.com')
-  .filteringRequestBody(function(body) {
-    return '*';
-  })
-  .post('/some_uri', '*')
-  .reply(200, 'OK');
 ```
 
 ## Contributing
