@@ -3,8 +3,8 @@
 [![Build Status](https://travis-ci.org/nock/nock.svg?branch=master)](https://travis-ci.org/nock/nock)
 [![Coverage Status](https://coveralls.io/repos/github/nock/nock/badge.svg?branch=master)](https://coveralls.io/github/nock/nock?branch=master)
 [![Greenkeeper](https://badges.greenkeeper.io/nock/nock.svg)](https://greenkeeper.io/)
-[![Backers on Open Collective](https://opencollective.com/nock/backers/badge.svg)](#backers) 
-[![Sponsors on Open Collective](https://opencollective.com/nock/sponsors/badge.svg)](#sponsors) 
+[![Backers on Open Collective](https://opencollective.com/nock/backers/badge.svg)](#backers)
+[![Sponsors on Open Collective](https://opencollective.com/nock/sponsors/badge.svg)](#sponsors)
 
 > HTTP server mocking and expectations library for Node.js
 
@@ -237,7 +237,7 @@ nock('http://www.example.com')
 
 ```js
 nock('http://www.example.com')
-  .post('/login', function(body) { 
+  .post('/login', function(body) {
     return body.username && body.password;
   })
   .reply(200, { id: '123ABC' });
