@@ -6,6 +6,7 @@ var nock          = require('../');
 
 nock.enableNetConnect();
 
+// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('allowUnmocked for https', {skip: process.env.AIRPLANE}, function(t) {
   nock('https://www.google.com/', {allowUnmocked: true})
   .get('/pathneverhit')
@@ -24,6 +25,7 @@ test('allowUnmocked for https', {skip: process.env.AIRPLANE}, function(t) {
   });
 });
 
+// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('allowUnmocked for https with query test miss', {skip: process.env.AIRPLANE}, function(t) {
   nock.cleanAll();
   nock('https://www.google.com', {allowUnmocked: true})

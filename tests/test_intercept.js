@@ -3112,6 +3112,7 @@ test('NetConnectNotAllowedError exposes the stack and has a code', function(t) {
   nock.enableNetConnect();
 });
 
+// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('enable real HTTP request only for google.com, via string', {skip: process.env.AIRPLANE}, function(t) {
   nock.enableNetConnect('google.com');
 
@@ -3129,6 +3130,7 @@ test('enable real HTTP request only for google.com, via string', {skip: process.
   nock.enableNetConnect();
 });
 
+// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('enable real HTTP request only for google.com, via regexp', {skip: process.env.AIRPLANE}, function(t) {
   nock.enableNetConnect(/google\.com/);
 
@@ -3900,6 +3902,7 @@ test('define() works with binary buffers', function(t) {
 
 });
 
+// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('issue #163 - Authorization header isn\'t mocked', {skip: process.env.AIRPLANE}, function(t) {
   nock.enableNetConnect();
   function makeRequest(cb) {
