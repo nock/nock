@@ -85,13 +85,13 @@ To generate this file, download `name-your-contributors` and set up a GitHub aut
 
 ```sh
 # Generate a JSON file of the members. This may take a while.
-$ name-your-contributors -r nock -u nock > contributors.json -a 2018-07-17
+$ name-your-contributors -r nock -u nock > contributors.json
 ```
 
 To parse that file, we suggest using [`jq`](https://stedolan.github.io/jq/), although other options are clearly possible:
 
 ```sh
-cat contribs.json | jq '.[][]' | jq '"\(if (.name | length) > 0 then .name else null end) @\(.login) \(.url)"' | jq '. | tostring' | jq -s . | jq unique | jq .[] > AUTHORS.md
+cat contribs.json | jq '.[][]' | jq '"\(if (.name | length) > 0 then .name else null end) @\(.login) \(.url)"' | jq '. | tostring' | jq -s . | jq unique | jq .[] > CONTRIBUTORS.md
 ```
 
 Note: This is a convoluted and time-intensive process, and could be updated in several ways. For one, `name-your-contributors` accepts a date flag, which could be used to only catch recent entries. Another way would be to use a bot to automate this at some regular interval. Any help on this would be appreciated.

@@ -2,113 +2,12 @@
 
 This list has been generated to thank everyone here for their contribution. Nock wouldn't be what it is without the individuals who've given their time to it. In alphabetical order, here is a list of people who the maintainers think are worthy of being thanked publicly and permanently here.
 
-@4no0p https://github.com/4no0p
-@acooper-accusoft https://github.com/acooper-accusoft
-@Alex0007 https://github.com/Alex0007
-@AlexRRR https://github.com/AlexRRR
-@alexscheelmeyer https://github.com/alexscheelmeyer
-@AndersAstrand https://github.com/AndersAstrand
-@andremrodrigues https://github.com/andremrodrigues
-@andrewaustin https://github.com/andrewaustin
-@apptous-seb https://github.com/apptous-seb
-@ashishblr2k https://github.com/ashishblr2k
-@bhar629 https://github.com/bhar629
-@bialesdaniel https://github.com/bialesdaniel
-@bitgal https://github.com/bitgal
-@blumus https://github.com/blumus
-@brian-poncho https://github.com/brian-poncho
-@chitsuhein https://github.com/chitsuhein
-@clydehunt76 https://github.com/clydehunt76
-@congdcit https://github.com/congdcit
-@craigcosmo https://github.com/craigcosmo
-@ddragosd https://github.com/ddragosd
-@devang-kredx https://github.com/devang-kredx
-@divo-ie https://github.com/divo-ie
-@dragoplut https://github.com/dragoplut
-@dunse https://github.com/dunse
-@dynamitesushi https://github.com/dynamitesushi
-@esatterwhite https://github.com/esatterwhite
-@ewoutmeyns https://github.com/ewoutmeyns
-@fent https://github.com/fent
-@flushentitypacket https://github.com/flushentitypacket
-@galenus https://github.com/galenus
-@getlittletech https://github.com/getlittletech
-@gmatroskin https://github.com/gmatroskin
-@greenkeeper null
-@greenkeeper[bot] https://github.com/greenkeeper%5Bbot%5D
-@handane123 https://github.com/handane123
-@hellboy81 https://github.com/hellboy81
-@Hyjaz https://github.com/Hyjaz
-@ianmacl https://github.com/ianmacl
-@ikokostya https://github.com/ikokostya
-@initialize https://github.com/initialize
-@j-brown https://github.com/j-brown
-@jeffsmale90 https://github.com/jeffsmale90
-@jimkang https://github.com/jimkang
-@JuHwon https://github.com/JuHwon
-@karlismelderis https://github.com/karlismelderis
-@keenaudio https://github.com/keenaudio
-@kgividen https://github.com/kgividen
-@kharandziuk https://github.com/kharandziuk
-@kjona https://github.com/kjona
-@krzysztofslonka https://github.com/krzysztofslonka
-@lblazecki https://github.com/lblazecki
-@leslc https://github.com/leslc
-@liorur https://github.com/liorur
-@loahou04 https://github.com/loahou04
-@louib https://github.com/louib
-@lukas-gitl https://github.com/lukas-gitl
-@madhavan020985 https://github.com/madhavan020985
-@massimocode https://github.com/massimocode
-@miazoom https://github.com/miazoom
-@michaelmosher https://github.com/michaelmosher
-@mijamo https://github.com/mijamo
-@mlchai https://github.com/mlchai
-@mren https://github.com/mren
-@mrkam https://github.com/mrkam
-@mrooths https://github.com/mrooths
-@Nagarjuna-S https://github.com/Nagarjuna-S
-@nandums https://github.com/nandums
-@nateholmes3 https://github.com/nateholmes3
-@Niggler https://github.com/Niggler
-@npetevn https://github.com/npetevn
-@NRaf https://github.com/NRaf
-@Nutelac https://github.com/Nutelac
-@oliver-stripe https://github.com/oliver-stripe
-@oroodie https://github.com/oroodie
-@PatSmuk360 https://github.com/PatSmuk360
-@pierscowburn https://github.com/pierscowburn
-@plynchnlm https://github.com/plynchnlm
-@pnsrinivasreddy https://github.com/pnsrinivasreddy
-@prakashchandrabarnwal https://github.com/prakashchandrabarnwal
-@pramodpr316 https://github.com/pramodpr316
-@raghavgujjar https://github.com/raghavgujjar
-@rajdeepmatharu https://github.com/rajdeepmatharu
-@rublev https://github.com/rublev
-@sagarmandakki-trialrun https://github.com/sagarmandakki-trialrun
-@scott-cornwell https://github.com/scott-cornwell
-@sebarys https://github.com/sebarys
-@shlomihaver https://github.com/shlomihaver
-@simlu https://github.com/simlu
-@solankipriti https://github.com/solankipriti
-@sondretj https://github.com/sondretj
-@stevenp https://github.com/stevenp
-@stubar https://github.com/stubar
-@tinder-dyakobian https://github.com/tinder-dyakobian
-@tobias-khs https://github.com/tobias-khs
-@tonyskn https://github.com/tonyskn
-@UndeadBaneGitHub https://github.com/UndeadBaneGitHub
-@vinaykkaimal https://github.com/vinaykkaimal
-@xuwanwanTT https://github.com/xuwanwanTT
-@yaozw https://github.com/yaozw
-@yogananth https://github.com/yogananth
-@zacharyscott https://github.com/zacharyscott
-@zeevl https://github.com/zeevl
 Aalhad Saraf @saraf https://github.com/saraf
 Aaron D Borden @adborden https://github.com/adborden
 Aaron Greenwald @aarongreenwald https://github.com/aarongreenwald
 Abdul Alkhatib @abdulito https://github.com/abdulito
 Abdullah Ali @AbdullahAli https://github.com/AbdullahAli
+Abhijeet Singh @abhijeetps https://github.com/abhijeetps
 Abimbola Idowu @hisabimbola https://github.com/hisabimbola
 Adam @snowmac https://github.com/snowmac
 Adam Bretz @arb https://github.com/arb
@@ -160,8 +59,8 @@ Amru E @amrue https://github.com/amrue
 Anders D. Johnson @AndersDJohnson https://github.com/AndersDJohnson
 Anderson S. Otuka @anderson-otuka-dextra https://github.com/anderson-otuka-dextra
 Andras @andrasq https://github.com/andrasq
-Andrea @gurghet https://github.com/gurghet
 Andrea Gariboldi @aaaristo https://github.com/aaaristo
+Andrea Passaglia @gurghet https://github.com/gurghet
 Andrea Reginato @andreareginato https://github.com/andreareginato
 Andreas Pålsson @apals https://github.com/apals
 Andrei Rusu @beatfactor https://github.com/beatfactor
@@ -178,7 +77,6 @@ André Gaul @andrenarchy https://github.com/andrenarchy
 André Rodrigues @andrerod https://github.com/andrerod
 Andy Fowler @andyfowler https://github.com/andyfowler
 Andy Kramolisch @andykram https://github.com/andykram
-Angel Tam @angeltam https://github.com/angeltam
 Ankur Oberoi @aoberoi https://github.com/aoberoi
 Ankush Sharma @darxtrix https://github.com/darxtrix
 Anny He @annyh https://github.com/annyh
@@ -199,6 +97,7 @@ Artur Mkrtchyan @arturmkrtchyan https://github.com/arturmkrtchyan
 Asaf Mesika @asafm https://github.com/asafm
 Ashik Vetrivelu @ashik94vc https://github.com/ashik94vc
 Assaf Arkin @assaf https://github.com/assaf
+Atishay Jain @atishay https://github.com/atishay
 Attila Incze @atimb https://github.com/atimb
 Aurélien Thieriot @athieriot https://github.com/athieriot
 Austin Birch @austinbirch https://github.com/austinbirch
@@ -221,6 +120,7 @@ Bharath Raja @bigomega https://github.com/bigomega
 Bin Chang @BinChang https://github.com/BinChang
 Boris Serebrov @serebrov https://github.com/serebrov
 Boubker Boulahdid @bboulahdid https://github.com/bboulahdid
+Bradley Bridges @bbridges https://github.com/bbridges
 Brandon Keepers @bkeepers https://github.com/bkeepers
 Branko Zivanovic @zivanovicb1 https://github.com/zivanovicb1
 Brent Van Minnen @Bjvanminnen https://github.com/Bjvanminnen
@@ -244,16 +144,15 @@ Cameron Roe @cameronroe https://github.com/cameronroe
 Cameron Sutter @cameronsutter https://github.com/cameronsutter
 Carl Ansley @carlansley https://github.com/carlansley
 Carl Napier-Cook @carlnc https://github.com/carlnc
+Carlos Guerrero @guerrerocarlos https://github.com/guerrerocarlos
 Carlos Villuendas Zambrana @carlosvillu https://github.com/carlosvillu
 Celestino Ferreira Gomes @tinogomes https://github.com/tinogomes
-chad king @kingchad https://github.com/kingchad
 Charles Lindsay @chazomaticus https://github.com/chazomaticus
 Charles Phillips @doublerebel https://github.com/doublerebel
 Charlie Briggs @Limess https://github.com/Limess
 Charlie Robbins @indexzero https://github.com/indexzero
 Charlie Rudolph @charlierudolph https://github.com/charlierudolph
 Chase Wilson @jiggliemon https://github.com/jiggliemon
-chen @koroshi https://github.com/koroshi
 Chevdor @chevdor https://github.com/chevdor
 Chris Cuellar @ChrisC https://github.com/ChrisC
 Chris Jamieson @jamiesoncj https://github.com/jamiesoncj
@@ -263,7 +162,7 @@ Chris Thompson @cjthompson https://github.com/cjthompson
 Chris Ward @cw6365 https://github.com/cw6365
 Christoph Neuroth @c089 https://github.com/c089
 Christoph Wagner @PandaWhisperer https://github.com/PandaWhisperer
-cjroebuck @cjroebuck https://github.com/cjroebuck
+Christopher Stone @ctstone https://github.com/ctstone
 Claudio Petrini @claudiopetrini https://github.com/claudiopetrini
 Claudius Coenen @ccoenen https://github.com/ccoenen
 Cody A. Taylor @CodeMan99 https://github.com/CodeMan99
@@ -278,6 +177,7 @@ Cristian Cialli @ciccia https://github.com/ciccia
 Cristian Szwarc @cristianszwarc https://github.com/cristianszwarc
 Csaba Palfi @csabapalfi https://github.com/csabapalfi
 Cyril Auburtin @caub https://github.com/caub
+DONGKEON KIM @shallwefootball https://github.com/shallwefootball
 Dallon Feldner @dallonf https://github.com/dallonf
 Damian Janowski @djanowski https://github.com/djanowski
 Damian Kaczmarek @Rush https://github.com/Rush
@@ -292,7 +192,7 @@ Daniel Pupius @dpup https://github.com/dpup
 Daniel Upton @elkelk https://github.com/elkelk
 Daniil Zavyalov @daniilzav123 https://github.com/daniilzav123
 Daniël Illouz @danillouz https://github.com/danillouz
-Danny @dannyid https://github.com/dannyid
+Dank @dannyid https://github.com/dannyid
 Danny Andrews @danny-andrews https://github.com/danny-andrews
 Dario Spadoni @dariospadoni https://github.com/dariospadoni
 Dave Cadwallader @geekdave https://github.com/geekdave
@@ -303,6 +203,7 @@ David Björklund @kesla https://github.com/kesla
 David Braun @NodeGuy https://github.com/NodeGuy
 David Chambers @davidchambers https://github.com/davidchambers
 David Chase @davidchase https://github.com/davidchase
+David Cho-Lerat @david-cho-lerat-HL2 https://github.com/david-cho-lerat-HL2
 David Judik @judikdavid https://github.com/judikdavid
 David M. Lee @leedm777 https://github.com/leedm777
 David Pate @DavidTPate https://github.com/DavidTPate
@@ -321,6 +222,7 @@ Devin Jett @djett41 https://github.com/djett41
 Devon Wesley @devonwesley https://github.com/devonwesley
 Diana Ionita @DianaIonita https://github.com/DianaIonita
 Diana Thayer @garbados https://github.com/garbados
+Diego Aguilar Aguilar @diegoaguilar https://github.com/diegoaguilar
 Diego José Molina González @kaizenberg https://github.com/kaizenberg
 Diego Rani Mazine @dmazine https://github.com/dmazine
 Dimitri Rosenberg @rosendi https://github.com/rosendi
@@ -333,7 +235,6 @@ Doan Nguyen @nguyendinhdoan https://github.com/nguyendinhdoan
 Domenic Denicola @domenic https://github.com/domenic
 Dominic Barnes @dominicbarnes https://github.com/dominicbarnes
 Dominykas Blyžė @dominykas https://github.com/dominykas
-Dongkeon Kim @shallwefootball https://github.com/shallwefootball
 Douglas Eggleton @douglaseggleton https://github.com/douglaseggleton
 Duke Jones @dukejones https://github.com/dukejones
 Dustin Deus @StarpTech https://github.com/StarpTech
@@ -344,14 +245,11 @@ E W @walshe https://github.com/walshe
 E. Itah @eitah https://github.com/eitah
 Ed @anotheredward https://github.com/anotheredward
 Ed Moore @eddiemoore https://github.com/eddiemoore
-edA-qa mort-ora-y @em-cliqz https://github.com/em-cliqz
 Edan Schwartz @eschwartz https://github.com/eschwartz
 Eddie Antonio Santos @eddieantonio https://github.com/eddieantonio
-eddie.chen @chenghung https://github.com/chenghung
 Edo Rivai @edorivai https://github.com/edorivai
 Eduard Bondarenko @eduardbcom https://github.com/eduardbcom
 Elnur Abdurrakhimov @elnur https://github.com/elnur
-Em Smith @miksago https://github.com/miksago
 Emelia Smith @ThisIsMissEm https://github.com/ThisIsMissEm
 Emily M Coco @emilycoco https://github.com/emilycoco
 Enzo Hernan NIcolorich @dkenzox https://github.com/dkenzox
@@ -407,34 +305,38 @@ Gary Cheng @yra99ary https://github.com/yra99ary
 Gastón Avila @avilaton https://github.com/avilaton
 Gastón Jorquera @gjorquera https://github.com/gjorquera
 Gavin Mogan @halkeye https://github.com/halkeye
+George Kalpakas @gkalpak https://github.com/gkalpak
+George Katsanos @gkatsanos https://github.com/gkatsanos
 George Maddocks @gwpmad https://github.com/gwpmad
 George Miroshnykov @laggyluke https://github.com/laggyluke
 George Ornbo @shapeshed https://github.com/shapeshed
 Gergo Barcza @barczaG https://github.com/barczaG
+Gio d'Amelio @giodamelio https://github.com/giodamelio
 Girish Ramakrishnan @gramakri https://github.com/gramakri
 Golo Roden @goloroden https://github.com/goloroden
 Goran Gajic @gorangajic https://github.com/gorangajic
 Greenkeeper @greenkeeperio-bot https://github.com/greenkeeperio-bot
 Greg Leppert @leppert https://github.com/leppert
 Gregor Martynus @gr2m https://github.com/gr2m
+Gregory Cowan @KrekkieD https://github.com/KrekkieD
 Gurpreet Atwal @gurpreetatwal https://github.com/gurpreetatwal
 Gustavo Henke @gustavohenke https://github.com/gustavohenke
 Gustavo Jiménez @gustavjf https://github.com/gustavjf
 Haider MA @hayderma https://github.com/hayderma
 Hal Carleton @halcarleton https://github.com/halcarleton
+Hari Prasetyo @hapr05 https://github.com/hapr05
 Harlan T Wood @harlantwood https://github.com/harlantwood
 Harry Hedger @hedgerh https://github.com/hedgerh
 Harry Moreno @morenoh149 https://github.com/morenoh149
 Haz @diegohaz https://github.com/diegohaz
 Hector Guillermo Parra Alvarez (HGPA) @hparra https://github.com/hparra
-hems.io @hems https://github.com/hems
 Hendrik Cech @hendrikcech https://github.com/hendrikcech
 Hendrik Liebau @KingHenne https://github.com/KingHenne
 Herman @hermansb https://github.com/hermansb
 Hidenari Nozaki @ghiden https://github.com/ghiden
 Hirad Yazdanpanah @hiradyazdan https://github.com/hiradyazdan
-huanghaiyang @huanghaiyang https://github.com/huanghaiyang
 Hugo Durães @hugoduraes https://github.com/hugoduraes
+Hutson Betts @hbetts https://github.com/hbetts
 Huu Da Tran @danosaure https://github.com/danosaure
 Hyunju Choi @blackpost38 https://github.com/blackpost38
 Ian Walker-Sperber @ianwsperber https://github.com/ianwsperber
@@ -491,9 +393,7 @@ Jens Peter Secher @jpsecher https://github.com/jpsecher
 JeongHoon Byun (aka Outsider) @outsideris https://github.com/outsideris
 Jeremiah Lee @jeremiahlee https://github.com/jeremiahlee
 Jeremy Sik @jeremysik https://github.com/jeremysik
-jerishi @qqcloud https://github.com/qqcloud
 Jerome Gravel-Niquet @jeromegn https://github.com/jeromegn
-jess @monkeywithacupcake https://github.com/monkeywithacupcake
 Jesús Leganés-Combarro @piranna https://github.com/piranna
 Jezeniel Zapanta @jezeniel https://github.com/jezeniel
 Jhuliano Skittberg Moreno @jhuliano https://github.com/jhuliano
@@ -520,11 +420,12 @@ John-David Dalton @jdalton https://github.com/jdalton
 Jon B @PizzaAficionado https://github.com/PizzaAficionado
 Jon Jaques @jonjaques https://github.com/jonjaques
 Jon Skulski @jskulski https://github.com/jskulski
-Jonas @jlilja https://github.com/jlilja
+Jonas Lilja @jlilja https://github.com/jlilja
 Jonas Scheffner @jscheffner https://github.com/jscheffner
 Jonathan Bergknoff @jbergknoff https://github.com/jbergknoff
 Jonathan Glock @glockjt https://github.com/glockjt
 Jonathan Lau @jonahlau https://github.com/jonahlau
+Jonathan Otto @jotto https://github.com/jotto
 Jonathan Petitcolas @jpetitcolas https://github.com/jpetitcolas
 Jonathan Rainey @Tivoli https://github.com/Tivoli
 Jonathon Herbert @jonathonherbert https://github.com/jonathonherbert
@@ -548,6 +449,7 @@ Justin Marrington @HowlingEverett https://github.com/HowlingEverett
 Jérôme Avoustin @rehia https://github.com/rehia
 Jörg Henning @joerx https://github.com/joerx
 Kafo @hyalkaf https://github.com/hyalkaf
+Kai Schwarz @papakai https://github.com/papakai
 Kaiwalya Kher @knkher https://github.com/knkher
 Kalashnikov Igor @silentroach https://github.com/silentroach
 Kamal Marhubi @kamalmarhubi https://github.com/kamalmarhubi
@@ -581,12 +483,13 @@ Krishna Rajendran @blazzy https://github.com/blazzy
 Kun Yan @kunyan https://github.com/kunyan
 Kyle White @chainlink https://github.com/chainlink
 Kévin Bernard-Allies @BAKFR https://github.com/BAKFR
+LAU Thierry @lauterry https://github.com/lauterry
 Lars Haßler @LarsHassler https://github.com/LarsHassler
 Lars Nyström @larsnystrom https://github.com/larsnystrom
-LAU Thierry @lauterry https://github.com/lauterry
 Leo Iannacone @LeoIannacone https://github.com/LeoIannacone
 Leo Liang @aleung https://github.com/aleung
 Leo Soto @leosoto https://github.com/leosoto
+Leon Rinkel @leonrinkel https://github.com/leonrinkel
 Leonardo Couto @wallacyyy https://github.com/wallacyyy
 Leonid Blinov @lblinovs https://github.com/lblinovs
 Levi Wheatcroft @leviwheatcroft https://github.com/leviwheatcroft
@@ -606,6 +509,7 @@ Luis Del Águila @delaguilaluis https://github.com/delaguilaluis
 Luke Childs @lukechilds https://github.com/lukechilds
 Luke Nimtz @protometa https://github.com/protometa
 Luu Ninh @ninhxuanluu https://github.com/ninhxuanluu
+MJ @maheshjag https://github.com/maheshjag
 Mac Angell @mac- https://github.com/mac-
 Maciek Sakrejda @uhoh-itsmaciek https://github.com/uhoh-itsmaciek
 Madan Raj @manmadan03 https://github.com/manmadan03
@@ -613,7 +517,6 @@ Malcolm Rebughini @malcolmrebughini https://github.com/malcolmrebughini
 Manan Jadhav @CurosMJ https://github.com/CurosMJ
 Maor Hayoun @maorhayoun https://github.com/maorhayoun
 Marc Boscher @marcboscher https://github.com/marcboscher
-marco @ayxos https://github.com/ayxos
 Marco @marco-c https://github.com/marco-c
 Marco Nascimento (Coi) @Coooi https://github.com/Coooi
 Mario Mendes @hyprstack https://github.com/hyprstack
@@ -681,20 +584,17 @@ Mike Reinstein @mreinstein https://github.com/mreinstein
 Mikela @glassresistor https://github.com/glassresistor
 Mikey Powers @mvpowers https://github.com/mvpowers
 Mikko Koponen @mtkopone https://github.com/mtkopone
-MJ @maheshjag https://github.com/maheshjag
+Minh Son Nguyen @nguymin4 https://github.com/nguymin4
 Mohammad Salim @MSaIim https://github.com/MSaIim
 MooYeol Prescott Lee @mooyoul https://github.com/mooyoul
-mscdex @mscdex https://github.com/mscdex
-n30n0v @n30n0v https://github.com/n30n0v
 Naga Pavan Kumar Kunisetty @nagapavan https://github.com/nagapavan
-narendra @reddynr https://github.com/reddynr
 Nate Wang @supnate https://github.com/supnate
 Nathan @naw https://github.com/naw
 Nathan Friedly @nfriedly https://github.com/nfriedly
 Nathan Houle @ndhoule https://github.com/ndhoule
 Nathan Richards @LAD500 https://github.com/LAD500
 Neeraj @smurfpandey https://github.com/smurfpandey
-Nic Aitch @nicinabox https://github.com/nicinabox
+Nic Haynes @nicinabox https://github.com/nicinabox
 Nicholas Calugar @SocalNick https://github.com/SocalNick
 Nick Howes @halfninja https://github.com/halfninja
 Nick Stefan @NickStefan https://github.com/NickStefan
@@ -705,6 +605,7 @@ Nicolas Froidure @nfroidure https://github.com/nfroidure
 Nicolas Lacasse @nlacasse https://github.com/nlacasse
 Nicolás Bevacqua @bevacqua https://github.com/bevacqua
 Niels Krijger @nielskrijger https://github.com/nielskrijger
+Nikita Vasilevskiy @Nigrimmist https://github.com/Nigrimmist
 Nikolaus Piccolotto @prayerslayer https://github.com/prayerslayer
 Nils Bunger @nilsbunger https://github.com/nilsbunger
 Nils Knappmeier @nknapp https://github.com/nknapp
@@ -748,17 +649,16 @@ Phil Wells @thephilwells https://github.com/thephilwells
 Philip Kobernik @philipkobernik https://github.com/philipkobernik
 Philipp Kretzschmar @k0pernikus https://github.com/k0pernikus
 Philipp Kyeck @pkyeck https://github.com/pkyeck
-Phillip Johnsen @phillipj https://github.com/phillipj
 Pierre Voisin @pvoisin https://github.com/pvoisin
 Prabir Shrestha @prabirshrestha https://github.com/prabirshrestha
 Prodigy @surya12badrinath https://github.com/surya12badrinath
 Prokop Simek @prokopsimek https://github.com/prokopsimek
-psixdev @PsiXdev https://github.com/PsiXdev
 Puneet Gupta @puneetguptanitj https://github.com/puneetguptanitj
 Rachel H @rainyday https://github.com/rainyday
 Rafael @rgarcia https://github.com/rgarcia
 Rahul Chaudhary @rash805115 https://github.com/rash805115
 Raine Virta @raine https://github.com/raine
+Raphael Luciano de Pontes @raphael-luciano https://github.com/raphael-luciano
 Raquel Vélez @rockbot https://github.com/rockbot
 Rashid Omar @rashthedude https://github.com/rashthedude
 Ray Tung @raytung https://github.com/raytung
@@ -771,6 +671,7 @@ Richard Harrington @FuzzySockets https://github.com/FuzzySockets
 Richard Lay @richardlay https://github.com/richardlay
 Richard Littauer @RichardLitt https://github.com/RichardLitt
 Richard Meijer @richmeij https://github.com/richmeij
+Richard Scarrott @richardscarrott https://github.com/richardscarrott
 Richard Watkins @RichardWatkins1 https://github.com/RichardWatkins1
 Rico Sta. Cruz @rstacruz https://github.com/rstacruz
 Rob Ballou @robballou https://github.com/robballou
@@ -781,6 +682,7 @@ Rob Wu @Rob--W https://github.com/Rob--W
 Robert Hurst @RobertWHurst https://github.com/RobertWHurst
 Robert Simpson @rsimp https://github.com/rsimp
 Robin Bobbitt @robinbobbitt https://github.com/robinbobbitt
+Roch Devost @rochdev https://github.com/rochdev
 Rocky Assad @CodisRedding https://github.com/CodisRedding
 Rod Howard @rodhoward https://github.com/rodhoward
 Rodrigo Gomes da Silva @rodrigogs https://github.com/rodrigogs
@@ -793,6 +695,7 @@ Roman Pearah @neverfox https://github.com/neverfox
 Roman Shtylman @defunctzombie https://github.com/defunctzombie
 Ronan Jouchet @ronjouch https://github.com/ronjouch
 Ronen Amiel @ronami https://github.com/ronami
+Rong Sen Ng @motss https://github.com/motss
 Rory Dent @Thebigbignooby https://github.com/Thebigbignooby
 Roy Choo @roychoo https://github.com/roychoo
 Ruben Verborgh @RubenVerborgh https://github.com/RubenVerborgh
@@ -810,6 +713,7 @@ Rémi Bèges @Overdrivr https://github.com/Overdrivr
 Rémi Jarasson @ArTiSTiX https://github.com/ArTiSTiX
 Rémy Boulanouar @DblK https://github.com/DblK
 Rémy HUBSCHER @Natim https://github.com/Natim
+SARUNYHOT SUVANNACHOTI @chenka https://github.com/chenka
 Sahat Yalkabov @sahat https://github.com/sahat
 Sam Saccone @samccone https://github.com/samccone
 Sam Vloeberghs @samvloeberghs https://github.com/samvloeberghs
@@ -818,7 +722,6 @@ Samuel Thompson @samuelt1 https://github.com/samuelt1
 Sarah Hayman @serahhh https://github.com/serahhh
 Sarah Vessels @cheshire137 https://github.com/cheshire137
 Saran Siriphantnon @deoxen0n2 https://github.com/deoxen0n2
-SARUNYHOT SUVANNACHOTI @chenka https://github.com/chenka
 Sascha Drews @perfusorius https://github.com/perfusorius
 Saïd Tayebi @SaidTayebi https://github.com/SaidTayebi
 Scott Tesoriere @scottkf https://github.com/scottkf
@@ -847,7 +750,6 @@ Simon Legg @leggsimon https://github.com/leggsimon
 Simon Taylor @s-taylor https://github.com/s-taylor
 Simon Turvey @serenitus https://github.com/serenitus
 Sindre Sorhus @sindresorhus https://github.com/sindresorhus
-slawkz @carolynnvu https://github.com/carolynnvu
 Soroush Pour @soroushjp https://github.com/soroushjp
 Spencer @spalger https://github.com/spalger
 Srdjan Cengic @srkimir https://github.com/srkimir
@@ -864,16 +766,15 @@ Steven Oxley @xonev https://github.com/xonev
 Steven Vachon @stevenvachon https://github.com/stevenvachon
 Stian Grytøyr @stiang https://github.com/stiang
 Stuart Dotson @sdotson https://github.com/sdotson
+Sunil Lulla @sunil-lulla https://github.com/sunil-lulla
 Suraj Byanju @surajbyanju https://github.com/surajbyanju
 Sushant @sushantdhiman https://github.com/sushantdhiman
 Sven Lito @svnlto https://github.com/svnlto
 Swift @theycallmeswift https://github.com/theycallmeswift
 Szymon Przybylski @sprzybylski https://github.com/sprzybylski
-t__hos @TomHoss https://github.com/TomHoss
-taevas @zyvas https://github.com/zyvas
 Tanner \tanman\ Hoisington @THoisington https://github.com/THoisington
-taven @taven-liu https://github.com/taven-liu
 Taylor Bockman @angrygoats https://github.com/angrygoats
+Taylor Dawson @taylorjdawson https://github.com/taylorjdawson
 Taylor Everding @taylor1791 https://github.com/taylor1791
 Tedde Lundgren @tedeh https://github.com/tedeh
 Terin Stock @terinjokes https://github.com/terinjokes
@@ -890,12 +791,15 @@ Thomas Shafer @trshafer https://github.com/trshafer
 Thomas Watson @watson https://github.com/watson
 Tiago @tiagocpontesp https://github.com/tiagocpontesp
 Tiago Ribeiro @fixe https://github.com/fixe
+Tiagojsag @tiagojsag https://github.com/tiagojsag
 Tim Jonischkat @timjonischkat https://github.com/timjonischkat
 Tim Kindberg @timkindberg https://github.com/timkindberg
 Tim Perry @pimterry https://github.com/pimterry
 Tim Robinson @timjrobinson https://github.com/timjrobinson
+Tim Rogers @timrogers https://github.com/timrogers
 Tim Savery @timsavery https://github.com/timsavery
 Tim Yager @creativetim https://github.com/creativetim
+Tim Zaitsev @tzaitsev https://github.com/tzaitsev
 Tobias Kaupat @Niondir https://github.com/Niondir
 Tom @tconroy https://github.com/tconroy
 Tom @traverse https://github.com/traverse
@@ -924,13 +828,12 @@ Vitalij Kudresov @kudresov https://github.com/kudresov
 Vitor Arins @vitorarins https://github.com/vitorarins
 Vojtech Novak @vonovak https://github.com/vonovak
 Vsevolod Strukchinsky @floatdrop https://github.com/floatdrop
-wang yu @wayoo https://github.com/wayoo
 Wes Johnson @sterlingwes https://github.com/sterlingwes
+Will Myers @griffinmyers https://github.com/griffinmyers
 Will Prater @wprater https://github.com/wprater
 Will Simons @bigredwill https://github.com/bigredwill
 Willson Mock @fay-jai https://github.com/fay-jai
 Winson Tsang @winsontsang https://github.com/winsontsang
-xavier @xavierchow https://github.com/xavierchow
 Xavier Zhou @xavierchou https://github.com/xavierchou
 Yann Odeyer @yodeyer https://github.com/yodeyer
 Yaroslav @mrself https://github.com/mrself
@@ -942,6 +845,135 @@ Zhanzhao (Deo) Liang @DeoLeung https://github.com/DeoLeung
 Zlatko @zladuric https://github.com/zladuric
 Zoli Kahan @Zolmeister https://github.com/Zolmeister
 Zuri Pabón @zuripabon https://github.com/zuripabon
+chad king @kingchad https://github.com/kingchad
+chen @koroshi https://github.com/koroshi
+cjroebuck @cjroebuck https://github.com/cjroebuck
+cv @carolynnvu https://github.com/carolynnvu
+edA-qa mort-ora-y @em-cliqz https://github.com/em-cliqz
+eddie.chen @chenghung https://github.com/chenghung
+hems.io @hems https://github.com/hems
+huanghaiyang @huanghaiyang https://github.com/huanghaiyang
+jerishi @qqcloud https://github.com/qqcloud
+jess @monkeywithacupcake https://github.com/monkeywithacupcake
+marco @ayxos https://github.com/ayxos
+mscdex @mscdex https://github.com/mscdex
+n30n0v @n30n0v https://github.com/n30n0v
+narendra @reddynr https://github.com/reddynr
+@4no0p https://github.com/4no0p
+@Alex0007 https://github.com/Alex0007
+@AlexRRR https://github.com/AlexRRR
+@AndersAstrand https://github.com/AndersAstrand
+@Hyjaz https://github.com/Hyjaz
+@JuHwon https://github.com/JuHwon
+@MarshallRJ https://github.com/MarshallRJ
+@NRaf https://github.com/NRaf
+@Nagarjuna-S https://github.com/Nagarjuna-S
+@Niggler https://github.com/Niggler
+@Nohbidy https://github.com/Nohbidy
+@Nutelac https://github.com/Nutelac
+@PatSmuk360 https://github.com/PatSmuk360
+@UndeadBaneGitHub https://github.com/UndeadBaneGitHub
+@abhishekk-optimus https://github.com/abhishekk-optimus
+@acooper-accusoft https://github.com/acooper-accusoft
+@alexscheelmeyer https://github.com/alexscheelmeyer
+@andremrodrigues https://github.com/andremrodrigues
+@andrewaustin https://github.com/andrewaustin
+@apptous-seb https://github.com/apptous-seb
+@ashishblr2k https://github.com/ashishblr2k
+@bhar629 https://github.com/bhar629
+@bialesdaniel https://github.com/bialesdaniel
+@bitgal https://github.com/bitgal
+@blumus https://github.com/blumus
+@brian-poncho https://github.com/brian-poncho
+@chitsuhein https://github.com/chitsuhein
+@clydehunt76 https://github.com/clydehunt76
+@congdcit https://github.com/congdcit
+@craigcosmo https://github.com/craigcosmo
+@ddragosd https://github.com/ddragosd
+@deepaktiwari-1987 https://github.com/deepaktiwari-1987
+@devang-kredx https://github.com/devang-kredx
+@divo-ie https://github.com/divo-ie
+@dragoplut https://github.com/dragoplut
+@dunse https://github.com/dunse
+@dynamitesushi https://github.com/dynamitesushi
+@esatterwhite https://github.com/esatterwhite
+@ewoutmeyns https://github.com/ewoutmeyns
+@fent https://github.com/fent
+@flushentitypacket https://github.com/flushentitypacket
+@galenus https://github.com/galenus
+@getlittletech https://github.com/getlittletech
+@gmatroskin https://github.com/gmatroskin
+@greenkeeper null
+@handane123 https://github.com/handane123
+@hellboy81 https://github.com/hellboy81
+@hermano360 https://github.com/hermano360
+@ianmacl https://github.com/ianmacl
+@ikokostya https://github.com/ikokostya
+@initialize https://github.com/initialize
+@j-brown https://github.com/j-brown
+@jeffsmale90 https://github.com/jeffsmale90
+@jimkang https://github.com/jimkang
+@karlismelderis https://github.com/karlismelderis
+@keenaudio https://github.com/keenaudio
+@kgividen https://github.com/kgividen
+@kharandziuk https://github.com/kharandziuk
+@kjona https://github.com/kjona
+@krzysztofslonka https://github.com/krzysztofslonka
+@lblazecki https://github.com/lblazecki
+@leslc https://github.com/leslc
+@liorur https://github.com/liorur
+@loahou04 https://github.com/loahou04
+@lock null
+@louib https://github.com/louib
+@lukas-gitl https://github.com/lukas-gitl
+@madhavan020985 https://github.com/madhavan020985
+@massimocode https://github.com/massimocode
+@miazoom https://github.com/miazoom
+@michaelmosher https://github.com/michaelmosher
+@mijamo https://github.com/mijamo
+@mlchai https://github.com/mlchai
+@mren https://github.com/mren
+@mrkam https://github.com/mrkam
+@mrooths https://github.com/mrooths
+@nandums https://github.com/nandums
+@nateholmes3 https://github.com/nateholmes3
+@nicolasprade https://github.com/nicolasprade
+@npetevn https://github.com/npetevn
+@oroodie https://github.com/oroodie
+@pierscowburn https://github.com/pierscowburn
+@plynchnlm https://github.com/plynchnlm
+@pnsrinivasreddy https://github.com/pnsrinivasreddy
+@prakashchandrabarnwal https://github.com/prakashchandrabarnwal
+@pramodpr316 https://github.com/pramodpr316
+@raghavgujjar https://github.com/raghavgujjar
+@rajdeepmatharu https://github.com/rajdeepmatharu
+@rublev https://github.com/rublev
+@sagarmandakki-trialrun https://github.com/sagarmandakki-trialrun
+@scott-cornwell https://github.com/scott-cornwell
+@sebarys https://github.com/sebarys
+@shlomihaver https://github.com/shlomihaver
+@simlu https://github.com/simlu
+@solankipriti https://github.com/solankipriti
+@sondretj https://github.com/sondretj
+@stale null
+@stevenp https://github.com/stevenp
+@stubar https://github.com/stubar
+@tinder-dyakobian https://github.com/tinder-dyakobian
+@tobias-khs https://github.com/tobias-khs
+@tonyskn https://github.com/tonyskn
+@vinaykkaimal https://github.com/vinaykkaimal
+@weekly-digest null
+@xuwanwanTT https://github.com/xuwanwanTT
+@yaozw https://github.com/yaozw
+@yogananth https://github.com/yogananth
+@zacharyscott https://github.com/zacharyscott
+@zeevl https://github.com/zeevl
+psixdev @PsiXdev https://github.com/PsiXdev
+t__hos @TomHoss https://github.com/TomHoss
+taevas @zyvas https://github.com/zyvas
+taven @taven-liu https://github.com/taven-liu
+wang yu @wayoo https://github.com/wayoo
+xavier @xavierchow https://github.com/xavierchow
 Łukasz Pluszczewski @Lukasz-pluszczewski https://github.com/Lukasz-pluszczewski
 刘智猷 @EasyHard https://github.com/EasyHard
 刘贝 @finderL https://github.com/finderL
