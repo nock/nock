@@ -83,3 +83,22 @@ Here are some things you can do today to actively show the Nock team that you're
 * **Refactor.** This is one of the hardest things to do, but one of the most useful. Go through the code, and find examples where it could be written better - with better variable names, more useful abstractions, and more elegant patterns. Taking away ten lines of code that are unnecessary is more valuable than submitting a hundred new lines, sometimes. Open a PR or a comment and defend your position; ask for feedback.
 
 Once you've been around for a bit, ask a current Maintainer - one of [the team members](https://github.com/orgs/nock/people) - whether you can be elevated to Maintainer status and given permissions to close issues and merge PRs. We're interested in how well you know what Nock is about, and how involved you are in the community - not where you're from, how good your English is, or whether or not you can pass a whiteboard test blindfolded. If you think that you've been helpful, let us know. We're friendly, promise. :)
+
+## Generating the CONTRIBUTORS.md file
+
+We use [`name-your-contributors`](https://github.com/mntnr/name-your-contributors) to generate the CONTRIBUTORS file, which contains the names of everyone who have submitted code to the Nock codebase, or commented on an issue, or opened a pull request, or reviewed anyone else's code. After all, all contributions are welcome, and anyone who works with Nock is part of our community.
+
+To generate this file, download `name-your-contributors` and set up a GitHub authorization token.
+
+```sh
+# Generate a JSON file of the members. This may take a while.
+$ name-your-contributors -r nock -u nock > contributors.json
+```
+
+To parse that file, we suggest using [`jq`](https://stedolan.github.io/jq/), although other options are clearly possible:
+
+```sh
+cat contribs.json | jq '.[][]' | jq '"\(if (.name | length) > 0 then .name else null end) @\(.login) \(.url)"' | jq '. | tostring' | jq -s . | jq unique | jq .[] > CONTRIBUTORS.md
+```
+
+Note: This is a convoluted and time-intensive process, and could be updated in several ways. For one, `name-your-contributors` accepts a date flag, which could be used to only catch recent entries. Another way would be to use a bot to automate this at some regular interval. Any help on this would be appreciated.
