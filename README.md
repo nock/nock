@@ -1031,7 +1031,7 @@ Only for cases where nock has been deactivated using [nock.restore()](#restoring
 nock.activate();
 ```
 
-**note**: To check if nock HTTP interceptor is active or deactive, use [nock.isActive()](#isactive).
+**note**: To check if nock HTTP interceptor is active or inactive, use [nock.isActive()](#isactive).
 
 ## Turning Nock Off (experimental!)
 
@@ -1393,7 +1393,7 @@ As an optional second parameter you can pass the following options
 
 #### Modes
 
-to set the mode call `nockBack.setMode(mode)` or run the tests with the `NOCK_BACK_MODE` environment variable set before loading nock. If the mode needs to be changed programatically, the following is valid: `nockBack.setMode(nockBack.currentMode)`
+to set the mode call `nockBack.setMode(mode)` or run the tests with the `NOCK_BACK_MODE` environment variable set before loading nock. If the mode needs to be changed programmatically, the following is valid: `nockBack.setMode(nockBack.currentMode)`
 
 - wild: all requests go out to the internet, don't replay anything, doesn't record anything
 
