@@ -46,7 +46,7 @@
     "restify-clients": "^2.2.0",
     "rimraf": "^2.6.2",
     "semantic-release": "^15.0.0",
-    "superagent": "^3.8.2",
+    "superagent": "^4.0.0",
     "tap": "^12.0.0"
   },
   "scripts": {
