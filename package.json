@@ -1,6 +1,6 @@
 {
   "name": "nock",
-  "description": "HTTP Server mocking for Node.js",
+  "description": "HTTP server mocking and expectations library for Node.js",
   "tags": [
     "Mock",
     "HTTP",
@@ -9,158 +9,12 @@
   ],
   "version": "0.0.0-development",
   "author": "Pedro Teixeira <pedro.teixeira@gmail.com>",
-  "contributors": [
-    {
-      "name": "Bin Chang",
-      "url": "https://github.com/BinChang"
-    },
-    {
-      "name": "Roman Hotsiy",
-      "url": "https://github.com/RomanGotsiy"
-    },
-    {
-      "name": "Jeffrey Jagoda",
-      "url": "https://github.com/jagoda"
-    },
-    {
-      "name": "Hidenari Nozaki",
-      "url": "https://github.com/ghiden"
-    },
-    {
-      "name": "Ken Sheedlo",
-      "url": "https://github.com/ksheedlo"
-    },
-    {
-      "name": "Douglas Eggleton",
-      "url": "https://github.com/douglaseggleton"
-    },
-    {
-      "name": "José F. Romaniello",
-      "url": "https://github.com/jfromaniello"
-    },
-    {
-      "name": "Benjamin Urban",
-      "url": "https://github.com/benurb"
-    },
-    {
-      "name": "Justin",
-      "url": "https://github.com/justincy"
-    },
-    {
-      "name": "Brett Porter"
-    },
-    {
-      "name": "Matt Olson"
-    },
-    {
-      "name": "Rémy HUBSCHER"
-    },
-    {
-      "name": "Roly Fentanes"
-    },
-    {
-      "name": "Alexander Simmerl"
-    },
-    {
-      "name": "Pedro Teixeira"
-    },
-    {
-      "name": "Nuno Job"
-    },
-    {
-      "name": "Ian Young"
-    },
-    {
-      "name": "nilsbunger"
-    },
-    {
-      "name": "bacchusrx",
-      "email": "bacchusrx@eightstar.ca"
-    },
-    {
-      "name": "Fabiano França"
-    },
-    {
-      "name": "Sascha Drews"
-    },
-    {
-      "name": "Mike Swift"
-    },
-    {
-      "name": "James Herdman"
-    },
-    {
-      "name": "David Björklund"
-    },
-    {
-      "name": "Andrew Kramolisch"
-    },
-    {
-      "name": "Balazs Nagy"
-    },
-    {
-      "name": "Brian J Brennan"
-    },
-    {
-      "name": "Attila Incze"
-    },
-    {
-      "name": "Mac Angell"
-    },
-    {
-      "name": "Tom Hosford"
-    },
-    {
-      "name": "Aurélien Thieriot"
-    },
-    {
-      "name": "Alex Zylman"
-    },
-    {
-      "name": "Celestino Gomes",
-      "email": "contact@tinogomes.com"
-    },
-    {
-      "name": "David Rousselie"
-    },
-    {
-      "name": "spenceralger"
-    },
-    {
-      "name": "Ivan Erceg",
-      "url": "https://github.com/ierceg",
-      "email": "ivan@softwaremarbles.com"
-    },
-    {
-      "name": "Keith Laban",
-      "url": "https://github.com/kelaban",
-      "email": "kelaban17@gmail.com"
-    },
-    {
-      "name": "Rui Marinho",
-      "url": "https://github.com/ruimarinho",
-      "email": "ruipmarinho@gmail.com"
-    },
-    {
-      "name": "David Pate",
-      "url": "https://github.com/DavidTPate",
-      "email": "davidtpate@gmail.com"
-    },
-    {
-      "name": "Matt Oakes",
-      "url": "https://github.com/matto1990"
-    },
-    {
-      "name": "Ian Walker-Sperber",
-      "url": "https://github.com/ianwsperber"
-    }
-  ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/node-nock/nock.git"
+    "url": "https://github.com/nock/nock.git"
   },
   "bugs": {
-    "url": "http://github.com/node-nock/nock/issues"
+    "url": "http://github.com/nock/nock/issues"
   },
   "engines": [
     "node >= 4.0"
@@ -168,7 +22,7 @@
   "main": "./index",
   "dependencies": {
     "chai": "^4.1.2",
-    "debug": "^3.1.0",
+    "debug": "^4.1.0",
     "deep-equal": "^1.0.0",
     "json-stringify-safe": "^5.0.1",
     "lodash": "^4.17.5",
@@ -181,30 +35,28 @@
     "async": "^2.6.0",
     "aws-sdk": "^2.202.0",
     "coveralls": "^3.0.0",
-    "eslint": "^4.18.1",
-    "glob": "^7.1.1",
+    "eslint": "^5.0.0",
     "hyperquest": "^2.1.3",
     "isomorphic-fetch": "^2.2.0",
-    "istanbul": "^0.4.2",
     "markdown-toc": "^1.2.0",
-    "needle": "^2.2.0",
-    "nyc": "^11.4.1",
+    "needle": "^2.2.2",
+    "nyc": "^12.0.1",
     "request": "^2.83.0",
     "request-promise": "^4.2.2",
-    "restify-clients": "^2.0.0",
+    "restify-clients": "^2.2.0",
     "rimraf": "^2.6.2",
     "semantic-release": "^15.0.0",
-    "superagent": "^3.8.2",
-    "tap": "^11.1.1"
+    "superagent": "^4.0.0",
+    "tap": "^12.0.0"
   },
   "scripts": {
-    "unit": "tap --harmony ./tests/test_*.js",
+    "unit": "tap --coverage ./tests/test_*.js",
     "pretest": "npm run -s lint",
     "test": "npm run -s unit",
-    "coverage": "nyc tap --harmony ./tests/test_*.js",
-    "coveralls": "cat ./coverage/lcov.info | coveralls",
-    "lint": "eslint '**/*.js'",
-    "toc": "markdown-toc -i README.md",
+    "coverage": "tap --coverage-report=html && open coverage/lcov-report/index.html",
+    "coverage:upload": "tap --coverage-report=text-lcov | coveralls",
+    "lint": "eslint \"**/*.js\"",
+    "toc": "markdown-toc -i README.md && markdown-toc -i CONTRIBUTING.md ",
     "semantic-release": "semantic-release"
   },
   "nyc": {

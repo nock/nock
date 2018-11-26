@@ -3,3 +3,4 @@ node_modules
 coverage
 .nyc_output
 tests
+CONTRIBUTORS.md

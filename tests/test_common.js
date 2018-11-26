@@ -74,10 +74,10 @@ tap.test('isBinaryBuffer works', function(t) {
   t.false(common.isBinaryBuffer(''));
 
   //  Returns true for binary buffers.
-  t.true(common.isBinaryBuffer(new Buffer('8001', 'hex')));
+  t.true(common.isBinaryBuffer(Buffer.from('8001', 'hex')));
 
   //  Returns false for buffers containing strings.
-  t.false(common.isBinaryBuffer(new Buffer('8001', 'utf8')));
+  t.false(common.isBinaryBuffer(Buffer.from('8001', 'utf8')));
 
   t.end();
 
@@ -228,25 +228,28 @@ tap.test('headersArrayToObject', function (t) {
   ];
 
   t.deepEqual(common.headersArrayToObject(headers), {
-    "Content-Type": "application/json; charset=utf-8",
-    "Last-Modified": "foobar",
-    "Expires": "fizbuzz"
+    "content-type": "application/json; charset=utf-8",
+    "last-modified": "foobar",
+    "expires": "fizbuzz"
   });
 
   var headersMultipleSetCookies = headers.concat([
     "Set-Cookie",
     "foo=bar; Domain=.github.com; Path=/",
     "Set-Cookie",
-    "fiz=baz; Domain=.github.com; Path=/"
+    "fiz=baz; Domain=.github.com; Path=/",
+    "set-cookie",
+    "foo=baz; Domain=.github.com; Path=/"
   ]);
 
   t.deepEqual(common.headersArrayToObject(headersMultipleSetCookies), {
-    "Content-Type": "application/json; charset=utf-8",
-    "Last-Modified": "foobar",
-    "Expires": "fizbuzz",
-    "Set-Cookie": [
+    "content-type": "application/json; charset=utf-8",
+    "last-modified": "foobar",
+    "expires": "fizbuzz",
+    "set-cookie": [
       "foo=bar; Domain=.github.com; Path=/",
-      "fiz=baz; Domain=.github.com; Path=/"
+      "fiz=baz; Domain=.github.com; Path=/",
+      "foo=baz; Domain=.github.com; Path=/"
     ]
   });
 

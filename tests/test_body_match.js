@@ -243,3 +243,109 @@ test('urlencoded form posts are matched with regexp', function(t) {
     t.end();
   });
 });
+
+test('match utf-8 buffer body with utf-8 buffer', function(t) {
+
+  nock('http://encodingsareus.com')
+      .post('/', Buffer.from('hello'))
+      .reply(200);
+
+  mikealRequest({
+    url: 'http://encodingsareus.com/',
+    method: 'post',
+    encoding: null,
+    body: Buffer.from('hello')
+  }, function(err, res) {
+    if (err) throw err;
+    assert.equal(res.statusCode, 200);
+    t.end();
+  });
+});
+
+test('doesn\'t match utf-8 buffer body with mismatching utf-8 buffer', function(t) {
+
+  nock('http://encodingsareus.com')
+      .post('/', Buffer.from('goodbye'))
+      .reply(200);
+
+  mikealRequest({
+    url: 'http://encodingsareus.com/',
+    method: 'post',
+    encoding: null,
+    body: Buffer.from('hello')
+  }, function(err) {
+    assert.ok(err);
+    t.end();
+  });
+});
+
+test('match binary buffer body with binary buffer', function(t) {
+
+  nock('http://encodingsareus.com')
+      .post('/', Buffer.from([0xff, 0xff, 0xff]))
+      .reply(200);
+
+  mikealRequest({
+    url: 'http://encodingsareus.com/',
+    method: 'post',
+    encoding: null,
+    body: Buffer.from([0xff, 0xff, 0xff])
+  }, function(err, res) {
+    if (err) throw err;
+    assert.equal(res.statusCode, 200);
+    t.end();
+  });
+});
+
+test('doesn\'t match binary buffer body with mismatching binary buffer', function(t) {
+
+  nock('http://encodingsareus.com')
+      .post('/', Buffer.from([0xff, 0xff, 0xfa]))
+      .reply(200);
+
+  mikealRequest({
+    url: 'http://encodingsareus.com/',
+    method: 'post',
+    encoding: null,
+    body: Buffer.from([0xff, 0xff, 0xff])
+  }, function(err) {
+    assert.ok(err);
+    t.end();
+  });
+});
+
+// for the next two tests, keeping the same urls causes them to interfere with another.
+
+test('doesn\'t match binary buffer body with mismatching utf-8 buffer', function(t) {
+
+  nock('http://encodingsareus-1.com')
+      .post('/', Buffer.from([0xff, 0xff, 0xff]))
+      .reply(200);
+
+  mikealRequest({
+    url: 'http://encodingsareus-1.com/',
+    method: 'post',
+    encoding: null,
+    body: Buffer.from('hello')
+  }, function(err) {
+    assert.ok(err);
+    t.end();
+  });
+});
+
+test('doesn\'t match utf-8 buffer body with mismatching binary buffer', function(t) {
+
+  nock('http://encodingsareus-2.com')
+      .post('/', Buffer.from('hello'))
+      .reply(200);
+
+  mikealRequest({
+    url: 'http://encodingsareus-2.com/',
+    method: 'post',
+    encoding: null,
+    body: Buffer.from([0xff, 0xff, 0xff])
+  }, function(err) {
+    assert.ok(err);
+    t.end();
+  });
+});
