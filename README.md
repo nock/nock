@@ -1333,32 +1333,14 @@ nockBack.setMode('record');
 
 nockBack.fixtures = __dirname + '/nockFixtures'; //this only needs to be set once in your test helper
 
-var beforeFunc = function(scope) {
-  scope.filteringRequestBody = function(body, aRecordedBody) {
-    if (typeof(body) !== 'string' || typeof(aRecordedBody) !== 'string') {
-      return body;
-    }
-
-    var recordedBodyResult = /timestamp:([0-9]+)/.exec(aRecordedBody);
-    if (!recordedBodyResult) {
-      return body;
-    }
-
-    var recordedTimestamp = recordedBodyResult[1];
-    return body.replace(/(timestamp):([0-9]+)/g, function(match, key, value) {
-      return key + ':' + recordedTimestamp;
-    });
-  };
-}
-
 // recording of the fixture
-nockBack('zomboFixture.json', { before: beforeFunc }, function(nockDone) {
+nockBack('zomboFixture.json', function(nockDone) {
   request.get('http://zombo.com', function(err, res, body) {
     nockDone();
 
 
     // usage of the created fixture
-    nockBack('zomboFixture.json', { before: beforeFunc }, function (nockDone) {
+    nockBack('zomboFixture.json', function (nockDone) {
       http.get('http://zombo.com/').end(); // respond body "Ok"
 
       this.assertScopesFinished(); //throws an exception if all nocks in fixture were not satisfied
@@ -1390,10 +1372,38 @@ As an optional second parameter you can pass the following options
 - `afterRecord`: a postprocessing function, gets called after recording. Is passed the array of scopes recorded and should return the array scopes to save to the fixture
 - `recorder`: custom options to pass to the recorder
 
+##### Example
+
+```javascript
+var beforeFunc = function(scope) {
+  scope.filteringRequestBody = function(body, aRecordedBody) {
+    if (typeof(body) !== 'string' || typeof(aRecordedBody) !== 'string') {
+      return body;
+    }
+
+    var recordedBodyResult = /timestamp:([0-9]+)/.exec(aRecordedBody);
+    if (!recordedBodyResult) {
+      return body;
+    }
+
+    var recordedTimestamp = recordedBodyResult[1];
+    return body.replace(/(timestamp):([0-9]+)/g, function(match, key, value) {
+      return key + ':' + recordedTimestamp;
+    });
+  };
+}
+
+nockBack('zomboFixture.json', { before: beforeFunc }, function(nockDone) {
+  request.get('http://zombo.com', function(err, res, body) {
+    // do your tests
+    nockDone();
+  }
+}
+```
 
 #### Modes
 
-to set the mode call `nockBack.setMode(mode)` or run the tests with the `NOCK_BACK_MODE` environment variable set before loading nock. If the mode needs to be changed programmatically, the following is valid: `nockBack.setMode(nockBack.currentMode)`
+To set the mode call `nockBack.setMode(mode)` or run the tests with the `NOCK_BACK_MODE` environment variable set before loading nock. If the mode needs to be changed programmatically, the following is valid: `nockBack.setMode(nockBack.currentMode)`
 
 - wild: all requests go out to the internet, don't replay anything, doesn't record anything
 
