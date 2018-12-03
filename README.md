@@ -1333,7 +1333,7 @@ nockBack.setMode('record');
 
 nockBack.fixtures = __dirname + '/nockFixtures'; //this only needs to be set once in your test helper
 
-var before = function(scope) {
+var beforeFunc = function(scope) {
   scope.filteringRequestBody = function(body, aRecordedBody) {
     if (typeof(body) !== 'string' || typeof(aRecordedBody) !== 'string') {
       return body;
@@ -1352,13 +1352,13 @@ var before = function(scope) {
 }
 
 // recording of the fixture
-nockBack('zomboFixture.json', function(nockDone) {
+nockBack('zomboFixture.json', { before: beforeFunc }, function(nockDone) {
   request.get('http://zombo.com', function(err, res, body) {
     nockDone();
 
 
     // usage of the created fixture
-    nockBack('zomboFixture.json', function (nockDone) {
+    nockBack('zomboFixture.json', { before: beforeFunc }, function (nockDone) {
       http.get('http://zombo.com/').end(); // respond body "Ok"
 
       this.assertScopesFinished(); //throws an exception if all nocks in fixture were not satisfied
@@ -1373,7 +1373,7 @@ nockBack('zomboFixture.json', function(nockDone) {
 If your tests are using promises then use `nockBack` like this:
 
 ```
-return nockBack('promisedFixture.json')
+return nockBack('promisedFixture.json', { before: beforeFunc })
   .then(({nockDone, context}) => {
     //  do your tests returning a promise and chain it with
     //  `.then(nockDone);`
