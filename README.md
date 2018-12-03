@@ -1355,7 +1355,7 @@ nockBack('zomboFixture.json', function(nockDone) {
 If your tests are using promises then use `nockBack` like this:
 
 ```
-return nockBack('promisedFixture.json', { before: beforeFunc })
+return nockBack('promisedFixture.json')
   .then(({nockDone, context}) => {
     //  do your tests returning a promise and chain it with
     //  `.then(nockDone);`
