@@ -4,3 +4,4 @@ coverage
 .nyc_output/
 tests/browserify-public/browserify-bundle.js
 .vscode/
+package-lock.json
