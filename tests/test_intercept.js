@@ -29,6 +29,17 @@ var acceptableLeaks = [
   '_key', '__core-js_shared__', 'fetch', 'Response', 'Headers', 'Request'];
 
 
+test("invalid or missing method parameter throws an exception", function(t) {
+  try {
+    nock("https://example.com").
+      intercept("/somepath");
+    t.false(true);
+  } catch(error) {
+    t.equal(error.toString(), 'Error: The "method" parameter is required for an intercept call.');
+  }
+  t.end();
+});
+
 test("double activation throws exception", function(t) {
   nock.restore();
   t.false(nock.isActive());
