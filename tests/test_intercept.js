@@ -3955,39 +3955,10 @@ test('define() works with binary buffers', function(t) {
 
 });
 
-// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
-// https://github.com/nock/nock/issues/163
-test("Authorization header isn't mocked", {skip: process.env.AIRPLANE}, function(t) {
-  nock.enableNetConnect();
-  function makeRequest(cb) {
-    var r = http.request(
-      {
-        hostname: 'www.example.com',
-        path: '/',
-        method: 'GET',
-        auth: 'foo:bar'
-      },
-      function(res) {
-        cb(res.req._headers);
-      }
-    );
-    r.end();
-  }
-
-  makeRequest(function(headers) {
-    var n = nock('http://www.example.com', {
-      reqheaders: { 'authorization': 'Basic Zm9vOmJhcg==' }
-    }).get('/').reply(200);
-
-    makeRequest(function(nockHeader) {
-      n.done();
-      t.equivalent(headers, nockHeader);
-      t.end();
-    });
-  });
-});
-
 test('define() uses reqheaders', function(t) {
+  const auth = 'foo:bar';
+  const authHeader = 'Basic ' + Buffer.from('foo:bar').toString('base64');
+
   var nockDef = {
     "scope":"http://example.com",
     "method":"GET",
@@ -3995,7 +3966,7 @@ test('define() uses reqheaders', function(t) {
     "status":200,
     "reqheaders": {
       host: 'example.com',
-      'authorization': 'Basic Zm9vOmJhcg=='
+      'authorization': authHeader,
     }
   };
 
@@ -4003,11 +3974,13 @@ test('define() uses reqheaders', function(t) {
 
   t.ok(nocks);
 
+  // Make a request which should match the mock that was configured above.
+  // This does not hit the network.
   var req = new http.request({
     host: 'example.com',
     method: nockDef.method,
     path: nockDef.path,
-    auth: 'foo:bar'
+    auth,
   }, function(res) {
     t.equal(res.statusCode, nockDef.status);
 
@@ -4637,16 +4610,14 @@ test(".setNoDelay", function(t) {
 test("match basic authentication header", function(t) {
   var username = 'testuser'
     , password = 'testpassword'
-    , authString = username + ":" + password
-    , encrypted = (Buffer.from(authString)).toString( 'base64' );
+    , authString = `${username}:${password}`
+
+  const expectedAuthHeader = 'Basic ' + Buffer.from(authString).toString('base64');
 
   var scope = nock('http://www.headdy.com')
-     .get('/')
-     .matchHeader('Authorization', function(val) {
-       var expected = 'Basic ' + encrypted;
-       return val == expected;
-     })
-     .reply(200, "Hello World!");
+    .get('/')
+    .matchHeader('Authorization', val => val === expectedAuthHeader)
+    .reply(200, "Hello World!");
 
   http.get({
      host: "www.headdy.com"
