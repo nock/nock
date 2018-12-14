@@ -34,31 +34,40 @@ test('recording turns off nock interception (backward compatibility behavior)', 
 });
 
 // Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
-test('records', {skip: process.env.AIRPLANE}, function(t) {
+test('records', function(t) {
+  t.plan(5)
+
   nock.restore();
   nock.recorder.clear();
   t.equal(nock.recorder.play().length, 0);
-  var options = { method: 'POST'
-                , host:'google.com'
-                , port:80
-                , path:'/' }
-  ;
+
+  const server = http.createServer((request, response) => {
+    t.pass('server received a request')
+    response.writeHead(200)
+    response.end()
+  });
+
+  t.once('end', () => {
+    server.close()
+  });
 
   nock.recorder.rec(true);
-  var req = http.request(options, function(res) {
-    res.resume();
-    var ret;
-    res.once('end', function() {
-      nock.restore();
-      ret = nock.recorder.play();
+  server.listen(() => {
+    const options = {
+      uri: `http://localhost:${server.address().port}`,
+      method: 'post'
+    }
+
+    mikealRequest(options, function(err, resp, body) {
+      nock.restore()
+      var ret = nock.recorder.play();
       t.equal(ret.length, 1);
       t.type(ret[0], 'string');
-      t.equal(ret[0].indexOf("\nnock('http://google.com:80', {\"encodedQueryParams\":true})\n  .post('/', \"ABCDEF\")\n  .reply("), 0);
-      t.end();
-    });
-  });
-  req.end('ABCDEF');
-});
+      t.equal(ret[0].indexOf(`\nnock('${options.uri}', {"encodedQueryParams":true})\n  .post('/')`), 0);
+      t.end()
+    })
+  })
+})
 
 // Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('records objects', {skip: process.env.AIRPLANE}, function(t) {
