@@ -70,35 +70,44 @@ test('records', function(t) {
 })
 
 // Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
-test('records objects', {skip: process.env.AIRPLANE}, function(t) {
+test('records objects', function(t) {
   nock.restore();
   nock.recorder.clear();
   t.equal(nock.recorder.play().length, 0);
-  var options = { method: 'POST'
-                , host:'google.com'
-                , path:'/' }
-  ;
 
-  nock.recorder.rec({
-    dont_print: true,
-    output_objects: true
+  const server = http.createServer((request, response) => {
+    t.pass('server received a request')
+    response.writeHead(200)
+    response.end()
   });
-  var req = http.request(options, function(res) {
-    res.resume();
-    res.once('end', function() {
-      nock.restore();
+
+  t.once('end', () => {
+    server.close()
+  });
+
+  server.listen(() => {
+    const url = `http://localhost:${server.address().port}`
+    const options = {
+      method: 'POST',
+      url,
+      body: '012345'
+    }
+
+    nock.recorder.rec({
+      dont_print: true,
+      output_objects: true
+    });
+
+    mikealRequest(options, function(err, resp, body) {
+      nock.restore()
       var ret = nock.recorder.play();
       t.equal(ret.length, 1);
-      ret = ret[0];
-      t.type(ret, 'object');
-      t.equal(ret.scope, "http://google.com:80");
-      t.equal(ret.method, "POST");
-      t.ok(typeof(ret.status) !== 'undefined');
-      t.ok(typeof(ret.response) !== 'undefined');
+      t.equal(ret[0].scope, url);
+      t.equal(ret[0].method, "POST");
+      t.equal(ret[0].body, "012345");
       t.end();
     });
   });
-  req.end('012345');
 });
 
 // Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
