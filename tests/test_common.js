@@ -74,10 +74,10 @@ tap.test('isBinaryBuffer works', function(t) {
   t.false(common.isBinaryBuffer(''));
 
   //  Returns true for binary buffers.
-  t.true(common.isBinaryBuffer(new Buffer('8001', 'hex')));
+  t.true(common.isBinaryBuffer(Buffer.from('8001', 'hex')));
 
   //  Returns false for buffers containing strings.
-  t.false(common.isBinaryBuffer(new Buffer('8001', 'utf8')));
+  t.false(common.isBinaryBuffer(Buffer.from('8001', 'utf8')));
 
   t.end();
 

@@ -12,6 +12,8 @@ Please note that this project is released with a [Contributor Code of Conduct](.
 - [Generate README TOC](#generate-readme-toc)
 - [Running tests](#running-tests)
   * [Airplane mode](#airplane-mode)
+- [Release Process](#release-process)
+- [GitHub Apps](#github-apps)
 - [Becoming a maintainer](#becoming-a-maintainer)
 
 <!-- tocstop -->
@@ -60,6 +62,18 @@ $ export AIRPLANE=true
 $ npm test
 ```
 
+## Release Process
+
+All of our releases are automated using [semantic-release](https://github.com/semantic-release/semantic-release). The commit messages pushed to the master branch trigger new releases. Semantic-release requires that commits follow certain conventions, [described above](#commit-message-conventions). semantic-release creates a GitHub release, adds release notes and publishes the new version to npm. This is why we do not store release notes in the [`CHANGELOG`](CHANGELOG.md) file - they're already on GitHub.
+
+We use @nockbot as a separate account for releases, because npm tokens cannot be scoped to a single package. This improves our security model in case of a data breach involving npm tokens. @nockbot's credentials were set up by @gr2m; contact him if for any reason you need to change this in the future.
+
+## GitHub Apps
+
+We use several GitHub apps to help maintain this repository. While we would like to address every issue and while we would like to be on hand to support every person, Nock is pretty much entirely volunteer run, and we simply don't have the time to do everything. Please don't be offended if an automated app posts in your issue! We're doing what we can with with we have.
+
+Currently, we use the [Stale](https://github.com/apps/stale) and [Lock](https://github.com/apps/lock) apps to mark old issues as stale, and to lock issues which have been closed to stop drive-by comments. You can see the configuration files for these in [.github/](.github).
+
 ## Becoming a maintainer
 
 So you want to do more than file a bug or submit a PR? Awesome!
@@ -76,3 +90,22 @@ Here are some things you can do today to actively show the Nock team that you're
 * **Refactor.** This is one of the hardest things to do, but one of the most useful. Go through the code, and find examples where it could be written better - with better variable names, more useful abstractions, and more elegant patterns. Taking away ten lines of code that are unnecessary is more valuable than submitting a hundred new lines, sometimes. Open a PR or a comment and defend your position; ask for feedback.
 
 Once you've been around for a bit, ask a current Maintainer - one of [the team members](https://github.com/orgs/nock/people) - whether you can be elevated to Maintainer status and given permissions to close issues and merge PRs. We're interested in how well you know what Nock is about, and how involved you are in the community - not where you're from, how good your English is, or whether or not you can pass a whiteboard test blindfolded. If you think that you've been helpful, let us know. We're friendly, promise. :)
+
+## Generating the CONTRIBUTORS.md file
+
+We use [`name-your-contributors`](https://github.com/mntnr/name-your-contributors) to generate the CONTRIBUTORS file, which contains the names of everyone who have submitted code to the Nock codebase, or commented on an issue, or opened a pull request, or reviewed anyone else's code. After all, all contributions are welcome, and anyone who works with Nock is part of our community.
+
+To generate this file, download `name-your-contributors` and set up a GitHub authorization token.
+
+```sh
+# Generate a JSON file of the members. This may take a while.
+$ name-your-contributors -r nock -u nock > contributors.json
+```
+
+To parse that file, we suggest using [`jq`](https://stedolan.github.io/jq/), although other options are clearly possible:
+
+```sh
+cat contribs.json | jq '.[][]' | jq '"\(if (.name | length) > 0 then .name else null end) @\(.login) \(.url)"' | jq '. | tostring' | jq -s . | jq unique | jq .[] > CONTRIBUTORS.md
+```
+
+Note: This is a convoluted and time-intensive process, and could be updated in several ways. For one, `name-your-contributors` accepts a date flag, which could be used to only catch recent entries. Another way would be to use a bot to automate this at some regular interval. Any help on this would be appreciated.

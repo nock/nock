@@ -3,6 +3,7 @@
 var test          = require('tap').test;
 var mikealRequest = require('request');
 
+// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('NOCK_OFF=true works for https', {skip: process.env.AIRPLANE}, function(t) {
   var original = process.env.NOCK_OFF;
   process.env.NOCK_OFF = 'true';

@@ -23,13 +23,11 @@ jobs:
       env: linting
       script: npm run lint
     - stage: test
-      node_js: 9
+      node_js: 10
       script: npm run unit
     - node_js: 8
       script: npm run unit
     - node_js: 6
-      script: npm run unit
-    - node_js: 4
       script: npm run unit
     - stage: release
       node_js: lts/*
@@ -38,5 +36,5 @@ jobs:
     - node_js: lts/*
       env: coverage
       script:
-        - npm run coverage
-        - npm run coveralls
+        - npm run test
+        - npm run coverage:upload

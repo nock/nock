@@ -3,6 +3,8 @@
 [![Build Status](https://travis-ci.org/nock/nock.svg?branch=master)](https://travis-ci.org/nock/nock)
 [![Coverage Status](https://coveralls.io/repos/github/nock/nock/badge.svg?branch=master)](https://coveralls.io/github/nock/nock?branch=master)
 [![Greenkeeper](https://badges.greenkeeper.io/nock/nock.svg)](https://greenkeeper.io/)
+[![Backers on Open Collective](https://opencollective.com/nock/backers/badge.svg)](#backers)
+[![Sponsors on Open Collective](https://opencollective.com/nock/sponsors/badge.svg)](#sponsors)
 
 > HTTP server mocking and expectations library for Node.js
 
@@ -47,7 +49,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
   * [Request Body filtering](#request-body-filtering)
   * [Request Headers Matching](#request-headers-matching)
   * [Optional Requests](#optional-requests)
-  * [Allow __unmocked__ requests on a mocked hostname](#allow-__unmocked__-requests-on-a-mocked-hostname)
+  * [Allow __unmocked__ requests on a mocked hostname](#allow-unmocked-requests-on-a-mocked-hostname)
 - [Expectations](#expectations)
   * [.isDone()](#isdone)
   * [.cleanAll()](#cleanall)
@@ -59,7 +61,10 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
 - [Restoring](#restoring)
 - [Activating](#activating)
 - [Turning Nock Off (experimental!)](#turning-nock-off-experimental)
-- [Enable/Disable real HTTP request](#enabledisable-real-http-request)
+- [Enable/Disable real HTTP requests](#enabledisable-real-http-requests)
+  * [Disabling requests](#disabling-requests)
+  * [Enabling requests](#enabling-requests)
+  * [Resetting NetConnect](#resetting-netconnect)
 - [Recording](#recording)
   * [`dont_print` option](#dont_print-option)
   * [`output_objects` option](#output_objects-option)
@@ -76,8 +81,9 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
     + [Options](#options-1)
     + [Modes](#modes)
 - [Debugging](#debugging)
-- [PROTIP](#protip)
 - [Contributing](#contributing)
+- [Backers](#backers)
+- [Sponsors](#sponsors)
 - [License](#license)
 
 <!-- tocstop -->
@@ -94,14 +100,19 @@ $ npm install --save nock
 
 ### Node version support
 
+The latest version of nock supports all currently maintained Node versions, see [Node Release Schedule](https://github.com/nodejs/Release#release-schedule)
+
+Here is a list of past nock versions with respective node version support
+
 | node | nock |
 |---|---|
 | 0.10 | up to 8.x |
 | 0.11 | up to 8.x |
 | 0.12 | up to 8.x |
-| 4 | 9.x |
+| 4 | up to 9.x |
 | 5 | up to 8.x |
-| 6 | 9.x |
+| 7 | up to 9.x |
+| 9 | up to 9.x |
 
 ## Usage
 
@@ -221,7 +232,7 @@ nock('http://www.example.com')
 
 ```js
 nock('http://www.example.com')
-  .post('/login', function(body) { 
+  .post('/login', function(body) {
     return body.username && body.password;
   })
   .reply(200, { id: '123ABC' });
@@ -629,7 +640,7 @@ nock('http://my.server.com')
   .reply(200, '<html></html>')
 ```
 
-NOTE: the [`'response'`](http://nodejs.org/api/http.html#http_event_response) event will occur immediately, but the [IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage) will not emit it's `'end'` event until after the delay.
+NOTE: the [`'response'`](http://nodejs.org/api/http.html#http_event_response) event will occur immediately, but the [IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage) will not emit its `'end'` event until after the delay.
 
 ### Delay the response
 
@@ -786,6 +797,17 @@ var scope = nock('http://api.myservice.com')
                  })
                 .post('/', 'ABC')
                 .reply(201, 'OK');
+```
+
+If you don't want to match the request body you can return a wildcard match:
+
+```js
+var scope = nock('http://api.myservice.com')
+  .filteringRequestBody(function(body) {
+    return '*';
+  })
+  .post('/some_uri', '*')
+  .reply(200, 'OK');
 ```
 
 ### Request Headers Matching
@@ -1009,7 +1031,7 @@ Only for cases where nock has been deactivated using [nock.restore()](#restoring
 nock.activate();
 ```
 
-**note**: To check if nock HTTP interceptor is active or deactive, use [nock.isActive()](#isactive).
+**note**: To check if nock HTTP interceptor is active or inactive, use [nock.isActive()](#isactive).
 
 ## Turning Nock Off (experimental!)
 
@@ -1021,9 +1043,11 @@ This way you can have your tests hit the real servers just by switching on this 
 $ NOCK_OFF=true node my_test.js
 ```
 
-## Enable/Disable real HTTP request
+## Enable/Disable real HTTP requests
 
 By default, any requests made to a host that is not mocked will be executed normally. If you want to block these requests, nock allows you to do so.
+
+### Disabling requests
 
 For disabling real http requests.
 
@@ -1031,7 +1055,7 @@ For disabling real http requests.
 nock.disableNetConnect();
 ```
 
-So, if you try to request any host not 'nocked', it will thrown an `NetConnectNotAllowedError`.
+So, if you try to request any host not 'nocked', it will throw a `NetConnectNotAllowedError`.
 
 ```js
 nock.disableNetConnect();
@@ -1041,40 +1065,45 @@ req.on('error', function(err){
 });
 // The returned `http.ClientRequest` will emit an error event (or throw if you're not listening for it)
 // This code will log a NetConnectNotAllowedError with message:
-// Nock: Not allow net connect for "google.com:80"
+// Nock: Disallowed net connect for "google.com:80"
 ```
 
-For enabling real HTTP requests (the default behaviour).
+### Enabling requests
+
+For enabling any real HTTP requests (the default behavior):
 
 ```js
 nock.enableNetConnect();
 ```
 
-You could allow real HTTP request for certain host names by providing a string or a regular expression for the hostname:
+You could allow real HTTP requests for certain host names by providing a string or a regular expression for the hostname:
 
 ```js
-// using a string
+// Using a string
 nock.enableNetConnect('amazon.com');
 
-// or a RegExp
-nock.enableNetConnect(/(amazon|github).com/);
+// Or a RegExp
+nock.enableNetConnect(/(amazon|github)\.com/);
 
 http.get('http://www.amazon.com/');
-http.get('http://github.com/'); // only for second example
+http.get('http://github.com/');
 
-// This request will be done!
 http.get('http://google.com/');
-// this will throw NetConnectNotAllowedError with message:
-// Nock: Not allow net connect for "google.com:80"
+// This will throw NetConnectNotAllowedError with message:
+// Nock: Disallowed net connect for "google.com:80"
 ```
 
-A common use case when testing local endpoints would be to disable all but local host, then adding in additional nocks for external requests:
+A common use case when testing local endpoints would be to disable all but localhost, then add in additional nocks for external requests:
 
 ```js
 nock.disableNetConnect();
-nock.enableNetConnect('127.0.0.1'); //Allow localhost connections so we can test local routes and mock servers.
+// Allow localhost connections so we can test local routes and mock servers.
+nock.enableNetConnect('127.0.0.1');
 ```
-Then when you're done with the test, you probably want to set everything back to normal:
+
+### Resetting NetConnect
+
+When you're done with the test, you probably want to set everything back to normal:
 
 ```js
 nock.cleanAll();
@@ -1115,7 +1144,7 @@ var nockCalls = nock.recorder.play();
 
 The `nockCalls` var will contain an array of strings representing the generated code you need.
 
-Copy and paste that code into your tests, customize at will, and you're done! You can call `nock.recorder.reset()` to remove already recorded calls from the array that `nock.recorder.play()` returns.
+Copy and paste that code into your tests, customize at will, and you're done! You can call `nock.recorder.clear()` to remove already recorded calls from the array that `nock.recorder.play()` returns.
 
 (Remember that you should do this one test at a time).
 
@@ -1184,7 +1213,7 @@ var nocks = nock.define(nockDefs);
 
 ### `enable_reqheaders_recording` option
 
-Recording request headers by default is deemed more trouble than its worth as some of them depend on the timestamp or other values that may change after the tests have been recorder thus leading to complex postprocessing of recorded tests. Thus by default the request headers are not recorded.
+Recording request headers by default is deemed more trouble than it's worth as some of them depend on the timestamp or other values that may change after the tests have been recorder thus leading to complex postprocessing of recorded tests. Thus by default the request headers are not recorded.
 
 The genuine use cases for recording request headers (e.g. checking authorization) can be handled manually or by using `enable_reqheaders_recording` in `recorder.rec()` options.
 
@@ -1213,7 +1242,7 @@ nock.recorder.rec({
 
 ### `use_separator` option
 
-By default, nock will wrap it's output with the separator string `<<<<<<-- cut here -->>>>>>` before and after anything it prints, whether to the console or a custom log function given with the `logging` option.
+By default, nock will wrap its output with the separator string `<<<<<<-- cut here -->>>>>>` before and after anything it prints, whether to the console or a custom log function given with the `logging` option.
 
 To disable this, set `use_separator` to false.
 
@@ -1268,11 +1297,11 @@ nock.emitter.on('no match', function(req) {
 
 ## Nock Back
 
-fixture recording support and playback
+Fixture recording support and playback.
 
 ### Setup
 
-**You must specify a fixture directory before using, for example:
+You must specify a fixture directory before using, for example:
 
 In your test helper
 
@@ -1303,24 +1332,6 @@ var request = require('request');
 nockBack.setMode('record');
 
 nockBack.fixtures = __dirname + '/nockFixtures'; //this only needs to be set once in your test helper
-
-var before = function(scope) {
-  scope.filteringRequestBody = function(body, aRecordedBody) {
-    if (typeof(body) !== 'string' || typeof(aRecordedBody) !== 'string') {
-      return body;
-    }
-
-    var recordedBodyResult = /timestamp:([0-9]+)/.exec(aRecordedBody);
-    if (!recordedBodyResult) {
-      return body;
-    }
-
-    var recordedTimestamp = recordedBodyResult[1];
-    return body.replace(/(timestamp):([0-9]+)/g, function(match, key, value) {
-      return key + ':' + recordedTimestamp;
-    });
-  };
-}
 
 // recording of the fixture
 nockBack('zomboFixture.json', function(nockDone) {
@@ -1361,10 +1372,38 @@ As an optional second parameter you can pass the following options
 - `afterRecord`: a postprocessing function, gets called after recording. Is passed the array of scopes recorded and should return the array scopes to save to the fixture
 - `recorder`: custom options to pass to the recorder
 
+##### Example
+
+```javascript
+var beforeFunc = function(scope) {
+  scope.filteringRequestBody = function(body, aRecordedBody) {
+    if (typeof(body) !== 'string' || typeof(aRecordedBody) !== 'string') {
+      return body;
+    }
+
+    var recordedBodyResult = /timestamp:([0-9]+)/.exec(aRecordedBody);
+    if (!recordedBodyResult) {
+      return body;
+    }
+
+    var recordedTimestamp = recordedBodyResult[1];
+    return body.replace(/(timestamp):([0-9]+)/g, function(match, key, value) {
+      return key + ':' + recordedTimestamp;
+    });
+  };
+}
+
+nockBack('zomboFixture.json', { before: beforeFunc }, function(nockDone) {
+  request.get('http://zombo.com', function(err, res, body) {
+    // do your tests
+    nockDone();
+  }
+}
+```
 
 #### Modes
 
-to set the mode call `nockBack.setMode(mode)` or run the tests with the `NOCK_BACK_MODE` environment variable set before loading nock. If the mode needs to be changed programatically, the following is valid: `nockBack.setMode(nockBack.currentMode)`
+To set the mode call `nockBack.setMode(mode)` or run the tests with the `NOCK_BACK_MODE` environment variable set before loading nock. If the mode needs to be changed programmatically, the following is valid: `nockBack.setMode(nockBack.currentMode)`
 
 - wild: all requests go out to the internet, don't replay anything, doesn't record anything
 
@@ -1375,31 +1414,40 @@ to set the mode call `nockBack.setMode(mode)` or run the tests with the `NOCK_BA
 - lockdown: use recorded nocks, disables all http calls even when not nocked, doesn't record
 
 ## Debugging
-Nock uses debug, so just run with environmental variable DEBUG set to nock.*
+
+Nock uses [`debug`](https://github.com/visionmedia/debug), so just run with environmental variable `DEBUG` set to `nock.*`.
 
 ```js
 $ DEBUG=nock.* node my_test.js
-```
-
-## PROTIP
-
-If you don't want to match the request body you can use this trick (by @theycallmeswift):
-
-```js
-var scope = nock('http://api.myservice.com')
-  .filteringRequestBody(function(body) {
-    return '*';
-  })
-  .post('/some_uri', '*')
-  .reply(200, 'OK');
 ```
 
 ## Contributing
 
 Thanks for wanting to contribute! Take a look at our [Contributing Guide](CONTRIBUTING.md) for notes on our commit message conventions and how to run tests.
 
-Please note that this project is released with a [Contributor Code of Conduct](./CODE_OF_CONDUCT.md).
+Please note that this project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md).
 By participating in this project you agree to abide by its terms.
+
+## Backers
+
+Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/nock#backer)]
+
+<a href="https://opencollective.com/nock#backers" target="_blank"><img src="https://opencollective.com/nock/backers.svg?width=890"></a>
+
+## Sponsors
+
+Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [[Become a sponsor](https://opencollective.com/nock#sponsor)]
+
+<a href="https://opencollective.com/nock/sponsor/0/website" target="_blank"><img src="https://opencollective.com/nock/sponsor/0/avatar.svg"></a>
+<a href="https://opencollective.com/nock/sponsor/1/website" target="_blank"><img src="https://opencollective.com/nock/sponsor/1/avatar.svg"></a>
+<a href="https://opencollective.com/nock/sponsor/2/website" target="_blank"><img src="https://opencollective.com/nock/sponsor/2/avatar.svg"></a>
+<a href="https://opencollective.com/nock/sponsor/3/website" target="_blank"><img src="https://opencollective.com/nock/sponsor/3/avatar.svg"></a>
+<a href="https://opencollective.com/nock/sponsor/4/website" target="_blank"><img src="https://opencollective.com/nock/sponsor/4/avatar.svg"></a>
+<a href="https://opencollective.com/nock/sponsor/5/website" target="_blank"><img src="https://opencollective.com/nock/sponsor/5/avatar.svg"></a>
+<a href="https://opencollective.com/nock/sponsor/6/website" target="_blank"><img src="https://opencollective.com/nock/sponsor/6/avatar.svg"></a>
+<a href="https://opencollective.com/nock/sponsor/7/website" target="_blank"><img src="https://opencollective.com/nock/sponsor/7/avatar.svg"></a>
+<a href="https://opencollective.com/nock/sponsor/8/website" target="_blank"><img src="https://opencollective.com/nock/sponsor/8/avatar.svg"></a>
+<a href="https://opencollective.com/nock/sponsor/9/website" target="_blank"><img src="https://opencollective.com/nock/sponsor/9/avatar.svg"></a>
 
 ## License
 

@@ -1,6 +1,6 @@
 ---
-name: 🤗 Support us
-about: If you want support our efforts in maintaining Nock
+name: ❤️ Say thank you
+about: Tell us how you use nock & support our efforts in maintaining Nock
 
 ---
 
@@ -18,4 +18,4 @@ Nock is a community driven project, which means it's not maintained by a company
 - [ ] Give talks
 - [ ] Support us on [https://opencollective.com/nock](https://opencollective.com/nock)
 
-Thank you! ☺️
+Thank you! 💐

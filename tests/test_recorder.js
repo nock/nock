@@ -33,6 +33,7 @@ test('recording turns off nock interception (backward compatibility behavior)', 
 
 });
 
+// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('records', {skip: process.env.AIRPLANE}, function(t) {
   nock.restore();
   nock.recorder.clear();
@@ -59,6 +60,7 @@ test('records', {skip: process.env.AIRPLANE}, function(t) {
   req.end('ABCDEF');
 });
 
+// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('records objects', {skip: process.env.AIRPLANE}, function(t) {
   nock.restore();
   nock.recorder.clear();
@@ -90,6 +92,7 @@ test('records objects', {skip: process.env.AIRPLANE}, function(t) {
   req.end('012345');
 });
 
+// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('records and replays objects correctly', {skip: process.env.AIRPLANE}, function(t) {
 
   nock.restore();
@@ -137,6 +140,7 @@ test('records and replays objects correctly', {skip: process.env.AIRPLANE}, func
 
 });
 
+// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('records and replays correctly with filteringRequestBody', {skip: process.env.AIRPLANE}, function(t) {
 
   nock.restore();
@@ -192,6 +196,7 @@ test('records and replays correctly with filteringRequestBody', {skip: process.e
 
 });
 
+// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('checks if callback is specified', {skip: process.env.AIRPLANE}, function(t) {
   var options = {
     host: 'www.google.com', method: 'GET', path: '/', port: 80
@@ -206,6 +211,7 @@ test('checks if callback is specified', {skip: process.env.AIRPLANE}, function(t
   t.end();
 });
 
+// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('when request body is json, it goes unstringified', {skip: process.env.AIRPLANE}, function(t) {
   var payload = {a: 1, b: true};
   var options = {
@@ -233,6 +239,7 @@ test('when request body is json, it goes unstringified', {skip: process.env.AIRP
   request.end(JSON.stringify(payload));
 });
 
+// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('when request body is json, it goes unstringified in objects', {skip: process.env.AIRPLANE}, function(t) {
   var payload = {a: 1, b: true};
   var options = {
@@ -337,6 +344,7 @@ test('rec() throws when reenvoked with already recorder requests', function(t) {
   }
 });
 
+// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('records https correctly', {skip: process.env.AIRPLANE}, function(t) {
   nock.restore();
   nock.recorder.clear();
@@ -371,6 +379,7 @@ test('records https correctly', {skip: process.env.AIRPLANE}, function(t) {
   req.end('012345');
 });
 
+// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('records request headers correctly', {skip: process.env.AIRPLANE}, function(t) {
   nock.restore();
   nock.recorder.clear();
@@ -406,6 +415,7 @@ test('records request headers correctly', {skip: process.env.AIRPLANE}, function
   req.end();
 });
 
+// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('records and replays gzipped nocks correctly', {skip: process.env.AIRPLANE}, function(t) {
 
   nock.restore();
@@ -454,6 +464,7 @@ test('records and replays gzipped nocks correctly', {skip: process.env.AIRPLANE}
 
 });
 
+// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('records and replays gzipped nocks correctly when gzip is returned as a string', {skip: process.env.AIRPLANE}, function(t) {
   nock.restore();
   nock.recorder.clear();
@@ -499,6 +510,7 @@ test('records and replays gzipped nocks correctly when gzip is returned as a str
   });
 });
 
+// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('records and replays nocks correctly', {skip: process.env.AIRPLANE}, function(t) {
 
   nock.restore();
@@ -552,6 +564,7 @@ test('records and replays nocks correctly', {skip: process.env.AIRPLANE}, functi
 
 });
 
+// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('doesn\'t record request headers by default', {skip: process.env.AIRPLANE}, function(t) {
   nock.restore();
   nock.recorder.clear();
@@ -583,6 +596,7 @@ test('doesn\'t record request headers by default', {skip: process.env.AIRPLANE},
   req.end();
 });
 
+// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('will call a custom logging function', {skip: process.env.AIRPLANE}, function(t) {
   // This also tests that use_separator is on by default.
   nock.restore();
@@ -618,6 +632,7 @@ test('will call a custom logging function', {skip: process.env.AIRPLANE}, functi
   req.end();
 });
 
+// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('use_separator:false is respected', {skip: process.env.AIRPLANE}, function(t) {
   nock.restore();
   nock.recorder.clear();
@@ -653,6 +668,7 @@ test('use_separator:false is respected', {skip: process.env.AIRPLANE}, function(
   req.end();
 });
 
+// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('records request headers except user-agent if enable_reqheaders_recording is set to true', {skip: process.env.AIRPLANE}, function(t) {
   nock.restore();
   nock.recorder.clear();
@@ -686,6 +702,7 @@ test('records request headers except user-agent if enable_reqheaders_recording i
   req.end();
 });
 
+// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('includes query parameters from superagent', {skip: process.env.AIRPLANE}, function(t) {
   nock.restore();
   nock.recorder.clear();
@@ -707,6 +724,7 @@ test('includes query parameters from superagent', {skip: process.env.AIRPLANE}, 
     });
 });
 
+// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('encodes the query parameters when not outputing objects', {skip: process.env.AIRPLANE}, function(t) {
 
   nock.restore();
@@ -730,6 +748,7 @@ test('encodes the query parameters when not outputing objects', {skip: process.e
 
 });
 
+// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('works with clients listening for readable', {skip: process.env.AIRPLANE}, function(t) {
   nock.restore();
   nock.recorder.clear();
@@ -793,6 +812,7 @@ test('works with clients listening for readable', {skip: process.env.AIRPLANE}, 
 
 });
 
+// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('outputs query string parameters using query()', {skip: process.env.AIRPLANE}, function(t) {
   nock.restore();
   nock.recorder.clear();
@@ -821,6 +841,7 @@ test('outputs query string parameters using query()', {skip: process.env.AIRPLAN
   });
 });
 
+// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('outputs query string arrays correctly', {skip: process.env.AIRPLANE}, function(t) {
   nock.restore();
   nock.recorder.clear();
@@ -849,6 +870,7 @@ test('outputs query string arrays correctly', {skip: process.env.AIRPLANE}, func
   });
 });
 
+// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('removes query params from that path and puts them in query()', {skip: process.env.AIRPLANE}, function(t) {
   nock.restore();
   nock.recorder.clear();
@@ -898,7 +920,7 @@ test("respects http.request() consumers", function(t) {
                   , path:'/' }
     ;
     var req = http.request(options, function (res) {
-      var buffer = new Buffer('');
+      var buffer = Buffer.from('');
 
       setTimeout(function () {
         res

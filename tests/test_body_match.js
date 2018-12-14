@@ -26,6 +26,7 @@ test('match body is regex trying to match string', function (t) {
   });
 
 });
+
 test('match body with regex', function (t) {
 
   nock('http://encodingsareus.com')
@@ -38,6 +39,28 @@ test('match body with regex', function (t) {
     json: {
       auth: {
         passwd: 'abc'
+      }
+    },
+  }, function(err, res) {
+    if (err) throw err;
+    assert.equal(res.statusCode, 200);
+    t.end();
+  });
+
+});
+
+test('match body (with space character) with regex', function (t) {
+
+  nock('http://encodingsareus.com')
+    .post('/', /a bc/)
+    .reply(200);
+
+  mikealRequest({
+    url: 'http://encodingsareus.com/',
+    method: 'post',
+    json: {
+      auth: {
+        passwd: 'a bc'
       }
     },
   }, function(err, res) {

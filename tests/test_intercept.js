@@ -29,6 +29,17 @@ var acceptableLeaks = [
   '_key', '__core-js_shared__', 'fetch', 'Response', 'Headers', 'Request'];
 
 
+test("invalid or missing method parameter throws an exception", function(t) {
+  try {
+    nock("https://example.com").
+      intercept("/somepath");
+    t.false(true);
+  } catch(error) {
+    t.equal(error.toString(), 'Error: The "method" parameter is required for an intercept call.');
+  }
+  t.end();
+});
+
 test("double activation throws exception", function(t) {
   nock.restore();
   t.false(nock.isActive());
@@ -176,6 +187,33 @@ test("reply can take a callback", function(t) {
       dataCalled = true;
       t.ok(data instanceof Buffer, "data should be buffer");
       t.equal(data.toString(), "Hello World!", "response should match");
+    });
+
+  });
+
+  req.end();
+});
+
+test("reply should send correct statusCode with array-notation and without body", function(t) {
+  t.plan(1);
+
+  var statusCode = 202;
+
+  var scope = nock("http://www.google.com")
+    .get("/test-path/")
+    .reply(function(path, requestBody) {
+      return [statusCode]
+    });
+
+  var req = http.request({
+    host: "www.google.com",
+    path: "/test-path/",
+    port: 80
+  }, function(res) {
+
+    t.equal(res.statusCode, statusCode, "sends status code");
+    res.on('end', function() {
+      scope.done();
     });
 
   });
@@ -536,6 +574,49 @@ test("get with reply callback returning array with headers", function(t) {
       'x-key-2', 'value 2']);
     res.on('data', function(data) {
       t.equal(data, 'body');
+      res.once('end', t.end.bind(t));
+    });
+  });
+});
+
+// Skipped because https://github.com/nock/nock/issues/1222
+test("get with reply callback returning default statusCode without body", {skip: true}, function(t) {
+  nock('http://replyheaderland')
+     .get('/')
+     .reply(function(uri, requestBody) {
+        return [401];
+     });
+
+  http.get({
+    host: "replyheaderland",
+    path: '/',
+    port: 80,
+  }, function(res) {
+    res.setEncoding('utf8');
+    t.equal(res.statusCode, 200);
+    res.on('data', function(data) {
+      t.equal(data, '[401]');
+      res.once('end', t.end.bind(t));
+    });
+  });
+});
+
+test("get with reply callback returning callback without headers", function(t) {
+  nock('http://replyheaderland')
+     .get('/')
+     .reply(function() {
+        return [401, 'This is a body'];
+     });
+
+  http.get({
+    host: "replyheaderland",
+    path: '/',
+    port: 80,
+  }, function(res) {
+    res.setEncoding('utf8');
+    t.equal(res.statusCode, 401);
+    res.on('data', function(data) {
+      t.equal(data, 'This is a body');
       res.once('end', t.end.bind(t));
     });
   });
@@ -1670,7 +1751,7 @@ test("response pipe", function(t) {
     function Constructor() {
       events.EventEmitter.call(this);
 
-      this.buffer = new Buffer(0);
+      this.buffer = Buffer.alloc(0);
       this.writable = true;
     }
 
@@ -1681,7 +1762,7 @@ test("response pipe", function(t) {
     };
 
     Constructor.prototype.write = function(chunk) {
-      var buf = new Buffer(this.buffer.length + chunk.length);
+      var buf = Buffer.alloc(this.buffer.length + chunk.length);
 
       this.buffer.copy(buf);
       chunk.copy(buf, this.buffer.length);
@@ -1721,7 +1802,7 @@ test("response pipe without implicit end", function(t) {
     function Constructor() {
       events.EventEmitter.call(this);
 
-      this.buffer = new Buffer(0);
+      this.buffer = Buffer.alloc(0);
       this.writable = true;
     }
 
@@ -1732,7 +1813,7 @@ test("response pipe without implicit end", function(t) {
     };
 
     Constructor.prototype.write = function(chunk) {
-      var buf = new Buffer(this.buffer.length + chunk.length);
+      var buf = Buffer.alloc(this.buffer.length + chunk.length);
 
       this.buffer.copy(buf);
       chunk.copy(buf, this.buffer.length);
@@ -2882,42 +2963,61 @@ test("allow unmocked option works with https", function(t) {
   })
 });
 
-// TODO: remove skip as part of https://github.com/nock/nock/issues/1077
-// test('allow unmocked post with json data', {skip: process.env.AIRPLANE}, function(t) {
-test('allow unmocked post with json data', {skip: true}, function(t) {
-  nock('https://httpbin.org', { allowUnmocked: true }).
-    get("/abc").
-    reply(200, "Hey!");
+test('allow unmocked post with json data', function(t) {
+  t.plan(2)
+  t.once('end', function () { server.close() })
 
-  var options = {
-    method: 'POST',
-    uri: 'https://httpbin.org/post',
-    json: { some: 'data' }
-  };
+  const server = http.createServer((request, response) => {
+    t.pass('server received a request')
+    response.writeHead(200)
+    response.end()
+  })
 
-  mikealRequest(options, function(err, resp, body) {
-    t.equal(200, resp.statusCode)
-    t.end();
-  });
+  server.listen(() => {
+    nock(`http://localhost:${server.address().port}`, { allowUnmocked: true}).
+      get('/').
+      reply(200, "Hey!");
+
+
+      var options = {
+        method: 'POST',
+        uri: `http://localhost:${server.address().port}`,
+        json: { some: 'data' }
+      };
+
+      mikealRequest(options, function(err, resp, body) {
+        t.equal(200, resp.statusCode)
+        t.end()
+      })
+    })
 });
 
-// TODO: remove skip as part of https://github.com/nock/nock/issues/1077
-// test('allow unmocked passthrough with mismatched bodies', {skip: process.env.AIRPLANE}, function(t) {
-test('allow unmocked passthrough with mismatched bodies', {skip: true}, function(t) {
-  nock('http://httpbin.org', { allowUnmocked: true }).
-    post("/post", {some: 'otherdata'}).
-    reply(404, "Hey!");
+test('allow unmocked passthrough with mismatched bodies', function(t) {
+  t.plan(2)
+  t.once('end', function () { server.close() })
 
-  var options = {
-    method: 'POST',
-    uri: 'http://httpbin.org/post',
-    json: { some: 'data' }
-  };
+  const server = http.createServer((request, response) => {
+    t.pass('server received a request')
+    response.writeHead(200)
+    response.end()
+  })
 
-  mikealRequest(options, function(err, resp, body) {
-    t.equal(200, resp.statusCode)
-    t.end();
-  });
+  server.listen(() => {
+    nock(`http://localhost:${server.address().port}`, { allowUnmocked: true}).
+      post("/post", {some: 'otherdata'}).
+      reply(404, "Hey!");
+
+      var options = {
+        method: 'POST',
+        uri: `http://localhost:${server.address().port}/post`,
+        json: { some: 'data' }
+      };
+
+      mikealRequest(options, function(err, resp, body) {
+        t.equal(200, resp.statusCode)
+        t.end()
+      });
+    })
 });
 
 test('allow unordered body with json encoding', function(t) {
@@ -3009,7 +3109,7 @@ test('disabled real HTTP request', function(t) {
   http.get('http://www.amazon.com', function(res) {
     throw "should not request this";
   }).on('error', function(err) {
-    t.equal(err.message, 'Nock: Not allow net connect for "www.amazon.com:80/"');
+    t.equal(err.message, 'Nock: Disallowed net connect for "www.amazon.com:80/"');
     t.end();
   });
 
@@ -3043,38 +3143,62 @@ test('NetConnectNotAllowedError exposes the stack and has a code', function(t) {
   nock.enableNetConnect();
 });
 
-test('enable real HTTP request only for google.com, via string', {skip: process.env.AIRPLANE}, function(t) {
-  nock.enableNetConnect('google.com');
+test('enable real HTTP request only for specified domain, via string', function(t) {
+  t.plan(1)
 
-  http.get('http://google.com.br/').on('error', function(err) {
-    throw err;
+  const server = http.createServer((request, response) => {
+    t.pass('server received a request')
+    response.writeHead(200)
+    response.end()
+    t.end()
   });
+  t.once('end', () => server.close());
+
+  nock.enableNetConnect('localhost')
+  t.once('end', () => nock.enableNetConnect());
+
+  server.listen(() => mikealRequest(`http://localhost:${server.address().port}/`));
+});
+
+test('disallow request for other domains, via string', function(t) {
+  nock.enableNetConnect('localhost');
+  t.once('end', () => nock.enableNetConnect());
 
   http.get('http://www.amazon.com', function(res) {
     throw "should not deliver this request"
   }).on('error', function (err) {
-    t.equal(err.message, 'Nock: Not allow net connect for "www.amazon.com:80/"');
+    t.equal(err.message, 'Nock: Disallowed net connect for "www.amazon.com:80/"');
     t.end();
   });
-
-  nock.enableNetConnect();
 });
 
-test('enable real HTTP request only for google.com, via regexp', {skip: process.env.AIRPLANE}, function(t) {
-  nock.enableNetConnect(/google\.com/);
+test('enable real HTTP request only for specified domain, via regexp', function(t) {
+  t.plan(1)
 
-  http.get('http://google.com.br/').on('error', function(err) {
-    throw err;
+  const server = http.createServer((request, response) => {
+    t.pass('server received a request')
+    response.writeHead(200)
+    response.end()
+    t.end()
   });
+  t.once('end', () => server.close());
+
+  nock.enableNetConnect(/ocalhos/);
+  t.once('end', () => nock.enableNetConnect());
+
+  server.listen(() => mikealRequest(`http://localhost:${server.address().port}/`));
+});
+
+test('disallow request for other domains, via regexp', function(t) {
+  nock.enableNetConnect(/ocalhos/);
+  t.once('end', () => nock.enableNetConnect());
 
   http.get('http://www.amazon.com', function(res) {
-    throw "should not request this";
+    throw "should not deliver this request"
   }).on('error', function (err) {
-    t.equal(err.message, 'Nock: Not allow net connect for "www.amazon.com:80/"');
+    t.equal(err.message, 'Nock: Disallowed net connect for "www.amazon.com:80/"');
     t.end();
   });
-
-  nock.enableNetConnect();
 });
 
 test('repeating once', function(t) {
@@ -3826,12 +3950,14 @@ test('define() works with binary buffers', function(t) {
     t.end();
   });
 
-  req.write(new Buffer(nockDef.body, 'hex'));
+  req.write(Buffer.from(nockDef.body, 'hex'));
   req.end();
 
 });
 
-test('issue #163 - Authorization header isn\'t mocked', {skip: process.env.AIRPLANE}, function(t) {
+// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
+// https://github.com/nock/nock/issues/163
+test("Authorization header isn't mocked", {skip: process.env.AIRPLANE}, function(t) {
   nock.enableNetConnect();
   function makeRequest(cb) {
     var r = http.request(
@@ -3949,7 +4075,7 @@ test('sending binary and receiving JSON should work ', function(t) {
   mikealRequest({
     method: 'POST',
     uri: 'http://example.com/some/path',
-    body: new Buffer('ffd8ffe000104a46494600010101006000600000ff', 'hex'),
+    body: Buffer.from('ffd8ffe000104a46494600010101006000600000ff', 'hex'),
     headers: { 'Accept': 'application/json', 'Content-Length': 23861 }
   }, function(err, res, body) {
       scope.done();
@@ -3970,9 +4096,10 @@ test('sending binary and receiving JSON should work ', function(t) {
   );
 });
 
-test('fix #146 - resume() is automatically invoked when the response is drained', function(t) {
+// https://github.com/nock/nock/issues/146
+test('resume() is automatically invoked when the response is drained', function(t) {
   var replyLength = 1024 * 1024;
-  var replyBuffer = new Buffer((new Array(replyLength + 1)).join("."));
+  var replyBuffer = Buffer.from((new Array(replyLength + 1)).join("."));
   t.equal(replyBuffer.length, replyLength);
 
   nock("http://www.abc.com")
@@ -4392,7 +4519,8 @@ test('mocking succeeds even when mocked and specified request header names have 
 
 });
 
-test('mocking succeeds when mocked and specified request headers have falsy values (#966)', function(t) {
+// https://github.com/nock/nock/issues/966
+test('mocking succeeds when mocked and specified request headers have falsy values', function(t) {
   nock('http://example.com', {
     reqheaders: {
       "x-foo": 0
@@ -4510,7 +4638,7 @@ test("match basic authentication header", function(t) {
   var username = 'testuser'
     , password = 'testpassword'
     , authString = username + ":" + password
-    , encrypted = (new Buffer(authString)).toString( 'base64' );
+    , encrypted = (Buffer.from(authString)).toString( 'base64' );
 
   var scope = nock('http://www.headdy.com')
      .get('/')
@@ -5415,7 +5543,8 @@ test('query(true) will match when the path has no query', function (t) {
   })
 });
 
-test('match domain and path using regexp (#835)', function (t) {
+// https://github.com/nock/nock/issues/835
+test('match domain and path using regexp', function (t) {
   nock.cleanAll();
   var imgResponse = 'Matched Images Page';
 
@@ -5432,7 +5561,8 @@ test('match domain and path using regexp (#835)', function (t) {
   });
 });
 
-test('match multiple paths to domain using regexp with allowUnmocked (#835)', function (t) {
+// https://github.com/nock/nock/issues/835
+test('match multiple paths to domain using regexp with allowUnmocked', function (t) {
   nock.cleanAll();
 
   var nockOpts = { allowUnmocked: true };
@@ -5535,7 +5665,8 @@ test('multiple interceptors override headers from unrelated request', function (
   });
 });
 
-test('match when query is specified with allowUnmocked (#490)', function (t) {
+// https://github.com/nock/nock/issues/490
+test('match when query is specified with allowUnmocked', function (t) {
   nock.cleanAll();
 
   var nockOpts = { allowUnmocked: true };
@@ -5561,7 +5692,8 @@ test('match when query is specified with allowUnmocked (#490)', function (t) {
   });
 });
 
-test('correctly parse request without specified path (#1003)', function(t) {
+// https://github.com/nock/nock/issues/1003
+test('correctly parse request without specified path', function(t) {
   nock.cleanAll();
 
   var scope1 = nock('https://example.com')
