@@ -32,6 +32,7 @@
     "semver": "^5.5.0"
   },
   "devDependencies": {
+    "acorn": "^6.0.4",
     "async": "^2.6.0",
     "aws-sdk": "^2.202.0",
     "coveralls": "^3.0.0",
