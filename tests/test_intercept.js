@@ -3143,13 +3143,26 @@ test('NetConnectNotAllowedError exposes the stack and has a code', function(t) {
   nock.enableNetConnect();
 });
 
-// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
-test('enable real HTTP request only for google.com, via string', {skip: process.env.AIRPLANE}, function(t) {
-  nock.enableNetConnect('google.com');
+test('enable real HTTP request only for specified domain, via string', function(t) {
+  t.plan(1)
 
-  http.get('http://google.com.br/').on('error', function(err) {
-    throw err;
+  const server = http.createServer((request, response) => {
+    t.pass('server received a request')
+    response.writeHead(200)
+    response.end()
+    t.end()
   });
+  t.once('end', () => server.close());
+
+  nock.enableNetConnect('localhost')
+  t.once('end', () => nock.enableNetConnect());
+
+  server.listen(() => mikealRequest(`http://localhost:${server.address().port}/`));
+});
+
+test('disallow request for other domains, via string', function(t) {
+  nock.enableNetConnect('localhost');
+  t.once('end', () => nock.enableNetConnect());
 
   http.get('http://www.amazon.com', function(res) {
     throw "should not deliver this request"
@@ -3157,26 +3170,35 @@ test('enable real HTTP request only for google.com, via string', {skip: process.
     t.equal(err.message, 'Nock: Disallowed net connect for "www.amazon.com:80/"');
     t.end();
   });
-
-  nock.enableNetConnect();
 });
 
-// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
-test('enable real HTTP request only for google.com, via regexp', {skip: process.env.AIRPLANE}, function(t) {
-  nock.enableNetConnect(/google\.com/);
+test('enable real HTTP request only for specified domain, via regexp', function(t) {
+  t.plan(1)
 
-  http.get('http://google.com.br/').on('error', function(err) {
-    throw err;
+  const server = http.createServer((request, response) => {
+    t.pass('server received a request')
+    response.writeHead(200)
+    response.end()
+    t.end()
   });
+  t.once('end', () => server.close());
+
+  nock.enableNetConnect(/ocalhos/);
+  t.once('end', () => nock.enableNetConnect());
+
+  server.listen(() => mikealRequest(`http://localhost:${server.address().port}/`));
+});
+
+test('disallow request for other domains, via regexp', function(t) {
+  nock.enableNetConnect(/ocalhos/);
+  t.once('end', () => nock.enableNetConnect());
 
   http.get('http://www.amazon.com', function(res) {
-    throw "should not request this";
+    throw "should not deliver this request"
   }).on('error', function (err) {
     t.equal(err.message, 'Nock: Disallowed net connect for "www.amazon.com:80/"');
     t.end();
   });
-
-  nock.enableNetConnect();
 });
 
 test('repeating once', function(t) {
