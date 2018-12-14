@@ -579,7 +579,8 @@ test("get with reply callback returning array with headers", function(t) {
   });
 });
 
-test("get with reply callback returning default statusCode without body (skipped because #1222)", {skip: true}, function(t) {
+// Skipped because https://github.com/nock/nock/issues/1222
+test("get with reply callback returning default statusCode without body", {skip: true}, function(t) {
   nock('http://replyheaderland')
      .get('/')
      .reply(function(uri, requestBody) {
@@ -3914,7 +3915,8 @@ test('define() works with binary buffers', function(t) {
 });
 
 // Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
-test('issue #163 - Authorization header isn\'t mocked', {skip: process.env.AIRPLANE}, function(t) {
+// https://github.com/nock/nock/issues/163
+test("Authorization header isn't mocked", {skip: process.env.AIRPLANE}, function(t) {
   nock.enableNetConnect();
   function makeRequest(cb) {
     var r = http.request(
@@ -4053,7 +4055,8 @@ test('sending binary and receiving JSON should work ', function(t) {
   );
 });
 
-test('fix #146 - resume() is automatically invoked when the response is drained', function(t) {
+// https://github.com/nock/nock/issues/146
+test('resume() is automatically invoked when the response is drained', function(t) {
   var replyLength = 1024 * 1024;
   var replyBuffer = Buffer.from((new Array(replyLength + 1)).join("."));
   t.equal(replyBuffer.length, replyLength);
@@ -4475,7 +4478,8 @@ test('mocking succeeds even when mocked and specified request header names have 
 
 });
 
-test('mocking succeeds when mocked and specified request headers have falsy values (#966)', function(t) {
+// https://github.com/nock/nock/issues/966
+test('mocking succeeds when mocked and specified request headers have falsy values', function(t) {
   nock('http://example.com', {
     reqheaders: {
       "x-foo": 0
@@ -5498,7 +5502,8 @@ test('query(true) will match when the path has no query', function (t) {
   })
 });
 
-test('match domain and path using regexp (#835)', function (t) {
+// https://github.com/nock/nock/issues/835
+test('match domain and path using regexp', function (t) {
   nock.cleanAll();
   var imgResponse = 'Matched Images Page';
 
@@ -5515,7 +5520,8 @@ test('match domain and path using regexp (#835)', function (t) {
   });
 });
 
-test('match multiple paths to domain using regexp with allowUnmocked (#835)', function (t) {
+// https://github.com/nock/nock/issues/835
+test('match multiple paths to domain using regexp with allowUnmocked', function (t) {
   nock.cleanAll();
 
   var nockOpts = { allowUnmocked: true };
@@ -5618,7 +5624,8 @@ test('multiple interceptors override headers from unrelated request', function (
   });
 });
 
-test('match when query is specified with allowUnmocked (#490)', function (t) {
+// https://github.com/nock/nock/issues/490
+test('match when query is specified with allowUnmocked', function (t) {
   nock.cleanAll();
 
   var nockOpts = { allowUnmocked: true };
@@ -5644,7 +5651,8 @@ test('match when query is specified with allowUnmocked (#490)', function (t) {
   });
 });
 
-test('correctly parse request without specified path (#1003)', function(t) {
+// https://github.com/nock/nock/issues/1003
+test('correctly parse request without specified path', function(t) {
   nock.cleanAll();
 
   var scope1 = nock('https://example.com')
