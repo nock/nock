@@ -2963,42 +2963,61 @@ test("allow unmocked option works with https", function(t) {
   })
 });
 
-// TODO: remove skip as part of https://github.com/nock/nock/issues/1077
-// test('allow unmocked post with json data', {skip: process.env.AIRPLANE}, function(t) {
-test('allow unmocked post with json data', {skip: true}, function(t) {
-  nock('https://httpbin.org', { allowUnmocked: true }).
-    get("/abc").
-    reply(200, "Hey!");
+test('allow unmocked post with json data', function(t) {
+  t.plan(2)
+  t.once('end', function () { server.close() })
 
-  var options = {
-    method: 'POST',
-    uri: 'https://httpbin.org/post',
-    json: { some: 'data' }
-  };
+  const server = http.createServer((request, response) => {
+    t.pass('server received a request')
+    response.writeHead(200)
+    response.end()
+  })
 
-  mikealRequest(options, function(err, resp, body) {
-    t.equal(200, resp.statusCode)
-    t.end();
-  });
+  server.listen(() => {
+    nock(`http://localhost:${server.address().port}`, { allowUnmocked: true}).
+      get('/').
+      reply(200, "Hey!");
+
+
+      var options = {
+        method: 'POST',
+        uri: `http://localhost:${server.address().port}`,
+        json: { some: 'data' }
+      };
+
+      mikealRequest(options, function(err, resp, body) {
+        t.equal(200, resp.statusCode)
+        t.end()
+      })
+    })
 });
 
-// TODO: remove skip as part of https://github.com/nock/nock/issues/1077
-// test('allow unmocked passthrough with mismatched bodies', {skip: process.env.AIRPLANE}, function(t) {
-test('allow unmocked passthrough with mismatched bodies', {skip: true}, function(t) {
-  nock('http://httpbin.org', { allowUnmocked: true }).
-    post("/post", {some: 'otherdata'}).
-    reply(404, "Hey!");
+test('allow unmocked passthrough with mismatched bodies', function(t) {
+  t.plan(2)
+  t.once('end', function () { server.close() })
 
-  var options = {
-    method: 'POST',
-    uri: 'http://httpbin.org/post',
-    json: { some: 'data' }
-  };
+  const server = http.createServer((request, response) => {
+    t.pass('server received a request')
+    response.writeHead(200)
+    response.end()
+  })
 
-  mikealRequest(options, function(err, resp, body) {
-    t.equal(200, resp.statusCode)
-    t.end();
-  });
+  server.listen(() => {
+    nock(`http://localhost:${server.address().port}`, { allowUnmocked: true}).
+      post("/post", {some: 'otherdata'}).
+      reply(404, "Hey!");
+
+      var options = {
+        method: 'POST',
+        uri: `http://localhost:${server.address().port}/post`,
+        json: { some: 'data' }
+      };
+
+      mikealRequest(options, function(err, resp, body) {
+        t.equal(200, resp.statusCode)
+        t.end()
+      });
+    })
 });
 
 test('allow unordered body with json encoding', function(t) {
