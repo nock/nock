@@ -51,12 +51,19 @@ test('Nock with allowUnmocked, url match and query false', (test) => {
   })
 
   server.listen(() => {
-    nock(`https://127.0.0.1:${server.address().port}`, { allowUnmocked: true })
-      .get('/urlMatch')
-      .query(() => { return false })
+    const port = server.address().port
+    const url = `https://127.0.0.1:${port}`
+    nock(url, { allowUnmocked: true })
+      .get('/')
+      .query(false)
       .reply(201, { hello: 'there' })
 
-    request(`https://127.0.0.1:${server.address().port}/urlMatch`, (error, response, body) => {
+      const options = {
+        method: 'GET',
+        uri: url
+      }
+
+    request(options, (error, response, body) => {
       test.true((error === null), 'should be no error')
       test.true(typeof body !== 'undefined', 'body should not be undefined')
       test.true(body.length !== 0, 'body should not be empty')
