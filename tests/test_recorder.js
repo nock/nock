@@ -69,7 +69,6 @@ test('records', function(t) {
   })
 })
 
-// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('records objects', function(t) {
   nock.restore();
   nock.recorder.clear();
