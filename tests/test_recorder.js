@@ -527,130 +527,148 @@ test('records and replays gzipped nocks correctly when gzip is returned as a str
   });
 });
 
-// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
-test('records and replays nocks correctly', {skip: process.env.AIRPLANE}, function(t) {
+test('records and replays nocks correctly', function(t) {
+  const server = http.createServer((request, response) => {
+    switch (require('url').parse(request.url).pathname) {
+      case '/':
+        response.writeHead(302, {Location: '/abc'});
+        break;
+      case '/abc':
+        response.write('<html><body>example</body></html>');
+        break;
+    }
+    response.end();
+  });
+  t.once('end', () => server.close());
 
   nock.restore();
   nock.recorder.clear();
   t.equal(nock.recorder.play().length, 0);
 
-  nock.recorder.rec({
-    dont_print: true,
-    output_objects: true
-  });
-
-  var makeRequest = function(callback) {
-
-    var options = {
-      method: 'GET',
-      uri: 'http://bit.ly/1hKHiTe',
-    };
-
-    mikealRequest(options, callback);
-
-  };
-
-  makeRequest(function(err, resp, body) {
-
-    t.ok(!err);
-    t.ok(resp);
-    t.ok(body);
-
-    nock.restore();
-    var nockDefs = nock.recorder.play();
-    nock.recorder.clear();
-    nock.activate();
-
-    // Original bit.ly request is redirected to the target page.
-    t.true(nockDefs.length > 1);
-    var nocks = nock.define(nockDefs);
-
-    makeRequest(function(mockedErr, mockedResp, mockedBody) {
-
-      t.equal(err, mockedErr);
-      t.equal(body, mockedBody);
-
-      _.each(nocks, function(nock) {
-        nock.done();
-      });
-
-      t.end();
-
+  server.listen(() => {
+    nock.recorder.rec({
+      dont_print: true,
+      output_objects: true
     });
-  });
 
-});
+    mikealRequest(`http://localhost:${server.address().port}`, (err, resp, body) => {
+      t.notOk(err);
+      t.ok(resp);
+      t.ok(body);
 
-// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
-test('doesn\'t record request headers by default', {skip: process.env.AIRPLANE}, function(t) {
-  nock.restore();
-  nock.recorder.clear();
-  t.equal(nock.recorder.play().length, 0);
+      nock.restore();
+      const recorded = nock.recorder.play();
+      nock.recorder.clear();
+      nock.activate();
 
-  nock.recorder.rec({
-    dont_print: true,
-    output_objects: true
-  });
+      // Two requests, on account of the redirect.
+      t.equal(recorded.length, 2);
+      const nocks = nock.define(recorded);
 
-  var req = http.request({
-      hostname: 'www.example.com',
-      path: '/',
-      method: 'GET',
-      auth: 'foo:bar'
-    }, function(res) {
-      res.resume();
-      res.once('end', function() {
-        nock.restore();
-        var ret = nock.recorder.play();
-        t.equal(ret.length, 1);
-        ret = ret[0];
-        t.type(ret, 'object');
-        t.false(ret.reqheaders);
+      mikealRequest(`http://localhost:${server.address().port}`, (mockedErr, mockedResp, mockedBody) => {
+        t.notOk(mockedErr);
+        t.equal(body, mockedBody);
+
+        nocks.forEach(nock => nock.done());
+
         t.end();
       });
-    }
-  );
-  req.end();
+    });
+  });
 });
 
-// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
-test('will call a custom logging function', {skip: process.env.AIRPLANE}, function(t) {
+test("doesn't record request headers by default", function(t) {
+  const server = http.createServer((request, response) => {
+    response.writeHead(200)
+    response.end()
+  });
+  t.once('end', () => server.close());
+
+  nock.restore();
+  nock.recorder.clear();
+  t.equal(nock.recorder.play().length, 0);
+
+  server.listen(() => {
+    nock.recorder.rec({
+      dont_print: true,
+      output_objects: true
+    });
+
+    http.request(
+      {
+        hostname: 'www.example.com',
+        path: '/',
+        method: 'GET',
+        auth: 'foo:bar'
+      },
+      function(res) {
+        res.resume();
+        res.once('end', function() {
+          nock.restore();
+          var ret = nock.recorder.play();
+          t.equal(ret.length, 1);
+          ret = ret[0];
+          t.type(ret, 'object');
+          t.false(ret.reqheaders);
+          t.end();
+        });
+      }
+    ).end();
+  });
+});
+
+test('will call a custom logging function', function(t) {
+  const server = http.createServer((request, response) => {
+    response.writeHead(200)
+    response.end()
+  });
+  t.once('end', () => server.close());
+
   // This also tests that use_separator is on by default.
   nock.restore();
   nock.recorder.clear();
   t.equal(nock.recorder.play().length, 0);
 
-  var record = [];
-  var arrayLog = function(content) {
+  const record = [];
+  const arrayLog = function(content) {
     record.push(content);
   }
 
-  nock.recorder.rec({
-    logging: arrayLog
+  server.listen(() => {
+    nock.recorder.rec({
+      logging: arrayLog
+    });
+
+    http.request(
+      {
+        hostname: 'localhost',
+        port: server.address().port,
+        path: '/',
+        method: 'GET',
+        auth: 'foo:bar'
+      },
+      function(res) {
+        res.resume();
+        res.once('end', function() {
+          nock.restore();
+
+          t.equal(record.length, 1)
+          var ret = record[0]
+          t.type(ret, 'string');
+          t.end();
+        });
+      }
+    ).end();
   });
-
-  var req = http.request({
-      hostname: 'www.example.com',
-      path: '/',
-      method: 'GET',
-      auth: 'foo:bar'
-    }, function(res) {
-      res.resume();
-      res.once('end', function() {
-        nock.restore();
-
-        t.equal(record.length, 1)
-        var ret = record[0]
-        t.type(ret, 'string');
-        t.end();
-      });
-    }
-  );
-  req.end();
 });
 
-// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
-test('use_separator:false is respected', {skip: process.env.AIRPLANE}, function(t) {
+test('use_separator:false is respected', function(t) {
+  const server = http.createServer((request, response) => {
+    response.writeHead(200)
+    response.end()
+  });
+  t.once('end', () => server.close());
+
   nock.restore();
   nock.recorder.clear();
   t.equal(nock.recorder.play().length, 0);
@@ -660,109 +678,132 @@ test('use_separator:false is respected', {skip: process.env.AIRPLANE}, function(
     record.push(content);
   }
 
-  nock.recorder.rec({
-    logging: arrayLog,
-    output_objects: true,
-    use_separator: false,
-  });
+  server.listen(() => {
+    nock.recorder.rec({
+      logging: arrayLog,
+      output_objects: true,
+      use_separator: false,
+    });
 
-  var req = http.request({
-      hostname: 'www.example.com',
-      path: '/',
-      method: 'GET',
-      auth: 'foo:bar'
-    }, function(res) {
-      res.resume();
-      res.once('end', function() {
-        nock.restore();
-        t.equal(record.length, 1)
-        var ret = record[0];
-        t.type(ret, 'object'); // this is still an object, because the "cut here" strings have not been appended
-        t.end();
-      });
-    }
-  );
-  req.end();
+    http.request(
+      {
+        hostname: 'localhost',
+        port: server.address().port,
+        path: '/',
+        method: 'GET',
+        auth: 'foo:bar'
+      },
+      function(res) {
+        res.resume();
+        res.once('end', function() {
+          nock.restore();
+          t.equal(record.length, 1)
+          var ret = record[0];
+          t.type(ret, 'object'); // this is still an object, because the "cut here" strings have not been appended
+          t.end();
+        });
+      }
+    ).end();
+  });
 });
 
-// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
-test('records request headers except user-agent if enable_reqheaders_recording is set to true', {skip: process.env.AIRPLANE}, function(t) {
+test('records request headers except user-agent if enable_reqheaders_recording is set to true', function(t) {
+  const server = http.createServer((request, response) => {
+    response.writeHead(200)
+    response.end()
+  });
+  t.once('end', () => server.close());
+
   nock.restore();
   nock.recorder.clear();
   t.equal(nock.recorder.play().length, 0);
 
-  nock.recorder.rec({
-    dont_print: true,
-    output_objects: true,
-    enable_reqheaders_recording: true
-  });
+  server.listen(() => {
+    nock.recorder.rec({
+      dont_print: true,
+      output_objects: true,
+      enable_reqheaders_recording: true
+    });
 
-  var req = http.request({
-      hostname: 'www.example.com',
-      path: '/',
-      method: 'GET',
-      auth: 'foo:bar'
-    }, function(res) {
-      res.resume();
-      res.once('end', function() {
+    http.request({
+        hostname: 'localhost',
+        port: server.address().port,
+        path: '/',
+        method: 'GET',
+        auth: 'foo:bar'
+      }, function(res) {
+        res.resume();
+        res.once('end', function() {
+          nock.restore();
+          var ret = nock.recorder.play();
+          t.equal(ret.length, 1);
+          ret = ret[0];
+          t.type(ret, 'object');
+          t.true(ret.reqheaders);
+          t.false(ret.reqheaders['user-agent']);
+          t.end();
+        });
+      }
+    ).end();
+  });
+});
+
+test('includes query parameters from superagent', function(t) {
+  const server = http.createServer((request, response) => {
+    response.writeHead(200)
+    response.end()
+  });
+  t.once('end', () => server.close());
+
+  nock.restore();
+  nock.recorder.clear();
+  t.equal(nock.recorder.play().length, 0);
+
+  server.listen(() => {
+    nock.recorder.rec({
+      dont_print: true,
+      output_objects: true
+    });
+
+    superagent.get(`http://localhost:${server.address().port}`)
+      .query({q: 'test search' })
+      .end(function(res) {
         nock.restore();
         var ret = nock.recorder.play();
-        t.equal(ret.length, 1);
-        ret = ret[0];
-        t.type(ret, 'object');
-        t.true(ret.reqheaders);
-        t.false(ret.reqheaders['user-agent']);
+        t.true(ret.length >= 1);
+        t.equal(ret[0].path, '/?q=test%20search');
         t.end();
       });
-    }
-  );
-  req.end();
-});
-
-// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
-test('includes query parameters from superagent', {skip: process.env.AIRPLANE}, function(t) {
-  nock.restore();
-  nock.recorder.clear();
-  t.equal(nock.recorder.play().length, 0);
-
-  nock.recorder.rec({
-    dont_print: true,
-    output_objects: true
   });
-
-  superagent.get('http://google.com')
-    .query({q: 'test search' })
-    .end(function(res) {
-      nock.restore();
-      var ret = nock.recorder.play();
-      t.true(ret.length >= 1);
-      t.equal(ret[0].path, '/?q=test%20search');
-      t.end();
-    });
 });
 
-// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
-test('encodes the query parameters when not outputing objects', {skip: process.env.AIRPLANE}, function(t) {
+test('encodes the query parameters when not outputing objects', function(t) {
+  const server = http.createServer((request, response) => {
+    response.writeHead(200)
+    response.end()
+  });
+  t.once('end', () => server.close());
 
   nock.restore();
   nock.recorder.clear();
   t.equal(nock.recorder.play().length, 0);
 
-  nock.recorder.rec({
-    dont_print: true,
-    output_objects: false
-  });
-
-  superagent.get('http://google.com')
-    .query({q: 'test search++' })
-    .end(function(res) {
-      nock.restore();
-      var recording = nock.recorder.play();
-      t.true(recording.length >= 1);
-      t.true(recording[0].indexOf('test%20search%2B%2B') !== -1);
-      t.end();
+  server.listen(() => {
+    nock.recorder.rec({
+      dont_print: true,
+      output_objects: false
     });
 
+    superagent.get(`http://localhost:${server.address().port}`)
+      .query({q: 'test search++' })
+      .end(function(res) {
+        nock.restore();
+        var recording = nock.recorder.play();
+        t.true(recording.length >= 1);
+        t.true(recording[0].indexOf('test%20search%2B%2B') !== -1);
+        t.end();
+      });
+  });
 });
 
 test('works with clients listening for readable', function(t) {
