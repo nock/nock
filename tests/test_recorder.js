@@ -765,153 +765,162 @@ test('encodes the query parameters when not outputing objects', {skip: process.e
 
 });
 
-// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
-test('works with clients listening for readable', {skip: process.env.AIRPLANE}, function(t) {
+test('works with clients listening for readable', function(t) {
+  nock.restore();
+  nock.recorder.clear();
+  t.equal(nock.recorder.play().length, 0);
+  t.once('end', () => nock.restore())
+
+  const requestBody = 'ABCDEF';
+  const responseBody = '012345';
+
+  const server = http.createServer((req, res) => {
+    res.end(responseBody);
+  });
+  t.once('end', () => server.close());
+
+  server.listen(() => {
+    nock.recorder.rec({ dont_print: true, output_objects: true });
+
+    http.request(
+      {
+        host: 'localhost',
+        port: server.address().port,
+        path: '/',
+      },
+      res => {
+        let readableCount = 0;
+        let chunkCount = 0;
+
+        res.on('readable', () => {
+          ++readableCount;
+          let chunk
+          while (null !== (chunk = res.read())) {
+            t.equal(chunk.toString(), responseBody);
+            ++chunkCount;
+          }
+        });
+
+        res.once('end', function() {
+          t.equal(readableCount, 1);
+          t.equal(chunkCount, 1);
+
+          const recorded = nock.recorder.play();
+          t.equal(recorded.length, 1);
+          t.type(recorded[0], 'object');
+          t.equal(recorded[0].scope, `http://localhost:${server.address().port}`);
+          t.equal(recorded[0].method, "GET");
+          t.equal(recorded[0].body, requestBody);
+          t.equal(recorded[0].status, 200);
+          t.equal(recorded[0].response, responseBody);
+
+          t.end();
+        });
+      }).end(requestBody)
+  });
+});
+
+test('outputs query string parameters using query()', function(t) {
+  t.plan(7);
+
+  const server = http.createServer((request, response) => {
+    response.writeHead(200)
+    response.end()
+  });
+  t.once('end', () => server.close());
+
   nock.restore();
   nock.recorder.clear();
   t.equal(nock.recorder.play().length, 0);
 
-  var REQUEST_BODY = 'ABCDEF';
-  var RESPONSE_BODY = '012345';
+  server.listen(() => {
+    nock.recorder.rec(true);
 
-  //  Create test http server and perform the tests while it's up.
-  var testServer = http.createServer(function(req, res) {
-    res.end(RESPONSE_BODY);
-  }).listen(8082, function(err) {
+    superagent
+      .get(`http://localhost:${server.address().port}/`)
+      .query({param1: 1, param2: 2})
+      .end((err, resp) => {
+        t.notOk(err)
+        t.ok(resp, 'have response');
+        t.ok(resp.headers, 'have headers');
 
-    // t.equal(err, undefined);
-
-    var options = { host:'localhost'
-                  , port:testServer.address().port
-                  , path:'/' }
-    ;
-
-    var rec_options = {
-      dont_print: true,
-      output_objects: true
-    };
-
-    nock.recorder.rec(rec_options);
-
-    var req = http.request(options, function(res) {
-      var readableCount = 0;
-      var chunkCount = 0;
-      res.on('readable', function() {
-        ++readableCount;
-        var chunk;
-        while (null !== (chunk = res.read())) {
-          t.equal(chunk.toString(), RESPONSE_BODY);
-          ++chunkCount;
-        }
-      });
-      res.once('end', function() {
-        nock.restore();
-        var ret = nock.recorder.play();
-        t.equal(ret.length, 1);
-        ret = ret[0];
-        t.type(ret, 'object');
-        t.equal(readableCount, 1);
-        t.equal(chunkCount, 1);
-        t.equal(ret.scope, "http://localhost:" + options.port);
-        t.equal(ret.method, "GET");
-        t.equal(ret.body, REQUEST_BODY);
-        t.equal(ret.status, 200);
-        t.equal(ret.response, RESPONSE_BODY);
+        const recorded = nock.recorder.play();
+        t.equal(recorded.length, 1);
+        t.type(recorded[0], 'string');
+        t.ok(recorded[0].includes(`.query({"param1":"1","param2":"2"})`))
         t.end();
-
-        //  Close the test server, we are done with it.
-        testServer.close();
       });
-    });
-
-    req.end(REQUEST_BODY);
   });
-
 });
 
-// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
-test('outputs query string parameters using query()', {skip: process.env.AIRPLANE}, function(t) {
+test('outputs query string arrays correctly', function(t) {
+  t.plan(7);
+
+  const server = http.createServer((request, response) => {
+    response.writeHead(200)
+    response.end()
+  });
+  t.once('end', () => server.close());
+
   nock.restore();
   nock.recorder.clear();
   t.equal(nock.recorder.play().length, 0);
 
-  nock.recorder.rec(true);
+  server.listen(() => {
+    nock.recorder.rec(true);
 
-  var makeRequest = function(callback) {
     superagent
-      .get('https://example.com/')
-      .query({'param1':1,'param2':2})
-      .end(callback);
-  };
+      .get(`http://localhost:${server.address().port}/`)
+      .query({'foo': ['bar', 'baz']})
+      .end((err, resp) => {
+        t.notOk(err)
+        t.ok(resp, 'have response');
+        t.ok(resp.headers, 'have headers');
 
-  makeRequest(function(err, resp) {
-    t.ok(!err, err && err.message || 'no error');
-    t.ok(resp, 'have response');
-    t.ok(resp.headers, 'have headers');
-
-    var ret = nock.recorder.play();
-    t.equal(ret.length, 1);
-    t.type(ret[0], 'string');
-    var match = "\nnock('https://example.com:443', {\"encodedQueryParams\":true})\n  .get('/')\n  .query({\"param1\":\"1\",\"param2\":\"2\"})\n  .reply(";
-    t.equal(ret[0].substring(0, match.length), match);
-    t.end();
-  });
+        const recorded = nock.recorder.play();
+        t.equal(recorded.length, 1);
+        t.type(recorded[0], 'string');
+        t.ok(recorded[0].includes(`.query({"foo":["bar","baz"]})`))
+        t.end();
+      });
+  })
 });
 
-// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
-test('outputs query string arrays correctly', {skip: process.env.AIRPLANE}, function(t) {
+test('removes query params from the path and puts them in query()', function(t) {
+  t.plan(5);
+
+  const server = http.createServer((request, response) => {
+    response.writeHead(200)
+    response.end()
+  });
+  t.once('end', () => server.close());
+
   nock.restore();
   nock.recorder.clear();
   t.equal(nock.recorder.play().length, 0);
+  t.once('end', () => nock.restore());
 
-  nock.recorder.rec(true);
-
-  var makeRequest = function(callback) {
-    superagent
-      .get('https://example.com/')
-      .query({'foo':['bar', 'baz']})
-      .end(callback);
-  };
-
-  makeRequest(function(err, resp) {
-    t.ok(!err, err && err.message || 'no error');
-    t.ok(resp, 'have response');
-    t.ok(resp.headers, 'have headers');
-
-    var ret = nock.recorder.play();
-    t.equal(ret.length, 1);
-    t.type(ret[0], 'string');
-    var match = "\nnock('https://example.com:443', {\"encodedQueryParams\":true})\n  .get('/')\n  .query({\"foo\":[\"bar\",\"baz\"]})\n  .reply(";
-    t.equal(ret[0].substring(0, match.length), match);
-    t.end();
+  server.listen(() => {
+    nock.recorder.rec(true);
+    http.request(
+      {
+        method: 'POST',
+        host: 'localhost',
+        port: server.address().port,
+        path: '/?param1=1&param2=2',
+      },
+      res => {
+        res.resume();
+        res.once('end', () => {
+          const recorded = nock.recorder.play();
+          t.equal(recorded.length, 1);
+          t.type(recorded[0], 'string');
+          t.ok(recorded[0].includes(`nock('http://localhost:${server.address().port}',`))
+          t.ok(recorded[0].includes(`.query({"param1":"1","param2":"2"})`))
+          t.end();
+        });
+      }).end('ABCDEF')
   });
-});
-
-// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
-test('removes query params from that path and puts them in query()', {skip: process.env.AIRPLANE}, function(t) {
-  nock.restore();
-  nock.recorder.clear();
-  t.equal(nock.recorder.play().length, 0);
-  var options = { method: 'POST'
-                , host:'google.com'
-                , port:80
-                , path:'/?param1=1&param2=2' }
-  ;
-
-  nock.recorder.rec(true);
-  var req = http.request(options, function(res) {
-    res.resume();
-    var ret;
-    res.once('end', function() {
-      nock.restore();
-      ret = nock.recorder.play();
-      t.equal(ret.length, 1);
-      t.type(ret[0], 'string');
-      t.equal(ret[0].indexOf("\nnock('http://google.com:80', {\"encodedQueryParams\":true})\n  .post('/', \"ABCDEF\")\n  .query({\"param1\":\"1\",\"param2\":\"2\"})\n  .reply("), 0);
-      t.end();
-    });
-  });
-  req.end('ABCDEF');
 });
 
 test("respects http.request() consumers", function(t) {
