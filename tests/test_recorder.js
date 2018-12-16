@@ -6,7 +6,6 @@ var nock    = require('../.')
   , https   = require('https')
   , fs      = require('fs')
   , zlib    = require('zlib')
-  , _       = require('lodash')
   , mikealRequest = require('request')
   , superagent = require('superagent');
 
@@ -191,14 +190,13 @@ test('records and replays correctly with filteringRequestBody', function(t) {
 
       t.equal(recorded.length, 1);
       let filteringRequestBodyCounter = 0;
-      const nocks = nock.define([{
-        ...recorded[0],
-        filteringRequestBody: (body, aRecodedBody) => {
-          ++filteringRequestBodyCounter;
-          t.strictEqual(body, aRecodedBody);
-          return body;
-        },
-      }]);
+      const definition = recorded[0];
+      definition.filteringRequestBody = (body, aRecodedBody) => {
+        ++filteringRequestBodyCounter;
+        t.strictEqual(body, aRecodedBody);
+        return body;
+      };
+      const nocks = nock.define([definition]);
 
       superagent.get(`http://localhost:${server.address().port}`, (mockedErr, mockedResp) => {
         t.equal(err, mockedErr);
