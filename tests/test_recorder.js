@@ -4,6 +4,8 @@ var nock    = require('../.')
   , test    = require('tap').test
   , http    = require('http')
   , https   = require('https')
+  , fs      = require('fs')
+  , zlib    = require('zlib')
   , _       = require('lodash')
   , mikealRequest = require('request')
   , superagent = require('superagent');
@@ -33,7 +35,6 @@ test('recording turns off nock interception (backward compatibility behavior)', 
 
 });
 
-// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('records', function(t) {
   t.plan(5)
 
@@ -109,8 +110,21 @@ test('records objects', function(t) {
   });
 });
 
-// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
-test('records and replays objects correctly', {skip: process.env.AIRPLANE}, function(t) {
+test('records and replays objects correctly', function(t) {
+  const exampleText = '<html><body>example</body></html>';
+
+  const server = http.createServer((request, response) => {
+    switch (require('url').parse(request.url).pathname) {
+      case '/':
+        response.writeHead(302, {Location: '/abc'});
+        break;
+      case '/abc':
+        response.write(exampleText);
+        break;
+    }
+    response.end();
+  });
+  t.once('end', () => server.close());
 
   nock.restore();
   nock.recorder.clear();
@@ -121,44 +135,39 @@ test('records and replays objects correctly', {skip: process.env.AIRPLANE}, func
     output_objects: true
   });
 
-  var makeRequest = function(callback) {
-    superagent
-      .get('http://google.com')
-      .end(callback);
-  };
+  server.listen(() => {
+    superagent.get(`http://localhost:${server.address().port}`, (err, resp) => {
+      t.ok(!err);
+      t.ok(resp);
+      t.ok(resp.headers);
+      t.strictEqual(resp.text, exampleText);
 
-  makeRequest(function(err, resp) {
+      nock.restore();
+      const recorded = nock.recorder.play();
+      nock.recorder.clear();
+      nock.activate();
 
-    t.ok(!err);
-    t.ok(resp);
-    t.ok(resp.headers);
+      t.equal(recorded.length, 2);
+      const nocks = nock.define(recorded);
 
-    nock.restore();
-    var nockDefs = nock.recorder.play();
-    nock.recorder.clear();
-    nock.activate();
+      superagent.get(`http://localhost:${server.address().port}`, (mockedErr, mockedResp) => {
+        t.equal(err, mockedErr);
+        t.strictEqual(resp.text, exampleText);
 
-    t.equal(nockDefs.length, 2);
-    var nocks = nock.define(nockDefs);
+        nocks.forEach(nock => nock.done());
 
-    makeRequest(function(mockedErr, mockedResp) {
-
-      t.equal(err, mockedErr);
-      t.deepEqual(mockedResp.body, resp.body);
-
-      _.each(nocks, function(nock) {
-        nock.done();
+        t.end();
       });
-
-      t.end();
-
     });
   });
-
 });
 
-// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
-test('records and replays correctly with filteringRequestBody', {skip: process.env.AIRPLANE}, function(t) {
+test('records and replays correctly with filteringRequestBody', function(t) {
+  const server = http.createServer((request, response) => {
+    response.write('<html><body>example</body></html>');
+    response.end();
+  });
+  t.once('end', () => server.close());
 
   nock.restore();
   nock.recorder.clear();
@@ -169,127 +178,130 @@ test('records and replays correctly with filteringRequestBody', {skip: process.e
     output_objects: true
   });
 
-  var makeRequest = function(callback) {
-    superagent
-      .get('http://google.com')
-      .end(callback);
-  };
+  server.listen(() => {
+    superagent.get(`http://localhost:${server.address().port}`, (err, resp) => {
+      t.ok(!err);
+      t.ok(resp);
+      t.ok(resp.headers);
 
-  makeRequest(function(err, resp) {
+      nock.restore();
+      const recorded = nock.recorder.play();
+      nock.recorder.clear();
+      nock.activate();
 
-    t.ok(!err);
-    t.ok(resp);
-    t.ok(resp.headers);
+      t.equal(recorded.length, 1);
+      let filteringRequestBodyCounter = 0;
+      const nocks = nock.define([{
+        ...recorded[0],
+        filteringRequestBody: (body, aRecodedBody) => {
+          ++filteringRequestBodyCounter;
+          t.strictEqual(body, aRecodedBody);
+          return body;
+        },
+      }]);
 
-    nock.restore();
-    var nockDefs = nock.recorder.play();
-    nock.recorder.clear();
-    nock.activate();
+      superagent.get(`http://localhost:${server.address().port}`, (mockedErr, mockedResp) => {
+        t.equal(err, mockedErr);
+        t.deepEqual(mockedResp.body, resp.body);
 
-    t.equal(nockDefs.length, 2);
-    var nockDef = _.first(nockDefs);
-    var filteringRequestBodyCounter = 0;
-    nockDef.filteringRequestBody = function(body, aRecodedBody) {
-      ++filteringRequestBodyCounter;
-      t.strictEqual(body, aRecodedBody);
-      return body;
-    };
-    var nocks = nock.define(nockDefs);
+        nocks.forEach(nock => nock.done());
 
-    makeRequest(function(mockedErr, mockedResp) {
-
-      t.equal(err, mockedErr);
-      t.deepEqual(mockedResp.body, resp.body);
-
-      _.each(nocks, function(nock) {
-        nock.done();
+        t.strictEqual(filteringRequestBodyCounter, 1);
+        t.end();
       });
-
-      t.strictEqual(filteringRequestBodyCounter, 1);
-      t.end();
-
     });
   });
-
 });
 
-// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
-test('checks if callback is specified', {skip: process.env.AIRPLANE}, function(t) {
-  var options = {
-    host: 'www.google.com', method: 'GET', path: '/', port: 80
-  };
+// https://github.com/nock/nock/issues/29
+test('checks if callback is specified', function(t) {
+  // Use t.plan() to make sure the test doesn't end until the request has
+  // returned _and_ the listen() callback has finished.
+  t.plan(3);
+  const server = http.createServer((request, response) => {
+    response.write('<html><body>example</body></html>');
+    response.end();
+    t.pass();
+  });
+  t.once('end', () => server.close());
 
   nock.restore();
   nock.recorder.clear();
   t.equal(nock.recorder.play().length, 0);
+
+  server.listen(() => {
+    nock.recorder.rec(true);
+    http.request({
+      host: 'localhost',
+      port: server.address().port,
+      method: 'GET',
+      path: '/',
+    }).end();
+    nock.restore();
+    t.pass();
+  });
+});
+
+test('when request body is json, it goes unstringified', function(t) {
+  const server = http.createServer((request, response) => response.end());
+  t.once('end', () => server.close());
+
+  nock.restore();
+  nock.recorder.clear();
   nock.recorder.rec(true);
 
-  http.request(options).end();
-  t.end();
+  const payload = {a: 1, b: true};
+
+  server.listen(() => {
+    http.request(
+      {
+        method: 'POST',
+        host: 'www.google.com',
+        path: '/',
+        port: 80
+      },
+      res => {
+        res.resume();
+        res.once('end', () => {
+          const recorded = nock.recorder.play();
+          t.equal(recorded.length, 1);
+          t.ok(recorded[0].includes('.post(\'/\', {"a":1,"b":true})'))
+          t.end();
+        });
+      }).end(JSON.stringify(payload));
+  });
 });
 
-// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
-test('when request body is json, it goes unstringified', {skip: process.env.AIRPLANE}, function(t) {
-  var payload = {a: 1, b: true};
-  var options = {
-    method: 'POST',
-    host: 'www.google.com',
-    path: '/',
-    port: 80
-  };
+test('when request body is json, it goes unstringified in objects', function(t) {
+  const server = http.createServer((request, response) => response.end());
+  t.once('end', () => server.close());
 
   nock.restore();
   nock.recorder.clear();
-  nock.recorder.rec(true);
+  nock.recorder.rec({dont_print: true, output_objects: true});
 
-  var request = http.request(options, function(res) {
-    res.resume();
-    res.once('end', function() {
-      var ret = nock.recorder.play();
-      t.ok(ret.length >= 1);
-      ret = ret[1] || ret[0];
-      t.equal(ret.indexOf("\nnock('http://www.google.com:80', {\"encodedQueryParams\":true})\n  .post('/', {\"a\":1,\"b\":true})\n  .reply("), 0);
-      t.end();
-    });
+  const payload = {a: 1, b: true};
+
+  server.listen(() => {
+    http.request(
+      {
+        method: 'POST',
+        host: 'www.google.com',
+        path: '/',
+        port: 80
+      },
+      res => {
+        res.resume();
+        res.once('end', () => {
+          const recorded = nock.recorder.play();
+          t.equal(recorded.length, 1);
+          t.type(recorded[0], 'object');
+          t.type(recorded[0].body, 'object');
+          t.deepEqual(recorded[0].body, payload);
+          t.end();
+        });
+      }).end(JSON.stringify(payload));
   });
-
-  request.end(JSON.stringify(payload));
-});
-
-// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
-test('when request body is json, it goes unstringified in objects', {skip: process.env.AIRPLANE}, function(t) {
-  var payload = {a: 1, b: true};
-  var options = {
-    method: 'POST',
-    host: 'www.google.com',
-    path: '/',
-    port: 80
-  };
-
-  nock.restore();
-  nock.recorder.clear();
-  nock.recorder.rec({
-    dont_print: true,
-    output_objects: true
-  });
-
-  var request = http.request(options, function(res) {
-    res.resume();
-    res.once('end', function() {
-      var ret = nock.recorder.play();
-      t.ok(ret.length >= 1);
-      ret = ret[1] || ret[0];
-      t.type(ret, 'object');
-      t.equal(ret.scope, "http://www.google.com:80");
-      t.equal(ret.method, "POST");
-      t.ok(ret.body && ret.body.a && ret.body.a === payload.a && ret.body.b && ret.body.b === payload.b);
-      t.ok(typeof(ret.status) !== 'undefined');
-      t.ok(typeof(ret.response) !== 'undefined');
-      t.end();
-    });
-  });
-
-  request.end(JSON.stringify(payload));
 });
 
 test('records nonstandard ports', function(t) {
@@ -361,168 +373,140 @@ test('rec() throws when reenvoked with already recorder requests', function(t) {
   }
 });
 
-// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
-test('records https correctly', {skip: process.env.AIRPLANE}, function(t) {
+test('records https correctly', function(t) {
+  const server = https.createServer(
+    {
+      key: fs.readFileSync('tests/ssl/ca.key'),
+      cert: fs.readFileSync('tests/ssl/ca.crt'),
+    },
+    (request, response) => {
+      response.write('<html><body>example</body></html>');
+      response.end();
+    });
+  t.once('end', () => server.close());
+
   nock.restore();
   nock.recorder.clear();
   t.equal(nock.recorder.play().length, 0);
-
-  var options = { method: 'POST'
-                , host:'google.com'
-                , path:'/' }
-  ;
 
   nock.recorder.rec({
     dont_print: true,
     output_objects: true
   });
 
-  var req = https.request(options, function(res) {
-    res.resume();
-    var ret;
-    res.once('end', function() {
-      nock.restore();
-      ret = nock.recorder.play();
-      t.equal(ret.length, 1);
-      ret = ret[0];
-      t.type(ret, 'object');
-      t.equal(ret.scope, "https://google.com:443");
-      t.equal(ret.method, "POST");
-      t.ok(typeof(ret.status) !== 'undefined');
-      t.ok(typeof(ret.response) !== 'undefined');
-      t.end();
-    });
+  server.listen(() => {
+    https.request(
+      {
+        method: 'POST',
+        host: 'localhost',
+        port: server.address().port,
+        path: '/',
+        rejectUnauthorized: false,
+      },
+      res => {
+        res.resume();
+        res.once('end', () => {
+          nock.restore();
+          const recorded = nock.recorder.play();
+          t.equal(recorded.length, 1);
+          t.type(recorded[0], 'object');
+          t.equal(recorded[0].scope, `https://localhost:${server.address().port}`);
+          t.equal(recorded[0].method, 'POST');
+          t.ok(typeof(recorded[0].status) !== 'undefined');
+          t.ok(typeof(recorded[0].response) !== 'undefined');
+          t.end();
+        });
+      }).end('012345');
   });
-  req.end('012345');
 });
 
-// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
-test('records request headers correctly', {skip: process.env.AIRPLANE}, function(t) {
+test('records request headers correctly', function(t) {
+  const server = http.createServer((request, response) => response.end());
+  t.once('end', () => server.close());
+
+  nock.restore();
+  nock.recorder.clear();
+  t.equal(nock.recorder.play().length, 0);
+
+  server.listen(() => {
+    nock.recorder.rec({
+      dont_print: true,
+      output_objects: true,
+      enable_reqheaders_recording: true
+    });
+
+    http.request(
+      {
+        hostname: 'localhost',
+        port: server.address().port,
+        path: '/',
+        method: 'GET',
+        auth: 'foo:bar'
+      },
+      res => {
+        res.resume();
+        res.once('end', function() {
+          nock.restore();
+          const recorded = nock.recorder.play();
+          t.equal(recorded.length, 1);
+          t.type(recorded[0], 'object');
+          t.equivalent(recorded[0].reqheaders, {
+            host: `localhost:${server.address().port}`,
+            'authorization': 'Basic ' + Buffer.from('foo:bar').toString('base64'),
+          });
+          t.end();
+        });
+      }
+    ).end();
+  });
+});
+
+test('records and replays gzipped nocks correctly', function(t) {
+  const exampleText = '<html><body>example</body></html>';
+
+  const server = http.createServer((request, response) => {
+    zlib.gzip(exampleText, (err, result) => {
+      t.notOk(err)
+      response.writeHead(200, {'content-encoding': 'gzip'});
+      response.end(result);
+    });
+  });
+  t.once('end', () => server.close());
+
   nock.restore();
   nock.recorder.clear();
   t.equal(nock.recorder.play().length, 0);
 
   nock.recorder.rec({
     dont_print: true,
-    output_objects: true,
-    enable_reqheaders_recording: true
+    output_objects: true
   });
 
-  var req = http.request({
-      hostname: 'www.example.com',
-      path: '/',
-      method: 'GET',
-      auth: 'foo:bar'
-    }, function(res) {
-      res.resume();
-      res.once('end', function() {
-        nock.restore();
-        var ret = nock.recorder.play();
-        t.equal(ret.length, 1);
-        ret = ret[0];
-        t.type(ret, 'object');
-        t.equivalent(ret.reqheaders, {
-          host: 'www.example.com',
-          'authorization': 'Basic Zm9vOmJhcg=='
-        });
+  server.listen(() => {
+    superagent.get(`localhost:${server.address().port}`, (err, resp) => {
+      t.ok(!err);
+      t.ok(resp);
+      t.ok(resp.headers);
+      t.equal(resp.headers['content-encoding'], 'gzip');
+      t.equal(resp.text, exampleText)
+
+      nock.restore();
+      const recorded = nock.recorder.play();
+      nock.recorder.clear();
+      nock.activate();
+
+      t.equal(recorded.length, 1);
+      const nocks = nock.define(recorded);
+
+      superagent.get(`localhost:${server.address().port}`, (mockedErr, mockedResp) => {
+        t.equal(err, mockedErr);
+        t.deepEqual(mockedResp.text, exampleText);
+        t.equal(mockedResp.headers['content-encoding'], 'gzip');
+
+        nocks.forEach(nock => nock.done())
+
         t.end();
       });
-    }
-  );
-  req.end();
-});
-
-// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
-test('records and replays gzipped nocks correctly', {skip: process.env.AIRPLANE}, function(t) {
-
-  nock.restore();
-  nock.recorder.clear();
-  t.equal(nock.recorder.play().length, 0);
-
-  nock.recorder.rec({
-    dont_print: true,
-    output_objects: true
-  });
-
-  var makeRequest = function(callback) {
-    superagent.get('https://bit.ly/1hKHiTe', callback);
-  };
-
-  makeRequest(function(err, resp) {
-
-    t.ok(!err);
-    t.ok(resp);
-    t.ok(resp.headers);
-    t.equal(resp.headers['content-encoding'], 'gzip');
-
-    nock.restore();
-    var nockDefs = nock.recorder.play();
-    nock.recorder.clear();
-    nock.activate();
-
-    // Original bit.ly request is redirected to the target page.
-    t.true(nockDefs.length > 1);
-    var nocks = nock.define(nockDefs);
-
-    makeRequest(function(mockedErr, mockedResp) {
-
-      t.equal(err, mockedErr);
-      t.deepEqual(mockedResp.body, resp.body);
-      t.equal(mockedResp.headers['content-encoding'], 'gzip');
-
-      _.each(nocks, function(nock) {
-        nock.done();
-      });
-
-      t.end();
-
-    });
-  });
-
-});
-
-// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
-test('records and replays gzipped nocks correctly when gzip is returned as a string', {skip: process.env.AIRPLANE}, function(t) {
-  nock.restore();
-  nock.recorder.clear();
-  t.equal(nock.recorder.play().length, 0);
-
-  nock.recorder.rec({
-    dont_print: true,
-    output_objects: true
-  });
-
-  var makeRequest = function(callback) {
-    mikealRequest.get('http://bit.ly/1hKHiTe', {'headers': {'Accept-Encoding': 'gzip'}}, (error, response, body) => {
-      t.error(error);
-      callback(null, response, body);
-    });
-  }
-
-  makeRequest(function(err, response, body) {
-    t.ok(response);
-    t.ok(response.headers);
-    t.equal(response.headers['content-encoding'], 'gzip');
-
-    nock.restore();
-    var nockDefs = nock.recorder.play();
-    nock.recorder.clear();
-    nock.activate();
-
-    // Original bit.ly request is redirected to the target page.
-    t.true(nockDefs.length > 1);
-    var nocks = nock.define(nockDefs);
-
-    makeRequest(function(mockedErr, mockedResponse, mockedBody) {
-      t.equal(err, mockedErr);
-      t.deepEqual(mockedBody, body);
-      t.equal(mockedResponse.headers['content-encoding'], 'gzip');
-
-      _.each(nocks, function(nock) {
-        nock.done();
-      });
-
-      t.end();
     });
   });
 });
