@@ -30,8 +30,6 @@ jobs:
       script: npm run unit
     - node_js: 8
       script: npm run unit
-    - node_js: 6
-      script: npm run unit
     - stage: release
       node_js: lts/*
       env: semantic-release
