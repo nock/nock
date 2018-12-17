@@ -15,7 +15,6 @@ var needle  = require("needle");
 var restify = require('restify-clients');
 var domain  = require('domain');
 var hyperquest = require('hyperquest');
-var _ = require('lodash');
 var async = require('async');
 
 var ssl = require('./ssl')
@@ -2935,7 +2934,7 @@ test("allow unmocked option works with https", function(t) {
 
     function secondIsDone() {
       t.ok(! scope.isDone());
-      https.request(_.merge({path: '/'}, requestOptions), function(res) {
+      https.request(Object.assign({path: '/'}, requestOptions), res => {
         res.resume();
         t.ok(true, 'Google replied to /');
         res.destroy();
@@ -2947,14 +2946,14 @@ test("allow unmocked option works with https", function(t) {
 
     function firstIsDone() {
       t.ok(! scope.isDone(), 'scope is not done');
-      https.request(_.merge({path: '/does/not/exist'}, requestOptions), function(res) {
+      https.request(Object.assign({path: '/does/not/exist'}, requestOptions), res => {
         t.equal(404, res.statusCode, 'real google response status code');
         res.on('data', function() {});
         res.on('end', secondIsDone);
       }).end();
     }
 
-    https.request(_.merge({path: '/abc'}, requestOptions), function(res) {
+    https.request(Object.assign({path: '/abc'}, requestOptions), res => {
       res.on('end', firstIsDone);
       // Streams start in 'paused' mode and must be started.
       // See https://nodejs.org/api/stream.html#stream_class_stream_readable

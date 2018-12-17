@@ -5,8 +5,7 @@ var nock    = require('../.')
   , tap     = require('tap')
   , http    = require('http')
   , fs      = require('fs')
-  , exists  = fs.existsSync
-  , _       = require('lodash');
+  , exists  = fs.existsSync;
 
 nock.enableNetConnect();
 
@@ -133,8 +132,8 @@ tap.test('nockBack returns a promise when neither options nor nockbackFn are spe
   promise.then((params) => {
     var nockDone = params.nockDone;
     var context = params.context;
-    t.assert(_.isFunction(nockDone));
-    t.assert(_.isObject(context));
+    t.type(nockDone, 'function');
+    t.type(context, 'object');
     t.end();
   });
 
@@ -149,8 +148,8 @@ tap.test('nockBack returns a promise when nockbackFn is not specified', function
   promise.then((params) => {
     var nockDone = params.nockDone;
     var context = params.context;
-    t.assert(_.isFunction(nockDone));
-    t.assert(_.isObject(context));
+    t.type(nockDone, 'function');
+    t.type(context, 'object');
     t.end();
   });
 
