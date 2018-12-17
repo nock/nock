@@ -66,7 +66,7 @@
       "text-summary"
     ],
     "exclude": [
-      "tests/test_*.js"
+      "tests/"
     ]
   },
   "license": "MIT"
