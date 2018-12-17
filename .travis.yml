@@ -9,6 +9,9 @@ branches:
   only:
     - master
     - /^greenkeeper.*$/
+    - beta # semantic-release preview releases
+    - next # semantic-release @next releases
+    - /^\d+\.x$/ # semantic-release maintenance releases
 
 stages:
   - lint
