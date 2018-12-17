@@ -3,10 +3,11 @@
 const http = require('http');
 const fs = require('fs');
 const tap = require('tap');
-const nock    = require('../.');
+const proxyquire = require('proxyquire').noPreserveCache();
+const nock = require('../.');
 
 const nockBack = nock.back;
-const exists  = fs.existsSync;
+const exists = fs.existsSync;
 
 nock.enableNetConnect();
 
@@ -114,6 +115,27 @@ tap.test('nockBack returns a promise when neither options nor nockbackFn are spe
       t.end();
     });
 });
+
+tap.test('nockBack throws an exception when a hook is not a function', t => {
+  nockBack.fixtures = __dirname + '/fixtures';
+  nockBack.setMode('dryrun');
+  setOriginalModeOnEnd(t, nockBack);
+
+  t.throws(
+    () => nockBack('goodRequest.json', {before: 'not-a-function-innit'}),
+    {message: 'processing hooks must be a function'});
+
+  t.end();
+});
+
+tap.test('nockBack.setMode throws an exception on unknown mode', t => {
+  t.throws(
+    () => nockBack.setMode('bogus'),
+    {message: 'Unknown mode: bogus'});
+
+  t.end();
+});
+
 
 tap.test('nockBack returns a promise when nockbackFn is not specified', t => {
   nockBack.fixtures = __dirname + '/fixtures';
@@ -232,6 +254,19 @@ tap.test('nockBack dryrun tests', nw => {
 
 tap.test('nockBack record tests', nw => {
   nockBack.setMode('record');
+
+  nw.test('nockBack record throws an exception when fs is not available', t => {
+    const nockBackWithoutFs = proxyquire('../lib/back', {fs: null});
+    setOriginalModeOnEnd(t, nockBackWithoutFs);
+
+    nockBackWithoutFs.fixtures = __dirname + '/fixtures';
+
+    t.throws(
+      () => nockBackWithoutFs('goodRequest.json'),
+      {message: 'no fs'});
+
+    t.end();
+  });
 
   nw.test('it records when configured correctly', t => {
     t.plan(4)
