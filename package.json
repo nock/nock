@@ -55,7 +55,7 @@
     "pretest": "npm run -s lint",
     "test": "npm run -s unit",
     "coverage": "tap --coverage-report=html && open coverage/lcov-report/index.html",
-    "coverage:upload": "tap --coverage-report=text-lcov",
+    "coverage:upload": "tap --coverage-report=text-lcov | coveralls",
     "lint": "eslint \"**/*.js\"",
     "toc": "markdown-toc -i README.md && markdown-toc -i CONTRIBUTING.md ",
     "semantic-release": "semantic-release"
