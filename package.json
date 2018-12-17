@@ -37,6 +37,7 @@
     "aws-sdk": "^2.202.0",
     "coveralls": "^3.0.0",
     "eslint": "^5.0.0",
+    "got": "^9.4.0",
     "hyperquest": "^2.1.3",
     "isomorphic-fetch": "^2.2.0",
     "markdown-toc": "^1.2.0",
