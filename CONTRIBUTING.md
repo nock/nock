@@ -9,12 +9,16 @@ Please note that this project is released with a [Contributor Code of Conduct](.
 <!-- toc -->
 
 - [Commit Message conventions](#commit-message-conventions)
+- [Beta / Next / Maintenance releases](#beta--next--maintenance-releases)
+  * [Backport a fix / feature to a previous version](#backport-a-fix--feature-to-a-previous-version)
+  * [Submit a Beta / Next release](#submit-a-beta--next-release)
 - [Generate README TOC](#generate-readme-toc)
 - [Running tests](#running-tests)
   * [Airplane mode](#airplane-mode)
 - [Release Process](#release-process)
 - [GitHub Apps](#github-apps)
 - [Becoming a maintainer](#becoming-a-maintainer)
+- [Generating the CONTRIBUTORS.md file](#generating-the-contributorsmd-file)
 
 <!-- tocstop -->
 
@@ -38,6 +42,29 @@ Other helpful conventions are
 - Code style changes with `style: standard`
 
 The commit message(s) of a pull request can be fixed using the `squash & merge` button.
+
+## Beta / Next / Maintenance releases
+
+We use [semantic-release](https://github.com/semantic-release/semantic-release) to automate the release of new versions based on semantic commit messages as described above. Depending on the branch that a new pull request is merged into, it is published to different versions using different [npm dist-tags](https://docs.npmjs.com/cli/dist-tag).
+
+- `master`: Publish with `@latest`, or if the commits have been merged into `next` branch before, update the `@latest` dist-tag to point at the new version
+- `next`: Publish with `@next`
+- `beta`: Publish to `X.0.0-beta.Y`, where `X` is the next breaking version and `Y` is number that gets increased with each release.
+- `[Version].x`: For example `10.x`, where `10` is the major release number. No breaking changes are allowed on this branch. Publishes fix/feature versions to `[Version]` using a `@release-@[version].x` release tag
+
+### Backport a fix / feature to a previous version
+
+If you want to **backport a fix** to version 10, and the last version released on version 10 is `10.0.4`, then you have to follow these steps
+
+1. Create the `[Version].x` branch unless it already exists. If you don’t have write access, ask one of the maintainers to do it for you. In this example, then command is `git checkout -b 10.x v10.0.4`.
+2. Push the branch to GitHub: `git push -u origin $(git symbolic-ref --short HEAD)`
+3. Create a new branch based on `10.x`
+4. Make your changes
+5. Submit the pull request against the `10.x` branch
+
+### Submit a Beta / Next release
+
+Create a new branch based off `beta` or `next`, depending on what you want. Make your changes and submit them to the same branches. If either `beta` or `next` is outdated, ask a maintainer to re-create them from `master`
 
 ## Generate README TOC
 
