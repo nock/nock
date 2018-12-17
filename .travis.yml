@@ -33,7 +33,7 @@ jobs:
       node_js: lts/*
       env: semantic-release
       script: npm run semantic-release
-    - node_js: lts/*
+    - node_js: 10
       env: coverage
       script:
         - npm run test
