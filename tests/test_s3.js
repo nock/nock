@@ -1,5 +1,13 @@
 'use strict';
 
+// This is a regression test for this change:
+// https://github.com/nock/nock/commit/8f303b2a1e5ac00429f1d9e252dd52c52e65987b
+//
+// It should be replaced by a small test which reproduces the specific issue.
+// See discussion: https://github.com/nock/nock/pull/1288
+//
+// Do not create new tests in this style.
+
 var nock = require('../');
 var AWS = require('aws-sdk');
 var test = require('tap').test;
