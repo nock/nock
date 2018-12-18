@@ -17,7 +17,7 @@ stages:
   - lint
   - test
   - name: release
-    if: branch = master AND type IN (push)
+    if: branch =~ /^(\d+\.x|master|next|beta)$/ AND type IN (push)
 
 jobs:
   include:
