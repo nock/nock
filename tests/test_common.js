@@ -1,7 +1,6 @@
 'use strict';
 
 const tap = require('tap');
-const { test, given } = require('sazerac');
 const common = require('../lib/common');
 const matchBody = require('../lib/match_body');
 
