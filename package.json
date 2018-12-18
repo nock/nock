@@ -16,9 +16,9 @@
   "bugs": {
     "url": "http://github.com/nock/nock/issues"
   },
-  "engines": [
-    "node >= 4.0"
-  ],
+  "engines": {
+    "node": ">= 6.0"
+  },
   "main": "./index",
   "dependencies": {
     "chai": "^4.1.2",
