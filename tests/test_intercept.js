@@ -19,11 +19,9 @@ const async = require('async')
 
 const ssl = require('./ssl')
 
-let globalCount
-
 nock.enableNetConnect()
 
-globalCount = Object.keys(global).length
+const globalCount = Object.keys(global).length
 const acceptableLeaks = [
   '_key',
   '__core-js_shared__',
@@ -3078,7 +3076,7 @@ test('request has path', function(t) {
     .get('/the/path/to/infinity')
     .reply(200)
 
-  var req = http.request(
+  const req = http.request(
     {
       hostname: 'haspath.com',
       port: 80,
@@ -4007,14 +4005,14 @@ test('delay works with replyWithError', function(t) {
     .delay(100)
     .replyWithError('this is an error message')
 
+  const req = http.get('http://errorland/')
+
   setTimeout(function() {
     req.once('error', function(err) {
       t.equal(err.message, 'this is an error message')
       t.end()
     })
   }, 100)
-
-  var req = http.get('http://errorland/')
 })
 
 test('write callback called', function(t) {
