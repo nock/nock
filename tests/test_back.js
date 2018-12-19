@@ -255,19 +255,6 @@ test('nockBack dryrun tests', nw => {
 test('nockBack record tests', nw => {
   nockBack.setMode('record');
 
-  nw.test('nockBack record throws an exception when fs is not available', t => {
-    const nockBackWithoutFs = proxyquire('../lib/back', {fs: null});
-    setOriginalModeOnEnd(t, nockBackWithoutFs);
-
-    nockBackWithoutFs.fixtures = __dirname + '/fixtures';
-
-    t.throws(
-      () => nockBackWithoutFs('goodRequest.json'),
-      {message: 'no fs'});
-
-    t.end();
-  });
-
   nw.test('it records when configured correctly', t => {
     t.plan(4)
 
@@ -448,4 +435,27 @@ test('nockBack lockdown tests', nw => {
   });
 
   nw.end();
+});
+
+tap.test('nockBack dryrun throws the expected exception when fs is not available', t => {
+  const nockBackWithoutFs = proxyquire('../lib/back', {fs: null});
+
+  nockBackWithoutFs.fixtures = __dirname + '/fixtures';
+  t.throws(
+    () => nockBackWithoutFs('goodRequest.json'),
+    {message: 'no fs'});
+
+  t.end();
+});
+
+tap.test('nockBack record mode throws the expected exception when fs is not available', t => {
+  const nockBackWithoutFs = proxyquire('../lib/back', {fs: null});
+  nockBackWithoutFs.setMode('record')
+  setOriginalModeOnEnd(t, nockBackWithoutFs);
+
+  nockBackWithoutFs.fixtures = __dirname + '/fixtures';
+  t.throws(
+    () => nockBackWithoutFs('goodRequest.json'),
+    {message: 'no fs'});
+  t.end();
 });
