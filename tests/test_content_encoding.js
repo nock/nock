@@ -1,28 +1,22 @@
 'use strict';
 
-var zlib = require('zlib');
-var nock = require('../.');
-var http = require('http');
-var test = require('tap').test;
+const zlib = require('zlib');
+const {test} = require('tap');
+const got = require('got');
+const nock = require('../.');
 
-test('accepts gzipped content', {skip: !zlib.gzipSync | !zlib.gunzipSync}, function(t) {
-  var message = 'Lorem ipsum dolor sit amet';
+test('accepts gzipped content', async t => {
+  const message = 'Lorem ipsum dolor sit amet';
+  const compressed = zlib.gzipSync(message);
 
-  var compressedMessage = zlib.gzipSync(message);
-
-  nock('http://gziplandpartywoo')
+  nock('http://example.com')
     .get('/foo')
-    .reply(200, compressedMessage, {
-      'X-Transfer-Length': String(compressedMessage.length),
+    .reply(200, compressed, {
+      'X-Transfer-Length': String(compressed.length),
       'Content-Length': undefined,
       'Content-Encoding': 'gzip',
     });
+  const { body } = await got('http://example.com/foo')
 
-  http.get('http://gziplandpartywoo/foo', function(res) {
-    res.once('data', function(d) {
-      var dd = zlib.gunzipSync(d);
-      t.equal(dd.toString(), message);
-      res.once('end', t.end.bind(t));
-    });
-  });
+  t.equal(body, message)
 });
