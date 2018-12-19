@@ -1,47 +1,53 @@
-'use strict';
+'use strict'
 
-var test          = require('tap').test;
-var mikealRequest = require('request');
-var nock          = require('../');
+var test = require('tap').test
+var mikealRequest = require('request')
+var nock = require('../')
 
-nock.enableNetConnect();
+nock.enableNetConnect()
 
 // Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
-test('allowUnmocked for https', {skip: process.env.AIRPLANE}, function(t) {
-  nock('https://www.google.com/', {allowUnmocked: true})
-  .get('/pathneverhit')
-  .reply(200, {foo: 'bar'});
+test('allowUnmocked for https', { skip: process.env.AIRPLANE }, function(t) {
+  nock('https://www.google.com/', { allowUnmocked: true })
+    .get('/pathneverhit')
+    .reply(200, { foo: 'bar' })
 
   var options = {
     method: 'GET',
-    uri: 'https://www.google.com'
-  };
+    uri: 'https://www.google.com',
+  }
 
   mikealRequest(options, function(err, resp, body) {
-    t.notOk(err, 'should be no error');
-    t.true(typeof body !== 'undefined', 'body should not be undefined');
-    t.true(body.length !== 0, 'body should not be empty');
-    t.end();
-  });
-});
+    t.notOk(err, 'should be no error')
+    t.true(typeof body !== 'undefined', 'body should not be undefined')
+    t.true(body.length !== 0, 'body should not be empty')
+    t.end()
+  })
+})
 
 // Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
-test('allowUnmocked for https with query test miss', {skip: process.env.AIRPLANE}, function(t) {
-  nock.cleanAll();
-  nock('https://www.google.com', {allowUnmocked: true})
-    .get('/search')
-    .query(function() {return false;})
-    .reply(500);
+test(
+  'allowUnmocked for https with query test miss',
+  { skip: process.env.AIRPLANE },
+  function(t) {
+    nock.cleanAll()
+    nock('https://www.google.com', { allowUnmocked: true })
+      .get('/search')
+      .query(function() {
+        return false
+      })
+      .reply(500)
 
-  var options = {
-    method: 'GET',
-    uri: 'https://www.google.com/search'
-  };
+    var options = {
+      method: 'GET',
+      uri: 'https://www.google.com/search',
+    }
 
-  mikealRequest(options, function(err, resp, body) {
-    t.notOk(err, 'should be no error');
-    t.true(typeof body !== 'undefined', 'body should not be undefined');
-    t.true(body.length !== 0, 'body should not be empty');
-    t.end();
-  });
-});
+    mikealRequest(options, function(err, resp, body) {
+      t.notOk(err, 'should be no error')
+      t.true(typeof body !== 'undefined', 'body should not be undefined')
+      t.true(body.length !== 0, 'body should not be empty')
+      t.end()
+    })
+  }
+)
