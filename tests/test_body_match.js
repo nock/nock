@@ -1,9 +1,9 @@
 'use strict'
 
-var nock = require('../')
-var test = require('tap').test
-var mikealRequest = require('request')
-var assert = require('assert')
+const nock = require('../')
+const test = require('tap').test
+const mikealRequest = require('request')
+const assert = require('assert')
 
 test('match body is regex trying to match string', function(t) {
   nock('http://encodingsareus.com')
@@ -172,7 +172,7 @@ test('match body with form multipart', function(t) {
     )
     .reply(200)
 
-  var r = mikealRequest(
+  const r = mikealRequest(
     {
       url: 'http://encodingsareus.com/',
       method: 'post',
@@ -183,7 +183,7 @@ test('match body with form multipart', function(t) {
       t.end()
     }
   )
-  var form = r.form()
+  const form = r.form()
   form._boundary = 'fixboundary' // fix boundary so that request could match at all
   form.append('field', 'value')
 })

@@ -1,8 +1,8 @@
 'use strict'
 
-var nock = require('../.')
-var test = require('tap').test
-var request = require('request')
+const nock = require('../.')
+const test = require('tap').test
+const request = require('request')
 
 test('request lib', function(t) {
   nock('http://google.com')

@@ -1,6 +1,6 @@
 'use strict'
 
-var recorder = require('./lib/recorder')
+const recorder = require('./lib/recorder')
 module.exports = require('./lib/scope')
 
 module.exports.recorder = {

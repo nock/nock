@@ -106,7 +106,7 @@ test('passes custom options to recorder', t => {
             response.once('end', () => {
               nockDone()
 
-              let fixtureContent = JSON.parse(
+              const fixtureContent = JSON.parse(
                 fs.readFileSync(fixture, { encoding: 'utf8' })
               )
 
