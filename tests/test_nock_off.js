@@ -1,15 +1,15 @@
 'use strict'
 
-var test = require('tap').test
-var mikealRequest = require('request')
+const test = require('tap').test
+const mikealRequest = require('request')
 
-var ssl = require('./ssl')
+const ssl = require('./ssl')
 
 // Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('NOCK_OFF=true works for https', function(t) {
-  var original = process.env.NOCK_OFF
+  const original = process.env.NOCK_OFF
   process.env.NOCK_OFF = 'true'
-  var nock = require('../')
+  const nock = require('../')
 
   t.plan(4)
 
@@ -22,12 +22,12 @@ test('NOCK_OFF=true works for https', function(t) {
   ssl.startServer(middleware, function(error, server) {
     t.error(error)
 
-    var port = server.address().port
-    var scope = nock(`https://localhost:${port}`, { allowUnmocked: true })
+    const port = server.address().port
+    const scope = nock(`https://localhost:${port}`, { allowUnmocked: true })
       .get('/')
       .reply(200, 'mock')
 
-    var options = {
+    const options = {
       method: 'GET',
       uri: `https://localhost:${port}`,
       ca: ssl.ca,

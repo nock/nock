@@ -11,7 +11,7 @@ const exists = fs.existsSync
 
 nock.enableNetConnect()
 
-let originalMode = nockBack.currentMode
+const originalMode = nockBack.currentMode
 
 function testNock(t) {
   let dataCalled = false
@@ -105,14 +105,14 @@ test('nockBack throws an exception when fixtures is not set', t => {
 })
 
 test('nockBack throws an exception when fixtureName is not a string', t => {
-  nockBack.fixtures = __dirname + '/fixtures'
+  nockBack.fixtures = `${__dirname}/fixtures`
 
   t.throws(nockBack, { message: 'Parameter fixtureName must be a string' })
   t.end()
 })
 
 test('nockBack returns a promise when neither options nor nockbackFn are specified', t => {
-  nockBack.fixtures = __dirname + '/fixtures'
+  nockBack.fixtures = `${__dirname}/fixtures`
 
   nockBack('test-promise-fixture.json').then(params => {
     t.type(params.nockDone, 'function')
@@ -122,7 +122,7 @@ test('nockBack returns a promise when neither options nor nockbackFn are specifi
 })
 
 test('nockBack throws an exception when a hook is not a function', t => {
-  nockBack.fixtures = __dirname + '/fixtures'
+  nockBack.fixtures = `${__dirname}/fixtures`
   nockBack.setMode('dryrun')
   setOriginalModeOnEnd(t, nockBack)
 
@@ -141,7 +141,7 @@ test('nockBack.setMode throws an exception on unknown mode', t => {
 })
 
 test('nockBack returns a promise when nockbackFn is not specified', t => {
-  nockBack.fixtures = __dirname + '/fixtures'
+  nockBack.fixtures = `${__dirname}/fixtures`
 
   nockBack('test-promise-fixture.json', { test: 'options' }).then(params => {
     t.type(params.nockDone, 'function')
@@ -154,7 +154,7 @@ test('nockBack wild tests', nw => {
   // Manually disable net connectivity to confirm that dryrun enables it.
   nock.disableNetConnect()
 
-  nockBack.fixtures = __dirname + '/fixtures'
+  nockBack.fixtures = `${__dirname}/fixtures`
   nockBack.setMode('wild')
   setOriginalModeOnEnd(nw, nockBack)
 
@@ -171,7 +171,7 @@ test('nockBack dryrun tests', nw => {
   // Manually disable net connectivity to confirm that dryrun enables it.
   nock.disableNetConnect()
 
-  nockBack.fixtures = __dirname + '/fixtures'
+  nockBack.fixtures = `${__dirname}/fixtures`
   nockBack.setMode('dryrun')
   setOriginalModeOnEnd(nw, nockBack)
 
@@ -214,7 +214,7 @@ test('nockBack dryrun tests', nw => {
     let dataCalled = false
 
     const fixture = 'someDryrunFixture.json'
-    const fixtureLoc = nockBack.fixtures + '/' + fixture
+    const fixtureLoc = `${nockBack.fixtures}/${fixture}`
 
     t.false(exists(fixtureLoc))
 
@@ -264,10 +264,10 @@ test('nockBack record tests', nw => {
   nw.test('it records when configured correctly', t => {
     t.plan(4)
 
-    nockBack.fixtures = __dirname + '/fixtures'
+    nockBack.fixtures = `${__dirname}/fixtures`
 
     const fixture = 'someFixture.txt'
-    const fixtureLoc = nockBack.fixtures + '/' + fixture
+    const fixtureLoc = `${nockBack.fixtures}/${fixture}`
 
     t.false(exists(fixtureLoc))
 
@@ -389,7 +389,7 @@ test('nockBack record tests', nw => {
     // an empty array.
     const afterRecord = scopes => []
 
-    nockBack(fixture, { afterRecord: afterRecord }, function(done) {
+    nockBack(fixture, { afterRecord }, function(done) {
       const server = http.createServer((request, response) => {
         t.pass('server received a request')
 
@@ -425,7 +425,7 @@ test('nockBack record tests', nw => {
 })
 
 test('nockBack lockdown tests', nw => {
-  nockBack.fixtures = __dirname + '/fixtures'
+  nockBack.fixtures = `${__dirname}/fixtures`
   nockBack.setMode('lockdown')
   setOriginalModeOnEnd(nw, nockBack)
 
@@ -459,7 +459,7 @@ test('nockBack lockdown tests', nw => {
 test('nockBack dryrun throws the expected exception when fs is not available', t => {
   const nockBackWithoutFs = proxyquire('../lib/back', { fs: null })
 
-  nockBackWithoutFs.fixtures = __dirname + '/fixtures'
+  nockBackWithoutFs.fixtures = `${__dirname}/fixtures`
   t.throws(() => nockBackWithoutFs('goodRequest.json'), { message: 'no fs' })
 
   t.end()
@@ -470,7 +470,7 @@ test('nockBack record mode throws the expected exception when fs is not availabl
   nockBackWithoutFs.setMode('record')
   setOriginalModeOnEnd(t, nockBackWithoutFs)
 
-  nockBackWithoutFs.fixtures = __dirname + '/fixtures'
+  nockBackWithoutFs.fixtures = `${__dirname}/fixtures`
   t.throws(() => nockBackWithoutFs('goodRequest.json'), { message: 'no fs' })
   t.end()
 })

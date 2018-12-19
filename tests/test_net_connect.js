@@ -1,9 +1,9 @@
 'use strict'
 
-var nock = require('../')
-var test = require('tap').test
-var mikealRequest = require('request')
-var assert = require('assert')
+const nock = require('../')
+const test = require('tap').test
+const mikealRequest = require('request')
+const assert = require('assert')
 
 test('disable net connect is default', function(t) {
   nock.disableNetConnect()
