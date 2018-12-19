@@ -59,6 +59,41 @@ test('matchBody uses strict equality for deep comparisons', t => {
   t.end()
 });
 
+test('normalizeRequestOptions', t => {
+  t.deepEqual(
+    common.normalizeRequestOptions({
+      host: 'foobar.com:12345',
+      port: 12345,
+    }),
+    {
+      host: 'foobar.com:12345',
+      hostname: 'foobar.com',
+      port: 12345,
+      proto: 'http',
+    })
+  t.deepEqual(
+    common.normalizeRequestOptions({
+      hostname: 'foobar.com',
+    }),
+    {
+      host: 'foobar.com:80',
+      hostname: 'foobar.com',
+      port: 80,
+      proto: 'http',
+    })
+  t.deepEqual(
+    common.normalizeRequestOptions({}),
+    {
+      host: 'localhost:80',
+      // Should this be included?
+      // hostname: 'localhost'
+      port: 80,
+      proto: 'http',
+    })
+  t.end()
+})
+
+
 test('isBinaryBuffer works', t => {
   //  Returns false for non-buffers.
   t.false(common.isBinaryBuffer());
@@ -72,6 +107,13 @@ test('isBinaryBuffer works', t => {
 
   t.end();
 });
+
+test('isJSONContent', t => {
+  t.true(common.isJSONContent({'content-type': 'application/json'}));
+  t.true(common.isJSONContent({'content-type': ['application/json']}));
+  t.false(common.isJSONContent({'content-type': 'text/plain'}));
+  t.end();
+})
 
 test('headersFieldNamesToLowerCase works', t => {
   t.deepEqual(
@@ -149,6 +191,22 @@ test('matchStringOrRegexp', function (t) {
 
   t.ok(common.matchStringOrRegexp('to match', /match/), 'match if pattern is regex and target matches');
   t.false(common.matchStringOrRegexp('to match', /not/), "false if pattern is regex and target doesn't match");
+  t.end();
+});
+
+test('overrideRequests', t => {
+  t.on('end', () => common.restoreOverriddenRequests());
+  common.overrideRequests();
+  // Second call throws.
+  t.throws(
+    () => common.overrideRequests(),
+    { message: "Module's request already overridden for http protocol."})
+  t.end();
+});
+
+test('restoreOverriddenRequests can be called more than once', t => {
+  common.restoreOverriddenRequests();
+  common.restoreOverriddenRequests();
   t.end();
 });
 
