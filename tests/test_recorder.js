@@ -1,13 +1,13 @@
 'use strict'
 
-var nock = require('../.'),
-  test = require('tap').test,
-  http = require('http'),
-  https = require('https'),
-  fs = require('fs'),
-  zlib = require('zlib'),
-  mikealRequest = require('request'),
-  superagent = require('superagent')
+var nock = require('../.')
+var test = require('tap').test
+var http = require('http')
+var https = require('https')
+var fs = require('fs')
+var zlib = require('zlib')
+var mikealRequest = require('request')
+var superagent = require('superagent')
 
 var globalCount
 
@@ -867,7 +867,7 @@ test('works with clients listening for readable', function(t) {
           res.on('readable', () => {
             ++readableCount
             let chunk
-            while (null !== (chunk = res.read())) {
+            while ((chunk = res.read()) !== null) {
               t.equal(chunk.toString(), responseBody)
               ++chunkCount
             }
