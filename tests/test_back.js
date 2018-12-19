@@ -2,7 +2,7 @@
 
 const http = require('http');
 const fs = require('fs');
-const tap = require('tap');
+const {test} = require('tap');
 const proxyquire = require('proxyquire').noPreserveCache();
 const nock = require('../.');
 
@@ -91,21 +91,21 @@ function setOriginalModeOnEnd(t, nockBack) {
   t.once('end', () => nockBack.setMode(originalMode));
 }
 
-tap.test('nockBack throws an exception when fixtures is not set', t => {
+test('nockBack throws an exception when fixtures is not set', t => {
   nockBack.fixtures = undefined;
 
   t.throws(nockBack, {message: 'Back requires nock.back.fixtures to be set'});
   t.end();
 });
 
-tap.test('nockBack throws an exception when fixtureName is not a string', t => {
+test('nockBack throws an exception when fixtureName is not a string', t => {
   nockBack.fixtures = __dirname + '/fixtures';
 
   t.throws(nockBack, {message: 'Parameter fixtureName must be a string'});
   t.end();
 });
 
-tap.test('nockBack returns a promise when neither options nor nockbackFn are specified', t => {
+test('nockBack returns a promise when neither options nor nockbackFn are specified', t => {
   nockBack.fixtures = __dirname + '/fixtures';
 
   nockBack('test-promise-fixture.json')
@@ -116,7 +116,7 @@ tap.test('nockBack returns a promise when neither options nor nockbackFn are spe
     });
 });
 
-tap.test('nockBack throws an exception when a hook is not a function', t => {
+test('nockBack throws an exception when a hook is not a function', t => {
   nockBack.fixtures = __dirname + '/fixtures';
   nockBack.setMode('dryrun');
   setOriginalModeOnEnd(t, nockBack);
@@ -128,7 +128,7 @@ tap.test('nockBack throws an exception when a hook is not a function', t => {
   t.end();
 });
 
-tap.test('nockBack.setMode throws an exception on unknown mode', t => {
+test('nockBack.setMode throws an exception on unknown mode', t => {
   t.throws(
     () => nockBack.setMode('bogus'),
     {message: 'Unknown mode: bogus'});
@@ -137,7 +137,7 @@ tap.test('nockBack.setMode throws an exception on unknown mode', t => {
 });
 
 
-tap.test('nockBack returns a promise when nockbackFn is not specified', t => {
+test('nockBack returns a promise when nockbackFn is not specified', t => {
   nockBack.fixtures = __dirname + '/fixtures';
 
   nockBack('test-promise-fixture.json', {test: 'options'})
@@ -148,7 +148,7 @@ tap.test('nockBack returns a promise when nockbackFn is not specified', t => {
     });
 });
 
-tap.test('nockBack wild tests', nw => {
+test('nockBack wild tests', nw => {
   // Manually disable net connectivity to confirm that dryrun enables it.
   nock.disableNetConnect();
 
@@ -165,7 +165,7 @@ tap.test('nockBack wild tests', nw => {
   nw.end();
 });
 
-tap.test('nockBack dryrun tests', nw => {
+test('nockBack dryrun tests', nw => {
   // Manually disable net connectivity to confirm that dryrun enables it.
   nock.disableNetConnect();
 
@@ -252,21 +252,8 @@ tap.test('nockBack dryrun tests', nw => {
 });
 
 
-tap.test('nockBack record tests', nw => {
+test('nockBack record tests', nw => {
   nockBack.setMode('record');
-
-  nw.test('nockBack record throws an exception when fs is not available', t => {
-    const nockBackWithoutFs = proxyquire('../lib/back', {fs: null});
-    setOriginalModeOnEnd(t, nockBackWithoutFs);
-
-    nockBackWithoutFs.fixtures = __dirname + '/fixtures';
-
-    t.throws(
-      () => nockBackWithoutFs('goodRequest.json'),
-      {message: 'no fs'});
-
-    t.end();
-  });
 
   nw.test('it records when configured correctly', t => {
     t.plan(4)
@@ -422,7 +409,7 @@ tap.test('nockBack record tests', nw => {
   });
 });
 
-tap.test('nockBack lockdown tests', nw => {
+test('nockBack lockdown tests', nw => {
   nockBack.fixtures = __dirname + '/fixtures';
   nockBack.setMode('lockdown');
   setOriginalModeOnEnd(nw, nockBack);
@@ -448,4 +435,27 @@ tap.test('nockBack lockdown tests', nw => {
   });
 
   nw.end();
+});
+
+test('nockBack dryrun throws the expected exception when fs is not available', t => {
+  const nockBackWithoutFs = proxyquire('../lib/back', {fs: null});
+
+  nockBackWithoutFs.fixtures = __dirname + '/fixtures';
+  t.throws(
+    () => nockBackWithoutFs('goodRequest.json'),
+    {message: 'no fs'});
+
+  t.end();
+});
+
+test('nockBack record mode throws the expected exception when fs is not available', t => {
+  const nockBackWithoutFs = proxyquire('../lib/back', {fs: null});
+  nockBackWithoutFs.setMode('record')
+  setOriginalModeOnEnd(t, nockBackWithoutFs);
+
+  nockBackWithoutFs.fixtures = __dirname + '/fixtures';
+  t.throws(
+    () => nockBackWithoutFs('goodRequest.json'),
+    {message: 'no fs'});
+  t.end();
 });
