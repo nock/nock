@@ -6,6 +6,7 @@ parserOptions:
 
 extends:
   - "eslint:recommended"
+  - prettier
 
 rules:
   # Override some recommended rules.
@@ -16,9 +17,3 @@ rules:
   no-loop-func: "error"
   no-trailing-spaces: "error"
   eol-last: "error"
-
-  # For future use.
-  # indent: ["error", 2, {SwitchCase: 1}]
-  # semi: ["error", always]
-  # comma-style: ["error", "last"]
-  # max-len: ["error", { code: 120, ignoreComments: true }]
