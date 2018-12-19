@@ -22,6 +22,19 @@ Please note that this project is released with a [Contributor Code of Conduct](.
 
 <!-- tocstop -->
 
+## Formatting & linting
+
+This project formats its source code using Prettier. The most enjoyable way to
+use Prettier is to let is format code for you when you save. You can [integrate
+it into your editor][integrate prettier].
+
+[integrate prettier]: https://prettier.io/docs/en/editors.html
+
+If you don't want to integrate with your editor, you can run `npm run prettier`
+instead.
+
+Semantic issues are checked with ESLint via `npm run lint`.
+
 ## Commit Message conventions
 
 `nock` releases are automated using [semantic-release](https://github.com/semantic-release/semantic-release).
@@ -41,7 +54,7 @@ Other helpful conventions are
 - Commit changes to README files or comments with `docs: ...`
 - Code style changes with `style: standard`
 
-The commit message(s) of a pull request can be fixed using the `squash & merge` button.
+Don't stress this; if necessary the maintainers can fix commit message(s) of a pull request using the `squash & merge` button.
 
 ## Beta / Next / Maintenance releases
 
