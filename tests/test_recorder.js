@@ -328,7 +328,7 @@ test('records nonstandard ports', function(t) {
   const RESPONSE_BODY = '012345'
 
   //  Create test http server and perform the tests while it's up.
-  var testServer = http
+  const testServer = http
     .createServer(function(req, res) {
       res.end(RESPONSE_BODY)
     })
@@ -1010,7 +1010,7 @@ test('removes query params from the path and puts them in query()', function(t) 
 
 test('respects http.request() consumers', function(t) {
   //  Create test http server and perform the tests while it's up.
-  var testServer = http
+  const testServer = http
     .createServer(function(req, res) {
       res.write('foo')
       setTimeout(function() {
