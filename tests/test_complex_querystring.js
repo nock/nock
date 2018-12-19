@@ -8,19 +8,20 @@ const nock = require('../.')
 const exampleText = 'it worked!'
 
 test('query with array', async t => {
+  // In Node 10.x this can be updated:
+  // const exampleQuery = new URLSearchParams([
+  //   ['list', 123],
+  //   ['list', 456],
+  //   ['list', 789],
+  //   ['a', 'b'],
+  // ])
   const expectedQuery = { list: [123, 456, 789], a: 'b' }
-  const exampleQuery = new URLSearchParams([
-    ['list', 123],
-    ['list', 456],
-    ['list', 789],
-    ['a', 'b'],
-  ])
 
   const scope = nock('http://example.com')
     .get('/test')
     .query(expectedQuery)
     .reply(200, exampleText)
-  await got('http://example.com/test', { query: exampleQuery })
+  await got(`http://example.com/test?${qs.stringify(expectedQuery)}`)
 
   scope.done()
 })
@@ -104,13 +105,19 @@ test('query with object which contains pre-encoded values', async t => {
 })
 
 test('query with array and regexp', async t => {
-  const exampleQuery = new URLSearchParams([
-    ['list', 123],
-    ['list', 456],
-    ['list', 789],
-    ['foo', 'bar'],
-    ['a', 'b'],
-  ])
+  const exampleQuery = {
+    list: [123, 456, 789],
+    foo: 'bar',
+    a: 'b',
+  }
+  // In Node 10.x this can be updated:
+  // const exampleQuery = new URLSearchParams([
+  //   ['list', 123],
+  //   ['list', 456],
+  //   ['list', 789],
+  //   ['foo', 'bar'],
+  //   ['a', 'b'],
+  // ])
   const expectedQuery = {
     list: [123, 456, 789],
     foo: /.*/,
@@ -121,7 +128,7 @@ test('query with array and regexp', async t => {
     .get('/test')
     .query(expectedQuery)
     .reply(200, exampleText)
-  await got('http://example.com/test', { query: exampleQuery })
+  await got(`http://example.com/test?${qs.stringify(exampleQuery)}`)
 
   scope.done()
 })
