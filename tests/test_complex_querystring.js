@@ -1,159 +1,127 @@
-'use strict';
+'use strict'
 
-var nock    = require('../.');
-var request = require('request');
-var test    = require('tap').test;
+const { test } = require('tap')
+const qs = require('qs')
+const got = require('got')
+const nock = require('../.')
 
-test('query with array', function(t) {
-    var query1 = { list: [123, 456, 789], a: 'b' };
+const exampleText = 'it worked!'
 
-    request({
-        url: 'https://array-query-string.com/test',
-        qs: query1,
-        method: 'GET'
-    }, function(error, response, body) {
-        t.ok(!error);
-        t.deepEqual(body, 'success');
-        t.end();
-    });
+test('query with array', async t => {
+  const expectedQuery = { list: [123, 456, 789], a: 'b' }
+  const exampleQuery = new URLSearchParams([
+    ['list', 123],
+    ['list', 456],
+    ['list', 789],
+    ['a', 'b'],
+  ])
 
-    nock('https://array-query-string.com')
-        .get('/test')
-        .query(query1)
-        .reply(200, 'success');
-});
+  const scope = nock('http://example.com')
+    .get('/test')
+    .query(expectedQuery)
+    .reply(200, exampleText)
+  await got('http://example.com/test', { query: exampleQuery })
 
-test('query with array which contains unencoded value ', function(t) {
-    var query1 = { list: ['hello%20world', '2hello%20world', 3], a: 'b' };
+  scope.done()
+})
 
-    nock('https://array-query-string.com')
-        .get('/test')
-        .query(query1)
-        .reply(200, 'success');
+// These tests enforce the historical behavior of query strings as encoded by
+// the `qs` library. These are not standard, although they are compatible with
+// the `qs` option to `request`.
+test('query with array which contains unencoded value', async t => {
+  const expectedQuery = { list: ['hello%20world', '2hello%20world', 3], a: 'b' }
 
-    request({
-        url: 'https://array-query-string.com/test',
-        qs: query1,
-        method: 'GET'
-    }, function(error, response, body) {
-        t.ok(!error);
-        t.deepEqual(body, 'success');
-        t.end();
-    });
-});
+  const scope = nock('http://example.com')
+    .get('/test')
+    .query(expectedQuery)
+    .reply(200, exampleText)
+  await got(`http://example.com/test?${qs.stringify(expectedQuery)}`)
 
-test('query with array which contains pre-encoded values ', function(t) {
-    var query1 = { list: ['hello%20world', '2hello%20world']};
+  scope.done()
+})
 
-    nock('https://array-query-string.com', { encodedQueryParams: true })
-        .get('/test')
-        .query(query1)
-        .reply(200, 'success');
+test('query with array which contains pre-encoded values ', async t => {
+  const expectedQuery = { list: ['hello%20world', '2hello%20world'] }
+  const queryString = 'list%5B0%5D=hello%20world&list%5B1%5D=2hello%20world'
 
-    request({
-        url: 'https://array-query-string.com/test?list%5B0%5D=hello%20world&list%5B1%5D=2hello%20world',
-        method: 'GET'
-    }, function(error, response, body) {
-        t.ok(!error);
-        t.deepEqual(body, 'success');
-        t.end();
-    });
-});
+  const scope = nock('http://example.com', { encodedQueryParams: true })
+    .get('/test')
+    .query(expectedQuery)
+    .reply(200, exampleText)
+  await got(`http://example.com/test?${queryString}`)
 
-test('query with object', function(t) {
-    var query1 = {
-        a: {
-            b: ['c', 'd']
-        },
-        e: [1, 2, 3, 4]
-    };
+  scope.done()
+})
 
-    nock('https://object-query-string.com')
-        .get('/test')
-        .query(query1)
-        .reply(200, 'success');
+test('query with object', async t => {
+  const expectedQuery = {
+    a: {
+      b: ['c', 'd'],
+    },
+    e: [1, 2, 3, 4],
+  }
 
-    request({
-        url: 'https://object-query-string.com/test',
-        qs: query1,
-        method: 'GET'
-    }, function(error, response, body) {
-        t.ok(!error);
-        t.deepEqual(body, 'success');
-        t.end();
-    });
-});
+  const scope = nock('http://example.com')
+    .get('/test')
+    .query(expectedQuery)
+    .reply(200, exampleText)
+  await got(`http://example.com/test?${qs.stringify(expectedQuery)}`)
 
-test('query with object which contains unencoded value', function(t) {
-    var query1 = {
-        a: {
-            b: 'hello%20world'
-        }
-    };
+  scope.done()
+})
 
-    nock('https://object-query-string.com')
-        .get('/test')
-        .query(query1)
-        .reply(200, 'success');
+test('query with object which contains unencoded value', async t => {
+  const exampleQuery = {
+    a: {
+      b: 'hello%20world',
+    },
+  }
 
-    request({
-        url: 'https://object-query-string.com/test',
-        qs: query1,
-        method: 'GET'
-    }, function(error, response, body) {
-        t.ok(!error);
-        t.deepEqual(body, 'success');
-        t.end();
-    });
-});
+  const scope = nock('http://example.com')
+    .get('/test')
+    .query(exampleQuery)
+    .reply(200, exampleText)
+  await got(`http://example.com/test?${qs.stringify(exampleQuery)}`)
 
-test('query with object which contains pre-encoded values', function(t) {
-    var query1 = {
-        a: {
-            b: 'hello%20world'
-        }
-    };
+  scope.done()
+})
 
-    nock('https://object-query-string.com',  { encodedQueryParams: true })
-        .get('/test')
-        .query(query1)
-        .reply(200, 'success');
+test('query with object which contains pre-encoded values', async t => {
+  const queryString = 'a%5Bb%5D=hello%20world'
+  const exampleQuery = {
+    a: {
+      b: 'hello%20world',
+    },
+  }
 
-    request({
-        url: 'https://object-query-string.com/test?a%5Bb%5D=hello%20world',
-        method: 'GET'
-    }, function(error, response, body) {
-        t.ok(!error);
-        t.deepEqual(body, 'success');
-        t.end();
-    });
-});
+  const scope = nock('http://example.com', { encodedQueryParams: true })
+    .get('/test')
+    .query(exampleQuery)
+    .reply(200, exampleText)
+  await got(`http://example.com/test?${queryString}`)
 
-test('query with array and regexp', function(t) {
-    var expectQuery = {
-        list: [123, 456, 789],
-        foo: /.*/,
-        a: 'b'
-    };
+  scope.done()
+})
 
-    var actualQuery = {
-        list: [123, 456, 789],
-        foo: 'bar',
-        a: 'b'
-    };
+test('query with array and regexp', async t => {
+  const exampleQuery = new URLSearchParams([
+    ['list', 123],
+    ['list', 456],
+    ['list', 789],
+    ['foo', 'bar'],
+    ['a', 'b'],
+  ])
+  const expectedQuery = {
+    list: [123, 456, 789],
+    foo: /.*/,
+    a: 'b',
+  }
 
-    nock('https://array-query-string.com')
-        .get('/test')
-        .query(expectQuery)
-        .reply(200, 'success');
+  const scope = nock('http://example.com')
+    .get('/test')
+    .query(expectedQuery)
+    .reply(200, exampleText)
+  await got('http://example.com/test', { query: exampleQuery })
 
-    request({
-        url: 'https://array-query-string.com/test',
-        qs: actualQuery,
-        method: 'GET'
-    }, function(error, response, body) {
-        t.ok(!error);
-        t.deepEqual(body, 'success');
-        t.end();
-    });
-});
+  scope.done()
+})
