@@ -1,10 +1,16 @@
 # Nock
 
-[![Build Status](https://travis-ci.org/nock/nock.svg?branch=master)](https://travis-ci.org/nock/nock)
-[![Coverage Status](https://coveralls.io/repos/github/nock/nock/badge.svg?branch=master)](https://coveralls.io/github/nock/nock?branch=master)
+[![npm](https://img.shields.io/npm/v/nock.svg)][npmjs]
+[![npm@beta](https://img.shields.io/npm/v/nock/beta.svg)][npmjs]
+[![Build Status](https://travis-ci.org/nock/nock.svg?branch=beta)][build]
+[![Coverage Status](https://coveralls.io/repos/github/nock/nock/badge.svg?branch=beta)][coverage]
 [![Greenkeeper](https://badges.greenkeeper.io/nock/nock.svg)](https://greenkeeper.io/)
 [![Backers on Open Collective](https://opencollective.com/nock/backers/badge.svg)](#backers)
 [![Sponsors on Open Collective](https://opencollective.com/nock/sponsors/badge.svg)](#sponsors)
+
+[npmjs]: https://www.npmjs.com/package/nock
+[build]: https://travis-ci.org/nock/nock
+[coverage]: https://coveralls.io/github/nock/nock
 
 > HTTP server mocking and expectations library for Node.js
 
