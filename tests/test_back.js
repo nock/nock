@@ -437,7 +437,7 @@ test('nockBack lockdown tests', nw => {
   nw.end();
 });
 
-tap.test('nockBack dryrun throws the expected exception when fs is not available', t => {
+test('nockBack dryrun throws the expected exception when fs is not available', t => {
   const nockBackWithoutFs = proxyquire('../lib/back', {fs: null});
 
   nockBackWithoutFs.fixtures = __dirname + '/fixtures';
@@ -448,7 +448,7 @@ tap.test('nockBack dryrun throws the expected exception when fs is not available
   t.end();
 });
 
-tap.test('nockBack record mode throws the expected exception when fs is not available', t => {
+test('nockBack record mode throws the expected exception when fs is not available', t => {
   const nockBackWithoutFs = proxyquire('../lib/back', {fs: null});
   nockBackWithoutFs.setMode('record')
   setOriginalModeOnEnd(t, nockBackWithoutFs);
