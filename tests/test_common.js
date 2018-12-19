@@ -1,10 +1,10 @@
 'use strict';
 
-const tap = require('tap');
+const {test} = require('tap');
 const common = require('../lib/common');
 const matchBody = require('../lib/match_body');
 
-tap.test('matchBody ignores new line characters from strings', t => {
+test('matchBody ignores new line characters from strings', t => {
   t.true(
     matchBody(
       "something //here is something more \n",
@@ -12,7 +12,7 @@ tap.test('matchBody ignores new line characters from strings', t => {
   t.end();
 });
 
-tap.test("when spec is a function, it's called with newline characters intact", t => {
+test("when spec is a function, it's called with newline characters intact", t => {
   const exampleBody = "something //here is something more \n";
   let param
   matchBody(body => { param = body }, exampleBody);
@@ -20,7 +20,7 @@ tap.test("when spec is a function, it's called with newline characters intact", 
   t.end()
 });
 
-tap.test('matchBody should not throw, when headers come node-fetch style as array', t => {
+test('matchBody should not throw, when headers come node-fetch style as array', t => {
   t.false(
     matchBody.call(
       {headers: {'Content-Type': ["multipart/form-data;"]}},
@@ -30,7 +30,7 @@ tap.test('matchBody should not throw, when headers come node-fetch style as arra
   t.end()
 });
 
-tap.test("matchBody should not ignore new line characters from strings when Content-Type contains 'multipart'", t => {
+test("matchBody should not ignore new line characters from strings when Content-Type contains 'multipart'", t => {
   t.true(
     matchBody.call(
       {headers: {'Content-Type': "multipart/form-data;"}},
@@ -40,7 +40,7 @@ tap.test("matchBody should not ignore new line characters from strings when Cont
   t.end()
 });
 
-tap.test("matchBody should not ignore new line characters from strings when Content-Type contains 'multipart' (arrays come node-fetch style as array)", t => {
+test("matchBody should not ignore new line characters from strings when Content-Type contains 'multipart' (arrays come node-fetch style as array)", t => {
   t.true(
     matchBody.call(
       {headers: {'Content-Type': ["multipart/form-data;"]}},
@@ -50,7 +50,7 @@ tap.test("matchBody should not ignore new line characters from strings when Cont
   t.end()
 });
 
-tap.test('matchBody uses strict equality for deep comparisons', t => {
+test('matchBody uses strict equality for deep comparisons', t => {
   t.false(
     matchBody(
       { number: 1 },
@@ -59,7 +59,7 @@ tap.test('matchBody uses strict equality for deep comparisons', t => {
   t.end()
 });
 
-tap.test('isBinaryBuffer works', t => {
+test('isBinaryBuffer works', t => {
   //  Returns false for non-buffers.
   t.false(common.isBinaryBuffer());
   t.false(common.isBinaryBuffer(''));
@@ -73,7 +73,7 @@ tap.test('isBinaryBuffer works', t => {
   t.end();
 });
 
-tap.test('headersFieldNamesToLowerCase works', t => {
+test('headersFieldNamesToLowerCase works', t => {
   t.deepEqual(
     common.headersFieldNamesToLowerCase({
       HoSt: 'example.com',
@@ -86,7 +86,7 @@ tap.test('headersFieldNamesToLowerCase works', t => {
   t.end();
 });
 
-tap.test('headersFieldNamesToLowerCase throws on conflicting keys', t => {
+test('headersFieldNamesToLowerCase throws on conflicting keys', t => {
   t.throws(
     () => common.headersFieldNamesToLowerCase({
       'HoSt': 'example.com',
@@ -97,7 +97,7 @@ tap.test('headersFieldNamesToLowerCase throws on conflicting keys', t => {
   t.end();
 });
 
-tap.test('headersFieldsArrayToLowerCase works on arrays', function (t) {
+test('headersFieldsArrayToLowerCase works on arrays', function (t) {
   t.deepEqual(
     // Sort for comparison beause order doesn't matter.
     common.headersFieldsArrayToLowerCase(['HoSt', 'Content-typE']).sort(),
@@ -106,7 +106,7 @@ tap.test('headersFieldsArrayToLowerCase works on arrays', function (t) {
   t.end();
 });
 
-tap.test('headersFieldsArrayToLowerCase deduplicates arrays', function (t) {
+test('headersFieldsArrayToLowerCase deduplicates arrays', function (t) {
   t.deepEqual(
     // Sort for comparison beause order doesn't matter.
     common.headersFieldsArrayToLowerCase(['hosT', 'HoSt', 'Content-typE', 'conTenT-tYpe']).sort(),
@@ -115,7 +115,7 @@ tap.test('headersFieldsArrayToLowerCase deduplicates arrays', function (t) {
   t.end();
 });
 
-tap.test('deleteHeadersField deletes fields with case-insensitive field names', t => {
+test('deleteHeadersField deletes fields with case-insensitive field names', t => {
   // Prepare.
   const headers = {
     HoSt: 'example.com',
@@ -138,7 +138,7 @@ tap.test('deleteHeadersField deletes fields with case-insensitive field names', 
   t.end();
 });
 
-tap.test('matchStringOrRegexp', function (t) {
+test('matchStringOrRegexp', function (t) {
   t.true(common.matchStringOrRegexp('to match', 'to match'), 'true if pattern is string and target matches');
   t.false(common.matchStringOrRegexp('to match', 'not to match'), "false if pattern is string and target doesn't match");
 
@@ -152,7 +152,7 @@ tap.test('matchStringOrRegexp', function (t) {
   t.end();
 });
 
-tap.test('stringifyRequest', function (t) {
+test('stringifyRequest', function (t) {
   const exampleOptions = {
     method: "POST",
     port: 81,
@@ -196,7 +196,7 @@ tap.test('stringifyRequest', function (t) {
 });
 
 
-tap.test('headersArrayToObject', function (t) {
+test('headersArrayToObject', function (t) {
   const headers = [
     "Content-Type",
     "application/json; charset=utf-8",
