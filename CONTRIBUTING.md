@@ -10,17 +10,30 @@ Please note that this project is released with a [Contributor Code of Conduct](.
 
 - [Commit Message conventions](#commit-message-conventions)
 - [Beta / Next / Maintenance releases](#beta--next--maintenance-releases)
-  * [Backport a fix / feature to a previous version](#backport-a-fix--feature-to-a-previous-version)
-  * [Submit a Beta / Next release](#submit-a-beta--next-release)
+  - [Backport a fix / feature to a previous version](#backport-a-fix--feature-to-a-previous-version)
+  - [Submit a Beta / Next release](#submit-a-beta--next-release)
 - [Generate README TOC](#generate-readme-toc)
 - [Running tests](#running-tests)
-  * [Airplane mode](#airplane-mode)
+  - [Airplane mode](#airplane-mode)
 - [Release Process](#release-process)
 - [GitHub Apps](#github-apps)
 - [Becoming a maintainer](#becoming-a-maintainer)
 - [Generating the CONTRIBUTORS.md file](#generating-the-contributorsmd-file)
 
 <!-- tocstop -->
+
+## Formatting & linting
+
+This project formats its source code using Prettier. The most enjoyable way to
+use Prettier is to let is format code for you when you save. You can [integrate
+it into your editor][integrate prettier].
+
+[integrate prettier]: https://prettier.io/docs/en/editors.html
+
+If you don't want to integrate with your editor, you can run `npm run prettier`
+instead.
+
+Semantic issues are checked with ESLint via `npm run lint`.
 
 ## Commit Message conventions
 
@@ -30,7 +43,7 @@ three commit message conventions need to be followed
 
 - Commit bug fixes with `fix: ...` or `fix(scope): ...` prefix in commit subject
 - Commit new features with `feat: ...` or `feat(scope): ...` prefix in commit subject
-- Commit breaking changes by adding `BREAKING CHANGE: ` in the commit body
+- Commit breaking changes by adding `BREAKING CHANGE:` in the commit body
   (not the subject line)
 
 Other helpful conventions are
@@ -41,7 +54,7 @@ Other helpful conventions are
 - Commit changes to README files or comments with `docs: ...`
 - Code style changes with `style: standard`
 
-The commit message(s) of a pull request can be fixed using the `squash & merge` button.
+Don't stress this; if necessary the maintainers can fix commit message(s) of a pull request using the `squash & merge` button.
 
 ## Beta / Next / Maintenance releases
 
@@ -109,12 +122,12 @@ Nock is actively interested in having more maintainers. That means that we would
 
 Here are some things you can do today to actively show the Nock team that you're interested in helping out in the long term:
 
-* **Triage issues!** We have more issues than we have bandwidth to deal with. For some of these issues, there are no labels, no comments suggesting how the issue could be resolved, and no follow-up after months or years of silence. It would be great if the issues actively reflected the state of the project. Go through old issues and suggesting labels in comments, ask for more information, and generally help out with the resolution process. This would be a great help!
-* **Review PRs.** We have a lot of open PRs! Some of these are probably ready to merge, and some of them probably need more work. Any extra eyes on PRs are encouraged. Comment on code patterns you think need work, suggest extra tests, and let us know if a PR 'LGTM' ("looks good to me"). The more reviewers we have, the faster we can merge issues, the better this project becomes.
-* **Help out!** If someone files a bug and no one has responded yet, see if you can resolve it! Suggest PRs, or file them yourself. While most contributors are going to only be interested in their own bugs, great maintainers help out with other people's bugs. This is one of the best ways to become an expert at Nock (and Node.js, JavaScript, or pretty much any project) - helping others.
-* **Write docs.** Are our docs missing something important? Are they not clear? Could they be better? Open a PR!
-* **Suggest examples.** Right now, we have a few examples, but we could always have more. Submit small example files and tutorials. At some point, we'll have to work on a better way to display these - for now, it's great to show others how to solve difficult mocking problems easily with Nock.
-* **Refactor.** This is one of the hardest things to do, but one of the most useful. Go through the code, and find examples where it could be written better - with better variable names, more useful abstractions, and more elegant patterns. Taking away ten lines of code that are unnecessary is more valuable than submitting a hundred new lines, sometimes. Open a PR or a comment and defend your position; ask for feedback.
+- **Triage issues!** We have more issues than we have bandwidth to deal with. For some of these issues, there are no labels, no comments suggesting how the issue could be resolved, and no follow-up after months or years of silence. It would be great if the issues actively reflected the state of the project. Go through old issues and suggesting labels in comments, ask for more information, and generally help out with the resolution process. This would be a great help!
+- **Review PRs.** We have a lot of open PRs! Some of these are probably ready to merge, and some of them probably need more work. Any extra eyes on PRs are encouraged. Comment on code patterns you think need work, suggest extra tests, and let us know if a PR 'LGTM' ("looks good to me"). The more reviewers we have, the faster we can merge issues, the better this project becomes.
+- **Help out!** If someone files a bug and no one has responded yet, see if you can resolve it! Suggest PRs, or file them yourself. While most contributors are going to only be interested in their own bugs, great maintainers help out with other people's bugs. This is one of the best ways to become an expert at Nock (and Node.js, JavaScript, or pretty much any project) - helping others.
+- **Write docs.** Are our docs missing something important? Are they not clear? Could they be better? Open a PR!
+- **Suggest examples.** Right now, we have a few examples, but we could always have more. Submit small example files and tutorials. At some point, we'll have to work on a better way to display these - for now, it's great to show others how to solve difficult mocking problems easily with Nock.
+- **Refactor.** This is one of the hardest things to do, but one of the most useful. Go through the code, and find examples where it could be written better - with better variable names, more useful abstractions, and more elegant patterns. Taking away ten lines of code that are unnecessary is more valuable than submitting a hundred new lines, sometimes. Open a PR or a comment and defend your position; ask for feedback.
 
 Once you've been around for a bit, ask a current Maintainer - one of [the team members](https://github.com/orgs/nock/people) - whether you can be elevated to Maintainer status and given permissions to close issues and merge PRs. We're interested in how well you know what Nock is about, and how involved you are in the community - not where you're from, how good your English is, or whether or not you can pass a whiteboard test blindfolded. If you think that you've been helpful, let us know. We're friendly, promise. :)
 

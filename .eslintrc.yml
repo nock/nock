@@ -2,23 +2,18 @@ env:
   node: true
 
 parserOptions:
-  ecmaVersion: 8
+  ecmaVersion: 9
 
 extends:
-  - "eslint:recommended"
+  - 'eslint:recommended'
+  - prettier
 
 rules:
   # Override some recommended rules.
-  no-unused-vars: ["error", {"args": "none"}]
-  no-empty: ["error", { "allowEmptyCatch": true }]
+  no-unused-vars: ['error', { 'args': 'none' }]
+  no-empty: ['error', { 'allowEmptyCatch': true }]
 
-  strict: ["error", "safe"]
-  no-loop-func: "error"
-  no-trailing-spaces: "error"
-  eol-last: "error"
-
-  # For future use.
-  # indent: ["error", 2, {SwitchCase: 1}]
-  # semi: ["error", always]
-  # comma-style: ["error", "last"]
-  # max-len: ["error", { code: 120, ignoreComments: true }]
+  strict: ['error', 'safe']
+  no-loop-func: 'error'
+  no-trailing-spaces: 'error'
+  eol-last: 'error'

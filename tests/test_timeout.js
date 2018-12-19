@@ -1,21 +1,24 @@
-'use strict';
+'use strict'
 
-var nock    = require('../.');
-var test    = require('tap').test;
-var request = require('request');
+var nock = require('../.')
+var test = require('tap').test
+var request = require('request')
 
-test('request lib', function (t) {
-    nock('http://google.com')
-        .get('/')
-        .delay(1000)
-        .reply(200, {});
+test('request lib', function(t) {
+  nock('http://google.com')
+    .get('/')
+    .delay(1000)
+    .reply(200, {})
 
-    request({
-        url: 'http://google.com',
-        timeout: 10
-    }, function (err, response) {
-        t.ok(err);
-        t.equal(err.code, 'ESOCKETTIMEDOUT');
-        t.end();
-    });
-});
+  request(
+    {
+      url: 'http://google.com',
+      timeout: 10,
+    },
+    function(err, response) {
+      t.ok(err)
+      t.equal(err.code, 'ESOCKETTIMEDOUT')
+      t.end()
+    }
+  )
+})
