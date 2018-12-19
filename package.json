@@ -64,7 +64,7 @@
     "coverage:upload": "tap --coverage-report=text-lcov | coveralls",
     "lint": "eslint \"**/*.js\"",
     "prettier": "prettier --write \"**/*.@(js|md|yml|json)\"",
-    "prettier-check": "prettier-check \"**/*.@(js|md|yml|json)\" || true",
+    "prettier-check": "prettier-check \"**/*.@(js|md|yml|json)\"",
     "toc": "markdown-toc -i README.md && markdown-toc -i CONTRIBUTING.md ",
     "semantic-release": "semantic-release"
   },
