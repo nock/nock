@@ -5077,9 +5077,7 @@ test('.setNoDelay', function(t) {
 
 test('match basic authentication header', function(t) {
   var username = 'testuser'
-
   var password = 'testpassword'
-
   var authString = `${username}:${password}`
 
   const expectedAuthHeader =
