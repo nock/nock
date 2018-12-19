@@ -18,9 +18,17 @@ stages:
   - test
   - name: release
     if: branch =~ /^(\d+\.x|master|next|beta)$/ AND type IN (push)
+  - name: update-prettier
+    if: branch =~ ^greenkeeper/prettier
 
 jobs:
   include:
+    - stage: update-prettier
+      script:
+        - git checkout $TRAVIS_BRANCH
+        - npm run prettier
+        # commit changes and push back to branch on GitHub. If there are no changes then exit without error
+        - 'git commit -a -m "style: prettier" && git push "https://${GH_TOKEN}@github.com/$TRAVIS_REPO_SLUG" ${TRAVIS_BRANCH} || true'
     - stage: lint
       node_js: lts/*
       env: linting
