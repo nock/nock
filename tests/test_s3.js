@@ -8,12 +8,12 @@
 //
 // Do not create new tests in this style.
 
-var nock = require('../')
-var AWS = require('aws-sdk')
-var test = require('tap').test
+const nock = require('../')
+const AWS = require('aws-sdk')
+const test = require('tap').test
 
 test('works with s3, body < 1024 ^ 2', function(t) {
-  var REGION = 'us-east-1'
+  const REGION = 'us-east-1'
 
   AWS.config.update({
     region: REGION,
@@ -22,7 +22,7 @@ test('works with s3, body < 1024 ^ 2', function(t) {
     secretAccessKey: 'SECRETACCESSKEY',
   })
 
-  var bucket = new AWS.S3({
+  const bucket = new AWS.S3({
     apiVersion: '2006-03-01',
     params: {
       Bucket: 'bucket',
@@ -49,7 +49,7 @@ test('works with s3, body < 1024 ^ 2', function(t) {
 })
 
 test('works with s3, body = 10 * 1024 ^ 2', function(t) {
-  var REGION = 'us-east-1'
+  const REGION = 'us-east-1'
 
   AWS.config.update({
     region: REGION,
@@ -58,7 +58,7 @@ test('works with s3, body = 10 * 1024 ^ 2', function(t) {
     secretAccessKey: 'SECRETACCESSKEY',
   })
 
-  var bucket = new AWS.S3({
+  const bucket = new AWS.S3({
     apiVersion: '2006-03-01',
     params: {
       Bucket: 'bucket',
@@ -84,7 +84,7 @@ test('works with s3, body = 10 * 1024 ^ 2', function(t) {
 })
 
 test('works with s3, body = 16 * 1024 ^ 2', function(t) {
-  var REGION = 'us-east-1'
+  const REGION = 'us-east-1'
 
   AWS.config.update({
     region: REGION,
@@ -93,7 +93,7 @@ test('works with s3, body = 16 * 1024 ^ 2', function(t) {
     secretAccessKey: 'SECRETACCESSKEY',
   })
 
-  var bucket = new AWS.S3({
+  const bucket = new AWS.S3({
     apiVersion: '2006-03-01',
     params: {
       Bucket: 'bucket',

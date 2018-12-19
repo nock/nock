@@ -12,12 +12,12 @@
 //   openssl x509 -req -in localhost.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out localhost.crt -days 3650
 //   rm ca.srl localhost.csr
 //
-var https = require('https')
-var readFileSync = require('fs').readFileSync
-var resolve = require('path').resolve
+const https = require('https')
+const readFileSync = require('fs').readFileSync
+const resolve = require('path').resolve
 
 function startHttpsServer(middleware, done) {
-  var server = https.createServer(
+  const server = https.createServer(
     {
       key: readFileSync(resolve(__dirname, './localhost.key')),
       cert: readFileSync(resolve(__dirname, './localhost.crt')),

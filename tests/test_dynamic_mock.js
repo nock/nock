@@ -1,8 +1,8 @@
 'use strict'
 
-var test = require('tap').test
-var nock = require('../.')
-var request = require('request')
+const test = require('tap').test
+const nock = require('../.')
+const request = require('request')
 
 test('one function returning the body defines a full mock', function(t) {
   nock('http://acompleteandfullmock.io')

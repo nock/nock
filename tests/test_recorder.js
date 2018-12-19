@@ -1,15 +1,15 @@
 'use strict'
 
-var nock = require('../.')
-var test = require('tap').test
-var http = require('http')
-var https = require('https')
-var fs = require('fs')
-var zlib = require('zlib')
-var mikealRequest = require('request')
-var superagent = require('superagent')
+const nock = require('../.')
+const test = require('tap').test
+const http = require('http')
+const https = require('https')
+const fs = require('fs')
+const zlib = require('zlib')
+const mikealRequest = require('request')
+const superagent = require('superagent')
 
-var globalCount
+let globalCount
 
 test('setup', function(t) {
   globalCount = Object.keys(global).length
@@ -58,7 +58,7 @@ test('records', function(t) {
 
     mikealRequest(options, function(err, resp, body) {
       nock.restore()
-      var ret = nock.recorder.play()
+      const ret = nock.recorder.play()
       t.equal(ret.length, 1)
       t.type(ret[0], 'string')
       t.equal(
@@ -102,7 +102,7 @@ test('records objects', function(t) {
 
     mikealRequest(options, function(err, resp, body) {
       nock.restore()
-      var ret = nock.recorder.play()
+      const ret = nock.recorder.play()
       t.equal(ret.length, 1)
       t.equal(ret[0].scope, url)
       t.equal(ret[0].method, 'POST')
@@ -324,8 +324,8 @@ test('records nonstandard ports', function(t) {
   nock.recorder.clear()
   t.equal(nock.recorder.play().length, 0)
 
-  var REQUEST_BODY = 'ABCDEF'
-  var RESPONSE_BODY = '012345'
+  const REQUEST_BODY = 'ABCDEF'
+  const RESPONSE_BODY = '012345'
 
   //  Create test http server and perform the tests while it's up.
   var testServer = http
@@ -335,27 +335,27 @@ test('records nonstandard ports', function(t) {
     .listen(8082, function(err) {
       t.equal(err, undefined)
 
-      var options = {
+      const options = {
         host: 'localhost',
         port: testServer.address().port,
         path: '/',
       }
-      var rec_options = {
+      const rec_options = {
         dont_print: true,
         output_objects: true,
       }
 
       nock.recorder.rec(rec_options)
 
-      var req = http.request(options, function(res) {
+      const req = http.request(options, function(res) {
         res.resume()
         res.once('end', function() {
           nock.restore()
-          var ret = nock.recorder.play()
+          let ret = nock.recorder.play()
           t.equal(ret.length, 1)
           ret = ret[0]
           t.type(ret, 'object')
-          t.equal(ret.scope, 'http://localhost:' + options.port)
+          t.equal(ret.scope, `http://localhost:${options.port}`)
           t.equal(ret.method, 'GET')
           t.equal(ret.body, REQUEST_BODY)
           t.equal(ret.status, 200)
@@ -475,8 +475,9 @@ test('records request headers correctly', function(t) {
             t.type(recorded[0], 'object')
             t.equivalent(recorded[0].reqheaders, {
               host: `localhost:${server.address().port}`,
-              authorization:
-                'Basic ' + Buffer.from('foo:bar').toString('base64'),
+              authorization: `Basic ${Buffer.from('foo:bar').toString(
+                'base64'
+              )}`,
             })
             t.end()
           })
@@ -624,7 +625,7 @@ test("doesn't record request headers by default", function(t) {
           res.resume()
           res.once('end', function() {
             nock.restore()
-            var ret = nock.recorder.play()
+            let ret = nock.recorder.play()
             t.equal(ret.length, 1)
             ret = ret[0]
             t.type(ret, 'object')
@@ -674,7 +675,7 @@ test('will call a custom logging function', function(t) {
             nock.restore()
 
             t.equal(record.length, 1)
-            var ret = record[0]
+            const ret = record[0]
             t.type(ret, 'string')
             t.end()
           })
@@ -695,8 +696,8 @@ test('use_separator:false is respected', function(t) {
   nock.recorder.clear()
   t.equal(nock.recorder.play().length, 0)
 
-  var record = []
-  var arrayLog = function(content) {
+  const record = []
+  const arrayLog = function(content) {
     record.push(content)
   }
 
@@ -721,7 +722,7 @@ test('use_separator:false is respected', function(t) {
           res.once('end', function() {
             nock.restore()
             t.equal(record.length, 1)
-            var ret = record[0]
+            const ret = record[0]
             t.type(ret, 'object') // this is still an object, because the "cut here" strings have not been appended
             t.end()
           })
@@ -762,7 +763,7 @@ test('records request headers except user-agent if enable_reqheaders_recording i
           res.resume()
           res.once('end', function() {
             nock.restore()
-            var ret = nock.recorder.play()
+            let ret = nock.recorder.play()
             t.equal(ret.length, 1)
             ret = ret[0]
             t.type(ret, 'object')
@@ -798,7 +799,7 @@ test('includes query parameters from superagent', function(t) {
       .query({ q: 'test search' })
       .end(function(res) {
         nock.restore()
-        var ret = nock.recorder.play()
+        const ret = nock.recorder.play()
         t.true(ret.length >= 1)
         t.equal(ret[0].path, '/?q=test%20search')
         t.end()
@@ -828,7 +829,7 @@ test('encodes the query parameters when not outputing objects', function(t) {
       .query({ q: 'test search++' })
       .end(function(res) {
         nock.restore()
-        var recording = nock.recorder.play()
+        const recording = nock.recorder.play()
         t.true(recording.length >= 1)
         t.true(recording[0].indexOf('test%20search%2B%2B') !== -1)
         t.end()
@@ -1026,15 +1027,15 @@ test('respects http.request() consumers', function(t) {
         output_objects: true,
       })
 
-      var options = {
+      const options = {
         host: 'localhost',
         port: testServer.address().port,
         path: '/',
       }
-      var req = http.request(
+      const req = http.request(
         options,
         function(res) {
-          var buffer = Buffer.from('')
+          let buffer = Buffer.from('')
 
           setTimeout(function() {
             res
@@ -1097,7 +1098,7 @@ test('records and replays binary response correctly', t => {
       },
     }
     const postRequest1 = http.request(postRequestOptions, function(response) {
-      var data = []
+      const data = []
 
       response.on('data', function(chunk) {
         data.push(chunk)
@@ -1121,7 +1122,7 @@ test('records and replays binary response correctly', t => {
           const postRequest2 = http.request(postRequestOptions, function(
             response
           ) {
-            var data = []
+            const data = []
 
             response.on('data', function(chunk) {
               data.push(chunk)
@@ -1152,7 +1153,7 @@ test('records and replays binary response correctly', t => {
 })
 
 test('teardown', function(t) {
-  var leaks = Object.keys(global).splice(globalCount, Number.MAX_VALUE)
+  let leaks = Object.keys(global).splice(globalCount, Number.MAX_VALUE)
 
   if (leaks.length == 1 && leaks[0] == '_key') {
     leaks = []

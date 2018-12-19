@@ -1,11 +1,11 @@
 'use strict'
 
-var nock = require('../')
-var test = require('tap').test
-var fetch = require('isomorphic-fetch')
+const nock = require('../')
+const test = require('tap').test
+const fetch = require('isomorphic-fetch')
 
 test('basic match works', function(t) {
-  var scope = nock('http://isomorphicfetchland.com')
+  const scope = nock('http://isomorphicfetchland.com')
     .get('/path')
     .reply(200, 'somedata')
 
@@ -24,7 +24,7 @@ test('basic match works', function(t) {
 })
 
 test('string-based reqheaders match works', function(t) {
-  var scope = nock('http://isomorphicfetchland.com', {
+  const scope = nock('http://isomorphicfetchland.com', {
     reqheaders: {
       header: 'header value',
     },
@@ -51,7 +51,7 @@ test('string-based reqheaders match works', function(t) {
 })
 
 test('basicAuth match works', function(t) {
-  var scope = nock('http://isomorphicfetchland.com')
+  const scope = nock('http://isomorphicfetchland.com')
     .get('/path2')
     .basicAuth({
       user: 'username',
@@ -61,8 +61,9 @@ test('basicAuth match works', function(t) {
 
   return fetch('http://isomorphicfetchland.com/path2', {
     headers: {
-      Authorization:
-        'Basic ' + Buffer.from('username:password').toString('base64'),
+      Authorization: `Basic ${Buffer.from('username:password').toString(
+        'base64'
+      )}`,
     },
   })
     .then(function(res) {
@@ -79,10 +80,11 @@ test('basicAuth match works', function(t) {
 })
 
 test('matchHeader works', function(t) {
-  var authorizationHeader =
-    'Basic ' + Buffer.from('username:password').toString('base64')
+  const authorizationHeader = `Basic ${Buffer.from(
+    'username:password'
+  ).toString('base64')}`
 
-  var scope = nock('http://isomorphicfetchland.com')
+  const scope = nock('http://isomorphicfetchland.com')
     .get('/path2')
     .matchHeader('authorization', authorizationHeader)
     .reply(200, 'somemoardata')

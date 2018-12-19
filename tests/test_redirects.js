@@ -1,9 +1,9 @@
 'use strict'
 
-var assert = require('assert')
-var test = require('tap').test
-var mikealRequest = require('request')
-var nock = require('../')
+const assert = require('assert')
+const test = require('tap').test
+const mikealRequest = require('request')
+const nock = require('../')
 
 test('follows redirects', function(t) {
   nock('http://redirecter.com')
