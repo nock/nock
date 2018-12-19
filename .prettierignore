@@ -1,0 +1,5 @@
+package.json
+package-lock.json
+/.nyc_output
+/coverage
+/tests/browserify-public/browserify-bundle.js
