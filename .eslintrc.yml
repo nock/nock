@@ -3,9 +3,13 @@ env:
 
 parserOptions:
   ecmaVersion: 9
+  # Override eslint-config-standard, which incorrectly sets this to "module",
+  # though that setting is only for ES6 modules, not CommonJS modules.
+  sourceType: 'script'
 
 extends:
   - 'eslint:recommended'
+  - standard
   - prettier
 
 rules:
@@ -13,7 +17,16 @@ rules:
   no-unused-vars: ['error', { 'args': 'none' }]
   no-empty: ['error', { 'allowEmptyCatch': true }]
 
+  # TODO These are included in standard and should be cleaned up and turned
+  # on.
+  node/no-deprecated-api: 'off'
+  no-path-concat: 'off'
+  no-throw-literal: 'off'
+  handle-callback-err: 'off'
+  eqeqeq: 'off'
+  new-cap: 'off'
+  camelcase: 'off'
+
+  # Nock additions.
   strict: ['error', 'safe']
   no-loop-func: 'error'
-  no-trailing-spaces: 'error'
-  eol-last: 'error'

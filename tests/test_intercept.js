@@ -1270,11 +1270,10 @@ test('match all headers', function(t) {
 
 test('header manipulation', function(t) {
   var scope = nock('http://example.com')
-      .get('/accounts')
-      .reply(200, { accounts: [{ id: 1, name: 'Joe Blow' }] }),
-    req
+    .get('/accounts')
+    .reply(200, { accounts: [{ id: 1, name: 'Joe Blow' }] })
 
-  req = http.get({ host: 'example.com', path: '/accounts' }, function(res) {
+  var req = http.get({ host: 'example.com', path: '/accounts' }, function(res) {
     res.on('end', function() {
       scope.done()
       t.end()
@@ -5036,7 +5035,7 @@ test('response readable pull stream works as expected', function(t) {
       t.equal(res.statusCode, 200)
       res.on('readable', function() {
         var chunk
-        while (null !== (chunk = res.read())) {
+        while ((chunk = res.read()) !== null) {
           responseBody += chunk.toString()
         }
         if (chunk === null && !ended) {
@@ -5077,9 +5076,9 @@ test('.setNoDelay', function(t) {
 })
 
 test('match basic authentication header', function(t) {
-  var username = 'testuser',
-    password = 'testpassword',
-    authString = `${username}:${password}`
+  var username = 'testuser'
+  var password = 'testpassword'
+  var authString = `${username}:${password}`
 
   const expectedAuthHeader =
     'Basic ' + Buffer.from(authString).toString('base64')
