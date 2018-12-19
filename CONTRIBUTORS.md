@@ -969,7 +969,7 @@ narendra @reddynr https://github.com/reddynr
 @zacharyscott https://github.com/zacharyscott
 @zeevl https://github.com/zeevl
 psixdev @PsiXdev https://github.com/PsiXdev
-t__hos @TomHoss https://github.com/TomHoss
+t\_\_hos @TomHoss https://github.com/TomHoss
 taevas @zyvas https://github.com/zyvas
 taven @taven-liu https://github.com/taven-liu
 wang yu @wayoo https://github.com/wayoo
