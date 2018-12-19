@@ -30,3 +30,8 @@ rules:
   # Nock additions.
   strict: ['error', 'safe']
   no-loop-func: 'error'
+  no-var: 'error'
+  prefer-const: 'error'
+  object-shorthand: ['error', 'properties']
+  prefer-template: 'error'
+  arrow-body-style: ['error', 'as-needed']
