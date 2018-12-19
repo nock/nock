@@ -1,11 +1,11 @@
 'use strict'
 
-var nock = require('../.')
-var request = require('request')
-var test = require('tap').test
+const nock = require('../.')
+const request = require('request')
+const test = require('tap').test
 
 test('encode query string', function(t) {
-  var query1 = { q: '(nodejs)' }
+  const query1 = { q: '(nodejs)' }
 
   nock('https://encodeland.com')
     .get('/test')

@@ -1,13 +1,13 @@
 'use strict'
 
-var nock = require('../.')
-var http = require('http')
-var Buffer = require('buffer').Buffer
-var querystring = require('querystring')
-var test = require('tap').test
+const nock = require('../.')
+const http = require('http')
+const Buffer = require('buffer').Buffer
+const querystring = require('querystring')
+const test = require('tap').test
 
 test('emits request and replied events', function(t) {
-  var scope = nock('http://eventland')
+  const scope = nock('http://eventland')
     .get('/please')
     .reply(200)
 
@@ -25,11 +25,11 @@ test('emits request and replied events', function(t) {
 })
 
 test('emits request and request body', function(t) {
-  var data = querystring.stringify({
+  const data = querystring.stringify({
     example: 123,
   })
 
-  var scope = nock('http://eventland')
+  const scope = nock('http://eventland')
     .post('/please')
     .reply(200)
 
@@ -44,7 +44,7 @@ test('emits request and request body', function(t) {
     })
   })
 
-  var req = http.request({
+  const req = http.request({
     hostname: 'eventland',
     method: 'POST',
     path: '/please',
@@ -63,7 +63,7 @@ test('emits no match when no match and no mock', function(t) {
     t.end()
   })
 
-  var req = http.get('http://doesnotexistandneverexistedbefore/abc')
+  const req = http.get('http://doesnotexistandneverexistedbefore/abc')
   req.once('error', ignore)
 })
 
@@ -72,7 +72,7 @@ test('emits no match when no match and mocked', function(t) {
     .get('/')
     .reply('howdy')
 
-  var assertion = function(req) {
+  const assertion = function(req) {
     t.equal(req.path, '/definitelymaybe')
     nock.emitter.removeAllListeners('no match')
     t.end()

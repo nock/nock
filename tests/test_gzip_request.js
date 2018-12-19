@@ -1,13 +1,13 @@
 'use strict'
 
-var nock = require('../')
-var test = require('tap').test
-var http = require('http')
-var zlib = require('zlib')
+const nock = require('../')
+const test = require('tap').test
+const http = require('http')
+const zlib = require('zlib')
 
 if (zlib.gzipSync && zlib.gunzipSync) {
   test('accepts and decodes gzip encoded application/json', function(t) {
-    var message = {
+    const message = {
       my: 'contents',
     }
 
@@ -21,7 +21,7 @@ if (zlib.gzipSync && zlib.gunzipSync) {
         return 200
       })
 
-    var req = http.request({
+    const req = http.request({
       hostname: 'gzipped.com',
       path: '/',
       method: 'POST',
@@ -31,7 +31,7 @@ if (zlib.gzipSync && zlib.gunzipSync) {
       },
     })
 
-    var compressedMessage = zlib.gzipSync(JSON.stringify(message))
+    const compressedMessage = zlib.gzipSync(JSON.stringify(message))
 
     req.write(compressedMessage)
     req.end()
@@ -40,7 +40,7 @@ if (zlib.gzipSync && zlib.gunzipSync) {
 
 if (zlib.deflateSync && zlib.inflateSync) {
   test('accepts and decodes deflate encoded application/json', function(t) {
-    var message = {
+    const message = {
       my: 'contents',
     }
 
@@ -54,7 +54,7 @@ if (zlib.deflateSync && zlib.inflateSync) {
         return 200
       })
 
-    var req = http.request({
+    const req = http.request({
       hostname: 'gzipped.com',
       path: '/',
       method: 'POST',
@@ -64,7 +64,7 @@ if (zlib.deflateSync && zlib.inflateSync) {
       },
     })
 
-    var compressedMessage = zlib.deflateSync(JSON.stringify(message))
+    const compressedMessage = zlib.deflateSync(JSON.stringify(message))
 
     req.write(compressedMessage)
     req.end()

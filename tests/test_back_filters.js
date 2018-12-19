@@ -9,9 +9,9 @@ const test = require('tap').test
 
 const originalMode = nockBack.currentMode
 nock.enableNetConnect()
-nockBack.fixtures = __dirname + '/fixtures'
+nockBack.fixtures = `${__dirname}/fixtures`
 nockBack.setMode('record')
-const fixture = nockBack.fixtures + '/recording_test.json'
+const fixture = `${nockBack.fixtures}/recording_test.json`
 
 function rimrafOnEnd(t) {
   t.once('end', function() {

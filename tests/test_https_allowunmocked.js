@@ -1,8 +1,8 @@
 'use strict'
 
-var test = require('tap').test
-var mikealRequest = require('request')
-var nock = require('../')
+const test = require('tap').test
+const mikealRequest = require('request')
+const nock = require('../')
 
 nock.enableNetConnect()
 
@@ -12,7 +12,7 @@ test('allowUnmocked for https', { skip: process.env.AIRPLANE }, function(t) {
     .get('/pathneverhit')
     .reply(200, { foo: 'bar' })
 
-  var options = {
+  const options = {
     method: 'GET',
     uri: 'https://www.google.com',
   }
@@ -38,7 +38,7 @@ test(
       })
       .reply(500)
 
-    var options = {
+    const options = {
       method: 'GET',
       uri: 'https://www.google.com/search',
     }
