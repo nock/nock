@@ -3,7 +3,7 @@
 [![npm](https://img.shields.io/npm/v/nock.svg)][npmjs]
 [![npm@beta](https://img.shields.io/npm/v/nock/beta.svg)][npmjs]
 [![Build Status](https://travis-ci.org/nock/nock.svg?branch=beta)][build]
-[![Coverage Status](https://coveralls.io/repos/github/nock/nock/badge.svg?branch=beta)][coverage]
+[![Coverage Status](https://img.shields.io/coveralls/github/nock/nock/beta.svg)][coverage]
 [![Greenkeeper](https://badges.greenkeeper.io/nock/nock.svg)](https://greenkeeper.io/)
 [![Backers on Open Collective](https://opencollective.com/nock/backers/badge.svg)](#backers)
 [![Sponsors on Open Collective](https://opencollective.com/nock/sponsors/badge.svg)](#sponsors)
