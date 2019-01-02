@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 const nock = require('../.');
 const test = require('tap').test;
