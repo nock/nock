@@ -5,6 +5,7 @@ const test = require('tap').test
 const request = require('request')
 const lolex = require('lolex')
 
+// https://github.com/nock/nock/issues/1334
 test('one function returns successfully when fake timer is enabled', function(t) {
   const clock = lolex.install()
   nock('http://www.google.com')
