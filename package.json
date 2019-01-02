@@ -39,6 +39,7 @@
     "eslint": "^5.0.0",
     "hyperquest": "^2.1.3",
     "isomorphic-fetch": "^2.2.0",
+    "lolex": "^3.0.0",
     "markdown-toc": "^1.2.0",
     "needle": "^2.2.2",
     "nyc": "^12.0.1",
