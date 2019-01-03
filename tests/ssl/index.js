@@ -13,24 +13,24 @@
 //   rm ca.srl localhost.csr
 //
 const https = require('https')
-const readFileSync = require('fs').readFileSync
-const resolve = require('path').resolve
+const path = require('path')
+const fs = require('fs')
 
-function startHttpsServer(middleware, done) {
+function startServer(middleware, done) {
   const server = https.createServer(
     {
-      key: readFileSync(resolve(__dirname, './localhost.key')),
-      cert: readFileSync(resolve(__dirname, './localhost.crt')),
+      key: fs.readFileSync(path.resolve(__dirname, './localhost.key')),
+      cert: fs.readFileSync(path.resolve(__dirname, './localhost.crt')),
     },
     middleware
   )
 
-  server.listen(0, function(error) {
+  server.listen(0, error => {
     done(error, server)
   })
 }
 
 module.exports = {
-  ca: readFileSync(resolve(__dirname, './ca.crt')),
-  startServer: startHttpsServer,
+  ca: fs.readFileSync(path.resolve(__dirname, './ca.crt')),
+  startServer,
 }

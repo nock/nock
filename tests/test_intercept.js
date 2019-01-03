@@ -8,7 +8,7 @@ const https = require('https')
 const util = require('util')
 const events = require('events')
 const stream = require('stream')
-const test = require('tap').test
+const { test } = require('tap')
 const mikealRequest = require('request')
 const superagent = require('superagent')
 const needle = require('needle')
@@ -1720,10 +1720,7 @@ test('response pipe without implicit end', t => {
         t.end()
       })
 
-      res.pipe(
-        dest,
-        { end: false }
-      )
+      res.pipe(dest, { end: false })
     }
   )
 })
@@ -2954,7 +2951,7 @@ test('allow unmocked option works with https', t => {
   ssl.startServer(middleware, function(error, server) {
     t.error(error)
 
-    const port = server.address().port
+    const { port } = server.address()
     const requestOptions = {
       host: 'localhost',
       port,

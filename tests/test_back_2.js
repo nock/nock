@@ -2,7 +2,7 @@
 
 const http = require('http')
 const fs = require('fs')
-const test = require('tap').test
+const { test } = require('tap')
 const rimraf = require('rimraf')
 const nock = require('../')
 

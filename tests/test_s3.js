@@ -10,7 +10,7 @@
 
 const nock = require('../')
 const AWS = require('aws-sdk')
-const test = require('tap').test
+const { test } = require('tap')
 
 test('works with s3, body < 1024 ^ 2', function(t) {
   const REGION = 'us-east-1'
