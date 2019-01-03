@@ -178,15 +178,17 @@ test('reply takes a callback for status code', async t => {
 test('reply should throw on error on the callback', t => {
   let dataCalled = false
 
-  const scope = nock('http://www.google.com')
+  const scope = nock('http://example.com')
     .get('/')
     .reply(500, (path, requestBody, callback) =>
       callback(new Error('Database failed'))
     )
 
+  // TODO When this request is converted to `got`, it causes the request not
+  // to match.
   const req = http.request(
     {
-      host: 'www.google.com',
+      host: 'example.com',
       path: '/',
       port: 80,
     },
@@ -213,10 +215,8 @@ test('reply should throw on error on the callback', t => {
   req.end()
 })
 
-test('reply should not cause an error on header conflict', t => {
-  let dataCalled = false
-
-  const scope = nock('http://www.google.com').defaultReplyHeaders({
+test('reply should not cause an error on header conflict', async t => {
+  const scope = nock('http://example.com').defaultReplyHeaders({
     'content-type': 'application/json',
   })
 
@@ -224,158 +224,85 @@ test('reply should not cause an error on header conflict', t => {
     'Content-Type': 'application/xml',
   })
 
-  const req = http.request(
-    {
-      host: 'www.google.com',
-      path: '/',
-      port: 80,
-    },
-    res => {
-      t.equal(res.statusCode, 200)
-      res.on('end', () => {
-        t.ok(dataCalled)
-        scope.done()
-        t.end()
-      })
-      res.on('data', data => {
-        dataCalled = true
-        t.equal(res.headers['content-type'], 'application/xml')
-        t.equal(data.toString(), '<html></html>', 'response should match')
-      })
-    }
-  )
+  const { statusCode, headers, body } = await got('http://example.com/')
 
-  req.end()
+  t.equal(statusCode, 200)
+  t.equal(headers['content-type'], 'application/xml')
+  t.equal(body, '<html></html>')
+  scope.done()
 })
 
-test('get gets mocked', t => {
-  let dataCalled = false
-
-  const scope = nock('http://www.google.com')
+test('get gets mocked', async t => {
+  const scope = nock('http://example.com')
     .get('/')
     .reply(200, 'Hello World!')
 
-  const req = http.request(
-    {
-      host: 'www.google.com',
-      path: '/',
-      port: 80,
-    },
-    res => {
-      t.equal(res.statusCode, 200, 'Status code is 200')
-      res.on('end', () => {
-        t.ok(dataCalled, 'data handler was called')
-        scope.done()
-        t.end()
-      })
-      res.on('data', data => {
-        dataCalled = true
-        t.ok(data instanceof Buffer, 'data should be buffer')
-        t.equal(data.toString(), 'Hello World!', 'response should match')
-      })
-    }
-  )
+  const { statusCode, body } = await got('http://example.com/', {
+    encoding: null,
+  })
 
-  req.end()
+  t.equal(statusCode, 200)
+  t.type(body, Buffer)
+  t.equal(body.toString('utf8'), 'Hello World!')
+  scope.done()
 })
 
-test('get gets mocked with relative base path', t => {
-  let dataCalled = false
-
-  const scope = nock('http://www.google.com/abc')
+test('get gets mocked with relative base path', async t => {
+  const scope = nock('http://example.com/abc')
     .get('/def')
     .reply(200, 'Hello World!')
 
-  const req = http.request(
-    {
-      host: 'www.google.com',
-      path: '/abc/def',
-      port: 80,
-    },
-    res => {
-      t.equal(res.statusCode, 200)
-      res.on('end', () => {
-        t.ok(dataCalled)
-        scope.done()
-        t.end()
-      })
-      res.on('data', data => {
-        dataCalled = true
-        t.ok(data instanceof Buffer, 'data should be buffer')
-        t.equal(data.toString(), 'Hello World!', 'response should match')
-      })
-    }
-  )
+  const { statusCode, body } = await got('http://example.com/abc/def', {
+    encoding: null,
+  })
 
-  req.end()
+  t.equal(statusCode, 200)
+  t.type(body, Buffer)
+  t.equal(body.toString('utf8'), 'Hello World!')
+  scope.done()
 })
 
-test('post', t => {
-  let dataCalled = false
-
-  const scope = nock('http://www.google.com')
+test('post', async t => {
+  const scope = nock('http://example.com')
     .post('/form')
     .reply(201, 'OK!')
 
-  const req = http.request(
-    {
-      host: 'www.google.com',
-      method: 'POST',
-      path: '/form',
-      port: 80,
-    },
-    res => {
-      t.equal(res.statusCode, 201)
-      res.on('end', () => {
-        t.ok(dataCalled)
-        scope.done()
-        t.end()
-      })
-      res.on('data', data => {
-        dataCalled = true
-        t.ok(data instanceof Buffer, 'data should be buffer')
-        t.equal(data.toString(), 'OK!', 'response should match')
-      })
-    }
-  )
+  const { statusCode, body } = await got.post('http://example.com/form', {
+    encoding: null,
+  })
 
-  req.end()
+  t.equal(statusCode, 201)
+  t.type(body, Buffer)
+  t.equal(body.toString('utf8'), 'OK!')
+  scope.done()
 })
 
-test('post with empty response body', t => {
-  const scope = nock('http://www.google.com')
+test('post with empty response body', async t => {
+  const scope = nock('http://example.com')
     .post('/form')
     .reply(200)
 
-  const req = http.request(
-    {
-      host: 'www.google.com',
-      method: 'POST',
-      path: '/form',
-      port: 80,
-    },
-    res => {
-      t.equal(res.statusCode, 200)
-      res.on('end', () => {
-        scope.done()
-        t.end()
-      })
-      res.on('data', () => t.fail('No body should be returned'))
-    }
-  )
-  req.end()
+  const { statusCode, body } = await got.post('http://example.com/form', {
+    encoding: null,
+  })
+
+  t.equal(statusCode, 200)
+  t.type(body, Buffer)
+  t.equal(body.length, 0)
+  scope.done()
 })
 
 test('post, lowercase', t => {
   let dataCalled = false
 
-  const scope = nock('http://www.google.com')
+  const scope = nock('http://example.com')
     .post('/form')
     .reply(200, 'OK!')
 
+  // Since this is testing a lowercase `method`, it's using the `http` module.
   const req = http.request(
     {
-      host: 'www.google.com',
+      host: 'example.com',
       method: 'post',
       path: '/form',
       port: 80,
@@ -398,87 +325,40 @@ test('post, lowercase', t => {
   req.end()
 })
 
-test('get with reply callback', t => {
-  const scope = nock('http://www.google.com')
+test('get with reply callback', async t => {
+  const scope = nock('http://example.com')
     .get('/')
     .reply(200, () => 'OK!')
 
-  const req = http.request(
-    {
-      host: 'www.google.com',
-      path: '/',
-      port: 80,
-    },
-    res => {
-      res.on('end', () => {
-        scope.done()
-        t.end()
-      })
-      res.on('data', data =>
-        t.equal(data.toString(), 'OK!', 'response should match')
-      )
-    }
-  )
-
-  req.end()
+  const { body } = await got('http://example.com')
+  t.equal(body, 'OK!')
+  scope.done()
 })
 
-test('get to different subdomain with reply callback and filtering scope', t => {
-  //  We scope for www.google.com but through scope filtering we
-  //  will accept any <subdomain>.google.com
-  const scope = nock('http://www.google.com', {
-    filteringScope: scope => /^http:\/\/.*\.google\.com/.test(scope),
+test('get to different subdomain with reply callback and filtering scope', async t => {
+  // We scope for www.example.com but through scope filtering we will accept
+  // any <subdomain>.example.com.
+  const scope = nock('http://www.example.com', {
+    filteringScope: scope => /^http:\/\/.*\.example\.com/.test(scope),
   })
     .get('/')
     .reply(200, () => 'OK!')
 
-  const req = http.request(
-    {
-      host: 'any-subdomain-will-do.google.com',
-      path: '/',
-      port: 80,
-    },
-    res => {
-      res.on('end', () => {
-        scope.done()
-        t.end()
-      })
-      res.on('data', data =>
-        t.equal(data.toString(), 'OK!', 'response should match')
-      )
-    }
-  )
-
-  req.end()
+  const { body } = await got('http://any-subdomain-will-do.example.com')
+  t.equal(body, 'OK!')
+  scope.done()
 })
 
-test('get with reply callback returning object', t => {
-  const scope = nock('http://www.googlezzzz.com')
+test('get with reply callback returning object', async t => {
+  const exampleResponse = { message: 'OK!' }
+
+  const scope = nock('http://example.com')
     .get('/')
-    .reply(200, () => ({ message: 'OK!' }))
+    .reply(200, () => exampleResponse)
 
-  const req = http.request(
-    {
-      host: 'www.googlezzzz.com',
-      path: '/',
-      port: 80,
-    },
-    res => {
-      res.on('end', () => {
-        scope.done()
-        t.end()
-      })
-      res.on('data', data => {
-        t.equal(
-          data.toString(),
-          JSON.stringify({ message: 'OK!' }),
-          'response should match'
-        )
-      })
-    }
-  )
-
-  req.end()
+  const { body } = await got('http://example.com')
+  t.equal(body, JSON.stringify(exampleResponse))
+  scope.done()
 })
 
 test('get with reply callback returning array with headers', t => {
