@@ -4009,6 +4009,7 @@ test('delay works with replyWithError', function(t) {
 
   setTimeout(function() {
     req.once('error', function(err) {
+      console.log('err', err)
       t.equal(err.message, 'this is an error message')
       t.end()
     })
