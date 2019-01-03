@@ -1568,10 +1568,7 @@ test('response pipe without implicit end', t => {
         t.end()
       })
 
-      res.pipe(
-        dest,
-        { end: false }
-      )
+      res.pipe(dest, { end: false })
     }
   )
 })
@@ -3458,9 +3455,9 @@ test('delayBody works with a stream', { only: true }, async t => {
   const scope = nock('http://example.com')
     .get('/')
     .delayBody(100)
-    .reply(200, (uri, requestBody) => {
-      return fs.createReadStream(path.resolve(__dirname, '..', 'LICENSE'))
-    })
+    .reply(200, (uri, requestBody) =>
+      fs.createReadStream(path.resolve(__dirname, '..', 'LICENSE'))
+    )
 
   await resolvesInAtLeast(
     t,
