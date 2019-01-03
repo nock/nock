@@ -1,6 +1,6 @@
 'use strict'
 
-const test = require('tap').test
+const { test } = require('tap')
 const mikealRequest = require('request')
 
 const ssl = require('./ssl')
@@ -22,14 +22,14 @@ test('NOCK_OFF=true works for https', function(t) {
   ssl.startServer(middleware, function(error, server) {
     t.error(error)
 
-    const port = server.address().port
-    const scope = nock(`https://localhost:${port}`, { allowUnmocked: true })
+    const url = `https://localhost:${server.address().port}`
+    const scope = nock(url, { allowUnmocked: true })
       .get('/')
       .reply(200, 'mock')
 
     const options = {
       method: 'GET',
-      uri: `https://localhost:${port}`,
+      uri: url,
       ca: ssl.ca,
     }
 

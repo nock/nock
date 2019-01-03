@@ -1,7 +1,7 @@
 'use strict'
 
 const nock = require('../')
-const test = require('tap').test
+const { test } = require('tap')
 const rp = require('request-promise')
 
 test('IPV6 URL in request-promise get gets mocked', function(t) {

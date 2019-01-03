@@ -2,7 +2,7 @@
 
 const nock = require('../.')
 const http = require('http')
-const test = require('tap').test
+const { test } = require('tap')
 
 test('[actual] req.abort() should cause "abort" and "error" to be emitted', t => {
   nock('http://localhost:16829')
