@@ -32,72 +32,57 @@ const acceptableLeaks = [
   'Request',
 ]
 
-test('invalid or missing method parameter throws an exception', function(t) {
-  try {
-    nock('https://example.com').intercept('/somepath')
-    t.false(true)
-  } catch (error) {
-    t.equal(
-      error.toString(),
-      'Error: The "method" parameter is required for an intercept call.'
-    )
-  }
+test('invalid or missing method parameter throws an exception', t => {
+  t.throws(() => nock('https://example.com').intercept('/somepath'), {
+    message: 'The "method" parameter is required for an intercept call.',
+  })
   t.end()
 })
 
-test('double activation throws exception', function(t) {
+test('double activation throws exception', t => {
   nock.restore()
   t.false(nock.isActive())
-  try {
-    nock.activate()
-    t.true(nock.isActive())
-    nock.activate()
-    //  This line should never be reached.
-    t.false(true)
-  } catch (e) {
-    t.equal(e.toString(), 'Error: Nock already active')
-  }
+
+  nock.activate()
   t.true(nock.isActive())
+
+  t.throws(() => nock.activate(), { message: 'Nock already active' })
+
+  t.true(nock.isActive())
+
   t.end()
 })
 
-test('allow unmocked works (2)', function(t) {
-  const scope = nock('https://httpbin.org', { allowUnmocked: true })
+test('allow unmocked works (2)', async t => {
+  const scope = nock('http://example.com', { allowUnmocked: true })
     .post('/post')
     .reply(200, '99problems')
 
-  const options = {
-    method: 'POST',
-    uri: 'https://httpbin.org/post',
-    json: {
-      some: 'data',
-    },
-  }
+  await got.post('http://example.com/post')
 
-  mikealRequest(options, function(err, resp, body) {
-    scope.done()
-    t.end()
-  })
+  scope.done()
 })
 
-test('allow unmocked works after one interceptor is removed', function(t) {
-  nock('https://example.org', { allowUnmocked: true })
+test('allow unmocked works after one interceptor is removed', async t => {
+  const server = http.createServer((request, response) => {
+    response.write('live')
+    response.end()
+  })
+  t.once('end', () => server.close())
+
+  await new Promise(resolve => server.listen(resolve))
+
+  const url = `http://localhost:${server.address().port}`
+
+  nock(url, { allowUnmocked: true })
     .get('/')
     .reply(200, 'Mocked')
 
-  mikealRequest('https://example.org', function(err, resp, body) {
-    t.error(err)
-    t.equal(body, 'Mocked')
-
-    mikealRequest('https://example.org/?unmocked', function(err, resp, body) {
-      t.error(err)
-      t.assert(~body.indexOf('Example Domain'))
-      t.end()
-    })
-  })
+  t.equal((await got(url)).body, 'Mocked')
+  t.equal((await got(url)).body, 'live')
 })
 
-test("reply callback's requestBody should automatically parse to JSON when content-type is json", function(t) {
+test("when request's content-type is json: reply callback's requestBody should automatically parse to JSON", async t => {
   const requestBodyFixture = {
     id: 1,
     name: 'bob',
@@ -105,41 +90,21 @@ test("reply callback's requestBody should automatically parse to JSON when conte
 
   const scope = nock('http://service')
     .post('/endpoint')
-    .reply(200, function(uri, requestBody) {
+    .reply(200, (uri, requestBody) => {
       t.deepEqual(requestBody, requestBodyFixture)
-
       return 'overwrite'
     })
 
-  const req = http.request(
-    {
-      host: 'service',
-      method: 'POST',
-      path: '/endpoint',
-      port: 80,
-    },
-    function(res) {
-      t.equal(res.statusCode, 200)
-      res.on('end', function() {
-        scope.done()
-        t.end()
-      })
-      res.on('data', function(data) {
-        t.equal(
-          data.toString(),
-          'overwrite',
-          'response should match mocked value'
-        )
-      })
-    }
-  )
+  const { body } = await got.post('http://service/endpoint', {
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(requestBodyFixture),
+  })
 
-  req.setHeader('Content-Type', 'application/json')
-  req.write(JSON.stringify(requestBodyFixture))
-  req.end()
+  t.equal(body, 'overwrite')
+  scope.done()
 })
 
-test("reply callback's requestBody should not automatically parse to JSON", function(t) {
+test("when request has no content-type header: reply callback's requestBody should not automatically parse to JSON", async t => {
   const requestBodyFixture = {
     id: 1,
     name: 'bob',
@@ -147,136 +112,67 @@ test("reply callback's requestBody should not automatically parse to JSON", func
 
   const scope = nock('http://service')
     .post('/endpoint')
-    .reply(200, function(uri, requestBody) {
+    .reply(200, (uri, requestBody) => {
       t.deepEqual(requestBody, JSON.stringify(requestBodyFixture))
-
       return 'overwrite'
     })
 
-  const req = http.request(
-    {
-      host: 'service',
-      method: 'POST',
-      path: '/endpoint',
-      port: 80,
-    },
-    function(res) {
-      t.equal(res.statusCode, 200)
-      res.on('end', function() {
-        scope.done()
-        t.end()
-      })
-      res.on('data', function(data) {
-        t.equal(
-          data.toString(),
-          'overwrite',
-          'response should match mocked value'
-        )
-      })
-    }
-  )
+  const { body } = await got.post('http://service/endpoint', {
+    body: JSON.stringify(requestBodyFixture),
+  })
 
-  req.write(JSON.stringify(requestBodyFixture))
-  req.end()
+  t.equal(body, 'overwrite')
+  scope.done()
 })
 
-test('reply can take a callback', function(t) {
-  let dataCalled = false
-
-  const scope = nock('http://www.google.com')
+test('reply can take a callback', async t => {
+  const scope = nock('http://example.com')
     .get('/')
-    .reply(200, function(path, requestBody, callback) {
-      callback(null, 'Hello World!')
-    })
+    .reply(200, (path, requestBody, callback) => callback(null, 'Hello World!'))
 
-  const req = http.request(
-    {
-      host: 'www.google.com',
-      path: '/',
-      port: 80,
-    },
-    function(res) {
-      t.equal(res.statusCode, 200, 'Status code is 200')
-      res.on('end', function() {
-        t.ok(dataCalled, 'data handler was called')
-        scope.done()
-        t.end()
-      })
-      res.on('data', function(data) {
-        dataCalled = true
-        t.ok(data instanceof Buffer, 'data should be buffer')
-        t.equal(data.toString(), 'Hello World!', 'response should match')
-      })
-    }
-  )
+  const response = await got('http://example.com/', {
+    encoding: null,
+  })
 
-  req.end()
+  scope.done()
+  t.type(response.body, Buffer)
+  t.equal(response.body.toString('utf8'), 'Hello World!')
 })
 
-test('reply should send correct statusCode with array-notation and without body', function(t) {
+test('reply should send correct statusCode with array-notation and without body', async t => {
   t.plan(1)
 
-  const statusCode = 202
+  const expectedStatusCode = 202
 
-  const scope = nock('http://www.google.com')
-    .get('/test-path/')
-    .reply(function(path, requestBody) {
-      return [statusCode]
-    })
+  const scope = nock('http://example.com')
+    .get('/')
+    .reply((path, requestBody) => [expectedStatusCode])
 
-  const req = http.request(
-    {
-      host: 'www.google.com',
-      path: '/test-path/',
-      port: 80,
-    },
-    function(res) {
-      t.equal(res.statusCode, statusCode, 'sends status code')
-      res.on('end', function() {
-        scope.done()
-      })
-    }
-  )
+  const { statusCode } = await got('http://example.com/')
 
-  req.end()
+  t.equal(statusCode, expectedStatusCode)
+  scope.done()
 })
 
-test('reply takes a callback for status code', function(t) {
-  t.plan(3)
-
-  const statusCode = 202
+test('reply takes a callback for status code', async t => {
+  const expectedStatusCode = 202
   const responseBody = 'Hello, world!'
   const headers = {
     'X-Custom-Header': 'abcdef',
   }
 
-  const scope = nock('http://www.google.com')
-    .get('/test-path/')
-    .reply(function(path, requestBody, cb) {
-      setTimeout(function() {
-        cb(null, [statusCode, responseBody, headers])
-      }, 1)
+  const scope = nock('http://example.com')
+    .get('/')
+    .reply((path, requestBody, cb) => {
+      setTimeout(() => cb(null, [expectedStatusCode, responseBody, headers]), 1)
     })
 
-  const req = http.request(
-    {
-      host: 'www.google.com',
-      path: '/test-path/',
-      port: 80,
-    },
-    function(res) {
-      t.equal(res.statusCode, statusCode, 'sends status code')
-      t.deepEqual(res.headers, headers, 'sends headers')
-      res.on('data', function(data) {
-        t.equal(data.toString(), responseBody, 'sends request body')
-      })
-      res.on('end', function() {
-        scope.done()
-      })
-    }
-  )
+  const response = await got('http://example.com/')
 
-  req.end()
+  t.equal(response.statusCode, expectedStatusCode, 'sends status code')
+  t.deepEqual(response.headers, headers, 'sends headers')
+  t.equal(response.body, responseBody, 'sends request body')
+  scope.done()
 })
 
 test('reply should throw on error on the callback', function(t) {
