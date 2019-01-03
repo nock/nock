@@ -2,9 +2,8 @@
 
 const nock = require('../.')
 const http = require('http')
-const Buffer = require('buffer').Buffer
 const querystring = require('querystring')
-const test = require('tap').test
+const { test } = require('tap')
 
 test('emits request and replied events', function(t) {
   const scope = nock('http://eventland')

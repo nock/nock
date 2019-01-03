@@ -1,7 +1,7 @@
 'use strict'
 
 const assert = require('assert')
-const test = require('tap').test
+const { test } = require('tap')
 const mikealRequest = require('request')
 const nock = require('../')
 

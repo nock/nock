@@ -1,7 +1,7 @@
 'use strict'
 
 const nock = require('../.')
-const test = require('tap').test
+const { test } = require('tap')
 const http = require('http')
 const https = require('https')
 const fs = require('fs')
@@ -196,7 +196,7 @@ test('records and replays correctly with filteringRequestBody', function(t) {
 
       t.equal(recorded.length, 1)
       let filteringRequestBodyCounter = 0
-      const definition = recorded[0]
+      const [definition] = recorded
       definition.filteringRequestBody = (body, aRecodedBody) => {
         ++filteringRequestBodyCounter
         t.strictEqual(body, aRecodedBody)
@@ -351,18 +351,17 @@ test('records nonstandard ports', function(t) {
         res.resume()
         res.once('end', function() {
           nock.restore()
-          let ret = nock.recorder.play()
+          const ret = nock.recorder.play()
           t.equal(ret.length, 1)
-          ret = ret[0]
-          t.type(ret, 'object')
-          t.equal(ret.scope, `http://localhost:${options.port}`)
-          t.equal(ret.method, 'GET')
-          t.equal(ret.body, REQUEST_BODY)
-          t.equal(ret.status, 200)
-          t.equal(ret.response, RESPONSE_BODY)
+          t.type(ret[0], 'object')
+          t.equal(ret[0].scope, `http://localhost:${options.port}`)
+          t.equal(ret[0].method, 'GET')
+          t.equal(ret[0].body, REQUEST_BODY)
+          t.equal(ret[0].status, 200)
+          t.equal(ret[0].response, RESPONSE_BODY)
           t.end()
 
-          //  Close the test server, we are done with it.
+          // Close the test server, we are done with it.
           testServer.close()
         })
       })
@@ -625,11 +624,10 @@ test("doesn't record request headers by default", function(t) {
           res.resume()
           res.once('end', function() {
             nock.restore()
-            let ret = nock.recorder.play()
+            const ret = nock.recorder.play()
             t.equal(ret.length, 1)
-            ret = ret[0]
-            t.type(ret, 'object')
-            t.false(ret.reqheaders)
+            t.type(ret[0], 'object')
+            t.false(ret[0].reqheaders)
             t.end()
           })
         }
@@ -675,8 +673,7 @@ test('will call a custom logging function', function(t) {
             nock.restore()
 
             t.equal(record.length, 1)
-            const ret = record[0]
-            t.type(ret, 'string')
+            t.type(record[0], 'string')
             t.end()
           })
         }
@@ -722,8 +719,7 @@ test('use_separator:false is respected', function(t) {
           res.once('end', function() {
             nock.restore()
             t.equal(record.length, 1)
-            const ret = record[0]
-            t.type(ret, 'object') // this is still an object, because the "cut here" strings have not been appended
+            t.type(record[0], 'object') // this is still an object, because the "cut here" strings have not been appended
             t.end()
           })
         }
@@ -763,12 +759,11 @@ test('records request headers except user-agent if enable_reqheaders_recording i
           res.resume()
           res.once('end', function() {
             nock.restore()
-            let ret = nock.recorder.play()
+            const ret = nock.recorder.play()
             t.equal(ret.length, 1)
-            ret = ret[0]
-            t.type(ret, 'object')
-            t.true(ret.reqheaders)
-            t.false(ret.reqheaders['user-agent'])
+            t.type(ret[0], 'object')
+            t.true(ret[0].reqheaders)
+            t.false(ret[0].reqheaders['user-agent'])
             t.end()
           })
         }
