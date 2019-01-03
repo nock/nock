@@ -1,6 +1,7 @@
 'use strict'
 
 const fs = require('fs')
+const path = require('path')
 const nock = require('../.')
 const url = require('url')
 const http = require('http')
@@ -3435,30 +3436,42 @@ test('calling delay with "body" delays the response body', t => {
   })
 })
 
-test('calling delayBody delays the response', t => {
-  // Do not base new tests on this one. Write async tests using
-  // `resolvesInAtLeast` instead.
-  checkDuration(t, 100)
-
-  nock('http://funk')
+test('calling delayBody delays the response', async t => {
+  const scope = nock('http://example.com')
     .get('/')
     .delayBody(100)
     .reply(200, 'OK')
 
-  http.get('http://funk/', function(res) {
-    res.setEncoding('utf8')
-
-    let body = ''
-
-    res.on('data', function(chunk) {
-      body += chunk
-    })
-
-    res.once('end', function() {
+  await resolvesInAtLeast(
+    t,
+    async () => {
+      const { body } = await got('http://example.com/')
       t.equal(body, 'OK')
-      t.end()
+    },
+    100
+  )
+
+  scope.done()
+})
+
+test('delayBody works with a stream', { only: true }, async t => {
+  const scope = nock('http://example.com')
+    .get('/')
+    .delayBody(100)
+    .reply(200, (uri, requestBody) => {
+      return fs.createReadStream(path.resolve(__dirname, '..', 'LICENSE'))
     })
-  })
+
+  await resolvesInAtLeast(
+    t,
+    async () => {
+      const { body } = await got('http://example.com/')
+      t.ok(body.includes('MIT'))
+    },
+    100
+  )
+
+  scope.done()
 })
 
 test('calling delay delays the response', t => {
