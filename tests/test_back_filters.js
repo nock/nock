@@ -1,11 +1,12 @@
 'use strict'
+
 const fs = require('fs')
 const http = require('http')
 const nock = require('../')
 const nockBack = nock.back
 const querystring = require('querystring')
 const rimraf = require('rimraf')
-const test = require('tap').test
+const { test } = require('tap')
 
 const originalMode = nockBack.currentMode
 nock.enableNetConnect()
@@ -76,12 +77,11 @@ test('nockBack passes filteringPath options', function(t) {
           nockDone()
           t.pass('nockBack regords fixture')
 
-          let fixtureContent = JSON.parse(
+          const fixtureContent = JSON.parse(
             fs.readFileSync(fixture, { encoding: 'utf8' })
           )
           t.equal(fixtureContent.length, 1)
-          fixtureContent = fixtureContent[0]
-          t.equal(fixtureContent.path, '/?timestamp=1111')
+          t.equal(fixtureContent[0].path, '/?timestamp=1111')
 
           nockBack('recording_test.json', nockBackOptions, function(nockDone) {
             const request = createRequest(
@@ -149,12 +149,11 @@ test('nockBack passes filteringRequestBody option', function(t) {
           nockDone()
           t.pass('nockBack regords fixture')
 
-          let fixtureContent = JSON.parse(
+          const fixtureContent = JSON.parse(
             fs.readFileSync(fixture, { encoding: 'utf8' })
           )
           t.equal(fixtureContent.length, 1)
-          fixtureContent = fixtureContent[0]
-          t.equal(fixtureContent.body, 'token=aaa-bbb-ccc')
+          t.equal(fixtureContent[0].body, 'token=aaa-bbb-ccc')
 
           nockBack('recording_test.json', nockBackOptions, function(nockDone) {
             const secondPostData = querystring.stringify({

@@ -35,3 +35,4 @@ rules:
   object-shorthand: ['error', 'properties']
   prefer-template: 'error'
   arrow-body-style: ['error', 'as-needed']
+  prefer-destructuring: ['error', { 'object': true, 'array': false }]

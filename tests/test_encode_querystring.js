@@ -2,7 +2,7 @@
 
 const nock = require('../.')
 const request = require('request')
-const test = require('tap').test
+const { test } = require('tap')
 
 test('encode query string', function(t) {
   const query1 = { q: '(nodejs)' }
