@@ -3754,7 +3754,7 @@ function checkDuration(t, ms) {
     ended = true
     const fin = process.hrtime(start)
     const finMs =
-      fin[0] * 1e3 + // seconds -> ms
+      fin[0] * 1000 + // seconds -> ms
       fin[1] * 1e-6 // nanoseconds -> ms
 
     /// innaccurate timers
@@ -3774,7 +3774,7 @@ async function resolvesInAtLeast(t, fn, durationMillis) {
   await fn()
 
   const [seconds, nanoseconds] = process.hrtime(startTime)
-  const elapsedTimeMillis = seconds * 1e3 + nanoseconds * 1e-6
+  const elapsedTimeMillis = seconds * 1000 + nanoseconds * 1e-6
 
   t.ok(
     elapsedTimeMillis >= durationMillis,
