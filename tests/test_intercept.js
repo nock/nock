@@ -16,6 +16,7 @@ const restify = require('restify-clients')
 const domain = require('domain')
 const hyperquest = require('hyperquest')
 const async = require('async')
+const got = require('got')
 
 const ssl = require('./ssl')
 
@@ -3743,6 +3744,8 @@ test('response is an http.IncomingMessage instance', function(t) {
 })
 
 function checkDuration(t, ms) {
+  // Do not write new tests using this function. Write async tests using
+  // `resolvesInAtLeast` instead.
   const _end = t.end
   const start = process.hrtime()
   let ended = false
@@ -3751,7 +3754,7 @@ function checkDuration(t, ms) {
     ended = true
     const fin = process.hrtime(start)
     const finMs =
-      fin[0] * 1e9 + // seconds -> ms
+      fin[0] * 1e3 + // seconds -> ms
       fin[1] * 1e-6 // nanoseconds -> ms
 
     /// innaccurate timers
@@ -3763,6 +3766,22 @@ function checkDuration(t, ms) {
     )
     _end.call(t)
   }
+}
+
+async function resolvesInAtLeast(t, fn, durationMillis) {
+  const startTime = process.hrtime()
+
+  await fn()
+
+  const [seconds, nanoseconds] = process.hrtime(startTime)
+  const elapsedTimeMillis = seconds * 1e3 + nanoseconds * 1e-6
+
+  t.ok(
+    elapsedTimeMillis >= durationMillis,
+    `Duration of ${Math.round(
+      elapsedTimeMillis
+    )} ms should be at least ${durationMillis} ms`
+  )
 }
 
 test('calling delay could cause mikealRequest timeout error', function(t) {
@@ -3813,6 +3832,8 @@ test('Body delay does not have impact on timeout', function(t) {
 })
 
 test('calling delay with "body" and "head" delays the response', function(t) {
+  // Do not base new tests on this one. Write async tests using
+  // `resolvesInAtLeast` instead.
   checkDuration(t, 600)
 
   nock('http://funk')
@@ -3832,6 +3853,8 @@ test('calling delay with "body" and "head" delays the response', function(t) {
 })
 
 test('calling delay with "body" delays the response body', function(t) {
+  // Do not base new tests on this one. Write async tests using
+  // `resolvesInAtLeast` instead.
   checkDuration(t, 100)
 
   nock('http://funk')
@@ -3858,6 +3881,8 @@ test('calling delay with "body" delays the response body', function(t) {
 })
 
 test('calling delayBody delays the response', function(t) {
+  // Do not base new tests on this one. Write async tests using
+  // `resolvesInAtLeast` instead.
   checkDuration(t, 100)
 
   nock('http://funk')
@@ -3882,6 +3907,8 @@ test('calling delayBody delays the response', function(t) {
 })
 
 test('calling delay delays the response', function(t) {
+  // Do not base new tests on this one. Write async tests using
+  // `resolvesInAtLeast` instead.
   checkDuration(t, 100)
 
   nock('http://funk')
@@ -3940,7 +3967,10 @@ test('using reply callback with delay can reply JSON', function(t) {
 })
 
 test('delay works with replyWithFile', function(t) {
+  // Do not base new tests on this one. Write async tests using
+  // `resolvesInAtLeast` instead.
   checkDuration(t, 100)
+
   nock('http://localhost')
     .get('/')
     .delay(100)
@@ -3969,7 +3999,10 @@ test('delay works with replyWithFile', function(t) {
 })
 
 test('delay works with when you return a generic stream from the reply callback', function(t) {
+  // Do not base new tests on this one. Write async tests using
+  // `resolvesInAtLeast` instead.
   checkDuration(t, 100)
+
   nock('http://localhost')
     .get('/')
     .delay(100)
@@ -3999,20 +4032,20 @@ test('delay works with when you return a generic stream from the reply callback'
     .end('OK')
 })
 
-test('delay works with replyWithError', function(t) {
+test('delay with replyWithError: response is delayed', async t => {
   nock('http://errorland')
     .get('/')
     .delay(100)
     .replyWithError('this is an error message')
 
-  const req = http.get('http://errorland/')
-
-  setTimeout(function() {
-    req.once('error', function(err) {
-      t.equal(err.message, 'this is an error message')
-      t.end()
-    })
-  }, 100)
+  await resolvesInAtLeast(
+    t,
+    async () =>
+      t.rejects(() => got('http://errorland/'), {
+        message: 'this is an error message',
+      }),
+    100
+  )
 })
 
 test('write callback called', function(t) {
@@ -4156,6 +4189,8 @@ test(
 )
 
 test('calling delayConnection delays the connection', function(t) {
+  // Do not base new tests on this one. Write async tests using
+  // `resolvesInAtLeast` instead.
   checkDuration(t, 100)
 
   nock('http://funk')
@@ -4193,7 +4228,10 @@ test('using reply callback with delayConnection provides proper arguments', func
 })
 
 test('delayConnection works with replyWithFile', function(t) {
+  // Do not base new tests on this one. Write async tests using
+  // `resolvesInAtLeast` instead.
   checkDuration(t, 100)
+
   nock('http://localhost')
     .get('/')
     .delayConnection(100)
@@ -4222,7 +4260,10 @@ test('delayConnection works with replyWithFile', function(t) {
 })
 
 test('delayConnection works with when you return a generic stream from the reply callback', function(t) {
+  // Do not base new tests on this one. Write async tests using
+  // `resolvesInAtLeast` instead.
   checkDuration(t, 100)
+
   nock('http://localhost')
     .get('/')
     .delayConnection(100)
