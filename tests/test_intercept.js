@@ -175,14 +175,14 @@ test('reply takes a callback for status code', async t => {
   scope.done()
 })
 
-test('reply should throw on error on the callback', function(t) {
+test('reply should throw on error on the callback', t => {
   let dataCalled = false
 
   const scope = nock('http://www.google.com')
     .get('/')
-    .reply(500, function(path, requestBody, callback) {
+    .reply(500, (path, requestBody, callback) =>
       callback(new Error('Database failed'))
-    })
+    )
 
   const req = http.request(
     {
@@ -190,10 +190,10 @@ test('reply should throw on error on the callback', function(t) {
       path: '/',
       port: 80,
     },
-    function(res) {
+    res => {
       t.equal(res.statusCode, 500, 'Status code is 500')
 
-      res.on('data', function(data) {
+      res.on('data', data => {
         dataCalled = true
         t.ok(data instanceof Buffer, 'data should be buffer')
         t.ok(
@@ -202,7 +202,7 @@ test('reply should throw on error on the callback', function(t) {
         )
       })
 
-      res.on('end', function() {
+      res.on('end', () => {
         t.ok(dataCalled, 'data handler was called')
         scope.done()
         t.end()
@@ -213,7 +213,7 @@ test('reply should throw on error on the callback', function(t) {
   req.end()
 })
 
-test('reply should not cause an error on header conflict', function(t) {
+test('reply should not cause an error on header conflict', t => {
   let dataCalled = false
 
   const scope = nock('http://www.google.com').defaultReplyHeaders({
@@ -230,14 +230,14 @@ test('reply should not cause an error on header conflict', function(t) {
       path: '/',
       port: 80,
     },
-    function(res) {
+    res => {
       t.equal(res.statusCode, 200)
-      res.on('end', function() {
+      res.on('end', () => {
         t.ok(dataCalled)
         scope.done()
         t.end()
       })
-      res.on('data', function(data) {
+      res.on('data', data => {
         dataCalled = true
         t.equal(res.headers['content-type'], 'application/xml')
         t.equal(data.toString(), '<html></html>', 'response should match')
@@ -248,7 +248,7 @@ test('reply should not cause an error on header conflict', function(t) {
   req.end()
 })
 
-test('get gets mocked', function(t) {
+test('get gets mocked', t => {
   let dataCalled = false
 
   const scope = nock('http://www.google.com')
@@ -261,14 +261,14 @@ test('get gets mocked', function(t) {
       path: '/',
       port: 80,
     },
-    function(res) {
+    res => {
       t.equal(res.statusCode, 200, 'Status code is 200')
-      res.on('end', function() {
+      res.on('end', () => {
         t.ok(dataCalled, 'data handler was called')
         scope.done()
         t.end()
       })
-      res.on('data', function(data) {
+      res.on('data', data => {
         dataCalled = true
         t.ok(data instanceof Buffer, 'data should be buffer')
         t.equal(data.toString(), 'Hello World!', 'response should match')
@@ -279,7 +279,7 @@ test('get gets mocked', function(t) {
   req.end()
 })
 
-test('get gets mocked with relative base path', function(t) {
+test('get gets mocked with relative base path', t => {
   let dataCalled = false
 
   const scope = nock('http://www.google.com/abc')
@@ -292,14 +292,14 @@ test('get gets mocked with relative base path', function(t) {
       path: '/abc/def',
       port: 80,
     },
-    function(res) {
+    res => {
       t.equal(res.statusCode, 200)
-      res.on('end', function() {
+      res.on('end', () => {
         t.ok(dataCalled)
         scope.done()
         t.end()
       })
-      res.on('data', function(data) {
+      res.on('data', data => {
         dataCalled = true
         t.ok(data instanceof Buffer, 'data should be buffer')
         t.equal(data.toString(), 'Hello World!', 'response should match')
@@ -310,7 +310,7 @@ test('get gets mocked with relative base path', function(t) {
   req.end()
 })
 
-test('post', function(t) {
+test('post', t => {
   let dataCalled = false
 
   const scope = nock('http://www.google.com')
@@ -324,14 +324,14 @@ test('post', function(t) {
       path: '/form',
       port: 80,
     },
-    function(res) {
+    res => {
       t.equal(res.statusCode, 201)
-      res.on('end', function() {
+      res.on('end', () => {
         t.ok(dataCalled)
         scope.done()
         t.end()
       })
-      res.on('data', function(data) {
+      res.on('data', data => {
         dataCalled = true
         t.ok(data instanceof Buffer, 'data should be buffer')
         t.equal(data.toString(), 'OK!', 'response should match')
@@ -342,7 +342,7 @@ test('post', function(t) {
   req.end()
 })
 
-test('post with empty response body', function(t) {
+test('post with empty response body', t => {
   const scope = nock('http://www.google.com')
     .post('/form')
     .reply(200)
@@ -354,21 +354,19 @@ test('post with empty response body', function(t) {
       path: '/form',
       port: 80,
     },
-    function(res) {
+    res => {
       t.equal(res.statusCode, 200)
-      res.on('end', function() {
+      res.on('end', () => {
         scope.done()
         t.end()
       })
-      res.on('data', function() {
-        t.fail('No body should be returned')
-      })
+      res.on('data', () => t.fail('No body should be returned'))
     }
   )
   req.end()
 })
 
-test('post, lowercase', function(t) {
+test('post, lowercase', t => {
   let dataCalled = false
 
   const scope = nock('http://www.google.com')
@@ -382,14 +380,14 @@ test('post, lowercase', function(t) {
       path: '/form',
       port: 80,
     },
-    function(res) {
+    res => {
       t.equal(res.statusCode, 200)
-      res.on('end', function() {
+      res.on('end', () => {
         t.ok(dataCalled)
         scope.done()
         t.end()
       })
-      res.on('data', function(data) {
+      res.on('data', data => {
         dataCalled = true
         t.ok(data instanceof Buffer, 'data should be buffer')
         t.equal(data.toString(), 'OK!', 'response should match')
@@ -400,12 +398,10 @@ test('post, lowercase', function(t) {
   req.end()
 })
 
-test('get with reply callback', function(t) {
+test('get with reply callback', t => {
   const scope = nock('http://www.google.com')
     .get('/')
-    .reply(200, function() {
-      return 'OK!'
-    })
+    .reply(200, () => 'OK!')
 
   const req = http.request(
     {
@@ -413,32 +409,28 @@ test('get with reply callback', function(t) {
       path: '/',
       port: 80,
     },
-    function(res) {
-      res.on('end', function() {
+    res => {
+      res.on('end', () => {
         scope.done()
         t.end()
       })
-      res.on('data', function(data) {
+      res.on('data', data =>
         t.equal(data.toString(), 'OK!', 'response should match')
-      })
+      )
     }
   )
 
   req.end()
 })
 
-test('get to different subdomain with reply callback and filtering scope', function(t) {
+test('get to different subdomain with reply callback and filtering scope', t => {
   //  We scope for www.google.com but through scope filtering we
   //  will accept any <subdomain>.google.com
   const scope = nock('http://www.google.com', {
-    filteringScope: function(scope) {
-      return /^http:\/\/.*\.google\.com/.test(scope)
-    },
+    filteringScope: scope => /^http:\/\/.*\.google\.com/.test(scope),
   })
     .get('/')
-    .reply(200, function() {
-      return 'OK!'
-    })
+    .reply(200, () => 'OK!')
 
   const req = http.request(
     {
@@ -446,26 +438,24 @@ test('get to different subdomain with reply callback and filtering scope', funct
       path: '/',
       port: 80,
     },
-    function(res) {
-      res.on('end', function() {
+    res => {
+      res.on('end', () => {
         scope.done()
         t.end()
       })
-      res.on('data', function(data) {
+      res.on('data', data =>
         t.equal(data.toString(), 'OK!', 'response should match')
-      })
+      )
     }
   )
 
   req.end()
 })
 
-test('get with reply callback returning object', function(t) {
+test('get with reply callback returning object', t => {
   const scope = nock('http://www.googlezzzz.com')
     .get('/')
-    .reply(200, function() {
-      return { message: 'OK!' }
-    })
+    .reply(200, () => ({ message: 'OK!' }))
 
   const req = http.request(
     {
@@ -473,12 +463,12 @@ test('get with reply callback returning object', function(t) {
       path: '/',
       port: 80,
     },
-    function(res) {
-      res.on('end', function() {
+    res => {
+      res.on('end', () => {
         scope.done()
         t.end()
       })
-      res.on('data', function(data) {
+      res.on('data', data => {
         t.equal(
           data.toString(),
           JSON.stringify({ message: 'OK!' }),
@@ -491,12 +481,10 @@ test('get with reply callback returning object', function(t) {
   req.end()
 })
 
-test('get with reply callback returning array with headers', function(t) {
+test('get with reply callback returning array with headers', t => {
   nock('http://replyheaderland')
     .get('/')
-    .reply(function() {
-      return [202, 'body', { 'x-key': 'value', 'x-key-2': 'value 2' }]
-    })
+    .reply(() => [202, 'body', { 'x-key': 'value', 'x-key-2': 'value 2' }])
 
   http.get(
     {
@@ -504,7 +492,7 @@ test('get with reply callback returning array with headers', function(t) {
       path: '/',
       port: 80,
     },
-    function(res) {
+    res => {
       res.setEncoding('utf8')
       t.equal(res.statusCode, 202)
       t.deepEqual(res.headers, {
@@ -512,7 +500,7 @@ test('get with reply callback returning array with headers', function(t) {
         'x-key-2': 'value 2',
       })
       t.deepEqual(res.rawHeaders, ['x-key', 'value', 'x-key-2', 'value 2'])
-      res.on('data', function(data) {
+      res.on('data', data => {
         t.equal(data, 'body')
         res.once('end', t.end.bind(t))
       })
@@ -524,12 +512,10 @@ test('get with reply callback returning array with headers', function(t) {
 test(
   'get with reply callback returning default statusCode without body',
   { skip: true },
-  function(t) {
+  t => {
     nock('http://replyheaderland')
       .get('/')
-      .reply(function(uri, requestBody) {
-        return [401]
-      })
+      .reply((uri, requestBody) => [401])
 
     http.get(
       {
@@ -537,10 +523,10 @@ test(
         path: '/',
         port: 80,
       },
-      function(res) {
+      res => {
         res.setEncoding('utf8')
         t.equal(res.statusCode, 200)
-        res.on('data', function(data) {
+        res.on('data', data => {
           t.equal(data, '[401]')
           res.once('end', t.end.bind(t))
         })
@@ -549,12 +535,10 @@ test(
   }
 )
 
-test('get with reply callback returning callback without headers', function(t) {
+test('get with reply callback returning callback without headers', t => {
   nock('http://replyheaderland')
     .get('/')
-    .reply(function() {
-      return [401, 'This is a body']
-    })
+    .reply(() => [401, 'This is a body'])
 
   http.get(
     {
@@ -562,10 +546,10 @@ test('get with reply callback returning callback without headers', function(t) {
       path: '/',
       port: 80,
     },
-    function(res) {
+    res => {
       res.setEncoding('utf8')
       t.equal(res.statusCode, 401)
-      res.on('data', function(data) {
+      res.on('data', data => {
         t.equal(data, 'This is a body')
         res.once('end', t.end.bind(t))
       })
@@ -573,14 +557,12 @@ test('get with reply callback returning callback without headers', function(t) {
   )
 })
 
-test('post with reply callback, uri, and request body', function(t) {
+test('post with reply callback, uri, and request body', t => {
   const input = 'key=val'
 
   const scope = nock('http://www.google.com')
     .post('/echo', input)
-    .reply(200, function(uri, body) {
-      return ['OK', uri, body].join(' ')
-    })
+    .reply(200, (uri, body) => ['OK', uri, body].join(' '))
 
   const req = http.request(
     {
@@ -589,14 +571,14 @@ test('post with reply callback, uri, and request body', function(t) {
       path: '/echo',
       port: 80,
     },
-    function(res) {
-      res.on('end', function() {
+    res => {
+      res.on('end', () => {
         scope.done()
         t.end()
       })
-      res.on('data', function(data) {
+      res.on('data', data =>
         t.equal(data.toString(), 'OK /echo key=val', 'response should match')
-      })
+      )
     }
   )
 
@@ -604,12 +586,10 @@ test('post with reply callback, uri, and request body', function(t) {
   req.end()
 })
 
-test('post with regexp as spec', function(t) {
+test('post with regexp as spec', t => {
   const scope = nock('http://www.google.com')
     .post('/echo', /key=v.?l/g)
-    .reply(200, function(uri, body) {
-      return ['OK', uri, body].join(' ')
-    })
+    .reply(200, (uri, body) => ['OK', uri, body].join(' '))
 
   const req = http.request(
     {
@@ -618,14 +598,14 @@ test('post with regexp as spec', function(t) {
       path: '/echo',
       port: 80,
     },
-    function(res) {
-      res.on('end', function() {
+    res => {
+      res.on('end', () => {
         scope.done()
         t.end()
       })
-      res.on('data', function(data) {
+      res.on('data', data =>
         t.equal(data.toString(), 'OK /echo key=val', 'response should match')
-      })
+      )
     }
   )
 
@@ -633,14 +613,10 @@ test('post with regexp as spec', function(t) {
   req.end()
 })
 
-test('post with function as spec', function(t) {
+test('post with function as spec', t => {
   const scope = nock('http://www.google.com')
-    .post('/echo', function(body) {
-      return body === 'key=val'
-    })
-    .reply(200, function(uri, body) {
-      return ['OK', uri, body].join(' ')
-    })
+    .post('/echo', body => body === 'key=val')
+    .reply(200, (uri, body) => ['OK', uri, body].join(' '))
 
   const req = http.request(
     {
@@ -649,14 +625,14 @@ test('post with function as spec', function(t) {
       path: '/echo',
       port: 80,
     },
-    function(res) {
-      res.on('end', function() {
+    res => {
+      res.on('end', () => {
         scope.done()
         t.end()
       })
-      res.on('data', function(data) {
+      res.on('data', data =>
         t.equal(data.toString(), 'OK /echo key=val', 'response should match')
-      })
+      )
     }
   )
 
@@ -664,14 +640,12 @@ test('post with function as spec', function(t) {
   req.end()
 })
 
-test('post with chaining on call', function(t) {
+test('post with chaining on call', t => {
   const input = 'key=val'
 
   const scope = nock('http://www.google.com')
     .post('/echo', input)
-    .reply(200, function(uri, body) {
-      return ['OK', uri, body].join(' ')
-    })
+    .reply(200, (uri, body) => ['OK', uri, body].join(' '))
 
   const req = http
     .request(
@@ -681,31 +655,31 @@ test('post with chaining on call', function(t) {
         path: '/echo',
         port: 80,
       },
-      function(res) {
-        res.on('end', function() {
+      res => {
+        res.on('end', () => {
           scope.done()
           t.end()
         })
-        res.on('data', function(data) {
+        res.on('data', data =>
           t.equal(data.toString(), 'OK /echo key=val', 'response should match')
-        })
+        )
       }
     )
-    .on('error', function(error) {
+    .on('error', error => {
       t.equal(error, null)
       t.end()
     })
   req.end(input)
 })
 
-test('reply with callback and filtered path and body', function(t) {
+test('reply with callback and filtered path and body', t => {
   let noPrematureExecution = false
 
   const scope = nock('http://www.realcallback.com')
     .filteringPath(/.*/, '*')
     .filteringRequestBody(/.*/, '*')
     .post('*', '*')
-    .reply(200, function(uri, body) {
+    .reply(200, (uri, body) => {
       t.assert(noPrematureExecution)
       return ['OK', uri, body].join(' ')
     })
@@ -717,13 +691,13 @@ test('reply with callback and filtered path and body', function(t) {
       path: '/original/path',
       port: 80,
     },
-    function(res) {
+    res => {
       t.equal(res.statusCode, 200)
-      res.on('end', function() {
+      res.on('end', () => {
         scope.done()
         t.end()
       })
-      res.on('data', function(data) {
+      res.on('data', data => {
         t.equal(
           data.toString(),
           'OK /original/path original=body',
@@ -737,7 +711,7 @@ test('reply with callback and filtered path and body', function(t) {
   req.end('original=body')
 })
 
-test('isDone', function(t) {
+test('isDone', t => {
   const scope = nock('http://www.google.com')
     .get('/')
     .reply(200, 'Hello World!')
@@ -750,9 +724,9 @@ test('isDone', function(t) {
       path: '/',
       port: 80,
     },
-    function(res) {
+    res => {
       t.equal(res.statusCode, 200)
-      res.on('end', function() {
+      res.on('end', () => {
         t.ok(scope.isDone(), 'done after request is made')
         scope.done()
         t.end()
@@ -766,7 +740,7 @@ test('isDone', function(t) {
   req.end()
 })
 
-test('request headers exposed', function(t) {
+test('request headers exposed', t => {
   const scope = nock('http://www.headdy.com')
     .get('/')
     .reply(200, 'Hello World!', { 'X-My-Headers': 'My Header value' })
@@ -779,8 +753,8 @@ test('request headers exposed', function(t) {
       port: 80,
       headers: { 'X-My-Headers': 'My custom Header value' },
     },
-    function(res) {
-      res.on('end', function() {
+    res => {
+      res.on('end', () => {
         scope.done()
         t.end()
       })
@@ -796,7 +770,7 @@ test('request headers exposed', function(t) {
   })
 })
 
-test('headers work', function(t) {
+test('headers work', t => {
   const scope = nock('http://www.headdy.com')
     .get('/')
     .reply(200, 'Hello World!', { 'X-My-Headers': 'My Header value' })
@@ -808,9 +782,9 @@ test('headers work', function(t) {
       path: '/',
       port: 80,
     },
-    function(res) {
+    res => {
       t.equal(res.statusCode, 200)
-      res.on('end', function() {
+      res.on('end', () => {
         t.equivalent(res.headers, { 'x-my-headers': 'My Header value' })
         scope.done()
         t.end()
@@ -824,16 +798,10 @@ test('headers work', function(t) {
   req.end()
 })
 
-test('reply headers work with function', function(t) {
+test('reply headers work with function', t => {
   const scope = nock('http://replyheadersworkwithfunction.xxx')
     .get('/')
-    .reply(
-      200,
-      function() {
-        return 'ABC'
-      },
-      { 'X-My-Headers': 'My custom header value' }
-    )
+    .reply(200, () => 'ABC', { 'X-My-Headers': 'My custom header value' })
 
   http.get(
     {
@@ -841,7 +809,7 @@ test('reply headers work with function', function(t) {
       path: '/',
       port: 80,
     },
-    function(res) {
+    res => {
       t.equivalent(res.headers, { 'x-my-headers': 'My custom header value' })
       scope.done()
       t.end()
@@ -849,13 +817,11 @@ test('reply headers work with function', function(t) {
   )
 })
 
-test('reply headers as function work', function(t) {
+test('reply headers as function work', t => {
   nock('http://example.com')
     .get('/')
     .reply(200, 'boo!', {
-      'X-My-Headers': function(req, res, body) {
-        return body.toString()
-      },
+      'X-My-Headers': (req, res, body) => body.toString(),
     })
 
   http.get(
@@ -863,7 +829,7 @@ test('reply headers as function work', function(t) {
       host: 'example.com',
       path: '/',
     },
-    function(res) {
+    res => {
       t.equivalent(res.headers, { 'x-my-headers': 'boo!' })
       t.equivalent(res.rawHeaders, ['X-My-Headers', 'boo!']) // 67
       t.end()
@@ -871,12 +837,12 @@ test('reply headers as function work', function(t) {
   )
 })
 
-test('reply headers as function are evaluated only once per request', function(t) {
+test('reply headers as function are evaluated only once per request', t => {
   let counter = 0
   nock('http://example.com')
     .get('/')
     .reply(200, 'boo!', {
-      'X-My-Headers': function(req, res, body) {
+      'X-My-Headers': (req, res, body) => {
         ++counter
         return body.toString()
       },
@@ -887,7 +853,7 @@ test('reply headers as function are evaluated only once per request', function(t
       host: 'example.com',
       path: '/',
     },
-    function(res) {
+    res => {
       t.equivalent(res.headers, { 'x-my-headers': 'boo!' })
       t.equivalent(res.rawHeaders, ['X-My-Headers', 'boo!'])
       t.equal(counter, 1)
@@ -896,15 +862,13 @@ test('reply headers as function are evaluated only once per request', function(t
   )
 })
 
-test('reply headers as function are evaluated on each request', function(t) {
+test('reply headers as function are evaluated on each request', t => {
   let counter = 0
   nock('http://example.com')
     .get('/')
     .times(2)
     .reply(200, 'boo!', {
-      'X-My-Headers': function(req, res, body) {
-        return `${++counter}`
-      },
+      'X-My-Headers': (req, res, body) => `${++counter}`,
     })
 
   http.get(
@@ -912,7 +876,7 @@ test('reply headers as function are evaluated on each request', function(t) {
       host: 'example.com',
       path: '/',
     },
-    function(res) {
+    res => {
       t.equivalent(res.headers, { 'x-my-headers': '1' })
       t.equivalent(res.rawHeaders, ['X-My-Headers', '1'])
       t.equal(counter, 1)
@@ -921,7 +885,7 @@ test('reply headers as function are evaluated on each request', function(t) {
           host: 'example.com',
           path: '/',
         },
-        function(res) {
+        res => {
           t.equivalent(res.headers, { 'x-my-headers': '2' })
           t.equivalent(res.rawHeaders, ['X-My-Headers', '2'])
           t.equal(counter, 2)
@@ -932,7 +896,7 @@ test('reply headers as function are evaluated on each request', function(t) {
   )
 })
 
-test('match headers', function(t) {
+test('match headers', t => {
   const scope = nock('http://www.headdy.com')
     .get('/')
     .matchHeader('x-my-headers', 'My custom Header value')
@@ -946,15 +910,13 @@ test('match headers', function(t) {
       port: 80,
       headers: { 'X-My-Headers': 'My custom Header value' },
     },
-    function(res) {
+    res => {
       res.setEncoding('utf8')
       t.equal(res.statusCode, 200)
 
-      res.on('data', function(data) {
-        t.equal(data, 'Hello World!')
-      })
+      res.on('data', data => t.equal(data, 'Hello World!'))
 
-      res.on('end', function() {
+      res.on('end', () => {
         scope.done()
         t.end()
       })
@@ -962,7 +924,7 @@ test('match headers', function(t) {
   )
 })
 
-test('multiple match headers', function(t) {
+test('multiple match headers', t => {
   const scope = nock('http://www.headdy.com')
     .get('/')
     .matchHeader('x-my-headers', 'My custom Header value')
@@ -979,15 +941,13 @@ test('multiple match headers', function(t) {
       port: 80,
       headers: { 'X-My-Headers': 'other value' },
     },
-    function(res) {
+    res => {
       res.setEncoding('utf8')
       t.equal(res.statusCode, 200)
 
-      res.on('data', function(data) {
-        t.equal(data, 'Hello World other value!')
-      })
+      res.on('data', data => t.equal(data, 'Hello World other value!'))
 
-      res.on('end', function() {
+      res.on('end', () => {
         http.get(
           {
             host: 'www.headdy.com',
@@ -996,15 +956,13 @@ test('multiple match headers', function(t) {
             port: 80,
             headers: { 'X-My-Headers': 'My custom Header value' },
           },
-          function(res) {
+          res => {
             res.setEncoding('utf8')
             t.equal(res.statusCode, 200)
 
-            res.on('data', function(data) {
-              t.equal(data, 'Hello World!')
-            })
+            res.on('data', data => t.equal(data, 'Hello World!'))
 
-            res.on('end', function() {
+            res.on('end', () => {
               scope.done()
               t.end()
             })
@@ -1015,7 +973,7 @@ test('multiple match headers', function(t) {
   )
 })
 
-test('match headers with regexp', function(t) {
+test('match headers with regexp', t => {
   const scope = nock('http://www.headier.com')
     .get('/')
     .matchHeader('x-my-headers', /My He.d.r [0-9.]+/)
@@ -1029,15 +987,13 @@ test('match headers with regexp', function(t) {
       port: 80,
       headers: { 'X-My-Headers': 'My Header 1.0' },
     },
-    function(res) {
+    res => {
       res.setEncoding('utf8')
       t.equal(res.statusCode, 200)
 
-      res.on('data', function(data) {
-        t.equal(data, 'Hello World!')
-      })
+      res.on('data', data => t.equal(data, 'Hello World!'))
 
-      res.on('end', function() {
+      res.on('end', () => {
         scope.done()
         t.end()
       })
@@ -1045,7 +1001,7 @@ test('match headers with regexp', function(t) {
   )
 })
 
-test('match headers on number with regexp', function(t) {
+test('match headers on number with regexp', t => {
   const scope = nock('http://www.headier.com')
     .get('/')
     .matchHeader('x-my-headers', /\d+/)
@@ -1059,15 +1015,13 @@ test('match headers on number with regexp', function(t) {
       port: 80,
       headers: { 'X-My-Headers': 123 },
     },
-    function(res) {
+    res => {
       res.setEncoding('utf8')
       t.equal(res.statusCode, 200)
 
-      res.on('data', function(data) {
-        t.equal(data, 'Hello World!')
-      })
+      res.on('data', data => t.equal(data, 'Hello World!'))
 
-      res.on('end', function() {
+      res.on('end', () => {
         scope.done()
         t.end()
       })
@@ -1075,12 +1029,10 @@ test('match headers on number with regexp', function(t) {
   )
 })
 
-test('match headers with function', function(t) {
+test('match headers with function', t => {
   const scope = nock('http://www.headier.com')
     .get('/')
-    .matchHeader('x-my-headers', function(val) {
-      return val > 123
-    })
+    .matchHeader('x-my-headers', val => val > 123)
     .reply(200, 'Hello World!')
 
   http.get(
@@ -1091,15 +1043,13 @@ test('match headers with function', function(t) {
       port: 80,
       headers: { 'X-My-Headers': 456 },
     },
-    function(res) {
+    res => {
       res.setEncoding('utf8')
       t.equal(res.statusCode, 200)
 
-      res.on('data', function(data) {
-        t.equal(data, 'Hello World!')
-      })
+      res.on('data', data => t.equal(data, 'Hello World!'))
 
-      res.on('end', function() {
+      res.on('end', () => {
         scope.done()
         t.end()
       })
@@ -1107,7 +1057,7 @@ test('match headers with function', function(t) {
   )
 })
 
-test('match all headers', function(t) {
+test('match all headers', t => {
   const scope = nock('http://api.headdy.com')
     .matchHeader('accept', 'application/json')
     .get('/one')
@@ -1131,13 +1081,11 @@ test('match all headers', function(t) {
       port: 80,
       headers: { Accept: 'application/json' },
     },
-    function(res) {
+    res => {
       res.setEncoding('utf8')
       t.equal(res.statusCode, 200)
 
-      res.on('data', function(data) {
-        t.equal(data, '{"hello":"world"}')
-      })
+      res.on('data', data => t.equal(data, '{"hello":"world"}'))
 
       res.on('end', callback)
     }
@@ -1150,28 +1098,24 @@ test('match all headers', function(t) {
       port: 80,
       headers: { accept: 'application/json' },
     },
-    function(res) {
+    res => {
       res.setEncoding('utf8')
       t.equal(res.statusCode, 200)
 
-      res.on('data', function(data) {
-        t.equal(data, '{"a":1,"b":2,"c":3}')
-      })
+      res.on('data', data => t.equal(data, '{"a":1,"b":2,"c":3}'))
 
       res.on('end', callback)
     }
   )
 })
 
-test('header manipulation', function(t) {
+test('header manipulation', t => {
   const scope = nock('http://example.com')
     .get('/accounts')
     .reply(200, { accounts: [{ id: 1, name: 'Joe Blow' }] })
 
-  const req = http.get({ host: 'example.com', path: '/accounts' }, function(
-    res
-  ) {
-    res.on('end', function() {
+  const req = http.get({ host: 'example.com', path: '/accounts' }, res => {
+    res.on('end', () => {
       scope.done()
       t.end()
     })
@@ -1193,7 +1137,7 @@ test('header manipulation', function(t) {
   req.end()
 })
 
-test('head', function(t) {
+test('head', t => {
   const scope = nock('http://www.google.com')
     .head('/form')
     .reply(201, 'OK!')
@@ -1205,9 +1149,9 @@ test('head', function(t) {
       path: '/form',
       port: 80,
     },
-    function(res) {
+    res => {
       t.equal(res.statusCode, 201)
-      res.on('end', function() {
+      res.on('end', () => {
         scope.done()
         t.end()
       })
@@ -1220,7 +1164,7 @@ test('head', function(t) {
   req.end()
 })
 
-test('body data is differentiating', function(t) {
+test('body data is differentiating', t => {
   nock('http://www.boddydiff.com')
     .post('/', 'abc')
     .reply(200, 'Hey 1')
@@ -1231,7 +1175,7 @@ test('body data is differentiating', function(t) {
     t.end()
   }
 
-  t.test('A', function(t) {
+  t.test('A', t => {
     const req = http.request(
       {
         host: 'www.boddydiff.com',
@@ -1239,14 +1183,14 @@ test('body data is differentiating', function(t) {
         path: '/',
         port: 80,
       },
-      function(res) {
+      res => {
         let dataCalled = false
         t.equal(res.statusCode, 200)
-        res.on('end', function() {
+        res.on('end', () => {
           t.ok(dataCalled)
           done(t)
         })
-        res.on('data', function(data) {
+        res.on('data', data => {
           dataCalled = true
           t.ok(data instanceof Buffer, 'data should be buffer')
           t.equal(data.toString(), 'Hey 1', 'response should match')
@@ -1257,7 +1201,7 @@ test('body data is differentiating', function(t) {
     req.end('abc')
   })
 
-  t.test('B', function(t) {
+  t.test('B', t => {
     const req = http.request(
       {
         host: 'www.boddydiff.com',
@@ -1265,14 +1209,14 @@ test('body data is differentiating', function(t) {
         path: '/',
         port: 80,
       },
-      function(res) {
+      res => {
         let dataCalled = false
         t.equal(res.statusCode, 200)
-        res.on('end', function() {
+        res.on('end', () => {
           t.ok(dataCalled)
           done(t)
         })
-        res.on('data', function(data) {
+        res.on('data', data => {
           dataCalled = true
           t.ok(data instanceof Buffer, 'data should be buffer')
           t.equal(data.toString(), 'Hey 2', 'response should match')
@@ -1286,7 +1230,7 @@ test('body data is differentiating', function(t) {
   t.end()
 })
 
-test('chaining', function(t) {
+test('chaining', t => {
   const scope = nock('http://www.spiffy.com')
     .get('/')
     .reply(200, 'Hello World!')
@@ -1295,7 +1239,7 @@ test('chaining', function(t) {
 
   t.tearDown(scope.done.bind(scope))
 
-  t.test('post', function(t) {
+  t.test('post', t => {
     const req = http.request(
       {
         host: 'www.spiffy.com',
@@ -1303,9 +1247,9 @@ test('chaining', function(t) {
         path: '/form',
         port: 80,
       },
-      function(res) {
+      res => {
         t.equal(res.statusCode, 201)
-        res.once('data', function(data) {
+        res.once('data', data => {
           t.ok(data instanceof Buffer, 'data should be buffer')
           t.equal(data.toString(), 'OK!', 'response should match')
 
@@ -1317,7 +1261,7 @@ test('chaining', function(t) {
     req.end()
   })
 
-  t.test('get', function(t) {
+  t.test('get', t => {
     const req = http.request(
       {
         host: 'www.spiffy.com',
@@ -1325,9 +1269,9 @@ test('chaining', function(t) {
         path: '/',
         port: 80,
       },
-      function(res) {
+      res => {
         t.equal(res.statusCode, 200)
-        res.once('data', function(data) {
+        res.once('data', data => {
           t.ok(data instanceof Buffer, 'data should be buffer')
           t.equal(data.toString(), 'Hello World!', 'response should match')
 
@@ -1342,7 +1286,7 @@ test('chaining', function(t) {
   t.end()
 })
 
-test('encoding', function(t) {
+test('encoding', t => {
   let dataCalled = false
 
   const scope = nock('http://www.encoderz.com')
@@ -1355,16 +1299,16 @@ test('encoding', function(t) {
       path: '/',
       port: 80,
     },
-    function(res) {
+    res => {
       res.setEncoding('base64')
 
       t.equal(res.statusCode, 200)
-      res.on('end', function() {
+      res.on('end', () => {
         t.ok(dataCalled)
         scope.done()
         t.end()
       })
-      res.on('data', function(data) {
+      res.on('data', data => {
         dataCalled = true
         t.type(data, 'string', 'data should be string')
         t.equal(
@@ -1379,7 +1323,7 @@ test('encoding', function(t) {
   req.end()
 })
 
-test('reply with file', function(t) {
+test('reply with file', t => {
   let dataCalled = false
 
   nock('http://www.filereplier.com')
@@ -1394,13 +1338,13 @@ test('reply with file', function(t) {
       path: '/',
       port: 80,
     },
-    function(res) {
+    res => {
       t.equal(res.statusCode, 200)
-      res.on('end', function() {
+      res.on('end', () => {
         t.ok(dataCalled)
         t.end()
       })
-      res.on('data', function(data) {
+      res.on('data', data => {
         dataCalled = true
         t.equal(
           data.toString(),
@@ -1414,7 +1358,7 @@ test('reply with file', function(t) {
   req.end()
 })
 
-test('reply with file and pipe response', function(t) {
+test('reply with file and pipe response', t => {
   nock('http://www.files.com')
     .get('/')
     .replyWithFile(200, `${__dirname}/../assets/reply_file_1.txt`)
@@ -1425,16 +1369,16 @@ test('reply with file and pipe response', function(t) {
       path: '/',
       port: 80,
     },
-    function(res) {
+    res => {
       let str = ''
       const fakeStream = new (require('stream')).Stream()
       fakeStream.writable = true
 
-      fakeStream.write = function(d) {
+      fakeStream.write = d => {
         str += d
       }
 
-      fakeStream.end = function() {
+      fakeStream.end = () => {
         t.equal(str, 'Hello from the file!', 'response should match')
         t.end()
       }
@@ -1446,7 +1390,7 @@ test('reply with file and pipe response', function(t) {
   )
 })
 
-test('reply with file with headers', function(t) {
+test('reply with file with headers', t => {
   let dataCalled = false
 
   nock('http://www.filereplier2.com')
@@ -1461,13 +1405,13 @@ test('reply with file with headers', function(t) {
       path: '/',
       port: 80,
     },
-    function(res) {
+    res => {
       t.equal(res.statusCode, 200)
-      res.on('end', function() {
+      res.on('end', () => {
         t.ok(dataCalled)
         t.end()
       })
-      res.on('data', function(data) {
+      res.on('data', data => {
         dataCalled = true
         t.equal(data.length, 57)
       })
@@ -1477,12 +1421,12 @@ test('reply with file with headers', function(t) {
   req.end()
 })
 
-test('reply with file with mikeal/request', function(t) {
+test('reply with file with mikeal/request', t => {
   nock('http://www.files.com')
     .get('/')
     .replyWithFile(200, `${__dirname}/../assets/reply_file_1.txt`)
 
-  mikealRequest('http://www.files.com/', function(err, res, body) {
+  mikealRequest('http://www.files.com/', (err, res, body) => {
     if (err) {
       throw err
     }
@@ -1495,7 +1439,7 @@ test('reply with file with mikeal/request', function(t) {
   })
 })
 
-test('reply with JSON', function(t) {
+test('reply with JSON', t => {
   let dataCalled = false
 
   const scope = nock('http://www.jsonreplier.com')
@@ -1508,18 +1452,18 @@ test('reply with JSON', function(t) {
       path: '/',
       port: 80,
     },
-    function(res) {
+    res => {
       res.setEncoding('utf8')
       t.equal(res.statusCode, 200)
       t.notOk(res.headers['date'])
       t.notOk(res.headers['content-length'])
       t.equal(res.headers['content-type'], 'application/json')
-      res.on('end', function() {
+      res.on('end', () => {
         t.ok(dataCalled)
         scope.done()
         t.end()
       })
-      res.on('data', function(data) {
+      res.on('data', data => {
         dataCalled = true
         t.equal(data.toString(), '{"hello":"world"}', 'response should match')
       })
@@ -1529,7 +1473,7 @@ test('reply with JSON', function(t) {
   req.end()
 })
 
-test('reply with content-length header', function(t) {
+test('reply with content-length header', t => {
   const scope = nock('http://www.jsonreplier.com')
     .replyContentLength()
     .get('/')
@@ -1541,9 +1485,9 @@ test('reply with content-length header', function(t) {
       path: '/',
       port: 80,
     },
-    function(res) {
+    res => {
       t.equal(res.headers['content-length'], 17)
-      res.on('end', function() {
+      res.on('end', () => {
         scope.done()
         t.end()
       })
@@ -1554,7 +1498,7 @@ test('reply with content-length header', function(t) {
   )
 })
 
-test('reply with date header', function(t) {
+test('reply with date header', t => {
   const date = new Date()
 
   const scope = nock('http://www.jsonreplier.com')
@@ -1568,9 +1512,9 @@ test('reply with date header', function(t) {
       path: '/',
       port: 80,
     },
-    function(res) {
+    res => {
       t.equal(res.headers['date'], date.toUTCString())
-      res.on('end', function() {
+      res.on('end', () => {
         scope.done()
         t.end()
       })
@@ -1581,11 +1525,9 @@ test('reply with date header', function(t) {
   )
 })
 
-test('filter path with function', function(t) {
+test('filter path with function', t => {
   const scope = nock('http://www.filterurls.com')
-    .filteringPath(function(path) {
-      return '/?a=2&b=1'
-    })
+    .filteringPath(path => '/?a=2&b=1')
     .get('/?a=2&b=1')
     .reply(200, 'Hello World!')
 
@@ -1596,9 +1538,9 @@ test('filter path with function', function(t) {
       path: '/?a=1&b=2',
       port: 80,
     },
-    function(res) {
+    res => {
       t.equal(res.statusCode, 200)
-      res.on('end', function() {
+      res.on('end', () => {
         scope.done()
         t.end()
       })
@@ -1611,7 +1553,7 @@ test('filter path with function', function(t) {
   req.end()
 })
 
-test('filter path with regexp', function(t) {
+test('filter path with regexp', t => {
   const scope = nock('http://www.filterurlswithregexp.com')
     .filteringPath(/\d/g, '3')
     .get('/?a=3&b=3')
@@ -1624,9 +1566,9 @@ test('filter path with regexp', function(t) {
       path: '/?a=1&b=2',
       port: 80,
     },
-    function(res) {
+    res => {
       t.equal(res.statusCode, 200)
-      res.on('end', function() {
+      res.on('end', () => {
         scope.done()
         t.end()
       })
@@ -1639,11 +1581,11 @@ test('filter path with regexp', function(t) {
   req.end()
 })
 
-test('filter body with function', function(t) {
+test('filter body with function', t => {
   let filteringRequestBodyCounter = 0
 
   const scope = nock('http://www.filterboddiez.com')
-    .filteringRequestBody(function(body) {
+    .filteringRequestBody(body => {
       ++filteringRequestBodyCounter
       t.equal(body, 'mamma mia')
       return 'mamma tua'
@@ -1658,9 +1600,9 @@ test('filter body with function', function(t) {
       path: '/',
       port: 80,
     },
-    function(res) {
+    res => {
       t.equal(res.statusCode, 200)
-      res.on('end', function() {
+      res.on('end', () => {
         scope.done()
         t.equal(filteringRequestBodyCounter, 1)
         t.end()
@@ -1674,7 +1616,7 @@ test('filter body with function', function(t) {
   req.end('mamma mia')
 })
 
-test('filter body with regexp', function(t) {
+test('filter body with regexp', t => {
   const scope = nock('http://www.filterboddiezregexp.com')
     .filteringRequestBody(/mia/, 'nostra')
     .post('/', 'mamma nostra')
@@ -1687,9 +1629,9 @@ test('filter body with regexp', function(t) {
       path: '/',
       port: 80,
     },
-    function(res) {
+    res => {
       t.equal(res.statusCode, 200)
-      res.on('end', function() {
+      res.on('end', () => {
         scope.done()
         t.end()
       })
@@ -1702,7 +1644,7 @@ test('filter body with regexp', function(t) {
   req.end('mamma mia')
 })
 
-test('abort request', function(t) {
+test('abort request', t => {
   const scope = nock('http://www.google.com')
     .get('/hey')
     .reply(200, 'nobody')
@@ -1712,17 +1654,15 @@ test('abort request', function(t) {
     path: '/hey',
   })
 
-  req.on('response', function(res) {
-    res.on('close', function(err) {
+  req.on('response', res => {
+    res.on('close', err => {
       t.equal(err.code, 'aborted')
       scope.done()
     })
 
-    res.on('end', function() {
-      t.true(false, 'this should never execute')
-    })
+    res.on('end', () => t.fail('this should never execute'))
 
-    req.once('error', function(err) {
+    req.once('error', err => {
       t.equal(err.code, 'ECONNRESET')
       t.end()
     })
@@ -1733,7 +1673,7 @@ test('abort request', function(t) {
   req.end()
 })
 
-test('pause response before data', function(t) {
+test('pause response before data', t => {
   const scope = nock('http://www.mouse.com')
     .get('/pauser')
     .reply(200, 'nobody')
@@ -1743,20 +1683,18 @@ test('pause response before data', function(t) {
     path: '/pauser',
   })
 
-  req.on('response', function(res) {
+  req.on('response', res => {
     res.pause()
 
     let waited = false
-    setTimeout(function() {
+    setTimeout(() => {
       waited = true
       res.resume()
     }, 500)
 
-    res.on('data', function(data) {
-      t.true(waited)
-    })
+    res.on('data', data => t.true(waited))
 
-    res.on('end', function() {
+    res.on('end', () => {
       scope.done()
       t.end()
     })
@@ -1765,7 +1703,7 @@ test('pause response before data', function(t) {
   req.end()
 })
 
-test('pause response after data', function(t) {
+test('pause response after data', t => {
   const response = new stream.PassThrough()
   const scope = nock('http://pauseme.com')
     .get('/')
@@ -1778,18 +1716,16 @@ test('pause response after data', function(t) {
       host: 'pauseme.com',
       path: '/',
     },
-    function(res) {
+    res => {
       let waited = false
-      setTimeout(function() {
+      setTimeout(() => {
         waited = true
         res.resume()
       }, 500)
 
-      res.on('data', function(data) {
-        res.pause()
-      })
+      res.on('data', data => res.pause())
 
-      res.on('end', function() {
+      res.on('end', () => {
         t.true(waited)
         scope.done()
         t.end()
@@ -1799,14 +1735,14 @@ test('pause response after data', function(t) {
 
   // Manually simulate multiple 'data' events.
   response.emit('data', 'one')
-  setTimeout(function() {
+  setTimeout(() => {
     response.emit('data', 'two')
     response.end()
   }, 0)
 })
 
-test('response pipe', function(t) {
-  const dest = (function() {
+test('response pipe', t => {
+  const dest = (() => {
     function Constructor() {
       events.EventEmitter.call(this)
 
@@ -1843,12 +1779,10 @@ test('response pipe', function(t) {
       host: 'pauseme.com',
       path: '/',
     },
-    function(res) {
-      dest.on('pipe', function() {
-        t.pass('should emit "pipe" event')
-      })
+    res => {
+      dest.on('pipe', () => t.pass('should emit "pipe" event'))
 
-      dest.on('end', function() {
+      dest.on('end', () => {
         scope.done()
         t.equal(dest.buffer.toString(), 'nobody')
         t.end()
@@ -1859,8 +1793,8 @@ test('response pipe', function(t) {
   )
 })
 
-test('response pipe without implicit end', function(t) {
-  const dest = (function() {
+test('response pipe without implicit end', t => {
+  const dest = (() => {
     function Constructor() {
       events.EventEmitter.call(this)
 
@@ -1897,12 +1831,10 @@ test('response pipe without implicit end', function(t) {
       host: 'pauseme.com',
       path: '/',
     },
-    function(res) {
-      dest.on('end', function() {
-        t.fail('should not call end implicitly')
-      })
+    res => {
+      dest.on('end', () => t.fail('should not call end implicitly'))
 
-      res.on('end', function() {
+      res.on('end', () => {
         scope.done()
         t.pass('should emit end event')
         t.end()
@@ -1916,7 +1848,7 @@ test('response pipe without implicit end', function(t) {
   )
 })
 
-test('chaining API', function(t) {
+test('chaining API', t => {
   const scope = nock('http://chainchomp.com')
     .get('/one')
     .reply(200, 'first one')
@@ -1928,27 +1860,27 @@ test('chaining API', function(t) {
       host: 'chainchomp.com',
       path: '/one',
     },
-    function(res) {
+    res => {
       res.setEncoding('utf8')
       t.equal(res.statusCode, 200, 'status should be ok')
-      res.on('data', function(data) {
+      res.on('data', data =>
         t.equal(data, 'first one', 'should be equal to first reply')
-      })
+      )
 
-      res.on('end', function() {
+      res.on('end', () => {
         http.get(
           {
             host: 'chainchomp.com',
             path: '/two',
           },
-          function(res) {
+          res => {
             res.setEncoding('utf8')
             t.equal(res.statusCode, 200, 'status should be ok')
-            res.on('data', function(data) {
+            res.on('data', data =>
               t.equal(data, 'second one', 'should be qual to second reply')
-            })
+            )
 
-            res.on('end', function() {
+            res.on('end', () => {
               scope.done()
               t.end()
             })
@@ -1959,7 +1891,7 @@ test('chaining API', function(t) {
   )
 })
 
-test('same URI', function(t) {
+test('same URI', t => {
   const scope = nock('http://sameurii.com')
     .get('/abc')
     .reply(200, 'first one')
@@ -2002,7 +1934,7 @@ test('same URI', function(t) {
   )
 })
 
-test('can use hostname instead of host', function(t) {
+test('can use hostname instead of host', t => {
   const scope = nock('http://www.google.com')
     .get('/')
     .reply(200, 'Hello World!')
@@ -2027,7 +1959,7 @@ test('can use hostname instead of host', function(t) {
   req.end()
 })
 
-test('hostname is case insensitive', function(t) {
+test('hostname is case insensitive', t => {
   const scope = nock('http://caseinsensitive.com')
     .get('/path')
     .reply(200, 'hey')
@@ -2046,7 +1978,7 @@ test('hostname is case insensitive', function(t) {
   req.end()
 })
 
-test('can take a port', function(t) {
+test('can take a port', t => {
   const scope = nock('http://www.myserver.com:3333')
     .get('/')
     .reply(200, 'Hello World!')
@@ -2072,7 +2004,7 @@ test('can take a port', function(t) {
   req.end()
 })
 
-test('can use https', function(t) {
+test('can use https', t => {
   let dataCalled = false
 
   const scope = nock('https://google.com')
@@ -2102,7 +2034,7 @@ test('can use https', function(t) {
   req.end()
 })
 
-test('emits error if https route is missing', function(t) {
+test('emits error if https route is missing', t => {
   nock('https://google.com')
     .get('/')
     .reply(200, 'Hello World!')
@@ -2134,7 +2066,7 @@ test('emits error if https route is missing', function(t) {
   })
 })
 
-test('emits error if https route is missing', function(t) {
+test('emits error if https route is missing', t => {
   nock('https://google.com:123')
     .get('/')
     .reply(200, 'Hello World!')
@@ -2167,7 +2099,7 @@ test('emits error if https route is missing', function(t) {
   })
 })
 
-test('can use ClientRequest using GET', function(t) {
+test('can use ClientRequest using GET', t => {
   let dataCalled = false
 
   const scope = nock('http://www2.clientrequester.com')
@@ -2197,7 +2129,7 @@ test('can use ClientRequest using GET', function(t) {
   req.end()
 })
 
-test('can use ClientRequest using POST', function(t) {
+test('can use ClientRequest using POST', t => {
   let dataCalled = false
 
   const scope = nock('http://www2.clientrequester.com')
@@ -2229,7 +2161,7 @@ test('can use ClientRequest using POST', function(t) {
   req.end()
 })
 
-test('same url matches twice', function(t) {
+test('same url matches twice', t => {
   const scope = nock('http://www.twicematcher.com')
     .get('/hey')
     .reply(200, 'First match')
@@ -2287,7 +2219,7 @@ test('same url matches twice', function(t) {
   )
 })
 
-test('scopes are independent', function(t) {
+test('scopes are independent', t => {
   const scope1 = nock('http://www34.google.com')
     .get('/')
     .reply(200, 'Hello World!')
@@ -2316,7 +2248,7 @@ test('scopes are independent', function(t) {
   req.end()
 })
 
-test('two scopes with the same request are consumed', function(t) {
+test('two scopes with the same request are consumed', t => {
   nock('http://www36.google.com')
     .get('/')
     .reply(200, 'Hello World!')
@@ -2352,7 +2284,7 @@ test('two scopes with the same request are consumed', function(t) {
   }
 })
 
-test('allow unmocked option works', function(t) {
+test('allow unmocked option works', t => {
   t.plan(7)
 
   const server = http.createServer((request, response) => {
@@ -2449,7 +2381,7 @@ test('allow unmocked option works', function(t) {
   })
 })
 
-test('default reply headers work', function(t) {
+test('default reply headers work', t => {
   nock('http://default.reply.headers.com')
     .defaultReplyHeaders({
       'X-Powered-By': 'Meeee',
@@ -2478,7 +2410,7 @@ test('default reply headers work', function(t) {
     .end()
 })
 
-test('default reply headers as functions work', function(t) {
+test('default reply headers as functions work', t => {
   const date = new Date().toUTCString()
   const message = 'A message.'
 
@@ -2517,7 +2449,7 @@ test('default reply headers as functions work', function(t) {
     .end()
 })
 
-test('JSON encoded replies set the content-type header', function(t) {
+test('JSON encoded replies set the content-type header', t => {
   const scope = nock('http://localhost')
     .get('/')
     .reply(200, {
@@ -2542,7 +2474,7 @@ test('JSON encoded replies set the content-type header', function(t) {
     .end()
 })
 
-test('JSON encoded replies does not overwrite existing content-type header', function(t) {
+test('JSON encoded replies does not overwrite existing content-type header', t => {
   const scope = nock('http://localhost')
     .get('/')
     .reply(
@@ -2573,7 +2505,7 @@ test('JSON encoded replies does not overwrite existing content-type header', fun
     .end()
 })
 
-test("blank response doesn't have content-type application/json attached to it", function(t) {
+test("blank response doesn't have content-type application/json attached to it", t => {
   nock('http://localhost')
     .get('/')
     .reply(200)
@@ -2595,7 +2527,7 @@ test("blank response doesn't have content-type application/json attached to it",
     .end()
 })
 
-test('clean all works', function(t) {
+test('clean all works', t => {
   nock('http://amazon.com')
     .get('/nonexistent')
     .reply(200)
@@ -2617,7 +2549,7 @@ test('clean all works', function(t) {
   })
 })
 
-test('cleanAll should remove pending mocks from all scopes', function(t) {
+test('cleanAll should remove pending mocks from all scopes', t => {
   const scope1 = nock('http://example.org')
     .get('/somepath')
     .reply(200, 'hey')
@@ -2634,7 +2566,7 @@ test('cleanAll should remove pending mocks from all scopes', function(t) {
   t.end()
 })
 
-test('is done works', function(t) {
+test('is done works', t => {
   nock('http://amazon.com')
     .get('/nonexistent')
     .reply(200)
@@ -2648,7 +2580,7 @@ test('is done works', function(t) {
   })
 })
 
-test('pending mocks works', function(t) {
+test('pending mocks works', t => {
   nock('http://amazon.com')
     .get('/nonexistent')
     .reply(200)
@@ -2662,7 +2594,7 @@ test('pending mocks works', function(t) {
   })
 })
 
-test("pending mocks doesn't include optional mocks", function(t) {
+test("pending mocks doesn't include optional mocks", t => {
   nock('http://example.com')
     .get('/nonexistent')
     .optionally()
@@ -2672,7 +2604,7 @@ test("pending mocks doesn't include optional mocks", function(t) {
   t.end()
 })
 
-test('calling optionally(true) on a mock makes it optional', function(t) {
+test('calling optionally(true) on a mock makes it optional', t => {
   nock('http://example.com')
     .get('/nonexistent')
     .optionally(true)
@@ -2682,7 +2614,7 @@ test('calling optionally(true) on a mock makes it optional', function(t) {
   t.end()
 })
 
-test('calling optionally(false) on a mock leaves it as required', function(t) {
+test('calling optionally(false) on a mock leaves it as required', t => {
   nock('http://example.com')
     .get('/nonexistent')
     .optionally(false)
@@ -2693,7 +2625,7 @@ test('calling optionally(false) on a mock leaves it as required', function(t) {
   t.end()
 })
 
-test('optional mocks are still functional', function(t) {
+test('optional mocks are still functional', t => {
   nock('http://example.com')
     .get('/abc')
     .optionally()
@@ -2706,7 +2638,7 @@ test('optional mocks are still functional', function(t) {
   })
 })
 
-test('isDone is true with optional mocks outstanding', function(t) {
+test('isDone is true with optional mocks outstanding', t => {
   const scope = nock('http://example.com')
     .get('/abc')
     .optionally()
@@ -2716,7 +2648,7 @@ test('isDone is true with optional mocks outstanding', function(t) {
   t.end()
 })
 
-test('optional but persisted mocks persist, but never appear as pending', function(t) {
+test('optional but persisted mocks persist, but never appear as pending', t => {
   nock('http://example.com')
     .get('/123')
     .optionally()
@@ -2736,7 +2668,7 @@ test('optional but persisted mocks persist, but never appear as pending', functi
   })
 })
 
-test('optional repeated mocks execute repeatedly, but never appear as pending', function(t) {
+test('optional repeated mocks execute repeatedly, but never appear as pending', t => {
   nock('http://example.com')
     .get('/456')
     .optionally()
@@ -2756,7 +2688,7 @@ test('optional repeated mocks execute repeatedly, but never appear as pending', 
   })
 })
 
-test("activeMocks returns optional mocks only before they're completed", function(t) {
+test("activeMocks returns optional mocks only before they're completed", t => {
   nock.cleanAll()
   nock('http://example.com')
     .get('/optional')
@@ -2770,7 +2702,7 @@ test("activeMocks returns optional mocks only before they're completed", functio
   })
 })
 
-test('activeMocks always returns persisted mocks', function(t) {
+test('activeMocks always returns persisted mocks', t => {
   nock.cleanAll()
   nock('http://example.com')
     .get('/persisted')
@@ -2784,7 +2716,7 @@ test('activeMocks always returns persisted mocks', function(t) {
   })
 })
 
-test('activeMocks returns incomplete mocks', function(t) {
+test('activeMocks returns incomplete mocks', t => {
   nock.cleanAll()
   nock('http://example.com')
     .get('/incomplete')
@@ -2794,7 +2726,7 @@ test('activeMocks returns incomplete mocks', function(t) {
   t.end()
 })
 
-test("activeMocks doesn't return completed mocks", function(t) {
+test("activeMocks doesn't return completed mocks", t => {
   nock.cleanAll()
   nock('http://example.com')
     .get('/complete-me')
@@ -2806,7 +2738,7 @@ test("activeMocks doesn't return completed mocks", function(t) {
   })
 })
 
-test('username and password works', function(t) {
+test('username and password works', t => {
   const scope = nock('http://passwordyy.com')
     .get('/')
     .reply(200, 'Welcome, username')
@@ -2826,7 +2758,7 @@ test('username and password works', function(t) {
     .end()
 })
 
-test('works with mikeal/request and username and password', function(t) {
+test('works with mikeal/request and username and password', t => {
   const scope = nock('http://passwordyyyyy.com')
     .get('/abc')
     .reply(200, 'Welcome, username')
@@ -2842,7 +2774,7 @@ test('works with mikeal/request and username and password', function(t) {
   )
 })
 
-test('different ports work works', function(t) {
+test('different ports work works', t => {
   const scope = nock('http://abc.portyyyy.com:8081')
     .get('/pathhh')
     .reply(200, 'Welcome, username')
@@ -2862,7 +2794,7 @@ test('different ports work works', function(t) {
     .end()
 })
 
-test('different ports work work with Mikeal request', function(t) {
+test('different ports work work with Mikeal request', t => {
   const scope = nock('http://abc.portyyyy.com:8082')
     .get('/pathhh')
     .reply(200, 'Welcome to Mikeal Request!')
@@ -2879,7 +2811,7 @@ test('different ports work work with Mikeal request', function(t) {
   })
 })
 
-test('explicitly specifiying port 80 works', function(t) {
+test('explicitly specifiying port 80 works', t => {
   const scope = nock('http://abc.portyyyy.com:80')
     .get('/pathhh')
     .reply(200, 'Welcome, username')
@@ -2899,7 +2831,7 @@ test('explicitly specifiying port 80 works', function(t) {
     .end()
 })
 
-test('post with object', function(t) {
+test('post with object', t => {
   const scope = nock('http://uri')
     .post('/claim', { some_data: 'something' })
     .reply(200)
@@ -2920,7 +2852,7 @@ test('post with object', function(t) {
     .end('{"some_data":"something"}')
 })
 
-test('accept string as request target', function(t) {
+test('accept string as request target', t => {
   let dataCalled = false
   const scope = nock('http://www.example.com')
     .get('/')
@@ -2944,7 +2876,7 @@ test('accept string as request target', function(t) {
 })
 
 if (url.URL) {
-  test('accept URL as request target', function(t) {
+  test('accept URL as request target', t => {
     let dataCalled = false
     const scope = nock('http://www.example.com')
       .get('/')
@@ -2968,7 +2900,7 @@ if (url.URL) {
   })
 }
 
-test('request has path', function(t) {
+test('request has path', t => {
   const scope = nock('http://haspath.com')
     .get('/the/path/to/infinity')
     .reply(200)
@@ -2993,7 +2925,7 @@ test('request has path', function(t) {
   req.end()
 })
 
-test('persists interceptors', function(t) {
+test('persists interceptors', t => {
   const scope = nock('http://persisssists.con')
     .persist()
     .get('/')
@@ -3013,7 +2945,7 @@ test('persists interceptors', function(t) {
     .end()
 })
 
-test('Persisted interceptors are in pendingMocks initially', function(t) {
+test('Persisted interceptors are in pendingMocks initially', t => {
   const scope = nock('http://example.com')
     .get('/abc')
     .reply(200, 'Persisted reply')
@@ -3023,7 +2955,7 @@ test('Persisted interceptors are in pendingMocks initially', function(t) {
   t.end()
 })
 
-test('Persisted interceptors are not in pendingMocks after the first request', function(t) {
+test('Persisted interceptors are not in pendingMocks after the first request', t => {
   const scope = nock('http://example.com')
     .get('/def')
     .reply(200, 'Persisted reply')
@@ -3035,7 +2967,7 @@ test('Persisted interceptors are not in pendingMocks after the first request', f
   })
 })
 
-test('persist reply with file', function(t) {
+test('persist reply with file', t => {
   nock('http://www.filereplier.com')
     .persist()
     .get('/')
@@ -3075,7 +3007,7 @@ test('persist reply with file', function(t) {
   )
 })
 
-test('(re-)activate after restore', function(t) {
+test('(re-)activate after restore', t => {
   t.plan(7)
 
   const server = http.createServer((request, response) => {
@@ -3125,7 +3057,7 @@ test('(re-)activate after restore', function(t) {
   })
 })
 
-test('allow unmocked option works with https', function(t) {
+test('allow unmocked option works with https', t => {
   t.plan(6)
 
   function middleware(request, response) {
@@ -3197,7 +3129,7 @@ test('allow unmocked option works with https', function(t) {
   })
 })
 
-test('allow unmocked post with json data', function(t) {
+test('allow unmocked post with json data', t => {
   t.plan(2)
   t.once('end', function() {
     server.close()
@@ -3227,7 +3159,7 @@ test('allow unmocked post with json data', function(t) {
   })
 })
 
-test('allow unmocked passthrough with mismatched bodies', function(t) {
+test('allow unmocked passthrough with mismatched bodies', t => {
   t.plan(2)
   t.once('end', function() {
     server.close()
@@ -3257,7 +3189,7 @@ test('allow unmocked passthrough with mismatched bodies', function(t) {
   })
 })
 
-test('allow unordered body with json encoding', function(t) {
+test('allow unordered body with json encoding', t => {
   const scope = nock('http://wtfjs.org')
     .post('/like-wtf', {
       foo: 'bar',
@@ -3282,7 +3214,7 @@ test('allow unordered body with json encoding', function(t) {
   )
 })
 
-test('allow unordered body with form encoding', function(t) {
+test('allow unordered body with form encoding', t => {
   const scope = nock('http://wtfjs.org')
     .post('/like-wtf', {
       foo: 'bar',
@@ -3307,7 +3239,7 @@ test('allow unordered body with form encoding', function(t) {
   )
 })
 
-test('allow string json spec', function(t) {
+test('allow string json spec', t => {
   const bodyObject = { bar: 'foo', foo: 'bar' }
 
   const scope = nock('http://wtfjs.org')
@@ -3331,7 +3263,7 @@ test('allow string json spec', function(t) {
   )
 })
 
-test('has a req property on the response', function(t) {
+test('has a req property on the response', t => {
   const scope = nock('http://wtfjs.org')
     .get('/like-wtf')
     .reply(200)
@@ -3348,7 +3280,7 @@ test('has a req property on the response', function(t) {
   req.end()
 })
 
-test('disabled real HTTP request', function(t) {
+test('disabled real HTTP request', t => {
   nock.disableNetConnect()
 
   http
@@ -3366,7 +3298,7 @@ test('disabled real HTTP request', function(t) {
   nock.enableNetConnect()
 })
 
-test('NetConnectNotAllowedError is instance of Error', function(t) {
+test('NetConnectNotAllowedError is instance of Error', t => {
   nock.disableNetConnect()
 
   http
@@ -3381,7 +3313,7 @@ test('NetConnectNotAllowedError is instance of Error', function(t) {
   nock.enableNetConnect()
 })
 
-test('NetConnectNotAllowedError exposes the stack and has a code', function(t) {
+test('NetConnectNotAllowedError exposes the stack and has a code', t => {
   nock.disableNetConnect()
 
   http
@@ -3397,7 +3329,7 @@ test('NetConnectNotAllowedError exposes the stack and has a code', function(t) {
   nock.enableNetConnect()
 })
 
-test('enable real HTTP request only for specified domain, via string', function(t) {
+test('enable real HTTP request only for specified domain, via string', t => {
   t.plan(1)
 
   const server = http.createServer((request, response) => {
@@ -3416,7 +3348,7 @@ test('enable real HTTP request only for specified domain, via string', function(
   )
 })
 
-test('disallow request for other domains, via string', function(t) {
+test('disallow request for other domains, via string', t => {
   nock.enableNetConnect('localhost')
   t.once('end', () => nock.enableNetConnect())
 
@@ -3433,7 +3365,7 @@ test('disallow request for other domains, via string', function(t) {
     })
 })
 
-test('enable real HTTP request only for specified domain, via regexp', function(t) {
+test('enable real HTTP request only for specified domain, via regexp', t => {
   t.plan(1)
 
   const server = http.createServer((request, response) => {
@@ -3452,7 +3384,7 @@ test('enable real HTTP request only for specified domain, via regexp', function(
   )
 })
 
-test('disallow request for other domains, via regexp', function(t) {
+test('disallow request for other domains, via regexp', t => {
   nock.enableNetConnect(/ocalhos/)
   t.once('end', () => nock.enableNetConnect())
 
@@ -3469,7 +3401,7 @@ test('disallow request for other domains, via regexp', function(t) {
     })
 })
 
-test('repeating once', function(t) {
+test('repeating once', t => {
   nock.disableNetConnect()
 
   nock('http://zombo.com')
@@ -3487,7 +3419,7 @@ test('repeating once', function(t) {
   nock.enableNetConnect()
 })
 
-test('repeating twice', function(t) {
+test('repeating twice', t => {
   nock.disableNetConnect()
 
   nock('http://zombo.com')
@@ -3507,7 +3439,7 @@ test('repeating twice', function(t) {
   )
 })
 
-test('repeating thrice', function(t) {
+test('repeating thrice', t => {
   nock.disableNetConnect()
 
   nock('http://zombo.com')
@@ -3527,7 +3459,7 @@ test('repeating thrice', function(t) {
   )
 })
 
-test('repeating response 4 times', function(t) {
+test('repeating response 4 times', t => {
   nock.disableNetConnect()
 
   nock('http://zombo.com')
@@ -3547,7 +3479,7 @@ test('repeating response 4 times', function(t) {
   )
 })
 
-test('superagent works', function(t) {
+test('superagent works', t => {
   const responseText = 'Yay superagent!'
   const headers = { 'Content-Type': 'text/plain' }
   nock('http://superagent.cz')
@@ -3560,7 +3492,7 @@ test('superagent works', function(t) {
   })
 })
 
-test('superagent works with query string', function(t) {
+test('superagent works with query string', t => {
   const responseText = 'Yay superagentzzz'
   const headers = { 'Content-Type': 'text/plain' }
   nock('http://superagent.cz')
@@ -3573,7 +3505,7 @@ test('superagent works with query string', function(t) {
   })
 })
 
-test('superagent posts', function(t) {
+test('superagent posts', t => {
   nock('http://superagent.cz')
     .post('/somepath?b=c')
     .reply(204)
@@ -3587,7 +3519,7 @@ test('superagent posts', function(t) {
     })
 })
 
-test('response is streams2 compatible', function(t) {
+test('response is streams2 compatible', t => {
   const responseText = 'streams2 streams2 streams2'
   nock('http://stream2hostnameftw')
     .get('/somepath')
@@ -3618,7 +3550,7 @@ test('response is streams2 compatible', function(t) {
     .end()
 })
 
-test('response is an http.IncomingMessage instance', function(t) {
+test('response is an http.IncomingMessage instance', t => {
   const responseText = 'incoming message!'
   nock('http://example.com')
     .get('/somepath')
@@ -3680,7 +3612,7 @@ async function resolvesInAtLeast(t, fn, durationMillis) {
   )
 }
 
-test('calling delay could cause mikealRequest timeout error', function(t) {
+test('calling delay could cause mikealRequest timeout error', t => {
   const scope = nock('http://funk')
     .get('/')
     .delay({
@@ -3702,7 +3634,7 @@ test('calling delay could cause mikealRequest timeout error', function(t) {
   )
 })
 
-test('Body delay does not have impact on timeout', function(t) {
+test('Body delay does not have impact on timeout', t => {
   const scope = nock('http://funk')
     .get('/')
     .delay({
@@ -3727,7 +3659,7 @@ test('Body delay does not have impact on timeout', function(t) {
   )
 })
 
-test('calling delay with "body" and "head" delays the response', function(t) {
+test('calling delay with "body" and "head" delays the response', t => {
   // Do not base new tests on this one. Write async tests using
   // `resolvesInAtLeast` instead.
   checkDuration(t, 600)
@@ -3748,7 +3680,7 @@ test('calling delay with "body" and "head" delays the response', function(t) {
   })
 })
 
-test('calling delay with "body" delays the response body', function(t) {
+test('calling delay with "body" delays the response body', t => {
   // Do not base new tests on this one. Write async tests using
   // `resolvesInAtLeast` instead.
   checkDuration(t, 100)
@@ -3776,7 +3708,7 @@ test('calling delay with "body" delays the response body', function(t) {
   })
 })
 
-test('calling delayBody delays the response', function(t) {
+test('calling delayBody delays the response', t => {
   // Do not base new tests on this one. Write async tests using
   // `resolvesInAtLeast` instead.
   checkDuration(t, 100)
@@ -3802,7 +3734,7 @@ test('calling delayBody delays the response', function(t) {
   })
 })
 
-test('calling delay delays the response', function(t) {
+test('calling delay delays the response', t => {
   // Do not base new tests on this one. Write async tests using
   // `resolvesInAtLeast` instead.
   checkDuration(t, 100)
@@ -3828,7 +3760,7 @@ test('calling delay delays the response', function(t) {
   })
 })
 
-test('using reply callback with delay provides proper arguments', function(t) {
+test('using reply callback with delay provides proper arguments', t => {
   nock('http://localhost')
     .get('/')
     .delay(100)
@@ -3841,7 +3773,7 @@ test('using reply callback with delay provides proper arguments', function(t) {
   http.request('http://localhost/', function() {}).end('OK')
 })
 
-test('using reply callback with delay can reply JSON', function(t) {
+test('using reply callback with delay can reply JSON', t => {
   nock('http://delayfunctionreplyjson')
     .get('/')
     .delay(100)
@@ -3862,7 +3794,7 @@ test('using reply callback with delay can reply JSON', function(t) {
   )
 })
 
-test('delay works with replyWithFile', function(t) {
+test('delay works with replyWithFile', t => {
   // Do not base new tests on this one. Write async tests using
   // `resolvesInAtLeast` instead.
   checkDuration(t, 100)
@@ -3894,7 +3826,7 @@ test('delay works with replyWithFile', function(t) {
     .end('OK')
 })
 
-test('delay works with when you return a generic stream from the reply callback', function(t) {
+test('delay works with when you return a generic stream from the reply callback', t => {
   // Do not base new tests on this one. Write async tests using
   // `resolvesInAtLeast` instead.
   checkDuration(t, 100)
@@ -3944,7 +3876,7 @@ test('delay with replyWithError: response is delayed', async t => {
   )
 })
 
-test('write callback called', function(t) {
+test('write callback called', t => {
   const scope = nock('http://www.filterboddiezregexp.com')
     .filteringRequestBody(/mia/, 'nostra')
     .post('/', 'mamma nostra')
@@ -3977,7 +3909,7 @@ test('write callback called', function(t) {
   })
 })
 
-test('end callback called', function(t) {
+test('end callback called', t => {
   const scope = nock('http://www.filterboddiezregexp.com')
     .filteringRequestBody(/mia/, 'nostra')
     .post('/', 'mamma nostra')
@@ -4009,7 +3941,7 @@ test('end callback called', function(t) {
   })
 })
 
-test('finish event fired before end event (bug-139)', function(t) {
+test('finish event fired before end event (bug-139)', t => {
   const scope = nock('http://www.filterboddiezregexp.com')
     .filteringRequestBody(/mia/, 'nostra')
     .post('/', 'mamma nostra')
@@ -4046,7 +3978,7 @@ test('finish event fired before end event (bug-139)', function(t) {
 test(
   'when a stream is used for the response body, it will not be read until after the response event',
   { skip: !stream.Readable },
-  function(t) {
+  t => {
     let responseEvent = false
     const text = 'Hello World\n'
 
@@ -4084,7 +4016,7 @@ test(
   }
 )
 
-test('calling delayConnection delays the connection', function(t) {
+test('calling delayConnection delays the connection', t => {
   // Do not base new tests on this one. Write async tests using
   // `resolvesInAtLeast` instead.
   checkDuration(t, 100)
@@ -4110,7 +4042,7 @@ test('calling delayConnection delays the connection', function(t) {
   })
 })
 
-test('using reply callback with delayConnection provides proper arguments', function(t) {
+test('using reply callback with delayConnection provides proper arguments', t => {
   nock('http://localhost')
     .get('/')
     .delayConnection(100)
@@ -4123,7 +4055,7 @@ test('using reply callback with delayConnection provides proper arguments', func
   http.request('http://localhost/', function() {}).end('OK')
 })
 
-test('delayConnection works with replyWithFile', function(t) {
+test('delayConnection works with replyWithFile', t => {
   // Do not base new tests on this one. Write async tests using
   // `resolvesInAtLeast` instead.
   checkDuration(t, 100)
@@ -4155,7 +4087,7 @@ test('delayConnection works with replyWithFile', function(t) {
     .end('OK')
 })
 
-test('delayConnection works with when you return a generic stream from the reply callback', function(t) {
+test('delayConnection works with when you return a generic stream from the reply callback', t => {
   // Do not base new tests on this one. Write async tests using
   // `resolvesInAtLeast` instead.
   checkDuration(t, 100)
@@ -4189,7 +4121,7 @@ test('delayConnection works with when you return a generic stream from the reply
     .end('OK')
 })
 
-test('define() is backward compatible', function(t) {
+test('define() is backward compatible', t => {
   const nockDef = {
     scope: 'http://example.com',
     //  "port" has been deprecated
@@ -4232,7 +4164,7 @@ test('define() is backward compatible', function(t) {
   req.end()
 })
 
-test('define() works with non-JSON responses', function(t) {
+test('define() works with non-JSON responses', t => {
   const nockDef = {
     scope: 'http://example.com',
     method: 'POST',
@@ -4279,7 +4211,7 @@ test('define() works with non-JSON responses', function(t) {
   req.end()
 })
 
-test('define() works with binary buffers', function(t) {
+test('define() works with binary buffers', t => {
   const nockDef = {
     scope: 'http://example.com',
     method: 'POST',
@@ -4326,7 +4258,7 @@ test('define() works with binary buffers', function(t) {
   req.end()
 })
 
-test('define() uses reqheaders', function(t) {
+test('define() uses reqheaders', t => {
   const auth = 'foo:bar'
   const authHeader = `Basic ${Buffer.from('foo:bar').toString('base64')}`
 
@@ -4369,7 +4301,7 @@ test('define() uses reqheaders', function(t) {
   req.end()
 })
 
-test('define() uses badheaders', function(t) {
+test('define() uses badheaders', t => {
   const nockDef = [
     {
       scope: 'http://example.com',
@@ -4416,7 +4348,7 @@ test('define() uses badheaders', function(t) {
   req.end()
 })
 
-test('sending binary and receiving JSON should work ', function(t) {
+test('sending binary and receiving JSON should work ', t => {
   const scope = nock('http://example.com')
     .filteringRequestBody(/.*/, '*')
     .post('/some/path', '*')
@@ -4455,7 +4387,7 @@ test('sending binary and receiving JSON should work ', function(t) {
 })
 
 // https://github.com/nock/nock/issues/146
-test('resume() is automatically invoked when the response is drained', function(t) {
+test('resume() is automatically invoked when the response is drained', t => {
   const replyLength = 1024 * 1024
   const replyBuffer = Buffer.from(new Array(replyLength + 1).join('.'))
   t.equal(replyBuffer.length, replyLength)
@@ -4473,7 +4405,7 @@ test('resume() is automatically invoked when the response is drained', function(
   })
 })
 
-test('handles get with restify client', function(t) {
+test('handles get with restify client', t => {
   const scope = nock('https://www.example.com')
     .get('/get')
     .reply(200, 'get')
@@ -4499,7 +4431,7 @@ test('handles get with restify client', function(t) {
   })
 })
 
-test('handles post with restify client', function(t) {
+test('handles post with restify client', t => {
   const scope = nock('https://www.example.com')
     .post('/post', 'hello world')
     .reply(200, 'post')
@@ -4528,7 +4460,7 @@ test('handles post with restify client', function(t) {
   })
 })
 
-test('handles get with restify JsonClient', function(t) {
+test('handles get with restify JsonClient', t => {
   const scope = nock('https://www.example.com')
     .get('/get')
     .reply(200, { get: 'ok' })
@@ -4544,7 +4476,7 @@ test('handles get with restify JsonClient', function(t) {
   })
 })
 
-test('handles post with restify JsonClient', function(t) {
+test('handles post with restify JsonClient', t => {
   const scope = nock('https://www.example.com')
     .post('/post', { username: 'banana' })
     .reply(200, { post: 'ok' })
@@ -4560,7 +4492,7 @@ test('handles post with restify JsonClient', function(t) {
   })
 })
 
-test('handles 404 with restify JsonClient', function(t) {
+test('handles 404 with restify JsonClient', t => {
   const scope = nock('https://www.example.com')
     .put('/404')
     .reply(404)
@@ -4576,7 +4508,7 @@ test('handles 404 with restify JsonClient', function(t) {
   })
 })
 
-test('handles 500 with restify JsonClient', function(t) {
+test('handles 500 with restify JsonClient', t => {
   const scope = nock('https://www.example.com')
     .delete('/500')
     .reply(500)
@@ -4592,7 +4524,7 @@ test('handles 500 with restify JsonClient', function(t) {
   })
 })
 
-test('test request timeout option', function(t) {
+test('test request timeout option', t => {
   nock('http://example.com')
     .get('/test')
     .reply(200, JSON.stringify({ foo: 'bar' }))
@@ -4610,7 +4542,7 @@ test('test request timeout option', function(t) {
   })
 })
 
-test('done fails when specified request header is missing', function(t) {
+test('done fails when specified request header is missing', t => {
   nock('http://example.com', {
     reqheaders: {
       'X-App-Token': 'apptoken',
@@ -4638,7 +4570,7 @@ test('done fails when specified request header is missing', function(t) {
   })
 })
 
-test('matches request header with regular expression', function(t) {
+test('matches request header with regular expression', t => {
   nock('http://example.com', {
     reqheaders: {
       'X-My-Super-Power': /.+/,
@@ -4663,7 +4595,7 @@ test('matches request header with regular expression', function(t) {
   )
 })
 
-test('request header satisfies the header function', function(t) {
+test('request header satisfies the header function', t => {
   nock('http://example.com', {
     reqheaders: {
       'X-My-Super-Power': function(value) {
@@ -4690,7 +4622,7 @@ test('request header satisfies the header function', function(t) {
   )
 })
 
-test("done fails when specified request header doesn't match regular expression", function(t) {
+test("done fails when specified request header doesn't match regular expression", t => {
   nock('http://example.com', {
     reqheaders: {
       'X-My-Super-Power': /Mullet.+/,
@@ -4717,7 +4649,7 @@ test("done fails when specified request header doesn't match regular expression"
   })
 })
 
-test("done fails when specified request header doesn't satisfy the header function", function(t) {
+test("done fails when specified request header doesn't satisfy the header function", t => {
   nock('http://example.com', {
     reqheaders: {
       'X-My-Super-Power': function(value) {
@@ -4746,7 +4678,7 @@ test("done fails when specified request header doesn't satisfy the header functi
   })
 })
 
-test('done does not fail when specified request header is not missing', function(t) {
+test('done does not fail when specified request header is not missing', t => {
   nock('http://example.com', {
     reqheaders: {
       'X-App-Token': 'apptoken',
@@ -4773,7 +4705,7 @@ test('done does not fail when specified request header is not missing', function
   )
 })
 
-test('done fails when specified bad request header is present', function(t) {
+test('done fails when specified bad request header is present', t => {
   nock('http://example.com', {
     badheaders: ['cookie'],
   })
@@ -4798,7 +4730,7 @@ test('done fails when specified bad request header is present', function(t) {
   })
 })
 
-test('mikeal/request with delayConnection and request.timeout', function(t) {
+test('mikeal/request with delayConnection and request.timeout', t => {
   nock('http://some-server.com')
     .post('/')
     .delayConnection(1000)
@@ -4817,7 +4749,7 @@ test('mikeal/request with delayConnection and request.timeout', function(t) {
   )
 })
 
-test('get correct filtering with scope and request headers filtering', function(t) {
+test('get correct filtering with scope and request headers filtering', t => {
   const responseText = 'OK!'
   const responseHeaders = { 'Content-Type': 'text/plain' }
   const requestHeaders = { host: 'a.subdomain.of.google.com' }
@@ -4855,7 +4787,7 @@ test('get correct filtering with scope and request headers filtering', function(
   t.equivalent(req._headers, { host: requestHeaders.host })
 })
 
-test('mocking succeeds even when mocked and specified request header names have different cases', function(t) {
+test('mocking succeeds even when mocked and specified request header names have different cases', t => {
   nock('http://example.com', {
     reqheaders: {
       'x-app-token': 'apptoken',
@@ -4883,7 +4815,7 @@ test('mocking succeeds even when mocked and specified request header names have 
 })
 
 // https://github.com/nock/nock/issues/966
-test('mocking succeeds when mocked and specified request headers have falsy values', function(t) {
+test('mocking succeeds when mocked and specified request headers have falsy values', t => {
   nock('http://example.com', {
     reqheaders: {
       'x-foo': 0,
@@ -4908,7 +4840,7 @@ test('mocking succeeds when mocked and specified request headers have falsy valu
   )
 })
 
-test('mocking succeeds even when host request header is not specified', function(t) {
+test('mocking succeeds even when host request header is not specified', t => {
   nock('http://example.com')
     .post('/resource')
     .reply(200, { status: 'ok' })
@@ -4930,7 +4862,7 @@ test('mocking succeeds even when host request header is not specified', function
   )
 })
 
-test('mikeal/request with strictSSL: true', function(t) {
+test('mikeal/request with strictSSL: true', t => {
   nock('https://strictssl.com')
     .post('/what')
     .reply(200, { status: 'ok' })
@@ -4949,7 +4881,7 @@ test('mikeal/request with strictSSL: true', function(t) {
   )
 })
 
-test('response readable pull stream works as expected', function(t) {
+test('response readable pull stream works as expected', t => {
   nock('http://streamingalltheway.com')
     .get('/ssstream')
     .reply(200, 'this is the response body yeah')
@@ -4981,7 +4913,7 @@ test('response readable pull stream works as expected', function(t) {
   req.end()
 })
 
-test('.setNoDelay', function(t) {
+test('.setNoDelay', t => {
   nock('http://nodelayyy.com')
     .get('/yay')
     .reply(200, 'Hi')
@@ -5006,7 +4938,7 @@ test('.setNoDelay', function(t) {
   req.end()
 })
 
-test('match basic authentication header', function(t) {
+test('match basic authentication header', t => {
   const username = 'testuser'
   const password = 'testpassword'
   const authString = `${username}:${password}`
@@ -5043,7 +4975,7 @@ test('match basic authentication header', function(t) {
   )
 })
 
-test('request emits socket', function(t) {
+test('request emits socket', t => {
   nock('http://gotzsocketz.com')
     .get('/')
     .reply(200, 'hey')
@@ -5057,7 +4989,7 @@ test('request emits socket', function(t) {
   })
 })
 
-test('socket emits connect and secureConnect', function(t) {
+test('socket emits connect and secureConnect', t => {
   t.plan(3)
 
   nock('http://gotzsocketz.com')
@@ -5088,7 +5020,7 @@ test('socket emits connect and secureConnect', function(t) {
   })
 })
 
-test('socket setKeepAlive', function(t) {
+test('socket setKeepAlive', t => {
   nock('http://setkeepalive.com')
     .get('/')
     .reply(200, 'hey')
@@ -5100,7 +5032,7 @@ test('socket setKeepAlive', function(t) {
   })
 })
 
-test('abort destroys socket', function(t) {
+test('abort destroys socket', t => {
   nock('http://socketdestroyer.com')
     .get('/')
     .reply(200, 'hey')
@@ -5116,7 +5048,7 @@ test('abort destroys socket', function(t) {
   })
 })
 
-test('hyperquest works', function(t) {
+test('hyperquest works', t => {
   nock('http://hyperquest.com')
     .get('/somepath')
     .reply(200, 'Yay hyperquest!')
@@ -5132,7 +5064,7 @@ test('hyperquest works', function(t) {
   })
 })
 
-test('match domain using regexp', function(t) {
+test('match domain using regexp', t => {
   nock(/regexexample\.com/)
     .get('/resources')
     .reply(200, 'Match regex')
@@ -5150,7 +5082,7 @@ test('match domain using regexp', function(t) {
   })
 })
 
-test('match domain using regexp with path as callback (issue-1137)', function(t) {
+test('match domain using regexp with path as callback (issue-1137)', t => {
   nock.cleanAll()
   nock(/.*/)
     .get(() => true)
@@ -5168,7 +5100,7 @@ test('match domain using regexp with path as callback (issue-1137)', function(t)
   })
 })
 
-test('match multiple interceptors with regexp domain (issue-508)', function(t) {
+test('match multiple interceptors with regexp domain (issue-508)', t => {
   nock.cleanAll()
   nock(/chainregex/)
     .get('/')
@@ -5191,7 +5123,7 @@ test('match multiple interceptors with regexp domain (issue-508)', function(t) {
   })
 })
 
-test('match domain using intercept callback', function(t) {
+test('match domain using intercept callback', t => {
   const validUrl = ['/cats', '/dogs']
 
   nock('http://www.interceptexample.com')
@@ -5225,7 +5157,7 @@ test('match domain using intercept callback', function(t) {
   })
 })
 
-test('match path using regexp', function(t) {
+test('match path using regexp', t => {
   nock('http://www.pathregex.com')
     .get(/regex$/)
     .reply(200, 'Match regex')
@@ -5242,7 +5174,7 @@ test('match path using regexp', function(t) {
   })
 })
 
-test('match path using regexp with allowUnmocked', function(t) {
+test('match path using regexp with allowUnmocked', t => {
   nock('http://www.pathregex.com', { allowUnmocked: true })
     .get(/regex$/)
     .reply(200, 'Match regex')
@@ -5259,7 +5191,7 @@ test('match path using regexp with allowUnmocked', function(t) {
   })
 })
 
-test('match hostname using regexp with allowUnmocked (issue-1076)', function(t) {
+test('match hostname using regexp with allowUnmocked (issue-1076)', t => {
   nock(/localhost/, { allowUnmocked: true })
     .get('/no/regex/here')
     .reply(200, 'Match regex')
@@ -5276,7 +5208,7 @@ test('match hostname using regexp with allowUnmocked (issue-1076)', function(t) 
   })
 })
 
-test('match path using function', function(t) {
+test('match path using function', t => {
   const path = '/match/uri/function'
   const options = {
     hostname: 'pathfunction.com',
@@ -5345,7 +5277,7 @@ test('match path using function', function(t) {
     .end()
 })
 
-test('remove interceptor for GET resource', function(t) {
+test('remove interceptor for GET resource', t => {
   const scope = nock('http://example.org')
     .get('/somepath')
     .reply(200, 'hey')
@@ -5383,7 +5315,7 @@ test('remove interceptor for GET resource', function(t) {
   )
 })
 
-test('remove interceptor removes given interceptor', function(t) {
+test('remove interceptor removes given interceptor', t => {
   const givenInterceptor = nock('http://example.org').get('/somepath')
   const scope = givenInterceptor.reply(200, 'hey')
 
@@ -5417,7 +5349,7 @@ test('remove interceptor removes given interceptor', function(t) {
   )
 })
 
-test('remove interceptor removes interceptor from pending requests', function(t) {
+test('remove interceptor removes interceptor from pending requests', t => {
   const givenInterceptor = nock('http://example.org').get('/somepath')
   const scope = givenInterceptor.reply(200, 'hey')
 
@@ -5432,7 +5364,7 @@ test('remove interceptor removes interceptor from pending requests', function(t)
   t.end()
 })
 
-test('remove interceptor removes given interceptor for https', function(t) {
+test('remove interceptor removes given interceptor for https', t => {
   const givenInterceptor = nock('https://example.org').get('/somepath')
   const scope = givenInterceptor.reply(200, 'hey')
 
@@ -5466,7 +5398,7 @@ test('remove interceptor removes given interceptor for https', function(t) {
   )
 })
 
-test('remove interceptor removes given interceptor for regex path', function(t) {
+test('remove interceptor removes given interceptor for regex path', t => {
   const givenInterceptor = nock('http://example.org').get(/somePath$/)
   const scope = givenInterceptor.reply(200, 'hey')
 
@@ -5500,7 +5432,7 @@ test('remove interceptor removes given interceptor for regex path', function(t) 
   )
 })
 
-test('remove interceptor for not found resource', function(t) {
+test('remove interceptor for not found resource', t => {
   const result = nock.removeInterceptor({
     hostname: 'example.org',
     path: '/somepath',
@@ -5509,7 +5441,7 @@ test('remove interceptor for not found resource', function(t) {
   t.end()
 })
 
-test('isDone() must consider repeated responses', function(t) {
+test('isDone() must consider repeated responses', t => {
   const scope = nock('http://www.example.com')
     .get('/')
     .times(2)
@@ -5544,7 +5476,7 @@ test('isDone() must consider repeated responses', function(t) {
   })
 })
 
-test('you must setup an interceptor for each request', function(t) {
+test('you must setup an interceptor for each request', t => {
   const scope = nock('http://www.example.com')
     .get('/hey')
     .reply(200, 'First match')
@@ -5572,7 +5504,7 @@ test('you must setup an interceptor for each request', function(t) {
   })
 })
 
-test('calling socketDelay will emit a timeout', function(t) {
+test('calling socketDelay will emit a timeout', t => {
   nock('http://www.example.com')
     .get('/')
     .socketDelay(10000)
@@ -5604,7 +5536,7 @@ test('calling socketDelay will emit a timeout', function(t) {
   req.end()
 })
 
-test('calling socketDelay not emit a timeout if not idle for long enough', function(t) {
+test('calling socketDelay not emit a timeout if not idle for long enough', t => {
   nock('http://www.example.com')
     .get('/')
     .socketDelay(10000)
@@ -5633,7 +5565,7 @@ test('calling socketDelay not emit a timeout if not idle for long enough', funct
   req.end()
 })
 
-test('replyWithError returns an error on request', function(t) {
+test('replyWithError returns an error on request', t => {
   const scope = nock('http://www.google.com')
     .post('/echo')
     .replyWithError('Service not found')
@@ -5655,7 +5587,7 @@ test('replyWithError returns an error on request', function(t) {
   req.end()
 })
 
-test('replyWithError allows json response', function(t) {
+test('replyWithError allows json response', t => {
   const scope = nock('http://www.google.com')
     .post('/echo')
     .replyWithError({ message: 'Service not found', code: 'test' })
@@ -5678,7 +5610,7 @@ test('replyWithError allows json response', function(t) {
   req.end()
 })
 
-test('no content type provided', function(t) {
+test('no content type provided', t => {
   const scope = nock('http://nocontenttype.com')
     .replyContentLength()
     .post('/httppost', function() {
@@ -5706,7 +5638,7 @@ test('no content type provided', function(t) {
     .end('WHAA')
 })
 
-test('query() matches a query string of the same name=value', function(t) {
+test('query() matches a query string of the same name=value', t => {
   nock('http://google.com')
     .get('/')
     .query({ foo: 'bar' })
@@ -5719,7 +5651,7 @@ test('query() matches a query string of the same name=value', function(t) {
   })
 })
 
-test('query() matches multiple query strings of the same name=value', function(t) {
+test('query() matches multiple query strings of the same name=value', t => {
   nock('http://google.com')
     .get('/')
     .query({ foo: 'bar', baz: 'foz' })
@@ -5732,7 +5664,7 @@ test('query() matches multiple query strings of the same name=value', function(t
   })
 })
 
-test('query() matches multiple query strings of the same name=value regardless of order', function(t) {
+test('query() matches multiple query strings of the same name=value regardless of order', t => {
   nock('http://google.com')
     .get('/')
     .query({ foo: 'bar', baz: 'foz' })
@@ -5745,7 +5677,7 @@ test('query() matches multiple query strings of the same name=value regardless o
   })
 })
 
-test('query() matches query values regardless of their type of declaration', function(t) {
+test('query() matches query values regardless of their type of declaration', t => {
   nock('http://google.com')
     .get('/')
     .query({ num: 1, bool: true, empty: null, str: 'fou' })
@@ -5761,7 +5693,7 @@ test('query() matches query values regardless of their type of declaration', fun
   })
 })
 
-test("query() doesn't match query values of requests without query string", function(t) {
+test("query() doesn't match query values of requests without query string", t => {
   nock('http://google.com')
     .get('/')
     .query({ num: 1, bool: true, empty: null, str: 'fou' })
@@ -5779,7 +5711,7 @@ test("query() doesn't match query values of requests without query string", func
   })
 })
 
-test('query() matches a query string using regexp', function(t) {
+test('query() matches a query string using regexp', t => {
   nock('http://google.com')
     .get('/')
     .query({ foo: /.*/ })
@@ -5792,7 +5724,7 @@ test('query() matches a query string using regexp', function(t) {
   })
 })
 
-test('query() matches a query string that contains special RFC3986 characters', function(t) {
+test('query() matches a query string that contains special RFC3986 characters', t => {
   nock('http://google.com')
     .get('/')
     .query({ 'foo&bar': 'hello&world' })
@@ -5812,7 +5744,7 @@ test('query() matches a query string that contains special RFC3986 characters', 
   })
 })
 
-test('query() expects unencoded query params', function(t) {
+test('query() expects unencoded query params', t => {
   nock('http://google.com')
     .get('/')
     .query({ foo: 'hello%20world' })
@@ -5824,7 +5756,7 @@ test('query() expects unencoded query params', function(t) {
   })
 })
 
-test('query() matches a query string with pre-encoded values', function(t) {
+test('query() matches a query string with pre-encoded values', t => {
   nock('http://google.com', { encodedQueryParams: true })
     .get('/')
     .query({ foo: 'hello%20world' })
@@ -5837,7 +5769,7 @@ test('query() matches a query string with pre-encoded values', function(t) {
   })
 })
 
-test('query() with "true" will allow all query strings to pass', function(t) {
+test('query() with "true" will allow all query strings to pass', t => {
   nock('http://google.com')
     .get('/')
     .query(true)
@@ -5850,7 +5782,7 @@ test('query() with "true" will allow all query strings to pass', function(t) {
   })
 })
 
-test('query() with "{}" will allow a match against ending in ?', function(t) {
+test('query() with "{}" will allow a match against ending in ?', t => {
   nock('http://querystringmatchland.com')
     .get('/noquerystring')
     .query({})
@@ -5866,7 +5798,7 @@ test('query() with "{}" will allow a match against ending in ?', function(t) {
   })
 })
 
-test('query() with a function, function called with actual queryObject', function(t) {
+test('query() with a function, function called with actual queryObject', t => {
   let queryObject
 
   const queryValidator = function(qs) {
@@ -5887,7 +5819,7 @@ test('query() with a function, function called with actual queryObject', functio
   })
 })
 
-test('query() with a function, function return true the query treat as matched', function(t) {
+test('query() with a function, function return true the query treat as matched', t => {
   const alwasyTrue = function() {
     return true
   }
@@ -5907,7 +5839,7 @@ test('query() with a function, function return true the query treat as matched',
   })
 })
 
-test('query() with a function, function return false the query treat as Un-matched', function(t) {
+test('query() with a function, function return false the query treat as Un-matched', t => {
   const alwayFalse = function() {
     return false
   }
@@ -5934,7 +5866,7 @@ test('query() with a function, function return false the query treat as Un-match
   })
 })
 
-test('query() will not match when a query string does not match name=value', function(t) {
+test('query() will not match when a query string does not match name=value', t => {
   nock('https://c.com')
     .get('/b')
     .query({ foo: 'bar' })
@@ -5957,7 +5889,7 @@ test('query() will not match when a query string does not match name=value', fun
   })
 })
 
-test('query() will not match when a query string is present that was not registered', function(t) {
+test('query() will not match when a query string is present that was not registered', t => {
   nock('https://b.com')
     .get('/c')
     .query({ foo: 'bar' })
@@ -5980,7 +5912,7 @@ test('query() will not match when a query string is present that was not registe
   })
 })
 
-test('query() will not match when a query string is malformed', function(t) {
+test('query() will not match when a query string is malformed', t => {
   nock('https://a.com')
     .get('/d')
     .query({ foo: 'bar' })
@@ -6003,7 +5935,7 @@ test('query() will not match when a query string is malformed', function(t) {
   })
 })
 
-test('query() will not match when a query string has fewer correct values than expected', function(t) {
+test('query() will not match when a query string has fewer correct values than expected', t => {
   nock('http://google.com')
     .get('/')
     .query({
@@ -6031,7 +5963,7 @@ test('query() will not match when a query string has fewer correct values than e
   })
 })
 
-test('query(true) will match when the path has no query', function(t) {
+test('query(true) will match when the path has no query', t => {
   nock('http://google.com')
     .get('/')
     .query(true)
@@ -6046,7 +5978,7 @@ test('query(true) will match when the path has no query', function(t) {
 })
 
 // https://github.com/nock/nock/issues/835
-test('match domain and path using regexp', function(t) {
+test('match domain and path using regexp', t => {
   nock.cleanAll()
   const imgResponse = 'Matched Images Page'
 
@@ -6068,7 +6000,7 @@ test('match domain and path using regexp', function(t) {
 })
 
 // https://github.com/nock/nock/issues/835
-test('match multiple paths to domain using regexp with allowUnmocked', function(t) {
+test('match multiple paths to domain using regexp with allowUnmocked', t => {
   nock.cleanAll()
 
   const nockOpts = { allowUnmocked: true }
@@ -6112,7 +6044,7 @@ test('match multiple paths to domain using regexp with allowUnmocked', function(
   })
 })
 
-test('match domain and path using regexp with query params and allow unmocked', function(t) {
+test('match domain and path using regexp with query params and allow unmocked', t => {
   nock.cleanAll()
   const imgResponse = 'Matched Images Page'
   const opts = { allowUnmocked: true }
@@ -6134,7 +6066,7 @@ test('match domain and path using regexp with query params and allow unmocked', 
   })
 })
 
-test('multiple interceptors override headers from unrelated request', function(t) {
+test('multiple interceptors override headers from unrelated request', t => {
   nock.cleanAll()
 
   nock.define([
@@ -6189,7 +6121,7 @@ test('multiple interceptors override headers from unrelated request', function(t
 })
 
 // https://github.com/nock/nock/issues/490
-test('match when query is specified with allowUnmocked', function(t) {
+test('match when query is specified with allowUnmocked', t => {
   nock.cleanAll()
 
   const nockOpts = { allowUnmocked: true }
@@ -6219,7 +6151,7 @@ test('match when query is specified with allowUnmocked', function(t) {
 })
 
 // https://github.com/nock/nock/issues/1003
-test('correctly parse request without specified path', function(t) {
+test('correctly parse request without specified path', t => {
   nock.cleanAll()
 
   const scope1 = nock('https://example.com')
@@ -6238,7 +6170,7 @@ test('correctly parse request without specified path', function(t) {
     .end()
 })
 
-test('data is sent with flushHeaders', function(t) {
+test('data is sent with flushHeaders', t => {
   nock.cleanAll()
 
   const scope1 = nock('https://example.com')
@@ -6259,7 +6191,7 @@ test('data is sent with flushHeaders', function(t) {
     .flushHeaders()
 })
 
-test('stop persisting a persistent nock', function(t) {
+test('stop persisting a persistent nock', t => {
   nock.cleanAll()
   const scope = nock('http://persist.com')
     .persist(true)
@@ -6289,7 +6221,7 @@ test('stop persisting a persistent nock', function(t) {
     .end()
 })
 
-test("should throw an error when persist flag isn't a boolean", function(t) {
+test("should throw an error when persist flag isn't a boolean", t => {
   try {
     nock('http://persist.com').persist('string')
   } catch (e) {
@@ -6298,7 +6230,7 @@ test("should throw an error when persist flag isn't a boolean", function(t) {
   }
 })
 
-test('teardown', function(t) {
+test('teardown', t => {
   let leaks = Object.keys(global).splice(globalCount, Number.MAX_VALUE)
 
   leaks = leaks.filter(function(key) {
