@@ -415,147 +415,71 @@ test(
   }
 )
 
-test('get with reply callback returning callback without headers', t => {
-  nock('http://replyheaderland')
+test('get with reply callback returning callback without headers', async t => {
+  const scope = nock('http://example.com')
     .get('/')
     .reply(() => [401, 'This is a body'])
 
-  http.get(
-    {
-      host: 'replyheaderland',
-      path: '/',
-      port: 80,
-    },
-    res => {
-      res.setEncoding('utf8')
-      t.equal(res.statusCode, 401)
-      res.on('data', data => {
-        t.equal(data, 'This is a body')
-        res.once('end', t.end.bind(t))
-      })
-    }
-  )
+  await t.rejects(async () => got('http://example.com/'), {
+    statusCode: 401,
+    body: 'This is a body',
+  })
+  scope.done()
 })
 
-test('post with reply callback, uri, and request body', t => {
+test('post with reply callback, uri, and request body', async t => {
   const input = 'key=val'
 
-  const scope = nock('http://www.google.com')
+  const scope = nock('http://example.com')
     .post('/echo', input)
     .reply(200, (uri, body) => ['OK', uri, body].join(' '))
 
-  const req = http.request(
-    {
-      host: 'www.google.com',
-      method: 'POST',
-      path: '/echo',
-      port: 80,
-    },
-    res => {
-      res.on('end', () => {
-        scope.done()
-        t.end()
-      })
-      res.on('data', data =>
-        t.equal(data.toString(), 'OK /echo key=val', 'response should match')
-      )
-    }
-  )
-
-  req.write(input)
-  req.end()
+  const { body } = await got('http://example.com/echo', { body: input })
+  t.equal(body, 'OK /echo key=val')
+  scope.done()
 })
 
-test('post with regexp as spec', t => {
-  const scope = nock('http://www.google.com')
+test('post with regexp as spec', async t => {
+  const input = 'key=val'
+
+  const scope = nock('http://example.com')
     .post('/echo', /key=v.?l/g)
     .reply(200, (uri, body) => ['OK', uri, body].join(' '))
 
-  const req = http.request(
-    {
-      host: 'www.google.com',
-      method: 'POST',
-      path: '/echo',
-      port: 80,
-    },
-    res => {
-      res.on('end', () => {
-        scope.done()
-        t.end()
-      })
-      res.on('data', data =>
-        t.equal(data.toString(), 'OK /echo key=val', 'response should match')
-      )
-    }
-  )
+  const { body } = await got('http://example.com/echo', { body: input })
 
-  req.write('key=val')
-  req.end()
+  t.equal(body, 'OK /echo key=val')
+  scope.done()
 })
 
-test('post with function as spec', t => {
-  const scope = nock('http://www.google.com')
+test('post with function as spec', async t => {
+  const scope = nock('http://example.com')
     .post('/echo', body => body === 'key=val')
     .reply(200, (uri, body) => ['OK', uri, body].join(' '))
 
-  const req = http.request(
-    {
-      host: 'www.google.com',
-      method: 'POST',
-      path: '/echo',
-      port: 80,
-    },
-    res => {
-      res.on('end', () => {
-        scope.done()
-        t.end()
-      })
-      res.on('data', data =>
-        t.equal(data.toString(), 'OK /echo key=val', 'response should match')
-      )
-    }
-  )
+  const { body } = await got('http://example.com/echo', { body: 'key=val' })
 
-  req.write('key=val')
-  req.end()
+  t.equal(body, 'OK /echo key=val')
+  scope.done()
 })
 
-test('post with chaining on call', t => {
+test('post with chaining on call', async t => {
   const input = 'key=val'
 
-  const scope = nock('http://www.google.com')
+  const scope = nock('http://example.com')
     .post('/echo', input)
     .reply(200, (uri, body) => ['OK', uri, body].join(' '))
 
-  const req = http
-    .request(
-      {
-        host: 'www.google.com',
-        method: 'POST',
-        path: '/echo',
-        port: 80,
-      },
-      res => {
-        res.on('end', () => {
-          scope.done()
-          t.end()
-        })
-        res.on('data', data =>
-          t.equal(data.toString(), 'OK /echo key=val', 'response should match')
-        )
-      }
-    )
-    .on('error', error => {
-      t.equal(error, null)
-      t.end()
-    })
-  req.end(input)
+  const { body } = await got('http://example.com/echo', { body: input })
+
+  t.equal(body, 'OK /echo key=val')
+  scope.done()
 })
 
-test('reply with callback and filtered path and body', t => {
+test('reply with callback and filtered path and body', async t => {
   let noPrematureExecution = false
 
-  const scope = nock('http://www.realcallback.com')
+  const scope = nock('http://example.com')
     .filteringPath(/.*/, '*')
     .filteringRequestBody(/.*/, '*')
     .post('*', '*')
@@ -564,70 +488,37 @@ test('reply with callback and filtered path and body', t => {
       return ['OK', uri, body].join(' ')
     })
 
-  const req = http.request(
-    {
-      host: 'www.realcallback.com',
-      method: 'POST',
-      path: '/original/path',
-      port: 80,
-    },
-    res => {
-      t.equal(res.statusCode, 200)
-      res.on('end', () => {
-        scope.done()
-        t.end()
-      })
-      res.on('data', data => {
-        t.equal(
-          data.toString(),
-          'OK /original/path original=body',
-          'response should match'
-        )
-      })
-    }
-  )
-
   noPrematureExecution = true
-  req.end('original=body')
+  const { body } = await got.post('http://example.com/original/path', {
+    body: 'original=body',
+  })
+
+  t.equal(body, 'OK /original/path original=body')
+  scope.done()
 })
 
-test('isDone', t => {
-  const scope = nock('http://www.google.com')
+test('isDone', async t => {
+  const scope = nock('http://example.com')
     .get('/')
     .reply(200, 'Hello World!')
 
   t.notOk(scope.isDone(), 'not done when a request is outstanding')
 
-  const req = http.request(
-    {
-      host: 'www.google.com',
-      path: '/',
-      port: 80,
-    },
-    res => {
-      t.equal(res.statusCode, 200)
-      res.on('end', () => {
-        t.ok(scope.isDone(), 'done after request is made')
-        scope.done()
-        t.end()
-      })
-      // Streams start in 'paused' mode and must be started.
-      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
-      res.resume()
-    }
-  )
+  const { body } = await got('http://example.com/')
 
-  req.end()
+  t.true(scope.isDone(), 'done after request is made')
+  scope.done()
 })
 
-test('request headers exposed', t => {
-  const scope = nock('http://www.headdy.com')
+test('request headers exposed', async t => {
+  const scope = nock('http://example.com')
     .get('/')
     .reply(200, 'Hello World!', { 'X-My-Headers': 'My Header value' })
 
+  // Testing that the req is augmented, so using `http`.
   const req = http.get(
     {
-      host: 'www.headdy.com',
+      host: 'example.com',
       method: 'GET',
       path: '/',
       port: 80,
@@ -646,80 +537,49 @@ test('request headers exposed', t => {
 
   t.equivalent(req._headers, {
     'x-my-headers': 'My custom Header value',
-    host: 'www.headdy.com',
+    host: 'example.com',
   })
 })
 
-test('headers work', t => {
-  const scope = nock('http://www.headdy.com')
+test('headers work', async t => {
+  const scope = nock('http://example.com')
     .get('/')
     .reply(200, 'Hello World!', { 'X-My-Headers': 'My Header value' })
 
-  const req = http.request(
-    {
-      host: 'www.headdy.com',
-      method: 'GET',
-      path: '/',
-      port: 80,
-    },
-    res => {
-      t.equal(res.statusCode, 200)
-      res.on('end', () => {
-        t.equivalent(res.headers, { 'x-my-headers': 'My Header value' })
-        scope.done()
-        t.end()
-      })
-      // Streams start in 'paused' mode and must be started.
-      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
-      res.resume()
-    }
-  )
+  const { headers } = await got('http://example.com/')
 
-  req.end()
+  t.equivalent(headers, { 'x-my-headers': 'My Header value' })
+  scope.done()
 })
 
-test('reply headers work with function', t => {
-  const scope = nock('http://replyheadersworkwithfunction.xxx')
+test('reply headers work with function', async t => {
+  const scope = nock('http://example.com')
     .get('/')
     .reply(200, () => 'ABC', { 'X-My-Headers': 'My custom header value' })
 
-  http.get(
-    {
-      host: 'replyheadersworkwithfunction.xxx',
-      path: '/',
-      port: 80,
-    },
-    res => {
-      t.equivalent(res.headers, { 'x-my-headers': 'My custom header value' })
-      scope.done()
-      t.end()
-    }
-  )
+  const { headers } = await got('http://example.com/')
+
+  t.equivalent(headers, { 'x-my-headers': 'My custom header value' })
+  scope.done()
 })
 
-test('reply headers as function work', t => {
-  nock('http://example.com')
+test('reply headers as function work', async t => {
+  const scope = nock('http://example.com')
     .get('/')
     .reply(200, 'boo!', {
       'X-My-Headers': (req, res, body) => body.toString(),
     })
 
-  http.get(
-    {
-      host: 'example.com',
-      path: '/',
-    },
-    res => {
-      t.equivalent(res.headers, { 'x-my-headers': 'boo!' })
-      t.equivalent(res.rawHeaders, ['X-My-Headers', 'boo!']) // 67
-      t.end()
-    }
-  )
+  const { headers, rawHeaders } = await got('http://example.com/')
+
+  t.equivalent(headers, { 'x-my-headers': 'boo!' })
+  t.equivalent(rawHeaders, ['X-My-Headers', 'boo!'])
+  scope.done()
 })
 
-test('reply headers as function are evaluated only once per request', t => {
+test('reply headers as function are evaluated only once per request', async t => {
   let counter = 0
-  nock('http://example.com')
+  const scope = nock('http://example.com')
     .get('/')
     .reply(200, 'boo!', {
       'X-My-Headers': (req, res, body) => {
@@ -728,52 +588,37 @@ test('reply headers as function are evaluated only once per request', t => {
       },
     })
 
-  http.get(
-    {
-      host: 'example.com',
-      path: '/',
-    },
-    res => {
-      t.equivalent(res.headers, { 'x-my-headers': 'boo!' })
-      t.equivalent(res.rawHeaders, ['X-My-Headers', 'boo!'])
-      t.equal(counter, 1)
-      t.end()
-    }
-  )
+  const { headers, rawHeaders } = await got('http://example.com/')
+
+  t.equivalent(headers, { 'x-my-headers': 'boo!' })
+  t.equivalent(rawHeaders, ['X-My-Headers', 'boo!'])
+  scope.done()
+
+  t.equal(counter, 1)
 })
 
-test('reply headers as function are evaluated on each request', t => {
+test('reply headers as function are evaluated on each request', async t => {
   let counter = 0
-  nock('http://example.com')
+  const scope = nock('http://example.com')
     .get('/')
     .times(2)
     .reply(200, 'boo!', {
       'X-My-Headers': (req, res, body) => `${++counter}`,
     })
 
-  http.get(
-    {
-      host: 'example.com',
-      path: '/',
-    },
-    res => {
-      t.equivalent(res.headers, { 'x-my-headers': '1' })
-      t.equivalent(res.rawHeaders, ['X-My-Headers', '1'])
-      t.equal(counter, 1)
-      http.get(
-        {
-          host: 'example.com',
-          path: '/',
-        },
-        res => {
-          t.equivalent(res.headers, { 'x-my-headers': '2' })
-          t.equivalent(res.rawHeaders, ['X-My-Headers', '2'])
-          t.equal(counter, 2)
-          t.end()
-        }
-      )
-    }
+  const { headers, rawHeaders } = await got('http://example.com/')
+  t.equivalent(headers, { 'x-my-headers': '1' })
+  t.equivalent(rawHeaders, ['X-My-Headers', '1'])
+
+  t.equal(counter, 1)
+
+  const { headers: headers2, rawHeaders: rawHeaders2 } = await got(
+    'http://example.com/'
   )
+  t.equivalent(headers2, { 'x-my-headers': '2' })
+  t.equivalent(rawHeaders2, ['X-My-Headers', '2'])
+
+  t.equal(counter, 2)
 })
 
 test('match headers', t => {
@@ -1720,7 +1565,10 @@ test('response pipe without implicit end', t => {
         t.end()
       })
 
-      res.pipe(dest, { end: false })
+      res.pipe(
+        dest,
+        { end: false }
+      )
     }
   )
 })
