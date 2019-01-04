@@ -504,7 +504,7 @@ test('isDone', async t => {
 
   t.notOk(scope.isDone(), 'not done when a request is outstanding')
 
-  const { body } = await got('http://example.com/')
+  await got('http://example.com/')
 
   t.true(scope.isDone(), 'done after request is made')
   scope.done()
@@ -619,6 +619,8 @@ test('reply headers as function are evaluated on each request', async t => {
   t.equivalent(rawHeaders2, ['X-My-Headers', '2'])
 
   t.equal(counter, 2)
+
+  scope.done()
 })
 
 test('match headers', t => {
