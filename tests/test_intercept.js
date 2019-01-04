@@ -1568,7 +1568,10 @@ test('response pipe without implicit end', t => {
         t.end()
       })
 
-      res.pipe(dest, { end: false })
+      res.pipe(
+        dest,
+        { end: false }
+      )
     }
   )
 })
@@ -3451,7 +3454,7 @@ test('calling delayBody delays the response', async t => {
   scope.done()
 })
 
-test('delayBody works with a stream', { only: true }, async t => {
+test('delayBody works with a stream', async t => {
   const scope = nock('http://example.com')
     .get('/')
     .delayBody(100)
