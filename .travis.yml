@@ -33,15 +33,9 @@ jobs:
       script: npm run lint
     - stage: test
       node_js: 10
-      script: npm run unit
     - node_js: 8
-      script: npm run unit
+      after_script: npm run coverage:upload
     - stage: release
       node_js: lts/*
       env: semantic-release
       script: npm run semantic-release
-    - node_js: lts/*
-      env: coverage
-      script:
-        - npm run test
-        - npm run coverage:upload
