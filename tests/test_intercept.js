@@ -880,152 +880,79 @@ test('reply with file with headers', async t => {
   scope.done()
 })
 
-test('reply with JSON', t => {
-  let dataCalled = false
-
-  const scope = nock('http://www.jsonreplier.com')
+test('reply with JSON', async t => {
+  const scope = nock('http://example.test')
     .get('/')
     .reply(200, { hello: 'world' })
 
-  const req = http.request(
-    {
-      host: 'www.jsonreplier.com',
-      path: '/',
-      port: 80,
-    },
-    res => {
-      res.setEncoding('utf8')
-      t.equal(res.statusCode, 200)
-      t.notOk(res.headers['date'])
-      t.notOk(res.headers['content-length'])
-      t.equal(res.headers['content-type'], 'application/json')
-      res.on('end', () => {
-        t.ok(dataCalled)
-        scope.done()
-        t.end()
-      })
-      res.on('data', data => {
-        dataCalled = true
-        t.equal(data.toString(), '{"hello":"world"}', 'response should match')
-      })
-    }
-  )
+  const { statusCode, headers, body } = await got('http://example.test/')
 
-  req.end()
+  t.equal(statusCode, 200)
+  t.type(headers.date, 'undefined')
+  t.type(headers['content-length'], 'undefined')
+  t.equal(headers['content-type'], 'application/json')
+  t.equal(body, '{"hello":"world"}', 'response should match')
+  scope.done()
 })
 
-test('reply with content-length header', t => {
-  const scope = nock('http://www.jsonreplier.com')
+test('reply with content-length header', async t => {
+  const scope = nock('http://example.test')
     .replyContentLength()
     .get('/')
     .reply(200, { hello: 'world' })
 
-  http.get(
-    {
-      host: 'www.jsonreplier.com',
-      path: '/',
-      port: 80,
-    },
-    res => {
-      t.equal(res.headers['content-length'], 17)
-      res.on('end', () => {
-        scope.done()
-        t.end()
-      })
-      // Streams start in 'paused' mode and must be started.
-      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
-      res.resume()
-    }
-  )
+  const { headers } = await got('http://example.test/')
+
+  t.equal(headers['content-length'], 17)
+  scope.done()
 })
 
-test('reply with date header', t => {
+test('reply with date header', async t => {
   const date = new Date()
 
-  const scope = nock('http://www.jsonreplier.com')
+  const scope = nock('http://example.test')
     .replyDate(date)
     .get('/')
     .reply(200, { hello: 'world' })
 
-  http.get(
-    {
-      host: 'www.jsonreplier.com',
-      path: '/',
-      port: 80,
-    },
-    res => {
-      t.equal(res.headers['date'], date.toUTCString())
-      res.on('end', () => {
-        scope.done()
-        t.end()
-      })
-      // Streams start in 'paused' mode and must be started.
-      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
-      res.resume()
-    }
-  )
+  const { headers } = await got('http://example.test/')
+
+  t.equal(headers.date, date.toUTCString())
+  scope.done()
 })
 
-test('filter path with function', t => {
-  const scope = nock('http://www.filterurls.com')
+test('filter path with function', async t => {
+  const scope = nock('http://example.test')
     .filteringPath(path => '/?a=2&b=1')
     .get('/?a=2&b=1')
     .reply(200, 'Hello World!')
 
-  const req = http.request(
-    {
-      host: 'www.filterurls.com',
-      method: 'GET',
-      path: '/?a=1&b=2',
-      port: 80,
-    },
-    res => {
-      t.equal(res.statusCode, 200)
-      res.on('end', () => {
-        scope.done()
-        t.end()
-      })
-      // Streams start in 'paused' mode and must be started.
-      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
-      res.resume()
-    }
-  )
+  const { statusCode } = await got('http://example.test/', {
+    query: { a: '1', b: '2' },
+  })
 
-  req.end()
+  t.equal(statusCode, 200)
+  scope.done()
 })
 
-test('filter path with regexp', t => {
-  const scope = nock('http://www.filterurlswithregexp.com')
+test('filter path with regexp', async t => {
+  const scope = nock('http://example.test')
     .filteringPath(/\d/g, '3')
     .get('/?a=3&b=3')
     .reply(200, 'Hello World!')
 
-  const req = http.request(
-    {
-      host: 'www.filterurlswithregexp.com',
-      method: 'GET',
-      path: '/?a=1&b=2',
-      port: 80,
-    },
-    res => {
-      t.equal(res.statusCode, 200)
-      res.on('end', () => {
-        scope.done()
-        t.end()
-      })
-      // Streams start in 'paused' mode and must be started.
-      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
-      res.resume()
-    }
-  )
+  const { statusCode } = await got('http://example.test/', {
+    query: { a: '1', b: '2' },
+  })
 
-  req.end()
+  t.equal(statusCode, 200)
+  scope.done()
 })
 
-test('filter body with function', t => {
+test('filter body with function', async t => {
   let filteringRequestBodyCounter = 0
 
-  const scope = nock('http://www.filterboddiez.com')
+  const scope = nock('http://example.test')
     .filteringRequestBody(body => {
       ++filteringRequestBodyCounter
       t.equal(body, 'mamma mia')
@@ -1034,57 +961,30 @@ test('filter body with function', t => {
     .post('/', 'mamma tua')
     .reply(200, 'Hello World!')
 
-  const req = http.request(
-    {
-      host: 'www.filterboddiez.com',
-      method: 'POST',
-      path: '/',
-      port: 80,
-    },
-    res => {
-      t.equal(res.statusCode, 200)
-      res.on('end', () => {
-        scope.done()
-        t.equal(filteringRequestBodyCounter, 1)
-        t.end()
-      })
-      // Streams start in 'paused' mode and must be started.
-      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
-      res.resume()
-    }
-  )
+  const { statusCode } = await got('http://example.test/', {
+    body: 'mamma mia',
+  })
 
-  req.end('mamma mia')
+  t.equal(statusCode, 200)
+  scope.done()
+  t.equal(filteringRequestBodyCounter, 1)
 })
 
-test('filter body with regexp', t => {
-  const scope = nock('http://www.filterboddiezregexp.com')
+test('filter body with regexp', async t => {
+  const scope = nock('http://example.test')
     .filteringRequestBody(/mia/, 'nostra')
     .post('/', 'mamma nostra')
     .reply(200, 'Hello World!')
 
-  const req = http.request(
-    {
-      host: 'www.filterboddiezregexp.com',
-      method: 'POST',
-      path: '/',
-      port: 80,
-    },
-    res => {
-      t.equal(res.statusCode, 200)
-      res.on('end', () => {
-        scope.done()
-        t.end()
-      })
-      // Streams start in 'paused' mode and must be started.
-      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
-      res.resume()
-    }
-  )
+  const { statusCode } = await got('http://example.test/', {
+    body: 'mamma mia',
+  })
 
-  req.end('mamma mia')
+  t.equal(statusCode, 200)
+  scope.done()
 })
 
+// TODO Convert to async / got.
 test('abort request', t => {
   const scope = nock('http://www.google.com')
     .get('/hey')
@@ -1114,6 +1014,7 @@ test('abort request', t => {
   req.end()
 })
 
+// TODO Convert to async / got.
 test('pause response before data', t => {
   const scope = nock('http://www.mouse.com')
     .get('/pauser')
@@ -1144,6 +1045,7 @@ test('pause response before data', t => {
   req.end()
 })
 
+// TODO Convert to async / got.
 test('pause response after data', t => {
   const response = new stream.PassThrough()
   const scope = nock('http://pauseme.com')
@@ -1182,6 +1084,7 @@ test('pause response after data', t => {
   }, 0)
 })
 
+// TODO Convert to async / got.
 test('response pipe', t => {
   const dest = (() => {
     function Constructor() {
@@ -1234,6 +1137,7 @@ test('response pipe', t => {
   )
 })
 
+// TODO Convert to async / got.
 test('response pipe without implicit end', t => {
   const dest = (() => {
     function Constructor() {
@@ -1289,92 +1193,47 @@ test('response pipe without implicit end', t => {
   )
 })
 
-test('chaining API', t => {
-  const scope = nock('http://chainchomp.com')
+test('chaining API', async t => {
+  const scope = nock('http://example.test')
     .get('/one')
     .reply(200, 'first one')
     .get('/two')
     .reply(200, 'second one')
 
-  http.get(
-    {
-      host: 'chainchomp.com',
-      path: '/one',
-    },
-    res => {
-      res.setEncoding('utf8')
-      t.equal(res.statusCode, 200, 'status should be ok')
-      res.on('data', data =>
-        t.equal(data, 'first one', 'should be equal to first reply')
-      )
+  const response1 = await got('http://example.test/one')
 
-      res.on('end', () => {
-        http.get(
-          {
-            host: 'chainchomp.com',
-            path: '/two',
-          },
-          res => {
-            res.setEncoding('utf8')
-            t.equal(res.statusCode, 200, 'status should be ok')
-            res.on('data', data =>
-              t.equal(data, 'second one', 'should be qual to second reply')
-            )
+  t.equal(response1.statusCode, 200)
+  t.equal(response1.body, 'first one')
 
-            res.on('end', () => {
-              scope.done()
-              t.end()
-            })
-          }
-        )
-      })
-    }
-  )
+  const response2 = await got('http://example.test/two')
+
+  t.equal(response2.statusCode, 200)
+  t.equal(response2.body, 'second one')
+
+  scope.done()
 })
 
-test('same URI', t => {
-  const scope = nock('http://sameurii.com')
+test('same URI', async t => {
+  const scope = nock('http://example.test')
     .get('/abc')
     .reply(200, 'first one')
     .get('/abc')
-    .reply(200, 'second one')
+    .reply(201, 'second one')
 
-  http.get(
-    {
-      host: 'sameurii.com',
-      path: '/abc',
-    },
-    function(res) {
-      res.on('data', function(data) {
-        res.setEncoding('utf8')
-        t.equal(data.toString(), 'first one', 'should be qual to first reply')
-        res.on('end', function() {
-          http.get(
-            {
-              host: 'sameurii.com',
-              path: '/abc',
-            },
-            function(res) {
-              res.setEncoding('utf8')
-              res.on('data', function(data) {
-                t.equal(
-                  data.toString(),
-                  'second one',
-                  'should be qual to second reply'
-                )
-                res.on('end', function() {
-                  scope.done()
-                  t.end()
-                })
-              })
-            }
-          )
-        })
-      })
-    }
-  )
+  const response1 = await got('http://example.test/abc')
+
+  t.equal(response1.statusCode, 200)
+  t.equal(response1.body, 'first one')
+
+  const response2 = await got('http://example.test/abc')
+
+  t.equal(response2.statusCode, 201)
+  t.equal(response2.body, 'second one')
+
+  scope.done()
 })
 
+// TODO Should this test be kept?
 test('can use hostname instead of host', t => {
   const scope = nock('http://www.google.com')
     .get('/')
@@ -1400,6 +1259,7 @@ test('can use hostname instead of host', t => {
   req.end()
 })
 
+// TODO convert to async / got.
 test('hostname is case insensitive', t => {
   const scope = nock('http://caseinsensitive.com')
     .get('/path')
@@ -1419,62 +1279,33 @@ test('hostname is case insensitive', t => {
   req.end()
 })
 
-test('can take a port', t => {
-  const scope = nock('http://www.myserver.com:3333')
+test('can take a port', async t => {
+  const scope = nock('http://example.test:3333')
     .get('/')
     .reply(200, 'Hello World!')
 
-  const req = http.request(
-    {
-      hostname: 'www.myserver.com',
-      path: '/',
-      port: 3333,
-    },
-    function(res) {
-      t.equal(res.statusCode, 200)
-      res.on('end', function() {
-        scope.done()
-        t.end()
-      })
-      // Streams start in 'paused' mode and must be started.
-      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
-      res.resume()
-    }
-  )
+  const { statusCode } = await got('http://example.test:3333/')
 
-  req.end()
+  t.equal(statusCode, 200)
+  scope.done()
 })
 
-test('can use https', t => {
-  let dataCalled = false
-
-  const scope = nock('https://google.com')
+test('can use https', async t => {
+  const scope = nock('https://example.test')
     .get('/')
     .reply(200, 'Hello World!')
 
-  const req = https.request(
-    {
-      host: 'google.com',
-      path: '/',
-    },
-    function(res) {
-      t.equal(res.statusCode, 200)
-      res.on('end', function() {
-        t.ok(dataCalled, 'data event called')
-        scope.done()
-        t.end()
-      })
-      res.on('data', function(data) {
-        dataCalled = true
-        t.ok(data instanceof Buffer, 'data should be buffer')
-        t.equal(data.toString(), 'Hello World!', 'response should match')
-      })
-    }
-  )
+  const { statusCode, body } = await got('https://example.test/', {
+    encoding: null,
+  })
 
-  req.end()
+  t.equal(statusCode, 200)
+  t.type(body, Buffer)
+  t.equal(body.toString(), 'Hello World!')
+  scope.done()
 })
 
+// TODO convert to got / async.
 test('emits error if https route is missing', t => {
   nock('https://google.com')
     .get('/')
@@ -1507,6 +1338,7 @@ test('emits error if https route is missing', t => {
   })
 })
 
+// TODO convert to got / async.
 test('emits error if https route is missing', t => {
   nock('https://google.com:123')
     .get('/')
@@ -1540,6 +1372,7 @@ test('emits error if https route is missing', t => {
   })
 })
 
+// This test seems to need `http`.
 test('can use ClientRequest using GET', t => {
   let dataCalled = false
 
@@ -1570,6 +1403,7 @@ test('can use ClientRequest using GET', t => {
   req.end()
 })
 
+// This test seems to need `http`.
 test('can use ClientRequest using POST', t => {
   let dataCalled = false
 
@@ -1602,127 +1436,36 @@ test('can use ClientRequest using POST', t => {
   req.end()
 })
 
-test('same url matches twice', t => {
-  const scope = nock('http://www.twicematcher.com')
-    .get('/hey')
-    .reply(200, 'First match')
-    .get('/hey')
-    .reply(201, 'Second match')
+test('scopes are independent', async t => {
+  const scope1 = nock('http://example.test')
+    .get('/')
+    .reply(200, 'Hello World!')
+  const scope2 = nock('http://example.test')
+    .get('/')
+    .reply(200, 'Hello World!')
 
-  let replied = 0
+  await got('http://example.test/')
 
-  function callback() {
-    replied += 1
-    if (replied == 2) {
-      scope.done()
-      t.end()
-    }
-  }
+  t.true(scope1.isDone())
+  t.false(scope2.isDone())
 
-  http.get(
-    {
-      host: 'www.twicematcher.com',
-      path: '/hey',
-    },
-    function(res) {
-      t.equal(res.statusCode, 200)
-
-      res.on('data', function(data) {
-        t.equal(
-          data.toString(),
-          'First match',
-          'should match first request response body'
-        )
-      })
-
-      res.on('end', callback)
-    }
-  )
-
-  http.get(
-    {
-      host: 'www.twicematcher.com',
-      path: '/hey',
-    },
-    function(res) {
-      t.equal(res.statusCode, 201)
-
-      res.on('data', function(data) {
-        t.equal(
-          data.toString(),
-          'Second match',
-          'should match second request response body'
-        )
-      })
-
-      res.on('end', callback)
-    }
-  )
+  nock.cleanAll()
 })
 
-test('scopes are independent', t => {
-  const scope1 = nock('http://www34.google.com')
-    .get('/')
-    .reply(200, 'Hello World!')
-  const scope2 = nock('http://www34.google.com')
+test('two scopes with the same request are consumed', async t => {
+  const scope1 = nock('http://example.test')
     .get('/')
     .reply(200, 'Hello World!')
 
-  const req = http.request(
-    {
-      host: 'www34.google.com',
-      path: '/',
-      port: 80,
-    },
-    function(res) {
-      res.on('end', function() {
-        t.ok(scope1.isDone())
-        t.ok(!scope2.isDone()) // fails
-        t.end()
-      })
-      // Streams start in 'paused' mode and must be started.
-      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
-      res.resume()
-    }
-  )
-
-  req.end()
-})
-
-test('two scopes with the same request are consumed', t => {
-  nock('http://www36.google.com')
+  const scope2 = nock('http://example.test')
     .get('/')
     .reply(200, 'Hello World!')
 
-  nock('http://www36.google.com')
-    .get('/')
-    .reply(200, 'Hello World!')
+  await got('http://example.test/')
+  await got('http://example.test/')
 
-  let doneCount = 0
-  function done() {
-    doneCount += 1
-    if (doneCount == 2) {
-      t.end()
-    }
-  }
-
-  for (let i = 0; i < 2; i += 1) {
-    const req = http.request(
-      {
-        host: 'www36.google.com',
-        path: '/',
-        port: 80,
-      },
-      function(res) {
-        res.on('end', done)
-        // Streams start in 'paused' mode and must be started.
-        // See https://nodejs.org/api/stream.html#stream_class_stream_readable
-        res.resume()
-      }
-    )
-
-    req.end()
-  }
+  scope1.done()
+  scope2.done()
 })
 
 test('allow unmocked option works', t => {
