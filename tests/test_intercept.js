@@ -822,7 +822,9 @@ test('reply with file', async t => {
 
   t.equal(statusCode, 200)
   t.equal(body, 'Hello from the file!')
-  scope.done()
+
+  // We leave one request unmade.
+  nock.cleanAll()
 })
 
 // TODO convert to async / got.
