@@ -649,6 +649,8 @@ test('multiple match headers', async t => {
 
   t.equal(response2.statusCode, 200)
   t.equal(response2.body, 'Hello World!')
+
+  scope.done()
 })
 
 test('match headers with regexp', async t => {
@@ -796,8 +798,6 @@ test('chaining', async t => {
 })
 
 test('encoding', async t => {
-  let dataCalled = false
-
   const scope = nock('http://example.test')
     .get('/')
     .reply(200, 'Hello World!')
@@ -806,6 +806,8 @@ test('encoding', async t => {
 
   t.type(body, 'string')
   t.equal(body, 'SGVsbG8gV29ybGQh', 'response should match base64 encoding')
+
+  scope.done()
 })
 
 test('reply with file', async t => {
@@ -815,16 +817,13 @@ test('reply with file', async t => {
       200,
       path.join(__dirname, '..', 'assets', 'reply_file_1.txt')
     )
-    .get('/test')
-    .reply(200, 'Yay!')
 
   const { statusCode, body } = await got('http://example.test/')
 
   t.equal(statusCode, 200)
   t.equal(body, 'Hello from the file!')
 
-  // We leave one request unmade.
-  nock.cleanAll()
+  scope.done()
 })
 
 // TODO convert to async / got.
