@@ -1844,7 +1844,7 @@ test('optional but persisted mocks persist, but never appear as pending', async 
   t.deepEqual(nock.pendingMocks(), [])
 
   const response2 = await got('http://example.test/')
-  t.equal(response1.statusCode, 200)
+  t.equal(response2.statusCode, 200)
   t.deepEqual(nock.pendingMocks(), [])
 
   scope.done()
@@ -2155,7 +2155,7 @@ test('Persisted interceptors are not in pendingMocks after the first request', a
 })
 
 test('persist reply with file', async t => {
-  const scope = nock('http://example.test')
+  nock('http://example.test')
     .persist()
     .get('/')
     .replyWithFile(
