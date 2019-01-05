@@ -1201,7 +1201,10 @@ test('response pipe without implicit end', t => {
         t.end()
       })
 
-      res.pipe(dest, { end: false })
+      res.pipe(
+        dest,
+        { end: false }
+      )
     }
   )
 })
