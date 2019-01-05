@@ -1,6 +1,7 @@
 'use strict'
 
 const fs = require('fs')
+const path = require('path')
 const nock = require('../.')
 const url = require('url')
 const http = require('http')
@@ -361,31 +362,19 @@ test('get with reply callback returning object', async t => {
   scope.done()
 })
 
-test('get with reply callback returning array with headers', t => {
-  nock('http://replyheaderland')
+test('get with reply callback returning array with headers', async t => {
+  const scope = nock('http://example.test')
     .get('/')
     .reply(() => [202, 'body', { 'x-key': 'value', 'x-key-2': 'value 2' }])
 
-  http.get(
-    {
-      host: 'replyheaderland',
-      path: '/',
-      port: 80,
-    },
-    res => {
-      res.setEncoding('utf8')
-      t.equal(res.statusCode, 202)
-      t.deepEqual(res.headers, {
-        'x-key': 'value',
-        'x-key-2': 'value 2',
-      })
-      t.deepEqual(res.rawHeaders, ['x-key', 'value', 'x-key-2', 'value 2'])
-      res.on('data', data => {
-        t.equal(data, 'body')
-        res.once('end', t.end.bind(t))
-      })
-    }
-  )
+  const { headers, rawHeaders } = await got('http://example.test/')
+
+  t.deepEqual(headers, {
+    'x-key': 'value',
+    'x-key-2': 'value 2',
+  })
+  t.deepEqual(rawHeaders, ['x-key', 'value', 'x-key-2', 'value 2'])
+  scope.done()
 })
 
 // Skipped because https://github.com/nock/nock/issues/1222
@@ -510,7 +499,7 @@ test('isDone', async t => {
   scope.done()
 })
 
-test('request headers exposed', async t => {
+test('request headers exposed', t => {
   const scope = nock('http://example.com')
     .get('/')
     .reply(200, 'Hello World!', { 'X-My-Headers': 'My Header value' })
@@ -623,36 +612,23 @@ test('reply headers as function are evaluated on each request', async t => {
   scope.done()
 })
 
-test('match headers', t => {
-  const scope = nock('http://www.headdy.com')
+test('match headers', async t => {
+  const scope = nock('http://example.test')
     .get('/')
     .matchHeader('x-my-headers', 'My custom Header value')
     .reply(200, 'Hello World!')
 
-  http.get(
-    {
-      host: 'www.headdy.com',
-      method: 'GET',
-      path: '/',
-      port: 80,
-      headers: { 'X-My-Headers': 'My custom Header value' },
-    },
-    res => {
-      res.setEncoding('utf8')
-      t.equal(res.statusCode, 200)
+  const { statusCode, body } = await got('http://example.test/', {
+    headers: { 'X-My-Headers': 'My custom Header value' },
+  })
 
-      res.on('data', data => t.equal(data, 'Hello World!'))
-
-      res.on('end', () => {
-        scope.done()
-        t.end()
-      })
-    }
-  )
+  t.equal(statusCode, 200)
+  t.equal(body, 'Hello World!')
+  scope.done()
 })
 
-test('multiple match headers', t => {
-  const scope = nock('http://www.headdy.com')
+test('multiple match headers', async t => {
+  const scope = nock('http://example.test')
     .get('/')
     .matchHeader('x-my-headers', 'My custom Header value')
     .reply(200, 'Hello World!')
@@ -660,183 +636,91 @@ test('multiple match headers', t => {
     .matchHeader('x-my-headers', 'other value')
     .reply(200, 'Hello World other value!')
 
-  http.get(
-    {
-      host: 'www.headdy.com',
-      method: 'GET',
-      path: '/',
-      port: 80,
-      headers: { 'X-My-Headers': 'other value' },
-    },
-    res => {
-      res.setEncoding('utf8')
-      t.equal(res.statusCode, 200)
+  const response1 = await got('http://example.test/', {
+    headers: { 'X-My-Headers': 'other value' },
+  })
 
-      res.on('data', data => t.equal(data, 'Hello World other value!'))
+  t.equal(response1.statusCode, 200)
+  t.equal(response1.body, 'Hello World other value!')
 
-      res.on('end', () => {
-        http.get(
-          {
-            host: 'www.headdy.com',
-            method: 'GET',
-            path: '/',
-            port: 80,
-            headers: { 'X-My-Headers': 'My custom Header value' },
-          },
-          res => {
-            res.setEncoding('utf8')
-            t.equal(res.statusCode, 200)
+  const response2 = await got('http://example.test/', {
+    headers: { 'X-My-Headers': 'My custom Header value' },
+  })
 
-            res.on('data', data => t.equal(data, 'Hello World!'))
-
-            res.on('end', () => {
-              scope.done()
-              t.end()
-            })
-          }
-        )
-      })
-    }
-  )
+  t.equal(response2.statusCode, 200)
+  t.equal(response2.body, 'Hello World!')
 })
 
-test('match headers with regexp', t => {
-  const scope = nock('http://www.headier.com')
+test('match headers with regexp', async t => {
+  const scope = nock('http://example.test')
     .get('/')
     .matchHeader('x-my-headers', /My He.d.r [0-9.]+/)
     .reply(200, 'Hello World!')
 
-  http.get(
-    {
-      host: 'www.headier.com',
-      method: 'GET',
-      path: '/',
-      port: 80,
-      headers: { 'X-My-Headers': 'My Header 1.0' },
-    },
-    res => {
-      res.setEncoding('utf8')
-      t.equal(res.statusCode, 200)
+  const { statusCode, body } = await got('http://example.test/', {
+    headers: { 'X-My-Headers': 'My Header 1.0' },
+  })
 
-      res.on('data', data => t.equal(data, 'Hello World!'))
-
-      res.on('end', () => {
-        scope.done()
-        t.end()
-      })
-    }
-  )
+  t.equal(statusCode, 200)
+  t.equal(body, 'Hello World!')
+  scope.done()
 })
 
-test('match headers on number with regexp', t => {
-  const scope = nock('http://www.headier.com')
+test('match headers on number with regexp', async t => {
+  const scope = nock('http://example.test')
     .get('/')
     .matchHeader('x-my-headers', /\d+/)
     .reply(200, 'Hello World!')
 
-  http.get(
-    {
-      host: 'www.headier.com',
-      method: 'GET',
-      path: '/',
-      port: 80,
-      headers: { 'X-My-Headers': 123 },
-    },
-    res => {
-      res.setEncoding('utf8')
-      t.equal(res.statusCode, 200)
+  const { statusCode, body } = await got('http://example.test/', {
+    headers: { 'X-My-Headers': 123 },
+  })
 
-      res.on('data', data => t.equal(data, 'Hello World!'))
-
-      res.on('end', () => {
-        scope.done()
-        t.end()
-      })
-    }
-  )
+  t.equal(statusCode, 200)
+  t.equal(body, 'Hello World!')
+  scope.done()
 })
 
-test('match headers with function', t => {
-  const scope = nock('http://www.headier.com')
+test('match headers with function', async t => {
+  const scope = nock('http://example.test')
     .get('/')
     .matchHeader('x-my-headers', val => val > 123)
     .reply(200, 'Hello World!')
 
-  http.get(
-    {
-      host: 'www.headier.com',
-      method: 'GET',
-      path: '/',
-      port: 80,
-      headers: { 'X-My-Headers': 456 },
-    },
-    res => {
-      res.setEncoding('utf8')
-      t.equal(res.statusCode, 200)
+  const { statusCode, body } = await got('http://example.test/', {
+    headers: { 'X-My-Headers': 456 },
+  })
 
-      res.on('data', data => t.equal(data, 'Hello World!'))
-
-      res.on('end', () => {
-        scope.done()
-        t.end()
-      })
-    }
-  )
+  t.equal(statusCode, 200)
+  t.equal(body, 'Hello World!')
+  scope.done()
 })
 
-test('match all headers', t => {
-  const scope = nock('http://api.headdy.com')
+test('match all headers', async t => {
+  const scope = nock('http://example.test')
     .matchHeader('accept', 'application/json')
     .get('/one')
     .reply(200, { hello: 'world' })
     .get('/two')
     .reply(200, { a: 1, b: 2, c: 3 })
 
-  let ended = 0
-  function callback() {
-    ended += 1
-    if (ended === 2) {
-      scope.done()
-      t.end()
-    }
-  }
+  const response1 = await got('http://example.test/one', {
+    headers: { Accept: 'application/json' },
+  })
+  t.equal(response1.statusCode, 200)
+  t.equal(response1.body, '{"hello":"world"}')
 
-  http.get(
-    {
-      host: 'api.headdy.com',
-      path: '/one',
-      port: 80,
-      headers: { Accept: 'application/json' },
-    },
-    res => {
-      res.setEncoding('utf8')
-      t.equal(res.statusCode, 200)
+  const response2 = await got('http://example.test/two', {
+    headers: { Accept: 'application/json' },
+  })
+  t.equal(response2.statusCode, 200)
+  t.equal(response2.body, '{"a":1,"b":2,"c":3}')
 
-      res.on('data', data => t.equal(data, '{"hello":"world"}'))
-
-      res.on('end', callback)
-    }
-  )
-
-  http.get(
-    {
-      host: 'api.headdy.com',
-      path: '/two',
-      port: 80,
-      headers: { accept: 'application/json' },
-    },
-    res => {
-      res.setEncoding('utf8')
-      t.equal(res.statusCode, 200)
-
-      res.on('data', data => t.equal(data, '{"a":1,"b":2,"c":3}'))
-
-      res.on('end', callback)
-    }
-  )
+  scope.done()
 })
 
 test('header manipulation', t => {
+  // This test seems to depend on behavior of the `http` module.
   const scope = nock('http://example.com')
     .get('/accounts')
     .reply(200, { accounts: [{ id: 1, name: 'Joe Blow' }] })
@@ -864,231 +748,91 @@ test('header manipulation', t => {
   req.end()
 })
 
-test('head', t => {
-  const scope = nock('http://www.google.com')
-    .head('/form')
+test('head', async t => {
+  const scope = nock('http://example.test')
+    .head('/')
     .reply(201, 'OK!')
 
-  const req = http.request(
-    {
-      host: 'www.google.com',
-      method: 'HEAD',
-      path: '/form',
-      port: 80,
-    },
-    res => {
-      t.equal(res.statusCode, 201)
-      res.on('end', () => {
-        scope.done()
-        t.end()
-      })
-      // Streams start in 'paused' mode and must be started.
-      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
-      res.resume()
-    }
-  )
+  const { statusCode } = await got.head('http://example.test/')
 
-  req.end()
+  t.equal(statusCode, 201)
+  scope.done()
 })
 
-test('body data is differentiating', t => {
-  nock('http://www.boddydiff.com')
+test('body data is differentiating', async t => {
+  const scope = nock('http://example.test')
     .post('/', 'abc')
     .reply(200, 'Hey 1')
     .post('/', 'def')
     .reply(200, 'Hey 2')
 
-  function done(t) {
-    t.end()
-  }
+  const response1 = await got('http://example.test/', { body: 'abc' })
+  t.equal(response1.statusCode, 200)
+  t.equal(response1.body, 'Hey 1')
 
-  t.test('A', t => {
-    const req = http.request(
-      {
-        host: 'www.boddydiff.com',
-        method: 'POST',
-        path: '/',
-        port: 80,
-      },
-      res => {
-        let dataCalled = false
-        t.equal(res.statusCode, 200)
-        res.on('end', () => {
-          t.ok(dataCalled)
-          done(t)
-        })
-        res.on('data', data => {
-          dataCalled = true
-          t.ok(data instanceof Buffer, 'data should be buffer')
-          t.equal(data.toString(), 'Hey 1', 'response should match')
-        })
-      }
-    )
+  const response2 = await got('http://example.test/', { body: 'def' })
+  t.equal(response2.statusCode, 200)
+  t.equal(response2.body, 'Hey 2')
 
-    req.end('abc')
-  })
-
-  t.test('B', t => {
-    const req = http.request(
-      {
-        host: 'www.boddydiff.com',
-        method: 'POST',
-        path: '/',
-        port: 80,
-      },
-      res => {
-        let dataCalled = false
-        t.equal(res.statusCode, 200)
-        res.on('end', () => {
-          t.ok(dataCalled)
-          done(t)
-        })
-        res.on('data', data => {
-          dataCalled = true
-          t.ok(data instanceof Buffer, 'data should be buffer')
-          t.equal(data.toString(), 'Hey 2', 'response should match')
-        })
-      }
-    )
-
-    req.end('def')
-  })
-
-  t.end()
+  scope.done()
 })
 
-test('chaining', t => {
-  const scope = nock('http://www.spiffy.com')
+test('chaining', async t => {
+  const scope = nock('http://example.test')
     .get('/')
     .reply(200, 'Hello World!')
     .post('/form')
     .reply(201, 'OK!')
 
-  t.tearDown(scope.done.bind(scope))
+  const response1 = await got.post('http://example.test/form')
+  t.equal(response1.statusCode, 201)
+  t.equal(response1.body, 'OK!')
 
-  t.test('post', t => {
-    const req = http.request(
-      {
-        host: 'www.spiffy.com',
-        method: 'POST',
-        path: '/form',
-        port: 80,
-      },
-      res => {
-        t.equal(res.statusCode, 201)
-        res.once('data', data => {
-          t.ok(data instanceof Buffer, 'data should be buffer')
-          t.equal(data.toString(), 'OK!', 'response should match')
+  const response2 = await got('http://example.test/')
+  t.equal(response2.statusCode, 200)
+  t.equal(response2.body, 'Hello World!')
 
-          res.once('end', t.end.bind(t))
-        })
-      }
-    )
-
-    req.end()
-  })
-
-  t.test('get', t => {
-    const req = http.request(
-      {
-        host: 'www.spiffy.com',
-        method: 'GET',
-        path: '/',
-        port: 80,
-      },
-      res => {
-        t.equal(res.statusCode, 200)
-        res.once('data', data => {
-          t.ok(data instanceof Buffer, 'data should be buffer')
-          t.equal(data.toString(), 'Hello World!', 'response should match')
-
-          res.once('end', t.end.bind(t))
-        })
-      }
-    )
-
-    req.end()
-  })
-
-  t.end()
+  scope.done()
 })
 
-test('encoding', t => {
+test('encoding', async t => {
   let dataCalled = false
 
-  const scope = nock('http://www.encoderz.com')
+  const scope = nock('http://example.test')
     .get('/')
     .reply(200, 'Hello World!')
 
-  const req = http.request(
-    {
-      host: 'www.encoderz.com',
-      path: '/',
-      port: 80,
-    },
-    res => {
-      res.setEncoding('base64')
+  const { body } = await got('http://example.test/', { encoding: 'base64' })
 
-      t.equal(res.statusCode, 200)
-      res.on('end', () => {
-        t.ok(dataCalled)
-        scope.done()
-        t.end()
-      })
-      res.on('data', data => {
-        dataCalled = true
-        t.type(data, 'string', 'data should be string')
-        t.equal(
-          data,
-          'SGVsbG8gV29ybGQh',
-          'response should match base64 encoding'
-        )
-      })
-    }
-  )
-
-  req.end()
+  t.type(body, 'string')
+  t.equal(body, 'SGVsbG8gV29ybGQh', 'response should match base64 encoding')
 })
 
-test('reply with file', t => {
-  let dataCalled = false
-
-  nock('http://www.filereplier.com')
+test('reply with file', async t => {
+  const scope = nock('http://example.test')
     .get('/')
-    .replyWithFile(200, `${__dirname}/../assets/reply_file_1.txt`)
+    .replyWithFile(
+      200,
+      path.join(__dirname, '..', 'assets', 'reply_file_1.txt')
+    )
     .get('/test')
     .reply(200, 'Yay!')
 
-  const req = http.request(
-    {
-      host: 'www.filereplier.com',
-      path: '/',
-      port: 80,
-    },
-    res => {
-      t.equal(res.statusCode, 200)
-      res.on('end', () => {
-        t.ok(dataCalled)
-        t.end()
-      })
-      res.on('data', data => {
-        dataCalled = true
-        t.equal(
-          data.toString(),
-          'Hello from the file!',
-          'response should match'
-        )
-      })
-    }
-  )
+  const { statusCode, body } = await got('http://example.test/')
 
-  req.end()
+  t.equal(statusCode, 200)
+  t.equal(body, 'Hello from the file!')
+  scope.done()
 })
 
+// TODO convert to async / got.
 test('reply with file and pipe response', t => {
   nock('http://www.files.com')
     .get('/')
-    .replyWithFile(200, `${__dirname}/../assets/reply_file_1.txt`)
+    .replyWithFile(
+      200,
+      path.join(__dirname, '..', 'assets', 'reply_file_1.txt')
+    )
 
   http.get(
     {
@@ -1117,53 +861,22 @@ test('reply with file and pipe response', t => {
   )
 })
 
-test('reply with file with headers', t => {
-  let dataCalled = false
-
-  nock('http://www.filereplier2.com')
+test('reply with file with headers', async t => {
+  const scope = nock('http://example.test')
     .get('/')
-    .replyWithFile(200, `${__dirname}/../assets/reply_file_2.txt.gz`, {
-      'content-encoding': 'gzip',
-    })
+    .replyWithFile(
+      200,
+      path.join(__dirname, '..', 'assets', 'reply_file_2.txt.gz'),
+      {
+        'content-encoding': 'gzip',
+      }
+    )
 
-  const req = http.request(
-    {
-      host: 'www.filereplier2.com',
-      path: '/',
-      port: 80,
-    },
-    res => {
-      t.equal(res.statusCode, 200)
-      res.on('end', () => {
-        t.ok(dataCalled)
-        t.end()
-      })
-      res.on('data', data => {
-        dataCalled = true
-        t.equal(data.length, 57)
-      })
-    }
-  )
+  const { statusCode, body } = await got('http://example.test/')
 
-  req.end()
-})
-
-test('reply with file with mikeal/request', t => {
-  nock('http://www.files.com')
-    .get('/')
-    .replyWithFile(200, `${__dirname}/../assets/reply_file_1.txt`)
-
-  mikealRequest('http://www.files.com/', (err, res, body) => {
-    if (err) {
-      throw err
-    }
-
-    res.setEncoding('utf8')
-    t.equal(res.statusCode, 200)
-
-    t.equal(body, 'Hello from the file!', 'response should match')
-    t.end()
-  })
+  t.equal(statusCode, 200)
+  t.equal(body.length, 20)
+  scope.done()
 })
 
 test('reply with JSON', t => {
