@@ -21,6 +21,7 @@
   ],
   "main": "./index",
   "dependencies": {
+    "axios": "^0.18.0",
     "chai": "^4.1.2",
     "debug": "^4.1.0",
     "deep-equal": "^1.0.0",

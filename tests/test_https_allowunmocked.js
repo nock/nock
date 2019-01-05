@@ -6,7 +6,10 @@ const https = require('https')
 const nock = require('../')
 const request = require('request')
 
+const axios = require('axios')
+
 nock.enableNetConnect()
+process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0
 
 test('Nock with allowUnmocked and an url match', (test) => {
   const options = {
@@ -47,29 +50,24 @@ test('Nock with allowUnmocked, url match and query false', (test) => {
 
   const server = https.createServer(options, (req, res) => {
     res.writeHead(200)
-    res.end({ status: 'default' })
+    res.end(JSON.stringify({ status: 'default' }))
   })
 
-  server.listen(() => {
-    const port = server.address().port
-    const url = `https://127.0.0.1:${port}`
-    nock(url, { allowUnmocked: true })
-      .get('/')
-      .query(false)
-      .reply(201, { hello: 'there' })
+  server.listen(3000)
 
-      const options = {
-        method: 'GET',
-        uri: url
-      }
+  const url = `https://127.0.0.1:3000` 
 
-    request(options, (error, response, body) => {
-      test.true((error === null), 'should be no error')
-      test.true(typeof body !== 'undefined', 'body should not be undefined')
-      test.true(body.length !== 0, 'body should not be empty')
-      test.end()
-    })
+  nock(`${url}`, { allowUnmocked: true })
+    .get('/')
+    .query(false)
+    .reply(200, { status: 'intercepted' })
 
+  axios.get(`${url}/otherpath`).then(response => {
+    test.true(response.data.status === 'default')
+    test.end()
+  }).catch(error => {
+    test.notOk()
+  }).then(_ => {
     server.close()
   })
 })
