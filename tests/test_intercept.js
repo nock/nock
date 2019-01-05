@@ -18,6 +18,7 @@ const domain = require('domain')
 const hyperquest = require('hyperquest')
 const async = require('async')
 const got = require('got')
+const lolex = require('lolex')
 
 const ssl = require('./ssl')
 
@@ -907,7 +908,7 @@ test('reply with content-length header', async t => {
   scope.done()
 })
 
-test('reply with date header', async t => {
+test('reply with explicit date header', async t => {
   const date = new Date()
 
   const scope = nock('http://example.test')
@@ -919,6 +920,31 @@ test('reply with date header', async t => {
 
   t.equal(headers.date, date.toUTCString())
   scope.done()
+})
+
+// async / got version is returning "not ok test unfinished".
+// https://github.com/nock/nock/issues/1305#issuecomment-451701657
+test('reply with implicit date header', t => {
+  const clock = lolex.install()
+  const date = new Date()
+
+  const scope = nock('http://example.test')
+    .replyDate()
+    .get('/')
+    .reply(200)
+
+  mikealRequest.get('http://example.test', (err, resp) => {
+    clock.uninstall()
+
+    if (err) {
+      throw err
+    }
+
+    t.equal(resp.headers.date, date.toUTCString())
+    scope.done()
+
+    t.end()
+  })
 })
 
 test('filter path with function', async t => {
@@ -1185,10 +1211,7 @@ test('response pipe without implicit end', t => {
         t.end()
       })
 
-      res.pipe(
-        dest,
-        { end: false }
-      )
+      res.pipe(dest, { end: false })
     }
   )
 })
