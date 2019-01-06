@@ -128,21 +128,17 @@ On your test, you can setup your mocking object like this:
 ```js
 const nock = require('nock')
 
-const scope = nock('http://myapp.iriscouch.com')
-  .get('/users/1')
+const scope = nock('https://api.github.com')
+  .get('/repos/atom/atom/license')
   .reply(200, {
-    _id: '123ABC',
-    _rev: '946B7D1C',
-    username: 'pgte',
-    email: 'pedro.teixeira@gmail.com',
+    license: 'MIT',
   })
 ```
 
-This setup says that we will intercept every HTTP call to `http://myapp.iriscouch.com`.
+This setup says that we will intercept every HTTP call to `https://api.github.com`.
 
-It will intercept an HTTP GET request to '/users/1' and reply with a status 200, and the body will contain a user representation in JSON.
-
-Then the test can call the module, and the module will do the HTTP requests.
+It will intercept an HTTPS GET request to `/repos/atom/atom/license`, reply with
+a status 200, and the body will contain a (partial) response in JSON.
 
 ### READ THIS! - About interceptors
 
