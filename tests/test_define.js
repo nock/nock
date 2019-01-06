@@ -2,7 +2,6 @@
 
 const http = require('http')
 const { test } = require('tap')
-const mikealRequest = require('request')
 const got = require('got')
 const nock = require('../.')
 

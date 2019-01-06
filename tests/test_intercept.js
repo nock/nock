@@ -5235,6 +5235,8 @@ test('should log matching', async t => {
   t.deepEqual(messages, [
     'matching http://example.test:80/ to GET http://example.test:80/: true',
   ])
+
+  scope.done()
 })
 
 test('teardown', t => {
