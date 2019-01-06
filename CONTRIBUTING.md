@@ -14,7 +14,6 @@ Please note that this project is released with a [Contributor Code of Conduct](.
   - [Submit a Beta / Next release](#submit-a-beta--next-release)
 - [Generate README TOC](#generate-readme-toc)
 - [Running tests](#running-tests)
-  - [Airplane mode](#airplane-mode)
 - [Release Process](#release-process)
 - [GitHub Apps](#github-apps)
 - [Becoming a maintainer](#becoming-a-maintainer)
@@ -89,16 +88,9 @@ $ npm run toc
 
 ## Running tests
 
-```
-$ npm test
-```
-
-### Airplane mode
-
-Some of the tests depend on online connectivity. To skip them, set the `AIRPLANE` environment variable to some value.
+All of the tests work offline. None of them should hit the network.
 
 ```
-$ export AIRPLANE=true
 $ npm test
 ```
 
