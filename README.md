@@ -32,7 +32,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
   - [Specifying request body](#specifying-request-body)
   - [Specifying request query string](#specifying-request-query-string)
   - [Specifying replies](#specifying-replies)
-    - [Access original request and headers](#access-original-request-and-headers)
+      - [Access original request and headers](#access-original-request-and-headers)
     - [Replying with errors](#replying-with-errors)
   - [Specifying headers](#specifying-headers)
     - [Header field names are case-insensitive](#header-field-names-are-case-insensitive)
