@@ -71,7 +71,7 @@
     "lint": "eslint \"**/*.js\"",
     "prettier": "prettier --write \"**/*.@(js|md|yml|json)\"",
     "prettier-check": "prettier-check \"**/*.@(js|md|yml|json)\"",
-    "toc": "markdown-toc -i README.md && markdown-toc -i CONTRIBUTING.md ",
+    "toc": "markdown-toc --bullets='-' -i README.md && markdown-toc --bullets='-' -i CONTRIBUTING.md",
     "semantic-release": "semantic-release"
   },
   "nyc": {

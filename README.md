@@ -22,75 +22,76 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
 
 <!-- toc -->
 
-* [How does it work?](#how-does-it-work)
-* [Install](#install)
-  * [Node version support](#node-version-support)
-* [Usage](#usage)
-  * [READ THIS! - About interceptors](#read-this---about-interceptors)
-  * [Specifying hostname](#specifying-hostname)
-  * [Specifying path](#specifying-path)
-  * [Specifying request body](#specifying-request-body)
-  * [Specifying request query string](#specifying-request-query-string)
-  * [Specifying replies](#specifying-replies)
-    * [Access original request and headers](#access-original-request-and-headers)
+- [How does it work?](#how-does-it-work)
+- [Install](#install)
+  - [Node version support](#node-version-support)
+- [Usage](#usage)
+  - [READ THIS! - About interceptors](#read-this---about-interceptors)
+  - [Specifying hostname](#specifying-hostname)
+  - [Specifying path](#specifying-path)
+  - [Specifying request body](#specifying-request-body)
+  - [Specifying request query string](#specifying-request-query-string)
+  - [Specifying replies](#specifying-replies)
+    - [Access original request and headers](#access-original-request-and-headers)
     - [Replying with errors](#replying-with-errors)
-  * [Specifying headers](#specifying-headers)
-    * [Header field names are case-insensitive](#header-field-names-are-case-insensitive)
-    * [Specifying Request Headers](#specifying-request-headers)
-    * [Specifying Reply Headers](#specifying-reply-headers)
-    * [Default Reply Headers](#default-reply-headers)
-    * [Including Content-Length Header Automatically](#including-content-length-header-automatically)
-    * [Including Date Header Automatically](#including-date-header-automatically)
-  * [HTTP Verbs](#http-verbs)
-  * [Support for HTTP and HTTPS](#support-for-http-and-https)
-  * [Non-standard ports](#non-standard-ports)
-  * [Repeat response n times](#repeat-response-n-times)
-  * [Delay the response body](#delay-the-response-body)
-  * [Delay the response](#delay-the-response)
-  * [Delay the connection](#delay-the-connection)
-  * [Socket timeout](#socket-timeout)
-  * [Chaining](#chaining)
-  * [Scope filtering](#scope-filtering)
-  * [Path filtering](#path-filtering)
-  * [Request Body filtering](#request-body-filtering)
-  * [Request Headers Matching](#request-headers-matching)
-  * [Optional Requests](#optional-requests)
-  * [Allow **unmocked** requests on a mocked hostname](#allow-unmocked-requests-on-a-mocked-hostname)
-* [Expectations](#expectations)
-  * [.isDone()](#isdone)
-  * [.cleanAll()](#cleanall)
-  * [.persist()](#persist)
-  * [.pendingMocks()](#pendingmocks)
-  * [.activeMocks()](#activemocks)
-  * [.isActive()](#isactive)
-* [Logging](#logging)
-* [Restoring](#restoring)
-* [Activating](#activating)
-* [Turning Nock Off (experimental!)](#turning-nock-off-experimental)
-* [Enable/Disable real HTTP requests](#enabledisable-real-http-requests)
-  * [Disabling requests](#disabling-requests)
-  * [Enabling requests](#enabling-requests)
-  * [Resetting NetConnect](#resetting-netconnect)
-* [Recording](#recording)
-  * [`dont_print` option](#dont_print-option)
-  * [`output_objects` option](#output_objects-option)
-  * [`enable_reqheaders_recording` option](#enable_reqheaders_recording-option)
-  * [`logging` option](#logging-option)
-  * [`use_separator` option](#use_separator-option)
-  * [.removeInterceptor()](#removeinterceptor)
-* [Events](#events)
-  * [Global no match event](#global-no-match-event)
-* [Nock Back](#nock-back)
-  * [Setup](#setup)
-    * [Options](#options)
-  * [Usage](#usage-1)
-    * [Options](#options-1)
-    * [Modes](#modes)
-* [Debugging](#debugging)
-* [Contributing](#contributing)
-* [Backers](#backers)
-* [Sponsors](#sponsors)
-* [License](#license)
+  - [Specifying headers](#specifying-headers)
+    - [Header field names are case-insensitive](#header-field-names-are-case-insensitive)
+    - [Specifying Request Headers](#specifying-request-headers)
+    - [Specifying Reply Headers](#specifying-reply-headers)
+    - [Default Reply Headers](#default-reply-headers)
+    - [Including Content-Length Header Automatically](#including-content-length-header-automatically)
+    - [Including Date Header Automatically](#including-date-header-automatically)
+  - [HTTP Verbs](#http-verbs)
+  - [Support for HTTP and HTTPS](#support-for-http-and-https)
+  - [Non-standard ports](#non-standard-ports)
+  - [Repeat response n times](#repeat-response-n-times)
+  - [Delay the response body](#delay-the-response-body)
+  - [Delay the response](#delay-the-response)
+  - [Delay the connection](#delay-the-connection)
+  - [Socket timeout](#socket-timeout)
+  - [Chaining](#chaining)
+  - [Scope filtering](#scope-filtering)
+  - [Path filtering](#path-filtering)
+  - [Request Body filtering](#request-body-filtering)
+  - [Request Headers Matching](#request-headers-matching)
+  - [Optional Requests](#optional-requests)
+  - [Allow **unmocked** requests on a mocked hostname](#allow-unmocked-requests-on-a-mocked-hostname)
+- [Expectations](#expectations)
+  - [.isDone()](#isdone)
+  - [.cleanAll()](#cleanall)
+  - [.persist()](#persist)
+  - [.pendingMocks()](#pendingmocks)
+  - [.activeMocks()](#activemocks)
+  - [.isActive()](#isactive)
+- [Logging](#logging)
+- [Restoring](#restoring)
+- [Activating](#activating)
+- [Turning Nock Off (experimental!)](#turning-nock-off-experimental)
+- [Enable/Disable real HTTP requests](#enabledisable-real-http-requests)
+  - [Disabling requests](#disabling-requests)
+  - [Enabling requests](#enabling-requests)
+  - [Resetting NetConnect](#resetting-netconnect)
+- [Recording](#recording)
+  - [`dont_print` option](#dont_print-option)
+  - [`output_objects` option](#output_objects-option)
+  - [`enable_reqheaders_recording` option](#enable_reqheaders_recording-option)
+  - [`logging` option](#logging-option)
+  - [`use_separator` option](#use_separator-option)
+  - [.removeInterceptor()](#removeinterceptor)
+- [Events](#events)
+  - [Global no match event](#global-no-match-event)
+- [Nock Back](#nock-back)
+  - [Setup](#setup)
+    - [Options](#options)
+  - [Usage](#usage-1)
+    - [Options](#options-1)
+      - [Example](#example)
+    - [Modes](#modes)
+- [Debugging](#debugging)
+- [Contributing](#contributing)
+- [Backers](#backers)
+- [Sponsors](#sponsors)
+- [License](#license)
 
 <!-- tocstop -->
 
@@ -1174,14 +1175,14 @@ const nockCallObjects = nock.recorder.play()
 
 The returned call objects have the following properties:
 
-* `scope` - the scope of the call including the protocol and non-standard ports (e.g. `'https://github.com:12345'`)
-* `method` - the HTTP verb of the call (e.g. `'GET'`)
-* `path` - the path of the call (e.g. `'/pgte/nock'`)
-* `body` - the body of the call, if any
-* `status` - the HTTP status of the reply (e.g. `200`)
-* `response` - the body of the reply which can be a JSON, string, hex string representing binary buffers or an array of such hex strings (when handling `content-encoded` in reply header)
-* `headers` - the headers of the reply
-* `reqheader` - the headers of the request
+- `scope` - the scope of the call including the protocol and non-standard ports (e.g. `'https://github.com:12345'`)
+- `method` - the HTTP verb of the call (e.g. `'GET'`)
+- `path` - the path of the call (e.g. `'/pgte/nock'`)
+- `body` - the body of the call, if any
+- `status` - the HTTP status of the reply (e.g. `200`)
+- `response` - the body of the reply which can be a JSON, string, hex string representing binary buffers or an array of such hex strings (when handling `content-encoded` in reply header)
+- `headers` - the headers of the reply
+- `reqheader` - the headers of the request
 
 If you save this as a JSON file, you can load them directly through `nock.load(path)`. Then you can post-process them before using them in the tests for example to add them request body filtering (shown here fixing timestamps to match the ones captured during recording):
 
@@ -1219,7 +1220,7 @@ nockDefs.forEach(def => {
   def.options = {
     ...def.options,
     filteringScope: = scope => /^https:\/\/api[0-9]*.dropbox.com/.test(scope),
-  };
+  }
 })
 
 //  Load the nocks from pre-processed definitions.
@@ -1286,7 +1287,7 @@ nock.removeInterceptor({
   path : '/login'
   method: 'POST'
   proto : 'https'
-});
+})
 ```
 
 ```js
@@ -1298,8 +1299,8 @@ nock.removeInterceptor(interceptor)
 
 A scope emits the following events:
 
-* `emit('request', function(req, interceptor, body))`;
-* `emit('replied', function(req, interceptor))`;
+- `emit('request', function(req, interceptor, body))`
+- `emit('replied', function(req, interceptor))`
 
 ### Global no match event
 
@@ -1328,8 +1329,8 @@ nockBack.setMode('record')
 
 #### Options
 
-* `nockBack.fixtures` : path to fixture directory
-* `nockBack.setMode()` : the mode to use
+- `nockBack.fixtures` : path to fixture directory
+- `nockBack.setMode()` : the mode to use
 
 ### Usage
 
@@ -1370,19 +1371,19 @@ If your tests are using promises then use `nockBack` like this:
 return nockBack('promisedFixture.json')
   .then(({ nockDone, context }) => {
     //  do your tests returning a promise and chain it with
-    //  `.then(nockDone);`
-  });
-});
+    //  `.then(nockDone)`
+  })
+})
 ```
 
 #### Options
 
 As an optional second parameter you can pass the following options
 
-* `before`: a preprocessing function, gets called before nock.define
-* `after`: a postprocessing function, gets called after nock.define
-* `afterRecord`: a postprocessing function, gets called after recording. Is passed the array of scopes recorded and should return the array scopes to save to the fixture
-* `recorder`: custom options to pass to the recorder
+- `before`: a preprocessing function, gets called before nock.define
+- `after`: a postprocessing function, gets called after nock.define
+- `afterRecord`: a postprocessing function, gets called after recording. Is passed the array of scopes recorded and should return the array scopes to save to the fixture
+- `recorder`: custom options to pass to the recorder
 
 ##### Example
 
@@ -1399,11 +1400,11 @@ function prepareScope(scope) {
       return body.replace(
         /(timestamp):([0-9]+)/g,
         (match, key, value) => `${key}:${recordedTimestamp}`
-      );
+      )
     } else {
       return body
     }
-  };
+  }
 }
 
 nockBack('zomboFixture.json', { before: prepareScope }, nockDone => {
@@ -1418,13 +1419,13 @@ nockBack('zomboFixture.json', { before: prepareScope }, nockDone => {
 
 To set the mode call `nockBack.setMode(mode)` or run the tests with the `NOCK_BACK_MODE` environment variable set before loading nock. If the mode needs to be changed programmatically, the following is valid: `nockBack.setMode(nockBack.currentMode)`
 
-* wild: all requests go out to the internet, don't replay anything, doesn't record anything
+- wild: all requests go out to the internet, don't replay anything, doesn't record anything
 
-* dryrun: The default, use recorded nocks, allow http calls, doesn't record anything, useful for writing new tests
+- dryrun: The default, use recorded nocks, allow http calls, doesn't record anything, useful for writing new tests
 
-* record: use recorded nocks, record new nocks
+- record: use recorded nocks, record new nocks
 
-* lockdown: use recorded nocks, disables all http calls even when not nocked, doesn't record
+- lockdown: use recorded nocks, disables all http calls even when not nocked, doesn't record
 
 ## Debugging
 
