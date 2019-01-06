@@ -85,7 +85,6 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
     - [Options](#options)
   - [Usage](#usage-1)
     - [Options](#options-1)
-      - [Example](#example)
     - [Modes](#modes)
 - [Debugging](#debugging)
 - [Contributing](#contributing)
@@ -1028,9 +1027,7 @@ You can check if nock interceptor is active or not by using `nock.isActive()`.
 Sample:
 
 ```js
-if (!nock.isActive()) {
-  nock.activate()
-}
+if (!nock.isActive()) nock.activate()
 ```
 
 ## Logging
