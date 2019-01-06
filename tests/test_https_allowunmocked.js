@@ -8,8 +8,6 @@ const got = require('got')
 
 nock.enableNetConnect()
 
-process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0
-
 test('Nock with allowUnmocked and an url match', async t => {
   const options = {
     key: fs.readFileSync('tests/ssl/ca.key'),
@@ -29,7 +27,11 @@ test('Nock with allowUnmocked and an url match', async t => {
     .get('/urlMatch')
     .reply(201, JSON.stringify({ status: 'intercepted' }))
 
-  const { body, statusCode } = await got(`${url}/urlMatch`)
+  const { body, statusCode } = await got(`${url}/urlMatch`, {
+    rejectUnauthorized: false,
+  }).catch(e => {
+    console.log(e)
+  })
 
   t.true(statusCode === 201)
   t.true(JSON.parse(body).status === 'intercepted')
@@ -59,7 +61,11 @@ test('Nock with allowUnmocked, url match and query false', async t => {
     .query(false)
     .reply(200, { status: 'intercepted' })
 
-  const { body } = await got(`${url}/otherpath`)
+  const { body } = await got(`${url}/otherpath`, {
+    rejectUnauthorized: false,
+  }).catch(e => {
+    console.log(e)
+  })
 
   t.true(JSON.parse(body).status === 'default')
 
