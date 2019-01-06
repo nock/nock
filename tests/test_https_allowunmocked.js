@@ -4,17 +4,16 @@ const test = require('tap').test
 const fs = require('fs')
 const https = require('https')
 const nock = require('../')
-const request = require('request')
-
-const axios = require('axios')
+const got = require('got')
 
 nock.enableNetConnect()
-process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0
 
-test('Nock with allowUnmocked and an url match', (test) => {
+process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0
+
+test('Nock with allowUnmocked and an url match', async test => {
   const options = {
     key: fs.readFileSync('tests/ssl/ca.key'),
-    cert: fs.readFileSync('tests/ssl/ca.crt')
+    cert: fs.readFileSync('tests/ssl/ca.crt'),
   }
 
   const server = https.createServer(options, (req, res) => {
@@ -22,30 +21,32 @@ test('Nock with allowUnmocked and an url match', (test) => {
     res.end({ status: 'default' })
   })
 
-  server.listen(() => {
-    nock(`https://127.0.0.1:${server.address().port}`, { allowUnmocked: true })
-      .get('/urlMatch')
-      .reply(201, { status: 'intercepted' })
+  server.listen(3000)
 
-    const url = `https://127.0.0.1:${server.address().port}/urlMatch`
+  const url = `https://127.0.0.1:${server.address().port}`
 
-    request(url, (error, data, body) => {
-      test.notOk(error, 'Should be no error')
-      test.true(data.statusCode === 201, 'statusCode should match')
-      test.true(JSON.parse(body).status === 'intercepted', 'body should match')
-      test.end()
-    })
+  nock(url, { allowUnmocked: true })
+    .get('/urlMatch')
+    .reply(201, JSON.stringify({ status: 'intercepted' }))
 
-    server.close()
-  })
+  try {
+    const { body, statusCode } = await got(`${url}/urlMatch`)
+    test.true(statusCode === 201)
+    test.true(JSON.parse(body).status === 'intercepted')
+  } catch (error) {
+    console.warn(error)
+  }
+
+  test.end()
+  server.close()
 })
 
-test('Nock with allowUnmocked, url match and query false', (test) => {
+test('Nock with allowUnmocked, url match and query false', async test => {
   nock.cleanAll()
 
   const options = {
     key: fs.readFileSync('tests/ssl/ca.key'),
-    cert: fs.readFileSync('tests/ssl/ca.crt')
+    cert: fs.readFileSync('tests/ssl/ca.crt'),
   }
 
   const server = https.createServer(options, (req, res) => {
@@ -55,19 +56,20 @@ test('Nock with allowUnmocked, url match and query false', (test) => {
 
   server.listen(3000)
 
-  const url = `https://127.0.0.1:3000` 
+  const url = `https://127.0.0.1:3000`
 
   nock(`${url}`, { allowUnmocked: true })
     .get('/')
     .query(false)
     .reply(200, { status: 'intercepted' })
 
-  axios.get(`${url}/otherpath`).then(response => {
-    test.true(response.data.status === 'default')
-    test.end()
-  }).catch(error => {
-    test.notOk()
-  }).then(_ => {
-    server.close()
-  })
+  try {
+    const { body } = await got(`${url}/otherpath`)
+    test.true(JSON.parse(body).status === 'default')
+  } catch (error) {
+    console.warn(error)
+  }
+
+  test.end()
+  server.close()
 })
