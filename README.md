@@ -85,6 +85,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
     - [Options](#options)
   - [Usage](#usage-1)
     - [Options](#options-1)
+      - [Example](#example)
     - [Modes](#modes)
 - [Debugging](#debugging)
 - [Contributing](#contributing)
