@@ -1011,7 +1011,9 @@ You can check if nock interceptor is active or not by using `nock.isActive()`.
 Sample:
 
 ```js
-if (!nock.isActive()) nock.activate()
+if (!nock.isActive()) {
+  nock.activate()
+}
 ```
 
 ## Logging
