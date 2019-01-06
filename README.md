@@ -942,7 +942,7 @@ nock.cleanAll()
 You can make all the interceptors for a scope persist by calling `.persist()` on it:
 
 ```js
-const scope = nock('http://persisssists.con')
+const scope = nock('http://example.com')
   .persist()
   .get('/')
   .reply(200, 'Persisting all the way')
