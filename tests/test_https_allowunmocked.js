@@ -16,12 +16,12 @@ test('Nock with allowUnmocked and an url match', async t => {
     cert: fs.readFileSync('tests/ssl/ca.crt'),
   }
 
-  const server = https.createServer(options, (req, res) => {
-    res.writeHead(200)
-    res.end({ status: 'default' })
-  })
-
-  server.listen(3000)
+  const server = https
+    .createServer(options, (req, res) => {
+      res.writeHead(200)
+      res.end({ status: 'default' })
+    })
+    .listen(3000)
 
   const url = `https://127.0.0.1:${server.address().port}`
 
@@ -29,15 +29,11 @@ test('Nock with allowUnmocked and an url match', async t => {
     .get('/urlMatch')
     .reply(201, JSON.stringify({ status: 'intercepted' }))
 
-  try {
-    const { body, statusCode } = await got(`${url}/urlMatch`)
-    t.true(statusCode === 201)
-    t.true(JSON.parse(body).status === 'intercepted')
-  } catch (error) {
-    console.warn(error)
-  }
+  const { body, statusCode } = await got(`${url}/urlMatch`)
 
-  t.end()
+  t.true(statusCode === 201)
+  t.true(JSON.parse(body).status === 'intercepted')
+
   server.close()
 })
 
@@ -49,12 +45,12 @@ test('Nock with allowUnmocked, url match and query false', async t => {
     cert: fs.readFileSync('tests/ssl/ca.crt'),
   }
 
-  const server = https.createServer(options, (req, res) => {
-    res.writeHead(200)
-    res.end(JSON.stringify({ status: 'default' }))
-  })
-
-  server.listen(3000)
+  const server = https
+    .createServer(options, (req, res) => {
+      res.writeHead(200)
+      res.end(JSON.stringify({ status: 'default' }))
+    })
+    .listen(3000)
 
   const url = `https://127.0.0.1:3000`
 
@@ -63,13 +59,9 @@ test('Nock with allowUnmocked, url match and query false', async t => {
     .query(false)
     .reply(200, { status: 'intercepted' })
 
-  try {
-    const { body } = await got(`${url}/otherpath`)
-    t.true(JSON.parse(body).status === 'default')
-  } catch (error) {
-    console.warn(error)
-  }
+  const { body } = await got(`${url}/otherpath`)
 
-  t.end()
+  t.true(JSON.parse(body).status === 'default')
+
   server.close()
 })
