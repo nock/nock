@@ -5,7 +5,6 @@ const mikealRequest = require('request')
 
 const ssl = require('./ssl')
 
-// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
 test('NOCK_OFF=true works for https', function(t) {
   const original = process.env.NOCK_OFF
   process.env.NOCK_OFF = 'true'
