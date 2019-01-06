@@ -3345,233 +3345,6 @@ test('delayConnection works with when you return a generic stream from the reply
     .end('OK')
 })
 
-test('define() is backward compatible', t => {
-  const nockDef = {
-    scope: 'http://example.com',
-    //  "port" has been deprecated
-    port: 12345,
-    method: 'GET',
-    path: '/',
-    //  "reply" has been deprected
-    reply: '500',
-  }
-
-  const nocks = nock.define([nockDef])
-
-  t.ok(nocks)
-
-  const req = new http.request(
-    {
-      host: 'example.com',
-      port: nockDef.port,
-      method: nockDef.method,
-      path: nockDef.path,
-    },
-    function(res) {
-      t.equal(res.statusCode, 500)
-
-      res.once('end', function() {
-        t.end()
-      })
-      // Streams start in 'paused' mode and must be started.
-      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
-      res.resume()
-    }
-  )
-
-  req.on('error', function(err) {
-    //  This should never happen.
-    t.ok(false, 'Error should never occur.')
-    t.end()
-  })
-
-  req.end()
-})
-
-test('define() works with non-JSON responses', t => {
-  const nockDef = {
-    scope: 'http://example.com',
-    method: 'POST',
-    path: '/',
-    body: '�',
-    status: 200,
-    response: '�',
-  }
-
-  const nocks = nock.define([nockDef])
-
-  t.ok(nocks)
-
-  const req = new http.request(
-    {
-      host: 'example.com',
-      method: nockDef.method,
-      path: nockDef.path,
-    },
-    function(res) {
-      t.equal(res.statusCode, nockDef.status)
-
-      const dataChunks = []
-
-      res.on('data', function(chunk) {
-        dataChunks.push(chunk)
-      })
-
-      res.once('end', function() {
-        const response = Buffer.concat(dataChunks)
-        t.equal(response.toString('utf8'), nockDef.response, 'responses match')
-        t.end()
-      })
-    }
-  )
-
-  req.on('error', function(err) {
-    //  This should never happen.
-    t.ok(false, 'Error should never occur.')
-    t.end()
-  })
-
-  req.write(nockDef.body)
-  req.end()
-})
-
-test('define() works with binary buffers', t => {
-  const nockDef = {
-    scope: 'http://example.com',
-    method: 'POST',
-    path: '/',
-    body: '8001',
-    status: 200,
-    response: '8001',
-  }
-
-  const nocks = nock.define([nockDef])
-
-  t.ok(nocks)
-
-  const req = new http.request(
-    {
-      host: 'example.com',
-      method: nockDef.method,
-      path: nockDef.path,
-    },
-    function(res) {
-      t.equal(res.statusCode, nockDef.status)
-
-      const dataChunks = []
-
-      res.on('data', function(chunk) {
-        dataChunks.push(chunk)
-      })
-
-      res.once('end', function() {
-        const response = Buffer.concat(dataChunks)
-        t.equal(response.toString('hex'), nockDef.response, 'responses match')
-        t.end()
-      })
-    }
-  )
-
-  req.on('error', function(err) {
-    //  This should never happen.
-    t.ok(false, 'Error should never occur.')
-    t.end()
-  })
-
-  req.write(Buffer.from(nockDef.body, 'hex'))
-  req.end()
-})
-
-test('define() uses reqheaders', t => {
-  const auth = 'foo:bar'
-  const authHeader = `Basic ${Buffer.from('foo:bar').toString('base64')}`
-
-  const nockDef = {
-    scope: 'http://example.com',
-    method: 'GET',
-    path: '/',
-    status: 200,
-    reqheaders: {
-      host: 'example.com',
-      authorization: authHeader,
-    },
-  }
-
-  const nocks = nock.define([nockDef])
-
-  t.ok(nocks)
-
-  // Make a request which should match the mock that was configured above.
-  // This does not hit the network.
-  const req = new http.request(
-    {
-      host: 'example.com',
-      method: nockDef.method,
-      path: nockDef.path,
-      auth,
-    },
-    function(res) {
-      t.equal(res.statusCode, nockDef.status)
-
-      res.once('end', function() {
-        t.equivalent(res.req._headers, nockDef.reqheaders)
-        t.end()
-      })
-      // Streams start in 'paused' mode and must be started.
-      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
-      res.resume()
-    }
-  )
-  req.end()
-})
-
-test('define() uses badheaders', t => {
-  const nockDef = [
-    {
-      scope: 'http://example.com',
-      method: 'GET',
-      path: '/',
-      status: 401,
-      badheaders: ['x-foo'],
-    },
-    {
-      scope: 'http://example.com',
-      method: 'GET',
-      path: '/',
-      status: 200,
-      reqheaders: {
-        'x-foo': 'bar',
-      },
-    },
-  ]
-
-  const nocks = nock.define(nockDef)
-
-  t.ok(nocks)
-
-  const req = new http.request(
-    {
-      host: 'example.com',
-      method: 'GET',
-      path: '/',
-      headers: {
-        'x-foo': 'bar',
-      },
-    },
-    function(res) {
-      t.equal(res.statusCode, 200)
-
-      res.once('end', function() {
-        t.end()
-      })
-      // Streams start in 'paused' mode and must be started.
-      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
-      res.resume()
-    }
-  )
-  req.end()
-})
-
 test('sending binary and receiving JSON should work ', t => {
   const scope = nock('http://example.com')
     .filteringRequestBody(/.*/, '*')
@@ -5447,6 +5220,21 @@ test("should throw an error when persist flag isn't a boolean", t => {
     message: 'Invalid arguments: argument should be a boolean',
   })
   t.end()
+})
+
+test('should log matching', async t => {
+  const messages = []
+
+  const scope = nock('http://example.test')
+    .get('/')
+    .reply(200, 'Hello, World!')
+    .log(message => messages.push(message))
+
+  await got('http://example.test/')
+
+  t.deepEqual(messages, [
+    'matching http://example.test:80/ to GET http://example.test:80/: true',
+  ])
 })
 
 test('teardown', t => {
