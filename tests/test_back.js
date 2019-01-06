@@ -1,238 +1,224 @@
-'use strict';
+'use strict'
 
-var nock    = require('../.')
-  , nockBack= nock.back
-  , tap     = require('tap')
-  , http    = require('http')
-  , fs      = require('fs')
-  , exists  = fs.existsSync
-  , _       = require('lodash');
+const http = require('http')
+const fs = require('fs')
+const { test } = require('tap')
+const proxyquire = require('proxyquire').noPreserveCache()
+const nock = require('../.')
 
-nock.enableNetConnect();
+const nockBack = nock.back
+const exists = fs.existsSync
 
-var originalMode = nockBack.currentMode;
+nock.enableNetConnect()
 
-function testNock (t) {
-  var dataCalled = false;
+const originalMode = nockBack.currentMode
 
-  var scope = nock('http://www.google.com')
+function testNock(t) {
+  let dataCalled = false
+
+  const scope = nock('http://www.google.com')
     .get('/')
-    .reply(200, "Hello World!");
+    .reply(200, 'Hello World!')
 
-  var req = http.request({
-      host: "www.google.com"
-    , path: '/'
-    , port: 80
-    }, function(res) {
-
-      t.equal(res.statusCode, 200);
-      res.once('end', function() {
-          t.ok(dataCalled);
-          scope.done();
-          t.end();
-        });
-      res.on('data', function(data) {
-          dataCalled = true;
-          t.ok(data instanceof Buffer, "data should be buffer");
-          t.equal(data.toString(), "Hello World!", "response should match");
-        });
-    });
-
-  req.end();
+  http
+    .request(
+      {
+        host: 'www.google.com',
+        path: '/',
+        port: 80,
+      },
+      res => {
+        t.equal(res.statusCode, 200)
+        res.once('end', () => {
+          t.ok(dataCalled)
+          scope.done()
+          t.end()
+        })
+        res.on('data', data => {
+          dataCalled = true
+          t.ok(data instanceof Buffer, 'data should be a buffer')
+          t.equal(data.toString(), 'Hello World!', 'response should match')
+        })
+      }
+    )
+    .end()
 }
 
-function nockBackWithFixture (t, scopesLoaded) {
-  var scopesLength = scopesLoaded ? 1 : 0;
+function nockBackWithFixture(t, scopesLoaded) {
+  const scopesLength = scopesLoaded ? 1 : 0
 
-  nockBack('goodRequest.json', function (done) {
-    t.true(this.scopes.length === scopesLength);
-    http.get('http://www.google.com').end();
-    this.assertScopesFinished();
-    done();
-    t.end();
-  });
+  nockBack('goodRequest.json', function(done) {
+    t.equal(this.scopes.length, scopesLength)
+    http.get('http://www.google.com').end()
+    this.assertScopesFinished()
+    done()
+    t.end()
+  })
 }
 
 // this is a temporary as we get rid of all the {skip: process.env.AIRPLANE}
 // settings. When we are done with all, replace nockBackWithFixture and get
 // rid of this function and the goodRequestLocalhost.json fixtures
-function nockBackWithFixtureLocalhost (t, scopesLoaded) {
-  const scopesLength = scopesLoaded ? 1 : 0;
+function nockBackWithFixtureLocalhost(t, scopesLoaded) {
+  const scopesLength = scopesLoaded ? 1 : 0
 
-  nockBack('goodRequestLocalhost.json', function (done) {
-    t.equals(this.scopes.length, scopesLength);
+  nockBack('goodRequestLocalhost.json', function(done) {
+    t.equal(this.scopes.length, scopesLength)
 
     const server = http.createServer((request, response) => {
-      t.pass('server received a request');
+      t.pass('server received a request')
 
-      response.writeHead(200);
-      response.end();
-    });
+      response.writeHead(200)
+      response.end()
+    })
 
     server.listen(() => {
-      const request = http.request({
-        host: 'localhost',
-        path: '/',
-        port: server.address().port
-      }, response => {
-        t.is(200, response.statusCode);
-        this.assertScopesFinished();
-        done();
-        server.close(t.end);
-      });
+      const request = http.request(
+        {
+          host: 'localhost',
+          path: '/',
+          port: server.address().port,
+        },
+        response => {
+          t.is(200, response.statusCode)
+          this.assertScopesFinished()
+          done()
+          server.close(t.end)
+        }
+      )
 
-      request.on('error', t.error);
-      request.end();
-    });
-  });
+      request.on('error', t.error)
+      request.end()
+    })
+  })
 }
 
 function setOriginalModeOnEnd(t, nockBack) {
-  t.once('end', function() {
-    nockBack.setMode(originalMode);
-  });
+  t.once('end', () => nockBack.setMode(originalMode))
 }
 
-tap.test('nockBack throws an exception when fixtures is not set', function (t) {
+test('nockBack throws an exception when fixtures is not set', t => {
+  nockBack.fixtures = undefined
 
-  try {
-    nockBack();
-  } catch (e) {
-    t.ok(true, 'excpected exception');
-    t.end();
-    return;
-  }
+  t.throws(nockBack, { message: 'Back requires nock.back.fixtures to be set' })
+  t.end()
+})
 
-  t.fail(true, false, 'test should have ended');
+test('nockBack throws an exception when fixtureName is not a string', t => {
+  nockBack.fixtures = `${__dirname}/fixtures`
 
-});
+  t.throws(nockBack, { message: 'Parameter fixtureName must be a string' })
+  t.end()
+})
 
-tap.test('nockBack throws an exception when fixtureName is not a string', function (t) {
+test('nockBack returns a promise when neither options nor nockbackFn are specified', t => {
+  nockBack.fixtures = `${__dirname}/fixtures`
 
-  nockBack.fixtures = __dirname + '/fixtures';
+  nockBack('test-promise-fixture.json').then(params => {
+    t.type(params.nockDone, 'function')
+    t.type(params.context, 'object')
+    t.end()
+  })
+})
 
-  try {
-    nockBack();
-  } catch (e) {
-    t.ok(true, 'excpected exception');
-    t.equal(e.message, 'Parameter fixtureName must be a string');
-    t.end();
-    return;
-  }
+test('nockBack throws an exception when a hook is not a function', t => {
+  nockBack.fixtures = `${__dirname}/fixtures`
+  nockBack.setMode('dryrun')
+  setOriginalModeOnEnd(t, nockBack)
 
-  t.fail(true, false, 'test should have ended');
+  t.throws(
+    () => nockBack('goodRequest.json', { before: 'not-a-function-innit' }),
+    { message: 'processing hooks must be a function' }
+  )
 
-});
+  t.end()
+})
 
-tap.test('nockBack returns a promise when neither options nor nockbackFn are specified', function (t) {
+test('nockBack.setMode throws an exception on unknown mode', t => {
+  t.throws(() => nockBack.setMode('bogus'), { message: 'Unknown mode: bogus' })
 
-  nockBack.fixtures = __dirname + '/fixtures';
+  t.end()
+})
 
-  var promise = nockBack('test-promise-fixture.json');
-  t.ok(promise);
-  promise.then((params) => {
-    var nockDone = params.nockDone;
-    var context = params.context;
-    t.assert(_.isFunction(nockDone));
-    t.assert(_.isObject(context));
-    t.end();
-  });
+test('nockBack returns a promise when nockbackFn is not specified', t => {
+  nockBack.fixtures = `${__dirname}/fixtures`
 
-});
+  nockBack('test-promise-fixture.json', { test: 'options' }).then(params => {
+    t.type(params.nockDone, 'function')
+    t.type(params.context, 'object')
+    t.end()
+  })
+})
 
-tap.test('nockBack returns a promise when nockbackFn is not specified', function (t) {
+test('nockBack wild tests', nw => {
+  // Manually disable net connectivity to confirm that dryrun enables it.
+  nock.disableNetConnect()
 
-  nockBack.fixtures = __dirname + '/fixtures';
+  nockBack.fixtures = `${__dirname}/fixtures`
+  nockBack.setMode('wild')
+  setOriginalModeOnEnd(nw, nockBack)
 
-  var promise = nockBack('test-promise-fixture.json', {test: 'options'});
-  t.ok(promise);
-  promise.then((params) => {
-    var nockDone = params.nockDone;
-    var context = params.context;
-    t.assert(_.isFunction(nockDone));
-    t.assert(_.isObject(context));
-    t.end();
-  });
+  nw.test('normal nocks work', t => testNock(t))
 
-});
+  nw.test("nock back doesn't do anything", t =>
+    nockBackWithFixtureLocalhost(t, false)
+  )
 
-tap.test('nockBack wild tests', function (nw) {
+  nw.end()
+})
 
-  //  Manually disable net connectivity to confirm that dryrun enables it.
-  nock.disableNetConnect();
+test('nockBack dryrun tests', nw => {
+  // Manually disable net connectivity to confirm that dryrun enables it.
+  nock.disableNetConnect()
 
-  nockBack.fixtures = __dirname + '/fixtures';
-  nockBack.setMode('wild');
+  nockBack.fixtures = `${__dirname}/fixtures`
+  nockBack.setMode('dryrun')
+  setOriginalModeOnEnd(nw, nockBack)
 
-  nw.test('normal nocks work', function (t) {
-    testNock(t);
-  });
-
-  nw.test('nock back doesn\'t do anything', function (t) {
-    nockBackWithFixtureLocalhost(t, false);
-  });
-
-  setOriginalModeOnEnd(nw, nockBack);
-
-  nw.end();
-});
-
-tap.test('nockBack dryrun tests', function (nw) {
-
-  //  Manually disable net connectivity to confirm that dryrun enables it.
-  nock.disableNetConnect();
-
-  nockBack.fixtures = __dirname + '/fixtures';
-  nockBack.setMode('dryrun');
-
-  nw.test('goes to internet even when no nockBacks are running', function(t) {
-
-    t.plan(2);
+  nw.test('goes to internet even when no nockBacks are running', t => {
+    t.plan(2)
 
     const server = http.createServer((request, response) => {
-      t.pass('server received a request');
+      t.pass('server received a request')
 
-      response.writeHead(200);
-      response.end();
-    });
+      response.writeHead(200)
+      response.end()
+    })
 
     server.listen(() => {
-      const request = http.request({
-        host: 'localhost',
-        path: '/',
-        port: server.address().port
-      }, response => {
-        t.is(200, response.statusCode);
+      const request = http.request(
+        {
+          host: 'localhost',
+          path: '/',
+          port: server.address().port,
+        },
+        response => {
+          t.is(200, response.statusCode)
 
-        server.close(t.end);
-      });
+          server.close(t.end)
+        }
+      )
 
-      request.on('error', t.error);
-      request.end();
-    });
+      request.on('error', t.error)
+      request.end()
+    })
+  })
 
-  });
+  nw.test('normal nocks work', t => testNock(t))
 
-  nw.test('normal nocks work', function (t) {
-    testNock(t);
-  });
+  nw.test('uses recorded fixtures', t => nockBackWithFixture(t, true))
 
-  nw.test('uses recorded fixtures', function (t) {
-    nockBackWithFixture(t, true);
-  });
-
-  nw.test('goes to internet, doesn\'t record new fixtures', function (t) {
-
+  nw.test("goes to internet, doesn't record new fixtures", t => {
     t.plan(5)
 
     let dataCalled = false
 
     const fixture = 'someDryrunFixture.json'
-    const fixtureLoc = nockBack.fixtures + '/' + fixture
+    const fixtureLoc = `${nockBack.fixtures}/${fixture}`
 
     t.false(exists(fixtureLoc))
 
-    nockBack(fixture, function (done) {
+    nockBack(fixture, done => {
       const server = http.createServer((request, response) => {
         t.pass('server received a request')
 
@@ -242,52 +228,50 @@ tap.test('nockBack dryrun tests', function (nw) {
       })
 
       server.listen(() => {
-        const request = http.request({
-          host: 'localhost',
-          path: '/',
-          port: server.address().port
-        }, (response) => {
-          t.is(200, response.statusCode)
+        const request = http.request(
+          {
+            host: 'localhost',
+            path: '/',
+            port: server.address().port,
+          },
+          response => {
+            t.is(200, response.statusCode)
 
-          response.on('data', (data) => {
-            dataCalled = true
-          })
+            response.on('data', data => {
+              dataCalled = true
+            })
 
-          response.on('end', () => {
-            t.ok(dataCalled)
-            t.false(exists(fixtureLoc))
+            response.on('end', () => {
+              t.ok(dataCalled)
+              t.false(exists(fixtureLoc))
 
-            server.close(t.end)
-          })
-        })
+              server.close(t.end)
+            })
+          }
+        )
 
         request.on('error', t.error)
         request.end()
       })
     })
-
   })
+  nw.end()
+})
 
-  setOriginalModeOnEnd(nw, nockBack);
+test('nockBack record tests', nw => {
+  nockBack.setMode('record')
 
-  nw.end();
-});
-
-tap.test('nockBack record tests', function (nw) {
-  nockBack.setMode('record');
-
-  nw.test('it records when configured correctly', function (t) {
-
+  nw.test('it records when configured correctly', t => {
     t.plan(4)
 
-    nockBack.fixtures = __dirname + '/fixtures';
+    nockBack.fixtures = `${__dirname}/fixtures`
 
     const fixture = 'someFixture.txt'
-    const fixtureLoc = nockBack.fixtures + '/' + fixture
+    const fixtureLoc = `${nockBack.fixtures}/${fixture}`
 
-    t.false(exists(fixtureLoc));
+    t.false(exists(fixtureLoc))
 
-    nockBack(fixture, function (done) {
+    nockBack(fixture, done => {
       const server = http.createServer((request, response) => {
         t.pass('server received a request')
 
@@ -297,41 +281,43 @@ tap.test('nockBack record tests', function (nw) {
       })
 
       server.listen(() => {
-        const request = http.request({
-          host: 'localhost',
-          path: '/',
-          port: server.address().port
-        }, (response) => {
-          done()
+        const request = http.request(
+          {
+            host: 'localhost',
+            path: '/',
+            port: server.address().port,
+          },
+          response => {
+            done()
 
-          t.is(200, response.statusCode)
-          t.true(exists(fixtureLoc))
+            t.is(200, response.statusCode)
+            t.true(exists(fixtureLoc))
 
-          fs.unlinkSync(fixtureLoc)
+            fs.unlinkSync(fixtureLoc)
 
-          server.close(t.end)
-        })
+            server.close(t.end)
+          }
+        )
 
         request.on('error', t.error)
         request.end()
       })
-    });
+    })
+  })
 
-  });
-
-  //Adding this test because there was an issue when not calling
-  //nock.activate() after calling nock.restore()
-  nw.test('it can record twice', function (t) {
+  // Adding this test because there was an issue when not calling
+  // nock.activate() after calling nock.restore().
+  nw.test('it can record twice', t => {
     t.plan(4)
 
-    nockBack.fixtures = __dirname + '/fixtures';
+    nockBack.fixtures = `${__dirname}/fixtures`
 
-    const fixture = 'someFixture2.txt';
-    const fixtureLoc = nockBack.fixtures + '/' + fixture;
+    const fixture = 'someFixture2.txt'
+    const fixtureLoc = `${nockBack.fixtures}/${fixture}`
 
-    t.false(exists(fixtureLoc));
+    t.false(exists(fixtureLoc))
 
-    nockBack(fixture, function (done) {
+    nockBack(fixture, function(done) {
       const server = http.createServer((request, response) => {
         t.pass('server received a request')
 
@@ -341,70 +327,69 @@ tap.test('nockBack record tests', function (nw) {
       })
 
       server.listen(() => {
-        const request = http.request({
-          host: 'localhost',
-          path: '/',
-          port: server.address().port
-        }, (response) => {
-          done()
+        const request = http.request(
+          {
+            host: 'localhost',
+            path: '/',
+            port: server.address().port,
+          },
+          response => {
+            done()
 
-          t.is(200, response.statusCode)
-          t.true(exists(fixtureLoc))
+            t.is(200, response.statusCode)
+            t.true(exists(fixtureLoc))
 
-          fs.unlinkSync(fixtureLoc)
+            fs.unlinkSync(fixtureLoc)
 
-          server.close(t.end)
-        })
+            server.close(t.end)
+          }
+        )
 
         request.on('error', t.error)
         request.end()
       })
-    });
-  });
+    })
+  })
 
-  nw.test('it shouldn\'t allow outside calls', function (t) {
+  nw.test("it shouldn't allow outside calls", t => {
+    const fixture = 'wrongUri.json'
+    nockBack(fixture, function(done) {
+      http
+        .get('http://www.amazon.com', res => t.fail('Should not come here!'))
+        .on('error', err => {
+          t.equal(
+            err.message,
+            'Nock: Disallowed net connect for "www.amazon.com:80/"'
+          )
+          done()
+          t.end()
+        })
+    })
+  })
 
-    var fixture = 'wrongUri.json';
+  nw.test('it loads your recorded tests', t => {
+    nockBack('goodRequest.json', function(done) {
+      t.true(this.scopes.length > 0)
+      http.get('http://www.google.com').end()
+      this.assertScopesFinished()
+      done()
+      t.end()
+    })
+  })
 
-    nockBack(fixture, function (done) {
+  nw.test('it can filter after recording', t => {
+    nockBack.fixtures = `${__dirname}/fixtures`
+    setOriginalModeOnEnd(nw, nockBack)
+    const fixture = 'filteredFixture.json'
+    const fixtureLoc = `${nockBack.fixtures}/${fixture}`
 
-      http.get('http://www.amazon.com', function(res) {
-        throw "should not request this";
-      }).on('error', function(err) {
-        t.equal(err.message, 'Nock: Disallowed net connect for "www.amazon.com:80/"');
-        done();
-        t.end();
-      });
+    t.false(exists(fixtureLoc))
 
-    });
+    // You would do some filtering here, but for this test we'll just return
+    // an empty array.
+    const afterRecord = scopes => []
 
-  });
-
-  nw.test('it loads your recorded tests', function (t) {
-
-    nockBack('goodRequest.json', function (done) {
-      t.true(this.scopes.length > 0);
-      http.get('http://www.google.com').end();
-      this.assertScopesFinished();
-      done();
-      t.end();
-    });
-
-  });
-
-  nw.test('it can filter after recording', function (t) {
-    nockBack.fixtures = __dirname + '/fixtures';
-    var fixture = 'filteredFixture.json';
-    var fixtureLoc = nockBack.fixtures + '/' + fixture;
-
-    t.false(exists(fixtureLoc));
-
-    var afterRecord = function(scopes) {
-       // You would do some filtering here, but for this test we'll just return an empty array
-      return [];
-    }
-
-    nockBack(fixture, {afterRecord: afterRecord}, function (done) {
+    nockBack(fixture, { afterRecord }, function(done) {
       const server = http.createServer((request, response) => {
         t.pass('server received a request')
 
@@ -414,59 +399,78 @@ tap.test('nockBack record tests', function (nw) {
       })
 
       server.listen(() => {
-        const request = http.request({
-          host: 'localhost',
-          path: '/',
-          port: server.address().port
-        }, (response) => {
-          done()
+        const request = http.request(
+          {
+            host: 'localhost',
+            path: '/',
+            port: server.address().port,
+          },
+          response => {
+            done()
 
-          t.is(200, response.statusCode)
-          t.true(exists(fixtureLoc))
-          t.true(this.scopes.length === 0)
-          fs.unlinkSync(fixtureLoc)
+            t.is(200, response.statusCode)
+            t.true(exists(fixtureLoc))
+            t.equal(this.scopes.length, 0)
+            fs.unlinkSync(fixtureLoc)
 
-          server.close(t.end)
-        })
-
+            server.close(t.end)
+          }
+        )
         request.on('error', t.error)
         request.end()
       })
-    });
-    nw.end();
-    setOriginalModeOnEnd(nw, nockBack);
-  });
-});
+    })
+    nw.end()
+  })
+})
 
-tap.test('nockBack lockdown tests', function (nw) {
-  nockBack.fixtures = __dirname + '/fixtures';
-  nockBack.setMode('lockdown');
+test('nockBack lockdown tests', nw => {
+  nockBack.fixtures = `${__dirname}/fixtures`
+  nockBack.setMode('lockdown')
+  setOriginalModeOnEnd(nw, nockBack)
 
-  nw.test('normal nocks work', function (t) {
-    testNock(t);
-  });
+  nw.test('normal nocks work', t => testNock(t))
 
-  nw.test('nock back loads scope', function (t) {
-    nockBackWithFixture(t, true);
-  });
+  nw.test('nock back loads scope', t => nockBackWithFixture(t, true))
 
-  nw.test('no unnocked http calls work', function (t) {
-    var req = http.request({
-        host: "google.com"
-      , path: '/'
-      }, function(res) {
-        throw new Error('should not come here!');
-      });
+  nw.test('no unnocked http calls work', t => {
+    const req = http.request(
+      {
+        host: 'google.com',
+        path: '/',
+      },
+      res => t.fail('Should not come here!')
+    )
 
-    req.on('error', function (err) {
-      t.equal(err.message.trim(), 'Nock: Disallowed net connect for "google.com:80/"');
-      t.end();
-    });
+    req.on('error', err => {
+      t.equal(
+        err.message.trim(),
+        'Nock: Disallowed net connect for "google.com:80/"'
+      )
+      t.end()
+    })
 
-    req.end();
-  });
+    req.end()
+  })
 
-  setOriginalModeOnEnd(nw, nockBack);
+  nw.end()
+})
 
-  nw.end();
-});
+test('nockBack dryrun throws the expected exception when fs is not available', t => {
+  const nockBackWithoutFs = proxyquire('../lib/back', { fs: null })
+
+  nockBackWithoutFs.fixtures = `${__dirname}/fixtures`
+  t.throws(() => nockBackWithoutFs('goodRequest.json'), { message: 'no fs' })
+
+  t.end()
+})
+
+test('nockBack record mode throws the expected exception when fs is not available', t => {
+  const nockBackWithoutFs = proxyquire('../lib/back', { fs: null })
+  nockBackWithoutFs.setMode('record')
+  setOriginalModeOnEnd(t, nockBackWithoutFs)
+
+  nockBackWithoutFs.fixtures = `${__dirname}/fixtures`
+  t.throws(() => nockBackWithoutFs('goodRequest.json'), { message: 'no fs' })
+  t.end()
+})

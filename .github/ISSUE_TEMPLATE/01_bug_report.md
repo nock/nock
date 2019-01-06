@@ -1,7 +1,6 @@
 ---
 name: 🐛 Bug report
 about: If something isn't working 🤕
-
 ---
 
 **What is the expected behavior?**
@@ -12,7 +11,7 @@ about: If something isn't working 🤕
 
 **How to reproduce the issue**
 
-Runkit: *[Example link](https://runkit.com/gr2m/node-nock-nock-768)*
+Runkit: _[Example link](https://runkit.com/gr2m/node-nock-nock-768)_
 
 _Having problem producing a test case? Try and ask the community for help. If the test case cannot be reproduced, the Nock community might not be able to help you._
 
@@ -21,6 +20,6 @@ _Having problem producing a test case? Try and ask the community for help. If th
 **Versions**
 
 | Software | Version(s) |
-|----------|------------|
+| -------- | ---------- |
 | Nock     |            |
 | Node     |            |
