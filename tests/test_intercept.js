@@ -1848,24 +1848,25 @@ test('isDone is true with optional mocks outstanding', t => {
   t.end()
 })
 
-test('optional but persisted mocks persist, but never appear as pending', t => {
-  nock('http://example.com')
-    .get('/123')
+test('optional but persisted mocks persist, but never appear as pending', async t => {
+  const scope = nock('http://example.test')
+    .get('/')
     .optionally()
     .reply(200)
     .persist()
 
   t.deepEqual(nock.pendingMocks(), [])
-  http.get({ host: 'example.com', path: '/123' }, function(res) {
-    t.assert(res.statusCode === 200, 'should mock first request')
-    t.deepEqual(nock.pendingMocks(), [])
 
-    http.get({ host: 'example.com', path: '/123' }, function(res) {
-      t.assert(res.statusCode === 200, 'should mock second request')
-      t.deepEqual(nock.pendingMocks(), [])
-      t.end()
-    })
-  })
+  const response1 = await got('http://example.test/')
+  t.equal(response1.statusCode, 200)
+
+  t.deepEqual(nock.pendingMocks(), [])
+
+  const response2 = await got('http://example.test/')
+  t.equal(response2.statusCode, 200)
+  t.deepEqual(nock.pendingMocks(), [])
+
+  scope.done()
 })
 
 test('optional repeated mocks execute repeatedly, but never appear as pending', t => {
@@ -1902,18 +1903,22 @@ test("activeMocks returns optional mocks only before they're completed", t => {
   })
 })
 
-test('activeMocks always returns persisted mocks', t => {
+test('activeMocks always returns persisted mocks', async t => {
   nock.cleanAll()
-  nock('http://example.com')
+
+  const scope = nock('http://example.test')
     .get('/persisted')
     .reply(200)
     .persist()
 
-  t.deepEqual(nock.activeMocks(), ['GET http://example.com:80/persisted'])
-  http.get({ host: 'example.com', path: '/persisted' }, function(res) {
-    t.deepEqual(nock.activeMocks(), ['GET http://example.com:80/persisted'])
-    t.end()
-  })
+  t.deepEqual(nock.activeMocks(), ['GET http://example.test:80/persisted'])
+
+  await got('http://example.test/persisted')
+
+  t.deepEqual(nock.activeMocks(), ['GET http://example.test:80/persisted'])
+
+  scope.done()
+  nock.cleanAll()
 })
 
 test('activeMocks returns incomplete mocks', t => {
@@ -2125,86 +2130,67 @@ test('request has path', t => {
   req.end()
 })
 
-test('persists interceptors', t => {
-  const scope = nock('http://persisssists.con')
+test('persists interceptors', async t => {
+  const scope = nock('http://example.test')
     .persist()
     .get('/')
     .reply(200, 'Persisting all the way')
 
-  t.ok(!scope.isDone())
-  http
-    .get('http://persisssists.con/', function(res) {
-      t.ok(scope.isDone())
-      http
-        .get('http://persisssists.con/', function(res) {
-          t.ok(scope.isDone())
-          t.end()
-        })
-        .end()
-    })
-    .end()
+  t.false(scope.isDone())
+
+  await got('http://example.test/')
+
+  t.true(scope.isDone())
+
+  await got('http://example.test/')
+
+  t.true(scope.isDone())
+
+  nock.cleanAll()
 })
 
-test('Persisted interceptors are in pendingMocks initially', t => {
-  const scope = nock('http://example.com')
+test('Persisted interceptors are in pendingMocks initially', async t => {
+  const scope = nock('http://example.test')
     .get('/abc')
     .reply(200, 'Persisted reply')
     .persist()
 
-  t.deepEqual(scope.pendingMocks(), ['GET http://example.com:80/abc'])
-  t.end()
+  t.deepEqual(scope.pendingMocks(), ['GET http://example.test:80/abc'])
+
+  nock.cleanAll()
 })
 
-test('Persisted interceptors are not in pendingMocks after the first request', t => {
-  const scope = nock('http://example.com')
+test('Persisted interceptors are not in pendingMocks after the first request', async t => {
+  const scope = nock('http://example.test')
     .get('/def')
     .reply(200, 'Persisted reply')
     .persist()
 
-  http.get('http://example.com/def', function(res) {
-    t.deepEqual(scope.pendingMocks(), [])
-    t.end()
-  })
+  await got('http://example.test/def')
+
+  t.deepEqual(scope.pendingMocks(), [])
+
+  nock.cleanAll()
 })
 
-test('persist reply with file', t => {
-  nock('http://www.filereplier.com')
+test('persist reply with file', async t => {
+  nock('http://example.test')
     .persist()
     .get('/')
-    .replyWithFile(200, `${__dirname}/../assets/reply_file_1.txt`)
+    .replyWithFile(
+      200,
+      path.join(__dirname, '..', 'assets', 'reply_file_1.txt')
+    )
     .get('/test')
     .reply(200, 'Yay!')
 
-  async.each(
-    [1, 2],
-    function(_, cb) {
-      let dataCalled = false
-      const req = http.request(
-        {
-          host: 'www.filereplier.com',
-          path: '/',
-          port: 80,
-        },
-        function(res) {
-          t.equal(res.statusCode, 200)
-          res.once('end', function() {
-            t.ok(dataCalled)
-            cb()
-          })
-          res.on('data', function(data) {
-            dataCalled = true
-            t.equal(
-              data.toString(),
-              'Hello from the file!',
-              'response should match'
-            )
-          })
-        }
-      )
-      req.end()
-    },
-    t.end.bind(t)
-  )
+  for (let i = 0; i < 2; ++i) {
+    const { statusCode, body } = await got('http://example.test/')
+    t.equal(statusCode, 200)
+    t.equal(body, 'Hello from the file!')
+  }
+
+  nock.cleanAll()
 })
 
 test('(re-)activate after restore', t => {
@@ -5403,43 +5389,38 @@ test('data is sent with flushHeaders', t => {
     .flushHeaders()
 })
 
-test('stop persisting a persistent nock', t => {
+test('stop persisting a persistent nock', async t => {
   nock.cleanAll()
-  const scope = nock('http://persist.com')
+
+  const scope = nock('http://example.test')
     .persist(true)
     .get('/')
     .reply(200, 'Persisting all the way')
 
-  t.ok(!scope.isDone())
-  http
-    .get('http://persist.com/', function() {
-      t.ok(scope.isDone())
-      t.deepEqual(nock.activeMocks(), ['GET http://persist.com:80/'])
-      scope.persist(false)
-      http
-        .get('http://persist.com/', function() {
-          t.equal(nock.activeMocks().length, 0)
-          t.ok(scope.isDone())
-          http
-            .get('http://persist.com/')
-            .on('error', e => {
-              t.similar(e.toString(), /Error: Nock: No match for request/)
-              t.end()
-            })
-            .end()
-        })
-        .end()
-    })
-    .end()
+  t.false(scope.isDone())
+
+  await got('http://example.test/')
+
+  t.true(scope.isDone())
+  t.deepEqual(nock.activeMocks(), ['GET http://example.test:80/'])
+
+  scope.persist(false)
+
+  await got('http://example.test/')
+
+  t.equal(nock.activeMocks().length, 0)
+  t.true(scope.isDone())
+
+  await t.rejects(async () => got('http://example.test/'), {
+    message: 'Nock: No match for request',
+  })
 })
 
 test("should throw an error when persist flag isn't a boolean", t => {
-  try {
-    nock('http://persist.com').persist('string')
-  } catch (e) {
-    t.similar(e.toString(), /Invalid arguments: argument should be a boolean/)
-    t.end()
-  }
+  t.throws(() => nock('http://persist.com').persist('string'), {
+    message: 'Invalid arguments: argument should be a boolean',
+  })
+  t.end()
 })
 
 test('teardown', t => {
