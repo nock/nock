@@ -67,22 +67,6 @@ test('define() applies default status code when none is specified', async t => {
   t.equal(statusCode, 200)
 })
 
-test('define() applies default method when none is specified', async t => {
-  const nocks = nock.define([
-    {
-      scope: 'http://example.test',
-      status: 200,
-      path: '/',
-    },
-  ])
-
-  t.equal(nocks.length, 1)
-
-  const { statusCode } = await got('http://example.test/')
-
-  t.equal(statusCode, 200)
-})
-
 test('define() throws the expected error when scope and port conflict', t => {
   const nockDef = {
     scope: 'http://example.test:8080',
