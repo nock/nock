@@ -490,11 +490,9 @@ const scope = nock('http://www.example.com')
 You can specify the reply headers like this:
 
 ```js
-const scope = nock('http://www.headdy.com')
-  .get('/')
-  .reply(200, 'Hello World!', {
-    'X-My-Headers': 'My Header value',
-  })
+const scope = nock('https://api.github.com')
+  .get('/repos/atom/atom/license')
+  .reply(200, { license: 'MIT' }, { 'X-RateLimit-Remaining': 4999 })
 ```
 
 Or you can use a function to generate the headers values. The function will be
