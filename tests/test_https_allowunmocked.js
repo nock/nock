@@ -10,7 +10,7 @@ nock.enableNetConnect()
 
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0
 
-test('Nock with allowUnmocked and an url match', async test => {
+test('Nock with allowUnmocked and an url match', async t => {
   const options = {
     key: fs.readFileSync('tests/ssl/ca.key'),
     cert: fs.readFileSync('tests/ssl/ca.crt'),
@@ -31,17 +31,17 @@ test('Nock with allowUnmocked and an url match', async test => {
 
   try {
     const { body, statusCode } = await got(`${url}/urlMatch`)
-    test.true(statusCode === 201)
-    test.true(JSON.parse(body).status === 'intercepted')
+    t.true(statusCode === 201)
+    t.true(JSON.parse(body).status === 'intercepted')
   } catch (error) {
     console.warn(error)
   }
 
-  test.end()
+  t.end()
   server.close()
 })
 
-test('Nock with allowUnmocked, url match and query false', async test => {
+test('Nock with allowUnmocked, url match and query false', async t => {
   nock.cleanAll()
 
   const options = {
@@ -65,11 +65,11 @@ test('Nock with allowUnmocked, url match and query false', async test => {
 
   try {
     const { body } = await got(`${url}/otherpath`)
-    test.true(JSON.parse(body).status === 'default')
+    t.true(JSON.parse(body).status === 'default')
   } catch (error) {
     console.warn(error)
   }
 
-  test.end()
+  t.end()
   server.close()
 })
