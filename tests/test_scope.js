@@ -65,7 +65,6 @@ test('scope#remove() is a no-op on a persisted mock', t => {
 
 test('scope#remove() is a no-op on a nonexistent key', t => {
   const scope = nock('http://example.test')
-    .persist()
     .get('/')
     .reply(200)
   const key = 'GET http://example.test:80/'
