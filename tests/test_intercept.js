@@ -486,6 +486,22 @@ test('reply with callback and filtered path and body', async t => {
   scope.done()
 })
 
+test('filteringPath with invalid argument throws expected', t => {
+  t.throws(() => nock('http://example.test').filteringPath('abc123'), {
+    message:
+      'Invalid arguments: filtering path should be a function or a regular expression',
+  })
+  t.end()
+})
+
+test('filteringRequestBody with invalid argument throws expected', t => {
+  t.throws(() => nock('http://example.test').filteringRequestBody('abc123'), {
+    message:
+      'Invalid arguments: filtering request body should be a function or a regular expression',
+  })
+  t.end()
+})
+
 test('isDone', async t => {
   const scope = nock('http://example.com')
     .get('/')
