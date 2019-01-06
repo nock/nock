@@ -503,9 +503,7 @@ buffer, a stream, or undefined.
 const scope = nock('http://www.headdy.com')
   .get('/')
   .reply(200, 'Hello World!', {
-    'X-My-Headers': function(req, res, body) {
-      return body.toString()
-    },
+    'X-My-Headers': (req, res, body) => body.toString(),
   })
 ```
 
