@@ -1,13 +1,11 @@
 'use strict'
 
-const http = require('http')
-const https = require('https')
 const { test } = require('tap')
 const got = require('got')
 const nock = require('..')
 
 test('remove interceptor for GET resource', async t => {
-  const scope = nock('http://example.test')
+  nock('http://example.test')
     .get('/somepath')
     .reply(200, 'hey')
 
@@ -32,7 +30,7 @@ test('remove interceptor for GET resource', async t => {
 
 test('remove interceptor removes given interceptor', async t => {
   const givenInterceptor = nock('http://example.test').get('/somepath')
-  const scope = givenInterceptor.reply(200, 'hey')
+  givenInterceptor.reply(200, 'hey')
 
   t.true(nock.removeInterceptor(givenInterceptor))
 
