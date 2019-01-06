@@ -29,8 +29,6 @@ test('Nock with allowUnmocked and an url match', async t => {
 
   const { body, statusCode } = await got(`${url}/urlMatch`, {
     rejectUnauthorized: false,
-  }).catch(e => {
-    console.log(e)
   })
 
   t.true(statusCode === 201)
@@ -63,8 +61,6 @@ test('Nock with allowUnmocked, url match and query false', async t => {
 
   const { body } = await got(`${url}/otherpath`, {
     rejectUnauthorized: false,
-  }).catch(e => {
-    console.log(e)
   })
 
   t.true(JSON.parse(body).status === 'default')
