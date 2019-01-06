@@ -1,6 +1,6 @@
 'use strict'
 
-const test = require('tap').test
+const { test } = require('tap')
 const fs = require('fs')
 const https = require('https')
 const nock = require('../')
