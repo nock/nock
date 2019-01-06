@@ -8,7 +8,6 @@ Please note that this project is released with a [Contributor Code of Conduct](.
 
 <!-- toc -->
 
-- [Formatting & linting](#formatting--linting)
 - [Commit Message conventions](#commit-message-conventions)
 - [Beta / Next / Maintenance releases](#beta--next--maintenance-releases)
   - [Backport a fix / feature to a previous version](#backport-a-fix--feature-to-a-previous-version)
