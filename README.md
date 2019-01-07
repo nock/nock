@@ -22,76 +22,76 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
 
 <!-- toc -->
 
-- [How does it work?](#how-does-it-work)
-- [Install](#install)
-  - [Node version support](#node-version-support)
-- [Usage](#usage)
-  - [READ THIS! - About interceptors](#read-this---about-interceptors)
-  - [Specifying hostname](#specifying-hostname)
-  - [Specifying path](#specifying-path)
-  - [Specifying request body](#specifying-request-body)
-  - [Specifying request query string](#specifying-request-query-string)
-  - [Specifying replies](#specifying-replies)
-      - [Access original request and headers](#access-original-request-and-headers)
-    - [Replying with errors](#replying-with-errors)
-  - [Specifying headers](#specifying-headers)
-    - [Header field names are case-insensitive](#header-field-names-are-case-insensitive)
-    - [Specifying Request Headers](#specifying-request-headers)
-    - [Specifying Reply Headers](#specifying-reply-headers)
-    - [Default Reply Headers](#default-reply-headers)
-    - [Including Content-Length Header Automatically](#including-content-length-header-automatically)
-    - [Including Date Header Automatically](#including-date-header-automatically)
-  - [HTTP Verbs](#http-verbs)
-  - [Support for HTTP and HTTPS](#support-for-http-and-https)
-  - [Non-standard ports](#non-standard-ports)
-  - [Repeat response n times](#repeat-response-n-times)
-  - [Delay the response body](#delay-the-response-body)
-  - [Delay the response](#delay-the-response)
-  - [Delay the connection](#delay-the-connection)
-  - [Socket timeout](#socket-timeout)
-  - [Chaining](#chaining)
-  - [Scope filtering](#scope-filtering)
-  - [Path filtering](#path-filtering)
-  - [Request Body filtering](#request-body-filtering)
-  - [Request Headers Matching](#request-headers-matching)
-  - [Optional Requests](#optional-requests)
-  - [Allow **unmocked** requests on a mocked hostname](#allow-unmocked-requests-on-a-mocked-hostname)
-- [Expectations](#expectations)
-  - [.isDone()](#isdone)
-  - [.cleanAll()](#cleanall)
-  - [.persist()](#persist)
-  - [.pendingMocks()](#pendingmocks)
-  - [.activeMocks()](#activemocks)
-  - [.isActive()](#isactive)
-- [Logging](#logging)
-- [Restoring](#restoring)
-- [Activating](#activating)
-- [Turning Nock Off (experimental!)](#turning-nock-off-experimental)
-- [Enable/Disable real HTTP requests](#enabledisable-real-http-requests)
-  - [Disabling requests](#disabling-requests)
-  - [Enabling requests](#enabling-requests)
-  - [Resetting NetConnect](#resetting-netconnect)
-- [Recording](#recording)
-  - [`dont_print` option](#dont_print-option)
-  - [`output_objects` option](#output_objects-option)
-  - [`enable_reqheaders_recording` option](#enable_reqheaders_recording-option)
-  - [`logging` option](#logging-option)
-  - [`use_separator` option](#use_separator-option)
-  - [.removeInterceptor()](#removeinterceptor)
-- [Events](#events)
-  - [Global no match event](#global-no-match-event)
-- [Nock Back](#nock-back)
-  - [Setup](#setup)
-    - [Options](#options)
-  - [Usage](#usage-1)
-    - [Options](#options-1)
-      - [Example](#example)
-    - [Modes](#modes)
-- [Debugging](#debugging)
-- [Contributing](#contributing)
-- [Backers](#backers)
-- [Sponsors](#sponsors)
-- [License](#license)
+-   [How does it work?](#how-does-it-work)
+-   [Install](#install)
+    -   [Node version support](#node-version-support)
+-   [Usage](#usage)
+    -   [READ THIS! - About interceptors](#read-this---about-interceptors)
+    -   [Specifying hostname](#specifying-hostname)
+    -   [Specifying path](#specifying-path)
+    -   [Specifying request body](#specifying-request-body)
+    -   [Specifying request query string](#specifying-request-query-string)
+    -   [Specifying replies](#specifying-replies)
+        -   [Access original request and headers](#access-original-request-and-headers)
+        -   [Replying with errors](#replying-with-errors)
+    -   [Specifying headers](#specifying-headers)
+        -   [Header field names are case-insensitive](#header-field-names-are-case-insensitive)
+        -   [Specifying Request Headers](#specifying-request-headers)
+        -   [Specifying Reply Headers](#specifying-reply-headers)
+        -   [Default Reply Headers](#default-reply-headers)
+        -   [Including Content-Length Header Automatically](#including-content-length-header-automatically)
+        -   [Including Date Header Automatically](#including-date-header-automatically)
+    -   [HTTP Verbs](#http-verbs)
+    -   [Support for HTTP and HTTPS](#support-for-http-and-https)
+    -   [Non-standard ports](#non-standard-ports)
+    -   [Repeat response n times](#repeat-response-n-times)
+    -   [Delay the response body](#delay-the-response-body)
+    -   [Delay the response](#delay-the-response)
+    -   [Delay the connection](#delay-the-connection)
+    -   [Socket timeout](#socket-timeout)
+    -   [Chaining](#chaining)
+    -   [Scope filtering](#scope-filtering)
+    -   [Path filtering](#path-filtering)
+    -   [Request Body filtering](#request-body-filtering)
+    -   [Request Headers Matching](#request-headers-matching)
+    -   [Optional Requests](#optional-requests)
+    -   [Allow **unmocked** requests on a mocked hostname](#allow-unmocked-requests-on-a-mocked-hostname)
+-   [Expectations](#expectations)
+    -   [.isDone()](#isdone)
+    -   [.cleanAll()](#cleanall)
+    -   [.persist()](#persist)
+    -   [.pendingMocks()](#pendingmocks)
+    -   [.activeMocks()](#activemocks)
+    -   [.isActive()](#isactive)
+-   [Logging](#logging)
+-   [Restoring](#restoring)
+-   [Activating](#activating)
+-   [Turning Nock Off (experimental!)](#turning-nock-off-experimental)
+-   [Enable/Disable real HTTP requests](#enabledisable-real-http-requests)
+    -   [Disabling requests](#disabling-requests)
+    -   [Enabling requests](#enabling-requests)
+    -   [Resetting NetConnect](#resetting-netconnect)
+-   [Recording](#recording)
+    -   [`dont_print` option](#dont_print-option)
+    -   [`output_objects` option](#output_objects-option)
+    -   [`enable_reqheaders_recording` option](#enable_reqheaders_recording-option)
+    -   [`logging` option](#logging-option)
+    -   [`use_separator` option](#use_separator-option)
+    -   [.removeInterceptor()](#removeinterceptor)
+-   [Events](#events)
+    -   [Global no match event](#global-no-match-event)
+-   [Nock Back](#nock-back)
+    -   [Setup](#setup)
+        -   [Options](#options)
+    -   [Usage](#usage-1)
+        -   [Options](#options-1)
+            -   [Example](#example)
+        -   [Modes](#modes)
+-   [Debugging](#debugging)
+-   [Contributing](#contributing)
+-   [Backers](#backers)
+-   [Sponsors](#sponsors)
+-   [License](#license)
 
 <!-- tocstop -->
 
@@ -129,16 +129,16 @@ On your test, you can setup your mocking object like this:
 const nock = require('nock')
 
 const scope = nock('https://api.github.com')
-  .get('/repos/atom/atom/license')
-  .reply(200, {
-    license: {
-      key: 'mit',
-      name: 'MIT License',
-      spdx_id: 'MIT',
-      url: 'https://api.github.com/licenses/mit',
-      node_id: 'MDc6TGljZW5zZTEz',
-    },
-  })
+    .get('/repos/atom/atom/license')
+    .reply(200, {
+        license: {
+            key: 'mit',
+            name: 'MIT License',
+            spdx_id: 'MIT',
+            url: 'https://api.github.com/licenses/mit',
+            node_id: 'MDc6TGljZW5zZTEz',
+        },
+    })
 ```
 
 This setup says that we will intercept every HTTP call to `https://api.github.com`.
@@ -159,14 +159,14 @@ The request hostname can be a string or a RegExp.
 
 ```js
 const scope = nock('http://www.example.com')
-  .get('/resource')
-  .reply(200, 'domain matched')
+    .get('/resource')
+    .reply(200, 'domain matched')
 ```
 
 ```js
 const scope = nock(/example\.com/)
-  .get('/resource')
-  .reply(200, 'domain regex matched')
+    .get('/resource')
+    .reply(200, 'domain regex matched')
 ```
 
 > Note: You can choose to include or not the protocol in the hostname matching.
@@ -179,24 +179,24 @@ Using a string:
 
 ```js
 const scope = nock('http://www.example.com')
-  .get('/resource')
-  .reply(200, 'path matched')
+    .get('/resource')
+    .reply(200, 'path matched')
 ```
 
 Using a regular expression:
 
 ```js
 const scope = nock('http://www.example.com')
-  .get(/source$/)
-  .reply(200, 'path using regex matched')
+    .get(/source$/)
+    .reply(200, 'path using regex matched')
 ```
 
 Using a function:
 
 ```js
 const scope = nock('http://www.example.com')
-  .get(uri => uri.includes('cats'))
-  .reply(200, 'path using function matched')
+    .get(uri => uri.includes('cats'))
+    .reply(200, 'path using function matched')
 ```
 
 ### Specifying request body
@@ -207,48 +207,48 @@ You can specify the request body to be matched as the second argument to the `ge
 
 ```js
 nock('http://www.example.com')
-  .post('/login', 'username=pgte&password=123456')
-  .reply(200, { id: '123ABC' })
+    .post('/login', 'username=pgte&password=123456')
+    .reply(200, { id: '123ABC' })
 ```
 
 **Buffer**: nock will exact match the stringified request body with the provided buffer
 
 ```js
 nock('http://www.example.com')
-  .post('/login', Buffer.from([0xff, 0x11]))
-  .reply(200, { id: '123ABC' })
+    .post('/login', Buffer.from([0xff, 0x11]))
+    .reply(200, { id: '123ABC' })
 ```
 
 **RegExp**: nock will test the stringified request body against the provided RegExp
 
 ```js
 nock('http://www.example.com')
-  .post('/login', /username=\w+/gi)
-  .reply(200, { id: '123ABC' })
+    .post('/login', /username=\w+/gi)
+    .reply(200, { id: '123ABC' })
 ```
 
 **JSON object**: nock will exact match the request body with the provided object. In order to increase flexibility, nock also supports RegExp as an attribute value for the keys:
 
 ```js
 nock('http://www.example.com')
-  .post('/login', { username: 'pgte', password: /.+/i })
-  .reply(200, { id: '123ABC' })
+    .post('/login', { username: 'pgte', password: /.+/i })
+    .reply(200, { id: '123ABC' })
 ```
 
 **Function**: nock will evaluate the function providing the request body object as first argument. Return true if it should be considered a match:
 
 ```js
 nock('http://www.example.com')
-  .post('/login', body => body.username && body.password)
-  .reply(200, { id: '123ABC' })
+    .post('/login', body => body.username && body.password)
+    .reply(200, { id: '123ABC' })
 ```
 
 In case you need to perform a partial matching on a complex, nested request body you should have a look at libraries like [lodash.matches](https://lodash.com/docs/#matches). Indeed, partial matching can be achieved as:
 
 ```js
 nock('http://www.example.com')
-  .post('/user', _.matches({ address: { country: 'US' } }))
-  .reply(200, { id: '123ABC' })
+    .post('/user', _.matches({ address: { country: 'US' } }))
+    .reply(200, { id: '123ABC' })
 ```
 
 ### Specifying request query string
@@ -257,47 +257,47 @@ Nock understands query strings. Instead of placing the entire URL, you can speci
 
 ```js
 nock('http://example.com')
-  .get('/users')
-  .query({ name: 'pedro', surname: 'teixeira' })
-  .reply(200, { results: [{ id: 'pgte' }] })
+    .get('/users')
+    .query({ name: 'pedro', surname: 'teixeira' })
+    .reply(200, { results: [{ id: 'pgte' }] })
 ```
 
 Nock supports array-style/object-style query parameters. The encoding format matches with request module.
 
 ```js
 nock('http://example.com')
-  .get('/users')
-  .query({
-    names: ['alice', 'bob'],
-    tags: {
-      alice: ['admin', 'tester'],
-      bob: ['tester'],
-    },
-  })
-  .reply(200, { results: [{ id: 'pgte' }] })
+    .get('/users')
+    .query({
+        names: ['alice', 'bob'],
+        tags: {
+            alice: ['admin', 'tester'],
+            bob: ['tester'],
+        },
+    })
+    .reply(200, { results: [{ id: 'pgte' }] })
 ```
 
 Nock supports passing a function to query. The function determines if the actual query matches or not.
 
 ```js
 nock('http://example.com')
-  .get('/users')
-  .query(actualQueryObject => {
-    // do some compare with the actual Query Object
-    // return true for matched
-    // return false for not matched
-    return true
-  })
-  .reply(200, { results: [{ id: 'pgte' }] })
+    .get('/users')
+    .query(actualQueryObject => {
+        // do some compare with the actual Query Object
+        // return true for matched
+        // return false for not matched
+        return true
+    })
+    .reply(200, { results: [{ id: 'pgte' }] })
 ```
 
 To mock the entire url regardless of the passed query string:
 
 ```js
 nock('http://example.com')
-  .get('/users')
-  .query(true)
-  .reply(200, { results: [{ id: 'pgte' }] })
+    .get('/users')
+    .query(true)
+    .reply(200, { results: [{ id: 'pgte' }] })
 ```
 
 ### Specifying replies
@@ -306,58 +306,58 @@ You can specify the return status code for a path on the first argument of reply
 
 ```js
 const scope = nock('http://myapp.iriscouch.com')
-  .get('/users/1')
-  .reply(404)
+    .get('/users/1')
+    .reply(404)
 ```
 
 You can also specify the reply body as a string:
 
 ```js
 const scope = nock('http://www.google.com')
-  .get('/')
-  .reply(200, 'Hello from Google!')
+    .get('/')
+    .reply(200, 'Hello from Google!')
 ```
 
 or as a JSON-encoded object:
 
 ```js
 const scope = nock('http://myapp.iriscouch.com')
-  .get('/')
-  .reply(200, {
-    username: 'pgte',
-    email: 'pedro.teixeira@gmail.com',
-    _id: '4324243fsd',
-  })
+    .get('/')
+    .reply(200, {
+        username: 'pgte',
+        email: 'pedro.teixeira@gmail.com',
+        _id: '4324243fsd',
+    })
 ```
 
 or even as a file:
 
 ```js
 const scope = nock('http://myapp.iriscouch.com')
-  .get('/')
-  .replyWithFile(200, __dirname + '/replies/user.json', {
-    'Content-Type': 'application/json',
-  })
+    .get('/')
+    .replyWithFile(200, __dirname + '/replies/user.json', {
+        'Content-Type': 'application/json',
+    })
 ```
 
 Instead of an object or a buffer you can also pass in a callback to be evaluated for the value of the response body:
 
 ```js
 const scope = nock('http://www.google.com')
-  .filteringRequestBody(/.*/, '*')
-  .post('/echo', '*')
-  .reply(201, (uri, requestBody) => requestBody)
+    .filteringRequestBody(/.*/, '*')
+    .post('/echo', '*')
+    .reply(201, (uri, requestBody) => requestBody)
 ```
 
 An asynchronous function that gets an error-first callback as last argument also works:
 
 ```js
 const scope = nock('http://www.google.com')
-  .filteringRequestBody(/.*/, '*')
-  .post('/echo', '*')
-  .reply(201, (uri, requestBody, cb) => {
-    fs.readFile('cat-poems.txt', cb) // Error-first callback
-  })
+    .filteringRequestBody(/.*/, '*')
+    .post('/echo', '*')
+    .reply(201, (uri, requestBody, cb) => {
+        fs.readFile('cat-poems.txt', cb) // Error-first callback
+    })
 ```
 
 > Note: When using a callback, if you call back with an error as first argument, that error will be sent in the response body, with a 500 HTTP response status code.
@@ -366,50 +366,50 @@ You can also return the status code and body using just one function:
 
 ```js
 const scope = nock('http://www.google.com')
-  .filteringRequestBody(/.*/, '*')
-  .post('/echo', '*')
-  .reply((uri, requestBody) => {
-    return [
-      201,
-      'THIS IS THE REPLY BODY',
-      { header: 'value' }, // optional headers
-    ]
-  })
+    .filteringRequestBody(/.*/, '*')
+    .post('/echo', '*')
+    .reply((uri, requestBody) => {
+        return [
+            201,
+            'THIS IS THE REPLY BODY',
+            { header: 'value' }, // optional headers
+        ]
+    })
 ```
 
 or, use an error-first callback that also gets the status code:
 
 ```js
 const scope = nock('http://www.google.com')
-  .filteringRequestBody(/.*/, '*')
-  .post('/echo', '*')
-  .reply((uri, requestBody, cb) => {
-    setTimeout(() => cb(null, [201, 'THIS IS THE REPLY BODY']), 1000)
-  })
+    .filteringRequestBody(/.*/, '*')
+    .post('/echo', '*')
+    .reply((uri, requestBody, cb) => {
+        setTimeout(() => cb(null, [201, 'THIS IS THE REPLY BODY']), 1000)
+    })
 ```
 
 A Stream works too:
 
 ```js
 const scope = nock('http://www.google.com')
-  .get('/cat-poems')
-  .reply(200, (uri, requestBody) => {
-    return fs.createReadStream('cat-poems.txt')
-  })
+    .get('/cat-poems')
+    .reply(200, (uri, requestBody) => {
+        return fs.createReadStream('cat-poems.txt')
+    })
 ```
 
-##### Access original request and headers
+#### Access original request and headers
 
 If you're using the reply callback style, you can access the original client request using `this.req` like this:
 
 ```js
 const scope = nock('http://www.google.com')
-  .get('/cat-poems')
-  .reply((uri, requestBody) => {
-    console.log('path:', this.req.path)
-    console.log('headers:', this.req.headers)
-    // ...
-  })
+    .get('/cat-poems')
+    .reply((uri, requestBody) => {
+        console.log('path:', this.req.path)
+        console.log('headers:', this.req.headers)
+        // ...
+    })
 ```
 
 #### Replying with errors
@@ -418,16 +418,19 @@ You can reply with an error like this:
 
 ```js
 nock('http://www.google.com')
-  .get('/cat-poems')
-  .replyWithError('something awful happened')
+    .get('/cat-poems')
+    .replyWithError('something awful happened')
 ```
 
 JSON error responses are allowed too:
 
 ```js
 nock('http://www.google.com')
-  .get('/cat-poems')
-  .replyWithError({ message: 'something awful happened', code: 'AWFUL_ERROR' })
+    .get('/cat-poems')
+    .replyWithError({
+        message: 'something awful happened',
+        code: 'AWFUL_ERROR',
+    })
 ```
 
 > Note: This will emit an `error` event on the `request` object, not the reply.
@@ -444,12 +447,12 @@ You can specify the request headers like this:
 
 ```js
 const scope = nock('http://www.example.com', {
-  reqheaders: {
-    authorization: 'Basic Auth',
-  },
+    reqheaders: {
+        authorization: 'Basic Auth',
+    },
 })
-  .get('/')
-  .reply(200)
+    .get('/')
+    .reply(200)
 ```
 
 Or you can use a regular expression or function to check the header values. The
@@ -457,13 +460,13 @@ function will be passed the header value.
 
 ```js
 const scope = nock('http://www.example.com', {
-  reqheaders: {
-    'X-My-Headers': headerValue => headerValue.includes('cats'),
-    'X-My-Awesome-Header': /Awesome/i,
-  },
+    reqheaders: {
+        'X-My-Headers': headerValue => headerValue.includes('cats'),
+        'X-My-Awesome-Header': /Awesome/i,
+    },
 })
-  .get('/')
-  .reply(200)
+    .get('/')
+    .reply(200)
 ```
 
 If `reqheaders` is not specified or if `host` is not part of it, Nock will automatically add `host` value to request header.
@@ -474,10 +477,10 @@ You can also have Nock fail the request if certain headers are present:
 
 ```js
 const scope = nock('http://www.example.com', {
-  badheaders: ['cookie', 'x-forwarded-for'],
+    badheaders: ['cookie', 'x-forwarded-for'],
 })
-  .get('/')
-  .reply(200)
+    .get('/')
+    .reply(200)
 ```
 
 When invoked with this option, Nock will not match the request if any of the `badheaders` are present.
@@ -486,9 +489,9 @@ Basic authentication can be specified as follows:
 
 ```js
 const scope = nock('http://www.example.com')
-  .get('/')
-  .basicAuth({ user: 'john', pass: 'doe' })
-  .reply(200)
+    .get('/')
+    .basicAuth({ user: 'john', pass: 'doe' })
+    .reply(200)
 ```
 
 #### Specifying Reply Headers
@@ -497,8 +500,8 @@ You can specify the reply headers like this:
 
 ```js
 const scope = nock('https://api.github.com')
-  .get('/repos/atom/atom/license')
-  .reply(200, { license: 'MIT' }, { 'X-RateLimit-Remaining': 4999 })
+    .get('/repos/atom/atom/license')
+    .reply(200, { license: 'MIT' }, { 'X-RateLimit-Remaining': 4999 })
 ```
 
 Or you can use a function to generate the headers values. The function will be
@@ -507,10 +510,10 @@ buffer, a stream, or undefined.
 
 ```js
 const scope = nock('http://www.headdy.com')
-  .get('/')
-  .reply(200, 'Hello World!', {
-    'X-My-Headers': (req, res, body) => body.toString(),
-  })
+    .get('/')
+    .reply(200, 'Hello World!', {
+        'X-My-Headers': (req, res, body) => body.toString(),
+    })
 ```
 
 #### Default Reply Headers
@@ -519,25 +522,25 @@ You can also specify default reply headers for all responses like this:
 
 ```js
 const scope = nock('http://www.headdy.com')
-  .defaultReplyHeaders({
-    'X-Powered-By': 'Rails',
-    'Content-Type': 'application/json',
-  })
-  .get('/')
-  .reply(200, 'The default headers should come too')
+    .defaultReplyHeaders({
+        'X-Powered-By': 'Rails',
+        'Content-Type': 'application/json',
+    })
+    .get('/')
+    .reply(200, 'The default headers should come too')
 ```
 
 Or you can use a function to generate the default headers values:
 
 ```js
 const scope = nock('http://www.headdy.com')
-  .defaultReplyHeaders({
-    'Content-Length': function(req, res, body) {
-      return body.length
-    },
-  })
-  .get('/')
-  .reply(200, 'The default headers should come too')
+    .defaultReplyHeaders({
+        'Content-Length': function(req, res, body) {
+            return body.length
+        },
+    })
+    .get('/')
+    .reply(200, 'The default headers should come too')
 ```
 
 #### Including Content-Length Header Automatically
@@ -547,9 +550,9 @@ When using `scope.reply()` to set a response body manually, you can have the
 
 ```js
 const scope = nock('http://www.headdy.com')
-  .replyContentLength()
-  .get('/')
-  .reply(200, { hello: 'world' })
+    .replyContentLength()
+    .get('/')
+    .reply(200, { hello: 'world' })
 ```
 
 **NOTE:** this does not work with streams or other advanced means of specifying
@@ -561,18 +564,18 @@ You can automatically append a `Date` header to your mock reply:
 
 ```js
 const scope = nock('http://www.headdy.com')
-  .replyDate()
-  .get('/')
-  .reply(200, { hello: 'world' })
+    .replyDate()
+    .get('/')
+    .reply(200, { hello: 'world' })
 ```
 
 Or provide your own `Date` object:
 
 ```js
 const scope = nock('http://www.headdy.com')
-  .replyDate(new Date(2015, 0, 1))
-  .get('/')
-  .reply(200, { hello: 'world' })
+    .replyDate(new Date(2015, 0, 1))
+    .get('/')
+    .reply(200, { hello: 'world' })
 ```
 
 ### HTTP Verbs
@@ -583,8 +586,8 @@ You can intercept any HTTP verb using `.intercept(path, verb [, requestBody [, o
 
 ```js
 const scope = nock('http://my.domain.com')
-  .intercept('/path', 'PATCH')
-  .reply(304)
+    .intercept('/path', 'PATCH')
+    .reply(304)
 ```
 
 ### Support for HTTP and HTTPS
@@ -611,9 +614,9 @@ You are able to specify the number of times to repeat the same response.
 
 ```js
 nock('http://zombo.com')
-  .get('/')
-  .times(4)
-  .reply(200, 'Ok')
+    .get('/')
+    .times(4)
+    .reply(200, 'Ok')
 
 http.get('http://zombo.com/') // respond body "Ok"
 http.get('http://zombo.com/') // respond body "Ok"
@@ -626,17 +629,17 @@ Sugar syntax
 
 ```js
 nock('http://zombo.com')
-  .get('/')
-  .once()
-  .reply(200, 'Ok')
+    .get('/')
+    .once()
+    .reply(200, 'Ok')
 nock('http://zombo.com')
-  .get('/')
-  .twice()
-  .reply(200, 'Ok')
+    .get('/')
+    .twice()
+    .reply(200, 'Ok')
 nock('http://zombo.com')
-  .get('/')
-  .thrice()
-  .reply(200, 'Ok')
+    .get('/')
+    .thrice()
+    .reply(200, 'Ok')
 ```
 
 ### Delay the response body
@@ -646,9 +649,9 @@ You are able to specify the number of milliseconds that the response body should
 
 ```js
 nock('http://my.server.com')
-  .get('/')
-  .delayBody(2000) // 2 seconds
-  .reply(200, '<html></html>')
+    .get('/')
+    .delayBody(2000) // 2 seconds
+    .reply(200, '<html></html>')
 ```
 
 NOTE: the [`'response'`](http://nodejs.org/api/http.html#http_event_response) event will occur immediately, but the [IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage) will not emit its `'end'` event until after the delay.
@@ -659,9 +662,9 @@ You are able to specify the number of milliseconds that your reply should be del
 
 ```js
 nock('http://my.server.com')
-  .get('/')
-  .delay(2000) // 2 seconds delay will be applied to the response header.
-  .reply(200, '<html></html>')
+    .get('/')
+    .delay(2000) // 2 seconds delay will be applied to the response header.
+    .reply(200, '<html></html>')
 ```
 
 `delay()` could also be used as
@@ -677,12 +680,12 @@ for example
 
 ```js
 nock('http://my.server.com')
-  .get('/')
-  .delay({
-    head: 2000, // header will be delayed for 2 seconds, i.e. the whole response will be delayed for 2 seconds.
-    body: 3000, // body will be delayed for another 3 seconds after header is sent out.
-  })
-  .reply(200, '<html></html>')
+    .get('/')
+    .delay({
+        head: 2000, // header will be delayed for 2 seconds, i.e. the whole response will be delayed for 2 seconds.
+        body: 3000, // body will be delayed for another 3 seconds after header is sent out.
+    })
+    .reply(200, '<html></html>')
 ```
 
 ### Delay the connection
@@ -695,9 +698,9 @@ You are able to specify the number of milliseconds that your connection should b
 
 ```js
 nock('http://my.server.com')
-  .get('/')
-  .socketDelay(2000) // 2 seconds
-  .reply(200, '<html></html>')
+    .get('/')
+    .socketDelay(2000) // 2 seconds
+    .reply(200, '<html></html>')
 ```
 
 To test a request like the following:
@@ -718,24 +721,24 @@ You can chain behaviour like this:
 
 ```js
 const scope = nock('http://myapp.iriscouch.com')
-  .get('/users/1')
-  .reply(404)
-  .post('/users', {
-    username: 'pgte',
-    email: 'pedro.teixeira@gmail.com',
-  })
-  .reply(201, {
-    ok: true,
-    id: '123ABC',
-    rev: '946B7D1C',
-  })
-  .get('/users/123ABC')
-  .reply(200, {
-    _id: '123ABC',
-    _rev: '946B7D1C',
-    username: 'pgte',
-    email: 'pedro.teixeira@gmail.com',
-  })
+    .get('/users/1')
+    .reply(404)
+    .post('/users', {
+        username: 'pgte',
+        email: 'pedro.teixeira@gmail.com',
+    })
+    .reply(201, {
+        ok: true,
+        id: '123ABC',
+        rev: '946B7D1C',
+    })
+    .get('/users/123ABC')
+    .reply(200, {
+        _id: '123ABC',
+        _rev: '946B7D1C',
+        username: 'pgte',
+        email: 'pedro.teixeira@gmail.com',
+    })
 ```
 
 ### Scope filtering
@@ -746,10 +749,10 @@ This can be useful if you have a node module that randomly changes subdomains to
 
 ```js
 const scope = nock('https://api.dropbox.com', {
-  filteringScope: scope => /^https:\/\/api[0-9]*.dropbox.com/.test(scope),
+    filteringScope: scope => /^https:\/\/api[0-9]*.dropbox.com/.test(scope),
 })
-  .get('/1/metadata/auto/Photos?include_deleted=false&list=true')
-  .reply(200)
+    .get('/1/metadata/auto/Photos?include_deleted=false&list=true')
+    .reply(200)
 ```
 
 ### Path filtering
@@ -762,18 +765,18 @@ You can use a regexp for replacement, just like String.prototype.replace:
 
 ```js
 const scope = nock('http://api.myservice.com')
-  .filteringPath(/password=[^&]*/g, 'password=XXX')
-  .get('/users/1?password=XXX')
-  .reply(200, 'user')
+    .filteringPath(/password=[^&]*/g, 'password=XXX')
+    .get('/users/1?password=XXX')
+    .reply(200, 'user')
 ```
 
 Or you can use a function:
 
 ```js
 const scope = nock('http://api.myservice.com')
-  .filteringPath(path => '/ABC')
-  .get('/ABC')
-  .reply(200, 'user')
+    .filteringPath(path => '/ABC')
+    .get('/ABC')
+    .reply(200, 'user')
 ```
 
 Note that `scope.filteringPath` is not cumulative: it should only be used once per scope.
@@ -788,27 +791,27 @@ You can use a regexp for replacement, just like String.prototype.replace:
 
 ```js
 const scope = nock('http://api.myservice.com')
-  .filteringRequestBody(/password=[^&]*/g, 'password=XXX')
-  .post('/users/1', 'data=ABC&password=XXX')
-  .reply(201, 'OK')
+    .filteringRequestBody(/password=[^&]*/g, 'password=XXX')
+    .post('/users/1', 'data=ABC&password=XXX')
+    .reply(201, 'OK')
 ```
 
 Or you can use a function to transform the body:
 
 ```js
 const scope = nock('http://api.myservice.com')
-  .filteringRequestBody(body => 'ABC')
-  .post('/', 'ABC')
-  .reply(201, 'OK')
+    .filteringRequestBody(body => 'ABC')
+    .post('/', 'ABC')
+    .reply(201, 'OK')
 ```
 
 If you don't want to match the request body you can return a wildcard match:
 
 ```js
 const scope = nock('http://api.myservice.com')
-  .filteringRequestBody(body => '*')
-  .post('/some_uri', '*')
-  .reply(200, 'OK')
+    .filteringRequestBody(body => '*')
+    .post('/some_uri', '*')
+    .reply(200, 'OK')
 ```
 
 ### Request Headers Matching
@@ -817,33 +820,33 @@ If you need to match requests only if certain request headers match, you can.
 
 ```js
 const scope = nock('http://api.myservice.com')
-  .matchHeader('accept', 'application/json')
-  .get('/')
-  .reply(200, {
-    data: 'hello world',
-  })
+    .matchHeader('accept', 'application/json')
+    .get('/')
+    .reply(200, {
+        data: 'hello world',
+    })
 ```
 
 You can also use a regexp for the header body.
 
 ```js
 const scope = nock('http://api.myservice.com')
-  .matchHeader('User-Agent', /Mozilla\/.*/)
-  .get('/')
-  .reply(200, {
-    data: 'hello world',
-  })
+    .matchHeader('User-Agent', /Mozilla\/.*/)
+    .get('/')
+    .reply(200, {
+        data: 'hello world',
+    })
 ```
 
 You can also use a function for the header body.
 
 ```js
 const scope = nock('http://api.myservice.com')
-  .matchHeader('content-length', val => val >= 1000)
-  .get('/')
-  .reply(200, {
-    data: 'hello world',
-  })
+    .matchHeader('content-length', val => val >= 1000)
+    .get('/')
+    .reply(200, {
+        data: 'hello world',
+    })
 ```
 
 ### Optional Requests
@@ -860,19 +863,19 @@ example.pendingMocks() // ["GET http://example.com:80/path"]
 example.pendingMocks() // []
 
 example
-  .get('/pathB')
-  .optionally()
-  .reply(200)
+    .get('/pathB')
+    .optionally()
+    .reply(200)
 example.pendingMocks() // []
 
 // You can also pass a boolean argument to `optionally()`. This
 // is useful if you want to conditionally make a mocked request
 // optional.
 const getMock = optional =>
-  example
-    .get('/pathC')
-    .optionally(optional)
-    .reply(200)
+    example
+        .get('/pathC')
+        .optionally(optional)
+        .reply(200)
 
 getMock(true)
 example.pendingMocks() // []
@@ -886,8 +889,8 @@ If you need some request on the same host name to be mocked and some others to *
 
 ```js
 const scope = nock('http://my.existing.service.com', { allowUnmocked: true })
-  .get('/my/url')
-  .reply(200, 'OK!')
+    .get('/my/url')
+    .reply(200, 'OK!')
 
 // GET /my/url => goes through nock
 // GET /other/url => actually makes request to the server
@@ -905,15 +908,15 @@ Example:
 
 ```js
 const scope = nock('http://google.com')
-  .get('/')
-  .reply(200, 'Hello from Google!')
+    .get('/')
+    .reply(200, 'Hello from Google!')
 
 // do some stuff
 
 setTimeout(() => {
-  // Will throw an assertion error if meanwhile a "GET http://google.com" was
-  // not performed.
-  scope.done()
+    // Will throw an assertion error if meanwhile a "GET http://google.com" was
+    // not performed.
+    scope.done()
 }, 5000)
 ```
 
@@ -923,8 +926,8 @@ You can call `isDone()` on a single expectation to determine if the expectation 
 
 ```js
 const scope = nock('http://google.com')
-  .get('/')
-  .reply(200)
+    .get('/')
+    .reply(200)
 
 scope.isDone() // will return false
 ```
@@ -949,9 +952,9 @@ You can make all the interceptors for a scope persist by calling `.persist()` on
 
 ```js
 const scope = nock('http://example.com')
-  .persist()
-  .get('/')
-  .reply(200, 'Persisting all the way')
+    .persist()
+    .get('/')
+    .reply(200, 'Persisting all the way')
 ```
 
 Note that while a persisted scope will always intercept the requests, it is considered "done" after the first interception.
@@ -960,9 +963,9 @@ If you want to stop persisting a persistent nock you can call `persist(false)`:
 
 ```js
 const scope = nock('http://example.com')
-  .persist()
-  .get('/')
-  .reply(200, 'ok')
+    .persist()
+    .get('/')
+    .reply(200, 'ok')
 
 // Do some tests ...
 
@@ -975,7 +978,7 @@ If a scope is not done, you can inspect the scope to infer which ones are still 
 
 ```js
 if (!scope.isDone()) {
-  console.error('pending mocks: %j', scope.pendingMocks())
+    console.error('pending mocks: %j', scope.pendingMocks())
 }
 ```
 
@@ -1010,7 +1013,7 @@ Sample:
 
 ```js
 if (!nock.isActive()) {
-  nock.activate()
+    nock.activate()
 }
 ```
 
@@ -1074,7 +1077,7 @@ So, if you try to request any host not 'nocked', it will throw a `NetConnectNotA
 nock.disableNetConnect()
 const req = http.get('http://google.com/')
 req.on('error', err => {
-  console.log(err)
+    console.log(err)
 })
 // The returned `http.ClientRequest` will emit an error event (or throw if you're not listening for it)
 // This code will log a NetConnectNotAllowedError with message:
@@ -1149,7 +1152,7 @@ If you just want to capture the generated code into a var as an array you can us
 
 ```js
 nock.recorder.rec({
-  dont_print: true,
+    dont_print: true,
 })
 // ... some HTTP calls
 const nockCalls = nock.recorder.play()
@@ -1167,7 +1170,7 @@ In case you want to generate the code yourself or use the test data in some othe
 
 ```js
 nock.recorder.rec({
-  output_objects: true,
+    output_objects: true,
 })
 // ... some HTTP calls
 const nockCallObjects = nock.recorder.play()
@@ -1175,35 +1178,39 @@ const nockCallObjects = nock.recorder.play()
 
 The returned call objects have the following properties:
 
-- `scope` - the scope of the call including the protocol and non-standard ports (e.g. `'https://github.com:12345'`)
-- `method` - the HTTP verb of the call (e.g. `'GET'`)
-- `path` - the path of the call (e.g. `'/pgte/nock'`)
-- `body` - the body of the call, if any
-- `status` - the HTTP status of the reply (e.g. `200`)
-- `response` - the body of the reply which can be a JSON, string, hex string representing binary buffers or an array of such hex strings (when handling `content-encoded` in reply header)
-- `headers` - the headers of the reply
-- `reqheader` - the headers of the request
+-   `scope` - the scope of the call including the protocol and non-standard ports (e.g. `'https://github.com:12345'`)
+-   `method` - the HTTP verb of the call (e.g. `'GET'`)
+-   `path` - the path of the call (e.g. `'/pgte/nock'`)
+-   `body` - the body of the call, if any
+-   `status` - the HTTP status of the reply (e.g. `200`)
+-   `response` - the body of the reply which can be a JSON, string, hex string representing binary buffers or an array of such hex strings (when handling `content-encoded` in reply header)
+-   `headers` - the headers of the reply
+-   `reqheader` - the headers of the request
 
 If you save this as a JSON file, you can load them directly through `nock.load(path)`. Then you can post-process them before using them in the tests for example to add them request body filtering (shown here fixing timestamps to match the ones captured during recording):
 
 ```js
 nocks = nock.load(pathToJson)
 nocks.forEach(function(nock) {
-  nock.filteringRequestBody = (body, aRecordedBody) => {
-    if (typeof body !== 'string' || typeof aRecordedBody !== 'string') {
-      return body
-    }
+    nock.filteringRequestBody = (body, aRecordedBody) => {
+        if (typeof body !== 'string' || typeof aRecordedBody !== 'string') {
+            return body
+        }
 
-    const recordedBodyResult = /timestamp:([0-9]+)/.exec(aRecordedBody)
-    if (recordedBodyResult) {
-      const recordedTimestamp = recordedBodyResult[1]
-      return body.replace(/(timestamp):([0-9]+)/g, function(match, key, value) {
-        return key + ':' + recordedTimestamp
-      })
-    } else {
-      return body
+        const recordedBodyResult = /timestamp:([0-9]+)/.exec(aRecordedBody)
+        if (recordedBodyResult) {
+            const recordedTimestamp = recordedBodyResult[1]
+            return body.replace(/(timestamp):([0-9]+)/g, function(
+                match,
+                key,
+                value
+            ) {
+                return key + ':' + recordedTimestamp
+            })
+        } else {
+            return body
+        }
     }
-  }
 })
 ```
 
@@ -1235,9 +1242,9 @@ The genuine use cases for recording request headers (e.g. checking authorization
 
 ```js
 nock.recorder.rec({
-  dont_print: true,
-  output_objects: true,
-  enable_reqheaders_recording: true,
+    dont_print: true,
+    output_objects: true,
+    enable_reqheaders_recording: true,
 })
 ```
 
@@ -1249,10 +1256,10 @@ Nock will print using `console.log` by default (assuming that `dont_print` is `f
 
 ```js
 const appendLogToFile = content => {
-  fs.appendFile('record.txt', content)
+    fs.appendFile('record.txt', content)
 }
 nock.recorder.rec({
-  logging: appendLogToFile,
+    logging: appendLogToFile,
 })
 ```
 
@@ -1264,7 +1271,7 @@ To disable this, set `use_separator` to false.
 
 ```js
 nock.recorder.rec({
-  use_separator: false,
+    use_separator: false,
 })
 ```
 
@@ -1276,8 +1283,8 @@ Examples:
 
 ```js
 nock.removeInterceptor({
-  hostname: 'localhost',
-  path: '/mockedResource',
+    hostname: 'localhost',
+    path: '/mockedResource',
 })
 ```
 
@@ -1299,8 +1306,8 @@ nock.removeInterceptor(interceptor)
 
 A scope emits the following events:
 
-- `emit('request', function(req, interceptor, body))`
-- `emit('replied', function(req, interceptor))`
+-   `emit('request', function(req, interceptor, body))`
+-   `emit('replied', function(req, interceptor))`
 
 ### Global no match event
 
@@ -1329,8 +1336,8 @@ nockBack.setMode('record')
 
 #### Options
 
-- `nockBack.fixtures` : path to fixture directory
-- `nockBack.setMode()` : the mode to use
+-   `nockBack.fixtures` : path to fixture directory
+-   `nockBack.setMode()` : the mode to use
 
 ### Usage
 
@@ -1349,19 +1356,19 @@ nockBack.fixtures = __dirname + '/nockFixtures' //this only needs to be set once
 
 // recording of the fixture
 nockBack('zomboFixture.json', nockDone => {
-  request.get('http://zombo.com', (err, res, body) => {
-    nockDone()
+    request.get('http://zombo.com', (err, res, body) => {
+        nockDone()
 
-    // usage of the created fixture
-    nockBack('zomboFixture.json', nockDone => {
-      http.get('http://zombo.com/').end() // respond body "Ok"
+        // usage of the created fixture
+        nockBack('zomboFixture.json', nockDone => {
+            http.get('http://zombo.com/').end() // respond body "Ok"
 
-      this.assertScopesFinished() //throws an exception if all nocks in fixture were not satisfied
-      http.get('http://zombo.com/').end() // throws exception because someFixture.json only had one call
+            this.assertScopesFinished() //throws an exception if all nocks in fixture were not satisfied
+            http.get('http://zombo.com/').end() // throws exception because someFixture.json only had one call
 
-      nockDone() //never gets here
+            nockDone() //never gets here
+        })
     })
-  })
 })
 ```
 
@@ -1380,10 +1387,10 @@ return nockBack('promisedFixture.json')
 
 As an optional second parameter you can pass the following options
 
-- `before`: a preprocessing function, gets called before nock.define
-- `after`: a postprocessing function, gets called after nock.define
-- `afterRecord`: a postprocessing function, gets called after recording. Is passed the array of scopes recorded and should return the array scopes to save to the fixture
-- `recorder`: custom options to pass to the recorder
+-   `before`: a preprocessing function, gets called before nock.define
+-   `after`: a postprocessing function, gets called after nock.define
+-   `afterRecord`: a postprocessing function, gets called after recording. Is passed the array of scopes recorded and should return the array scopes to save to the fixture
+-   `recorder`: custom options to pass to the recorder
 
 ##### Example
 
@@ -1419,13 +1426,13 @@ nockBack('zomboFixture.json', { before: prepareScope }, nockDone => {
 
 To set the mode call `nockBack.setMode(mode)` or run the tests with the `NOCK_BACK_MODE` environment variable set before loading nock. If the mode needs to be changed programmatically, the following is valid: `nockBack.setMode(nockBack.currentMode)`
 
-- wild: all requests go out to the internet, don't replay anything, doesn't record anything
+-   wild: all requests go out to the internet, don't replay anything, doesn't record anything
 
-- dryrun: The default, use recorded nocks, allow http calls, doesn't record anything, useful for writing new tests
+-   dryrun: The default, use recorded nocks, allow http calls, doesn't record anything, useful for writing new tests
 
-- record: use recorded nocks, record new nocks
+-   record: use recorded nocks, record new nocks
 
-- lockdown: use recorded nocks, disables all http calls even when not nocked, doesn't record
+-   lockdown: use recorded nocks, disables all http calls even when not nocked, doesn't record
 
 ## Debugging
 
