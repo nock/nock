@@ -8,7 +8,6 @@ Please note that this project is released with a [Contributor Code of Conduct](.
 
 <!-- toc -->
 
-- [Formatting & linting](#formatting--linting)
 - [Commit Message conventions](#commit-message-conventions)
 - [Beta / Next / Maintenance releases](#beta--next--maintenance-releases)
   - [Backport a fix / feature to a previous version](#backport-a-fix--feature-to-a-previous-version)
@@ -26,7 +25,7 @@ Please note that this project is released with a [Contributor Code of Conduct](.
 ## Formatting & linting
 
 This project formats its source code using Prettier. The most enjoyable way to
-use Prettier is to let is format code for you when you save. You can [integrate
+use Prettier is to let it format code for you when you save. You can [integrate
 it into your editor][integrate prettier].
 
 [integrate prettier]: https://prettier.io/docs/en/editors.html
@@ -70,7 +69,7 @@ We use [semantic-release](https://github.com/semantic-release/semantic-release) 
 
 If you want to **backport a fix** to version 10, and the last version released on version 10 is `10.0.4`, then you have to follow these steps
 
-1. Create the `[Version].x` branch unless it already exists. If you don’t have write access, ask one of the maintainers to do it for you. In this example, then command is `git checkout -b 10.x v10.0.4`.
+1. Create the `[Version].x` branch unless it already exists. If you don’t have write access, ask one of the maintainers to do it for you. In this example, the command is `git checkout -b 10.x v10.0.4`.
 2. Push the branch to GitHub: `git push -u origin $(git symbolic-ref --short HEAD)`
 3. Create a new branch based on `10.x`
 4. Make your changes
