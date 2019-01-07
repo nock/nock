@@ -4,6 +4,7 @@ const path = require('path')
 const nock = require('../')
 const Interceptor = require('../lib/interceptor')
 const { test } = require('tap')
+const proxyquire = require('proxyquire').noPreserveCache()
 
 test('scope exposes interceptors', t => {
   const scopes = nock.load(path.join(__dirname, 'fixtures', 'goodRequest.json'))
@@ -80,5 +81,13 @@ test('scope#remove() is a no-op on a nonexistent key', t => {
 
   // Clean up.
   nock.cleanAll()
+  t.end()
+})
+
+test('loadDefs throws expected when fs is not available', t => {
+  const { loadDefs } = proxyquire('../lib/scope', { fs: null })
+
+  t.throws(() => loadDefs(), { message: 'No fs' })
+
   t.end()
 })
