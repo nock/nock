@@ -477,7 +477,8 @@ test('records and replays gzipped nocks correctly', function(t) {
 
   nock.recorder.rec({
     dont_print: true,
-    output_objects: true
+    output_objects: true,
+    gunzip: true
   });
 
   server.listen(() => {
