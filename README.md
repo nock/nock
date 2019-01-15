@@ -405,12 +405,14 @@ If you're using the reply callback style, you can access the original client req
 ```js
 const scope = nock('http://www.google.com')
   .get('/cat-poems')
-  .reply((uri, requestBody) => {
+  .reply(function(uri, requestBody) {
     console.log('path:', this.req.path)
     console.log('headers:', this.req.headers)
     // ...
   })
 ```
+
+> Note: Remember to use normal `function` in that case, as arrow functions are using enclosing scope for `this` binding.
 
 #### Replying with errors
 
@@ -1356,7 +1358,7 @@ nockBack('zomboFixture.json', nockDone => {
     nockDone()
 
     // usage of the created fixture
-    nockBack('zomboFixture.json', nockDone => {
+    nockBack('zomboFixture.json', function(nockDone) {
       http.get('http://zombo.com/').end() // respond body "Ok"
 
       this.assertScopesFinished() //throws an exception if all nocks in fixture were not satisfied
