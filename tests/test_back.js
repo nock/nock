@@ -56,9 +56,10 @@ function nockBackWithFixture(t, scopesLoaded) {
   })
 }
 
-// this is a temporary as we get rid of all the {skip: process.env.AIRPLANE}
-// settings. When we are done with all, replace nockBackWithFixture and get
-// rid of this function and the goodRequestLocalhost.json fixtures
+// TODO: This was added as a temporary patch. It's possible that we don't need
+// both `goodRequest.json`/`nockBackWithFixture()` on google.com and a second
+// pair on localhost. Consolidate them if possible. Otherwise remove this
+// comment.
 function nockBackWithFixtureLocalhost(t, scopesLoaded) {
   const scopesLength = scopesLoaded ? 1 : 0
 
