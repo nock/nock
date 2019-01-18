@@ -3828,6 +3828,7 @@ test('mocking succeeds even when host request header is not specified', t => {
   )
 })
 
+// https://github.com/nock/nock/issues/158
 test('mikeal/request with strictSSL: true', t => {
   nock('https://strictssl.com')
     .post('/what')
