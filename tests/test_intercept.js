@@ -516,37 +516,6 @@ test('isDone', async t => {
   scope.done()
 })
 
-test('request headers exposed', t => {
-  const scope = nock('http://example.com')
-    .get('/')
-    .reply(200, 'Hello World!', { 'X-My-Headers': 'My Header value' })
-
-  // Testing that the req is augmented, so using `http`.
-  const req = http.get(
-    {
-      host: 'example.com',
-      method: 'GET',
-      path: '/',
-      port: 80,
-      headers: { 'X-My-Headers': 'My custom Header value' },
-    },
-    res => {
-      res.on('end', () => {
-        scope.done()
-        t.end()
-      })
-      // Streams start in 'paused' mode and must be started.
-      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
-      res.resume()
-    }
-  )
-
-  t.equivalent(req._headers, {
-    'x-my-headers': 'My custom Header value',
-    host: 'example.com',
-  })
-})
-
 test('headers work', async t => {
   const scope = nock('http://example.com')
     .get('/')
