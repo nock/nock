@@ -16,6 +16,42 @@ test('setup', function(t) {
   t.end()
 })
 
+test('when request port is different, use the alternate port', function(t) {
+  const server = http.createServer((request, response) => response.end())
+  t.once('end', () => server.close())
+
+  nock.restore()
+  nock.recorder.clear()
+  nock.recorder.rec(true)
+
+  server.listen(
+    {
+      port: 4302,
+    },
+    () => {
+      http
+        .request(
+          {
+            method: 'POST',
+            host: 'localhost',
+            path: '/',
+            port: 4302,
+          },
+          res => {
+            res.resume()
+            res.once('end', () => {
+              const recorded = nock.recorder.play()
+              t.equal(recorded.length, 1)
+              t.true(recorded[0].indexOf('localhost:4302') !== -1)
+              t.end()
+            })
+          }
+        )
+        .end()
+    }
+  )
+})
+
 test('recording turns off nock interception (backward compatibility behavior)', function(t) {
   //  We ensure that there are no overrides.
   nock.restore()
