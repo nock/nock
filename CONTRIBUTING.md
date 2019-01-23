@@ -8,11 +8,11 @@ Please note that this project is released with a [Contributor Code of Conduct](.
 
 <!-- toc -->
 
-- [Formatting & linting](#formatting--linting)
-- [Commit Message conventions](#commit-message-conventions)
-- [Beta / Next / Maintenance releases](#beta--next--maintenance-releases)
+- [Branching](#branching)
   - [Backport a fix / feature to a previous version](#backport-a-fix--feature-to-a-previous-version)
   - [Submit a Beta / Next release](#submit-a-beta--next-release)
+- [Formatting & linting](#formatting--linting)
+- [Commit Message conventions](#commit-message-conventions)
 - [Generate README TOC](#generate-readme-toc)
 - [Running tests](#running-tests)
 - [Release Process](#release-process)
