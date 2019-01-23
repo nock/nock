@@ -68,3 +68,87 @@ test('Aborting an aborted request should not emit an error', t => {
     t.end()
   }, 10)
 })
+
+test('`req.write() on an aborted request should trigger the expected error', t => {
+  t.plan(2)
+
+  nock('http://example.test')
+    .get('/')
+    .reply(200)
+
+  let callCount = 0
+  const req = http.get('http://example.test/')
+
+  // TODO: Fix behavior of `req.once()` and refactor this to use it.
+  req.on('error', err => {
+    ++callCount
+    if (callCount === 1) {
+      // This is the expected first error event emitted, triggered by
+      // `req.abort()`.
+      t.equal(err.code, 'ECONNRESET')
+    } else if (callCount === 2) {
+      // This is the abort error under test, triggered by `req.write()`
+      t.equal(err.message, 'Request aborted')
+      t.end()
+    }
+  })
+
+  process.nextTick(() => req.abort())
+  process.nextTick(() => req.write('some nonsense'))
+})
+
+test('`req.end()` on an aborted request should trigger the expected error', t => {
+  t.plan(2)
+
+  nock('http://example.test')
+    .get('/')
+    .reply(200)
+
+  let callCount = 0
+  const req = http.get('http://example.test/')
+
+  // TODO: Fix behavior of `req.once()` and refactor this to use it.
+  req.on('error', err => {
+    ++callCount
+    if (callCount === 1) {
+      // This is the expected first error event emitted, triggered by
+      // `req.abort()`.
+      t.equal(err.code, 'ECONNRESET')
+    } else if (callCount === 2) {
+      // This is the abort error under test, triggered by `req.write()`
+      t.equal(err.message, 'Request aborted')
+      t.end()
+    }
+  })
+
+  process.nextTick(() => req.abort())
+  process.nextTick(() => req.end())
+})
+
+test('`req.flushHeaders()` on an aborted request should trigger the expected error', t => {
+  t.plan(2)
+
+  nock('http://example.test')
+    .get('/')
+    .reply(200)
+
+  let callCount = 0
+  const req = http.get('http://example.test/')
+
+  // TODO: Fix behavior of `req.once()` and refactor this to use it.
+  req.on('error', err => {
+    ++callCount
+    if (callCount === 1) {
+      // This is the expected first error event emitted, triggered by
+      // `req.abort()`.
+      t.equal(err.code, 'ECONNRESET')
+    } else if (callCount === 2) {
+      // This is the abort error under test, triggered by `req.write()`
+      t.equal(err.message, 'Request aborted')
+      t.end()
+    }
+  })
+
+  process.nextTick(() => req.abort())
+  process.nextTick(() => req.flushHeaders())
+})
