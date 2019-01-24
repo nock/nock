@@ -69,6 +69,28 @@ test('Aborting an aborted request should not emit an error', t => {
   }, 10)
 })
 
+test('Aborting a not-yet-ended request should end it', t => {
+  // Set up.
+  const scope = nock('http://test.example.com')
+    .post('/')
+    .reply(200)
+
+  const req = http.request({
+    host: 'test.example.com',
+    method: 'post',
+    path: '/',
+  })
+  req.on('error', () => {})
+
+  // Act.
+  req.abort()
+
+  // Assert.
+  scope.done()
+
+  t.end()
+})
+
 test('`req.write() on an aborted request should trigger the expected error', t => {
   t.plan(2)
 
