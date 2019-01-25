@@ -12,7 +12,7 @@ test('define() is backward compatible', t => {
     port: 12345,
     method: 'GET',
     path: '/',
-    //  "reply" has been deprected
+    //  "reply" has been deprecated
     reply: '500',
   }
 
