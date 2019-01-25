@@ -2912,6 +2912,26 @@ test('calling delayBody delays the response', async t => {
   scope.done()
 })
 
+test('delayBody works with a buffer', async t => {
+  const buffer = Buffer.from('foo')
+
+  const scope = nock('http://example.com')
+    .get('/')
+    .delayBody(100)
+    .reply(200, buffer)
+
+  await resolvesInAtLeast(
+    t,
+    async () => {
+      const { body } = await got('http://example.com/', { encoding: null })
+      t.true(buffer.equals(body))
+    },
+    100
+  )
+
+  scope.done()
+})
+
 test('delayBody works with a stream', async t => {
   const scope = nock('http://example.com')
     .get('/')
