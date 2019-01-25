@@ -2912,8 +2912,8 @@ test('calling delayBody delays the response', async t => {
   scope.done()
 })
 
-test('delayBody works with a buffer', async t => {
-  const buffer = Buffer.from('foo')
+test('delayBody works with a non-utf8 representable buffer', async t => {
+  const buffer = Buffer.from('8001', 'hex')
 
   const scope = nock('http://example.com')
     .get('/')
