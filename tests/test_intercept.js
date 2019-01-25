@@ -2952,6 +2952,33 @@ test('delayBody works with a stream', async t => {
   scope.done()
 })
 
+test('delayBody works with a delayed stream', async t => {
+  const passthrough = new stream.Transform({
+    transform(chunk, encoding, callback) {
+      this.push(chunk.toString())
+      callback()
+    },
+  })
+
+  const scope = nock('http://example.com')
+    .get('/')
+    .delayBody(100)
+    .reply(200, (uri, requestBody) => passthrough)
+
+  setTimeout(
+    () =>
+      fs
+        .createReadStream(path.resolve(__dirname, '..', 'LICENSE'))
+        .pipe(passthrough),
+    125
+  )
+
+  const { body } = await got('http://example.com/')
+  t.ok(body.includes('MIT'))
+
+  scope.done()
+})
+
 test('calling delay delays the response', t => {
   // Do not base new tests on this one. Write async tests using
   // `resolvesInAtLeast` instead.
