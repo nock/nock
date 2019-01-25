@@ -106,6 +106,11 @@ test("when request's content-type is json: reply callback's requestBody should a
   scope.done()
 })
 
+test("when the path doesn't include a leading slash it raises an error", function(t) {
+  t.plan(1)
+  t.throws(() => nock('http://example.test').get('no-leading-slash'))
+})
+
 test("when request has no content-type header: reply callback's requestBody should not automatically parse to JSON", async t => {
   const requestBodyFixture = {
     id: 1,
