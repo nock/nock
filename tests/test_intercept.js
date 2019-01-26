@@ -2938,6 +2938,8 @@ test('delayBody works with a stream of binary buffers', async t => {
   const scope = nock('http://example.com')
     .get('/')
     .delayBody(100)
+    // No encoding specified, which causes the file to be streamed using
+    // buffers instead of strings.
     .reply(200, (uri, requestBody) => fs.createReadStream(filePath))
 
   await resolvesInAtLeast(
