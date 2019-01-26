@@ -2913,7 +2913,7 @@ test('calling delayBody delays the response', async t => {
 })
 
 test('delayBody works with a stream of strings', async t => {
-  const filePath = path.resolve(__dirname, '..', 'assets', 'reply_file_1.txt')
+  const filePath = path.resolve(__dirname, '..', 'LICENSE')
   const scope = nock('http://example.com')
     .get('/')
     .delayBody(100)
@@ -2934,7 +2934,7 @@ test('delayBody works with a stream of strings', async t => {
 })
 
 test('delayBody works with a stream of binary buffers', async t => {
-  const filePath = path.resolve(__dirname, '..', 'assets', 'reply_file_1.txt')
+  const filePath = path.resolve(__dirname, '..', 'LICENSE')
   const scope = nock('http://example.com')
     .get('/')
     .delayBody(100)
@@ -2944,7 +2944,7 @@ test('delayBody works with a stream of binary buffers', async t => {
     t,
     async () => {
       const { body } = await got('http://example.com/')
-      t.true(Buffer.from(body).equals(fs.readFileSync(filePath)))
+      t.equal(body, fs.readFileSync(filePath, { encoding: 'utf8' }))
     },
     100
   )
@@ -2953,6 +2953,7 @@ test('delayBody works with a stream of binary buffers', async t => {
 })
 
 test('delayBody works with a delayed stream', async t => {
+  const filePath = path.resolve(__dirname, '..', 'LICENSE')
   const passthrough = new stream.Transform({
     transform(chunk, encoding, callback) {
       this.push(chunk.toString())
@@ -2974,7 +2975,7 @@ test('delayBody works with a delayed stream', async t => {
   )
 
   const { body } = await got('http://example.com/')
-  t.ok(body.includes('MIT'))
+  t.equal(body, fs.readFileSync(filePath, { encoding: 'utf8' }))
 
   scope.done()
 })
