@@ -2912,19 +2912,20 @@ test('calling delayBody delays the response', async t => {
   scope.done()
 })
 
-test('delayBody works with a non-utf8 representable buffer', async t => {
-  const buffer = Buffer.from('8001', 'hex')
-
+test('delayBody works with a stream of strings', async t => {
+  const filePath = path.resolve(__dirname, '..', 'assets', 'reply_file_1.txt')
   const scope = nock('http://example.com')
     .get('/')
     .delayBody(100)
-    .reply(200, buffer)
+    .reply(200, (uri, requestBody) =>
+      fs.createReadStream(filePath, { encoding: 'utf8' })
+    )
 
   await resolvesInAtLeast(
     t,
     async () => {
-      const { body } = await got('http://example.com/', { encoding: null })
-      t.true(buffer.equals(body))
+      const { body } = await got('http://example.com/')
+      t.equal(body, fs.readFileSync(filePath, { encoding: 'utf8' }))
     },
     100
   )
@@ -2932,19 +2933,18 @@ test('delayBody works with a non-utf8 representable buffer', async t => {
   scope.done()
 })
 
-test('delayBody works with a stream', async t => {
+test('delayBody works with a stream of binary buffers', async t => {
+  const filePath = path.resolve(__dirname, '..', 'assets', 'reply_file_1.txt')
   const scope = nock('http://example.com')
     .get('/')
     .delayBody(100)
-    .reply(200, (uri, requestBody) =>
-      fs.createReadStream(path.resolve(__dirname, '..', 'LICENSE'))
-    )
+    .reply(200, (uri, requestBody) => fs.createReadStream(filePath))
 
   await resolvesInAtLeast(
     t,
     async () => {
       const { body } = await got('http://example.com/')
-      t.ok(body.includes('MIT'))
+      t.true(Buffer.from(body).equals(fs.readFileSync(filePath)))
     },
     100
   )
