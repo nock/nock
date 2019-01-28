@@ -15,6 +15,7 @@ Please note that this project is released with a [Contributor Code of Conduct](.
 - [Commit Message conventions](#commit-message-conventions)
 - [Generate README TOC](#generate-readme-toc)
 - [Running tests](#running-tests)
+  - [Running only a single test](#running-only-a-single-test)
 - [Release Process](#release-process)
 - [GitHub Apps](#github-apps)
 - [Becoming a maintainer](#becoming-a-maintainer)
@@ -95,6 +96,22 @@ All of the tests work offline. None of them should hit the network.
 
 ```
 $ npm test
+```
+
+### Running only a single test
+
+When you're writing a test for a specific purpose, it may be useful to only run that test. In order to do this, you can pass a `only` option as the second argument to the [`tap`](https://www.node-tap.org/) testrunner. For instance in `tests/example.js`, like so:
+
+```js
+test('description', { only: true }, t => {
+  // ...
+})
+```
+
+And then:
+
+```sh
+$ tap --only tests/example_file.js
 ```
 
 ## Release Process
