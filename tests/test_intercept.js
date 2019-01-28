@@ -22,6 +22,9 @@ const lolex = require('lolex')
 
 const ssl = require('./ssl')
 
+const textFile = path.join(__dirname, '..', 'assets', 'reply_file_1.txt')
+const binaryFile = path.join(__dirname, '..', 'assets', 'reply_file_2.txt.gz')
+
 nock.enableNetConnect()
 
 const globalCount = Object.keys(global).length
@@ -804,10 +807,7 @@ test('encoding', async t => {
 test('reply with file', async t => {
   const scope = nock('http://example.test')
     .get('/')
-    .replyWithFile(
-      200,
-      path.join(__dirname, '..', 'assets', 'reply_file_1.txt')
-    )
+    .replyWithFile(200, textFile)
 
   const { statusCode, body } = await got('http://example.test/')
 
@@ -821,10 +821,7 @@ test('reply with file', async t => {
 test('reply with file and pipe response', t => {
   nock('http://www.files.com')
     .get('/')
-    .replyWithFile(
-      200,
-      path.join(__dirname, '..', 'assets', 'reply_file_1.txt')
-    )
+    .replyWithFile(200, textFile)
 
   http.get(
     {
@@ -856,13 +853,9 @@ test('reply with file and pipe response', t => {
 test('reply with file with headers', async t => {
   const scope = nock('http://example.test')
     .get('/')
-    .replyWithFile(
-      200,
-      path.join(__dirname, '..', 'assets', 'reply_file_2.txt.gz'),
-      {
-        'content-encoding': 'gzip',
-      }
-    )
+    .replyWithFile(200, binaryFile, {
+      'content-encoding': 'gzip',
+    })
 
   const { statusCode, body } = await got('http://example.test/')
 
@@ -2177,10 +2170,7 @@ test('persist reply with file', async t => {
   nock('http://example.test')
     .persist()
     .get('/')
-    .replyWithFile(
-      200,
-      path.join(__dirname, '..', 'assets', 'reply_file_1.txt')
-    )
+    .replyWithFile(200, textFile)
     .get('/test')
     .reply(200, 'Yay!')
 
@@ -2913,19 +2903,18 @@ test('calling delayBody delays the response', async t => {
 })
 
 test('delayBody works with a stream of strings', async t => {
-  const filePath = path.resolve(__dirname, '..', 'LICENSE')
   const scope = nock('http://example.com')
     .get('/')
     .delayBody(100)
     .reply(200, (uri, requestBody) =>
-      fs.createReadStream(filePath, { encoding: 'utf8' })
+      fs.createReadStream(textFile, { encoding: 'utf8' })
     )
 
   await resolvesInAtLeast(
     t,
     async () => {
       const { body } = await got('http://example.com/')
-      t.equal(body, fs.readFileSync(filePath, { encoding: 'utf8' }))
+      t.equal(body, fs.readFileSync(textFile, { encoding: 'utf8' }))
     },
     100
   )
@@ -2934,19 +2923,18 @@ test('delayBody works with a stream of strings', async t => {
 })
 
 test('delayBody works with a stream of binary buffers', async t => {
-  const filePath = path.resolve(__dirname, '..', 'LICENSE')
   const scope = nock('http://example.com')
     .get('/')
     .delayBody(100)
     // No encoding specified, which causes the file to be streamed using
     // buffers instead of strings.
-    .reply(200, (uri, requestBody) => fs.createReadStream(filePath))
+    .reply(200, (uri, requestBody) => fs.createReadStream(textFile))
 
   await resolvesInAtLeast(
     t,
     async () => {
       const { body } = await got('http://example.com/')
-      t.equal(body, fs.readFileSync(filePath, { encoding: 'utf8' }))
+      t.equal(body, fs.readFileSync(textFile, { encoding: 'utf8' }))
     },
     100
   )
@@ -2955,7 +2943,6 @@ test('delayBody works with a stream of binary buffers', async t => {
 })
 
 test('delayBody works with a delayed stream', async t => {
-  const filePath = path.resolve(__dirname, '..', 'LICENSE')
   const passthrough = new stream.Transform({
     transform(chunk, encoding, callback) {
       this.push(chunk.toString())
@@ -2968,16 +2955,10 @@ test('delayBody works with a delayed stream', async t => {
     .delayBody(100)
     .reply(200, (uri, requestBody) => passthrough)
 
-  setTimeout(
-    () =>
-      fs
-        .createReadStream(path.resolve(__dirname, '..', 'LICENSE'))
-        .pipe(passthrough),
-    125
-  )
+  setTimeout(() => fs.createReadStream(textFile).pipe(passthrough), 125)
 
   const { body } = await got('http://example.com/')
-  t.equal(body, fs.readFileSync(filePath, { encoding: 'utf8' }))
+  t.equal(body, fs.readFileSync(textFile, { encoding: 'utf8' }))
 
   scope.done()
 })
