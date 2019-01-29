@@ -576,13 +576,15 @@ test('records and replays gzipped nocks correctly', function(t) {
 })
 
 test('records and replays nocks correctly', function(t) {
+  const exampleBody = '<html><body>example</body></html>'
+
   const server = http.createServer((request, response) => {
     switch (require('url').parse(request.url).pathname) {
       case '/':
         response.writeHead(302, { Location: '/abc' })
         break
       case '/abc':
-        response.write('<html><body>example</body></html>')
+        response.write(exampleBody)
         break
     }
     response.end()
@@ -604,7 +606,7 @@ test('records and replays nocks correctly', function(t) {
       (err, resp, body) => {
         t.notOk(err)
         t.ok(resp)
-        t.ok(body)
+        t.equal(body, exampleBody)
 
         nock.restore()
         const recorded = nock.recorder.play()
@@ -619,7 +621,7 @@ test('records and replays nocks correctly', function(t) {
           `http://localhost:${server.address().port}`,
           (mockedErr, mockedResp, mockedBody) => {
             t.notOk(mockedErr)
-            t.equal(body, mockedBody)
+            t.equal(mockedBody, exampleBody)
 
             nocks.forEach(nock => nock.done())
 
