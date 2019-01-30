@@ -2911,7 +2911,7 @@ test('delayBody works with a stream', async t => {
     t,
     async () => {
       const { body } = await got('http://example.test')
-      t.ok(body.includes('MIT'))
+      t.equal(body, fs.readFileSync(textFile, { encoding: 'utf8' }))
     },
     100
   )
@@ -4948,16 +4948,16 @@ test('match when query is specified with allowUnmocked', t => {
   const nockOpts = { allowUnmocked: true }
   const searchResponse = 'Matched body'
 
-  const scope = nock('http://google.com/', nockOpts)
+  const scope = nock('http://www.google.com/', nockOpts)
     .get('/search')
     .query({ q: 'js' })
     .reply(200, searchResponse)
 
-  mikealRequest.get('http://google.com', function(err, res, body) {
+  mikealRequest.get('http://www.google.com', function(err, res, body) {
     t.type(err, 'null')
     t.equal(res.statusCode, 200)
 
-    mikealRequest.get('http://google.com/search?q=js', function(
+    mikealRequest.get('http://www.google.com/search?q=js', function(
       err,
       res,
       body
