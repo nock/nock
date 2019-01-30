@@ -4821,6 +4821,7 @@ test('match domain and path using regexp', t => {
 })
 
 // https://github.com/nock/nock/issues/835
+// TODO: Start using local web server
 test('match multiple paths to domain using regexp with allowUnmocked', t => {
   nock.cleanAll()
 
@@ -4942,6 +4943,7 @@ test('multiple interceptors override headers from unrelated request', t => {
 })
 
 // https://github.com/nock/nock/issues/490
+// TODO: Start using local web server
 test('match when query is specified with allowUnmocked', t => {
   nock.cleanAll()
 
