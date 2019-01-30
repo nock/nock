@@ -5064,6 +5064,14 @@ test("should throw an error when persist flag isn't a boolean", t => {
   t.end()
 })
 
+test('should throw expected error when creating request with missing options', t => {
+  t.throws(() => http.request(), {
+    message:
+      'Creating a client request with missing `options` is not supported in Nock',
+  })
+  t.end()
+})
+
 test('should log matching', async t => {
   const messages = []
 
