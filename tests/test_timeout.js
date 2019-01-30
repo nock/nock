@@ -5,14 +5,14 @@ const { test } = require('tap')
 const request = require('request')
 
 test('request lib', function(t) {
-  nock('http://google.com')
+  nock('http://example.test')
     .get('/')
     .delay(1000)
     .reply(200, {})
 
   request(
     {
-      url: 'http://google.com',
+      url: 'http://example.test',
       timeout: 10,
     },
     function(err, response) {

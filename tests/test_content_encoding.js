@@ -9,14 +9,14 @@ test('accepts gzipped content', async t => {
   const message = 'Lorem ipsum dolor sit amet'
   const compressed = zlib.gzipSync(message)
 
-  nock('http://example.com')
+  nock('http://example.test')
     .get('/foo')
     .reply(200, compressed, {
       'X-Transfer-Length': String(compressed.length),
       'Content-Length': undefined,
       'Content-Encoding': 'gzip',
     })
-  const { body } = await got('http://example.com/foo')
+  const { body } = await got('http://example.test/foo')
 
   t.equal(body, message)
 })
