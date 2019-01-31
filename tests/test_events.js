@@ -6,7 +6,7 @@ const querystring = require('querystring')
 const { test } = require('tap')
 
 test('emits request and replied events', function(t) {
-  const scope = nock('http://eventland')
+  const scope = nock('http://example.test')
     .get('/please')
     .reply(200)
 
@@ -20,7 +20,7 @@ test('emits request and replied events', function(t) {
     })
   })
 
-  http.get('http://eventland/please')
+  http.get('http://example.test/please')
 })
 
 test('emits request and request body', function(t) {
@@ -28,7 +28,7 @@ test('emits request and request body', function(t) {
     example: 123,
   })
 
-  const scope = nock('http://eventland')
+  const scope = nock('http://example.test')
     .post('/please')
     .reply(200)
 
@@ -44,7 +44,7 @@ test('emits request and request body', function(t) {
   })
 
   const req = http.request({
-    hostname: 'eventland',
+    hostname: 'example.test',
     method: 'POST',
     path: '/please',
     headers: {
@@ -62,12 +62,12 @@ test('emits no match when no match and no mock', function(t) {
     t.end()
   })
 
-  const req = http.get('http://doesnotexistandneverexistedbefore/abc')
+  const req = http.get('http://example.test/abc')
   req.once('error', ignore)
 })
 
 test('emits no match when no match and mocked', function(t) {
-  nock('http://itmayormaynotexistidontknowreally')
+  nock('http://example.test')
     .get('/')
     .reply('howdy')
 
@@ -78,20 +78,19 @@ test('emits no match when no match and mocked', function(t) {
   }
   nock.emitter.on('no match', assertion)
 
-  http
-    .get('http://itmayormaynotexistidontknowreally/definitelymaybe')
-    .once('error', ignore)
+  http.get('http://example.test/definitelymaybe').once('error', ignore)
 })
 
+// TODO: Rewrite tests to use localhost server instead of google.com
 test('emits no match when netConnect is disabled', function(t) {
   nock.disableNetConnect()
   nock.emitter.on('no match', function(req) {
-    t.equal(req.hostname, 'jsonip.com')
+    t.equal(req.hostname, 'google.com')
     nock.emitter.removeAllListeners('no match')
     nock.enableNetConnect()
     t.end()
   })
-  http.get('http://jsonip.com').once('error', ignore)
+  http.get('http://google.com').once('error', ignore)
 })
 
 function ignore() {}

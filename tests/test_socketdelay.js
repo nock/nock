@@ -7,12 +7,12 @@ const nock = require('../.')
 test('socketDelay', function(t) {
   let timeouted = false
 
-  nock('http://my.server.com')
+  nock('http://example.test')
     .get('/')
     .socketDelay(200)
     .reply(200, '<html></html>')
 
-  const req = http.get('http://my.server.com')
+  const req = http.get('http://example.test')
 
   const onTimeout = () => {
     timeouted = true

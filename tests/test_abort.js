@@ -27,14 +27,14 @@ test('[actual] req.abort() should cause "abort" and "error" to be emitted', t =>
 })
 
 test('abort is emitted before delay time', t => {
-  nock('http://test.example.com')
+  nock('http://example.test')
     .get('/status')
     .delayConnection(500)
     .reply(204)
 
   const tstart = Date.now()
   const req = http
-    .get('http://test.example.com/status')
+    .get('http://example.test/status')
     .once('abort', () => {
       const actual = Date.now() - tstart
       t.ok(actual < 250, `abort took only ${actual} ms`)
@@ -47,12 +47,12 @@ test('abort is emitted before delay time', t => {
 })
 
 test('Aborting an aborted request should not emit an error', t => {
-  nock('http://test.example.com')
+  nock('http://example.test')
     .get('/status')
     .reply(200)
 
   let errorCount = 0
-  const req = http.get('http://test.example.com/status').on('error', err => {
+  const req = http.get('http://example.test/status').on('error', err => {
     errorCount++
     if (errorCount < 3) {
       // Abort 3 times at max, otherwise this would be an endless loop,
