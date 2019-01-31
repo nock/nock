@@ -6,13 +6,13 @@ const mikealRequest = require('request')
 const assert = require('assert')
 
 test('match body is regex trying to match string', function(t) {
-  nock('http://encodingsareus.com')
+  nock('http://example.test')
     .post('/', new RegExp('a.+'))
     .reply(200)
 
   mikealRequest(
     {
-      url: 'http://encodingsareus.com/',
+      url: 'http://example.test/',
       method: 'post',
       json: {
         auth: {
@@ -29,13 +29,13 @@ test('match body is regex trying to match string', function(t) {
 })
 
 test('match body with regex', function(t) {
-  nock('http://encodingsareus.com')
+  nock('http://example.test')
     .post('/', { auth: { passwd: /a.+/ } })
     .reply(200)
 
   mikealRequest(
     {
-      url: 'http://encodingsareus.com/',
+      url: 'http://example.test',
       method: 'post',
       json: {
         auth: {
@@ -52,13 +52,13 @@ test('match body with regex', function(t) {
 })
 
 test('match body (with space character) with regex', function(t) {
-  nock('http://encodingsareus.com')
+  nock('http://example.test')
     .post('/', /a bc/)
     .reply(200)
 
   mikealRequest(
     {
-      url: 'http://encodingsareus.com/',
+      url: 'http://example.test',
       method: 'post',
       json: {
         auth: {
@@ -75,13 +75,13 @@ test('match body (with space character) with regex', function(t) {
 })
 
 test('match body with regex inside array', function(t) {
-  nock('http://encodingsareus.com')
+  nock('http://example.test')
     .post('/', { items: [{ name: /t.+/ }] })
     .reply(200)
 
   mikealRequest(
     {
-      url: 'http://encodingsareus.com/',
+      url: 'http://example.test/',
       method: 'post',
       json: {
         items: [
@@ -100,13 +100,13 @@ test('match body with regex inside array', function(t) {
 })
 
 test('match body with empty object inside', function(t) {
-  nock('http://encodingsareus.com')
+  nock('http://example.test')
     .post('/', { obj: {} })
     .reply(200)
 
   mikealRequest(
     {
-      url: 'http://encodingsareus.com/',
+      url: 'http://example.test/',
       method: 'post',
       json: {
         obj: {},
@@ -121,13 +121,13 @@ test('match body with empty object inside', function(t) {
 })
 
 test('match body with nested object inside', function(t) {
-  nock('http://encodingsareus.com')
+  nock('http://example.test')
     .post('/', /x/)
     .reply(200)
 
   mikealRequest(
     {
-      url: 'http://encodingsareus.com/',
+      url: 'http://example.test',
       method: 'post',
       json: {
         obj: {
@@ -144,13 +144,13 @@ test('match body with nested object inside', function(t) {
 })
 
 test("doesn't match body with mismatching keys", function(t) {
-  nock('http://encodingsareus.com')
+  nock('http://example.test')
     .post('/', { a: 'a' })
     .reply(200)
 
   mikealRequest(
     {
-      url: 'http://encodingsareus.com/',
+      url: 'http://example.test',
       method: 'post',
       json: {
         a: 'a',
@@ -165,7 +165,7 @@ test("doesn't match body with mismatching keys", function(t) {
 })
 
 test('match body with form multipart', function(t) {
-  nock('http://encodingsareus.com')
+  nock('http://example.test')
     .post(
       '/',
       '--fixboundary\r\nContent-Disposition: form-data; name="field"\r\n\r\nvalue\r\n--fixboundary--\r\n'
@@ -174,7 +174,7 @@ test('match body with form multipart', function(t) {
 
   const r = mikealRequest(
     {
-      url: 'http://encodingsareus.com/',
+      url: 'http://example.test',
       method: 'post',
     },
     function(err, res) {
@@ -189,7 +189,7 @@ test('match body with form multipart', function(t) {
 })
 
 test('array like urlencoded form posts are correctly parsed', function(t) {
-  nock('http://encodingsareus.com')
+  nock('http://example.test')
     .post('/', {
       arrayLike: [
         {
@@ -203,7 +203,7 @@ test('array like urlencoded form posts are correctly parsed', function(t) {
 
   mikealRequest(
     {
-      url: 'http://encodingsareus.com/',
+      url: 'http://example.test',
       method: 'post',
       form: {
         'arrayLike[0].fieldA': '0',
@@ -220,7 +220,7 @@ test('array like urlencoded form posts are correctly parsed', function(t) {
 })
 
 test('urlencoded form posts are matched with non-string values', function(t) {
-  nock('http://encodingsareus.com')
+  nock('http://example.test')
     .post('/', {
       boolean: true,
       number: 1,
@@ -230,7 +230,7 @@ test('urlencoded form posts are matched with non-string values', function(t) {
 
   mikealRequest(
     {
-      url: 'http://encodingsareus.com/',
+      url: 'http://example.test',
       method: 'post',
       form: {
         boolean: true,
@@ -247,7 +247,7 @@ test('urlencoded form posts are matched with non-string values', function(t) {
 })
 
 test('urlencoded form posts are matched with regexp', function(t) {
-  nock('http://encodingsareus.com')
+  nock('http://example.test')
     .post('/', {
       regexp: /^xyz$/,
     })
@@ -255,7 +255,7 @@ test('urlencoded form posts are matched with regexp', function(t) {
 
   mikealRequest(
     {
-      url: 'http://encodingsareus.com/',
+      url: 'http://example.test',
       method: 'post',
       form: {
         regexp: 'xyz',
@@ -270,13 +270,13 @@ test('urlencoded form posts are matched with regexp', function(t) {
 })
 
 test('match utf-8 buffer body with utf-8 buffer', function(t) {
-  nock('http://encodingsareus.com')
+  nock('http://example.test')
     .post('/', Buffer.from('hello'))
     .reply(200)
 
   mikealRequest(
     {
-      url: 'http://encodingsareus.com/',
+      url: 'http://example.test',
       method: 'post',
       encoding: null,
       body: Buffer.from('hello'),
@@ -290,13 +290,13 @@ test('match utf-8 buffer body with utf-8 buffer', function(t) {
 })
 
 test("doesn't match utf-8 buffer body with mismatching utf-8 buffer", function(t) {
-  nock('http://encodingsareus.com')
+  nock('http://example.test')
     .post('/', Buffer.from('goodbye'))
     .reply(200)
 
   mikealRequest(
     {
-      url: 'http://encodingsareus.com/',
+      url: 'http://example.test',
       method: 'post',
       encoding: null,
       body: Buffer.from('hello'),
@@ -309,13 +309,13 @@ test("doesn't match utf-8 buffer body with mismatching utf-8 buffer", function(t
 })
 
 test('match binary buffer body with binary buffer', function(t) {
-  nock('http://encodingsareus.com')
+  nock('http://example.test')
     .post('/', Buffer.from([0xff, 0xff, 0xff]))
     .reply(200)
 
   mikealRequest(
     {
-      url: 'http://encodingsareus.com/',
+      url: 'http://example.test',
       method: 'post',
       encoding: null,
       body: Buffer.from([0xff, 0xff, 0xff]),
@@ -329,13 +329,13 @@ test('match binary buffer body with binary buffer', function(t) {
 })
 
 test("doesn't match binary buffer body with mismatching binary buffer", function(t) {
-  nock('http://encodingsareus.com')
+  nock('http://example.test')
     .post('/', Buffer.from([0xff, 0xff, 0xfa]))
     .reply(200)
 
   mikealRequest(
     {
-      url: 'http://encodingsareus.com/',
+      url: 'http://example.test',
       method: 'post',
       encoding: null,
       body: Buffer.from([0xff, 0xff, 0xff]),
@@ -350,13 +350,13 @@ test("doesn't match binary buffer body with mismatching binary buffer", function
 // for the next two tests, keeping the same urls causes them to interfere with another.
 
 test("doesn't match binary buffer body with mismatching utf-8 buffer", function(t) {
-  nock('http://encodingsareus-1.com')
+  nock('http://example-1.test')
     .post('/', Buffer.from([0xff, 0xff, 0xff]))
     .reply(200)
 
   mikealRequest(
     {
-      url: 'http://encodingsareus-1.com/',
+      url: 'http://example-1.test',
       method: 'post',
       encoding: null,
       body: Buffer.from('hello'),
@@ -369,13 +369,13 @@ test("doesn't match binary buffer body with mismatching utf-8 buffer", function(
 })
 
 test("doesn't match utf-8 buffer body with mismatching binary buffer", function(t) {
-  nock('http://encodingsareus-2.com')
+  nock('http://example-2.test')
     .post('/', Buffer.from('hello'))
     .reply(200)
 
   mikealRequest(
     {
-      url: 'http://encodingsareus-2.com/',
+      url: 'http://example-2.test',
       method: 'post',
       encoding: null,
       body: Buffer.from([0xff, 0xff, 0xff]),

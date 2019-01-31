@@ -6,11 +6,11 @@ const mikealRequest = require('request')
 const assert = require('assert')
 
 test('url encoding', function(t) {
-  nock('http://encodingsareus.com')
+  nock('http://example.test')
     .get('/key?a=[1]')
     .reply(200)
 
-  mikealRequest('http://encodingsareus.com/key?a=[1]', function(err, res) {
+  mikealRequest('http://example.test/key?a=[1]', function(err, res) {
     if (err) throw err
     assert.equal(res.statusCode, 200)
     t.end()
