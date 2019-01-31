@@ -5065,6 +5065,18 @@ test('should log matching', async t => {
   scope.done()
 })
 
+test('creating ClientRequest with empty options throws expected error', t => {
+  // Confidence check.
+  t.ok(nock.isActive())
+
+  t.throws(() => new http.ClientRequest(), {
+    message: 'Creating a client request with empty `options` is not supported in Nock'
+  })
+
+  t.end()
+})
+
+
 test('teardown', t => {
   let leaks = Object.keys(global).splice(globalCount, Number.MAX_VALUE)
 
