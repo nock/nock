@@ -6,15 +6,15 @@ const mikealRequest = require('request')
 const nock = require('../')
 
 test('follows redirects', function(t) {
-  nock('http://redirecter.com')
+  nock('http://example.test')
     .get('/YourAccount')
     .reply(302, undefined, {
-      Location: 'http://redirecter.com/Login',
+      Location: 'http://example.test/Login',
     })
     .get('/Login')
     .reply(200, 'Here is the login page')
 
-  mikealRequest('http://redirecter.com/YourAccount', function(err, res, body) {
+  mikealRequest('http://example.test/YourAccount', function(err, res, body) {
     if (err) {
       throw err
     }

@@ -47,10 +47,10 @@ test('remove interceptor removes given interceptor', async t => {
 })
 
 test('remove interceptor removes interceptor from pending requests', t => {
-  const givenInterceptor = nock('http://example.org').get('/somepath')
+  const givenInterceptor = nock('http://example.test').get('/somepath')
   const scope = givenInterceptor.reply(200, 'hey')
 
-  t.deepEqual(scope.pendingMocks(), ['GET http://example.org:80/somepath'])
+  t.deepEqual(scope.pendingMocks(), ['GET http://example.test:80/somepath'])
 
   t.true(nock.removeInterceptor(givenInterceptor))
 

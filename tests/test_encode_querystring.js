@@ -7,14 +7,14 @@ const { test } = require('tap')
 test('encode query string', function(t) {
   const query1 = { q: '(nodejs)' }
 
-  nock('https://encodeland.com')
+  nock('https://example.test')
     .get('/test')
     .query(query1)
     .reply(200, 'success')
 
   request(
     {
-      url: 'https://encodeland.com/test',
+      url: 'https://example.test/test',
       qs: query1,
       method: 'GET',
     },

@@ -13,7 +13,7 @@ if (zlib.gzipSync && zlib.gunzipSync) {
 
     t.plan(1)
 
-    nock('http://gzipped.com')
+    nock('http://example.test')
       .post('/')
       .reply(function(url, actual) {
         t.same(actual, message)
@@ -22,7 +22,7 @@ if (zlib.gzipSync && zlib.gunzipSync) {
       })
 
     const req = http.request({
-      hostname: 'gzipped.com',
+      hostname: 'example.test',
       path: '/',
       method: 'POST',
       headers: {
@@ -46,7 +46,7 @@ if (zlib.deflateSync && zlib.inflateSync) {
 
     t.plan(1)
 
-    nock('http://gzipped.com')
+    nock('http://example.test')
       .post('/')
       .reply(function(url, actual) {
         t.same(actual, message)
@@ -55,7 +55,7 @@ if (zlib.deflateSync && zlib.inflateSync) {
       })
 
     const req = http.request({
-      hostname: 'gzipped.com',
+      hostname: 'example.test',
       path: '/',
       method: 'POST',
       headers: {
