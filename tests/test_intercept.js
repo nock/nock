@@ -3074,6 +3074,28 @@ test('delay with replyWithError: response is delayed', async t => {
   )
 })
 
+test('resetting nock catastrophically while a request is in progress is handled gracefully', async t => {
+  // While invoking cleanAll() from a nock request handler isn't very
+  // realistic, it's possible that user code under test could crash, causing
+  // before or after hooks to fire, which invoke `nock.cleanAll()`. A little
+  // extreme, though if this does happen, we may as well be graceful about it.
+  function somethingBad() {
+    nock.cleanAll()
+  }
+
+  const scope = nock('http://example.test')
+    .get('/somepath')
+    .reply(200, (uri, requestBody) => {
+      somethingBad()
+      return 'hi'
+    })
+
+  const { body } = await got('http://example.test/somepath')
+
+  t.equal(body, 'hi')
+  scope.done()
+})
+
 test('write callback called', t => {
   const scope = nock('http://filterboddiezregexp.com')
     .filteringRequestBody(/mia/, 'nostra')
