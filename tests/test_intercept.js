@@ -2458,50 +2458,20 @@ test('has a req property on the response', t => {
   req.end()
 })
 
-test('disabled real HTTP request', t => {
+test('when net connect is disabled, throws the expected error ', async t => {
+  nock.cleanAll()
   nock.disableNetConnect()
+  t.once('end', () => nock.enableNetConnect())
 
-  http
-    .get('http://google.com', function(res) {
-      throw 'should not request this'
-    })
-    .on('error', function(err) {
-      t.equal(err.message, 'Nock: Disallowed net connect for "google.com:80/"')
-      t.end()
-    })
-
-  nock.enableNetConnect()
-})
-
-test('NetConnectNotAllowedError is instance of Error', t => {
-  nock.disableNetConnect()
-
-  http
-    .get('http://example.test', function(res) {
-      throw 'should not request this'
-    })
-    .on('error', function(err) {
-      t.type(err, 'Error')
-      t.end()
-    })
-
-  nock.enableNetConnect()
-})
-
-test('NetConnectNotAllowedError exposes the stack and has a code', t => {
-  nock.disableNetConnect()
-
-  http
-    .get('http://amazon.com', function(res) {
-      throw 'should not request this'
-    })
-    .on('error', function(err) {
-      t.equal(err.code, 'ENETUNREACH')
-      t.notEqual(err.stack, undefined)
-      t.end()
-    })
-
-  nock.enableNetConnect()
+  try {
+    await got('http://example.test')
+    t.fail('Expected to throw')
+  } catch (err) {
+    t.type(err, 'Error')
+    t.equal(err.message, 'Nock: Disallowed net connect for "example.test:80/"')
+    t.equal(err.code, 'ENETUNREACH')
+    t.ok(err.stack)
+  }
 })
 
 test('enable real HTTP request only for specified domain, via string', t => {
