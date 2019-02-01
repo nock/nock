@@ -58,12 +58,14 @@ test('double activation throws exception', t => {
   t.end()
 })
 
-test('allow unmocked works (2)', async t => {
+test('with allowUnmocked, mocked request still works', async t => {
   const scope = nock('http://example.com', { allowUnmocked: true })
     .post('/post')
     .reply(200, '99problems')
 
-  await got.post('http://example.com/post')
+  const { body, statusCode } = await got.post('http://example.com/post')
+  t.equal(statusCode, 200)
+  t.equal(body, '99problems')
 
   scope.done()
 })
