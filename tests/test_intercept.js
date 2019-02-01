@@ -5070,12 +5070,12 @@ test('creating ClientRequest with empty options throws expected error', t => {
   t.ok(nock.isActive())
 
   t.throws(() => new http.ClientRequest(), {
-    message: 'Creating a client request with empty `options` is not supported in Nock'
+    message:
+      'Creating a client request with empty `options` is not supported in Nock',
   })
 
   t.end()
 })
-
 
 test('teardown', t => {
   let leaks = Object.keys(global).splice(globalCount, Number.MAX_VALUE)
