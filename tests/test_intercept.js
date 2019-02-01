@@ -4821,49 +4821,28 @@ test('match domain and path using regexp', t => {
 })
 
 // https://github.com/nock/nock/issues/835
-// TODO: Start using local web server
-test('match multiple paths to domain using regexp with allowUnmocked', t => {
+test('match multiple paths to domain using regexp with allowUnmocked', async t => {
   nock.cleanAll()
 
-  const nockOpts = { allowUnmocked: true }
-  const searchResponse = 'Matched Google Search Results Page'
-  const imgResponse = 'Matched Google Images Page'
-
-  const scope1 = nock(/google/, nockOpts)
-    .get(/imghp/)
-    .reply(200, imgResponse)
-
-  const scope2 = nock(/google/, nockOpts)
-    .get(/search/)
-    .reply(200, searchResponse)
-
-  mikealRequest.get('http://google.com', function(err, res, body) {
-    t.type(err, 'null')
-    t.equal(res.statusCode, 200)
-
-    mikealRequest.get('http://google.com/imghp?hl=en', function(
-      err,
-      res,
-      body
-    ) {
-      scope1.done()
-      t.type(err, 'null')
-      t.equal(res.statusCode, 200)
-      t.equal(body, imgResponse)
-
-      mikealRequest.get('http://google.com/search?q=pugs', function(
-        err,
-        res,
-        body
-      ) {
-        scope2.done()
-        t.type(err, 'null')
-        t.equal(res.statusCode, 200)
-        t.equal(body, searchResponse)
-        t.end()
-      })
-    })
+  const server = http.createServer((request, response) => {
+    response.write('live')
+    response.end()
   })
+  t.once('end', () => server.close())
+  await new Promise(resolve => server.listen(resolve))
+  const url = `http://localhost:${server.address().port}`
+
+  const scope1 = nock(/localhost/, { allowUnmocked: true })
+    .get(/alpha/)
+    .reply(200, 'this is alpha')
+
+  const scope2 = nock(/localhost/, { allowUnmocked: true })
+    .get(/bravo/)
+    .reply(200, 'bravo, bravo!')
+
+  t.equal((await got(`${url}`)).body, 'live')
+  t.equal((await got(`${url}/alphalicious`)).body, 'this is alpha')
+  t.equal((await got(`${url}/bravo-company`)).body, 'bravo, bravo!')
 })
 
 test('match domain and path using regexp with query params and allow unmocked', t => {
@@ -4943,34 +4922,24 @@ test('multiple interceptors override headers from unrelated request', t => {
 })
 
 // https://github.com/nock/nock/issues/490
-// TODO: Start using local web server
-test('match when query is specified with allowUnmocked', t => {
+test('match when query is specified with allowUnmocked', async t => {
   nock.cleanAll()
 
-  const nockOpts = { allowUnmocked: true }
-  const searchResponse = 'Matched body'
-
-  const scope = nock('http://www.google.com/', nockOpts)
-    .get('/search')
-    .query({ q: 'js' })
-    .reply(200, searchResponse)
-
-  mikealRequest.get('http://www.google.com', function(err, res, body) {
-    t.type(err, 'null')
-    t.equal(res.statusCode, 200)
-
-    mikealRequest.get('http://www.google.com/search?q=js', function(
-      err,
-      res,
-      body
-    ) {
-      scope.done()
-      t.type(err, 'null')
-      t.equal(res.statusCode, 200)
-      t.equal(body, searchResponse)
-      t.end()
-    })
+  const server = http.createServer((request, response) => {
+    response.write('live')
+    response.end()
   })
+  t.once('end', () => server.close())
+  await new Promise(resolve => server.listen(resolve))
+  const url = `http://localhost:${server.address().port}`
+
+  const scope = nock(url, { allowUnmocked: true })
+    .get('/search')
+    .query({ q: 'cat pictures' })
+    .reply(200, '😻')
+
+  t.equal((await got(url)).body, 'live')
+  t.equal((await got(`${url}/search?q=cat%20pictures`)).body, '😻')
 })
 
 // https://github.com/nock/nock/issues/1003
