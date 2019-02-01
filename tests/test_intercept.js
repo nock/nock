@@ -5023,6 +5023,39 @@ test('creating ClientRequest with empty options throws expected error', t => {
   t.end()
 })
 
+test('when no interceptors and net connect is allowed, request via ClientRequest goes through', t => {
+  nock.cleanAll()
+  nock.enableNetConnect()
+
+  // Confidence check. We need nock enabled to test the desired path.
+  t.ok(nock.isActive())
+
+  const server = http.createServer((request, response) => {
+    response.writeHead(201)
+    response.end()
+  })
+  t.once('end', () => server.close())
+
+  server.listen(() => {
+    const req = new http.ClientRequest({ port: server.address().port })
+    req.on('response', res => {
+      t.equal(res.statusCode, 201)
+      t.end()
+    })
+    req.end()
+  })
+})
+
+test('when no interceptors and net connect is disallowed, receive via ClientRequest emits the expected error', t => {
+  nock.disableNetConnect()
+  t.once('end', () => nock.enableNetConnect())
+
+  new http.ClientRequest({ port: 12345, path: '/' }).on('error', err => {
+    t.equal(err.message, 'Nock: Disallowed net connect for "localhost:12345/"')
+    t.end()
+  })
+})
+
 test('teardown', t => {
   let leaks = Object.keys(global).splice(globalCount, Number.MAX_VALUE)
 
