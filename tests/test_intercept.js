@@ -4843,6 +4843,9 @@ test('match multiple paths to domain using regexp with allowUnmocked', async t =
   t.equal((await got(`${url}`)).body, 'live')
   t.equal((await got(`${url}/alphalicious`)).body, 'this is alpha')
   t.equal((await got(`${url}/bravo-company`)).body, 'bravo, bravo!')
+
+  scope1.done()
+  scope2.done()
 })
 
 test('match domain and path using regexp with query params and allow unmocked', t => {
@@ -4940,6 +4943,8 @@ test('match when query is specified with allowUnmocked', async t => {
 
   t.equal((await got(url)).body, 'live')
   t.equal((await got(`${url}/search?q=cat%20pictures`)).body, '😻')
+
+  scope.done()
 })
 
 // https://github.com/nock/nock/issues/1003
