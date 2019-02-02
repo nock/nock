@@ -227,23 +227,6 @@ test('reply should throw on error on the callback', t => {
   req.end()
 })
 
-test('reply should not cause an error on header conflict', async t => {
-  const scope = nock('http://example.com').defaultReplyHeaders({
-    'content-type': 'application/json',
-  })
-
-  scope.get('/').reply(200, '<html></html>', {
-    'Content-Type': 'application/xml',
-  })
-
-  const { statusCode, headers, body } = await got('http://example.com/')
-
-  t.equal(statusCode, 200)
-  t.equal(headers['content-type'], 'application/xml')
-  t.equal(body, '<html></html>')
-  scope.done()
-})
-
 test('get gets mocked', async t => {
   const scope = nock('http://example.com')
     .get('/')
@@ -1574,74 +1557,6 @@ test('allow unmocked option works', t => {
     request.on('error', t.error)
     request.end()
   })
-})
-
-test('default reply headers work', t => {
-  nock('http://example.test')
-    .defaultReplyHeaders({
-      'X-Powered-By': 'Meeee',
-      'X-Another-Header': 'Hey man!',
-    })
-    .get('/')
-    .reply(200, '', { A: 'b' })
-
-  function done(res) {
-    t.deepEqual(res.headers, {
-      'x-powered-by': 'Meeee',
-      'x-another-header': 'Hey man!',
-      a: 'b',
-    })
-    t.end()
-  }
-
-  http
-    .request(
-      {
-        host: 'example.test',
-        path: '/',
-      },
-      done
-    )
-    .end()
-})
-
-test('default reply headers as functions work', t => {
-  const date = new Date().toUTCString()
-  const message = 'A message.'
-
-  nock('http://example.test')
-    .defaultReplyHeaders({
-      'Content-Length': function(req, res, body) {
-        return body.length
-      },
-
-      Date: function() {
-        return date
-      },
-
-      Foo: function() {
-        return 'foo'
-      },
-    })
-    .get('/')
-    .reply(200, message, { foo: 'bar' })
-
-  http
-    .request(
-      {
-        host: 'example.test',
-        path: '/',
-      },
-      function(res) {
-        t.deepEqual(res.headers, {
-          'content-length': message.length,
-          date,
-          foo: 'bar',
-        })
-        t.end()
-      }
-    )
-    .end()
 })
 
 test('JSON encoded replies set the content-type header', t => {
