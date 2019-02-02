@@ -1987,62 +1987,6 @@ test('response is an http.IncomingMessage instance', t => {
     .end()
 })
 
-test('write callback called', t => {
-  const scope = nock('http://filterboddiezregexp.com')
-    .filteringRequestBody(/mia/, 'nostra')
-    .post('/', 'mamma nostra')
-    .reply(200, 'Hello World!')
-
-  let callbackCalled = false
-  const req = http.request(
-    {
-      host: 'filterboddiezregexp.com',
-      method: 'POST',
-      path: '/',
-      port: 80,
-    },
-    function(res) {
-      t.equal(callbackCalled, true)
-      t.equal(res.statusCode, 200)
-      res.on('end', function() {
-        scope.done()
-        t.end()
-      })
-      // Streams start in 'paused' mode and must be started.
-      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
-      res.resume()
-    }
-  )
-
-  req.write('mamma mia', null, function() {
-    callbackCalled = true
-    req.end()
-  })
-})
-
-test('end callback called', t => {
-  const scope = nock('http://example.test')
-    .filteringRequestBody(/mia/, 'nostra')
-    .post('/', 'mamma nostra')
-    .reply(200, 'Hello World!')
-
-  let callbackCalled = false
-  const req = http.request(
-    {
-      uri: 'http://example.test',
-      method: 'GET',
-      timeout: 500,
-    },
-    function(err, r, body) {
-      t.equal(err, null)
-      t.equal(body, 'OK')
-      t.equal(r.statusCode, 200)
-      scope.done()
-      t.end()
-    }
-  )
-})
-
 test('calling delay with "body" and "head" delays the response', t => {
   // Do not base new tests on this one. Write async tests using
   // `resolvesInAtLeast` instead.
@@ -2333,6 +2277,62 @@ test('resetting nock catastrophically while a request is in progress is handled 
 
   t.equal(body, 'hi')
   scope.done()
+})
+
+test('write callback called', t => {
+  const scope = nock('http://filterboddiezregexp.com')
+    .filteringRequestBody(/mia/, 'nostra')
+    .post('/', 'mamma nostra')
+    .reply(200, 'Hello World!')
+
+  let callbackCalled = false
+  const req = http.request(
+    {
+      host: 'filterboddiezregexp.com',
+      method: 'POST',
+      path: '/',
+      port: 80,
+    },
+    function(res) {
+      t.equal(callbackCalled, true)
+      t.equal(res.statusCode, 200)
+      res.on('end', function() {
+        scope.done()
+        t.end()
+      })
+      // Streams start in 'paused' mode and must be started.
+      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+      res.resume()
+    }
+  )
+
+  req.write('mamma mia', null, function() {
+    callbackCalled = true
+    req.end()
+  })
+})
+
+test('end callback called', t => {
+  const scope = nock('http://example.test')
+    .filteringRequestBody(/mia/, 'nostra')
+    .post('/', 'mamma nostra')
+    .reply(200, 'Hello World!')
+
+  let callbackCalled = false
+  const req = http.request(
+    {
+      uri: 'http://example.test',
+      method: 'GET',
+      timeout: 500,
+    },
+    function(err, r, body) {
+      t.equal(err, null)
+      t.equal(body, 'OK')
+      t.equal(r.statusCode, 200)
+      scope.done()
+      t.end()
+    }
+  )
 })
 
 test('finish event fired before end event (bug-139)', t => {
