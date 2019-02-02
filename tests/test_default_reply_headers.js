@@ -21,7 +21,6 @@ test('when no headers are specified on the request, default reply headers work',
   })
 })
 
-
 test('when headers are specified on the request, they override default reply headers', async t => {
   nock('http://example.test')
     .defaultReplyHeaders({
