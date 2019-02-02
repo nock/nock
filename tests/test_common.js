@@ -327,5 +327,9 @@ test('headersArrayToObject', function(t) {
     ],
   })
 
+  t.throws(() => common.headersArrayToObject(123), {
+    message: 'Expected a header array',
+  })
+
   t.end()
 })
