@@ -2321,18 +2321,27 @@ test('end callback called', t => {
   let callbackCalled = false
   const req = http.request(
     {
-      uri: 'http://example.test',
-      method: 'GET',
-      timeout: 500,
+      host: 'example.test',
+      method: 'POST',
+      path: '/',
+      port: 80,
     },
-    function(err, r, body) {
-      t.equal(err, null)
-      t.equal(body, 'OK')
-      t.equal(r.statusCode, 200)
-      scope.done()
-      t.end()
+    function(res) {
+      t.equal(callbackCalled, true)
+      t.equal(res.statusCode, 200)
+      res.on('end', function() {
+        scope.done()
+        t.end()
+      })
+      // Streams start in 'paused' mode and must be started.
+      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+      res.resume()
     }
   )
+
+  req.end('mamma mia', null, function() {
+    callbackCalled = true
+  })
 })
 
 test('finish event fired before end event (bug-139)', t => {
