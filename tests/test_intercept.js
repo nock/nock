@@ -1,7 +1,7 @@
 'use strict'
 
 const path = require('path')
-const nock = require('../.')
+const nock = require('..')
 const url = require('url')
 const http = require('http')
 const https = require('https')
@@ -15,6 +15,7 @@ const hyperquest = require('hyperquest')
 const async = require('async')
 const got = require('got')
 const lolex = require('lolex')
+const proxyquire = require('proxyquire').noPreserveCache()
 
 const textFile = path.join(__dirname, '..', 'assets', 'reply_file_1.txt')
 const binaryFile = path.join(__dirname, '..', 'assets', 'reply_file_2.txt.gz')
@@ -777,6 +778,24 @@ test('reply with file with headers', async t => {
   t.equal(statusCode, 200)
   t.equal(body.length, 20)
   scope.done()
+})
+
+test('reply with file with no fs', { only: true }, t => {
+  const nockWithoutFs = proxyquire('../lib/scope', {
+    './interceptor': proxyquire('../lib/interceptor', { fs: null }),
+  })
+
+  t.throws(
+    () =>
+      nockWithoutFs('http://example.test')
+        .get('/')
+        .replyWithFile(200, textFile),
+    {
+      message: 'No fs',
+    }
+  )
+
+  t.end()
 })
 
 test('reply with JSON', async t => {
