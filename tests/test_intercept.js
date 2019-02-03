@@ -3125,40 +3125,6 @@ test('data is sent with flushHeaders', t => {
     .flushHeaders()
 })
 
-test('stop persisting a persistent nock', async t => {
-  nock.cleanAll()
-
-  const scope = nock('http://example.test')
-    .persist(true)
-    .get('/')
-    .reply(200, 'Persisting all the way')
-
-  t.false(scope.isDone())
-
-  await got('http://example.test/')
-
-  t.true(scope.isDone())
-  t.deepEqual(nock.activeMocks(), ['GET http://example.test:80/'])
-
-  scope.persist(false)
-
-  await got('http://example.test/')
-
-  t.equal(nock.activeMocks().length, 0)
-  t.true(scope.isDone())
-
-  await t.rejects(async () => got('http://example.test/'), {
-    message: 'Nock: No match for request',
-  })
-})
-
-test("should throw an error when persist flag isn't a boolean", t => {
-  t.throws(() => nock('http://persist.com').persist('string'), {
-    message: 'Invalid arguments: argument should be a boolean',
-  })
-  t.end()
-})
-
 test('should throw expected error when creating request with missing options', t => {
   t.throws(() => http.request(), {
     message:
