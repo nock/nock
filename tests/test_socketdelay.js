@@ -95,3 +95,18 @@ test('calling socketDelay not emit a timeout if not idle for long enough', t => 
 
   req.end()
 })
+
+test('Socket#setTimeout adds callback as a one-time listener for parity with a real socket', t => {
+  nock('http://example.test')
+    .get('/')
+    .socketDelay(100)
+    .reply(200, '<html></html>')
+
+  const onTimeout = () => {
+    t.end()
+  }
+
+  http.get('http://example.test').on('socket', socket => {
+    socket.setTimeout(50, onTimeout)
+  })
+})
