@@ -1180,33 +1180,23 @@ test('two scopes with the same request are consumed', async t => {
   scope2.done()
 })
 
-test('JSON encoded replies set the content-type header', t => {
-  const scope = nock('http://localhost')
+test('JSON encoded replies set the content-type header', async t => {
+  const scope = nock('http://example.test')
     .get('/')
     .reply(200, {
       A: 'b',
     })
 
-  function done(res) {
-    scope.done()
-    t.equal(res.statusCode, 200)
-    t.equal(res.headers['content-type'], 'application/json')
-    t.end()
-  }
+  t.equal(
+    (await got('http://example.test/')).headers['content-type'],
+    'application/json'
+  )
 
-  http
-    .request(
-      {
-        host: 'localhost',
-        path: '/',
-      },
-      done
-    )
-    .end()
+  scope.done()
 })
 
-test('JSON encoded replies does not overwrite existing content-type header', t => {
-  const scope = nock('http://localhost')
+test('JSON encoded replies does not overwrite existing content-type header', async t => {
+  const scope = nock('http://example.test')
     .get('/')
     .reply(
       200,
@@ -1218,44 +1208,45 @@ test('JSON encoded replies does not overwrite existing content-type header', t =
       }
     )
 
-  function done(res) {
-    scope.done()
-    t.equal(res.statusCode, 200)
-    t.equal(res.headers['content-type'], 'unicorns')
-    t.end()
-  }
+  t.equal(
+    (await got('http://example.test/')).headers['content-type'],
+    'unicorns'
+  )
 
-  http
-    .request(
-      {
-        host: 'localhost',
-        path: '/',
-      },
-      done
-    )
-    .end()
+  scope.done()
 })
 
-test("blank response doesn't have content-type application/json attached to it", t => {
-  nock('http://localhost')
+test("blank response doesn't have content-type application/json attached to it", async t => {
+  const scope = nock('http://example.test')
     .get('/')
     .reply(200)
 
-  function done(res) {
-    t.equal(res.statusCode, 200)
-    t.notEqual(res.headers['content-type'], 'application/json')
-    t.end()
+  t.equal(
+    (await got('http://example.test/')).headers['content-type'],
+    undefined
+  )
+
+  scope.done()
+})
+
+test('unencodable object throws the expected error', t => {
+  const unencodableObject = {
+    toJSON() {
+      throw Error('bad!')
+    },
   }
 
-  http
-    .request(
-      {
-        host: 'localhost',
-        path: '/',
-      },
-      done
-    )
-    .end()
+  t.throws(
+    () =>
+      nock('http://localhost')
+        .get('/')
+        .reply(200, unencodableObject),
+    {
+      message: 'Error encoding response body into JSON',
+    }
+  )
+
+  t.end()
 })
 
 test('clean all works', t => {
