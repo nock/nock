@@ -114,6 +114,25 @@ test('define() throws the expected error when scope and port conflict', t => {
   t.end()
 })
 
+test('define() throws the expected error when method is missing', t => {
+  t.throws(
+    () =>
+      nock.define([
+        {
+          scope: 'http://example.test',
+          path: '/',
+          body: 'Hello, world!',
+          response: 'yo',
+        },
+      ]),
+    {
+      message: 'Method is required',
+    }
+  )
+
+  t.end()
+})
+
 test('define() works with non-JSON responses', async t => {
   const exampleBody = '�'
   const exampleResponseBody = 'hey: �'
