@@ -15,6 +15,8 @@ const hyperquest = require('hyperquest')
 const async = require('async')
 const got = require('got')
 const lolex = require('lolex')
+const debug = require('debug')
+const sinon = require('sinon')
 
 const textFile = path.join(__dirname, '..', 'assets', 'reply_file_1.txt')
 const binaryFile = path.join(__dirname, '..', 'assets', 'reply_file_2.txt.gz')
@@ -188,6 +190,29 @@ test('reply should throw on error on the callback', t => {
   )
 
   req.end()
+})
+
+test('match debugging works', async t => {
+  const log = sinon.stub(debug, 'log')
+  debug.enable('nock.interceptor')
+  t.once('end', () => {
+    sinon.restore()
+    debug.disable('nock.interceptor')
+  })
+
+  nock('http://example.test')
+    .post('/deep/link')
+    .reply(200, 'Hello World!')
+
+  const exampleBody = 'Hello yourself!'
+  await got.post('http://example.test/deep/link', { body: exampleBody })
+
+  t.ok(log.calledOnce)
+  t.equal(
+    JSON.parse(log.getCall(0).args[1]).href,
+    'http://example.test/deep/link'
+  )
+  t.equal(JSON.parse(log.getCall(0).args[2]), exampleBody)
 })
 
 test('get gets mocked', async t => {
