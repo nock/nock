@@ -3,34 +3,34 @@
 const http = require('http')
 const { test } = require('tap')
 const got = require('got')
-const nock = require('../.')
+const nock = require('..')
 
 test('define() is backward compatible', t => {
-  const nockDef = {
-    scope: 'http://example.com',
-    //  "port" has been deprecated
-    port: 12345,
-    method: 'GET',
-    path: '/',
-    //  "reply" has been deprecated
-    reply: '500',
-  }
-
-  const nocks = nock.define([nockDef])
-
-  t.ok(nocks)
+  t.ok(
+    nock.define([
+      {
+        scope: 'http://example.com',
+        //  "port" has been deprecated
+        port: 12345,
+        method: 'GET',
+        path: '/',
+        //  "reply" has been deprecated
+        reply: '500',
+      },
+    ])
+  )
 
   const req = new http.request(
     {
       host: 'example.com',
-      port: nockDef.port,
-      method: nockDef.method,
-      path: nockDef.path,
+      port: 12345,
+      method: 'GET',
+      path: '/',
     },
-    function(res) {
+    res => {
       t.equal(res.statusCode, 500)
 
-      res.once('end', function() {
+      res.once('end', () => {
         t.end()
       })
       // Streams start in 'paused' mode and must be started.
@@ -39,9 +39,9 @@ test('define() is backward compatible', t => {
     }
   )
 
-  req.on('error', function(err) {
-    //  This should never happen.
-    t.ok(false, 'Error should never occur.')
+  req.on('error', err => {
+    // This should never happen.
+    t.fail('Error should never occur.')
     t.end()
   })
 
@@ -50,168 +50,184 @@ test('define() is backward compatible', t => {
 
 test('define() applies default status code when none is specified', async t => {
   const body = '�'
-  const nockDef = {
-    scope: 'http://example.test',
-    method: 'POST',
-    path: '/',
-    body,
-    response: '�',
-  }
 
-  const nocks = nock.define([nockDef])
-
-  t.equal(nocks.length, 1)
+  t.equal(
+    nock.define([
+      {
+        scope: 'http://example.test',
+        method: 'POST',
+        path: '/',
+        body,
+        response: '�',
+      },
+    ]).length,
+    1
+  )
 
   const { statusCode } = await got.post('http://example.test/', { body })
 
   t.equal(statusCode, 200)
 })
 
-test('define() throws the expected error when scope and port conflict', t => {
-  const nockDef = {
-    scope: 'http://example.test:8080',
-    port: 5000,
-    method: 'POST',
-    path: '/',
-    body: 'Hello, world!',
-    response: '�',
-  }
+test('define() works when scope and port are both specified', async t => {
+  const body = 'Hello, world!'
 
-  t.throws(() => nock.define([nockDef]), {
-    message:
-      'Mismatched port numbers in scope and port properties of nock definition.',
-  })
+  t.ok(
+    nock.define([
+      {
+        scope: 'http://example.test:1451',
+        port: 1451,
+        method: 'POST',
+        path: '/',
+        body,
+        response: '�',
+      },
+    ])
+  )
+
+  const { statusCode } = await got.post('http://example.test:1451/', { body })
+
+  t.equal(statusCode, 200)
 
   t.end()
 })
 
-test('define() works with non-JSON responses', t => {
-  const nockDef = {
-    scope: 'http://example.com',
-    method: 'POST',
-    path: '/',
-    body: '�',
-    status: 200,
-    response: '�',
-  }
-
-  const nocks = nock.define([nockDef])
-
-  t.ok(nocks)
-
-  const req = new http.request(
+test('define() throws the expected error when scope and port conflict', t => {
+  t.throws(
+    () =>
+      nock.define([
+        {
+          scope: 'http://example.test:8080',
+          port: 5000,
+          method: 'POST',
+          path: '/',
+          body: 'Hello, world!',
+          response: '�',
+        },
+      ]),
     {
-      host: 'example.com',
-      method: nockDef.method,
-      path: nockDef.path,
-    },
-    function(res) {
-      t.equal(res.statusCode, nockDef.status)
-
-      const dataChunks = []
-
-      res.on('data', function(chunk) {
-        dataChunks.push(chunk)
-      })
-
-      res.once('end', function() {
-        const response = Buffer.concat(dataChunks)
-        t.equal(response.toString('utf8'), nockDef.response, 'responses match')
-        t.end()
-      })
+      message:
+        'Mismatched port numbers in scope and port properties of nock definition.',
     }
   )
 
-  req.on('error', function(err) {
-    //  This should never happen.
-    t.ok(false, 'Error should never occur.')
-    t.end()
-  })
-
-  req.write(nockDef.body)
-  req.end()
+  t.end()
 })
 
+test('define() works with non-JSON responses', async t => {
+  const exampleBody = '�'
+  const exampleResponseBody = 'hey: �'
+
+  t.ok(
+    nock.define([
+      {
+        scope: 'http://example.test',
+        method: 'POST',
+        path: '/',
+        body: exampleBody,
+        status: 200,
+        response: exampleResponseBody,
+      },
+    ])
+  )
+
+  const { statusCode, body } = await got.post('http://example.test/', {
+    encoding: false,
+    body: exampleBody,
+  })
+
+  t.equal(statusCode, 200)
+  // TODO: `body` should be a buffer. This seems to be a bug.
+  t.equal(body, exampleResponseBody)
+})
+
+// TODO: There seems to be a bug here. When testing via `got` with `{
+// encoding: false }` the body that comes back should be a buffer, but is not.
+// It's difficult to get this test to pass after porting it.
 test('define() works with binary buffers', t => {
-  const nockDef = {
-    scope: 'http://example.com',
-    method: 'POST',
-    path: '/',
-    body: '8001',
-    status: 200,
-    response: '8001',
-  }
+  const exampleBody = '8001'
+  const exampleResponse = '8001'
 
-  const nocks = nock.define([nockDef])
-
-  t.ok(nocks)
+  t.ok(
+    nock.define([
+      {
+        scope: 'http://example.com',
+        method: 'POST',
+        path: '/',
+        body: exampleBody,
+        status: 200,
+        response: exampleResponse,
+      },
+    ])
+  )
 
   const req = new http.request(
     {
       host: 'example.com',
-      method: nockDef.method,
-      path: nockDef.path,
+      method: 'POST',
+      path: '/',
     },
-    function(res) {
-      t.equal(res.statusCode, nockDef.status)
+    res => {
+      t.equal(res.statusCode, 200)
 
       const dataChunks = []
 
-      res.on('data', function(chunk) {
+      res.on('data', chunk => {
         dataChunks.push(chunk)
       })
 
-      res.once('end', function() {
+      res.once('end', () => {
         const response = Buffer.concat(dataChunks)
-        t.equal(response.toString('hex'), nockDef.response, 'responses match')
+        t.equal(response.toString('hex'), exampleResponse, 'responses match')
         t.end()
       })
     }
   )
 
-  req.on('error', function(err) {
+  req.on('error', err => {
     //  This should never happen.
-    t.ok(false, 'Error should never occur.')
+    t.fail('Error should never occur.')
     t.end()
   })
 
-  req.write(Buffer.from(nockDef.body, 'hex'))
+  req.write(Buffer.from(exampleBody, 'hex'))
   req.end()
 })
 
 test('define() uses reqheaders', t => {
   const auth = 'foo:bar'
   const authHeader = `Basic ${Buffer.from('foo:bar').toString('base64')}`
-
-  const nockDef = {
-    scope: 'http://example.com',
-    method: 'GET',
-    path: '/',
-    status: 200,
-    reqheaders: {
-      host: 'example.com',
-      authorization: authHeader,
-    },
+  const reqheaders = {
+    host: 'example.com',
+    authorization: authHeader,
   }
 
-  const nocks = nock.define([nockDef])
-
-  t.ok(nocks)
+  t.ok(
+    nock.define([
+      {
+        scope: 'http://example.com',
+        method: 'GET',
+        path: '/',
+        status: 200,
+        reqheaders,
+      },
+    ])
+  )
 
   // Make a request which should match the mock that was configured above.
   // This does not hit the network.
   const req = new http.request(
     {
       host: 'example.com',
-      method: nockDef.method,
-      path: nockDef.path,
+      method: 'GET',
+      path: '/',
       auth,
     },
-    function(res) {
-      t.equal(res.statusCode, nockDef.status)
+    res => {
+      t.equal(res.statusCode, 200)
 
-      res.once('end', function() {
-        t.equivalent(res.req._headers, nockDef.reqheaders)
+      res.once('end', () => {
+        t.equivalent(res.req._headers, reqheaders)
         t.end()
       })
       // Streams start in 'paused' mode and must be started.
@@ -223,28 +239,26 @@ test('define() uses reqheaders', t => {
 })
 
 test('define() uses badheaders', t => {
-  const nockDef = [
-    {
-      scope: 'http://example.com',
-      method: 'GET',
-      path: '/',
-      status: 401,
-      badheaders: ['x-foo'],
-    },
-    {
-      scope: 'http://example.com',
-      method: 'GET',
-      path: '/',
-      status: 200,
-      reqheaders: {
-        'x-foo': 'bar',
+  t.ok(
+    nock.define([
+      {
+        scope: 'http://example.com',
+        method: 'GET',
+        path: '/',
+        status: 401,
+        badheaders: ['x-foo'],
       },
-    },
-  ]
-
-  const nocks = nock.define(nockDef)
-
-  t.ok(nocks)
+      {
+        scope: 'http://example.com',
+        method: 'GET',
+        path: '/',
+        status: 200,
+        reqheaders: {
+          'x-foo': 'bar',
+        },
+      },
+    ])
+  )
 
   const req = new http.request(
     {
@@ -255,10 +269,10 @@ test('define() uses badheaders', t => {
         'x-foo': 'bar',
       },
     },
-    function(res) {
+    res => {
       t.equal(res.statusCode, 200)
 
-      res.once('end', function() {
+      res.once('end', () => {
         t.end()
       })
       // Streams start in 'paused' mode and must be started.
