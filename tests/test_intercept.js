@@ -780,7 +780,7 @@ test('reply with file with headers', async t => {
   scope.done()
 })
 
-test('reply with file with no fs', { only: true }, t => {
+test('reply with file with no fs', t => {
   const nockWithoutFs = proxyquire('../lib/scope', {
     './interceptor': proxyquire('../lib/interceptor', { fs: null }),
   })
