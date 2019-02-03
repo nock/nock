@@ -17,11 +17,11 @@ test('query with array', async t => {
   // ])
   const expectedQuery = { list: [123, 456, 789], a: 'b' }
 
-  const scope = nock('http://example.com')
+  const scope = nock('http://example.test')
     .get('/test')
     .query(expectedQuery)
     .reply(200, exampleText)
-  await got(`http://example.com/test?${qs.stringify(expectedQuery)}`)
+  await got(`http://example.test/test?${qs.stringify(expectedQuery)}`)
 
   scope.done()
 })
@@ -32,11 +32,11 @@ test('query with array', async t => {
 test('query with array which contains unencoded value', async t => {
   const expectedQuery = { list: ['hello%20world', '2hello%20world', 3], a: 'b' }
 
-  const scope = nock('http://example.com')
+  const scope = nock('http://example.test')
     .get('/test')
     .query(expectedQuery)
     .reply(200, exampleText)
-  await got(`http://example.com/test?${qs.stringify(expectedQuery)}`)
+  await got(`http://example.test/test?${qs.stringify(expectedQuery)}`)
 
   scope.done()
 })
@@ -45,11 +45,11 @@ test('query with array which contains pre-encoded values ', async t => {
   const expectedQuery = { list: ['hello%20world', '2hello%20world'] }
   const queryString = 'list%5B0%5D=hello%20world&list%5B1%5D=2hello%20world'
 
-  const scope = nock('http://example.com', { encodedQueryParams: true })
+  const scope = nock('http://example.test', { encodedQueryParams: true })
     .get('/test')
     .query(expectedQuery)
     .reply(200, exampleText)
-  await got(`http://example.com/test?${queryString}`)
+  await got(`http://example.test/test?${queryString}`)
 
   scope.done()
 })
@@ -62,11 +62,11 @@ test('query with object', async t => {
     e: [1, 2, 3, 4],
   }
 
-  const scope = nock('http://example.com')
+  const scope = nock('http://example.test')
     .get('/test')
     .query(expectedQuery)
     .reply(200, exampleText)
-  await got(`http://example.com/test?${qs.stringify(expectedQuery)}`)
+  await got(`http://example.test/test?${qs.stringify(expectedQuery)}`)
 
   scope.done()
 })
@@ -78,11 +78,11 @@ test('query with object which contains unencoded value', async t => {
     },
   }
 
-  const scope = nock('http://example.com')
+  const scope = nock('http://example.test')
     .get('/test')
     .query(exampleQuery)
     .reply(200, exampleText)
-  await got(`http://example.com/test?${qs.stringify(exampleQuery)}`)
+  await got(`http://example.test/test?${qs.stringify(exampleQuery)}`)
 
   scope.done()
 })
@@ -95,11 +95,11 @@ test('query with object which contains pre-encoded values', async t => {
     },
   }
 
-  const scope = nock('http://example.com', { encodedQueryParams: true })
+  const scope = nock('http://example.test', { encodedQueryParams: true })
     .get('/test')
     .query(exampleQuery)
     .reply(200, exampleText)
-  await got(`http://example.com/test?${queryString}`)
+  await got(`http://example.test/test?${queryString}`)
 
   scope.done()
 })
@@ -124,11 +124,11 @@ test('query with array and regexp', async t => {
     a: 'b',
   }
 
-  const scope = nock('http://example.com')
+  const scope = nock('http://example.test')
     .get('/test')
     .query(expectedQuery)
     .reply(200, exampleText)
-  await got(`http://example.com/test?${qs.stringify(exampleQuery)}`)
+  await got(`http://example.test/test?${qs.stringify(exampleQuery)}`)
 
   scope.done()
 })

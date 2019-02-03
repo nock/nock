@@ -65,23 +65,23 @@ test('matchBody uses strict equality for deep comparisons', t => {
 test('normalizeRequestOptions', t => {
   t.deepEqual(
     common.normalizeRequestOptions({
-      host: 'foobar.com:12345',
+      host: 'example.test:12345',
       port: 12345,
     }),
     {
-      host: 'foobar.com:12345',
-      hostname: 'foobar.com',
+      host: 'example.test:12345',
+      hostname: 'example.test',
       port: 12345,
       proto: 'http',
     }
   )
   t.deepEqual(
     common.normalizeRequestOptions({
-      hostname: 'foobar.com',
+      hostname: 'example.test',
     }),
     {
-      host: 'foobar.com:80',
-      hostname: 'foobar.com',
+      host: 'example.test:80',
+      hostname: 'example.test',
       port: 80,
       proto: 'http',
     }
@@ -120,11 +120,11 @@ test('isJSONContent', t => {
 test('headersFieldNamesToLowerCase works', t => {
   t.deepEqual(
     common.headersFieldNamesToLowerCase({
-      HoSt: 'example.com',
+      HoSt: 'example.test',
       'Content-typE': 'plain/text',
     }),
     {
-      host: 'example.com',
+      host: 'example.test',
       'content-type': 'plain/text',
     }
   )
@@ -174,7 +174,7 @@ test('headersFieldsArrayToLowerCase deduplicates arrays', function(t) {
 test('deleteHeadersField deletes fields with case-insensitive field names', t => {
   // Prepare.
   const headers = {
-    HoSt: 'example.com',
+    HoSt: 'example.test',
     'Content-typE': 'plain/text',
   }
 
@@ -250,7 +250,7 @@ test('stringifyRequest', function(t) {
     method: 'POST',
     port: 81,
     proto: 'http',
-    hostname: 'www.example.com',
+    hostname: 'example.test',
     path: '/path/1',
     headers: { cookie: 'fiz=baz' },
   }
@@ -259,7 +259,7 @@ test('stringifyRequest', function(t) {
     JSON.parse(common.stringifyRequest(exampleOptions, { foo: 'bar' })),
     {
       method: 'POST',
-      url: 'http://www.example.com:81/path/1',
+      url: 'http://example.test:81/path/1',
       headers: {
         cookie: 'fiz=baz',
       },
@@ -281,7 +281,7 @@ test('stringifyRequest', function(t) {
     ),
     {
       method: 'GET',
-      url: 'http://www.example.com:81/path/1',
+      url: 'http://example.test:81/path/1',
       headers: {
         cookie: 'fiz=baz',
       },
@@ -325,6 +325,10 @@ test('headersArrayToObject', function(t) {
       'fiz=baz; Domain=.github.com; Path=/',
       'foo=baz; Domain=.github.com; Path=/',
     ],
+  })
+
+  t.throws(() => common.headersArrayToObject(123), {
+    message: 'Expected a header array',
   })
 
   t.end()

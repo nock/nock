@@ -5,11 +5,11 @@ const { test } = require('tap')
 const fetch = require('isomorphic-fetch')
 
 test('basic match works', function(t) {
-  const scope = nock('http://isomorphicfetchland.com')
+  const scope = nock('http://example.test')
     .get('/path')
     .reply(200, 'somedata')
 
-  fetch('http://isomorphicfetchland.com/path')
+  fetch('http://example.test/path')
     .then(function(res) {
       return res.text()
     })
@@ -24,7 +24,7 @@ test('basic match works', function(t) {
 })
 
 test('string-based reqheaders match works', function(t) {
-  const scope = nock('http://isomorphicfetchland.com', {
+  const scope = nock('http://example.test', {
     reqheaders: {
       header: 'header value',
     },
@@ -32,7 +32,7 @@ test('string-based reqheaders match works', function(t) {
     .get('/path2')
     .reply(200, 'somemoardata')
 
-  return fetch('http://isomorphicfetchland.com/path2', {
+  return fetch('http://example.test/path2', {
     headers: {
       header: 'header value',
     },
@@ -51,7 +51,7 @@ test('string-based reqheaders match works', function(t) {
 })
 
 test('basicAuth match works', function(t) {
-  const scope = nock('http://isomorphicfetchland.com')
+  const scope = nock('http://example.test')
     .get('/path2')
     .basicAuth({
       user: 'username',
@@ -59,7 +59,7 @@ test('basicAuth match works', function(t) {
     })
     .reply(200, 'somemoardata')
 
-  return fetch('http://isomorphicfetchland.com/path2', {
+  return fetch('http://example.test/path2', {
     headers: {
       Authorization: `Basic ${Buffer.from('username:password').toString(
         'base64'
@@ -84,12 +84,12 @@ test('matchHeader works', function(t) {
     'username:password'
   ).toString('base64')}`
 
-  const scope = nock('http://isomorphicfetchland.com')
+  const scope = nock('http://example.test')
     .get('/path2')
     .matchHeader('authorization', authorizationHeader)
     .reply(200, 'somemoardata')
 
-  return fetch('http://isomorphicfetchland.com/path2', {
+  return fetch('http://example.test/path2', {
     headers: {
       Authorization: authorizationHeader,
     },

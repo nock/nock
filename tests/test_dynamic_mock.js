@@ -5,13 +5,13 @@ const nock = require('../.')
 const request = require('request')
 
 test('one function returning the body defines a full mock', function(t) {
-  nock('http://acompleteandfullmock.io')
+  nock('http://example.test')
     .get('/abc')
     .reply(function() {
       return 'ABC'
     })
 
-  request.get('http://acompleteandfullmock.io/abc', function(err, resp, body) {
+  request.get('http://example.test/abc', function(err, resp, body) {
     if (err) {
       throw err
     }
@@ -22,13 +22,13 @@ test('one function returning the body defines a full mock', function(t) {
 })
 
 test('one function returning the status code and body defines a full mock', function(t) {
-  nock('http://acompleteandfullmock.io')
+  nock('http://example.test')
     .get('/def')
     .reply(function() {
       return [201, 'DEF']
     })
 
-  request.get('http://acompleteandfullmock.io/def', function(err, resp, body) {
+  request.get('http://example.test/def', function(err, resp, body) {
     if (err) {
       throw err
     }
@@ -39,7 +39,7 @@ test('one function returning the status code and body defines a full mock', func
 })
 
 test('one asynchronous function returning the status code and body defines a full mock', function(t) {
-  nock('http://acompleteandfullmock.io')
+  nock('http://example.test')
     .get('/ghi')
     .reply(function(path, reqBody, cb) {
       setTimeout(function() {
@@ -47,7 +47,7 @@ test('one asynchronous function returning the status code and body defines a ful
       }, 1e3)
     })
 
-  request.get('http://acompleteandfullmock.io/ghi', function(err, resp, body) {
+  request.get('http://example.test/ghi', function(err, resp, body) {
     if (err) {
       throw err
     }
@@ -58,14 +58,14 @@ test('one asynchronous function returning the status code and body defines a ful
 })
 
 test('asynchronous function gets request headers', function(t) {
-  nock('http://someheadersarein.io')
+  nock('http://example.test')
     .get('/yo')
     .reply(200, function(path, reqBody, cb) {
       t.equal(this.req.path, '/yo')
       t.deepEqual(this.req.headers, {
         'x-my-header': 'some-value',
         'x-my-other-header': 'some-other-value',
-        host: 'someheadersarein.io',
+        host: 'example.test',
       })
       setTimeout(function() {
         cb(null, [201, 'GHI'])
@@ -75,7 +75,7 @@ test('asynchronous function gets request headers', function(t) {
   request(
     {
       method: 'GET',
-      uri: 'http://someheadersarein.io/yo',
+      uri: 'http://example.test/yo',
       headers: {
         'x-my-header': 'some-value',
         'x-my-other-header': 'some-other-value',

@@ -16,14 +16,14 @@ const originalMode = nockBack.currentMode
 function testNock(t) {
   let dataCalled = false
 
-  const scope = nock('http://www.google.com')
+  const scope = nock('http://example.test')
     .get('/')
     .reply(200, 'Hello World!')
 
   http
     .request(
       {
-        host: 'www.google.com',
+        host: 'example.test',
         path: '/',
         port: 80,
       },

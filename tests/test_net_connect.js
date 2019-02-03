@@ -7,7 +7,7 @@ const assert = require('assert')
 
 test('disable net connect is default', function(t) {
   nock.disableNetConnect()
-  nock('http://somethingelsecompletelyunrelated.com')
+  nock('http://example.test')
     .get('/')
     .reply(200)
 
