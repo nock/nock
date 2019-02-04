@@ -1192,8 +1192,6 @@ test('emits error if https route is missing', t => {
   })
 })
 
-<<<<<<< HEAD
-=======
 // This test seems to need `http`.
 test('can use ClientRequest using GET', t => {
   let dataCalled = false
@@ -1225,50 +1223,14 @@ test('can use ClientRequest using GET', t => {
   req.end()
 })
 
-test('can use ClientRequest using GET with url', t => {
+test('can use ClientRequest using GET ipv6 url', t => {
   let dataCalled = false
 
-  const scope = nock('http://example.test')
-    .get('/dsad')
+  const scope = nock('http://[1080::8:800:200C:417A]')
+    .get('/foo')
     .reply(202, 'HEHE!')
 
-  const req = new http.ClientRequest('http://example.test/dsad')
-  req.end()
-
-  req.on('response', function(res) {
-    t.equal(res.statusCode, 202)
-    res.on('end', function() {
-      t.ok(dataCalled, 'data event was called')
-      scope.done()
-      t.end()
-    })
-    res.on('data', function(data) {
-      dataCalled = true
-      t.ok(data instanceof Buffer, 'data should be buffer')
-      t.equal(data.toString(), 'HEHE!', 'response should match')
-    })
-  })
-
-  req.end()
-})
-
-test('can use ClientRequest using GET with url and options', t => {
-  let dataCalled = false
-
-  const scope = nock('http://example.test', {
-    reqheaders: {
-      'X-My-Super-Power': /Awesome/i,
-    },
-  })
-    .get('/dsad')
-    .reply(202, 'HEHE!')
-
-  const req = new http.ClientRequest('http://example.test/dsad', {
-    method: 'GET',
-    headers: {
-      'X-My-Super-Power': /Awesome/i,
-    },
-  })
+  const req = new http.ClientRequest('http://[1080::8:800:200C:417A]/foo')
   req.end()
 
   req.on('response', function(res) {
@@ -1321,7 +1283,79 @@ test('can use ClientRequest using POST', t => {
   req.end()
 })
 
->>>>>>> fix(intercept): Add support for node 10.x ClientRequest
+test('http.request works with ClientRequest Node >=10.9', t => {
+  process.env.NOCK = 2
+  let dataCalled = false
+
+  const scope = nock('http://username:password@example.test:3414', {
+    reqheaders: {
+      'X-My-Super-Power': /Awesome/i,
+    },
+  })
+    .get('/dsad')
+    .reply(202, 'HEHE!')
+
+  const req = http.request(
+    'http://username:password@example.test:3414/dsad',
+    {
+      method: 'GET',
+      headers: {
+        'X-My-Super-Power': /Awesome/i,
+      },
+    },
+    res => {
+      t.equal(res.statusCode, 202)
+      res.on('data', function(data) {
+        dataCalled = true
+        t.ok(data instanceof Buffer, 'data should be buffer')
+        t.equal(data.toString(), 'HEHE!', 'response should match')
+      })
+      res.on('end', function() {
+        t.ok(dataCalled, 'data event was called')
+        scope.done()
+        t.end()
+      })
+    }
+  )
+  req.end()
+})
+
+test('http.get works with URL and options', t => {
+  let dataCalled = false
+
+  const scope = nock('http://username:password@example.test:3414', {
+    reqheaders: {
+      'X-My-Super-Power': /Awesome/i,
+    },
+  })
+    .get('/dsad')
+    .reply(202, 'HEHE!')
+
+  const req = http.get(
+    new url.URL('http://username:password@example.test:3414/dsad'),
+    {
+      method: 'GET',
+      headers: {
+        'X-My-Super-Power': /Awesome/i,
+      },
+    },
+    res => {
+      t.equal(res.statusCode, 202)
+      res.on('data', function(data) {
+        dataCalled = true
+        t.ok(data instanceof Buffer, 'data should be buffer')
+        t.equal(data.toString(), 'HEHE!', 'response should match')
+      })
+      res.on('end', function() {
+        t.ok(dataCalled, 'data event was called')
+        scope.done()
+        t.end()
+      })
+    }
+  )
+  req.end()
+})
+
 test('scopes are independent', async t => {
   const scope1 = nock('http://example.test')
     .get('/')
