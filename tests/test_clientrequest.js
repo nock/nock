@@ -68,9 +68,36 @@ test('can use ClientRequest using POST', t => {
   req.end()
 })
 
-test('creating ClientRequest with empty options throws expected error', t => {
+test('creating ClientRequestLegacy with empty options throws expected error', t => {
   // Confidence check.
+  nock('http://example.test', { legacy: true })
   t.ok(nock.isActive())
+
+  t.throws(() => new http.ClientRequest(), {
+    message:
+      'Creating a client request with empty `options` is not supported in Nock',
+  })
+
+  t.end()
+})
+
+test('creating ClientRequest with empty options throws expected error', t => {
+  nock('http://example.test', {
+    legacy: false,
+  })
+
+  t.throws(() => new http.ClientRequest(), {
+    message:
+      'Creating a client request with empty `options` is not supported in Nock',
+  })
+
+  t.end()
+})
+
+test('creating ClientRequestLegacy with empty options throws expected error', t => {
+  nock('http://example.test', {
+    legacy: true,
+  })
 
   t.throws(() => new http.ClientRequest(), {
     message:
@@ -111,4 +138,33 @@ test('when no interceptors and net connect is disallowed, receive via ClientRequ
     t.equal(err.message, 'Nock: Disallowed net connect for "localhost:12345/"')
     t.end()
   })
+})
+
+test('can use ClientRequest using GET ipv6 url', t => {
+  let dataCalled = false
+
+  const scope = nock('http://[1080::8:800:200C:417A]', {
+    legacy: false,
+  })
+    .get('/foo')
+    .reply(202, 'HEHE!')
+
+  const req = new http.ClientRequest('http://[1080::8:800:200C:417A]/foo')
+  req.end()
+
+  req.on('response', function(res) {
+    t.equal(res.statusCode, 202)
+    res.on('end', function() {
+      t.ok(dataCalled, 'data event was called')
+      scope.done()
+      t.end()
+    })
+    res.on('data', function(data) {
+      dataCalled = true
+      t.ok(data instanceof Buffer, 'data should be buffer')
+      t.equal(data.toString(), 'HEHE!', 'response should match')
+    })
+  })
+
+  req.end()
 })
