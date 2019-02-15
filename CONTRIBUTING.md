@@ -18,8 +18,10 @@ Please note that this project is released with a [Contributor Code of Conduct](.
   - [Running only a single test](#running-only-a-single-test)
 - [Release Process](#release-process)
 - [GitHub Apps](#github-apps)
-- [Becoming a maintainer](#becoming-a-maintainer)
 - [Generating the CONTRIBUTORS.md file](#generating-the-contributorsmd-file)
+- [Becoming a maintainer](#becoming-a-maintainer)
+- [Who is funding work on Nock?](#who-is-funding-work-on-nock)
+- [Is there a chat where I can talk to other maintainers and users?](#is-there-a-chat-where-i-can-talk-to-other-maintainers-and-users)
 
 <!-- tocstop -->
 
