@@ -1,0 +1,23 @@
+{
+  "projectName": "nock",
+  "projectOwner": "nock",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "RichardLitt",
+      "name": "Richard Littauer",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/910753?v=4",
+      "profile": "https://burntfen.com",
+      "contributions": [
+        "maintenance"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7
+}
