@@ -89,7 +89,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
     - [Modes](#modes)
 - [Debugging](#debugging)
 - [Contributing](#contributing)
-- [Backers](#backers)
+- [Contributors](#contributors)
 - [Sponsors](#sponsors)
 - [License](#license)
 
@@ -1447,11 +1447,16 @@ Thanks for wanting to contribute! Take a look at our [Contributing Guide](CONTRI
 Please note that this project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md).
 By participating in this project you agree to abide by its terms.
 
-## Backers
+## Contributors
 
-Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/nock#backer)]
+Thanks goes to these wonderful people ([emoji key](https://github.com/all-contributors/all-contributors#emoji-key)):
 
-<a href="https://opencollective.com/nock#backers" target="_blank"><img src="https://opencollective.com/nock/backers.svg?width=890"></a>
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore -->
+<table><tr><td align="center"><a href="http://pgte.me"><img src="https://avatars1.githubusercontent.com/u/47910?v=4" width="100px;" alt="Pedro Teixeira"/><br /><sub><b>Pedro Teixeira</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=pgte" title="Code">💻</a> <a href="#maintenance-pgte" title="Maintenance">🚧</a></td><td align="center"><a href="https://burntfen.com"><img src="https://avatars3.githubusercontent.com/u/910753?v=4" width="100px;" alt="Richard Littauer"/><br /><sub><b>Richard Littauer</b></sub></a><br /><a href="#maintenance-RichardLitt" title="Maintenance">🚧</a> <a href="https://github.com/nock/nock/commits?author=RichardLitt" title="Code">💻</a> <a href="#blog-RichardLitt" title="Blogposts">📝</a></td><td align="center"><a href="https://github.com/n30n0v"><img src="https://avatars3.githubusercontent.com/u/10771967?v=4" width="100px;" alt="n30n0v"/><br /><sub><b>n30n0v</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=n30n0v" title="Code">💻</a></td><td align="center"><a href="http://ianwsperber.com"><img src="https://avatars1.githubusercontent.com/u/3731165?v=4" width="100px;" alt="Ian Walker-Sperber"/><br /><sub><b>Ian Walker-Sperber</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=ianwsperber" title="Code">💻</a></td><td align="center"><a href="http://ilovacha.com"><img src="https://avatars2.githubusercontent.com/u/1505203?v=4" width="100px;" alt="Ivan Erceg"/><br /><sub><b>Ivan Erceg</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=ierceg" title="Code">💻</a> <a href="#maintenance-ierceg" title="Maintenance">🚧</a></td><td align="center"><a href="https://twitter.com/paulmelnikow"><img src="https://avatars2.githubusercontent.com/u/1487036?v=4" width="100px;" alt="Paul Melnikow"/><br /><sub><b>Paul Melnikow</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=paulmelnikow" title="Code">💻</a> <a href="#maintenance-paulmelnikow" title="Maintenance">🚧</a></td><td align="center"><a href="https://twitter.com/gr2m"><img src="https://avatars3.githubusercontent.com/u/39992?v=4" width="100px;" alt="Gregor Martynus"/><br /><sub><b>Gregor Martynus</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=gr2m" title="Code">💻</a> <a href="#maintenance-gr2m" title="Maintenance">🚧</a> <a href="#business-gr2m" title="Business development">💼</a> <a href="#financial-gr2m" title="Financial">💵</a> <a href="#blog-gr2m" title="Blogposts">📝</a></td></tr><tr><td align="center"><a href="https://gitlab.com/hutson"><img src="https://avatars1.githubusercontent.com/u/6701030?v=4" width="100px;" alt="Hutson Betts"/><br /><sub><b>Hutson Betts</b></sub></a><br /><a href="#financial-hutson" title="Financial">💵</a></td><td align="center"><a href="http://lilja.io"><img src="https://avatars2.githubusercontent.com/u/6105119?v=4" width="100px;" alt="Jonas Lilja"/><br /><sub><b>Jonas Lilja</b></sub></a><br /><a href="#financial-jlilja" title="Financial">💵</a> <a href="https://github.com/nock/nock/commits?author=jlilja" title="Code">💻</a></td><td align="center"><a href="https://github.com/benrki"><img src="https://avatars0.githubusercontent.com/u/4446950?v=4" width="100px;" alt="Benjamin Ki"/><br /><sub><b>Benjamin Ki</b></sub></a><br /><a href="#financial-benrki" title="Financial">💵</a></td></tr></table>
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
 
 ## Sponsors
 
