@@ -166,7 +166,7 @@ Once you've been around for a bit, ask a current Maintainer - one of [the team m
 
 ## Who is funding work on Nock?
 
-Nock is entirely self-funded by [our Open Collective](https://opencollective.com/nock). Open Collective allows us to get small contributions from users and companies, without giving away our open source IP. Think of it like a kickstarter, or an old-fashioned system of art patrons.
+Nock is entirely self-funded by [our Open Collective](https://opencollective.com/nock). Open Collective allows us to get contributions from users and companies, without giving away our open source IP. Think of it like a kickstarter, or an old-fashioned system of art patrons.
 
 If you'd like to give money to support Nock, please do go to our profile and check it out.
 
