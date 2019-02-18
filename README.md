@@ -1,5 +1,4 @@
 # Nock
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors)
 
 [![npm](https://img.shields.io/npm/v/nock.svg)][npmjs]
 [![npm@beta](https://img.shields.io/npm/v/nock/beta.svg)][npmjs]
@@ -90,10 +89,9 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
     - [Modes](#modes)
 - [Debugging](#debugging)
 - [Contributing](#contributing)
-- [Backers](#backers)
+- [Contributors](#contributors)
 - [Sponsors](#sponsors)
 - [License](#license)
-- [Contributors](#contributors)
 
 <!-- tocstop -->
 
@@ -1449,11 +1447,17 @@ Thanks for wanting to contribute! Take a look at our [Contributing Guide](CONTRI
 Please note that this project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md).
 By participating in this project you agree to abide by its terms.
 
-## Backers
+## Contributors
 
-Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/nock#backer)]
+Thanks goes to these wonderful people ([emoji key](https://github.com/all-contributors/all-contributors#emoji-key)):
 
-<a href="https://opencollective.com/nock#backers" target="_blank"><img src="https://opencollective.com/nock/backers.svg?width=890"></a>
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore -->
+| [<img src="https://avatars3.githubusercontent.com/u/910753?v=4" width="100px;" alt="Richard Littauer"/><br /><sub><b>Richard Littauer</b></sub>](https://burntfen.com)<br />[🚧](#maintenance-RichardLitt "Maintenance") |
+| :---: |
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
 
 ## Sponsors
 
@@ -1475,15 +1479,3 @@ Support this project by becoming a sponsor. Your logo will show up here with a l
 [MIT](LICENSE)
 
 Copyright (c) 2011–2019 [Pedro Teixeira](http://about.me/pedroteixeira) and other [contributors](https://github.com/nock/nock/graphs/contributors).
-
-## Contributors
-
-Thanks goes to these wonderful people ([emoji key](https://github.com/all-contributors/all-contributors#emoji-key)):
-
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore -->
-| [<img src="https://avatars3.githubusercontent.com/u/910753?v=4" width="100px;" alt="Richard Littauer"/><br /><sub><b>Richard Littauer</b></sub>](https://burntfen.com)<br />[🚧](#maintenance-RichardLitt "Maintenance") |
-| :---: |
-<!-- ALL-CONTRIBUTORS-LIST:END -->
-
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
