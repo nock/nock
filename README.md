@@ -1,4 +1,5 @@
 # Nock
+[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors)
 
 [![npm](https://img.shields.io/npm/v/nock.svg)][npmjs]
 [![npm@beta](https://img.shields.io/npm/v/nock/beta.svg)][npmjs]
@@ -1473,3 +1474,15 @@ Support this project by becoming a sponsor. Your logo will show up here with a l
 [MIT](LICENSE)
 
 Copyright (c) 2011–2019 [Pedro Teixeira](http://about.me/pedroteixeira) and other [contributors](https://github.com/nock/nock/graphs/contributors).
+
+## Contributors
+
+Thanks goes to these wonderful people ([emoji key](https://github.com/all-contributors/all-contributors#emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore -->
+| [<img src="https://avatars3.githubusercontent.com/u/910753?v=4" width="100px;" alt="Richard Littauer"/><br /><sub><b>Richard Littauer</b></sub>](https://burntfen.com)<br />[🚧](#maintenance-RichardLitt "Maintenance") |
+| :---: |
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
