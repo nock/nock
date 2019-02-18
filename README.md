@@ -93,6 +93,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
 - [Backers](#backers)
 - [Sponsors](#sponsors)
 - [License](#license)
+- [Contributors](#contributors)
 
 <!-- tocstop -->
 
