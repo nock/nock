@@ -18,7 +18,6 @@ Please note that this project is released with a [Contributor Code of Conduct](.
   - [Running only a single test](#running-only-a-single-test)
 - [Release Process](#release-process)
 - [GitHub Apps](#github-apps)
-- [Generating the CONTRIBUTORS.md file](#generating-the-contributorsmd-file)
 - [Becoming a maintainer](#becoming-a-maintainer)
 - [Who is funding work on Nock?](#who-is-funding-work-on-nock)
 - [Is there a chat where I can talk to other maintainers and users?](#is-there-a-chat-where-i-can-talk-to-other-maintainers-and-users)
@@ -127,25 +126,6 @@ We use @nockbot as a separate account for releases, because npm tokens cannot be
 We use several GitHub apps to help maintain this repository. While we would like to address every issue and while we would like to be on hand to support every person, Nock is pretty much entirely volunteer run, and we simply don't have the time to do everything. Please don't be offended if an automated app posts in your issue! We're doing what we can with with we have.
 
 Currently, we use the [Stale](https://github.com/apps/stale) and [Lock](https://github.com/apps/lock) apps to mark old issues as stale, and to lock issues which have been closed to stop drive-by comments. You can see the configuration files for these in [.github/](.github).
-
-## Generating the CONTRIBUTORS.md file
-
-We use [`name-your-contributors`](https://github.com/mntnr/name-your-contributors) to generate the CONTRIBUTORS file, which contains the names of everyone who have submitted code to the Nock codebase, or commented on an issue, or opened a pull request, or reviewed anyone else's code. After all, all contributions are welcome, and anyone who works with Nock is part of our community.
-
-To generate this file, download `name-your-contributors` and set up a GitHub authorization token.
-
-```sh
-# Generate a JSON file of the members. This may take a while.
-$ name-your-contributors -r nock -u nock > contributors.json
-```
-
-To parse that file, we suggest using [`jq`](https://stedolan.github.io/jq/), although other options are clearly possible:
-
-```sh
-cat contribs.json | jq '.[][]' | jq '"\(if (.name | length) > 0 then .name else null end) @\(.login) \(.url)"' | jq '. | tostring' | jq -s . | jq unique | jq .[] > CONTRIBUTORS.md
-```
-
-Note: This is a convoluted and time-intensive process, and could be updated in several ways. For one, `name-your-contributors` accepts a date flag, which could be used to only catch recent entries. Another way would be to use a bot to automate this at some regular interval. Any help on this would be appreciated.
 
 ## Becoming a maintainer
 
