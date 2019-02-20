@@ -1,7 +1,7 @@
 'use strict'
 
 const http = require('http')
-const path = require("path")
+const path = require('path')
 const { test } = require('tap')
 const mikealRequest = require('request')
 const got = require('got')
