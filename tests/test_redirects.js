@@ -1,12 +1,11 @@
 'use strict'
 
-const assert = require('assert')
 const { test } = require('tap')
-const mikealRequest = require('request')
+const got = require('got')
 const nock = require('../')
 
-test('follows redirects', function(t) {
-  nock('http://example.test')
+test('follows redirects', async t => {
+  const scope = nock('http://example.test')
     .get('/YourAccount')
     .reply(302, undefined, {
       Location: 'http://example.test/Login',
@@ -14,13 +13,10 @@ test('follows redirects', function(t) {
     .get('/Login')
     .reply(200, 'Here is the login page')
 
-  mikealRequest('http://example.test/YourAccount', function(err, res, body) {
-    if (err) {
-      throw err
-    }
+  const { statusCode, body } = await got('http://example.test/YourAccount')
 
-    assert.equal(res.statusCode, 200)
-    assert.equal(body, 'Here is the login page')
-    t.end()
-  })
+  t.is(statusCode, 200)
+  t.equal(body, 'Here is the login page')
+
+  scope.done()
 })
