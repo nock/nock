@@ -7,40 +7,34 @@ const stream = require('stream')
 const util = require('util')
 const { test } = require('tap')
 const nock = require('../.')
+const got = require('got')
+const { Stream } = require('stream')
 
 const textFile = path.join(__dirname, '..', 'assets', 'reply_file_1.txt')
 
-// TODO convert to async / got.
 test('reply with file and pipe response', t => {
-  nock('http://example.test')
+  t.plan(1)
+
+  const scope = nock('http://example.test')
     .get('/')
     .replyWithFile(200, textFile)
 
-  http.get(
-    {
-      host: 'example.test',
-      path: '/',
-      port: 80,
-    },
-    res => {
-      let str = ''
-      const fakeStream = new (require('stream')).Stream()
-      fakeStream.writable = true
+  t.once('end', () => {
+    scope.done()
+  })
 
-      fakeStream.write = d => {
-        str += d
-      }
+  let text = ''
+  const fakeStream = new Stream()
+  fakeStream.writable = true
+  fakeStream.write = d => {
+    text += d
+  }
+  fakeStream.end = () => {
+    t.equal(text, 'Hello from the file!', 'response should match')
+    t.end()
+  }
 
-      fakeStream.end = () => {
-        t.equal(str, 'Hello from the file!', 'response should match')
-        t.end()
-      }
-
-      res.pipe(fakeStream)
-      res.setEncoding('utf8')
-      t.equal(res.statusCode, 200)
-    }
-  )
+  got.stream('http://example.test/').pipe(fakeStream)
 })
 
 // TODO Convert to async / got.
