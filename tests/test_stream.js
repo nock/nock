@@ -30,7 +30,7 @@ test('reply with file and pipe response', t => {
     text += d
   }
   fakeStream.end = () => {
-    t.equal(str, 'Hello from the file!', 'response should match')
+    t.equal(text, 'Hello from the file!', 'response should match')
     t.end()
   }
 
