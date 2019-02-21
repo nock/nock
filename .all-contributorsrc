@@ -108,6 +108,15 @@
       "contributions": [
         "financial"
       ]
+    },
+    {
+      "login": "chadfawcett",
+      "name": "Chad Fawcett",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/3250463?v=4",
+      "profile": "http://chadf.ca",
+      "contributions": [
+        "financial"
+      ]
     }
   ],
   "contributorsPerLine": 7
