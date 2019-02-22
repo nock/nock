@@ -1,3 +1,5 @@
+'use strict'
+
 const { afterEach } = require('tap')
 const nock = require('..')
 
