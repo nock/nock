@@ -42,42 +42,66 @@ completely sure it's correct.
 Create functions that correspond to these use cases, and give them unambiguous names.
 
 1.  **Reset `nock` after a test to its initial post-`require()` state**
-    i. Add `nock.reset()` which calls
-    `nock.restore(); nock.cleanAll(); nock.enableNetConnect(); nock.activate()`.
-    This is suitable for running from `afterEach()` or `finally`.
+    1. Add `nock.reset()` which calls
+       `nock.restore(); nock.cleanAll(); nock.enableNetConnect(); nock.activate()`.
+       This is suitable for running from `afterEach()` or `finally`.
 2.  **Temporarily disable http interception while preserving registered mocks**
-    i. Rename `nock.restore()` to `nock.deactivate()`. The new name
-    harmonizes with `nock.activate()`: they are inverses of each other.
-    iii. Emit a deprecation warning for `nock.restore()`.
-3.  Leave `nock.cleanAll()` as is.
-4.  **Assert that all mocks have been satisfied**
-    i. Add `nock.assertAll()` which does the equivalent of
-    `scopes.forEach(scope => scope.done())`. This is suitable to call from
-    the test itself, though some developers may prefer to call it from an
-    `afterEach()` hook to avoid boilerplate. Accordingly when no mocks
-    have been set up, it should do the natural thing: no-op.
-    ii. Rename `scope.done()` to `scope.assert()`. This is a better nam
-    because it makes it clear it makes an assertion, and it harmonizes
-    better with `assertAll()`. Keep the function around because it
-    allows for granular control.
-    iii. Emit a deprecation warning for `scope.done()`.
-5.  **Simulate network connection failure**:
-    i. Rename `disableNetConnect()` to `nock.simulateUnreachable()`. As before,
-    this method emits an unreachable-like error through normal HTTP error
-    channels.
-    ii. Add a deprecation warning for `disableNetConnect()`.
-6.  **Forbid unmocked requests**:
-    i. Add `nock.forbidUnmockedRequests()` which causes any unmocked request
-    to be considered a programmer error. In contrast to
-    `simulateUnreachable()`, the error is thrown – as if a `TypeError` – rather
-    than emitted through the HTTP client. That way instead of being received by
-    the client library and ultimately the application, it bubbles up to the test
-    runner.
-    ii. This resolves #844.
-    iii. Add a deprecation warning for `enableNetConnect()`.
-
-    test runner, not caught by the application. This resolves #884. Add options
-    for allowing / denying certain hosts so this can replace `disableNetConnect()`
-    and `enableNetConnect()`. Emit a warning from those functions, encouraging
-    switching to either `nock.forbidUnmockedRequests()` or `nock.simulateUnreachable()`
-    depending on the motive of the test.
+    1. Rename `nock.restore()` to `nock.deactivate()`. The new name
+       harmonizes with `nock.activate()`: they are inverses of each other.
+    2. Emit a deprecation warning for `nock.restore()`.
+3.  **Assert that all mocks have been satisfied**
+    1. Add `nock.assertAll()` which does the equivalent of
+       `scopes.forEach(scope => scope.done())`. This is suitable to call from
+       the test itself, though some developers may prefer to call it from an
+       `afterEach()` hook to avoid boilerplate. Accordingly when no mocks
+       have been set up, it should do the natural thing: no-op.
+    2. Rename `scope.done()` to `scope.assert()`. This is a better nam
+       because it makes it clear it makes an assertion, and it harmonizes
+       better with `assertAll()`. Keep the function around because it
+       allows for granular control.
+    3. Emit a deprecation warning for `scope.done()`.
+4.  **Simulate network connection failure**:
+    1. Rename `disableNetConnect()` to `nock.simulateUnreachability()`. As before,
+       emit an unreachable-like error through normal HTTP error channels.
+    2. Optionally pass an argument `{ allowedHosts }` to specify exceptions: hosts
+       which should still be reachable. This replaces calls like
+       `enableNetConnect('localhost')`, while clarifying that the call causes some
+       requests to be blocked.
+    3. Emit a deprecation warning from `disableNetConnect()`.
+    4. Emit a deprecation warning when `enableNetConnect()` is invoked with an
+       argument. These calls should be changed to
+       `simulateUnreachability({ allowedHosts: ... })`.
+5.  **Forbid unmocked requests**:
+    1. Add `nock.forbidUnmockedRequests()` which causes any unmocked request
+       to be considered a programmer error. In contrast to
+       `simulateUnreachable()`, the error is thrown – as if a TypeError – rather
+       than emitted through the HTTP client. That way it bubbles up to the test
+       runner instead of being handled by the client library and application.
+    2. When Nock blocks requests to mocked hostnames, throw the error instead.
+    3. This resolves #844.
+6.  I'm not thrilled with these proposals for `nock.simulateUnreachability()` and
+    `nock.forbidUnmockedRequests()`. While these use cases are important and need
+    to be distinguished, having similar behavior triggered by two different
+    functions is confusing. Let me try to propose an **alternative** with a
+    combined API.
+    1. Add a new function that controls nock's behavior on unmocked requests:
+       `nock.whenUnmocked({ callThrough, simulateUnreachable, fail })`.
+    2. Each of `callThrough`, `simulateUnreachable`, and `fail` is an optional
+       array. The array can be a mix of literal strings, the wildcard string, and
+       regexes.
+    3. Calling `nock.whenUnmocked()` with no parameters is equivalent to
+       `nock.whenUnmocked({ callThrough: '*' })`. This is also nock's initial state.
+    4. The order of precedence is: `callThrough`, `simulateUnreachable`, `fail`.
+       1. An unmocked request hitting a host matching `callThrough` is let through.
+       2. An unmocked request hitting a host matching `simulateUnreachable` emits
+          an unreachable-like error through normal HTTP error channels. As the
+          error can be handled by the client library and application code, this option is
+          suitable for _testing how an application handles unreachable hosts_.
+       3. An unmocked request hitting a host matching `fail` is considered a
+          programmer error. Either the test or the application has done something
+          wrong. The error is thrown – as if a TypeError – so it bubbles up to
+          the test runner. By putting a wildcard match in this list, you know
+          your tests will immediately choke if they try to hit live servers.
+          Since the client library and application are kept out of the loop, this
+          _provides confidence that a mock is configured for each request made by
+          the application_.
