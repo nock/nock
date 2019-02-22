@@ -263,6 +263,24 @@ test('checks if callback is specified', t => {
   })
 })
 
+test('checks that data is specified', t => {
+  nock.restore()
+  nock.recorder.clear()
+  nock.recorder.rec(true)
+
+  const req = http.request({
+    method: 'POST',
+    host: 'localhost',
+    path: '/',
+    port: '80',
+    body: undefined,
+  })
+
+  t.throws(() => req.write(), { message: 'Data was undefined.' })
+  req.abort()
+  t.end()
+})
+
 test('when request body is json, it goes unstringified', t => {
   const server = http.createServer((request, response) => response.end())
   t.once('end', () => server.close())
