@@ -11,6 +11,7 @@ require('./cleanup_hook')()
 
 test('disable net connect is default', function(t) {
   nock.disableNetConnect()
+
   nock('http://example.test')
     .get('/')
     .reply(200)
@@ -26,9 +27,7 @@ test('disable net connect is default', function(t) {
 })
 
 test('when net connect is disabled, throws the expected error ', async t => {
-  nock.cleanAll()
   nock.disableNetConnect()
-  t.once('end', () => nock.enableNetConnect())
 
   try {
     await got('http://example.test')
@@ -53,7 +52,6 @@ test('enable real HTTP request only for specified domain, via string', t => {
   t.once('end', () => server.close())
 
   nock.enableNetConnect('localhost')
-  t.once('end', () => nock.enableNetConnect())
 
   server.listen(() =>
     mikealRequest(`http://localhost:${server.address().port}/`)
@@ -62,7 +60,6 @@ test('enable real HTTP request only for specified domain, via string', t => {
 
 test('disallow request for other domains, via string', t => {
   nock.enableNetConnect('localhost')
-  t.once('end', () => nock.enableNetConnect())
 
   http
     .get('http://www.amazon.com', function(res) {
@@ -89,7 +86,6 @@ test('enable real HTTP request only for specified domain, via regexp', t => {
   t.once('end', () => server.close())
 
   nock.enableNetConnect(/ocalhos/)
-  t.once('end', () => nock.enableNetConnect())
 
   server.listen(() =>
     mikealRequest(`http://localhost:${server.address().port}/`)
@@ -98,7 +94,6 @@ test('enable real HTTP request only for specified domain, via regexp', t => {
 
 test('disallow request for other domains, via regexp', t => {
   nock.enableNetConnect(/ocalhos/)
-  t.once('end', () => nock.enableNetConnect())
 
   http
     .get('http://www.amazon.com', function(res) {

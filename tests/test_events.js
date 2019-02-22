@@ -89,7 +89,6 @@ test('emits no match when netConnect is disabled', function(t) {
   nock.emitter.on('no match', function(req) {
     t.equal(req.hostname, 'google.com')
     nock.emitter.removeAllListeners('no match')
-    nock.enableNetConnect()
     t.end()
   })
   http.get('http://google.com').once('error', ignore)

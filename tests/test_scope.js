@@ -21,7 +21,6 @@ test('scope exposes interceptors', t => {
     })
   })
 
-  nock.cleanAll()
   t.end()
 })
 
@@ -40,8 +39,6 @@ test('scope#remove() works', t => {
   // Assert.
   t.deepEqual(scope.activeMocks(), [])
 
-  // Clean up.
-  nock.cleanAll()
   t.end()
 })
 
@@ -61,8 +58,6 @@ test('scope#remove() is a no-op on a persisted mock', t => {
   // Assert.
   t.deepEqual(scope.activeMocks(), [key])
 
-  // Clean up.
-  nock.cleanAll()
   t.end()
 })
 
@@ -81,8 +76,6 @@ test('scope#remove() is a no-op on a nonexistent key', t => {
   // Assert.
   t.deepEqual(scope.activeMocks(), [key])
 
-  // Clean up.
-  nock.cleanAll()
   t.end()
 })
 

@@ -426,8 +426,6 @@ test('match basic authentication header', t => {
 })
 
 test('multiple interceptors override headers from unrelated request', t => {
-  nock.cleanAll()
-
   nock.define([
     {
       scope: 'https://example.test:443',

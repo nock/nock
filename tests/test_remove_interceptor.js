@@ -188,7 +188,5 @@ test('does not remove unmatched interceptors', t => {
   t.deepEqual(scope1.pendingMocks(), ['GET http://example.test:80/somepath'])
   t.deepEqual(scope2.pendingMocks(), [])
 
-  nock.cleanAll()
-
   t.end()
 })
