@@ -50,15 +50,18 @@ Create functions that correspond to these use cases, and give them unambiguous n
        harmonizes with `nock.activate()`: they are inverses of each other.
     2. Emit a deprecation warning for `nock.restore()`.
 3.  **Assert that all mocks have been satisfied**
-    1. Add `nock.assertAll()` which does the equivalent of
+    1. Add `nock.assertAllMocksUsed()` which does the equivalent of
        `scopes.forEach(scope => scope.done())`. This is suitable to call from
        the test itself, though some developers may prefer to call it from an
        `afterEach()` hook to avoid boilerplate. Accordingly when no mocks
        have been set up, it should do the natural thing: no-op.
-    2. Rename `scope.done()` to `scope.assert()`. This is a better nam
-       because it makes it clear it makes an assertion, and it harmonizes
-       better with `assertAll()`. Keep the function around because it
-       allows for granular control.
+    2. Rename `scope.done()` to `scope.assertMocksUsed()`. This is a better name
+       for a function that makes an assertion, and it harmonizes better with
+       `assertAllMocksUsed()`. Keep the function around because it allows for
+       granular control within a complex text. Even though it's a method on a
+       scope, it's `assertMocksUsed()`, not `assertMockUsed()`. This avoids the
+       possibility of confusion in a case like `nock.get().times(5).reply()`
+       where a single scope is responsible for 5 mock requests.
     3. Emit a deprecation warning for `scope.done()`.
 4.  **Simulate network connection failure**:
     1. Rename `disableNetConnect()` to `nock.simulateUnreachability()`. As before,
