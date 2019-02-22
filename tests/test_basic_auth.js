@@ -12,7 +12,7 @@ test('basic auth with username and password', async t => {
       .get('/test')
       .basicAuth({ user: 'foo', pass: 'bar' })
       .reply(200, 'Here is the content')
-      done()
+    done()
   })
 
   await t.test('succeeds when it matches', async tt => {
