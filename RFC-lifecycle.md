@@ -7,8 +7,9 @@ misunderstand this and leave unwanted state in `nock`.
 Nock doesn't automatically have a way to assert that mocks have been
 satisfied; it's the caller's responsibility to do this for each one.
 
-See https://github.com/paulmelnikow/icedfrisby-nock/blob/master/icedfrisby-
-nock.js for one attempt I made at getting the lifecycle right.
+See
+https://github.com/paulmelnikow/icedfrisby-nock/blob/master/icedfrisby-nock.js
+for one attempt I made at getting the lifecycle right.
 
 # Typical use cases
 
