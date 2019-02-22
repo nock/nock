@@ -4,7 +4,7 @@ const http = require('http')
 const fs = require('fs')
 const { test } = require('tap')
 const proxyquire = require('proxyquire').noPreserveCache()
-const nock = require('../.')
+const nock = require('..')
 
 const nockBack = nock.back
 const exists = fs.existsSync

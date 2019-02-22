@@ -4,6 +4,8 @@ const http = require('http')
 const { test } = require('tap')
 const nock = require('../.')
 
+require('./cleanup_hook')()
+
 // This test seems to need `http`.
 test('can use ClientRequest using GET', t => {
   let dataCalled = false

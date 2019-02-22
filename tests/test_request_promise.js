@@ -1,10 +1,12 @@
 'use strict'
 
-const nock = require('../')
 const { test } = require('tap')
 const rp = require('request-promise')
+const nock = require('..')
 
-test('IPV6 URL in request-promise get gets mocked', function(t) {
+require('./cleanup_hook')()
+
+test('IPV6 URL in request-promise get gets mocked', t => {
   const payload = 'somedata'
   const target = 'http://[2607:f0d0:1002:51::4]:8080'
 

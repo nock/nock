@@ -7,7 +7,9 @@ const stream = require('stream')
 const got = require('got')
 const mikealRequest = require('request')
 const { test } = require('tap')
-const nock = require('../.')
+const nock = require('..')
+
+require('./cleanup_hook')()
 
 const textFile = path.join(__dirname, '..', 'assets', 'reply_file_1.txt')
 

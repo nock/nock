@@ -1,10 +1,12 @@
 'use strict'
 
 const path = require('path')
-const nock = require('../')
-const Interceptor = require('../lib/interceptor')
 const { test } = require('tap')
 const proxyquire = require('proxyquire').noPreserveCache()
+const Interceptor = require('../lib/interceptor')
+const nock = require('..')
+
+require('./cleanup_hook')()
 
 test('scope exposes interceptors', t => {
   const scopes = nock.load(path.join(__dirname, 'fixtures', 'goodRequest.json'))

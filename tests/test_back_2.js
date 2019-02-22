@@ -4,12 +4,14 @@ const http = require('http')
 const fs = require('fs')
 const { test } = require('tap')
 const rimraf = require('rimraf')
-const nock = require('../')
+const nock = require('..')
 
 const nockBack = nock.back
 
 let originalMode
 let fixture
+
+require('./cleanup_hook')()
 
 function rimrafOnEnd(t) {
   t.once('end', () => rimraf.sync(fixture))
@@ -18,7 +20,6 @@ function rimrafOnEnd(t) {
 test('setup', t => {
   originalMode = nockBack.currentMode
 
-  nock.enableNetConnect()
   nockBack.fixtures = `${__dirname}/fixtures`
   fixture = `${nockBack.fixtures}/recording_test.json`
   rimraf.sync(fixture)

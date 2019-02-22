@@ -2,7 +2,9 @@
 
 const { test } = require('tap')
 const http = require('http')
-const nock = require('../.')
+const nock = require('..')
+
+require('./cleanup_hook')()
 
 test('socketDelay', function(t) {
   let timeouted = false

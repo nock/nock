@@ -3,7 +3,9 @@
 const { test } = require('tap')
 const qs = require('qs')
 const got = require('got')
-const nock = require('../.')
+const nock = require('..')
+
+require('./cleanup_hook')()
 
 const exampleText = 'it worked!'
 

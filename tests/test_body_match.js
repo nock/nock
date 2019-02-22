@@ -5,6 +5,8 @@ const { test } = require('tap')
 const mikealRequest = require('request')
 const assert = require('assert')
 
+require('./cleanup_hook')()
+
 test('match body is regex trying to match string', function(t) {
   nock('http://example.test')
     .post('/', new RegExp('a.+'))

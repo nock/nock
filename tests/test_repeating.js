@@ -5,6 +5,8 @@ const async = require('async')
 const { test } = require('tap')
 const nock = require('..')
 
+require('./cleanup_hook')()
+
 test('repeating once', t => {
   nock.disableNetConnect()
 
@@ -17,10 +19,6 @@ test('repeating once', t => {
     t.equal(200, res.statusCode, 'first request')
     t.end()
   })
-
-  nock.cleanAll()
-
-  nock.enableNetConnect()
 })
 
 test('repeating twice', t => {

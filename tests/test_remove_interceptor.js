@@ -4,6 +4,8 @@ const { test } = require('tap')
 const got = require('got')
 const nock = require('..')
 
+require('./cleanup_hook')()
+
 test('remove interceptor for GET resource', async t => {
   nock('http://example.test')
     .get('/somepath')

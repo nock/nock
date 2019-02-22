@@ -1,6 +1,5 @@
 'use strict'
 
-const nock = require('../.')
 const { test } = require('tap')
 const http = require('http')
 const https = require('https')
@@ -9,6 +8,9 @@ const zlib = require('zlib')
 const got = require('got')
 const mikealRequest = require('request')
 const superagent = require('superagent')
+const nock = require('..')
+
+require('./cleanup_hook')()
 
 let globalCount
 

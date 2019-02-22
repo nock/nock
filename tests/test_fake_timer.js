@@ -1,12 +1,14 @@
 'use strict'
 
-const nock = require('../.')
 const { test } = require('tap')
 const request = require('request')
 const lolex = require('lolex')
+const nock = require('..')
+
+require('./cleanup_hook')()
 
 // https://github.com/nock/nock/issues/1334
-test('one function returns successfully when fake timer is enabled', function(t) {
+test('one function returns successfully when fake timer is enabled', t => {
   const clock = lolex.install()
   nock('http://example.test')
     .get('/')

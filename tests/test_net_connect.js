@@ -7,6 +7,8 @@ const mikealRequest = require('request')
 const { test } = require('tap')
 const nock = require('..')
 
+require('./cleanup_hook')()
+
 test('disable net connect is default', function(t) {
   nock.disableNetConnect()
   nock('http://example.test')

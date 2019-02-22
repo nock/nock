@@ -2,7 +2,9 @@
 
 const { test } = require('tap')
 const got = require('got')
-const nock = require('../')
+const nock = require('..')
+
+require('./cleanup_hook')()
 
 test('follows redirects', async t => {
   const scope = nock('http://example.test')

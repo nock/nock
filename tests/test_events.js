@@ -1,9 +1,11 @@
 'use strict'
 
-const nock = require('../.')
 const http = require('http')
 const querystring = require('querystring')
 const { test } = require('tap')
+const nock = require('..')
+
+require('./cleanup_hook')()
 
 test('emits request and replied events', function(t) {
   const scope = nock('http://example.test')
