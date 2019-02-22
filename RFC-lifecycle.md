@@ -41,29 +41,43 @@ completely sure it's correct.
 
 Create functions that correspond to these use cases, and give them unambiguous names.
 
-1. Add `nock.reset()` which resets 100% of nock's state. I think that is the
-   equivalent of `nock.restore(); nock.cleanAll(); nock.enableNetConnect()`.
-   This is suitable for running from `afterEach()` or `finally`.
-2. Rename `nock.restore()` to `nock.deactivate()`. `nock.restore()` should
-   still work but emit a deprecation warning to encourage switching to
-   `nock.reset()`. The new name harmonizes with `nock.activate()` as they are
-   inverses of each other.
-3. Leave `nock.cleanAll()` as is.
-4. Add `nock.assertAll()` which does the equivalent of
-   `scopes.forEach(scope => scope.done())`. This probably should be invoked
-   in the test itself.
-5. Rename `scope.done()` to `scope.assert()` to harmonize with `assertAll()`
-   and make it clearer what the function is for. Emit a deprecation warning for
-   `scope.done()`. Encourage switching to `nock.assertAll()`, or `nock.assert()`
-   if more granular control is needed.
-6. Add `nock.simulateUnreachable()` or similar, which works like the current
-   `disableNetConnect()`, emitting an unreachable-like error through the usual
-   channels.
-7. Add `nock.lockdown()` (or `nock.forbidUnmockedRequests()`?) which causes
-   any unmocked request to immediately raise an assertion error. The error should
-   not emit through the request. That's because we want it to be handled by the
-   test runner, not caught by the application. This resolves #884. Add options
-   for allowing / denying certain hosts so this can replace `disableNetConnect()`
-   and `enableNetConnect()`. Emit a warning from those functions, encouraging
-   switching to either `nock.lockdown()` or `nock.simulateUnreachable()`
-   depending on the motive of the test.
+1.  **Reset `nock` after a test to its initial post-`require()` state**
+    i. Add `nock.reset()` which calls
+    `nock.restore(); nock.cleanAll(); nock.enableNetConnect(); nock.activate()`.
+    This is suitable for running from `afterEach()` or `finally`.
+2.  **Temporarily disable http interception while preserving registered mocks**
+    i. Rename `nock.restore()` to `nock.deactivate()`. The new name
+    harmonizes with `nock.activate()`: they are inverses of each other.
+    iii. Emit a deprecation warning for `nock.restore()`.
+3.  Leave `nock.cleanAll()` as is.
+4.  **Assert that all mocks have been satisfied**
+    i. Add `nock.assertAll()` which does the equivalent of
+    `scopes.forEach(scope => scope.done())`. This is suitable to call from
+    the test itself, though some developers may prefer to call it from an
+    `afterEach()` hook to avoid boilerplate. Accordingly when no mocks
+    have been set up, it should do the natural thing: no-op.
+    ii. Rename `scope.done()` to `scope.assert()`. This is a better nam
+    because it makes it clear it makes an assertion, and it harmonizes
+    better with `assertAll()`. Keep the function around because it
+    allows for granular control.
+    iii. Emit a deprecation warning for `scope.done()`.
+5.  **Simulate network connection failure**:
+    i. Rename `disableNetConnect()` to `nock.simulateUnreachable()`. As before,
+    this method emits an unreachable-like error through normal HTTP error
+    channels.
+    ii. Add a deprecation warning for `disableNetConnect()`.
+6.  **Forbid unmocked requests**:
+    i. Add `nock.forbidUnmockedRequests()` which causes any unmocked request
+    to be considered a programmer error. In contrast to
+    `simulateUnreachable()`, the error is thrown – as if a `TypeError` – rather
+    than emitted through the HTTP client. That way instead of being received by
+    the client library and ultimately the application, it bubbles up to the test
+    runner.
+    ii. This resolves #844.
+    iii. Add a deprecation warning for `enableNetConnect()`.
+
+    test runner, not caught by the application. This resolves #884. Add options
+    for allowing / denying certain hosts so this can replace `disableNetConnect()`
+    and `enableNetConnect()`. Emit a warning from those functions, encouraging
+    switching to either `nock.forbidUnmockedRequests()` or `nock.simulateUnreachable()`
+    depending on the motive of the test.
