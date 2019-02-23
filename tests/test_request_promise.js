@@ -4,7 +4,7 @@ const { test } = require('tap')
 const rp = require('request-promise')
 const nock = require('..')
 
-require('./cleanup_hook')()
+require('./cleanup_after_each')()
 
 test('IPV6 URL in request-promise get gets mocked', t => {
   const payload = 'somedata'

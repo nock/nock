@@ -4,7 +4,7 @@ const { test } = require('tap')
 const got = require('got')
 const nock = require('..')
 
-require('./cleanup_hook')()
+require('./cleanup_after_each')()
 
 test('remove interceptor for GET resource', async t => {
   nock('http://example.test')

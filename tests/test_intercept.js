@@ -12,7 +12,7 @@ const hyperquest = require('hyperquest')
 const got = require('got')
 const nock = require('..')
 
-require('./cleanup_hook')()
+require('./cleanup_after_each')()
 
 const globalCount = Object.keys(global).length
 const acceptableLeaks = [

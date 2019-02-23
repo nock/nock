@@ -4,7 +4,7 @@ const { test } = require('tap')
 const got = require('got')
 const nock = require('..')
 
-require('./cleanup_hook')()
+require('./cleanup_after_each')()
 
 test('basic auth with username and password', async t => {
   t.beforeEach(done => {

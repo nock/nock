@@ -5,7 +5,7 @@ const querystring = require('querystring')
 const { test } = require('tap')
 const nock = require('..')
 
-require('./cleanup_hook')()
+require('./cleanup_after_each')()
 
 test('emits request and replied events', function(t) {
   const scope = nock('http://example.test')

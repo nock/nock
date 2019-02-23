@@ -5,7 +5,7 @@ const http = require('http')
 const zlib = require('zlib')
 const nock = require('..')
 
-require('./cleanup_hook')()
+require('./cleanup_after_each')()
 
 test('accepts and decodes gzip encoded application/json', t => {
   const message = {

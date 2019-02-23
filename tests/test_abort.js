@@ -4,7 +4,7 @@ const nock = require('..')
 const http = require('http')
 const { test } = require('tap')
 
-require('./cleanup_hook')()
+require('./cleanup_after_each')()
 
 test('[actual] req.abort() should cause "abort" and "error" to be emitted', t => {
   nock('http://localhost:16829')

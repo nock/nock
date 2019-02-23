@@ -4,7 +4,7 @@ const { test } = require('tap')
 const mikealRequest = require('request')
 const nock = require('..')
 
-require('./cleanup_hook')()
+require('./cleanup_after_each')()
 
 test('url encoding', t => {
   nock('http://example.test')

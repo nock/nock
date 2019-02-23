@@ -4,7 +4,7 @@ const { test } = require('tap')
 const http = require('http')
 const nock = require('..')
 
-require('./cleanup_hook')()
+require('./cleanup_after_each')()
 
 test('IPV6 URL in http.get get gets mocked', function(t) {
   let dataCalled = false

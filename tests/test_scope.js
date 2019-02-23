@@ -6,7 +6,7 @@ const proxyquire = require('proxyquire').noPreserveCache()
 const Interceptor = require('../lib/interceptor')
 const nock = require('..')
 
-require('./cleanup_hook')()
+require('./cleanup_after_each')()
 
 test('scope exposes interceptors', t => {
   const scopes = nock.load(path.join(__dirname, 'fixtures', 'goodRequest.json'))

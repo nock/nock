@@ -4,7 +4,7 @@ const { test } = require('tap')
 const nock = require('..')
 const got = require('got')
 
-require('./cleanup_hook')()
+require('./cleanup_after_each')()
 
 test('when no headers are specified on the request, default reply headers work', async t => {
   nock('http://example.test')

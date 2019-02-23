@@ -7,7 +7,7 @@ const mikealRequest = require('request')
 const { test } = require('tap')
 const nock = require('..')
 
-require('./cleanup_hook')()
+require('./cleanup_after_each')()
 
 test('with allowUnmocked, mocked request still works', async t => {
   const scope = nock('http://example.com', { allowUnmocked: true })

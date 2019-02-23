@@ -5,7 +5,7 @@ const qs = require('qs')
 const got = require('got')
 const nock = require('..')
 
-require('./cleanup_hook')()
+require('./cleanup_after_each')()
 
 const exampleText = 'it worked!'
 

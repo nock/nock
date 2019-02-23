@@ -4,7 +4,7 @@ const request = require('request')
 const { test } = require('tap')
 const nock = require('..')
 
-require('./cleanup_hook')()
+require('./cleanup_after_each')()
 
 test('encode query string', t => {
   const query1 = { q: '(nodejs)' }

@@ -5,7 +5,7 @@ const common = require('../lib/common')
 const matchBody = require('../lib/match_body')
 const nock = require('..')
 
-require('./cleanup_hook')()
+require('./cleanup_after_each')()
 
 test('matchBody ignores new line characters from strings', t => {
   t.true(

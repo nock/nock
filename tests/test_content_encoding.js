@@ -5,7 +5,7 @@ const { test } = require('tap')
 const got = require('got')
 const nock = require('..')
 
-require('./cleanup_hook')()
+require('./cleanup_after_each')()
 
 test('accepts gzipped content', async t => {
   const message = 'Lorem ipsum dolor sit amet'

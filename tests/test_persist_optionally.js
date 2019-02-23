@@ -9,7 +9,7 @@ const got = require('got')
 const { test } = require('tap')
 const nock = require('..')
 
-require('./cleanup_hook')()
+require('./cleanup_after_each')()
 
 const textFile = path.join(__dirname, '..', 'assets', 'reply_file_1.txt')
 

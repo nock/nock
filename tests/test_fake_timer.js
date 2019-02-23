@@ -5,7 +5,7 @@ const request = require('request')
 const lolex = require('lolex')
 const nock = require('..')
 
-require('./cleanup_hook')()
+require('./cleanup_after_each')()
 
 // https://github.com/nock/nock/issues/1334
 test('one function returns successfully when fake timer is enabled', t => {

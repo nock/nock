@@ -7,7 +7,7 @@ const got = require('got')
 const mikealRequest = require('request')
 const nock = require('..')
 
-require('./cleanup_hook')()
+require('./cleanup_after_each')()
 
 test('match headers', async t => {
   const scope = nock('http://example.test')

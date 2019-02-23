@@ -11,7 +11,7 @@ const nockBack = nock.back
 let originalMode
 let fixture
 
-require('./cleanup_hook')()
+require('./cleanup_after_each')()
 
 function rimrafOnEnd(t) {
   t.once('end', () => rimraf.sync(fixture))

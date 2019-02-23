@@ -7,7 +7,7 @@ const nock = require('..')
 const ssl = require('./ssl')
 const got = require('got')
 
-require('./cleanup_hook')()
+require('./cleanup_after_each')()
 
 test('Nock with allowUnmocked and an url match', async t => {
   const options = {

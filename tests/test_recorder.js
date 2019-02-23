@@ -10,7 +10,7 @@ const mikealRequest = require('request')
 const superagent = require('superagent')
 const nock = require('..')
 
-require('./cleanup_hook')()
+require('./cleanup_after_each')()
 
 let globalCount
 
