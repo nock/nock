@@ -24,7 +24,7 @@ test('define() is backward compatible', async t => {
 
   // TODO: It seems like this test is actually broken. It probably is meant to read
   // await got('http://example.com:12345/') but if I change it to that, it fails.
-  const {statusCode} = await got('http://example.com/')
+  const { statusCode } = await got('http://example.com/')
   t.is(statusCode, 500)
 })
 
