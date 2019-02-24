@@ -5,7 +5,9 @@ const url = require('url')
 const got = require('got')
 const mikealRequest = require('request')
 const { test } = require('tap')
-const nock = require('../.')
+const nock = require('..')
+
+require('./cleanup_after_each')()
 
 test('with allowUnmocked, mocked request still works', async t => {
   const scope = nock('http://example.com', { allowUnmocked: true })
@@ -231,8 +233,6 @@ test('match hostname using regexp with allowUnmocked (issue-1076)', t => {
 
 // https://github.com/nock/nock/issues/835
 test('match multiple paths to domain using regexp with allowUnmocked', async t => {
-  nock.cleanAll()
-
   const server = http.createServer((request, response) => {
     response.write('live')
     response.end()
@@ -258,7 +258,6 @@ test('match multiple paths to domain using regexp with allowUnmocked', async t =
 })
 
 test('match domain and path using regexp with query params and allowUnmocked', t => {
-  nock.cleanAll()
   const imgResponse = 'Matched Images Page'
   const opts = { allowUnmocked: true }
 
@@ -281,8 +280,6 @@ test('match domain and path using regexp with query params and allowUnmocked', t
 
 // https://github.com/nock/nock/issues/490
 test('match when query is specified with allowUnmocked', async t => {
-  nock.cleanAll()
-
   const server = http.createServer((request, response) => {
     response.write('live')
     response.end()

@@ -6,6 +6,8 @@ const sinon = require('sinon')
 const { test } = require('tap')
 const nock = require('..')
 
+require('./cleanup_after_each')()
+
 test('match debugging works', async t => {
   const log = sinon.stub(debug, 'log')
   debug.enable('nock.interceptor')

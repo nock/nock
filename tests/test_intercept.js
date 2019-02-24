@@ -12,7 +12,7 @@ const hyperquest = require('hyperquest')
 const got = require('got')
 const nock = require('..')
 
-nock.enableNetConnect()
+require('./cleanup_after_each')()
 
 const globalCount = Object.keys(global).length
 const acceptableLeaks = [
@@ -578,8 +578,6 @@ test('scopes are independent', async t => {
 
   t.true(scope1.isDone())
   t.false(scope2.isDone())
-
-  nock.cleanAll()
 })
 
 test('two scopes with the same request are consumed', async t => {
@@ -1443,7 +1441,6 @@ test('match domain using regexp', t => {
 })
 
 test('match domain using regexp with path as callback (issue-1137)', t => {
-  nock.cleanAll()
   nock(/.*/)
     .get(() => true)
     .reply(200, 'Match regex')
@@ -1457,7 +1454,6 @@ test('match domain using regexp with path as callback (issue-1137)', t => {
 })
 
 test('match multiple interceptors with regexp domain (issue-508)', t => {
-  nock.cleanAll()
   nock(/chainregex/)
     .get('/')
     .reply(200, 'Match regex')
@@ -1649,7 +1645,6 @@ test('no content type provided', t => {
 
 // https://github.com/nock/nock/issues/835
 test('match domain and path using regexp', t => {
-  nock.cleanAll()
   const imgResponse = 'Matched Images Page'
 
   const scope = nock(/example/)
@@ -1671,8 +1666,6 @@ test('match domain and path using regexp', t => {
 
 // https://github.com/nock/nock/issues/1003
 test('correctly parse request without specified path', t => {
-  nock.cleanAll()
-
   const scope1 = nock('https://example.test')
     .get('')
     .reply(200)
@@ -1690,8 +1683,6 @@ test('correctly parse request without specified path', t => {
 })
 
 test('data is sent with flushHeaders', t => {
-  nock.cleanAll()
-
   const scope1 = nock('https://example.test')
     .get('')
     .reply(200, 'this is data')

@@ -5,6 +5,8 @@ const { test } = require('tap')
 const got = require('got')
 const nock = require('..')
 
+require('./cleanup_after_each')()
+
 test('define() is backward compatible', t => {
   t.ok(
     nock.define([
