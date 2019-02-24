@@ -7,6 +7,8 @@ const got = require('got')
 const mikealRequest = require('request')
 const nock = require('..')
 
+require('./cleanup_after_each')()
+
 test('match headers', async t => {
   const scope = nock('http://example.test')
     .get('/')
@@ -424,8 +426,6 @@ test('match basic authentication header', t => {
 })
 
 test('multiple interceptors override headers from unrelated request', t => {
-  nock.cleanAll()
-
   nock.define([
     {
       scope: 'https://example.test:443',

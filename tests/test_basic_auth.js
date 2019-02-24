@@ -2,13 +2,18 @@
 
 const { test } = require('tap')
 const got = require('got')
-const nock = require('../')
+const nock = require('..')
+
+require('./cleanup_after_each')()
 
 test('basic auth with username and password', async t => {
-  nock('http://example.test')
-    .get('/test')
-    .basicAuth({ user: 'foo', pass: 'bar' })
-    .reply(200, 'Here is the content')
+  t.beforeEach(done => {
+    nock('http://example.test')
+      .get('/test')
+      .basicAuth({ user: 'foo', pass: 'bar' })
+      .reply(200, 'Here is the content')
+    done()
+  })
 
   await t.test('succeeds when it matches', async tt => {
     const response = await got('http://example.test/test', {
@@ -26,10 +31,13 @@ test('basic auth with username and password', async t => {
 })
 
 test('basic auth with username only', async t => {
-  nock('http://example.test')
-    .get('/test')
-    .basicAuth({ user: 'foo' })
-    .reply(200, 'Here is the content')
+  t.beforeEach(done => {
+    nock('http://example.test')
+      .get('/test')
+      .basicAuth({ user: 'foo' })
+      .reply(200, 'Here is the content')
+    done()
+  })
 
   await t.test('succeeds when it matches', async tt => {
     const response = await got('http://example.test/test', { auth: 'foo:' })

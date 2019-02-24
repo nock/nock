@@ -6,9 +6,10 @@ const path = require('path')
 const stream = require('stream')
 const util = require('util')
 const { test } = require('tap')
-const nock = require('../.')
 const got = require('got')
-const { Stream } = require('stream')
+const nock = require('..')
+
+require('./cleanup_after_each')()
 
 const textFile = path.join(__dirname, '..', 'assets', 'reply_file_1.txt')
 
@@ -24,7 +25,7 @@ test('reply with file and pipe response', t => {
   })
 
   let text = ''
-  const fakeStream = new Stream()
+  const fakeStream = new stream.Stream()
   fakeStream.writable = true
   fakeStream.write = d => {
     text += d
