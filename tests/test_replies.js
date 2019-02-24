@@ -9,6 +9,8 @@ const lolex = require('lolex')
 const proxyquire = require('proxyquire').noPreserveCache()
 const nock = require('..')
 
+require('./cleanup_after_each')()
+
 const textFile = path.join(__dirname, '..', 'assets', 'reply_file_1.txt')
 const binaryFile = path.join(__dirname, '..', 'assets', 'reply_file_2.txt.gz')
 

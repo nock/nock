@@ -6,6 +6,8 @@ const { test } = require('tap')
 const got = require('got')
 const nock = require('..')
 
+require('./cleanup_after_each')()
+
 test('double activation throws exception', t => {
   nock.restore()
   t.false(nock.isActive())

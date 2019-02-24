@@ -2,7 +2,9 @@
 
 const mikealRequest = require('request')
 const { test } = require('tap')
-const nock = require('../.')
+const nock = require('..')
+
+require('./cleanup_after_each')()
 
 test('query() matches a query string of the same name=value', t => {
   nock('http://example.test')

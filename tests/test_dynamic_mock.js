@@ -1,8 +1,10 @@
 'use strict'
 
 const { test } = require('tap')
-const nock = require('../.')
 const request = require('request')
+const nock = require('..')
+
+require('./cleanup_after_each')()
 
 test('one function returning the body defines a full mock', function(t) {
   nock('http://example.test')

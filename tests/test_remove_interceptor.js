@@ -4,6 +4,8 @@ const { test } = require('tap')
 const got = require('got')
 const nock = require('..')
 
+require('./cleanup_after_each')()
+
 test('remove interceptor for GET resource', async t => {
   nock('http://example.test')
     .get('/somepath')
@@ -185,8 +187,6 @@ test('does not remove unmatched interceptors', t => {
 
   t.deepEqual(scope1.pendingMocks(), ['GET http://example.test:80/somepath'])
   t.deepEqual(scope2.pendingMocks(), [])
-
-  nock.cleanAll()
 
   t.end()
 })

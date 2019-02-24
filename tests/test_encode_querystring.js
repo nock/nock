@@ -1,10 +1,12 @@
 'use strict'
 
-const nock = require('../.')
 const request = require('request')
 const { test } = require('tap')
+const nock = require('..')
 
-test('encode query string', function(t) {
+require('./cleanup_after_each')()
+
+test('encode query string', t => {
   const query1 = { q: '(nodejs)' }
 
   nock('https://example.test')

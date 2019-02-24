@@ -1,10 +1,12 @@
 'use strict'
 
 const path = require('path')
-const nock = require('../')
-const Interceptor = require('../lib/interceptor')
 const { test } = require('tap')
 const proxyquire = require('proxyquire').noPreserveCache()
+const Interceptor = require('../lib/interceptor')
+const nock = require('..')
+
+require('./cleanup_after_each')()
 
 test('scope exposes interceptors', t => {
   const scopes = nock.load(path.join(__dirname, 'fixtures', 'goodRequest.json'))
@@ -19,7 +21,6 @@ test('scope exposes interceptors', t => {
     })
   })
 
-  nock.cleanAll()
   t.end()
 })
 
@@ -38,8 +39,6 @@ test('scope#remove() works', t => {
   // Assert.
   t.deepEqual(scope.activeMocks(), [])
 
-  // Clean up.
-  nock.cleanAll()
   t.end()
 })
 
@@ -59,8 +58,6 @@ test('scope#remove() is a no-op on a persisted mock', t => {
   // Assert.
   t.deepEqual(scope.activeMocks(), [key])
 
-  // Clean up.
-  nock.cleanAll()
   t.end()
 })
 
@@ -79,8 +76,6 @@ test('scope#remove() is a no-op on a nonexistent key', t => {
   // Assert.
   t.deepEqual(scope.activeMocks(), [key])
 
-  // Clean up.
-  nock.cleanAll()
   t.end()
 })
 

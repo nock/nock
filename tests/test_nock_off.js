@@ -2,10 +2,11 @@
 
 const { test } = require('tap')
 const mikealRequest = require('request')
-
 const ssl = require('./ssl')
 
-test('NOCK_OFF=true works for https', function(t) {
+require('./cleanup_after_each')()
+
+test('NOCK_OFF=true works for https', t => {
   const original = process.env.NOCK_OFF
   process.env.NOCK_OFF = 'true'
   const nock = require('../')
