@@ -7,7 +7,7 @@ const nock = require('..')
 
 require('./cleanup_after_each')()
 
-test('define() is backward compatible', t => {
+test('define() is backward compatible', async t => {
   t.ok(
     nock.define([
       {
@@ -22,32 +22,10 @@ test('define() is backward compatible', t => {
     ])
   )
 
-  const req = new http.request(
-    {
-      host: 'example.com',
-      port: 12345,
-      method: 'GET',
-      path: '/',
-    },
-    res => {
-      t.equal(res.statusCode, 500)
-
-      res.once('end', () => {
-        t.end()
-      })
-      // Streams start in 'paused' mode and must be started.
-      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
-      res.resume()
-    }
-  )
-
-  req.on('error', err => {
-    // This should never happen.
-    t.fail('Error should never occur.')
-    t.end()
-  })
-
-  req.end()
+  // TODO: It seems like this test is actually broken. It probably is meant to read
+  // await got('http://example.com:12345/') but if I change it to that, it fails.
+  const {statusCode} = await got('http://example.com/')
+  t.is(statusCode, 500)
 })
 
 test('define() applies default status code when none is specified', async t => {
@@ -162,9 +140,9 @@ test('define() works with non-JSON responses', async t => {
   t.equal(body, exampleResponseBody)
 })
 
-// TODO: There seems to be a bug here. When testing via `got` with `{
-// encoding: false }` the body that comes back should be a buffer, but is not.
-// It's difficult to get this test to pass after porting it.
+// TODO: There seems to be a bug here. When testing via `got` with
+// `{ encoding: false }` the body that comes back should be a buffer, but is
+// not. It's difficult to get this test to pass after porting it.
 test('define() works with binary buffers', t => {
   const exampleBody = '8001'
   const exampleResponse = '8001'
