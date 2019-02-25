@@ -68,7 +68,6 @@ function nockBackWithFixtureLocalhost(t) {
   nockBack('goodRequestLocalhost.json', function(done) {
     t.equal(this.scopes.length, 0)
 
-
     const server = http.createServer((request, response) => {
       t.pass('server received a request')
 
@@ -155,8 +154,7 @@ test('wild enables net connect', t => {
 })
 
 test("with wild, nock back doesn't do anything", t =>
-  nockBackWithFixtureLocalhost(t)
-)
+  nockBackWithFixtureLocalhost(t))
 
 test('nockBack dryrun tests', nw => {
   nw.beforeEach(done => {
