@@ -1,6 +1,6 @@
 # Analysis of lifecycle methods
 
-![](https://img.shields.io/badge/rfc-NOCK--001-blue.svg)
+![](https://img.shields.io/badge/rfc-001-blue.svg)
 ![](https://img.shields.io/badge/status-draft-orange.svg)
 
 Nock's lifecycle methods are confusingly named, and at times are inconvenient.
