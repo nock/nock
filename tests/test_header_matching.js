@@ -80,10 +80,17 @@ test('match headers on number with regexp', async t => {
   scope.done()
 })
 
-test('match headers with function', async t => {
+test('match headers with function: gets the expected argument', async t => {
+  t.plan(3)
+
   const scope = nock('http://example.test')
     .get('/')
-    .matchHeader('x-my-headers', val => val > 123)
+    .matchHeader('x-my-headers', val => {
+      // TODO: It's surprising that this function receives a number instead of
+      // a string. Probably this behavior should be changed.
+      t.equal(val, 456)
+      return true
+    })
     .reply(200, 'Hello World!')
 
   const { statusCode, body } = await got('http://example.test/', {
@@ -94,6 +101,63 @@ test('match headers with function', async t => {
   t.equal(body, 'Hello World!')
   scope.done()
 })
+
+test('match headers with function: matches when match accepted', async t => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .matchHeader('x-my-headers', val => true)
+    .reply(200, 'Hello World!')
+
+  const { statusCode, body } = await got('http://example.test/', {
+    headers: { 'X-My-Headers': 456 },
+  })
+
+  t.equal(statusCode, 200)
+  t.equal(body, 'Hello World!')
+  scope.done()
+})
+
+test('match headers with function: does not match when match declined', async t => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .matchHeader('x-my-headers', val => false)
+    .reply(200, 'Hello World!')
+
+  await t.rejects(
+    () =>
+      got('http://example.test/', {
+        headers: { 'X-My-Headers': 456 },
+      }),
+    {
+      message: 'Nock: No match for request',
+    }
+  )
+})
+
+// TODO: This is failing test for a bug.
+test(
+  'match headers with function: does not consume mock request when match declined',
+  { skip: true },
+  async t => {
+    const scope = nock('http://example.test')
+      .get('/')
+      .matchHeader('x-my-headers', val => false)
+      .reply(200, 'Hello World!')
+
+    await t.rejects(
+      () =>
+        got('http://example.test/', {
+          headers: { 'X-My-Headers': 456 },
+        }),
+      {
+        message: 'Nock: No match for request',
+      }
+    )
+    t.throws(() => scope.done(), {
+      message: 'Mocks not yet satisfied',
+    })
+  }
+)
 
 test('match all headers', async t => {
   const scope = nock('http://example.test')
