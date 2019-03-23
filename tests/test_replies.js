@@ -100,7 +100,8 @@ test('get with reply callback returning callback without headers', async t => {
 
   await assertRejects(got('http://example.com/'), err => {
     t.equal(err.statusCode, 401)
-    t.equal(body, 'This is a body')
+    t.equal(err.body, 'This is a body')
+    return true
   })
   scope.done()
 })
