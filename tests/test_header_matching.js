@@ -133,26 +133,23 @@ test('match headers with function: does not match when match declined', async t 
   )
 })
 
-test(
-  'match headers with function: does not consume mock request when match declined',
-  async t => {
-    const scope = nock('http://example.test')
-      .get('/')
-      .matchHeader('x-my-headers', val => false)
-      .reply(200, 'Hello World!')
+test('match headers with function: does not consume mock request when match declined', async t => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .matchHeader('x-my-headers', val => false)
+    .reply(200, 'Hello World!')
 
-    await assertRejects(
-      got('http://example.test/', {
-        headers: { '-My-Headers': 456 },
-      }),
-      Error,
-      'Nock: No match for request'
-    )
-    t.throws(() => scope.done(), {
-      message: 'Mocks not yet satisfied',
-    })
-  }
-)
+  await assertRejects(
+    got('http://example.test/', {
+      headers: { '-My-Headers': 456 },
+    }),
+    Error,
+    'Nock: No match for request'
+  )
+  t.throws(() => scope.done(), {
+    message: 'Mocks not yet satisfied',
+  })
+})
 
 test('match all headers', async t => {
   const scope = nock('http://example.test')
