@@ -2,6 +2,7 @@
 
 const http = require('http')
 const domain = require('domain')
+const assertRejects = require('assert-rejects')
 const { test } = require('tap')
 const got = require('got')
 const mikealRequest = require('request')
@@ -80,10 +81,17 @@ test('match headers on number with regexp', async t => {
   scope.done()
 })
 
-test('match headers with function', async t => {
+test('match header on scope with function: gets the expected argument', async t => {
+  t.plan(3)
+
   const scope = nock('http://example.test')
     .get('/')
-    .matchHeader('x-my-headers', val => val > 123)
+    .matchHeader('x-my-headers', val => {
+      // TODO: It's surprising that this function receives a number instead of
+      // a string. Probably this behavior should be changed.
+      t.equal(val, 456)
+      return true
+    })
     .reply(200, 'Hello World!')
 
   const { statusCode, body } = await got('http://example.test/', {
@@ -93,6 +101,132 @@ test('match headers with function', async t => {
   t.equal(statusCode, 200)
   t.equal(body, 'Hello World!')
   scope.done()
+})
+
+test('match header on scope with function: matches when match accepted', async t => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .matchHeader('x-my-headers', val => true)
+    .reply(200, 'Hello World!')
+
+  const { statusCode, body } = await got('http://example.test/', {
+    headers: { 'X-My-Headers': 456 },
+  })
+
+  t.equal(statusCode, 200)
+  t.equal(body, 'Hello World!')
+  scope.done()
+})
+
+test('match header on scope with function: does not match when match declined', async t => {
+  nock('http://example.test')
+    .get('/')
+    .matchHeader('x-my-headers', val => false)
+    .reply(200, 'Hello World!')
+
+  await assertRejects(
+    got('http://example.test/', {
+      headers: { 'X-My-Headers': 456 },
+    }),
+    Error,
+    'Nock: No match for request'
+  )
+})
+
+test('match header on scope with function: does not consume mock request when match declined', async t => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .matchHeader('x-my-headers', val => false)
+    .reply(200, 'Hello World!')
+
+  await assertRejects(
+    got('http://example.test/', {
+      headers: { '-My-Headers': 456 },
+    }),
+    Error,
+    'Nock: No match for request'
+  )
+  t.throws(() => scope.done(), {
+    message: 'Mocks not yet satisfied',
+  })
+})
+
+test('match header on intercept with function: gets the expected argument', async t => {
+  t.plan(3)
+
+  const scope = nock('http://example.test')
+    .matchHeader('x-my-headers', val => {
+      // TODO: It's surprising that this function receives a number instead of
+      // a string. Probably this behavior should be changed.
+      t.equal(val, 456)
+      return true
+    })
+    // `.matchHeader()` is called on the interceptor. It precedes the call to
+    // `.get()`.
+    .get('/')
+    .reply(200, 'Hello World!')
+
+  const { statusCode, body } = await got('http://example.test/', {
+    headers: { 'X-My-Headers': 456 },
+  })
+
+  t.equal(statusCode, 200)
+  t.equal(body, 'Hello World!')
+  scope.done()
+})
+
+test('match header on interceptor with function: matches when match accepted', async t => {
+  const scope = nock('http://example.test')
+    .matchHeader('x-my-headers', val => true)
+    // `.matchHeader()` is called on the interceptor. It precedes the call to
+    // `.get()`.
+    .get('/')
+    .reply(200, 'Hello World!')
+
+  const { statusCode, body } = await got('http://example.test/', {
+    headers: { 'X-My-Headers': 456 },
+  })
+
+  t.equal(statusCode, 200)
+  t.equal(body, 'Hello World!')
+  scope.done()
+})
+
+test('match header on interceptor with function: does not match when match declined', async t => {
+  nock('http://example.test')
+    .matchHeader('x-my-headers', val => false)
+    // `.matchHeader()` is called on the interceptor. It precedes the call to
+    // `.get()`.
+    .get('/')
+    .reply(200, 'Hello World!')
+
+  await assertRejects(
+    got('http://example.test/', {
+      headers: { 'X-My-Headers': 456 },
+    }),
+    Error,
+    'Nock: No match for request'
+  )
+})
+
+test('match header on interceptor with function: does not consume mock request when match declined', async t => {
+  const scope = nock('http://example.test')
+    .matchHeader('x-my-headers', val => false)
+    // `.matchHeader()` is called on the interceptor. It precedes the call to
+    // `.get()`.
+    .get('/')
+    .reply(200, 'Hello World!')
+
+  await assertRejects(
+    got('http://example.test/', {
+      headers: { '-My-Headers': 456 },
+    }),
+    Error,
+    'Nock: No match for request'
+  )
+  t.throws(() => scope.done(), {
+    message: 'Mocks not yet satisfied',
+  })
 })
 
 test('match all headers', async t => {
