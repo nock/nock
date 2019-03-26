@@ -2,6 +2,7 @@
 
 const http = require('http')
 const path = require('path')
+const assertRejects = require('assert-rejects')
 const { test } = require('tap')
 const mikealRequest = require('request')
 const got = require('got')
@@ -97,9 +98,10 @@ test('get with reply callback returning callback without headers', async t => {
     .get('/')
     .reply(() => [401, 'This is a body'])
 
-  await t.rejects(async () => got('http://example.com/'), {
-    statusCode: 401,
-    body: 'This is a body',
+  await assertRejects(got('http://example.com/'), err => {
+    t.equal(err.statusCode, 401)
+    t.equal(err.body, 'This is a body')
+    return true
   })
   scope.done()
 })
