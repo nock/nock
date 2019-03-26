@@ -11,6 +11,7 @@ const restify = require('restify-clients')
 const hyperquest = require('hyperquest')
 const got = require('got')
 const nock = require('..')
+const httpProxy = require('http-proxy')
 
 require('./cleanup_after_each')()
 
@@ -1710,4 +1711,44 @@ test('teardown', t => {
 
   t.deepEqual(leaks, [], 'No leaks')
   t.end()
+})
+
+test('works when headers removed by http-proxy', t => {
+  const serviceScope = nock('http://service', {
+    badheaders: ['authorization'],
+  })
+    .get('/endpoint')
+    .reply(200)
+
+  const proxy = httpProxy.createProxyServer({
+    prependUrl: false,
+  })
+
+  proxy.on('proxyReq', (proxyReq, req, res) => {
+    proxyReq.removeHeader('authorization')
+  })
+
+  const server = http.createServer((request, response) => {
+    proxy.web(request, response, { target: 'http://service' })
+  })
+
+  server.listen(() => {
+    const options = {
+      uri: `http://localhost:${server.address().port}/endpoint`,
+      method: 'GET',
+      headers: {
+        authorization: 'blah',
+      },
+    }
+
+    mikealRequest(options, (err, resp, body) => {
+      if (err) {
+        t.error(err)
+      } else {
+        t.equal(200, resp.statusCode)
+        serviceScope.done()
+        server.close(t.end)
+      }
+    })
+  })
 })
