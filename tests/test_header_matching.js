@@ -82,7 +82,7 @@ test('match headers on number with regexp', async t => {
 })
 
 test('match header on scope with function: gets the expected argument', async t => {
-  t.plan(3)
+  t.plan(4) // The check in matchHeader should run twice
 
   const scope = nock('http://example.test')
     .get('/')
@@ -105,6 +105,21 @@ test('match header on scope with function: gets the expected argument', async t 
 
 test('match header on scope with function: matches when match accepted', async t => {
   const scope = nock('http://example.test')
+    .get('/')
+    .matchHeader('x-my-headers', val => true)
+    .reply(200, 'Hello World!')
+
+  const { statusCode, body } = await got('http://example.test/', {
+    headers: { 'X-My-Headers': 456 },
+  })
+
+  t.equal(statusCode, 200)
+  t.equal(body, 'Hello World!')
+  scope.done()
+})
+
+test('match header on scope with function and allow unmocked: matches when match accepted', async t => {
+  const scope = nock('http://example.test', { allowUnmocked: true })
     .get('/')
     .matchHeader('x-my-headers', val => true)
     .reply(200, 'Hello World!')
@@ -152,7 +167,7 @@ test('match header on scope with function: does not consume mock request when ma
 })
 
 test('match header on intercept with function: gets the expected argument', async t => {
-  t.plan(3)
+  t.plan(4) // The check in matchHeader should run twice
 
   const scope = nock('http://example.test')
     .matchHeader('x-my-headers', val => {
@@ -177,6 +192,23 @@ test('match header on intercept with function: gets the expected argument', asyn
 
 test('match header on interceptor with function: matches when match accepted', async t => {
   const scope = nock('http://example.test')
+    .matchHeader('x-my-headers', val => true)
+    // `.matchHeader()` is called on the interceptor. It precedes the call to
+    // `.get()`.
+    .get('/')
+    .reply(200, 'Hello World!')
+
+  const { statusCode, body } = await got('http://example.test/', {
+    headers: { 'X-My-Headers': 456 },
+  })
+
+  t.equal(statusCode, 200)
+  t.equal(body, 'Hello World!')
+  scope.done()
+})
+
+test('match header on interceptor with function: matches when match accepted', async t => {
+  const scope = nock('http://example.test', { allowUnmocked: true })
     .matchHeader('x-my-headers', val => true)
     // `.matchHeader()` is called on the interceptor. It precedes the call to
     // `.get()`.
