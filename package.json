@@ -58,7 +58,7 @@
     "rimraf": "^2.6.2",
     "semantic-release": "^16.0.0-beta.15",
     "sinon": "^7.2.3",
-    "superagent": "^4.0.0",
+    "superagent": "^5.0.2",
     "tap": "^12.0.0"
   },
   "scripts": {
