@@ -1228,6 +1228,67 @@ test('test request timeout option', t => {
   })
 })
 
+test('match when filteringExternal = true', t => {
+  const responseText = 'OK!'
+  const responseHeaders = { 'Content-Type': 'text/plain' }
+  const requestHeaders = { host: 'a.subdomain.of.google.com' }
+
+  const scope = nock('http://a.subdomain.of.google.com', {
+    filteringExternal: function() {
+      return true
+    },
+  })
+    .get('/somepath')
+    .reply(200, responseText, responseHeaders)
+
+  let dataCalled = false
+  const host = 'a.subdomain.of.google.com'
+  const req = http.get(
+    {
+      host,
+      method: 'GET',
+      path: '/somepath',
+      port: 80,
+    },
+    function(res) {
+      res.on('data', function(data) {
+        dataCalled = true
+        t.equal(data.toString(), responseText)
+      })
+      res.on('end', function() {
+        t.true(dataCalled)
+        scope.done()
+        t.end()
+      })
+    }
+  )
+
+  t.equivalent(req._headers, { host: requestHeaders.host })
+})
+
+test('do not match when filteringExternal = false', t => {
+  nock('http://example.test')
+    .get('/')
+    .reply('howdy')
+
+  nock('http://example.test', {
+    filteringExternal: function() {
+      return false
+    },
+  })
+    .get('/foobar')
+    .reply('howdy')
+
+  const assertion = function(req) {
+    t.equal(req.path, '/foobar')
+    nock.emitter.removeAllListeners('no match')
+    t.end()
+  }
+  nock.emitter.on('no match', assertion)
+
+  http.get('http://example.test/foobar').once('error', function() {})
+})
+
 test('get correct filtering with scope and request headers filtering', t => {
   const responseText = 'OK!'
   const responseHeaders = { 'Content-Type': 'text/plain' }
