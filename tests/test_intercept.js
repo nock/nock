@@ -8,6 +8,7 @@ const mikealRequest = require('request')
 const superagent = require('superagent')
 const needle = require('needle')
 const restify = require('restify-clients')
+const assertRejects = require('assert-rejects')
 const hyperquest = require('hyperquest')
 const got = require('got')
 const nock = require('..')
@@ -1228,73 +1229,33 @@ test('test request timeout option', t => {
   })
 })
 
-test('match when filteringExternal = true', t => {
-  const responseText = 'OK!'
-  const responseHeaders = { 'Content-Type': 'text/plain' }
-  const requestHeaders = { host: 'a.subdomain.of.google.com' }
+test('do not match when filteringExternal = false but should match after trying again when = true', async t => {
+  let enabled = false
 
-  nock('http://a.subdomain.of.google.com', {
+  const scope = nock('http://example.test', {
     filteringExternal: function() {
-      return false
+      return enabled
     },
   })
-    .get('/foobar')
-    .reply('howdy')
-
-  const scope = nock('http://a.subdomain.of.google.com', {
-    filteringExternal: function() {
-      return true
-    },
-  })
-    .get('/somepath')
-    .reply(200, responseText, responseHeaders)
-
-  let dataCalled = false
-  const host = 'a.subdomain.of.google.com'
-  const req = http.get(
-    {
-      host,
-      method: 'GET',
-      path: '/somepath',
-      port: 80,
-    },
-    function(res) {
-      res.on('data', function(data) {
-        dataCalled = true
-        t.equal(data.toString(), responseText)
-      })
-      res.on('end', function() {
-        t.true(dataCalled)
-        scope.done()
-        t.end()
-      })
-    }
-  )
-
-  t.equivalent(req._headers, { host: requestHeaders.host })
-})
-
-test('do not match when filteringExternal = false', t => {
-  nock('http://example.test')
     .get('/')
-    .reply('howdy')
+    .reply(200)
 
-  nock('http://example.test', {
-    filteringExternal: function() {
-      return false
-    },
+  // now the scope has been used, should fail on second try
+  await assertRejects(
+    got('http://example.test/'),
+    Error,
+    'Nock: No match for request'
+  )
+  t.throws(() => scope.done(), {
+    message: 'Mocks not yet satisfied',
   })
-    .get('/foobar')
-    .reply('howdy')
 
-  const assertion = function(req) {
-    t.equal(req.path, '/foobar')
-    nock.emitter.removeAllListeners('no match')
-    t.end()
-  }
-  nock.emitter.on('no match', assertion)
+  enabled = true
 
-  http.get('http://example.test/foobar').once('error', function() {})
+  const { statusCode } = await got('http://example.test/')
+
+  t.equal(statusCode, 200)
+  scope.done()
 })
 
 test('get correct filtering with scope and request headers filtering', t => {
