@@ -1233,6 +1233,14 @@ test('match when filteringExternal = true', t => {
   const responseHeaders = { 'Content-Type': 'text/plain' }
   const requestHeaders = { host: 'a.subdomain.of.google.com' }
 
+  nock('http://a.subdomain.of.google.com', {
+    filteringExternal: function() {
+      return false
+    },
+  })
+    .get('/foobar')
+    .reply('howdy')
+
   const scope = nock('http://a.subdomain.of.google.com', {
     filteringExternal: function() {
       return true
