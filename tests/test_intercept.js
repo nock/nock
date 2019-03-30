@@ -1230,6 +1230,7 @@ test('test request timeout option', t => {
 })
 
 test('do not match when filteringExternal = false but should match after trying again when = true', async t => {
+  t.plan(2)
   let enabled = false
 
   const scope = nock('http://example.test', {
@@ -1256,6 +1257,35 @@ test('do not match when filteringExternal = false but should match after trying 
 
   t.equal(statusCode, 200)
   scope.done()
+})
+
+test('should match even when another scope for the same host is filtered out', async t => {
+  let enabled = false
+
+  const scope1 = nock(new RegExp('.*'), {
+    filteringExternal: function() {
+      return enabled
+    },
+  })
+    .get('/')
+    .reply(200)
+
+  const scope2 = nock('http://example.test', {
+    filteringExternal: function() {
+      return true
+    },
+  })
+    .get('/')
+    .reply(200)
+
+  t.equal((await got('http://example.test/')).statusCode, 200)
+
+  enabled = true
+
+  t.equal((await got('http://example.test/')).statusCode, 200)
+
+  scope1.done()
+  scope2.done()
 })
 
 test('get correct filtering with scope and request headers filtering', t => {
