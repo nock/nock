@@ -50,7 +50,6 @@
     "needle": "^2.2.2",
     "nyc": "^13.2.0",
     "prettier": "1.15.3",
-    "prettier-check": "^2.0.0",
     "proxyquire": "^2.1.0",
     "request": "^2.83.0",
     "request-promise": "^4.2.2",
@@ -65,12 +64,12 @@
     "unit": "tap --coverage ./tests/test_*.js",
     "pretest": "npm run -s lint",
     "test": "npm run -s unit",
-    "posttest": "npm run -s prettier-check",
+    "posttest": "npm run -s prettier:check",
     "coverage": "tap --coverage-report=html && open coverage/lcov-report/index.html",
     "coverage:upload": "tap --coverage-report=text-lcov | coveralls",
     "lint": "eslint \"**/*.js\"",
     "prettier": "prettier --write \"**/*.@(js|md|yml|json)\"",
-    "prettier-check": "prettier-check \"**/*.@(js|md|yml|json)\"",
+    "prettier:check": "prettier --check \"**/*.@(js|md|yml|json)\"",
     "semantic-release": "semantic-release"
   },
   "nyc": {
