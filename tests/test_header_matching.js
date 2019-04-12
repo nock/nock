@@ -82,7 +82,7 @@ test('match headers on number with regexp', async t => {
 })
 
 test('match header on scope with function: gets the expected argument', async t => {
-  t.plan(4) // The check in matchHeader should run twice
+  t.plan(3)
 
   const scope = nock('http://example.test')
     .get('/')
@@ -167,7 +167,7 @@ test('match header on scope with function: does not consume mock request when ma
 })
 
 test('match header on intercept with function: gets the expected argument', async t => {
-  t.plan(4) // The check in matchHeader should run twice
+  t.plan(3)
 
   const scope = nock('http://example.test')
     .matchHeader('x-my-headers', val => {
