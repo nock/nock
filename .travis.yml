@@ -30,11 +30,12 @@ jobs:
     - stage: lint
       node_js: lts/*
       env: linting
-      script: npm run lint
+      # Show prettier errors, even if lint fails.
+      script: run-s --silent --continue-on-error lint prettier-check
     - stage: test
       node_js: 10
     - node_js: 8
-      after_script: npm run coverage:upload
+      after_script: npm run --silent unit
     - stage: release
       node_js: lts/*
       env: semantic-release
