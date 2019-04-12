@@ -35,6 +35,7 @@ jobs:
     - stage: test
       node_js: 10
     - node_js: 8
+      # Avoid running lint and prettier again.
       script: npm run --silent unit
       after_script: npm run coverage:upload
     - stage: release
