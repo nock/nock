@@ -1703,8 +1703,7 @@ test('data is sent with flushHeaders', t => {
 
 test('should throw expected error when creating request with missing options', t => {
   t.throws(() => http.request(), {
-    message:
-      'Creating a client request with missing `options` is not supported in Nock',
+    message: '`options` is required',
   })
   t.end()
 })
