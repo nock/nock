@@ -1,14 +1,20 @@
 'use strict'
 
 const { test } = require('tap')
+const assertRejects = require('assert-rejects')
 const got = require('got')
-const nock = require('../')
+const nock = require('..')
+
+require('./cleanup_after_each')()
 
 test('basic auth with username and password', async t => {
-  nock('http://example.test')
-    .get('/test')
-    .basicAuth({ user: 'foo', pass: 'bar' })
-    .reply(200, 'Here is the content')
+  t.beforeEach(done => {
+    nock('http://example.test')
+      .get('/test')
+      .basicAuth({ user: 'foo', pass: 'bar' })
+      .reply(200, 'Here is the content')
+    done()
+  })
 
   await t.test('succeeds when it matches', async tt => {
     const response = await got('http://example.test/test', {
@@ -19,17 +25,22 @@ test('basic auth with username and password', async t => {
   })
 
   await t.test('fails when it doesnt match', async tt => {
-    await tt.rejects(() => got('http://example.test/test'), {
-      message: 'Nock: No match for request',
-    })
+    await assertRejects(
+      got('http://example.test/test'),
+      Error,
+      'Nock: No match for request'
+    )
   })
 })
 
 test('basic auth with username only', async t => {
-  nock('http://example.test')
-    .get('/test')
-    .basicAuth({ user: 'foo' })
-    .reply(200, 'Here is the content')
+  t.beforeEach(done => {
+    nock('http://example.test')
+      .get('/test')
+      .basicAuth({ user: 'foo' })
+      .reply(200, 'Here is the content')
+    done()
+  })
 
   await t.test('succeeds when it matches', async tt => {
     const response = await got('http://example.test/test', { auth: 'foo:' })
@@ -38,8 +49,10 @@ test('basic auth with username only', async t => {
   })
 
   await t.test('fails when it doesnt match', async tt => {
-    await tt.rejects(() => got('http://example.test/test'), {
-      message: 'Nock: No match for request',
-    })
+    await assertRejects(
+      got('http://example.test/test'),
+      Error,
+      'Nock: No match for request'
+    )
   })
 })

@@ -4,10 +4,13 @@ const fs = require('fs')
 const path = require('path')
 const http = require('http')
 const stream = require('stream')
+const assertRejects = require('assert-rejects')
 const got = require('got')
 const mikealRequest = require('request')
 const { test } = require('tap')
-const nock = require('../.')
+const nock = require('..')
+
+require('./cleanup_after_each')()
 
 const textFile = path.join(__dirname, '..', 'assets', 'reply_file_1.txt')
 
@@ -362,9 +365,11 @@ test('delay with replyWithError: response is delayed', async t => {
   await resolvesInAtLeast(
     t,
     async () =>
-      t.rejects(() => got('http://example.test'), {
-        message: 'this is an error message',
-      }),
+      assertRejects(
+        got('http://example.test'),
+        Error,
+        'this is an error message'
+      ),
     100
   )
 })

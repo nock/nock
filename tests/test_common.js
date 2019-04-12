@@ -3,6 +3,9 @@
 const { test } = require('tap')
 const common = require('../lib/common')
 const matchBody = require('../lib/match_body')
+const nock = require('..')
+
+require('./cleanup_after_each')()
 
 test('matchBody ignores new line characters from strings', t => {
   t.true(
@@ -231,6 +234,7 @@ test('matchStringOrRegexp', function(t) {
 
 test('overrideRequests', t => {
   t.on('end', () => common.restoreOverriddenRequests())
+  nock.restore()
   common.overrideRequests()
   // Second call throws.
   t.throws(() => common.overrideRequests(), {

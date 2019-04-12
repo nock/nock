@@ -1,8 +1,10 @@
 'use strict'
 
-const nock = require('../')
 const { test } = require('tap')
 const fetch = require('isomorphic-fetch')
+const nock = require('..')
+
+require('./cleanup_after_each')()
 
 test('basic match works', function(t) {
   const scope = nock('http://example.test')

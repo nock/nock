@@ -1,72 +1,70 @@
 'use strict'
 
-const nock = require('../')
 const { test } = require('tap')
 const http = require('http')
 const zlib = require('zlib')
+const nock = require('..')
 
-if (zlib.gzipSync && zlib.gunzipSync) {
-  test('accepts and decodes gzip encoded application/json', function(t) {
-    const message = {
-      my: 'contents',
-    }
+require('./cleanup_after_each')()
 
-    t.plan(1)
+test('accepts and decodes gzip encoded application/json', t => {
+  const message = {
+    my: 'contents',
+  }
 
-    nock('http://example.test')
-      .post('/')
-      .reply(function(url, actual) {
-        t.same(actual, message)
-        t.end()
-        return 200
-      })
+  t.plan(1)
 
-    const req = http.request({
-      hostname: 'example.test',
-      path: '/',
-      method: 'POST',
-      headers: {
-        'content-encoding': 'gzip',
-        'content-type': 'application/json',
-      },
+  nock('http://example.test')
+    .post('/')
+    .reply(function(url, actual) {
+      t.same(actual, message)
+      t.end()
+      return 200
     })
 
-    const compressedMessage = zlib.gzipSync(JSON.stringify(message))
-
-    req.write(compressedMessage)
-    req.end()
+  const req = http.request({
+    hostname: 'example.test',
+    path: '/',
+    method: 'POST',
+    headers: {
+      'content-encoding': 'gzip',
+      'content-type': 'application/json',
+    },
   })
-}
 
-if (zlib.deflateSync && zlib.inflateSync) {
-  test('accepts and decodes deflate encoded application/json', function(t) {
-    const message = {
-      my: 'contents',
-    }
+  const compressedMessage = zlib.gzipSync(JSON.stringify(message))
 
-    t.plan(1)
+  req.write(compressedMessage)
+  req.end()
+})
 
-    nock('http://example.test')
-      .post('/')
-      .reply(function(url, actual) {
-        t.same(actual, message)
-        t.end()
-        return 200
-      })
+test('accepts and decodes deflate encoded application/json', t => {
+  const message = {
+    my: 'contents',
+  }
 
-    const req = http.request({
-      hostname: 'example.test',
-      path: '/',
-      method: 'POST',
-      headers: {
-        'content-encoding': 'deflate',
-        'content-type': 'application/json',
-      },
+  t.plan(1)
+
+  nock('http://example.test')
+    .post('/')
+    .reply(function(url, actual) {
+      t.same(actual, message)
+      t.end()
+      return 200
     })
 
-    const compressedMessage = zlib.deflateSync(JSON.stringify(message))
-
-    req.write(compressedMessage)
-    req.end()
+  const req = http.request({
+    hostname: 'example.test',
+    path: '/',
+    method: 'POST',
+    headers: {
+      'content-encoding': 'deflate',
+      'content-type': 'application/json',
+    },
   })
-}
+
+  const compressedMessage = zlib.deflateSync(JSON.stringify(message))
+
+  req.write(compressedMessage)
+  req.end()
+})

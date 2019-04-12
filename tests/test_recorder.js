@@ -1,6 +1,5 @@
 'use strict'
 
-const nock = require('../.')
 const { test } = require('tap')
 const http = require('http')
 const https = require('https')
@@ -9,6 +8,9 @@ const zlib = require('zlib')
 const got = require('got')
 const mikealRequest = require('request')
 const superagent = require('superagent')
+const nock = require('..')
+
+require('./cleanup_after_each')()
 
 let globalCount
 
@@ -261,6 +263,24 @@ test('checks if callback is specified', t => {
     nock.restore()
     t.pass()
   })
+})
+
+test('checks that data is specified', t => {
+  nock.restore()
+  nock.recorder.clear()
+  nock.recorder.rec(true)
+
+  const req = http.request({
+    method: 'POST',
+    host: 'localhost',
+    path: '/',
+    port: '80',
+    body: undefined,
+  })
+
+  t.throws(() => req.write(), { message: 'Data was undefined.' })
+  req.abort()
+  t.end()
 })
 
 test('when request body is json, it goes unstringified', t => {
@@ -626,6 +646,7 @@ test("doesn't record request headers by default", t => {
       output_objects: true,
     })
 
+    // TODO: replace request to www.example.com with local server
     http
       .request(
         {

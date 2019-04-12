@@ -4,6 +4,8 @@ const http = require('http')
 const { test } = require('tap')
 const nock = require('../.')
 
+require('./cleanup_after_each')()
+
 // This test seems to need `http`.
 test('can use ClientRequest using GET', t => {
   let dataCalled = false
@@ -69,9 +71,6 @@ test('can use ClientRequest using POST', t => {
 })
 
 test('creating ClientRequest with empty options throws expected error', t => {
-  // Confidence check.
-  t.ok(nock.isActive())
-
   t.throws(() => new http.ClientRequest(), {
     message:
       'Creating a client request with empty `options` is not supported in Nock',
@@ -81,12 +80,6 @@ test('creating ClientRequest with empty options throws expected error', t => {
 })
 
 test('when no interceptors and net connect is allowed, request via ClientRequest goes through', t => {
-  nock.cleanAll()
-  nock.enableNetConnect()
-
-  // Confidence check. We need nock enabled to test the desired path.
-  t.ok(nock.isActive())
-
   const server = http.createServer((request, response) => {
     response.writeHead(201)
     response.end()
@@ -105,8 +98,6 @@ test('when no interceptors and net connect is allowed, request via ClientRequest
 
 test('when no interceptors and net connect is disallowed, receive via ClientRequest emits the expected error', t => {
   nock.disableNetConnect()
-  t.once('end', () => nock.enableNetConnect())
-
   new http.ClientRequest({ port: 12345, path: '/' }).on('error', err => {
     t.equal(err.message, 'Nock: Disallowed net connect for "localhost:12345/"')
     t.end()

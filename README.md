@@ -89,7 +89,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
     - [Modes](#modes)
 - [Debugging](#debugging)
 - [Contributing](#contributing)
-- [Backers](#backers)
+- [Contributors](#contributors)
 - [Sponsors](#sponsors)
 - [License](#license)
 
@@ -1447,11 +1447,19 @@ Thanks for wanting to contribute! Take a look at our [Contributing Guide](CONTRI
 Please note that this project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md).
 By participating in this project you agree to abide by its terms.
 
-## Backers
+## Contributors
 
-Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/nock#backer)]
+Thanks goes to these wonderful people ([emoji key](https://github.com/all-contributors/all-contributors#emoji-key)):
 
-<a href="https://opencollective.com/nock#backers" target="_blank"><img src="https://opencollective.com/nock/backers.svg?width=890"></a>
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore -->
+| [<img src="https://avatars1.githubusercontent.com/u/47910?v=4" width="100px;" alt="Pedro Teixeira"/><br /><sub><b>Pedro Teixeira</b></sub>](http://pgte.me)<br />[💻](https://github.com/nock/nock/commits?author=pgte "Code") [🚧](#maintenance-pgte "Maintenance") | [<img src="https://avatars3.githubusercontent.com/u/10771967?v=4" width="100px;" alt="n30n0v"/><br /><sub><b>n30n0v</b></sub>](https://github.com/n30n0v)<br />[💻](https://github.com/nock/nock/commits?author=n30n0v "Code") | [<img src="https://avatars3.githubusercontent.com/u/910753?v=4" width="100px;" alt="Richard Littauer"/><br /><sub><b>Richard Littauer</b></sub>](https://burntfen.com)<br />[🚧](#maintenance-RichardLitt "Maintenance") [💻](https://github.com/nock/nock/commits?author=RichardLitt "Code") [📝](#blog-RichardLitt "Blogposts") | [<img src="https://avatars1.githubusercontent.com/u/3731165?v=4" width="100px;" alt="Ian Walker-Sperber"/><br /><sub><b>Ian Walker-Sperber</b></sub>](http://ianwsperber.com)<br />[💻](https://github.com/nock/nock/commits?author=ianwsperber "Code") | [<img src="https://avatars2.githubusercontent.com/u/1505203?v=4" width="100px;" alt="Ivan Erceg"/><br /><sub><b>Ivan Erceg</b></sub>](http://ilovacha.com)<br />[💻](https://github.com/nock/nock/commits?author=ierceg "Code") [🚧](#maintenance-ierceg "Maintenance") | [<img src="https://avatars2.githubusercontent.com/u/1487036?v=4" width="100px;" alt="Paul Melnikow"/><br /><sub><b>Paul Melnikow</b></sub>](https://twitter.com/paulmelnikow)<br />[💻](https://github.com/nock/nock/commits?author=paulmelnikow "Code") [🚧](#maintenance-paulmelnikow "Maintenance") | [<img src="https://avatars3.githubusercontent.com/u/39992?v=4" width="100px;" alt="Gregor Martynus"/><br /><sub><b>Gregor Martynus</b></sub>](https://twitter.com/gr2m)<br />[💻](https://github.com/nock/nock/commits?author=gr2m "Code") [🚧](#maintenance-gr2m "Maintenance") [💼](#business-gr2m "Business development") [💵](#financial-gr2m "Financial") [📝](#blog-gr2m "Blogposts") |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| [<img src="https://avatars1.githubusercontent.com/u/6701030?v=4" width="100px;" alt="Hutson Betts"/><br /><sub><b>Hutson Betts</b></sub>](https://gitlab.com/hutson)<br />[💵](#financial-hutson "Financial") | [<img src="https://avatars2.githubusercontent.com/u/6105119?v=4" width="100px;" alt="Jonas Lilja"/><br /><sub><b>Jonas Lilja</b></sub>](http://lilja.io)<br />[💵](#financial-jlilja "Financial") [💻](https://github.com/nock/nock/commits?author=jlilja "Code") | [<img src="https://avatars0.githubusercontent.com/u/4446950?v=4" width="100px;" alt="Benjamin Ki"/><br /><sub><b>Benjamin Ki</b></sub>](https://github.com/benrki)<br />[💵](#financial-benrki "Financial") | [<img src="https://avatars2.githubusercontent.com/u/3250463?v=4" width="100px;" alt="Chad Fawcett"/><br /><sub><b>Chad Fawcett</b></sub>](http://chadf.ca)<br />[💵](#financial-chadfawcett "Financial") |
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
 
 ## Sponsors
 
