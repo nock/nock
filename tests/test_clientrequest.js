@@ -73,7 +73,7 @@ test('can use ClientRequest using POST', t => {
 test('creating ClientRequest with empty options throws expected error', t => {
   t.throws(() => new http.ClientRequest(), {
     message:
-      'Creating a client request with empty `options` is not supported in Nock',
+      'Creating a ClientRequest with empty `options` is not supported in Nock',
   })
 
   t.end()
