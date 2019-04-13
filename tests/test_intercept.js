@@ -1701,6 +1701,13 @@ test('data is sent with flushHeaders', t => {
     .flushHeaders()
 })
 
+test('should throw expected error when creating request with missing options', t => {
+  t.throws(() => http.request(), {
+    message: 'Making a request with empty `options` is not supported in Nock',
+  })
+  t.end()
+})
+
 test('teardown', t => {
   let leaks = Object.keys(global).splice(globalCount, Number.MAX_VALUE)
 
