@@ -22,6 +22,7 @@ stages:
 jobs:
   include:
     - stage: update-prettier
+      node_js: lts/*
       script:
         - git checkout $TRAVIS_BRANCH
         - npm run prettier
