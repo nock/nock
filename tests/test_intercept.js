@@ -1229,12 +1229,12 @@ test('test request timeout option', t => {
   })
 })
 
-test('do not match when filteringExternal = false but should match after trying again when = true', async t => {
+test('do not match when conditionally = false but should match after trying again when = true', async t => {
   t.plan(2)
   let enabled = false
 
   const scope = nock('http://example.test', {
-    filteringExternal: function() {
+    conditionally: function() {
       return enabled
     },
   })
