@@ -8,6 +8,7 @@ const mikealRequest = require('request')
 const superagent = require('superagent')
 const needle = require('needle')
 const restify = require('restify-clients')
+const assertRejects = require('assert-rejects')
 const hyperquest = require('hyperquest')
 const got = require('got')
 const nock = require('..')
@@ -1226,6 +1227,36 @@ test('test request timeout option', t => {
     t.equal(body, '{"foo":"bar"}')
     t.end()
   })
+})
+
+test('do not match when conditionally = false but should match after trying again when = true', async t => {
+  t.plan(2)
+  let enabled = false
+
+  const scope = nock('http://example.test', {
+    conditionally: function() {
+      return enabled
+    },
+  })
+    .get('/')
+    .reply(200)
+
+  // now the scope has been used, should fail on second try
+  await assertRejects(
+    got('http://example.test/'),
+    Error,
+    'Nock: No match for request'
+  )
+  t.throws(() => scope.done(), {
+    message: 'Mocks not yet satisfied',
+  })
+
+  enabled = true
+
+  const { statusCode } = await got('http://example.test/')
+
+  t.equal(statusCode, 200)
+  scope.done()
 })
 
 test('get correct filtering with scope and request headers filtering', t => {
