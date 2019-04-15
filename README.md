@@ -757,6 +757,18 @@ const scope = nock('https://api.dropbox.com', {
   .reply(200)
 ```
 
+### Conditional scope filtering
+
+You can also choose to filter out a scope based on your system environment (or any external factor). The filtering function is accepted at the `conditionally` field of the `options` argument.
+
+This can be useful if you only want certain scopes to apply depending on how your tests are executed.
+
+```js
+const scope = nock('https://api.myservice.com', {
+  conditionally: () => true,
+})
+```
+
 ### Path filtering
 
 You can also filter the URLs based on a function.
