@@ -349,7 +349,7 @@ const scope = nock('http://www.google.com')
   .reply(201, (uri, requestBody) => requestBody)
 ```
 
-An asynchronous function that gets an error-first callback as last argument also works:
+An asynchronous function that gets an error-first callback as its last argument also works:
 
 ```js
 const scope = nock('http://www.google.com')
@@ -360,7 +360,7 @@ const scope = nock('http://www.google.com')
   })
 ```
 
-> Note: When using a callback, if you call back with an error as first argument, that error will be sent in the response body, with a 500 HTTP response status code.
+> Note: When using a callback, if you call back with an error as the first argument, that error will be sent in the response body, with a 500 HTTP response status code.
 
 You can also return the status code and body using just one function:
 
@@ -473,7 +473,7 @@ const scope = nock('http://www.example.com', {
 
 If `reqheaders` is not specified or if `host` is not part of it, Nock will automatically add `host` value to request header.
 
-If no request headers are specified for mocking then Nock will automatically skip matching of request headers. Since `host` header is a special case which may get automatically inserted by Nock, its matching is skipped unless it was _also_ specified in the request being mocked.
+If no request headers are specified for mocking then Nock will automatically skip matching of request headers. Since the `host` header is a special case which may get automatically inserted by Nock, its matching is skipped unless it was _also_ specified in the request being mocked.
 
 You can also have Nock fail the request if certain headers are present:
 
@@ -1065,7 +1065,7 @@ nock.activate()
 
 ## Turning Nock Off (experimental!)
 
-You can bypass Nock completely by setting `NOCK_OFF` environment variable to `"true"`.
+You can bypass Nock completely by setting the `NOCK_OFF` environment variable to `"true"`.
 
 This way you can have your tests hit the real servers just by switching on this environment variable.
 
@@ -1154,7 +1154,7 @@ nock.recorder.rec()
 // those calls will be outputted to console
 ```
 
-Recording relies on intercepting real requests and answers and then persisting them for later use.
+Recording relies on intercepting real requests and responses and then persisting them for later use.
 
 In order to stop recording you should call `nock.restore()` and recording will stop.
 
@@ -1201,7 +1201,7 @@ The returned call objects have the following properties:
 - `headers` - the headers of the reply
 - `reqheader` - the headers of the request
 
-If you save this as a JSON file, you can load them directly through `nock.load(path)`. Then you can post-process them before using them in the tests for example to add them request body filtering (shown here fixing timestamps to match the ones captured during recording):
+If you save this as a JSON file, you can load them directly through `nock.load(path)`. Then you can post-process them before using them in the tests. For example, to add request body filtering (shown here fixing timestamps to match the ones captured during recording):
 
 ```js
 nocks = nock.load(pathToJson)
@@ -1246,7 +1246,7 @@ const nocks = nock.define(nockDefs)
 
 ### `enable_reqheaders_recording` option
 
-Recording request headers by default is deemed more trouble than it's worth as some of them depend on the timestamp or other values that may change after the tests have been recorder thus leading to complex postprocessing of recorded tests. Thus by default the request headers are not recorded.
+Recording request headers by default is deemed more trouble than it's worth as some of them depend on the timestamp or other values that may change after the tests have been recorded thus leading to complex postprocessing of recorded tests. Thus by default the request headers are not recorded.
 
 The genuine use cases for recording request headers (e.g. checking authorization) can be handled manually or by using `enable_reqheaders_recording` in `recorder.rec()` options.
 
