@@ -117,7 +117,7 @@ test('define() throws the expected error when method is missing', t => {
   t.end()
 })
 
-test('define() works with non-JSON responses', { only: true }, async t => {
+test('define() works with non-JSON responses', async t => {
   const exampleBody = '�'
   const exampleResponseBody = 'hey: �'
 
