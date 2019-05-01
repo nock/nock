@@ -1001,7 +1001,8 @@ test('end callback called', t => {
   })
 })
 
-test('finish event fired before end event (bug-139)', t => {
+// http://github.com/nock/nock/issues/139
+test('finish event fired before end event', t => {
   const scope = nock('http://example.test')
     .filteringRequestBody(/mia/, 'nostra')
     .post('/', 'mamma nostra')
