@@ -5,9 +5,9 @@
 
 const { test } = require('tap')
 const mikealRequest = require('request')
-const got = require('got')
 const lolex = require('lolex')
 const nock = require('..')
+const got = require('./got_client')
 
 require('./cleanup_after_each')()
 

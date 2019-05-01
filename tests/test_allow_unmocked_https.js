@@ -5,7 +5,7 @@ const fs = require('fs')
 const https = require('https')
 const nock = require('..')
 const ssl = require('./ssl')
-const got = require('got')
+const got = require('./got_client')
 
 require('./cleanup_after_each')()
 

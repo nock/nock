@@ -5,10 +5,10 @@ const path = require('path')
 const http = require('http')
 const stream = require('stream')
 const assertRejects = require('assert-rejects')
-const got = require('got')
 const mikealRequest = require('request')
 const { test } = require('tap')
 const nock = require('..')
+const got = require('./got_client')
 
 require('./cleanup_after_each')()
 

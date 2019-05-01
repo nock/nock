@@ -4,7 +4,7 @@
 
 const { test } = require('tap')
 const nock = require('..')
-const got = require('got')
+const got = require('./got_client')
 
 require('./cleanup_after_each')()
 

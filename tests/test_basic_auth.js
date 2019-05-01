@@ -2,8 +2,8 @@
 
 const { test } = require('tap')
 const assertRejects = require('assert-rejects')
-const got = require('got')
 const nock = require('..')
+const got = require('./got_client')
 
 require('./cleanup_after_each')()
 
