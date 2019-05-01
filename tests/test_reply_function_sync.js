@@ -169,20 +169,6 @@ test("when request has no content-type header: reply callback's requestBody shou
   scope.done()
 })
 
-test('reply can take a callback', async t => {
-  const scope = nock('http://example.com')
-    .get('/')
-    .reply(200, (path, requestBody, callback) => callback(null, 'Hello World!'))
-
-  const response = await got('http://example.com/', {
-    encoding: null,
-  })
-
-  scope.done()
-  t.type(response.body, Buffer)
-  t.equal(response.body.toString('utf8'), 'Hello World!')
-})
-
 test('reply should send correct statusCode with array-notation and without body', async t => {
   t.plan(1)
 
