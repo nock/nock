@@ -6,8 +6,8 @@ const path = require('path')
 const stream = require('stream')
 const util = require('util')
 const { test } = require('tap')
-const got = require('got')
 const nock = require('..')
+const got = require('./got_client')
 
 require('./cleanup_after_each')()
 
