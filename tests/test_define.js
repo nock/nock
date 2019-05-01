@@ -1,6 +1,7 @@
 'use strict'
 
 const http = require('http')
+const assertRejects = require('assert-rejects')
 const { test } = require('tap')
 const got = require('got')
 const nock = require('..')
@@ -22,10 +23,13 @@ test('define() is backward compatible', async t => {
     ])
   )
 
-  // TODO: It seems like this test is actually broken. It probably is meant to read
-  // await got('http://example.com:12345/') but if I change it to that, it fails.
-  const { statusCode } = await got('http://example.com/')
-  t.is(statusCode, 500)
+  await assertRejects(
+    got('http://example.com:12345/', { retry: 0 }),
+    ({ statusCode }) => {
+      t.is(statusCode, 500)
+      return true
+    }
+  )
 })
 
 test('define() applies default status code when none is specified', async t => {
@@ -113,7 +117,7 @@ test('define() throws the expected error when method is missing', t => {
   t.end()
 })
 
-test('define() works with non-JSON responses', async t => {
+test('define() works with non-JSON responses', { only: true }, async t => {
   const exampleBody = '�'
   const exampleResponseBody = 'hey: �'
 
@@ -136,7 +140,8 @@ test('define() works with non-JSON responses', async t => {
   })
 
   t.equal(statusCode, 200)
-  // TODO: `body` should be a buffer. This seems to be a bug.
+  // TODO: beacuse `{ encoding: false }` is passed to `got`, `body` should be
+  // a buffer, but it's a string. Is this a bug in nock or got?
   t.equal(body, exampleResponseBody)
 })
 
