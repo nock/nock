@@ -506,6 +506,14 @@ const scope = nock('https://api.github.com')
   .reply(200, { license: 'MIT' }, { 'X-RateLimit-Remaining': 4999 })
 ```
 
+Or along with a callback:
+
+```js
+const scope = nock('http://www.example.com')
+  .get('/ping')
+  .reply(() => 'OK!', { 'X-Powered-By': 'Rails' })
+```
+
 Or you can use a function to generate the headers values. The function will be
 passed the request, response, and body (if available). The body will be either a
 buffer, a stream, or undefined.

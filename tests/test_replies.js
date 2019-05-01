@@ -262,6 +262,50 @@ test('headers work', async t => {
   scope.done()
 })
 
+test('raw headers work with reply callback but no status', async t => {
+  const scope = nock('http://example.com')
+    .get('/')
+    .reply(() => 'OK!', { 'X-My-Headers': 'My Header value' })
+
+  const { headers, rawHeaders, statusCode } = await got('http://example.com/')
+
+  t.equal(statusCode, 200)
+  t.equivalent(headers, { 'x-my-headers': 'My Header value' })
+  t.equivalent(rawHeaders, ['X-My-Headers', 'My Header value'])
+  scope.done()
+})
+
+test('raw headers merge with reply callbacks array with headers', async t => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .reply(
+      () => [202, 'body', { 'x-key': 'value', 'x-key-2': 'value 2 override' }],
+      { 'x-key-2': 'value 2', 'x-key-3': 'value 3' }
+    )
+
+  const { headers, rawHeaders, statusCode } = await got('http://example.test/')
+
+  t.equal(statusCode, 202)
+  t.deepEqual(headers, {
+    'x-key': 'value',
+    'x-key-2': 'value 2 override',
+    'x-key-3': 'value 3',
+  })
+  t.deepEqual(rawHeaders, [
+    'x-key-2',
+    'value 2',
+    'x-key-3',
+    'value 3',
+    'x-key-2',
+    'value 2 override',
+    'x-key-3',
+    'value 3',
+    'x-key',
+    'value',
+  ])
+  scope.done()
+})
+
 test('reply headers work with function', async t => {
   const scope = nock('http://example.com')
     .get('/')
