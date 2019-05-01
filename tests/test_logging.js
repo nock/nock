@@ -1,10 +1,10 @@
 'use strict'
 
 const debug = require('debug')
-const got = require('got')
 const sinon = require('sinon')
 const { test } = require('tap')
 const nock = require('..')
+const got = require('./got_client')
 
 require('./cleanup_after_each')()
 

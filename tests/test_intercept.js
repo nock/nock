@@ -10,8 +10,8 @@ const needle = require('needle')
 const restify = require('restify-clients')
 const assertRejects = require('assert-rejects')
 const hyperquest = require('hyperquest')
-const got = require('got')
 const nock = require('..')
+const got = require('./got_client')
 
 require('./cleanup_after_each')()
 
