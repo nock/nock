@@ -2,36 +2,31 @@
 
 const http = require('http')
 const fs = require('fs')
-const { test } = require('tap')
+const { beforeEach, afterEach, test } = require('tap')
 const rimraf = require('rimraf')
 const nock = require('..')
 
 const nockBack = nock.back
 
-let originalMode
-let fixture
-
 require('./cleanup_after_each')()
 
-function rimrafOnEnd(t) {
-  t.once('end', () => rimraf.sync(fixture))
-}
-
-test('setup', t => {
-  originalMode = nockBack.currentMode
-
-  nockBack.fixtures = `${__dirname}/fixtures`
-  fixture = `${nockBack.fixtures}/recording_test.json`
+const fixture = `${__dirname}/fixtures/recording_test.json`
+beforeEach(done => {
   rimraf.sync(fixture)
 
+  nockBack.fixtures = `${__dirname}/fixtures`
   nockBack.setMode('record')
-  t.end()
+
+  done()
+})
+
+afterEach(done => {
+  rimraf.sync(fixture)
+  done()
 })
 
 test('recording', t => {
   t.plan(5)
-
-  rimrafOnEnd(t)
 
   nockBack('recording_test.json', function(nockDone) {
     const server = http.createServer((request, response) => {
@@ -81,8 +76,6 @@ test('recording', t => {
 test('passes custom options to recorder', t => {
   t.plan(3)
 
-  rimrafOnEnd(t)
-
   nockBack(
     'recording_test.json',
     { recorder: { enable_reqheaders_recording: true } },
@@ -125,9 +118,4 @@ test('passes custom options to recorder', t => {
       })
     }
   )
-})
-
-test('teardown', t => {
-  nockBack.setMode(originalMode)
-  t.end()
 })

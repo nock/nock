@@ -1,5 +1,7 @@
 'use strict'
 
+// Tests of `.defaultReplyHeaders()`.
+
 const { test } = require('tap')
 const nock = require('..')
 const got = require('got')
