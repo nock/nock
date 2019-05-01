@@ -50,6 +50,24 @@ test('define() is backward compatible', t => {
   req.end()
 })
 
+test('define() throws when reply is not a numeric string', t => {
+  t.throws(
+    () =>
+      nock.define([
+        {
+          scope: 'http://example.com:1451',
+          method: 'GET',
+          path: '/',
+          reply: 'frodo',
+        },
+      ]),
+    {
+      message: '`reply`, when present, must be a numeric string',
+    }
+  )
+  t.end()
+})
+
 test('define() applies default status code when none is specified', async t => {
   const body = '�'
 
