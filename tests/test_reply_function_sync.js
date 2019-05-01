@@ -22,20 +22,6 @@ test('get with reply callback', async t => {
   scope.done()
 })
 
-test('get to different subdomain with reply callback and filtering scope', async t => {
-  // We scope for www.example.com but through scope filtering we will accept
-  // any <subdomain>.example.com.
-  const scope = nock('http://example.test', {
-    filteringScope: scope => /^http:\/\/.*\.example/.test(scope),
-  })
-    .get('/')
-    .reply(200, () => 'OK!')
-
-  const { body } = await got('http://a.example.test')
-  t.equal(body, 'OK!')
-  scope.done()
-})
-
 test('get with reply callback returning object', async t => {
   const exampleResponse = { message: 'OK!' }
 

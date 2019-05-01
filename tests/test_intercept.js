@@ -1297,6 +1297,20 @@ test('get correct filtering with scope and request headers filtering', t => {
   t.equivalent(req._headers, { host: requestHeaders.host })
 })
 
+test('different subdomain with reply callback and filtering scope', async t => {
+  // We scope for www.example.com but through scope filtering we will accept
+  // any <subdomain>.example.com.
+  const scope = nock('http://example.test', {
+    filteringScope: scope => /^http:\/\/.*\.example/.test(scope),
+  })
+    .get('/')
+    .reply(200, () => 'OK!')
+
+  const { body } = await got('http://a.example.test')
+  t.equal(body, 'OK!')
+  scope.done()
+})
+
 test('mocking succeeds even when host request header is not specified', t => {
   nock('http://example.test')
     .post('/resource')
