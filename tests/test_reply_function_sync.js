@@ -4,7 +4,6 @@
 // response body or an array containing the status code and optional response
 // body and headers.
 
-const http = require('http')
 const assertRejects = require('assert-rejects')
 const { test } = require('tap')
 const got = require('got')
