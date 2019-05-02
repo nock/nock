@@ -167,6 +167,17 @@ test('post with chaining on call', async t => {
   scope.done()
 })
 
+test('delete request', async t => {
+  const scope = nock('https://example.test')
+    .delete('/')
+    .reply(204)
+
+  const { statusCode } = await got.delete('https://example.test')
+
+  t.is(statusCode, 204)
+  scope.done()
+})
+
 test('reply with callback and filtered path and body', async t => {
   let noPrematureExecution = false
 
