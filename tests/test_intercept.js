@@ -10,8 +10,8 @@ const needle = require('needle')
 const restify = require('restify-clients')
 const assertRejects = require('assert-rejects')
 const hyperquest = require('hyperquest')
-const got = require('got')
 const nock = require('..')
+const got = require('./got_client')
 
 require('./cleanup_after_each')()
 
@@ -164,6 +164,17 @@ test('post with chaining on call', async t => {
   const { body } = await got('http://example.com/echo', { body: input })
 
   t.equal(body, 'OK /echo key=val')
+  scope.done()
+})
+
+test('delete request', async t => {
+  const scope = nock('https://example.test')
+    .delete('/')
+    .reply(204)
+
+  const { statusCode } = await got.delete('https://example.test')
+
+  t.is(statusCode, 204)
   scope.done()
 })
 
@@ -1001,7 +1012,8 @@ test('end callback called', t => {
   })
 })
 
-test('finish event fired before end event (bug-139)', t => {
+// http://github.com/nock/nock/issues/139
+test('finish event fired before end event', t => {
   const scope = nock('http://example.test')
     .filteringRequestBody(/mia/, 'nostra')
     .post('/', 'mamma nostra')
@@ -1295,6 +1307,20 @@ test('get correct filtering with scope and request headers filtering', t => {
   )
 
   t.equivalent(req._headers, { host: requestHeaders.host })
+})
+
+test('different subdomain with reply callback and filtering scope', async t => {
+  // We scope for www.example.com but through scope filtering we will accept
+  // any <subdomain>.example.com.
+  const scope = nock('http://example.test', {
+    filteringScope: scope => /^http:\/\/.*\.example/.test(scope),
+  })
+    .get('/')
+    .reply(200, () => 'OK!')
+
+  const { body } = await got('http://a.example.test')
+  t.equal(body, 'OK!')
+  scope.done()
 })
 
 test('mocking succeeds even when host request header is not specified', t => {

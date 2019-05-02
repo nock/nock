@@ -6,10 +6,24 @@
 
 const http = require('http')
 const { test } = require('tap')
-const got = require('got')
 const nock = require('..')
+const got = require('./got_client')
 
 require('./cleanup_after_each')()
+
+test('reply can take a callback', async t => {
+  const scope = nock('http://example.com')
+    .get('/')
+    .reply(200, (path, requestBody, callback) => callback(null, 'Hello World!'))
+
+  const response = await got('http://example.com/', {
+    encoding: null,
+  })
+
+  scope.done()
+  t.type(response.body, Buffer)
+  t.equal(response.body.toString('utf8'), 'Hello World!')
+})
 
 test('reply takes a callback for status code', async t => {
   const expectedStatusCode = 202

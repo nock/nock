@@ -4,9 +4,9 @@ const http = require('http')
 const domain = require('domain')
 const assertRejects = require('assert-rejects')
 const { test } = require('tap')
-const got = require('got')
 const mikealRequest = require('request')
 const nock = require('..')
+const got = require('./got_client')
 
 require('./cleanup_after_each')()
 

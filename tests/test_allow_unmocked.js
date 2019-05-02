@@ -2,10 +2,10 @@
 
 const http = require('http')
 const url = require('url')
-const got = require('got')
 const mikealRequest = require('request')
 const { test } = require('tap')
 const nock = require('..')
+const got = require('./got_client')
 
 require('./cleanup_after_each')()
 

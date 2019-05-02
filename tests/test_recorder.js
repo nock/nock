@@ -5,10 +5,10 @@ const http = require('http')
 const https = require('https')
 const fs = require('fs')
 const zlib = require('zlib')
-const got = require('got')
 const mikealRequest = require('request')
 const superagent = require('superagent')
 const nock = require('..')
+const got = require('./got_client')
 
 require('./cleanup_after_each')()
 

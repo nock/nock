@@ -4,9 +4,9 @@
 
 const path = require('path')
 const { test } = require('tap')
-const got = require('got')
 const proxyquire = require('proxyquire').noPreserveCache()
 const nock = require('..')
+const got = require('./got_client')
 
 require('./cleanup_after_each')()
 
