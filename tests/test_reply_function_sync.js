@@ -220,8 +220,12 @@ test('reply function returning array with status code, string body, and headers 
     .get('/')
     .reply(() => [202, 'body', { 'x-key': 'value', 'x-key-2': 'value 2' }])
 
-  const { headers, rawHeaders } = await got('http://example.test/')
+  const { statusCode, body, headers, rawHeaders } = await got(
+    'http://example.test/'
+  )
 
+  t.is(statusCode, 202)
+  t.equal(body, 'body')
   t.deepEqual(headers, {
     'x-key': 'value',
     'x-key-2': 'value 2',
