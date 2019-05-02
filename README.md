@@ -301,6 +301,16 @@ nock('http://example.com')
   .reply(200, { results: [{ id: 'pgte' }] })
 ```
 
+A query string that is already [URL encoded](https://en.wikipedia.org/wiki/Percent-encoding) can be
+matched by passing the `encodedQueryParams` flag in the options when creating the Scope.
+
+```js
+nock('http://example.com', { encodedQueryParams: true })
+  .get('/users')
+  .query('foo%5Bbar%5D%3Dhello%20world%21')
+  .reply(200, { results: [{ id: 'pgte' }] })
+```
+
 ### Specifying replies
 
 You can specify the return status code for a path on the first argument of reply like this:
