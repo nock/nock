@@ -51,6 +51,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
   - [Socket timeout](#socket-timeout)
   - [Chaining](#chaining)
   - [Scope filtering](#scope-filtering)
+  - [Conditional scope filtering](#conditional-scope-filtering)
   - [Path filtering](#path-filtering)
   - [Request Body filtering](#request-body-filtering)
   - [Request Headers Matching](#request-headers-matching)
