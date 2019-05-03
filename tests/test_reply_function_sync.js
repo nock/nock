@@ -4,7 +4,6 @@
 // response body or an array containing the status code and optional response
 // body and headers.
 
-const http = require('http')
 const assertRejects = require('assert-rejects')
 const { test } = require('tap')
 const nock = require('..')
@@ -12,7 +11,7 @@ const got = require('./got_client')
 
 require('./cleanup_after_each')()
 
-test('get with reply callback', async t => {
+test('reply with status code and function returning body as string', async t => {
   const scope = nock('http://example.com')
     .get('/')
     .reply(200, () => 'OK!')
@@ -22,7 +21,7 @@ test('get with reply callback', async t => {
   scope.done()
 })
 
-test('get with reply callback returning object', async t => {
+test('reply with status code and function returning body object', async t => {
   const exampleResponse = { message: 'OK!' }
 
   const scope = nock('http://example.test')
@@ -34,22 +33,120 @@ test('get with reply callback returning object', async t => {
   scope.done()
 })
 
-test('get with reply callback returning array with headers', async t => {
+test('reply with status code and function returning body as number', async t => {
   const scope = nock('http://example.test')
     .get('/')
-    .reply(() => [202, 'body', { 'x-key': 'value', 'x-key-2': 'value 2' }])
+    .reply(200, () => 123)
 
-  const { headers, rawHeaders } = await got('http://example.test/')
-
-  t.deepEqual(headers, {
-    'x-key': 'value',
-    'x-key-2': 'value 2',
-  })
-  t.deepEqual(rawHeaders, ['x-key', 'value', 'x-key-2', 'value 2'])
+  const { body } = await got('http://example.test')
+  t.equal(body, '123')
   scope.done()
 })
 
-test('reply headers work with function', async t => {
+// The observed behavior is that this returns a 123 status code.
+//
+// The expected behavior is that this should either throw an error or reply
+// with 200 and the JSON-stringified '[123]'.
+test(
+  'reply with status code and function returning array',
+  { skip: true },
+  async t => {
+    const scope = nock('http://example.test')
+      .get('/')
+      .reply(200, () => [123])
+
+    const { body } = await got('http://example.test')
+    t.equal(body, '[123]')
+    scope.done()
+  }
+)
+
+test('reply function with string body using POST', async t => {
+  const exampleRequestBody = 'key=val'
+  const exampleResponseBody = 'foo'
+
+  const scope = nock('http://example.test')
+    .post('/endpoint', exampleRequestBody)
+    .reply(404, () => exampleResponseBody)
+
+  await assertRejects(
+    got.post('http://example.test/endpoint', {
+      body: exampleRequestBody,
+    }),
+    ({ statusCode, body }) => {
+      t.equal(statusCode, 404)
+      t.equal(body, exampleResponseBody)
+      return true
+    }
+  )
+  scope.done()
+})
+
+test('reply function receives the request URL and body', async t => {
+  t.plan(3)
+
+  const exampleRequestBody = 'key=val'
+
+  const scope = nock('http://example.test')
+    .post('/endpoint', exampleRequestBody)
+    .reply(404, (uri, requestBody) => {
+      t.equal(uri, '/endpoint')
+      t.equal(requestBody, exampleRequestBody)
+    })
+
+  await assertRejects(
+    got('http://example.test/endpoint', {
+      body: exampleRequestBody,
+    }),
+    ({ statusCode, body }) => {
+      t.equal(statusCode, 404)
+      return true
+    }
+  )
+  scope.done()
+})
+
+test('when content-type is json, reply function receives parsed body', async t => {
+  t.plan(3)
+  const exampleRequestBody = JSON.stringify({ id: 1, name: 'bob' })
+
+  const scope = nock('http://example.test')
+    .post('/')
+    .reply(200, (uri, requestBody) => {
+      t.type(requestBody, 'object')
+      t.deepEqual(requestBody, JSON.parse(exampleRequestBody))
+    })
+
+  const { statusCode } = await got('http://example.test/', {
+    headers: { 'Content-Type': 'application/json' },
+    body: exampleRequestBody,
+  })
+  t.is(statusCode, 200)
+  scope.done()
+})
+
+test('without content-type header, body sent to reply function is not parsed', async t => {
+  t.plan(3)
+  const exampleRequestBody = JSON.stringify({ id: 1, name: 'bob' })
+
+  const scope = nock('http://example.test')
+    .post('/')
+    .reply(200, (uri, requestBody) => {
+      t.type(requestBody, 'string')
+      t.equal(requestBody, exampleRequestBody)
+    })
+
+  const { statusCode } = await got.post('http://example.test/', {
+    body: exampleRequestBody,
+  })
+  t.is(statusCode, 200)
+  scope.done()
+})
+
+// This signature is supported today, however it seems unnecessary. This is
+// just as easily accomplished with a function returning an array:
+// `.reply(() => [200, 'ABC', { 'X-My-Headers': 'My custom header value' }])`
+test('reply with status code, function returning string body, and header object', async t => {
   const scope = nock('http://example.com')
     .get('/')
     .reply(200, () => 'ABC', { 'X-My-Headers': 'My custom header value' })
@@ -57,37 +154,28 @@ test('reply headers work with function', async t => {
   const { headers } = await got('http://example.com/')
 
   t.equivalent(headers, { 'x-my-headers': 'My custom header value' })
+
   scope.done()
 })
 
-// Skipped because https://github.com/nock/nock/issues/1222
 test(
-  'get with reply callback returning default statusCode without body',
+  'reply function returning array with status code',
+  // Seems likely a bug related to https://github.com/nock/nock/issues/1222.
   { skip: true },
-  t => {
-    nock('http://replyheaderland')
+  async t => {
+    const scope = nock('http://example.test')
       .get('/')
-      .reply((uri, requestBody) => [401])
+      .reply(() => [202])
 
-    http.get(
-      {
-        host: 'replyheaderland',
-        path: '/',
-        port: 80,
-      },
-      res => {
-        res.setEncoding('utf8')
-        t.equal(res.statusCode, 200)
-        res.on('data', data => {
-          t.equal(data, '[401]')
-          res.once('end', t.end.bind(t))
-        })
-      }
-    )
+    const { statusCode, body } = await got('http://example.test/')
+
+    t.is(statusCode, 202)
+    t.equal(body, '')
+    scope.done()
   }
 )
 
-test('get with reply callback returning callback without headers', async t => {
+test('reply function returning array with status code and string body', async t => {
   const scope = nock('http://example.com')
     .get('/')
     .reply(() => [401, 'This is a body'])
@@ -100,72 +188,48 @@ test('get with reply callback returning callback without headers', async t => {
   scope.done()
 })
 
-test('post with reply callback, uri, and request body', async t => {
-  const input = 'key=val'
+test('reply function returning array with status code and body object', async t => {
+  const exampleResponse = { message: 'OK!' }
 
-  const scope = nock('http://example.com')
-    .post('/echo', input)
-    .reply(200, (uri, body) => ['OK', uri, body].join(' '))
-
-  const { body } = await got('http://example.com/echo', { body: input })
-  t.equal(body, 'OK /echo key=val')
-  scope.done()
-})
-
-test("when request's content-type is json: reply callback's requestBody should automatically parse to JSON", async t => {
-  const requestBodyFixture = {
-    id: 1,
-    name: 'bob',
-  }
-
-  const scope = nock('http://service')
-    .post('/endpoint')
-    .reply(200, (uri, requestBody) => {
-      t.deepEqual(requestBody, requestBodyFixture)
-      return 'overwrite'
-    })
-
-  const { body } = await got.post('http://service/endpoint', {
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(requestBodyFixture),
-  })
-
-  t.equal(body, 'overwrite')
-  scope.done()
-})
-
-test("when request has no content-type header: reply callback's requestBody should not automatically parse to JSON", async t => {
-  const requestBodyFixture = {
-    id: 1,
-    name: 'bob',
-  }
-
-  const scope = nock('http://service')
-    .post('/endpoint')
-    .reply(200, (uri, requestBody) => {
-      t.deepEqual(requestBody, JSON.stringify(requestBodyFixture))
-      return 'overwrite'
-    })
-
-  const { body } = await got.post('http://service/endpoint', {
-    body: JSON.stringify(requestBodyFixture),
-  })
-
-  t.equal(body, 'overwrite')
-  scope.done()
-})
-
-test('reply should send correct statusCode with array-notation and without body', async t => {
-  t.plan(1)
-
-  const expectedStatusCode = 202
-
-  const scope = nock('http://example.com')
+  const scope = nock('http://example.test')
     .get('/')
-    .reply((path, requestBody) => [expectedStatusCode])
+    .reply(() => [202, exampleResponse])
 
-  const { statusCode } = await got('http://example.com/')
+  const { statusCode, body } = await got('http://example.test/')
 
-  t.equal(statusCode, expectedStatusCode)
+  t.is(statusCode, 202)
+  t.equal(body, JSON.stringify(exampleResponse))
+  scope.done()
+})
+
+test('reply function returning array with status code and body as number', async t => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .reply(() => [202, 123])
+
+  const { statusCode, body } = await got('http://example.test/')
+
+  t.is(statusCode, 202)
+  t.type(body, 'string')
+  t.equal(body, '123')
+  scope.done()
+})
+
+test('reply function returning array with status code, string body, and headers object', async t => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .reply(() => [202, 'body', { 'x-key': 'value', 'x-key-2': 'value 2' }])
+
+  const { statusCode, body, headers, rawHeaders } = await got(
+    'http://example.test/'
+  )
+
+  t.is(statusCode, 202)
+  t.equal(body, 'body')
+  t.deepEqual(headers, {
+    'x-key': 'value',
+    'x-key-2': 'value 2',
+  })
+  t.deepEqual(rawHeaders, ['x-key', 'value', 'x-key-2', 'value 2'])
   scope.done()
 })
