@@ -51,6 +51,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
   - [Socket timeout](#socket-timeout)
   - [Chaining](#chaining)
   - [Scope filtering](#scope-filtering)
+  - [Conditional scope filtering](#conditional-scope-filtering)
   - [Path filtering](#path-filtering)
   - [Request Body filtering](#request-body-filtering)
   - [Request Headers Matching](#request-headers-matching)
@@ -297,6 +298,16 @@ To mock the entire url regardless of the passed query string:
 nock('http://example.com')
   .get('/users')
   .query(true)
+  .reply(200, { results: [{ id: 'pgte' }] })
+```
+
+A query string that is already [URL encoded](https://en.wikipedia.org/wiki/Percent-encoding) can be
+matched by passing the `encodedQueryParams` flag in the options when creating the Scope.
+
+```js
+nock('http://example.com', { encodedQueryParams: true })
+  .get('/users')
+  .query('foo%5Bbar%5D%3Dhello%20world%21')
   .reply(200, { results: [{ id: 'pgte' }] })
 ```
 
