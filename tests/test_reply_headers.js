@@ -36,6 +36,76 @@ test('reply headers as function work', async t => {
   scope.done()
 })
 
+// Skipping these two test because of the inconsistencies around raw headers.
+// - they often receive the lower-cased versions of the keys
+// - the resulting order differs depending if overrides are provided to .reply directly or via a callback
+// - replacing values with function results isn't guaranteed to keep the correct order
+// - the resulting `headers` object itself is fine and these assertions pass
+test('reply headers and defaults', { skip: true }, async t => {
+  const scope = nock('http://example.com')
+    .defaultReplyHeaders({
+      'X-Powered-By': 'Meeee',
+      'X-Another-Header': 'Hey man!',
+    })
+    .get('/')
+    .reply(200, 'Success!', {
+      'X-Custom-Header': 'boo!',
+      'x-another-header': 'foobar',
+    })
+
+  const { headers, rawHeaders } = await got('http://example.com/')
+
+  t.equivalent(headers, {
+    'x-custom-header': 'boo!',
+    'x-another-header': 'foobar', // note this overrode the default value, despite the case difference
+    'x-powered-by': 'Meeee',
+  })
+  t.equivalent(rawHeaders, [
+    'X-Powered-By',
+    'Meeee',
+    'X-Another-Header',
+    'Hey man!',
+    'X-Custom-Header',
+    'boo!',
+    'x-another-header',
+    'foobar',
+  ])
+  scope.done()
+})
+
+test('reply headers from callback and defaults', { skip: true }, async t => {
+  const scope = nock('http://example.com')
+    .defaultReplyHeaders({
+      'X-Powered-By': 'Meeee',
+      'X-Another-Header': 'Hey man!',
+    })
+    .get('/')
+    .reply(() => [
+      200,
+      'Success!',
+      { 'X-Custom-Header': 'boo!', 'x-another-header': 'foobar' },
+    ])
+
+  const { headers, rawHeaders } = await got('http://example.com/')
+
+  t.equivalent(headers, {
+    'x-custom-header': 'boo!',
+    'x-another-header': 'foobar',
+    'x-powered-by': 'Meeee',
+  })
+  t.equivalent(rawHeaders, [
+    'X-Powered-By',
+    'Meeee',
+    'X-Another-Header',
+    'Hey man!',
+    'X-Custom-Header',
+    'boo!',
+    'x-another-header',
+    'foobar',
+  ])
+  scope.done()
+})
+
 test('reply headers as function are evaluated only once per request', async t => {
   let counter = 0
   const scope = nock('http://example.com')
