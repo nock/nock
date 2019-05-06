@@ -7,6 +7,80 @@ const assert = require('assert')
 
 require('./cleanup_after_each')()
 
+test('allow unordered body with json encoding', t => {
+  const scope = nock('http://example.test')
+    .post('/like-wtf', {
+      foo: 'bar',
+      bar: 'foo',
+    })
+    .reply(200, 'Heyyyy!')
+
+  mikealRequest(
+    {
+      uri: 'http://example.test/like-wtf',
+      method: 'POST',
+      json: {
+        bar: 'foo',
+        foo: 'bar',
+      },
+    },
+    function(e, r, body) {
+      t.equal(body, 'Heyyyy!')
+      scope.done()
+      t.end()
+    }
+  )
+})
+
+test('allow unordered body with form encoding', { only: true }, t => {
+  const scope = nock('http://example.test')
+    .post('/like-wtf', {
+      foo: 'bar',
+      bar: 'foo',
+    })
+    .reply(200, 'Heyyyy!')
+
+  mikealRequest(
+    {
+      uri: 'http://example.test/like-wtf',
+      method: 'POST',
+      form: {
+        bar: 'foo',
+        foo: 'bar',
+      },
+    },
+    function(e, r, body) {
+      t.equal(body, 'Heyyyy!')
+      scope.done()
+      t.end()
+    }
+  )
+})
+
+test('allow string json spec', t => {
+  const bodyObject = { bar: 'foo', foo: 'bar' }
+
+  const scope = nock('http://example.test')
+    .post('/like-wtf', JSON.stringify(bodyObject))
+    .reply(200, 'Heyyyy!')
+
+  mikealRequest(
+    {
+      uri: 'http://example.test/like-wtf',
+      method: 'POST',
+      json: {
+        bar: 'foo',
+        foo: 'bar',
+      },
+    },
+    function(e, r, body) {
+      t.equal(body, 'Heyyyy!')
+      scope.done()
+      t.end()
+    }
+  )
+})
+
 test('match body is regex trying to match string', function(t) {
   nock('http://example.test')
     .post('/', new RegExp('a.+'))
