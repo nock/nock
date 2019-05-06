@@ -13,12 +13,13 @@ test('accepts gzipped content', async t => {
 
   nock('http://example.test')
     .get('/foo')
-    .reply(200, compressed, {
+    .reply('200', compressed, {
       'X-Transfer-Length': String(compressed.length),
       'Content-Length': undefined,
       'Content-Encoding': 'gzip',
     })
-  const { body } = await got('http://example.test/foo')
+  const { body, statusCode } = await got('http://example.test/foo')
 
   t.equal(body, message)
+  t.equal(statusCode, 200)
 })

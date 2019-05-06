@@ -337,3 +337,25 @@ test('headersArrayToObject', function(t) {
 
   t.end()
 })
+
+test('statusCodeInt casts valid inputs', t => {
+  t.equal(common.statusCodeInt(418), 418)
+  t.equal(common.statusCodeInt('418'), 418)
+  t.equal(common.statusCodeInt('418.000'), 418)
+  t.end()
+})
+
+test('statusCodeInt throws for invalid inputs', t => {
+  t.throws(() => common.statusCodeInt(''), Error('Invalid string value'))
+  t.throws(() => common.statusCodeInt('foobar'), Error('Invalid string value'))
+  t.throws(
+    () => common.statusCodeInt({ foo: 'bar' }),
+    Error('Invalid object value')
+  )
+  t.throws(() => common.statusCodeInt(null), Error('Invalid object value'))
+  t.throws(
+    () => common.statusCodeInt(undefined),
+    Error('Invalid undefined value')
+  )
+  t.end()
+})
