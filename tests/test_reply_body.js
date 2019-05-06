@@ -91,3 +91,27 @@ test('unencodable object throws the expected error', t => {
 
   t.end()
 })
+
+test('reply with missing body defaults to empty', async t => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .reply(204)
+
+  const { statusCode, body } = await got('http://example.test/')
+
+  t.is(statusCode, 204)
+  t.equal(body, '')
+  scope.done()
+})
+
+test('reply with missing status code defaults to 200 + empty body', async t => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .reply()
+
+  const { statusCode, body } = await got('http://example.test/')
+
+  t.is(statusCode, 200)
+  t.equal(body, '')
+  scope.done()
+})
