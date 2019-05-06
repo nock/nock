@@ -46,6 +46,7 @@ test('header array sends multiple reply headers', async t => {
   t.equivalent(headers, {
     'set-cookie': ['cookie1=foo', 'cookie2=bar'],
   })
+  t.equivalent(rawHeaders, ['Set-Cookie', ['cookie1=foo', 'cookie2=bar']])
 
   scope.done()
 })
