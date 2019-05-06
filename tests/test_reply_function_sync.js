@@ -46,24 +46,16 @@ test('reply with status code and function returning body as number', async t => 
   scope.done()
 })
 
-// The observed behavior is that this returns a 123 status code.
-//
-// The expected behavior is that this should either throw an error or reply
-// with 201 and the JSON-stringified '[123]'.
-test(
-  'reply with status code and function returning array',
-  { skip: true },
-  async t => {
-    const scope = nock('http://example.test')
-      .get('/')
-      .reply(201, () => [123])
+test('reply with status code and function returning array', async t => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .reply(201, () => [123])
 
-    const { statusCode, body } = await got('http://example.test')
-    t.is(statusCode, 201)
-    t.equal(body, '[123]')
-    scope.done()
-  }
-)
+  const { statusCode, body } = await got('http://example.test')
+  t.is(statusCode, 201)
+  t.equal(body, '[123]')
+  scope.done()
+})
 
 test('reply function with string body using POST', async t => {
   const exampleRequestBody = 'key=val'
@@ -164,27 +156,22 @@ test('reply with status code, function returning string body, and header object'
   scope.done()
 })
 
-test(
-  'reply function returning array with status code',
-  // Seems likely a bug related to https://github.com/nock/nock/issues/1222.
-  { skip: true },
-  async t => {
-    const scope = nock('http://example.test')
-      .get('/')
-      .reply(() => [202])
+test('reply function returning array with status code', async t => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .reply(() => [202])
 
-    const { statusCode, body } = await got('http://example.test/')
+  const { statusCode, body } = await got('http://example.test/')
 
-    t.is(statusCode, 202)
-    t.equal(body, '')
-    scope.done()
-  }
-)
+  t.equal(statusCode, 202)
+  t.equal(body, '')
+  scope.done()
+})
 
 test('reply function returning array with status code and string body', async t => {
   const scope = nock('http://example.com')
     .get('/')
-    .reply(() => [401, 'This is a body'])
+    .reply(() => ['401', 'This is a body'])
 
   await assertRejects(got('http://example.com/'), ({ statusCode, body }) => {
     t.is(statusCode, 401)

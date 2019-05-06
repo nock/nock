@@ -104,14 +104,11 @@ test('reply with missing body defaults to empty', async t => {
   scope.done()
 })
 
-test('reply with missing status code defaults to 200 + empty body', async t => {
-  const scope = nock('http://example.test')
-    .get('/')
-    .reply()
-
-  const { statusCode, body } = await got('http://example.test/')
-
-  t.is(statusCode, 200)
-  t.equal(body, '')
-  scope.done()
+test('reply with missing status code throws an error', async t => {
+  const interceptor = nock('http://example.test').get('/')
+  t.throws(
+    () => interceptor.reply(),
+    Error('Invalid undefined value for status code')
+  )
+  t.end()
 })

@@ -245,6 +245,7 @@ test(
       res.setEncoding('utf8')
 
       let body = ''
+      t.equal(res.statusCode, 200)
 
       res.on('data', function(chunk) {
         body += chunk
