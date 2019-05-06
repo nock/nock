@@ -2,8 +2,10 @@
 
 const zlib = require('zlib')
 const { test } = require('tap')
-const got = require('got')
-const nock = require('../.')
+const nock = require('..')
+const got = require('./got_client')
+
+require('./cleanup_after_each')()
 
 test('accepts gzipped content', async t => {
   const message = 'Lorem ipsum dolor sit amet'

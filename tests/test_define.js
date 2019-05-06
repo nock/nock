@@ -1,11 +1,14 @@
 'use strict'
 
 const http = require('http')
+const assertRejects = require('assert-rejects')
 const { test } = require('tap')
-const got = require('got')
 const nock = require('..')
+const got = require('./got_client')
 
-test('define() is backward compatible', t => {
+require('./cleanup_after_each')()
+
+test('define() is backward compatible', async t => {
   t.ok(
     nock.define([
       {
@@ -20,32 +23,31 @@ test('define() is backward compatible', t => {
     ])
   )
 
-  const req = new http.request(
-    {
-      host: 'example.com',
-      port: 12345,
-      method: 'GET',
-      path: '/',
-    },
-    res => {
-      t.equal(res.statusCode, 500)
-
-      res.once('end', () => {
-        t.end()
-      })
-      // Streams start in 'paused' mode and must be started.
-      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
-      res.resume()
+  await assertRejects(
+    got('http://example.com:12345/', { retry: 0 }),
+    ({ statusCode }) => {
+      t.is(statusCode, 500)
+      return true
     }
   )
+})
 
-  req.on('error', err => {
-    // This should never happen.
-    t.fail('Error should never occur.')
-    t.end()
-  })
-
-  req.end()
+test('define() throws when reply is not a numeric string', t => {
+  t.throws(
+    () =>
+      nock.define([
+        {
+          scope: 'http://example.com:1451',
+          method: 'GET',
+          path: '/',
+          reply: 'frodo',
+        },
+      ]),
+    {
+      message: '`reply`, when present, must be a numeric string',
+    }
+  )
+  t.end()
 })
 
 test('define() applies default status code when none is specified', async t => {
@@ -156,13 +158,14 @@ test('define() works with non-JSON responses', async t => {
   })
 
   t.equal(statusCode, 200)
-  // TODO: `body` should be a buffer. This seems to be a bug.
+  // TODO: beacuse `{ encoding: false }` is passed to `got`, `body` should be
+  // a buffer, but it's a string. Is this a bug in nock or got?
   t.equal(body, exampleResponseBody)
 })
 
-// TODO: There seems to be a bug here. When testing via `got` with `{
-// encoding: false }` the body that comes back should be a buffer, but is not.
-// It's difficult to get this test to pass after porting it.
+// TODO: There seems to be a bug here. When testing via `got` with
+// `{ encoding: false }` the body that comes back should be a buffer, but is
+// not. It's difficult to get this test to pass after porting it.
 test('define() works with binary buffers', t => {
   const exampleBody = '8001'
   const exampleResponse = '8001'

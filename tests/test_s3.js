@@ -8,9 +8,11 @@
 //
 // Do not create new tests in this style.
 
-const nock = require('../')
 const AWS = require('aws-sdk')
 const { test } = require('tap')
+const nock = require('..')
+
+require('./cleanup_after_each')()
 
 test('works with s3, body < 1024 ^ 2', function(t) {
   const REGION = 'us-east-1'

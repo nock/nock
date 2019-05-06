@@ -1,18 +1,19 @@
 'use strict'
 
-const nock = require('../')
 const { test } = require('tap')
 const mikealRequest = require('request')
-const assert = require('assert')
+const nock = require('..')
 
-test('url encoding', function(t) {
+require('./cleanup_after_each')()
+
+test('url encoding', t => {
   nock('http://example.test')
     .get('/key?a=[1]')
     .reply(200)
 
   mikealRequest('http://example.test/key?a=[1]', function(err, res) {
     if (err) throw err
-    assert.equal(res.statusCode, 200)
+    t.equal(res.statusCode, 200)
     t.end()
   })
 })

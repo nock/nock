@@ -2,8 +2,10 @@
 
 const { test } = require('tap')
 const qs = require('qs')
-const got = require('got')
-const nock = require('../.')
+const nock = require('..')
+const got = require('./got_client')
+
+require('./cleanup_after_each')()
 
 const exampleText = 'it worked!'
 

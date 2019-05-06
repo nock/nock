@@ -3,11 +3,11 @@
 const { test } = require('tap')
 const fs = require('fs')
 const https = require('https')
-const nock = require('../')
+const nock = require('..')
 const ssl = require('./ssl')
-const got = require('got')
+const got = require('./got_client')
 
-nock.enableNetConnect()
+require('./cleanup_after_each')()
 
 test('Nock with allowUnmocked and an url match', async t => {
   const options = {
@@ -39,8 +39,6 @@ test('Nock with allowUnmocked and an url match', async t => {
 })
 
 test('Nock with allowUnmocked, url match and query false', async t => {
-  nock.cleanAll()
-
   const options = {
     key: fs.readFileSync('tests/ssl/ca.key'),
     cert: fs.readFileSync('tests/ssl/ca.crt'),

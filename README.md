@@ -51,6 +51,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
   - [Socket timeout](#socket-timeout)
   - [Chaining](#chaining)
   - [Scope filtering](#scope-filtering)
+  - [Conditional scope filtering](#conditional-scope-filtering)
   - [Path filtering](#path-filtering)
   - [Request Body filtering](#request-body-filtering)
   - [Request Headers Matching](#request-headers-matching)
@@ -89,7 +90,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
     - [Modes](#modes)
 - [Debugging](#debugging)
 - [Contributing](#contributing)
-- [Backers](#backers)
+- [Contributors](#contributors)
 - [Sponsors](#sponsors)
 - [License](#license)
 
@@ -300,6 +301,16 @@ nock('http://example.com')
   .reply(200, { results: [{ id: 'pgte' }] })
 ```
 
+A query string that is already [URL encoded](https://en.wikipedia.org/wiki/Percent-encoding) can be
+matched by passing the `encodedQueryParams` flag in the options when creating the Scope.
+
+```js
+nock('http://example.com', { encodedQueryParams: true })
+  .get('/users')
+  .query('foo%5Bbar%5D%3Dhello%20world%21')
+  .reply(200, { results: [{ id: 'pgte' }] })
+```
+
 ### Specifying replies
 
 You can specify the return status code for a path on the first argument of reply like this:
@@ -349,7 +360,7 @@ const scope = nock('http://www.google.com')
   .reply(201, (uri, requestBody) => requestBody)
 ```
 
-An asynchronous function that gets an error-first callback as last argument also works:
+An asynchronous function that gets an error-first callback as its last argument also works:
 
 ```js
 const scope = nock('http://www.google.com')
@@ -360,7 +371,7 @@ const scope = nock('http://www.google.com')
   })
 ```
 
-> Note: When using a callback, if you call back with an error as first argument, that error will be sent in the response body, with a 500 HTTP response status code.
+> Note: When using a callback, if you call back with an error as the first argument, that error will be sent in the response body, with a 500 HTTP response status code.
 
 You can also return the status code and body using just one function:
 
@@ -473,7 +484,7 @@ const scope = nock('http://www.example.com', {
 
 If `reqheaders` is not specified or if `host` is not part of it, Nock will automatically add `host` value to request header.
 
-If no request headers are specified for mocking then Nock will automatically skip matching of request headers. Since `host` header is a special case which may get automatically inserted by Nock, its matching is skipped unless it was _also_ specified in the request being mocked.
+If no request headers are specified for mocking then Nock will automatically skip matching of request headers. Since the `host` header is a special case which may get automatically inserted by Nock, its matching is skipped unless it was _also_ specified in the request being mocked.
 
 You can also have Nock fail the request if certain headers are present:
 
@@ -755,6 +766,18 @@ const scope = nock('https://api.dropbox.com', {
 })
   .get('/1/metadata/auto/Photos?include_deleted=false&list=true')
   .reply(200)
+```
+
+### Conditional scope filtering
+
+You can also choose to filter out a scope based on your system environment (or any external factor). The filtering function is accepted at the `conditionally` field of the `options` argument.
+
+This can be useful if you only want certain scopes to apply depending on how your tests are executed.
+
+```js
+const scope = nock('https://api.myservice.com', {
+  conditionally: () => true,
+})
 ```
 
 ### Path filtering
@@ -1053,7 +1076,7 @@ nock.activate()
 
 ## Turning Nock Off (experimental!)
 
-You can bypass Nock completely by setting `NOCK_OFF` environment variable to `"true"`.
+You can bypass Nock completely by setting the `NOCK_OFF` environment variable to `"true"`.
 
 This way you can have your tests hit the real servers just by switching on this environment variable.
 
@@ -1142,7 +1165,7 @@ nock.recorder.rec()
 // those calls will be outputted to console
 ```
 
-Recording relies on intercepting real requests and answers and then persisting them for later use.
+Recording relies on intercepting real requests and responses and then persisting them for later use.
 
 In order to stop recording you should call `nock.restore()` and recording will stop.
 
@@ -1189,7 +1212,7 @@ The returned call objects have the following properties:
 - `headers` - the headers of the reply
 - `reqheader` - the headers of the request
 
-If you save this as a JSON file, you can load them directly through `nock.load(path)`. Then you can post-process them before using them in the tests for example to add them request body filtering (shown here fixing timestamps to match the ones captured during recording):
+If you save this as a JSON file, you can load them directly through `nock.load(path)`. Then you can post-process them before using them in the tests. For example, to add request body filtering (shown here fixing timestamps to match the ones captured during recording):
 
 ```js
 nocks = nock.load(pathToJson)
@@ -1234,7 +1257,7 @@ const nocks = nock.define(nockDefs)
 
 ### `enable_reqheaders_recording` option
 
-Recording request headers by default is deemed more trouble than it's worth as some of them depend on the timestamp or other values that may change after the tests have been recorder thus leading to complex postprocessing of recorded tests. Thus by default the request headers are not recorded.
+Recording request headers by default is deemed more trouble than it's worth as some of them depend on the timestamp or other values that may change after the tests have been recorded thus leading to complex postprocessing of recorded tests. Thus by default the request headers are not recorded.
 
 The genuine use cases for recording request headers (e.g. checking authorization) can be handled manually or by using `enable_reqheaders_recording` in `recorder.rec()` options.
 
@@ -1447,11 +1470,19 @@ Thanks for wanting to contribute! Take a look at our [Contributing Guide](CONTRI
 Please note that this project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md).
 By participating in this project you agree to abide by its terms.
 
-## Backers
+## Contributors
 
-Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/nock#backer)]
+Thanks goes to these wonderful people ([emoji key](https://github.com/all-contributors/all-contributors#emoji-key)):
 
-<a href="https://opencollective.com/nock#backers" target="_blank"><img src="https://opencollective.com/nock/backers.svg?width=890"></a>
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore -->
+| [<img src="https://avatars1.githubusercontent.com/u/47910?v=4" width="100px;" alt="Pedro Teixeira"/><br /><sub><b>Pedro Teixeira</b></sub>](http://pgte.me)<br />[💻](https://github.com/nock/nock/commits?author=pgte "Code") [🚧](#maintenance-pgte "Maintenance") | [<img src="https://avatars3.githubusercontent.com/u/10771967?v=4" width="100px;" alt="n30n0v"/><br /><sub><b>n30n0v</b></sub>](https://github.com/n30n0v)<br />[💻](https://github.com/nock/nock/commits?author=n30n0v "Code") | [<img src="https://avatars3.githubusercontent.com/u/910753?v=4" width="100px;" alt="Richard Littauer"/><br /><sub><b>Richard Littauer</b></sub>](https://burntfen.com)<br />[🚧](#maintenance-RichardLitt "Maintenance") [💻](https://github.com/nock/nock/commits?author=RichardLitt "Code") [📝](#blog-RichardLitt "Blogposts") | [<img src="https://avatars1.githubusercontent.com/u/3731165?v=4" width="100px;" alt="Ian Walker-Sperber"/><br /><sub><b>Ian Walker-Sperber</b></sub>](http://ianwsperber.com)<br />[💻](https://github.com/nock/nock/commits?author=ianwsperber "Code") | [<img src="https://avatars2.githubusercontent.com/u/1505203?v=4" width="100px;" alt="Ivan Erceg"/><br /><sub><b>Ivan Erceg</b></sub>](http://ilovacha.com)<br />[💻](https://github.com/nock/nock/commits?author=ierceg "Code") [🚧](#maintenance-ierceg "Maintenance") | [<img src="https://avatars2.githubusercontent.com/u/1487036?v=4" width="100px;" alt="Paul Melnikow"/><br /><sub><b>Paul Melnikow</b></sub>](https://twitter.com/paulmelnikow)<br />[💻](https://github.com/nock/nock/commits?author=paulmelnikow "Code") [🚧](#maintenance-paulmelnikow "Maintenance") | [<img src="https://avatars3.githubusercontent.com/u/39992?v=4" width="100px;" alt="Gregor Martynus"/><br /><sub><b>Gregor Martynus</b></sub>](https://twitter.com/gr2m)<br />[💻](https://github.com/nock/nock/commits?author=gr2m "Code") [🚧](#maintenance-gr2m "Maintenance") [💼](#business-gr2m "Business development") [💵](#financial-gr2m "Financial") [📝](#blog-gr2m "Blogposts") |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| [<img src="https://avatars1.githubusercontent.com/u/6701030?v=4" width="100px;" alt="Hutson Betts"/><br /><sub><b>Hutson Betts</b></sub>](https://gitlab.com/hutson)<br />[💵](#financial-hutson "Financial") | [<img src="https://avatars2.githubusercontent.com/u/6105119?v=4" width="100px;" alt="Jonas Lilja"/><br /><sub><b>Jonas Lilja</b></sub>](http://lilja.io)<br />[💵](#financial-jlilja "Financial") [💻](https://github.com/nock/nock/commits?author=jlilja "Code") | [<img src="https://avatars0.githubusercontent.com/u/4446950?v=4" width="100px;" alt="Benjamin Ki"/><br /><sub><b>Benjamin Ki</b></sub>](https://github.com/benrki)<br />[💵](#financial-benrki "Financial") | [<img src="https://avatars2.githubusercontent.com/u/3250463?v=4" width="100px;" alt="Chad Fawcett"/><br /><sub><b>Chad Fawcett</b></sub>](http://chadf.ca)<br />[💵](#financial-chadfawcett "Financial") |
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
 
 ## Sponsors
 
