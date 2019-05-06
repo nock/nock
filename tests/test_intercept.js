@@ -275,10 +275,24 @@ test('encoding', async t => {
   scope.done()
 })
 
-test('filter path with function', async t => {
+test('filter path with function on scope', async t => {
   const scope = nock('http://example.test')
-    .filteringPath(path => '/?a=2&b=1')
+    .filteringPath(() => '/?a=2&b=1')
     .get('/?a=2&b=1')
+    .reply(200, 'Hello World!')
+
+  const { statusCode } = await got('http://example.test/', {
+    query: { a: '1', b: '2' },
+  })
+
+  t.equal(statusCode, 200)
+  scope.done()
+})
+
+test('filter path with function on intercept', async t => {
+  const scope = nock('http://example.test')
+    .get('/?a=2&b=1')
+    .filteringPath(() => '/?a=2&b=1')
     .reply(200, 'Hello World!')
 
   const { statusCode } = await got('http://example.test/', {
