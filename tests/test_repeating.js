@@ -81,6 +81,20 @@ test('repeating response 4 times', t => {
   )
 })
 
+test('times with invalid argument is ignored', t => {
+  nock.disableNetConnect()
+
+  nock('http://example.test')
+    .get('/')
+    .times(0)
+    .reply(200, 'Hello World!')
+
+  http.get('http://example.test', function(res) {
+    t.equal(200, res.statusCode, 'first request')
+    t.end()
+  })
+})
+
 test('isDone() must consider repeated responses', t => {
   const scope = nock('http://example.test')
     .get('/')

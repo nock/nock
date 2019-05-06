@@ -53,6 +53,16 @@ test('one function returning too large an array causes an error', function(t) {
   })
 })
 
+test('one function throws an error if extraneous args are provided', function(t) {
+  const interceptor = nock('http://example.test').get('/')
+  t.throws(
+    () => interceptor.reply(() => [200], { 'x-my-header': 'some-value' }),
+    Error('Invalid arguments')
+  )
+
+  t.end()
+})
+
 test('one function returning the status code and body defines a full mock', function(t) {
   nock('http://example.test')
     .get('/def')
