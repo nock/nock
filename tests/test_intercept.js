@@ -259,7 +259,7 @@ test('encoding', async t => {
   scope.done()
 })
 
-test('filter path with function', async t => {
+test('on interceptor, filter path with function', async t => {
   // Interceptor.filteringPath simply proxies to Scope.filteringPath, this test covers the proxy,
   // testing the logic of filteringPath itself is done in test_scope.js.
   const scope = nock('http://example.test')
