@@ -1247,7 +1247,7 @@ nockDefs.forEach(def => {
   //  Do something with the definition object e.g. scope filtering.
   def.options = {
     ...def.options,
-    filteringScope: = scope => /^https:\/\/api[0-9]*.dropbox.com/.test(scope),
+    filteringScope: scope => /^https:\/\/api[0-9]*.dropbox.com/.test(scope),
   }
 })
 
