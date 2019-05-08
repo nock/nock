@@ -101,7 +101,7 @@ test('reply function with string body using POST', async t => {
 })
 
 test('reply function receives the request URL and body', async t => {
-  t.plan(3)
+  t.plan(4)
 
   const exampleRequestBody = 'key=val'
 
@@ -118,6 +118,7 @@ test('reply function receives the request URL and body', async t => {
     }),
     ({ statusCode, body }) => {
       t.equal(statusCode, 404)
+      t.equal(body, '')
       return true
     }
   )
@@ -178,7 +179,7 @@ test('reply with status code, function returning string body, and header object'
   scope.done()
 })
 
-test('reply function returning array with status code', async t => {
+test('reply function returning array with only status code', async t => {
   const scope = nock('http://example.test')
     .get('/')
     .reply(() => [202])
@@ -247,4 +248,64 @@ test('reply function returning array with status code, string body, and headers 
   })
   t.deepEqual(rawHeaders, ['x-key', 'value', 'x-key-2', 'value 2'])
   scope.done()
+})
+
+test('one function not returning an array causes an error', async t => {
+  nock('http://example.test')
+    .get('/abc')
+    .reply(function() {
+      return 'ABC'
+    })
+
+  await assertRejects(got('http://example.test/abc'), err => {
+    t.match(
+      err,
+      Error('A single function provided to .reply MUST return an array')
+    )
+    return true
+  })
+  t.end()
+})
+
+test('one function returning an empty array causes an error', async t => {
+  nock('http://example.test')
+    .get('/abc')
+    .reply(function() {
+      return []
+    })
+
+  await assertRejects(got('http://example.test/abc'), err => {
+    t.match(err, Error('Invalid undefined value for status code'))
+    return true
+  })
+  t.end()
+})
+
+test('one function returning too large an array causes an error', async t => {
+  nock('http://example.test')
+    .get('/abc')
+    .reply(function() {
+      return ['user', 'probably', 'intended', 'this', 'to', 'be', 'JSON']
+    })
+
+  await assertRejects(got('http://example.test/abc'), err => {
+    t.match(
+      err,
+      Error(
+        'The array returned from the .reply callback contains too many values'
+      )
+    )
+    return true
+  })
+  t.end()
+})
+
+test('one function throws an error if extraneous args are provided', async t => {
+  const interceptor = nock('http://example.test').get('/')
+  t.throws(
+    () => interceptor.reply(() => [200], { 'x-my-header': 'some-value' }),
+    Error('Invalid arguments')
+  )
+
+  t.end()
 })
