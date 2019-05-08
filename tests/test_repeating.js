@@ -4,6 +4,7 @@ const http = require('http')
 const async = require('async')
 const { test } = require('tap')
 const nock = require('..')
+const got = require('./got_client')
 
 require('./cleanup_after_each')()
 
@@ -81,18 +82,18 @@ test('repeating response 4 times', t => {
   )
 })
 
-test('times with invalid argument is ignored', t => {
+test('times with invalid argument is ignored', async t => {
   nock.disableNetConnect()
 
-  nock('http://example.test')
+  const scope = nock('http://example.test')
     .get('/')
     .times(0)
     .reply(200, 'Hello World!')
 
-  http.get('http://example.test', function(res) {
-    t.equal(200, res.statusCode, 'first request')
-    t.end()
-  })
+  const { statusCode } = await got('http://example.test/')
+  t.is(statusCode, 200)
+
+  scope.done()
 })
 
 test('isDone() must consider repeated responses', t => {
