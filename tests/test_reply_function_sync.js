@@ -57,6 +57,28 @@ test('reply with status code and function returning array', async t => {
   scope.done()
 })
 
+test('reply with status code and function returning a native boolean', async t => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .reply(201, () => false)
+
+  const { statusCode, body } = await got('http://example.test')
+  t.is(statusCode, 201)
+  t.equal(body, 'false')
+  scope.done()
+})
+
+test('reply with status code and function returning a native null', async t => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .reply(201, () => null)
+
+  const { statusCode, body } = await got('http://example.test')
+  t.is(statusCode, 201)
+  t.equal(body, 'null')
+  scope.done()
+})
+
 test('reply function with string body using POST', async t => {
   const exampleRequestBody = 'key=val'
   const exampleResponseBody = 'foo'

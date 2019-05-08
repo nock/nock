@@ -104,6 +104,31 @@ test('reply with missing body defaults to empty', async t => {
   scope.done()
 })
 
+// while `false` and `null` are falsy, they are valid JSON value so they should be returned as a strings
+// that JSON.parse would convert back to native values
+test('reply with native boolean as the body', async t => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .reply(204, false)
+
+  const { statusCode, body } = await got('http://example.test/')
+
+  t.is(statusCode, 204)
+  t.equal(body, 'false')
+  scope.done()
+})
+
+test('reply with native null as the body', async t => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .reply(204, null)
+
+  const { statusCode, body } = await got('http://example.test/')
+
+  t.is(statusCode, 204)
+  t.equal(body, 'null')
+  scope.done()
+})
 
 test('reply with missing status code defaults to 200', async t => {
   const scope = nock('http://example.test')
