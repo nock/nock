@@ -155,8 +155,6 @@ test('records objects and correctly stores JSON object in body', async t => {
 
   t.equal(recorded.length, 1)
 
-  const { body } = recorded[0]
-
   // TODO See https://github.com/nock/nock/issues/1229
 
   // This is the current behavior: store body as decoded JSON.
