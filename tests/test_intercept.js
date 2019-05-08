@@ -199,22 +199,6 @@ test('reply with callback and filtered path and body', async t => {
   scope.done()
 })
 
-test('filteringPath with invalid argument throws expected', t => {
-  t.throws(() => nock('http://example.test').filteringPath('abc123'), {
-    message:
-      'Invalid arguments: filtering path should be a function or a regular expression',
-  })
-  t.end()
-})
-
-test('filteringRequestBody with invalid argument throws expected', t => {
-  t.throws(() => nock('http://example.test').filteringRequestBody('abc123'), {
-    message:
-      'Invalid arguments: filtering request body should be a function or a regular expression',
-  })
-  t.end()
-})
-
 test('head', async t => {
   const scope = nock('http://example.test')
     .head('/')
@@ -275,21 +259,9 @@ test('encoding', async t => {
   scope.done()
 })
 
-test('filter path with function on scope', async t => {
-  const scope = nock('http://example.test')
-    .filteringPath(() => '/?a=2&b=1')
-    .get('/?a=2&b=1')
-    .reply(200, 'Hello World!')
-
-  const { statusCode } = await got('http://example.test/', {
-    query: { a: '1', b: '2' },
-  })
-
-  t.equal(statusCode, 200)
-  scope.done()
-})
-
-test('filter path with function on intercept', async t => {
+test('on interceptor, filter path with function', async t => {
+  // Interceptor.filteringPath simply proxies to Scope.filteringPath, this test covers the proxy,
+  // testing the logic of filteringPath itself is done in test_scope.js.
   const scope = nock('http://example.test')
     .get('/?a=2&b=1')
     .filteringPath(() => '/?a=2&b=1')
@@ -297,55 +269,6 @@ test('filter path with function on intercept', async t => {
 
   const { statusCode } = await got('http://example.test/', {
     query: { a: '1', b: '2' },
-  })
-
-  t.equal(statusCode, 200)
-  scope.done()
-})
-
-test('filter path with regexp', async t => {
-  const scope = nock('http://example.test')
-    .filteringPath(/\d/g, '3')
-    .get('/?a=3&b=3')
-    .reply(200, 'Hello World!')
-
-  const { statusCode } = await got('http://example.test/', {
-    query: { a: '1', b: '2' },
-  })
-
-  t.equal(statusCode, 200)
-  scope.done()
-})
-
-test('filter body with function', async t => {
-  let filteringRequestBodyCounter = 0
-
-  const scope = nock('http://example.test')
-    .filteringRequestBody(body => {
-      ++filteringRequestBodyCounter
-      t.equal(body, 'mamma mia')
-      return 'mamma tua'
-    })
-    .post('/', 'mamma tua')
-    .reply(200, 'Hello World!')
-
-  const { statusCode } = await got('http://example.test/', {
-    body: 'mamma mia',
-  })
-
-  t.equal(statusCode, 200)
-  scope.done()
-  t.equal(filteringRequestBodyCounter, 1)
-})
-
-test('filter body with regexp', async t => {
-  const scope = nock('http://example.test')
-    .filteringRequestBody(/mia/, 'nostra')
-    .post('/', 'mamma nostra')
-    .reply(200, 'Hello World!')
-
-  const { statusCode } = await got('http://example.test/', {
-    body: 'mamma mia',
   })
 
   t.equal(statusCode, 200)
@@ -807,80 +730,6 @@ test('request has path', t => {
     }
   )
   req.end()
-})
-
-test('allow unordered body with json encoding', t => {
-  const scope = nock('http://example.test')
-    .post('/like-wtf', {
-      foo: 'bar',
-      bar: 'foo',
-    })
-    .reply(200, 'Heyyyy!')
-
-  mikealRequest(
-    {
-      uri: 'http://example.test/like-wtf',
-      method: 'POST',
-      json: {
-        bar: 'foo',
-        foo: 'bar',
-      },
-    },
-    function(e, r, body) {
-      t.equal(body, 'Heyyyy!')
-      scope.done()
-      t.end()
-    }
-  )
-})
-
-test('allow unordered body with form encoding', t => {
-  const scope = nock('http://example.test')
-    .post('/like-wtf', {
-      foo: 'bar',
-      bar: 'foo',
-    })
-    .reply(200, 'Heyyyy!')
-
-  mikealRequest(
-    {
-      uri: 'http://example.test/like-wtf',
-      method: 'POST',
-      form: {
-        bar: 'foo',
-        foo: 'bar',
-      },
-    },
-    function(e, r, body) {
-      t.equal(body, 'Heyyyy!')
-      scope.done()
-      t.end()
-    }
-  )
-})
-
-test('allow string json spec', t => {
-  const bodyObject = { bar: 'foo', foo: 'bar' }
-
-  const scope = nock('http://example.test')
-    .post('/like-wtf', JSON.stringify(bodyObject))
-    .reply(200, 'Heyyyy!')
-
-  mikealRequest(
-    {
-      uri: 'http://example.test/like-wtf',
-      method: 'POST',
-      json: {
-        bar: 'foo',
-        foo: 'bar',
-      },
-    },
-    function(e, r, body) {
-      t.equal(body, 'Heyyyy!')
-      scope.done()
-      t.end()
-    }
-  )
 })
 
 test('has a req property on the response', t => {
