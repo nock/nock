@@ -4,9 +4,9 @@ const http = require('http')
 const domain = require('domain')
 const assertRejects = require('assert-rejects')
 const { test } = require('tap')
-const got = require('got')
 const mikealRequest = require('request')
 const nock = require('..')
+const got = require('./got_client')
 
 require('./cleanup_after_each')()
 
@@ -118,6 +118,21 @@ test('match header on scope with function: matches when match accepted', async t
   scope.done()
 })
 
+test('match header on scope with function and allow unmocked: matches when match accepted', async t => {
+  const scope = nock('http://example.test', { allowUnmocked: true })
+    .get('/')
+    .matchHeader('x-my-headers', val => true)
+    .reply(200, 'Hello World!')
+
+  const { statusCode, body } = await got('http://example.test/', {
+    headers: { 'X-My-Headers': 456 },
+  })
+
+  t.equal(statusCode, 200)
+  t.equal(body, 'Hello World!')
+  scope.done()
+})
+
 test('match header on scope with function: does not match when match declined', async t => {
   nock('http://example.test')
     .get('/')
@@ -177,6 +192,23 @@ test('match header on intercept with function: gets the expected argument', asyn
 
 test('match header on interceptor with function: matches when match accepted', async t => {
   const scope = nock('http://example.test')
+    .matchHeader('x-my-headers', val => true)
+    // `.matchHeader()` is called on the interceptor. It precedes the call to
+    // `.get()`.
+    .get('/')
+    .reply(200, 'Hello World!')
+
+  const { statusCode, body } = await got('http://example.test/', {
+    headers: { 'X-My-Headers': 456 },
+  })
+
+  t.equal(statusCode, 200)
+  t.equal(body, 'Hello World!')
+  scope.done()
+})
+
+test('match header on interceptor with function: matches when match accepted', async t => {
+  const scope = nock('http://example.test', { allowUnmocked: true })
     .matchHeader('x-my-headers', val => true)
     // `.matchHeader()` is called on the interceptor. It precedes the call to
     // `.get()`.

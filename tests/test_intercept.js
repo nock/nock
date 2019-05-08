@@ -8,9 +8,10 @@ const mikealRequest = require('request')
 const superagent = require('superagent')
 const needle = require('needle')
 const restify = require('restify-clients')
+const assertRejects = require('assert-rejects')
 const hyperquest = require('hyperquest')
-const got = require('got')
 const nock = require('..')
+const got = require('./got_client')
 
 require('./cleanup_after_each')()
 
@@ -166,6 +167,17 @@ test('post with chaining on call', async t => {
   scope.done()
 })
 
+test('delete request', async t => {
+  const scope = nock('https://example.test')
+    .delete('/')
+    .reply(204)
+
+  const { statusCode } = await got.delete('https://example.test')
+
+  t.is(statusCode, 204)
+  scope.done()
+})
+
 test('reply with callback and filtered path and body', async t => {
   let noPrematureExecution = false
 
@@ -185,22 +197,6 @@ test('reply with callback and filtered path and body', async t => {
 
   t.equal(body, 'OK /original/path original=body')
   scope.done()
-})
-
-test('filteringPath with invalid argument throws expected', t => {
-  t.throws(() => nock('http://example.test').filteringPath('abc123'), {
-    message:
-      'Invalid arguments: filtering path should be a function or a regular expression',
-  })
-  t.end()
-})
-
-test('filteringRequestBody with invalid argument throws expected', t => {
-  t.throws(() => nock('http://example.test').filteringRequestBody('abc123'), {
-    message:
-      'Invalid arguments: filtering request body should be a function or a regular expression',
-  })
-  t.end()
 })
 
 test('head', async t => {
@@ -263,63 +259,16 @@ test('encoding', async t => {
   scope.done()
 })
 
-test('filter path with function', async t => {
+test('on interceptor, filter path with function', async t => {
+  // Interceptor.filteringPath simply proxies to Scope.filteringPath, this test covers the proxy,
+  // testing the logic of filteringPath itself is done in test_scope.js.
   const scope = nock('http://example.test')
-    .filteringPath(path => '/?a=2&b=1')
     .get('/?a=2&b=1')
+    .filteringPath(() => '/?a=2&b=1')
     .reply(200, 'Hello World!')
 
   const { statusCode } = await got('http://example.test/', {
     query: { a: '1', b: '2' },
-  })
-
-  t.equal(statusCode, 200)
-  scope.done()
-})
-
-test('filter path with regexp', async t => {
-  const scope = nock('http://example.test')
-    .filteringPath(/\d/g, '3')
-    .get('/?a=3&b=3')
-    .reply(200, 'Hello World!')
-
-  const { statusCode } = await got('http://example.test/', {
-    query: { a: '1', b: '2' },
-  })
-
-  t.equal(statusCode, 200)
-  scope.done()
-})
-
-test('filter body with function', async t => {
-  let filteringRequestBodyCounter = 0
-
-  const scope = nock('http://example.test')
-    .filteringRequestBody(body => {
-      ++filteringRequestBodyCounter
-      t.equal(body, 'mamma mia')
-      return 'mamma tua'
-    })
-    .post('/', 'mamma tua')
-    .reply(200, 'Hello World!')
-
-  const { statusCode } = await got('http://example.test/', {
-    body: 'mamma mia',
-  })
-
-  t.equal(statusCode, 200)
-  scope.done()
-  t.equal(filteringRequestBodyCounter, 1)
-})
-
-test('filter body with regexp', async t => {
-  const scope = nock('http://example.test')
-    .filteringRequestBody(/mia/, 'nostra')
-    .post('/', 'mamma nostra')
-    .reply(200, 'Hello World!')
-
-  const { statusCode } = await got('http://example.test/', {
-    body: 'mamma mia',
   })
 
   t.equal(statusCode, 200)
@@ -783,80 +732,6 @@ test('request has path', t => {
   req.end()
 })
 
-test('allow unordered body with json encoding', t => {
-  const scope = nock('http://example.test')
-    .post('/like-wtf', {
-      foo: 'bar',
-      bar: 'foo',
-    })
-    .reply(200, 'Heyyyy!')
-
-  mikealRequest(
-    {
-      uri: 'http://example.test/like-wtf',
-      method: 'POST',
-      json: {
-        bar: 'foo',
-        foo: 'bar',
-      },
-    },
-    function(e, r, body) {
-      t.equal(body, 'Heyyyy!')
-      scope.done()
-      t.end()
-    }
-  )
-})
-
-test('allow unordered body with form encoding', t => {
-  const scope = nock('http://example.test')
-    .post('/like-wtf', {
-      foo: 'bar',
-      bar: 'foo',
-    })
-    .reply(200, 'Heyyyy!')
-
-  mikealRequest(
-    {
-      uri: 'http://example.test/like-wtf',
-      method: 'POST',
-      form: {
-        bar: 'foo',
-        foo: 'bar',
-      },
-    },
-    function(e, r, body) {
-      t.equal(body, 'Heyyyy!')
-      scope.done()
-      t.end()
-    }
-  )
-})
-
-test('allow string json spec', t => {
-  const bodyObject = { bar: 'foo', foo: 'bar' }
-
-  const scope = nock('http://example.test')
-    .post('/like-wtf', JSON.stringify(bodyObject))
-    .reply(200, 'Heyyyy!')
-
-  mikealRequest(
-    {
-      uri: 'http://example.test/like-wtf',
-      method: 'POST',
-      json: {
-        bar: 'foo',
-        foo: 'bar',
-      },
-    },
-    function(e, r, body) {
-      t.equal(body, 'Heyyyy!')
-      scope.done()
-      t.end()
-    }
-  )
-})
-
 test('has a req property on the response', t => {
   const scope = nock('http://example.test')
     .get('/like-wtf')
@@ -1000,7 +875,8 @@ test('end callback called', t => {
   })
 })
 
-test('finish event fired before end event (bug-139)', t => {
+// http://github.com/nock/nock/issues/139
+test('finish event fired before end event', t => {
   const scope = nock('http://example.test')
     .filteringRequestBody(/mia/, 'nostra')
     .post('/', 'mamma nostra')
@@ -1228,6 +1104,36 @@ test('test request timeout option', t => {
   })
 })
 
+test('do not match when conditionally = false but should match after trying again when = true', async t => {
+  t.plan(2)
+  let enabled = false
+
+  const scope = nock('http://example.test', {
+    conditionally: function() {
+      return enabled
+    },
+  })
+    .get('/')
+    .reply(200)
+
+  // now the scope has been used, should fail on second try
+  await assertRejects(
+    got('http://example.test/'),
+    Error,
+    'Nock: No match for request'
+  )
+  t.throws(() => scope.done(), {
+    message: 'Mocks not yet satisfied',
+  })
+
+  enabled = true
+
+  const { statusCode } = await got('http://example.test/')
+
+  t.equal(statusCode, 200)
+  scope.done()
+})
+
 test('get correct filtering with scope and request headers filtering', t => {
   const responseText = 'OK!'
   const responseHeaders = { 'Content-Type': 'text/plain' }
@@ -1264,6 +1170,20 @@ test('get correct filtering with scope and request headers filtering', t => {
   )
 
   t.equivalent(req._headers, { host: requestHeaders.host })
+})
+
+test('different subdomain with reply callback and filtering scope', async t => {
+  // We scope for www.example.com but through scope filtering we will accept
+  // any <subdomain>.example.com.
+  const scope = nock('http://example.test', {
+    filteringScope: scope => /^http:\/\/.*\.example/.test(scope),
+  })
+    .get('/')
+    .reply(200, () => 'OK!')
+
+  const { body } = await got('http://a.example.test')
+  t.equal(body, 'OK!')
+  scope.done()
 })
 
 test('mocking succeeds even when host request header is not specified', t => {
@@ -1699,6 +1619,13 @@ test('data is sent with flushHeaders', t => {
       })
     })
     .flushHeaders()
+})
+
+test('should throw expected error when creating request with missing options', t => {
+  t.throws(() => http.request(), {
+    message: 'Making a request with empty `options` is not supported in Nock',
+  })
+  t.end()
 })
 
 test('teardown', t => {
