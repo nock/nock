@@ -114,7 +114,7 @@ test('one asynchronous function returning the status code and body defines a ful
 test('asynchronous function gets request headers', function(t) {
   nock('http://example.test')
     .get('/yo')
-    .reply(200, function(path, reqBody, cb) {
+    .reply(201, function(path, reqBody, cb) {
       t.equal(this.req.path, '/yo')
       t.deepEqual(this.req.headers, {
         'x-my-header': 'some-value',
@@ -137,7 +137,7 @@ test('asynchronous function gets request headers', function(t) {
     },
     function(err, resp, body) {
       t.error(err)
-      t.equal(resp.statusCode, 200)
+      t.equal(resp.statusCode, 201)
       t.equal(body, 'foobar')
       t.end()
     }

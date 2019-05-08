@@ -171,7 +171,7 @@ test('reply function returning array with status code', async t => {
 test('reply function returning array with status code and string body', async t => {
   const scope = nock('http://example.com')
     .get('/')
-    .reply(() => ['401', 'This is a body'])
+    .reply(() => [401, 'This is a body'])
 
   await assertRejects(got('http://example.com/'), ({ statusCode, body }) => {
     t.is(statusCode, 401)
