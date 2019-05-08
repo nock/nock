@@ -23,6 +23,21 @@ test('reply with JSON', async t => {
   scope.done()
 })
 
+test('reply with JSON array', async t => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .reply(200, [{ hello: 'world' }])
+
+  const { statusCode, headers, body } = await got('http://example.test/')
+
+  t.equal(statusCode, 200)
+  t.type(headers.date, 'undefined')
+  t.type(headers['content-length'], 'undefined')
+  t.equal(headers['content-type'], 'application/json')
+  t.equal(body, '[{"hello":"world"}]', 'response should match')
+  scope.done()
+})
+
 test('JSON encoded replies set the content-type header', async t => {
   const scope = nock('http://example.test')
     .get('/')
