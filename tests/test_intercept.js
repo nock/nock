@@ -875,6 +875,38 @@ test('end callback called', t => {
   })
 })
 
+// https://github.com/nock/nock/issues/1509
+test('end callback called when end has callback, but no buffer', t => {
+  const scope = nock('http://example.test')
+    .post('/')
+    .reply(200, 'Hello World!')
+
+  let callbackCalled = false
+  const req = http.request(
+    {
+      host: 'example.test',
+      method: 'POST',
+      path: '/',
+      port: 80,
+    },
+    function(res) {
+      t.equal(callbackCalled, true)
+      t.equal(res.statusCode, 200)
+      res.on('end', function() {
+        scope.done()
+        t.end()
+      })
+      // Streams start in 'paused' mode and must be started.
+      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+      res.resume()
+    }
+  )
+
+  req.end(function() {
+    callbackCalled = true
+  })
+})
+
 // http://github.com/nock/nock/issues/139
 test('finish event fired before end event', t => {
   const scope = nock('http://example.test')
