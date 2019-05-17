@@ -51,6 +51,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
   - [Socket timeout](#socket-timeout)
   - [Chaining](#chaining)
   - [Scope filtering](#scope-filtering)
+  - [Conditional scope filtering](#conditional-scope-filtering)
   - [Path filtering](#path-filtering)
   - [Request Body filtering](#request-body-filtering)
   - [Request Headers Matching](#request-headers-matching)
@@ -300,6 +301,16 @@ nock('http://example.com')
   .reply(200, { results: [{ id: 'pgte' }] })
 ```
 
+A query string that is already [URL encoded](https://en.wikipedia.org/wiki/Percent-encoding) can be
+matched by passing the `encodedQueryParams` flag in the options when creating the Scope.
+
+```js
+nock('http://example.com', { encodedQueryParams: true })
+  .get('/users')
+  .query('foo%5Bbar%5D%3Dhello%20world%21')
+  .reply(200, { results: [{ id: 'pgte' }] })
+```
+
 ### Specifying replies
 
 You can specify the return status code for a path on the first argument of reply like this:
@@ -349,7 +360,7 @@ const scope = nock('http://www.google.com')
   .reply(201, (uri, requestBody) => requestBody)
 ```
 
-An asynchronous function that gets an error-first callback as last argument also works:
+An asynchronous function that gets an error-first callback as its last argument also works:
 
 ```js
 const scope = nock('http://www.google.com')
@@ -360,7 +371,7 @@ const scope = nock('http://www.google.com')
   })
 ```
 
-> Note: When using a callback, if you call back with an error as first argument, that error will be sent in the response body, with a 500 HTTP response status code.
+> Note: When using a callback, if you call back with an error as the first argument, that error will be sent in the response body, with a 500 HTTP response status code.
 
 You can also return the status code and body using just one function:
 
@@ -473,7 +484,7 @@ const scope = nock('http://www.example.com', {
 
 If `reqheaders` is not specified or if `host` is not part of it, Nock will automatically add `host` value to request header.
 
-If no request headers are specified for mocking then Nock will automatically skip matching of request headers. Since `host` header is a special case which may get automatically inserted by Nock, its matching is skipped unless it was _also_ specified in the request being mocked.
+If no request headers are specified for mocking then Nock will automatically skip matching of request headers. Since the `host` header is a special case which may get automatically inserted by Nock, its matching is skipped unless it was _also_ specified in the request being mocked.
 
 You can also have Nock fail the request if certain headers are present:
 
@@ -755,6 +766,18 @@ const scope = nock('https://api.dropbox.com', {
 })
   .get('/1/metadata/auto/Photos?include_deleted=false&list=true')
   .reply(200)
+```
+
+### Conditional scope filtering
+
+You can also choose to filter out a scope based on your system environment (or any external factor). The filtering function is accepted at the `conditionally` field of the `options` argument.
+
+This can be useful if you only want certain scopes to apply depending on how your tests are executed.
+
+```js
+const scope = nock('https://api.myservice.com', {
+  conditionally: () => true,
+})
 ```
 
 ### Path filtering
@@ -1053,7 +1076,7 @@ nock.activate()
 
 ## Turning Nock Off (experimental!)
 
-You can bypass Nock completely by setting `NOCK_OFF` environment variable to `"true"`.
+You can bypass Nock completely by setting the `NOCK_OFF` environment variable to `"true"`.
 
 This way you can have your tests hit the real servers just by switching on this environment variable.
 
@@ -1142,7 +1165,7 @@ nock.recorder.rec()
 // those calls will be outputted to console
 ```
 
-Recording relies on intercepting real requests and answers and then persisting them for later use.
+Recording relies on intercepting real requests and responses and then persisting them for later use.
 
 In order to stop recording you should call `nock.restore()` and recording will stop.
 
@@ -1189,7 +1212,7 @@ The returned call objects have the following properties:
 - `headers` - the headers of the reply
 - `reqheader` - the headers of the request
 
-If you save this as a JSON file, you can load them directly through `nock.load(path)`. Then you can post-process them before using them in the tests for example to add them request body filtering (shown here fixing timestamps to match the ones captured during recording):
+If you save this as a JSON file, you can load them directly through `nock.load(path)`. Then you can post-process them before using them in the tests. For example, to add request body filtering (shown here fixing timestamps to match the ones captured during recording):
 
 ```js
 nocks = nock.load(pathToJson)
@@ -1224,7 +1247,7 @@ nockDefs.forEach(def => {
   //  Do something with the definition object e.g. scope filtering.
   def.options = {
     ...def.options,
-    filteringScope: = scope => /^https:\/\/api[0-9]*.dropbox.com/.test(scope),
+    filteringScope: scope => /^https:\/\/api[0-9]*.dropbox.com/.test(scope),
   }
 })
 
@@ -1234,7 +1257,7 @@ const nocks = nock.define(nockDefs)
 
 ### `enable_reqheaders_recording` option
 
-Recording request headers by default is deemed more trouble than it's worth as some of them depend on the timestamp or other values that may change after the tests have been recorder thus leading to complex postprocessing of recorded tests. Thus by default the request headers are not recorded.
+Recording request headers by default is deemed more trouble than it's worth as some of them depend on the timestamp or other values that may change after the tests have been recorded thus leading to complex postprocessing of recorded tests. Thus by default the request headers are not recorded.
 
 The genuine use cases for recording request headers (e.g. checking authorization) can be handled manually or by using `enable_reqheaders_recording` in `recorder.rec()` options.
 

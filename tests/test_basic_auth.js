@@ -1,8 +1,9 @@
 'use strict'
 
 const { test } = require('tap')
-const got = require('got')
+const assertRejects = require('assert-rejects')
 const nock = require('..')
+const got = require('./got_client')
 
 require('./cleanup_after_each')()
 
@@ -24,9 +25,11 @@ test('basic auth with username and password', async t => {
   })
 
   await t.test('fails when it doesnt match', async tt => {
-    await tt.rejects(() => got('http://example.test/test'), {
-      message: 'Nock: No match for request',
-    })
+    await assertRejects(
+      got('http://example.test/test'),
+      Error,
+      'Nock: No match for request'
+    )
   })
 })
 
@@ -46,8 +49,10 @@ test('basic auth with username only', async t => {
   })
 
   await t.test('fails when it doesnt match', async tt => {
-    await tt.rejects(() => got('http://example.test/test'), {
-      message: 'Nock: No match for request',
-    })
+    await assertRejects(
+      got('http://example.test/test'),
+      Error,
+      'Nock: No match for request'
+    )
   })
 })

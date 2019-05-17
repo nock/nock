@@ -5,9 +5,10 @@
 
 const http = require('http')
 const path = require('path')
-const got = require('got')
+const assertRejects = require('assert-rejects')
 const { test } = require('tap')
 const nock = require('..')
+const got = require('./got_client')
 
 require('./cleanup_after_each')()
 
@@ -207,9 +208,11 @@ test('stop persisting a persistent nock', async t => {
   t.equal(nock.activeMocks().length, 0)
   t.true(scope.isDone())
 
-  await t.rejects(async () => got('http://example.test/'), {
-    message: 'Nock: No match for request',
-  })
+  await assertRejects(
+    got('http://example.test/'),
+    Error,
+    'Nock: No match for request'
+  )
 })
 
 test("should throw an error when persist flag isn't a boolean", t => {

@@ -5,10 +5,10 @@ const http = require('http')
 const https = require('https')
 const fs = require('fs')
 const zlib = require('zlib')
-const got = require('got')
 const mikealRequest = require('request')
 const superagent = require('superagent')
 const nock = require('..')
+const got = require('./got_client')
 
 require('./cleanup_after_each')()
 
@@ -124,6 +124,48 @@ test('records objects', t => {
       t.end()
     })
   })
+})
+
+test('records objects and correctly stores JSON object in body', async t => {
+  nock.restore()
+  nock.recorder.clear()
+  t.equal(nock.recorder.play().length, 0)
+
+  const server = http.createServer((request, response) => response.end())
+  t.once('end', () => server.close())
+  await new Promise(resolve => server.listen(resolve))
+  const { port } = server.address()
+
+  nock.recorder.rec({
+    dont_print: true,
+    output_objects: true,
+  })
+
+  const exampleBody = { foo: 123 }
+
+  await got.post(`http://localhost:${port}/`, {
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(exampleBody),
+  })
+
+  nock.restore()
+  const recorded = nock.recorder.play()
+  nock.recorder.clear()
+  nock.activate()
+
+  t.equal(recorded.length, 1)
+
+  // TODO See https://github.com/nock/nock/issues/1229
+
+  // This is the current behavior: store body as decoded JSON.
+  t.deepEqual(recorded[0].body, exampleBody)
+
+  // This is the desired behavior: store the body as encoded JSON. The second
+  // test shows desired behavior: store body as encoded JSON so that JSON
+  // strings can be correctly matched at runtime. Because headers are not
+  // stored in the recorder output, it is impossible for the loader to
+  // differentiate a stored JSON string from a non-JSON body.
+  // t.equal(recorded[0].body, JSON.stringify(exampleBody))
 })
 
 test('records and replays objects correctly', t => {

@@ -4,10 +4,11 @@ const fs = require('fs')
 const path = require('path')
 const http = require('http')
 const stream = require('stream')
-const got = require('got')
+const assertRejects = require('assert-rejects')
 const mikealRequest = require('request')
 const { test } = require('tap')
 const nock = require('..')
+const got = require('./got_client')
 
 require('./cleanup_after_each')()
 
@@ -122,32 +123,22 @@ test('calling delay with "body" and "head" delays the response', t => {
   })
 })
 
-test('calling delay with "body" delays the response body', t => {
-  // Do not base new tests on this one. Write async tests using
-  // `resolvesInAtLeast` instead.
-  checkDuration(t, 100)
-
-  nock('http://example.test')
+test('calling delay with "body" delays the response body', async t => {
+  const scope = nock('http://example.test')
     .get('/')
-    .delay({
-      body: 100,
-    })
+    .delay({ body: 100 })
     .reply(200, 'OK')
 
-  http.get('http://example.test', function(res) {
-    res.setEncoding('utf8')
-
-    let body = ''
-
-    res.on('data', function(chunk) {
-      body += chunk
-    })
-
-    res.once('end', function() {
+  await resolvesInAtLeast(
+    t,
+    async () => {
+      const { body } = await got('http://example.test/')
       t.equal(body, 'OK')
-      t.end()
-    })
-  })
+    },
+    100
+  )
+
+  scope.done()
 })
 
 test('calling delayBody delays the response', async t => {
@@ -229,32 +220,26 @@ test('delayBody works with a delayed stream', async t => {
   scope.done()
 })
 
-test('calling delay delays the response', t => {
-  // Do not base new tests on this one. Write async tests using
-  // `resolvesInAtLeast` instead.
-  checkDuration(t, 100)
-
-  nock('http://example.test')
+test('calling delay delays the response', async t => {
+  const scope = nock('http://example.test')
     .get('/')
     .delay(100)
     .reply(200, 'OK')
 
-  http.get('http://example.test', function(res) {
-    res.setEncoding('utf8')
-
-    let body = ''
-
-    res.on('data', function(chunk) {
-      body += chunk
-    })
-
-    res.once('end', function() {
+  await resolvesInAtLeast(
+    t,
+    async () => {
+      const { body } = await got('http://example.test/')
       t.equal(body, 'OK')
-      t.end()
-    })
-  })
+    },
+    100
+  )
+
+  scope.done()
 })
 
+// TODO: This test is difficult to port to got. It's not clear why the request
+// matches given that there's a request body that isn't specified by the mock.
 test('using reply callback with delay provides proper arguments', t => {
   nock('http://localhost')
     .get('/')
@@ -364,9 +349,11 @@ test('delay with replyWithError: response is delayed', async t => {
   await resolvesInAtLeast(
     t,
     async () =>
-      t.rejects(() => got('http://example.test'), {
-        message: 'this is an error message',
-      }),
+      assertRejects(
+        got('http://example.test'),
+        Error,
+        'this is an error message'
+      ),
     100
   )
 })

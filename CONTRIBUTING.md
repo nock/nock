@@ -19,7 +19,8 @@ Please note that this project is released with a [Contributor Code of Conduct](.
 - [Release Process](#release-process)
 - [GitHub Apps](#github-apps)
 - [Becoming a maintainer](#becoming-a-maintainer)
-- [Generating the CONTRIBUTORS.md file](#generating-the-contributorsmd-file)
+- [Who is funding work on Nock?](#who-is-funding-work-on-nock)
+- [Is there a chat where I can talk to other maintainers and users?](#is-there-a-chat-where-i-can-talk-to-other-maintainers-and-users)
 
 <!-- tocstop -->
 
@@ -143,21 +144,16 @@ Here are some things you can do today to actively show the Nock team that you're
 
 Once you've been around for a bit, ask a current Maintainer - one of [the team members](https://github.com/orgs/nock/people) - whether you can be elevated to Maintainer status and given permissions to close issues and merge PRs. We're interested in how well you know what Nock is about, and how involved you are in the community - not where you're from, how good your English is, or whether or not you can pass a whiteboard test blindfolded. If you think that you've been helpful, let us know. We're friendly, promise. :)
 
-## Generating the CONTRIBUTORS.md file
+## Who is funding work on Nock?
 
-We use [`name-your-contributors`](https://github.com/mntnr/name-your-contributors) to generate the CONTRIBUTORS file, which contains the names of everyone who have submitted code to the Nock codebase, or commented on an issue, or opened a pull request, or reviewed anyone else's code. After all, all contributions are welcome, and anyone who works with Nock is part of our community.
+Nock is entirely self-funded by [our Open Collective](https://opencollective.com/nock). Open Collective allows us to get contributions from users and companies, without giving away our open source IP. Think of it like a kickstarter, or an old-fashioned system of art patrons.
 
-To generate this file, download `name-your-contributors` and set up a GitHub authorization token.
+If you'd like to give money to support Nock, please do go to our profile and check it out.
 
-```sh
-# Generate a JSON file of the members. This may take a while.
-$ name-your-contributors -r nock -u nock > contributors.json
-```
+## Is there a chat where I can talk to other maintainers and users?
 
-To parse that file, we suggest using [`jq`](https://stedolan.github.io/jq/), although other options are clearly possible:
+We don't have a chat for a variety of reasons - mainly, because our maintainers' time is limited, and we don't want to be on the hook for enforcing codes of conduct or for checking in every day. However, we encourage you to open issues about anything related to Nock! Issues really are the best way to keep the conversation focused on development.
 
-```sh
-cat contribs.json | jq '.[][]' | jq '"\(if (.name | length) > 0 then .name else null end) @\(.login) \(.url)"' | jq '. | tostring' | jq -s . | jq unique | jq .[] > CONTRIBUTORS.md
-```
+We often have video calls to pair program or to hack together on Nock. Join us! Look at the issues for a notification about these, and, if there isn't one planned, open an issue and suggest one.
 
-Note: This is a convoluted and time-intensive process, and could be updated in several ways. For one, `name-your-contributors` accepts a date flag, which could be used to only catch recent entries. Another way would be to use a bot to automate this at some regular interval. Any help on this would be appreciated.
+On that note, thanks for reading this far. Go mock some tests now, there's nothing left to read here. :)
