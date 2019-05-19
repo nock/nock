@@ -66,7 +66,7 @@ test('reply header function is evaluated and the result sent in the mock respons
 })
 
 test('reply header function receives the correct arguments', async t => {
-  t.plan(3)
+  t.plan(4)
 
   const { ClientRequest: OverriddenClientRequest } = require('http')
   const scope = nock('http://example.test')
