@@ -72,12 +72,11 @@ test('reply header function receives the correct arguments', async t => {
   const scope = nock('http://example.test')
     .post('/')
     .reply(200, 'boo!', {
-      'X-My-Headers': (req, res, ...rest) => {
+      'X-My-Headers': (req, res, body) => {
         t.type(req, OverriddenClientRequest)
         t.type(res, IncomingMessage)
-        // The third argument was once a buffer, though no longer.
-        // https://github.com/nock/nock/issues/1542
-        t.deepEqual(rest, [])
+        t.type(body, Buffer)
+        t.true(Buffer.from('boo!').equals(body))
         return 'gotcha'
       },
     })
