@@ -1,12 +1,10 @@
 'use strict'
 
-const url = require('url')
 const http = require('http')
 const https = require('https')
 const { test } = require('tap')
 const mikealRequest = require('request')
 const superagent = require('superagent')
-const needle = require('needle')
 const restify = require('restify-clients')
 const assertRejects = require('assert-rejects')
 const hyperquest = require('hyperquest')
@@ -199,22 +197,6 @@ test('reply with callback and filtered path and body', async t => {
   scope.done()
 })
 
-test('filteringPath with invalid argument throws expected', t => {
-  t.throws(() => nock('http://example.test').filteringPath('abc123'), {
-    message:
-      'Invalid arguments: filtering path should be a function or a regular expression',
-  })
-  t.end()
-})
-
-test('filteringRequestBody with invalid argument throws expected', t => {
-  t.throws(() => nock('http://example.test').filteringRequestBody('abc123'), {
-    message:
-      'Invalid arguments: filtering request body should be a function or a regular expression',
-  })
-  t.end()
-})
-
 test('head', async t => {
   const scope = nock('http://example.test')
     .head('/')
@@ -275,63 +257,16 @@ test('encoding', async t => {
   scope.done()
 })
 
-test('filter path with function', async t => {
+test('on interceptor, filter path with function', async t => {
+  // Interceptor.filteringPath simply proxies to Scope.filteringPath, this test covers the proxy,
+  // testing the logic of filteringPath itself is done in test_scope.js.
   const scope = nock('http://example.test')
-    .filteringPath(path => '/?a=2&b=1')
     .get('/?a=2&b=1')
+    .filteringPath(() => '/?a=2&b=1')
     .reply(200, 'Hello World!')
 
   const { statusCode } = await got('http://example.test/', {
     query: { a: '1', b: '2' },
-  })
-
-  t.equal(statusCode, 200)
-  scope.done()
-})
-
-test('filter path with regexp', async t => {
-  const scope = nock('http://example.test')
-    .filteringPath(/\d/g, '3')
-    .get('/?a=3&b=3')
-    .reply(200, 'Hello World!')
-
-  const { statusCode } = await got('http://example.test/', {
-    query: { a: '1', b: '2' },
-  })
-
-  t.equal(statusCode, 200)
-  scope.done()
-})
-
-test('filter body with function', async t => {
-  let filteringRequestBodyCounter = 0
-
-  const scope = nock('http://example.test')
-    .filteringRequestBody(body => {
-      ++filteringRequestBodyCounter
-      t.equal(body, 'mamma mia')
-      return 'mamma tua'
-    })
-    .post('/', 'mamma tua')
-    .reply(200, 'Hello World!')
-
-  const { statusCode } = await got('http://example.test/', {
-    body: 'mamma mia',
-  })
-
-  t.equal(statusCode, 200)
-  scope.done()
-  t.equal(filteringRequestBodyCounter, 1)
-})
-
-test('filter body with regexp', async t => {
-  const scope = nock('http://example.test')
-    .filteringRequestBody(/mia/, 'nostra')
-    .post('/', 'mamma nostra')
-    .reply(200, 'Hello World!')
-
-  const { statusCode } = await got('http://example.test/', {
-    body: 'mamma mia',
   })
 
   t.equal(statusCode, 200)
@@ -363,37 +298,6 @@ test('abort request', t => {
     })
 
     req.abort()
-  })
-
-  req.end()
-})
-
-// TODO Convert to async / got.
-test('pause response before data', t => {
-  const scope = nock('http://example.test')
-    .get('/pauser')
-    .reply(200, 'nobody')
-
-  const req = http.request({
-    host: 'example.test',
-    path: '/pauser',
-  })
-
-  req.on('response', res => {
-    res.pause()
-
-    let waited = false
-    setTimeout(() => {
-      waited = true
-      res.resume()
-    }, 500)
-
-    res.on('data', data => t.true(waited))
-
-    res.on('end', () => {
-      scope.done()
-      t.end()
-    })
   })
 
   req.end()
@@ -745,73 +649,6 @@ test('accept string as request target', t => {
   })
 })
 
-if (url.URL) {
-  test('accept URL as request target', t => {
-    let dataCalled = false
-    const scope = nock('http://example.test')
-      .get('/')
-      .reply(200, 'Hello World!')
-
-    http.get(new url.URL('http://example.test'), function(res) {
-      t.equal(res.statusCode, 200)
-
-      res.on('data', function(data) {
-        dataCalled = true
-        t.ok(data instanceof Buffer, 'data should be buffer')
-        t.equal(data.toString(), 'Hello World!', 'response should match')
-      })
-
-      res.on('end', function() {
-        t.ok(dataCalled)
-        scope.done()
-        t.end()
-      })
-    })
-  })
-}
-
-test('request has path', t => {
-  const scope = nock('http://example.test')
-    .get('/the/path/to/infinity')
-    .reply(200)
-
-  const req = http.request(
-    {
-      hostname: 'example.test',
-      port: 80,
-      method: 'GET',
-      path: '/the/path/to/infinity',
-    },
-    function(res) {
-      scope.done()
-      t.equal(
-        req.path,
-        '/the/path/to/infinity',
-        'should have req.path set to /the/path/to/infinity'
-      )
-      t.end()
-    }
-  )
-  req.end()
-})
-
-test('has a req property on the response', t => {
-  const scope = nock('http://example.test')
-    .get('/like-wtf')
-    .reply(200)
-  const req = http.request('http://example.test/like-wtf', function(res) {
-    res.on('end', function() {
-      t.ok(res.req, "req property doesn't exist")
-      scope.done()
-      t.end()
-    })
-    // Streams start in 'paused' mode and must be started.
-    // See https://nodejs.org/api/stream.html#stream_class_stream_readable
-    res.resume()
-  })
-  req.end()
-})
-
 test('superagent works', t => {
   const responseText = 'Yay superagent!'
   const headers = { 'Content-Type': 'text/plain' }
@@ -852,127 +689,6 @@ test('superagent posts', t => {
     })
 })
 
-test('response is an http.IncomingMessage instance', t => {
-  const responseText = 'incoming message!'
-  nock('http://example.test')
-    .get('/somepath')
-    .reply(200, responseText)
-
-  http
-    .request(
-      {
-        host: 'example.test',
-        path: '/somepath',
-      },
-      function(res) {
-        res.resume()
-        t.true(res instanceof http.IncomingMessage)
-        t.end()
-      }
-    )
-    .end()
-})
-
-test('write callback called', t => {
-  const scope = nock('http://filterboddiezregexp.com')
-    .filteringRequestBody(/mia/, 'nostra')
-    .post('/', 'mamma nostra')
-    .reply(200, 'Hello World!')
-
-  let callbackCalled = false
-  const req = http.request(
-    {
-      host: 'filterboddiezregexp.com',
-      method: 'POST',
-      path: '/',
-      port: 80,
-    },
-    function(res) {
-      t.equal(callbackCalled, true)
-      t.equal(res.statusCode, 200)
-      res.on('end', function() {
-        scope.done()
-        t.end()
-      })
-      // Streams start in 'paused' mode and must be started.
-      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
-      res.resume()
-    }
-  )
-
-  req.write('mamma mia', null, function() {
-    callbackCalled = true
-    req.end()
-  })
-})
-
-test('end callback called', t => {
-  const scope = nock('http://example.test')
-    .filteringRequestBody(/mia/, 'nostra')
-    .post('/', 'mamma nostra')
-    .reply(200, 'Hello World!')
-
-  let callbackCalled = false
-  const req = http.request(
-    {
-      host: 'example.test',
-      method: 'POST',
-      path: '/',
-      port: 80,
-    },
-    function(res) {
-      t.equal(callbackCalled, true)
-      t.equal(res.statusCode, 200)
-      res.on('end', function() {
-        scope.done()
-        t.end()
-      })
-      // Streams start in 'paused' mode and must be started.
-      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
-      res.resume()
-    }
-  )
-
-  req.end('mamma mia', null, function() {
-    callbackCalled = true
-  })
-})
-
-// http://github.com/nock/nock/issues/139
-test('finish event fired before end event', t => {
-  const scope = nock('http://example.test')
-    .filteringRequestBody(/mia/, 'nostra')
-    .post('/', 'mamma nostra')
-    .reply(200, 'Hello World!')
-
-  let finishCalled = false
-  const req = http.request(
-    {
-      host: 'example.test',
-      method: 'POST',
-      path: '/',
-      port: 80,
-    },
-    function(res) {
-      t.equal(finishCalled, true)
-      t.equal(res.statusCode, 200)
-      res.on('end', function() {
-        scope.done()
-        t.end()
-      })
-      // Streams start in 'paused' mode and must be started.
-      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
-      res.resume()
-    }
-  )
-
-  req.on('finish', function() {
-    finishCalled = true
-  })
-
-  req.end('mamma mia')
-})
-
 test('sending binary and receiving JSON should work ', t => {
   const scope = nock('http://example.test')
     .filteringRequestBody(/.*/, '*')
@@ -1009,25 +725,6 @@ test('sending binary and receiving JSON should work ', t => {
       t.end()
     }
   )
-})
-
-// https://github.com/nock/nock/issues/146
-test('resume() is automatically invoked when the response is drained', t => {
-  const replyLength = 1024 * 1024
-  const replyBuffer = Buffer.from(new Array(replyLength + 1).join('.'))
-  t.equal(replyBuffer.length, replyLength)
-
-  nock('http://example.test')
-    .get('/abc')
-    .reply(200, replyBuffer)
-
-  needle.get('http://example.test/abc', function(err, res, buffer) {
-    t.notOk(err)
-    t.ok(res)
-    t.ok(buffer)
-    t.same(buffer, replyBuffer)
-    t.end()
-  })
 })
 
 test('handles get with restify client', t => {
@@ -1289,104 +986,6 @@ test('mikeal/request with strictSSL: true', t => {
       t.end()
     }
   )
-})
-
-test('.setNoDelay', t => {
-  nock('http://example.test')
-    .get('/yay')
-    .reply(200, 'Hi')
-
-  const req = http.request(
-    {
-      host: 'example.test',
-      path: '/yay',
-      port: 80,
-    },
-    function(res) {
-      t.equal(res.statusCode, 200)
-      res.on('end', t.end.bind(t))
-      // Streams start in 'paused' mode and must be started.
-      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
-      res.resume()
-    }
-  )
-
-  req.setNoDelay(true)
-
-  req.end()
-})
-
-test('request emits socket', t => {
-  nock('http://example.test')
-    .get('/')
-    .reply(200, 'hey')
-
-  const req = http.get('http://example.test')
-  req.once('socket', function(socket) {
-    t.equal(this, req)
-    t.type(socket, Object)
-    t.type(socket.getPeerCertificate(), 'string')
-    t.end()
-  })
-})
-
-test('socket emits connect and secureConnect', t => {
-  t.plan(3)
-
-  nock('http://example.test')
-    .post('/')
-    .reply(200, 'hey')
-
-  const req = http.request({
-    host: 'example.test',
-    path: '/',
-    method: 'POST',
-  })
-
-  req.on('socket', function(socket) {
-    socket.once('connect', function() {
-      req.end()
-      t.ok(true)
-    })
-    socket.once('secureConnect', function() {
-      t.ok(true)
-    })
-  })
-
-  req.once('response', function(res) {
-    res.setEncoding('utf8')
-    res.on('data', function(d) {
-      t.equal(d, 'hey')
-    })
-  })
-})
-
-test('socket setKeepAlive', t => {
-  nock('http://example.test')
-    .get('/')
-    .reply(200, 'hey')
-
-  const req = http.get('http://example.test')
-  req.once('socket', function(socket) {
-    socket.setKeepAlive(true)
-    t.end()
-  })
-})
-
-test('abort destroys socket', t => {
-  nock('http://example.test')
-    .get('/')
-    .reply(200, 'hey')
-
-  const req = http.get('http://example.test')
-  req.once('error', function() {
-    // ignore
-  })
-  req.once('socket', function(socket) {
-    req.abort()
-    t.ok(socket.destroyed)
-    t.end()
-  })
 })
 
 test('hyperquest works', t => {
@@ -1682,13 +1281,6 @@ test('data is sent with flushHeaders', t => {
       })
     })
     .flushHeaders()
-})
-
-test('should throw expected error when creating request with missing options', t => {
-  t.throws(() => http.request(), {
-    message: 'Making a request with empty `options` is not supported in Nock',
-  })
-  t.end()
 })
 
 test('teardown', t => {
