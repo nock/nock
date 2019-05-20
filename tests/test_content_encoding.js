@@ -18,7 +18,8 @@ test('accepts gzipped content', async t => {
       'Content-Length': undefined,
       'Content-Encoding': 'gzip',
     })
-  const { body } = await got('http://example.test/foo')
+  const { body, statusCode } = await got('http://example.test/foo')
 
   t.equal(body, message)
+  t.equal(statusCode, 200)
 })
