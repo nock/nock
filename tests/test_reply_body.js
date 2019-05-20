@@ -129,6 +129,7 @@ test('reply with native boolean as the body', async t => {
   const { statusCode, body } = await got('http://example.test/')
 
   t.is(statusCode, 204)
+  // `'false'` is json-stringified `false`.
   t.equal(body, 'false')
   scope.done()
 })
@@ -141,6 +142,7 @@ test('reply with native null as the body', async t => {
   const { statusCode, body } = await got('http://example.test/')
 
   t.is(statusCode, 204)
+  // `'null'` is json-stringified `null`.
   t.equal(body, 'null')
   scope.done()
 })

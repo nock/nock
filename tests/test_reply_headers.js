@@ -70,6 +70,7 @@ test('reply header function is evaluated and the result sent in the mock respons
 // - the resulting order differs depending if overrides are provided to .reply directly or via a callback
 // - replacing values with function results isn't guaranteed to keep the correct order
 // - the resulting `headers` object itself is fine and these assertions pass
+// https://github.com/nock/nock/issues/1553
 test('reply headers and defaults', { skip: true }, async t => {
   const scope = nock('http://example.com')
     .defaultReplyHeaders({
