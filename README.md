@@ -526,14 +526,15 @@ const scope = nock('https://api.github.com')
 ```
 
 Or you can use a function to generate the headers values. The function will be
-passed the request, response, and body (if available). The body will be either a
-buffer, a stream, or undefined.
+passed the request, response, and response body (if available). The body will
+be either a buffer, a stream, or undefined.
 
 ```js
 const scope = nock('http://www.headdy.com')
   .get('/')
   .reply(200, 'Hello World!', {
-    'X-My-Headers': (req, res, body) => body.toString(),
+    'Content-Length': (req, res, body) => body.length,
+    ETag: () => `${Date.now()}`,
   })
 ```
 
@@ -556,9 +557,7 @@ Or you can use a function to generate the default headers values:
 ```js
 const scope = nock('http://www.headdy.com')
   .defaultReplyHeaders({
-    'Content-Length': function(req, res, body) {
-      return body.length
-    },
+    'Content-Length': (req, res, body) => body.length,
   })
   .get('/')
   .reply(200, 'The default headers should come too')
