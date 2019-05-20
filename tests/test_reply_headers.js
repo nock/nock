@@ -146,10 +146,6 @@ test('reply header function receives the correct arguments', async t => {
       'X-My-Headers': (req, res, body) => {
         t.type(req, OverriddenClientRequest)
         t.type(res, IncomingMessage)
-        // TODO The current behavior is to pass the response body as a buffer.
-        // This doesn't seem at all helpful and seems like it is probably a
-        // bug.
-        // https://github.com/nock/nock/issues/1542
         t.type(body, Buffer)
         t.true(Buffer.from('boo!').equals(body))
         return 'gotcha'
