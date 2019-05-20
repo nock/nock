@@ -274,6 +274,15 @@ test('using reply callback with delay can reply JSON', t => {
   )
 })
 
+test('delay with invalid arguments', t => {
+  const interceptor = nock('http://example.test').get('/')
+  t.throws(
+    () => interceptor.delay('one million seconds'),
+    Error('Unexpected input')
+  )
+  t.end()
+})
+
 test('delay works with replyWithFile', t => {
   // Do not base new tests on this one. Write async tests using
   // `resolvesInAtLeast` instead.
