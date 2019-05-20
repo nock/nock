@@ -71,7 +71,7 @@ test('emits no match when no match and no mock', function(t) {
 test('emits no match when no match and mocked', function(t) {
   nock('http://example.test')
     .get('/')
-    .reply('howdy')
+    .reply(418)
 
   const assertion = function(req) {
     t.equal(req.path, '/definitelymaybe')
