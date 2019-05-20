@@ -41,7 +41,11 @@ test('reply takes a callback for status code', async t => {
   const response = await got('http://example.com/')
 
   t.equal(response.statusCode, expectedStatusCode, 'sends status code')
-  t.deepEqual(response.headers, headers, 'sends headers')
+  t.deepEqual(
+    response.headers,
+    { 'x-custom-header': 'abcdef' },
+    'sends headers'
+  )
   t.equal(response.body, responseBody, 'sends request body')
   scope.done()
 })

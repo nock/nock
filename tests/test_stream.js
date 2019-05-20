@@ -236,7 +236,7 @@ test(
 
     nock('http://localhost')
       .get('/')
-      .reply(200, function(path, reqBody) {
+      .reply(201, function(path, reqBody) {
         return new SimpleStream()
       })
 
@@ -245,6 +245,7 @@ test(
       res.setEncoding('utf8')
 
       let body = ''
+      t.equal(res.statusCode, 201)
 
       res.on('data', function(chunk) {
         body += chunk

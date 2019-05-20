@@ -19,7 +19,7 @@ test('accepts and decodes gzip encoded application/json', t => {
     .reply(function(url, actual) {
       t.same(actual, message)
       t.end()
-      return 200
+      return [200]
     })
 
   const req = http.request({
@@ -50,7 +50,7 @@ test('accepts and decodes deflate encoded application/json', t => {
     .reply(function(url, actual) {
       t.same(actual, message)
       t.end()
-      return 200
+      return [200]
     })
 
   const req = http.request({
