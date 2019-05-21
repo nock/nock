@@ -396,7 +396,7 @@ test('should throw expected error when creating request with missing options', t
 
 // https://github.com/nock/nock/issues/1558
 test("mocked requests have 'method' property", t => {
-  nock('http://example.test')
+  const scope = nock('http://example.test')
     .get('/somepath')
     .reply(200, {})
 
@@ -409,6 +409,7 @@ test("mocked requests have 'method' property", t => {
   t.equal(req.method, 'GET')
   req.on('response', function(res) {
     t.equal(res.req.method, 'GET')
+    scope.done()
     t.end()
   })
   req.end()
