@@ -393,3 +393,24 @@ test('should throw expected error when creating request with missing options', t
   })
   t.end()
 })
+
+// https://github.com/nock/nock/issues/1558
+test("mocked requests have 'method' property", t => {
+  const scope = nock('http://example.test')
+    .get('/somepath')
+    .reply(200, {})
+
+  const req = http.request({
+    host: 'example.test',
+    path: '/somepath',
+    method: 'GET',
+    port: 80,
+  })
+  t.equal(req.method, 'GET')
+  req.on('response', function(res) {
+    t.equal(res.req.method, 'GET')
+    scope.done()
+    t.end()
+  })
+  req.end()
+})
