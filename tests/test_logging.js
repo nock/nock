@@ -23,12 +23,13 @@ test('match debugging works', async t => {
   const exampleBody = 'Hello yourself!'
   await got.post('http://example.test/deep/link', { body: exampleBody })
 
-  t.ok(log.calledOnce)
-  t.equal(
-    JSON.parse(log.getCall(0).args[1]).href,
-    'http://example.test/deep/link'
+  t.ok(
+    log.calledWith(
+      sinon.match.string,
+      sinon.match('http://example.test/deep/link'),
+      sinon.match(exampleBody)
+    )
   )
-  t.equal(JSON.parse(log.getCall(0).args[2]), exampleBody)
 })
 
 test('should log matching', async t => {
