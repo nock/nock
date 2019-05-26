@@ -33,7 +33,7 @@
   "devDependencies": {
     "acorn": "^6.1.1",
     "assert-rejects": "^1.0.0",
-    "async": "^2.6.2",
+    "async": "^3.0.1",
     "aws-sdk": "^2.437.0",
     "coveralls": "^3.0.3",
     "eslint": "^5.16.0",
