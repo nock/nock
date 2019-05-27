@@ -414,12 +414,12 @@ test('records nonstandard ports', t => {
         port: testServer.address().port,
         path: '/',
       }
-      const rec_options = {
+      const recOptions = {
         dont_print: true,
         output_objects: true,
       }
 
-      nock.recorder.rec(rec_options)
+      nock.recorder.rec(recOptions)
 
       const req = http.request(options, res => {
         res.resume()

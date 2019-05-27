@@ -21,7 +21,6 @@ rules:
   # on.
   node/no-deprecated-api: 'off'
   handle-callback-err: 'off'
-  camelcase: 'off'
 
   # Nock additions.
   strict: ['error', 'safe']
