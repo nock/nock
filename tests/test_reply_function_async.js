@@ -125,3 +125,64 @@ test('subsequent calls to the reply callback are ignored', async t => {
   t.is(statusCode, 201)
   t.equal(body, 'one')
 })
+
+test('reply can take a direct async function without a callback', async t => {
+  const scope = nock('http://example.com')
+    .get('/')
+    .reply(200, async (path, requestBody) => {
+      t.equal(path, '/')
+      t.equal(requestBody, '')
+      return 'Hello World!'
+    })
+
+  const response = await got('http://example.com/')
+
+  t.equal(response.body, 'Hello World!')
+  scope.done()
+})
+
+test('reply can take a dynamic async function without a callback', async t => {
+  const scope = nock('http://example.com')
+    .get('/')
+    .reply(async () => [201, 'Hello World!'])
+
+  const response = await got('http://example.com/')
+
+  t.equal(response.statusCode, 201)
+  t.equal(response.body, 'Hello World!')
+  scope.done()
+})
+
+test('reply with a direct async function that rejects', async t => {
+  t.plan(2)
+
+  const scope = nock('http://example.com')
+    .get('/')
+    .reply(201, async () => {
+      throw Error('oh no!')
+    })
+
+  await got('http://example.com/').catch(reason => {
+    t.equal(reason.response.statusCode, 500)
+    t.match(reason.response.body, 'oh no!')
+  })
+
+  scope.done()
+})
+
+test('reply with a dynamic async function that rejects', async t => {
+  t.plan(2)
+
+  const scope = nock('http://example.com')
+    .get('/')
+    .reply(async () => {
+      throw Error('oh no!')
+    })
+
+  await got('http://example.com/').catch(reason => {
+    t.equal(reason.response.statusCode, 500)
+    t.match(reason.response.body, 'oh no!')
+  })
+
+  scope.done()
+})
