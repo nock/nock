@@ -20,7 +20,6 @@ rules:
   # TODO These are included in standard and should be cleaned up and turned
   # on.
   node/no-deprecated-api: 'off'
-  no-throw-literal: 'off'
   handle-callback-err: 'off'
   eqeqeq: 'off'
   new-cap: 'off'
