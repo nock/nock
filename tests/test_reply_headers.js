@@ -141,7 +141,19 @@ test('reply headers throws for invalid data', async t => {
       'Headers must be provided as an array of raw values, a Map, or a plain Object. foo: bar',
   })
 
-  t.done()
+  t.throws(() => scope.reply(200, 'Hello World!', false), {
+    message:
+      'Headers must be provided as an array of raw values, a Map, or a plain Object. false',
+  })
+})
+
+test('reply headers throws for raw array with an odd number of items', async t => {
+  const scope = nock('http://example.test').get('/')
+
+  t.throws(() => scope.reply(200, 'Hello World!', ['one', 'two', 'three']), {
+    message:
+      'Raw headers must be provided as an array with an even number of items. [fieldName, value, ...]',
+  })
 })
 
 test('reply header function is evaluated and the result sent in the mock response', async t => {

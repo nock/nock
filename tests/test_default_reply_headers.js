@@ -135,64 +135,67 @@ test('reply should not cause an error on header conflict', async t => {
   t.equal(body, '<html></html>')
 })
 
-test('default replay headers are not used when direct replay headers are a different case', async t => {
+test('direct reply headers override defaults when casing differs', async t => {
   const scope = nock('http://example.com')
     .defaultReplyHeaders({
-      'X-Powered-By': 'Meeee',
-      'X-Another-Header': 'Hey man!',
+      'X-Default-Only': 'default',
+      'X-Overridden': 'default',
     })
     .get('/')
     .reply(200, 'Success!', {
-      'X-Custom-Header': 'boo!',
-      'x-another-header': 'foobar',
+      'X-Reply-Only': 'from-reply',
+      'x-overridden': 'from-reply',
     })
 
   const { headers, rawHeaders } = await got('http://example.com/')
 
   t.deepEqual(headers, {
-    'x-custom-header': 'boo!',
-    'x-another-header': 'foobar', // note this overrode the default value, despite the case difference
-    'x-powered-by': 'Meeee',
+    'x-default-only': 'default',
+    'x-reply-only': 'from-reply',
+    'x-overridden': 'from-reply', // note this overrode the default value, despite the case difference
   })
   t.deepEqual(rawHeaders, [
-    'X-Custom-Header',
-    'boo!',
-    'x-another-header',
-    'foobar',
-    'X-Powered-By',
-    'Meeee',
-    // note 'X-Another-Header': 'Hey man!' from the defaults is not included
+    'X-Reply-Only',
+    'from-reply',
+    'x-overridden',
+    'from-reply',
+    'X-Default-Only',
+    'default',
+    // note 'X-Overridden' from the defaults is not included
   ])
   scope.done()
 })
 
-test('default replay headers are not used when dynamic replay headers are a different case', async t => {
+test('dynamic reply headers override defaults when casing differs', async t => {
   const scope = nock('http://example.com')
     .defaultReplyHeaders({
-      'X-Powered-By': 'Meeee',
-      'X-Another-Header': 'Hey man!',
+      'X-Default-Only': 'default',
+      'X-Overridden': 'default',
     })
     .get('/')
     .reply(() => [
       200,
       'Success!',
-      { 'X-Custom-Header': 'boo!', 'x-another-header': 'foobar' },
+      {
+        'X-Reply-Only': 'from-reply',
+        'x-overridden': 'from-reply',
+      },
     ])
 
   const { headers, rawHeaders } = await got('http://example.com/')
 
   t.deepEqual(headers, {
-    'x-custom-header': 'boo!',
-    'x-another-header': 'foobar',
-    'x-powered-by': 'Meeee',
+    'x-default-only': 'default',
+    'x-reply-only': 'from-reply',
+    'x-overridden': 'from-reply',
   })
   t.deepEqual(rawHeaders, [
-    'X-Custom-Header',
-    'boo!',
-    'x-another-header',
-    'foobar',
-    'X-Powered-By',
-    'Meeee',
+    'X-Reply-Only',
+    'from-reply',
+    'x-overridden',
+    'from-reply',
+    'X-Default-Only',
+    'default',
   ])
   scope.done()
 })
