@@ -206,7 +206,7 @@ test('define() works with binary buffers', t => {
     }
   )
 
-  req.on('error', err => {
+  req.on('error', () => {
     //  This should never happen.
     t.fail('Error should never occur.')
     t.end()

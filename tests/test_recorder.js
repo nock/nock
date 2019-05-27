@@ -114,7 +114,7 @@ test('records objects', t => {
       output_objects: true,
     })
 
-    mikealRequest(options, (err, resp, body) => {
+    mikealRequest(options, () => {
       nock.restore()
       const ret = nock.recorder.play()
       t.equal(ret.length, 1)
