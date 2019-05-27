@@ -1225,7 +1225,7 @@ test('records and replays binary response correctly', t => {
 test('teardown', t => {
   let leaks = Object.keys(global).splice(globalCount, Number.MAX_VALUE)
 
-  if (leaks.length == 1 && leaks[0] == '_key') {
+  if (leaks.length === 1 && leaks[0] === '_key') {
     leaks = []
   }
   t.deepEqual(leaks, [], 'No leaks')

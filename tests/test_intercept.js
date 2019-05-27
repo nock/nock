@@ -1287,7 +1287,7 @@ test('teardown', t => {
   let leaks = Object.keys(global).splice(globalCount, Number.MAX_VALUE)
 
   leaks = leaks.filter(function(key) {
-    return acceptableLeaks.indexOf(key) == -1
+    return acceptableLeaks.indexOf(key) === -1
   })
 
   t.deepEqual(leaks, [], 'No leaks')
