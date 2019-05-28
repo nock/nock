@@ -13,15 +13,15 @@ const got = require('./got_client')
 
 require('./cleanup_after_each')()
 
-const globalCount = Object.keys(global).length
-const acceptableLeaks = [
+const acceptableGlobalKeys = new Set([
+  ...Object.keys(global),
   '_key',
   '__core-js_shared__',
   'fetch',
   'Response',
   'Headers',
   'Request',
-]
+])
 
 test('invalid or missing method parameter throws an exception', t => {
   t.throws(() => nock('https://example.com').intercept('/somepath'), {
@@ -1300,12 +1300,10 @@ test('data is sent with flushHeaders', t => {
     .flushHeaders()
 })
 
-test('teardown', t => {
-  let leaks = Object.keys(global).splice(globalCount, Number.MAX_VALUE)
-
-  leaks = leaks.filter(function(key) {
-    return acceptableLeaks.indexOf(key) === -1
-  })
+test('no new keys were added to the global namespace', t => {
+  const leaks = Object.keys(global).filter(
+    key => !acceptableGlobalKeys.has(key)
+  )
 
   t.deepEqual(leaks, [], 'No leaks')
   t.end()
