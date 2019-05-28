@@ -118,5 +118,4 @@ test('isDone() must consider repeated responses', async t => {
     await got('http://example.test/')
   }
   t.is(scope.isDone(), true)
-
 })
