@@ -85,7 +85,7 @@ test('allow unmocked option works', t => {
           response => {
             response.destroy()
 
-            t.assert(response.statusCode === 200, 'Do not intercept /')
+            t.is(response.statusCode, 200, 'Do not intercept /')
 
             server.close(t.end)
           }
@@ -123,7 +123,7 @@ test('allow unmocked option works', t => {
         port: server.address().port,
       },
       response => {
-        t.assert(response.statusCode === 304, 'Intercept /abc')
+        t.is(response.statusCode, 304, 'Intercept /abc')
 
         response.on('end', firstIsDone)
         // Streams start in 'paused' mode and must be started.
