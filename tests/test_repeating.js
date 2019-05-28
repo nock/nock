@@ -119,5 +119,4 @@ test('isDone() must consider repeated responses', async t => {
   }
   t.is(scope.isDone(), true)
 
-  scope.done()
 })
