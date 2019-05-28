@@ -31,7 +31,8 @@ test('repeating twice', async t => {
     .twice()
     .reply(200, 'Hello World!')
 
-  for (const count of [1, 2]) {
+  // eslint-disable-next-line no-unused-vars
+  for (const _ of Array(2)) {
     const { statusCode } = await got('http://example.test/')
     t.is(statusCode, 200)
   }
@@ -51,7 +52,8 @@ test('repeating thrice', async t => {
     .thrice()
     .reply(200, 'Hello World!')
 
-  for (const count of [1, 2, 3]) {
+  // eslint-disable-next-line no-unused-vars
+  for (const _ of Array(3)) {
     const { statusCode } = await got('http://example.test/')
     t.is(statusCode, 200)
   }
@@ -71,7 +73,8 @@ test('repeating response 4 times', async t => {
     .times(4)
     .reply(200, 'Hello World!')
 
-  for (const count of [1, 2, 3, 4]) {
+  // eslint-disable-next-line no-unused-vars
+  for (const _ of Array(4)) {
     const { statusCode } = await got('http://example.test/')
     t.is(statusCode, 200)
   }
@@ -109,7 +112,8 @@ test('isDone() must consider repeated responses', async t => {
     .times(2)
     .reply(204)
 
-  for (const count of [1, 2]) {
+  // eslint-disable-next-line no-unused-vars
+  for (const _ of Array(2)) {
     t.is(scope.isDone(), false)
     await got('http://example.test/')
   }
