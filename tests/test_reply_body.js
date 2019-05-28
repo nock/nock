@@ -158,3 +158,16 @@ test('reply with missing status code defaults to 200', async t => {
   t.equal(body, '')
   scope.done()
 })
+
+test('reply with invalid status code throws', t => {
+  const scope = nock('http://localhost').get('/')
+
+  t.throws(() => scope.reply('200'), {
+    message: 'Invalid string value for status code',
+  })
+  t.throws(() => scope.reply(false), {
+    message: 'Invalid boolean value for status code',
+  })
+
+  t.end()
+})
