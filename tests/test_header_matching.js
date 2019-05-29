@@ -366,6 +366,17 @@ test('matches request header with regular expression', t => {
   )
 })
 
+test('reqheaders throw if they are not an object', async t => {
+  const options = {
+    reqheaders: 'Content-Type: text/plain',
+  }
+
+  t.throws(
+    () => nock('http://example.test', options).get('/'),
+    Error('Headers must be provided as an object')
+  )
+})
+
 test('request header satisfies the header function', t => {
   nock('http://example.test', {
     reqheaders: {
