@@ -662,6 +662,8 @@ nock('http://zombo.com')
   .reply(200, 'Ok')
 ```
 
+To repeat this response for as long as nock is active, use [.persist()](#persist).
+
 ### Delay the response body
 
 You are able to specify the number of milliseconds that the response body should be delayed. Response header will be replied immediately.
@@ -1003,6 +1005,8 @@ const scope = nock('http://example.com')
 
 scope.persist(false)
 ```
+
+To specify an exact number of times that nock should repeat the response, use [.times()](#repeat-response-n-times).
 
 ### .pendingMocks()
 
