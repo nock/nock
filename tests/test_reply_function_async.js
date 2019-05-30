@@ -89,3 +89,19 @@ test('reply should throw on error on the callback', t => {
 
   req.end()
 })
+
+test('subsequent calls to the reply callback are ignored', async t => {
+  const scope = nock('http://example.com')
+    .get('/')
+    .reply(201, (path, requestBody, callback) => {
+      callback(null, 'one')
+      callback(null, 'two')
+      callback(null, 'three')
+    })
+
+  const { statusCode, body } = await got('http://example.com/')
+
+  scope.done()
+  t.is(statusCode, 201)
+  t.equal(body, 'one')
+})
