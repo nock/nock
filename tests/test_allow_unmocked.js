@@ -85,7 +85,7 @@ test('allow unmocked option works', t => {
           response => {
             response.destroy()
 
-            t.assert(response.statusCode == 200, 'Do not intercept /')
+            t.is(response.statusCode, 200, 'Do not intercept /')
 
             server.close(t.end)
           }
@@ -123,7 +123,7 @@ test('allow unmocked option works', t => {
         port: server.address().port,
       },
       response => {
-        t.assert(response.statusCode == 304, 'Intercept /abc')
+        t.is(response.statusCode, 304, 'Intercept /abc')
 
         response.on('end', firstIsDone)
         // Streams start in 'paused' mode and must be started.
@@ -138,7 +138,7 @@ test('allow unmocked option works', t => {
 })
 
 test('allow unmocked post with json data', t => {
-  t.plan(2)
+  t.plan(3)
   t.once('end', function() {
     server.close()
   })
@@ -160,7 +160,8 @@ test('allow unmocked post with json data', t => {
       json: { some: 'data' },
     }
 
-    mikealRequest(options, function(err, resp, body) {
+    mikealRequest(options, function(err, resp) {
+      t.error(err)
       t.equal(200, resp.statusCode)
       t.end()
     })
@@ -168,7 +169,7 @@ test('allow unmocked post with json data', t => {
 })
 
 test('allow unmocked passthrough with mismatched bodies', t => {
-  t.plan(2)
+  t.plan(3)
   t.once('end', function() {
     server.close()
   })
@@ -181,7 +182,7 @@ test('allow unmocked passthrough with mismatched bodies', t => {
 
   server.listen(() => {
     nock(`http://localhost:${server.address().port}`, { allowUnmocked: true })
-      .post('/post', { some: 'otherdata' })
+      .post('/post', { some: 'other data' })
       .reply(404, 'Hey!')
 
     const options = {
@@ -190,7 +191,8 @@ test('allow unmocked passthrough with mismatched bodies', t => {
       json: { some: 'data' },
     }
 
-    mikealRequest(options, function(err, resp, body) {
+    mikealRequest(options, function(err, resp) {
+      t.error(err)
       t.equal(200, resp.statusCode)
       t.end()
     })

@@ -54,7 +54,7 @@ test('Aborting an aborted request should not emit an error', t => {
     .reply(200)
 
   let errorCount = 0
-  const req = http.get('http://example.test/status').on('error', err => {
+  const req = http.get('http://example.test/status').on('error', () => {
     errorCount++
     if (errorCount < 3) {
       // Abort 3 times at max, otherwise this would be an endless loop,
