@@ -267,6 +267,7 @@ test('using reply callback with delay can reply JSON', t => {
       json: true,
     },
     function(err, res, body) {
+      t.error(err)
       t.equals(res.headers['content-type'], 'application/json')
       t.deepEqual(body, { a: 1 })
       t.end()

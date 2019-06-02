@@ -88,7 +88,7 @@ test('clean all works', t => {
         t.assert(res.statusCode !== 200, 'should clean up properly')
         t.end()
       })
-      .on('error', function(err) {
+      .on('error', function() {
         t.end()
       })
   })

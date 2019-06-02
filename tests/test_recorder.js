@@ -114,7 +114,7 @@ test('records objects', t => {
       output_objects: true,
     })
 
-    mikealRequest(options, (err, resp, body) => {
+    mikealRequest(options, () => {
       nock.restore()
       const ret = nock.recorder.play()
       t.equal(ret.length, 1)
@@ -414,12 +414,12 @@ test('records nonstandard ports', t => {
         port: testServer.address().port,
         path: '/',
       }
-      const rec_options = {
+      const recOptions = {
         dont_print: true,
         output_objects: true,
       }
 
-      nock.recorder.rec(rec_options)
+      nock.recorder.rec(recOptions)
 
       const req = http.request(options, res => {
         res.resume()
@@ -1225,7 +1225,7 @@ test('records and replays binary response correctly', t => {
 test('teardown', t => {
   let leaks = Object.keys(global).splice(globalCount, Number.MAX_VALUE)
 
-  if (leaks.length == 1 && leaks[0] == '_key') {
+  if (leaks.length === 1 && leaks[0] === '_key') {
     leaks = []
   }
   t.deepEqual(leaks, [], 'No leaks')

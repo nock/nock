@@ -13,15 +13,15 @@ const got = require('./got_client')
 
 require('./cleanup_after_each')()
 
-const globalCount = Object.keys(global).length
-const acceptableLeaks = [
+const acceptableGlobalKeys = new Set([
+  ...Object.keys(global),
   '_key',
   '__core-js_shared__',
   'fetch',
   'Response',
   'Headers',
   'Request',
-]
+])
 
 test('invalid or missing method parameter throws an exception', t => {
   t.throws(() => nock('https://example.com').intercept('/somepath'), {
@@ -657,6 +657,7 @@ test('superagent works', t => {
     .reply(200, responseText, headers)
 
   superagent.get('http://example.test/somepath').end(function(err, res) {
+    t.error(err)
     t.equal(res.text, responseText)
     t.end()
   })
@@ -670,6 +671,7 @@ test('superagent works with query string', t => {
     .reply(200, responseText, headers)
 
   superagent.get('http://example.test/somepath?a=b').end(function(err, res) {
+    t.error(err)
     t.equal(res.text, responseText)
     t.end()
   })
@@ -684,6 +686,7 @@ test('superagent posts', t => {
     .post('http://example.test/somepath?b=c')
     .send('some data')
     .end(function(err, res) {
+      t.error(err)
       t.equal(res.status, 204)
       t.end()
     })
@@ -709,6 +712,7 @@ test('sending binary and receiving JSON should work ', t => {
       headers: { Accept: 'application/json', 'Content-Length': 23861 },
     },
     function(err, res, body) {
+      t.error(err)
       scope.done()
 
       t.equal(res.statusCode, 201)
@@ -736,8 +740,10 @@ test('handles get with restify client', t => {
     url: 'https://example.test',
   })
 
-  client.get('/get', function(err, req, res) {
+  client.get('/get', function(err, req) {
+    t.error(err)
     req.on('result', function(err, res) {
+      t.error(err)
       res.body = ''
       res.setEncoding('utf8')
       res.on('data', function(chunk) {
@@ -762,8 +768,10 @@ test('handles post with restify client', t => {
     url: 'https://example.test',
   })
 
-  client.post('/post', function(err, req, res) {
+  client.post('/post', function(err, req) {
+    t.error(err)
     req.on('result', function(err, res) {
+      t.error(err)
       res.body = ''
       res.setEncoding('utf8')
       res.on('data', function(chunk) {
@@ -792,6 +800,7 @@ test('handles get with restify JsonClient', t => {
   })
 
   client.get('/get', function(err, req, res, obj) {
+    t.error(err)
     t.equal(obj.get, 'ok')
     t.end()
     scope.done()
@@ -808,6 +817,7 @@ test('handles post with restify JsonClient', t => {
   })
 
   client.post('/post', { username: 'banana' }, function(err, req, res, obj) {
+    t.error(err)
     t.equal(obj.post, 'ok')
     t.end()
     scope.done()
@@ -823,7 +833,10 @@ test('handles 404 with restify JsonClient', t => {
     url: 'https://example.test',
   })
 
-  client.put('/404', function(err, req, res, obj) {
+  client.put('/404', function(err, req, res) {
+    if (!err) {
+      t.fail('No Error was provided')
+    }
     t.equal(res.statusCode, 404)
     t.end()
     scope.done()
@@ -839,7 +852,10 @@ test('handles 500 with restify JsonClient', t => {
     url: 'https://example.test',
   })
 
-  client.del('/500', function(err, req, res, obj) {
+  client.del('/500', function(err, req, res) {
+    if (!err) {
+      t.fail('No Error was provided')
+    }
     t.equal(res.statusCode, 500)
     t.end()
     scope.done()
@@ -1175,6 +1191,7 @@ test('you must setup an interceptor for each request', t => {
     .reply(200, 'First match')
 
   mikealRequest.get('http://example.test/hey', function(error, res, body) {
+    t.error(error)
     t.equal(res.statusCode, 200)
     t.equal(body, 'First match', 'should match first request response body')
 
@@ -1283,12 +1300,10 @@ test('data is sent with flushHeaders', t => {
     .flushHeaders()
 })
 
-test('teardown', t => {
-  let leaks = Object.keys(global).splice(globalCount, Number.MAX_VALUE)
-
-  leaks = leaks.filter(function(key) {
-    return acceptableLeaks.indexOf(key) == -1
-  })
+test('no new keys were added to the global namespace', t => {
+  const leaks = Object.keys(global).filter(
+    key => !acceptableGlobalKeys.has(key)
+  )
 
   t.deepEqual(leaks, [], 'No leaks')
   t.end()
