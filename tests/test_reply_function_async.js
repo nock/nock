@@ -91,7 +91,7 @@ test('reply should throw on error on the callback', t => {
   req.end()
 })
 
-test('an error passed to the callback when a full response array is expected', async t => {
+test('an error passed to the callback propagates when [err, fullResponseArray] is expected', async t => {
   const scope = nock('http://example.test')
     .get('/')
     .reply((path, requestBody, callback) => {
