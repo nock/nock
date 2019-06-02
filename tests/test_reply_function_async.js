@@ -108,12 +108,15 @@ test('an error passed to the callback propagates when [err, fullResponseArray] i
 })
 
 test('subsequent calls to the reply callback are ignored', async t => {
+  t.plan(3)
+
   const scope = nock('http://example.com')
     .get('/')
     .reply(201, (path, requestBody, callback) => {
       callback(null, 'one')
       callback(null, 'two')
       callback(null, 'three')
+      t.pass()
     })
 
   const { statusCode, body } = await got('http://example.com/')
