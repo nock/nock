@@ -183,7 +183,7 @@ test('define() works with binary buffers', t => {
     ])
   )
 
-  const req = new http.request(
+  const req = http.request(
     {
       host: 'example.com',
       method: 'POST',
@@ -206,7 +206,7 @@ test('define() works with binary buffers', t => {
     }
   )
 
-  req.on('error', err => {
+  req.on('error', () => {
     //  This should never happen.
     t.fail('Error should never occur.')
     t.end()
@@ -238,7 +238,7 @@ test('define() uses reqheaders', t => {
 
   // Make a request which should match the mock that was configured above.
   // This does not hit the network.
-  const req = new http.request(
+  const req = http.request(
     {
       host: 'example.com',
       method: 'GET',
@@ -282,7 +282,7 @@ test('define() uses badheaders', t => {
     ])
   )
 
-  const req = new http.request(
+  const req = http.request(
     {
       host: 'example.com',
       method: 'GET',
