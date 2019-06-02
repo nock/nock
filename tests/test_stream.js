@@ -290,3 +290,32 @@ test('response readable pull stream works as expected', t => {
 
   req.end()
 })
+
+test('error events on reply streams proxy to the response', async t => {
+  // This test could probably be written to use got, however, that lib has a lot of built in
+  // error handling and this test would get convoluted.
+  t.plan(1)
+
+  const replyBody = new stream.PassThrough()
+  const scope = nock('http://example.test')
+    .get('/')
+    .reply(201, replyBody)
+
+  const reqOpts = {
+    host: 'example.test',
+    method: 'GET',
+    path: '/',
+  }
+  http.get(reqOpts, res => {
+    res.on('error', err => {
+      t.is(err, 'oh no!')
+      t.done()
+    })
+  })
+
+  scope.done()
+
+  replyBody.end(() => {
+    replyBody.emit('error', 'oh no!')
+  })
+})
