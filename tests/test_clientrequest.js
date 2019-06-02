@@ -70,6 +70,27 @@ test('can use ClientRequest using POST', t => {
   req.end()
 })
 
+// This test needs `http`.
+test('direct use of ClientRequest executes optional callback', async t => {
+  t.plan(1)
+
+  const scope = nock('http://example.test')
+    .get('/')
+    .reply(201)
+
+  const reqOpts = {
+    host: 'example.test',
+    path: '/',
+    method: 'GET',
+  }
+  const req = new http.ClientRequest(reqOpts, res => {
+    t.is(res.statusCode, 201)
+  })
+  req.end()
+
+  scope.done()
+})
+
 test('creating ClientRequest with empty options throws expected error', t => {
   t.throws(() => new http.ClientRequest(), {
     message:
