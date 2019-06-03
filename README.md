@@ -355,8 +355,7 @@ Instead of an object or a buffer you can also pass in a callback to be evaluated
 
 ```js
 const scope = nock('http://www.google.com')
-  .filteringRequestBody(/.*/, '*')
-  .post('/echo', '*')
+  .post('/echo')
   .reply(201, (uri, requestBody) => requestBody)
 ```
 
@@ -372,8 +371,7 @@ An asynchronous function that gets an error-first callback as its last argument 
 
 ```js
 const scope = nock('http://www.google.com')
-  .filteringRequestBody(/.*/, '*')
-  .post('/echo', '*')
+  .post('/echo')
   .reply(201, (uri, requestBody, cb) => {
     fs.readFile('cat-poems.txt', cb) // Error-first callback
   })
@@ -385,8 +383,7 @@ You can also return the status code and body using just one function:
 
 ```js
 const scope = nock('http://www.google.com')
-  .filteringRequestBody(/.*/, '*')
-  .post('/echo', '*')
+  .post('/echo')
   .reply((uri, requestBody) => {
     return [
       201,
@@ -400,8 +397,7 @@ or, use an error-first callback that also gets the status code:
 
 ```js
 const scope = nock('http://www.google.com')
-  .filteringRequestBody(/.*/, '*')
-  .post('/echo', '*')
+  .post('/echo')
   .reply((uri, requestBody, cb) => {
     setTimeout(() => cb(null, [201, 'THIS IS THE REPLY BODY']), 1000)
   })
@@ -839,12 +835,11 @@ const scope = nock('http://api.myservice.com')
   .reply(201, 'OK')
 ```
 
-If you don't want to match the request body you can return a wildcard match:
+If you don't want to match the request body you should omit the `body` argument from the method function:
 
 ```js
 const scope = nock('http://api.myservice.com')
-  .filteringRequestBody(body => '*')
-  .post('/some_uri', '*')
+  .post('/some_uri') // no body argument
   .reply(200, 'OK')
 ```
 
