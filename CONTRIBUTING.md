@@ -20,6 +20,7 @@ Please note that this project is released with a [Contributor Code of Conduct](.
 - [GitHub Apps](#github-apps)
 - [Becoming a maintainer](#becoming-a-maintainer)
 - [Who is funding work on Nock?](#who-is-funding-work-on-nock)
+- [Priority Support](#priority-support)
 - [Is there a chat where I can talk to other maintainers and users?](#is-there-a-chat-where-i-can-talk-to-other-maintainers-and-users)
 
 <!-- tocstop -->
@@ -149,6 +150,10 @@ Once you've been around for a bit, ask a current Maintainer - one of [the team m
 Nock is entirely self-funded by [our Open Collective](https://opencollective.com/nock). Open Collective allows us to get contributions from users and companies, without giving away our open source IP. Think of it like a kickstarter, or an old-fashioned system of art patrons.
 
 If you'd like to give money to support Nock, please do go to our profile and check it out.
+
+## Priority Support
+
+As part of backing on Open Collective, we tag some issues as a priority if the user who opens them is also a backer, using the [Open Collective Bot](https://github.com/marketplace/open-collective-bot). In general, as maintainers we will try to get to these issues as soon as we can. The money in the Open Collective goes to the entire project, however, and maintainers are volunteers. Get in touch with a maintainer individually if you want faster response times.
 
 ## Is there a chat where I can talk to other maintainers and users?
 
