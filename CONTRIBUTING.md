@@ -153,7 +153,7 @@ If you'd like to give money to support Nock, please do go to our profile and che
 
 ## Priority Support
 
-As part of backing on Open Collective, we tag some issues as a priority if the user who opens them is also a backer, using the [Open Collective Bot](https://github.com/marketplace/open-collective-bot). In general, as maintainers we will try to get to these issues as soon as we can. The money in the Open Collective goes to the entire project, however, and maintainers are volunteers. Get in touch with a maintainer individually if you want faster response times.
+As part of backing on Open Collective, we tag some issues as a priority if the user who opens them is also a backer, using the [Open Collective Bot](https://github.com/marketplace/open-collective-bot). In general, as maintainers we will give priority to support people who are working on these issues. The money in the Open Collective goes to the entire project, however, and maintainers are volunteers.
 
 ## Is there a chat where I can talk to other maintainers and users?
 
