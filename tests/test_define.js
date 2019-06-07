@@ -306,6 +306,8 @@ test('define() uses badheaders', t => {
 })
 
 test('define() treats a * body as a special case for not matching the request body', async t => {
+  t.plan(4)
+
   nock.define([
     {
       scope: 'http://example.test',
@@ -315,6 +317,11 @@ test('define() treats a * body as a special case for not matching the request bo
       response: 'matched',
     },
   ])
+
+  process.once('warning', warning => {
+    t.equal(warning.name, 'DeprecationWarning')
+    t.match(warning.message, 'Skipping body matching using')
+  })
 
   const { statusCode, body } = await got.post('http://example.test/', {
     body: 'foo bar',
