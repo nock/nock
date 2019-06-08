@@ -158,7 +158,7 @@ test('define() works with non-JSON responses', async t => {
   })
 
   t.equal(statusCode, 200)
-  // TODO: beacuse `{ encoding: false }` is passed to `got`, `body` should be
+  // TODO: because `{ encoding: false }` is passed to `got`, `body` should be
   // a buffer, but it's a string. Is this a bug in nock or got?
   t.equal(body, exampleResponseBody)
 })
@@ -303,4 +303,30 @@ test('define() uses badheaders', t => {
     }
   )
   req.end()
+})
+
+test('define() treats a * body as a special case for not matching the request body', async t => {
+  t.plan(4)
+
+  nock.define([
+    {
+      scope: 'http://example.test',
+      method: 'POST',
+      path: '/',
+      body: '*',
+      response: 'matched',
+    },
+  ])
+
+  process.once('warning', warning => {
+    t.equal(warning.name, 'DeprecationWarning')
+    t.match(warning.message, 'Skipping body matching using')
+  })
+
+  const { statusCode, body } = await got.post('http://example.test/', {
+    body: 'foo bar',
+  })
+
+  t.equal(statusCode, 200)
+  t.equal(body, 'matched')
 })
