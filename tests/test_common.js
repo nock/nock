@@ -115,7 +115,9 @@ test('isUtf8Representable works', t => {
 
 test('isJSONContent', t => {
   t.true(common.isJSONContent({ 'content-type': 'application/json' }))
-  t.true(common.isJSONContent({ 'content-type': ['application/json'] }))
+  t.true(
+    common.isJSONContent({ 'content-type': 'application/json; charset=utf-8' })
+  )
   t.false(common.isJSONContent({ 'content-type': 'text/plain' }))
   t.end()
 })
