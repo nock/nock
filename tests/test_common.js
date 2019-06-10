@@ -199,6 +199,30 @@ test('deleteHeadersField deletes fields with case-insensitive field names', t =>
   t.end()
 })
 
+test('deleteHeadersField removes multiple fields with same case-insensitive names', async t => {
+  const headers = {
+    foo: 'one',
+    FOO: 'two',
+    'X-Foo': 'three',
+  }
+
+  common.deleteHeadersField(headers, 'foo')
+
+  t.deepEqual(headers, { 'X-Foo': 'three' })
+})
+
+test('deleteHeadersField throws for invalid headers', async t => {
+  t.throws(() => common.deleteHeadersField('foo', 'Content-Type'), {
+    message: 'headers must be an object',
+  })
+})
+
+test('deleteHeadersField throws for invalid field name', async t => {
+  t.throws(() => common.deleteHeadersField({}, /cookie/), {
+    message: 'field name must be a string',
+  })
+})
+
 test('matchStringOrRegexp', function(t) {
   t.true(
     common.matchStringOrRegexp('to match', 'to match'),
