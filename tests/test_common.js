@@ -251,50 +251,125 @@ test('restoreOverriddenRequests can be called more than once', t => {
   t.end()
 })
 
-test('stringifyRequest', function(t) {
-  const exampleOptions = {
-    method: 'POST',
-    port: 81,
-    proto: 'http',
-    hostname: 'example.test',
-    path: '/path/1',
-    headers: { cookie: 'fiz=baz' },
-  }
-
-  t.deepEqual(
-    JSON.parse(common.stringifyRequest(exampleOptions, { foo: 'bar' })),
-    {
-      method: 'POST',
-      url: 'http://example.test:81/path/1',
-      headers: {
-        cookie: 'fiz=baz',
-      },
-      body: {
-        foo: 'bar',
-      },
-    }
-  )
-
-  t.deepEqual(
-    JSON.parse(
-      common.stringifyRequest(
-        {
-          ...exampleOptions,
-          method: 'GET',
-        },
-        null
-      )
-    ),
-    {
+test('stringifyRequest', async t => {
+  t.test('includes non-default ports', async t => {
+    const options = {
       method: 'GET',
-      url: 'http://example.test:81/path/1',
-      headers: {
-        cookie: 'fiz=baz',
-      },
+      port: 3000,
+      proto: 'http',
+      hostname: 'example.test',
+      path: '/',
+      headers: {},
     }
-  )
 
-  t.end()
+    const result = common.stringifyRequest(options, 'foo')
+
+    // We have to parse the object instead of comparing the raw string because the order of keys are not guaranteed.
+    t.deepEqual(JSON.parse(result), {
+      method: 'GET',
+      url: 'http://example.test:3000/',
+      headers: {},
+      body: 'foo',
+    })
+  })
+
+  t.test('does not include default http port', async t => {
+    const options = {
+      method: 'GET',
+      port: 80,
+      proto: 'http',
+      hostname: 'example.test',
+      path: '/',
+      headers: {},
+    }
+
+    const result = common.stringifyRequest(options, 'foo')
+
+    t.deepEqual(JSON.parse(result), {
+      method: 'GET',
+      url: 'http://example.test/',
+      headers: {},
+      body: 'foo',
+    })
+  })
+
+  t.test('does not include default http port', async t => {
+    const options = {
+      method: 'POST',
+      port: 443,
+      proto: 'https',
+      hostname: 'example.test',
+      path: '/the/path',
+      headers: {},
+    }
+
+    const result = common.stringifyRequest(options, 'foo')
+
+    t.deepEqual(JSON.parse(result), {
+      method: 'POST',
+      url: 'https://example.test/the/path',
+      headers: {},
+      body: 'foo',
+    })
+  })
+
+  t.test('defaults optional options', async t => {
+    const options = {
+      port: 80,
+      proto: 'http',
+      hostname: 'example.test',
+      headers: {},
+    }
+
+    const result = common.stringifyRequest(options, 'foo')
+
+    t.deepEqual(JSON.parse(result), {
+      method: 'GET',
+      url: 'http://example.test',
+      headers: {},
+      body: 'foo',
+    })
+  })
+
+  t.test('passes headers through', async t => {
+    const options = {
+      method: 'GET',
+      port: 80,
+      proto: 'http',
+      hostname: 'example.test',
+      path: '/',
+      headers: { cookie: 'fiz=baz', 'set-cookie': ['hello', 'world'] },
+    }
+
+    const result = common.stringifyRequest(options, 'foo')
+
+    t.deepEqual(JSON.parse(result), {
+      method: 'GET',
+      url: 'http://example.test/',
+      headers: { cookie: 'fiz=baz', 'set-cookie': ['hello', 'world'] },
+      body: 'foo',
+    })
+  })
+
+  t.test('the body is always treated as a string', async t => {
+    const options = {
+      method: 'GET',
+      port: 80,
+      proto: 'http',
+      hostname: 'example.test',
+      path: '/',
+      headers: {},
+    }
+
+    const result = common.stringifyRequest(options, '{"hello":"world"}')
+
+    t.deepEqual(JSON.parse(result), {
+      method: 'GET',
+      url: 'http://example.test/',
+      headers: {},
+      body: '{"hello":"world"}',
+    })
+  })
 })
 
 test('headersArrayToObject', function(t) {
