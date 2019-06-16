@@ -75,7 +75,7 @@ test('nockBack passes filteringPath options', function(t) {
         },
         firstRawData => {
           nockDone()
-          t.pass('nockBack regords fixture')
+          t.pass('nockBack records fixture')
 
           const fixtureContent = JSON.parse(
             fs.readFileSync(fixture, { encoding: 'utf8' })
