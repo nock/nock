@@ -453,3 +453,28 @@ test('percentEncode encodes extra reserved characters', t => {
   t.equal(common.percentEncode('foo+(*)!'), 'foo%2B%28%2A%29%21')
   t.done()
 })
+
+test('normalizeClientRequestArgs throws for invalid URL', async t => {
+  // no schema
+  t.throws(() => common.normalizeClientRequestArgs('example.test'), {
+    input: 'example.test',
+    name: /TypeError/,
+  })
+})
+
+test('normalizeClientRequestArgs can include auth info', async t => {
+  const { options } = common.normalizeClientRequestArgs(
+    'https://user:pw@example.test'
+  )
+
+  t.equal(options.auth, 'user:pw')
+})
+
+test('normalizeClientRequestArgs with a single callback', async t => {
+  const cb = () => {}
+
+  const { options, callback } = common.normalizeClientRequestArgs(cb)
+
+  t.deepEqual(options, {})
+  t.is(callback, cb)
+})
