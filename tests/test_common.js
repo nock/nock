@@ -449,6 +449,7 @@ test('headersArrayToObject', function(t) {
   t.end()
 })
 
-test('percentEncode encodes extra reserved characters', async t => {
+test('percentEncode encodes extra reserved characters', t => {
   t.equal(common.percentEncode('foo+(*)!'), 'foo%2B%28%2A%29%21')
+  t.done()
 })
