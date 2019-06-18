@@ -320,7 +320,7 @@ test('stringifyRequest does not include default http port', t => {
   t.end()
 })
 
-test('stringifyRequest does not include default http port', t => {
+test('stringifyRequest does not include default https port', t => {
   const options = {
     method: 'POST',
     port: 443,
