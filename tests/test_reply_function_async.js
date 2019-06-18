@@ -115,7 +115,7 @@ test('subsequent calls to the reply callback are ignored', async t => {
     .reply(201, (path, requestBody, callback) => {
       callback(null, 'one')
       callback(null, 'two')
-      callback(null, 'three')
+      callback(new Error('three'))
       t.pass()
     })
 
