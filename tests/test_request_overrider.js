@@ -329,6 +329,21 @@ test('request emits socket', t => {
   })
 })
 
+test('socket is shared and aliased correctly', t => {
+  nock('http://example.test')
+    .get('/')
+    .reply()
+
+  const req = http.get('http://example.test')
+
+  req.once('response', res => {
+    t.is(req.socket, req.connection)
+    t.is(req.socket, res.socket)
+    t.is(res.socket, res.connection)
+    t.end()
+  })
+})
+
 test('socket emits connect and secureConnect', t => {
   t.plan(3)
 
