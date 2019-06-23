@@ -18,7 +18,7 @@ test('disable net connect is default', function(t) {
 
   mikealRequest('https://google.com/', function(err, res) {
     assert(err)
-    assert.equal(
+    assert.strictEqual(
       err.message,
       'Nock: Disallowed net connect for "google.com:443/"'
     )
