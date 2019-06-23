@@ -95,7 +95,7 @@ test('match body with regex', t => {
     },
     function(err, res) {
       if (err) throw err
-      assert.equal(res.statusCode, 200)
+      assert.strictEqual(res.statusCode, 200)
       t.end()
     }
   )
@@ -118,7 +118,7 @@ test('match body (with space character) with regex', t => {
     },
     function(err, res) {
       if (err) throw err
-      assert.equal(res.statusCode, 200)
+      assert.strictEqual(res.statusCode, 200)
       t.end()
     }
   )
@@ -143,7 +143,7 @@ test('match body with regex inside array', t => {
     },
     function(err, res) {
       if (err) throw err
-      assert.equal(res.statusCode, 200)
+      assert.strictEqual(res.statusCode, 200)
       t.end()
     }
   )
@@ -164,7 +164,7 @@ test('match body with empty object inside', t => {
     },
     function(err, res) {
       if (err) throw err
-      assert.equal(res.statusCode, 200)
+      assert.strictEqual(res.statusCode, 200)
       t.end()
     }
   )
@@ -187,7 +187,7 @@ test('match body with nested object inside', t => {
     },
     function(err, res) {
       if (err) throw err
-      assert.equal(res.statusCode, 200)
+      assert.strictEqual(res.statusCode, 200)
       t.end()
     }
   )
@@ -229,7 +229,7 @@ test('match body with form multipart', t => {
     },
     function(err, res) {
       if (err) throw err
-      assert.equal(res.statusCode, 200)
+      assert.strictEqual(res.statusCode, 200)
       t.end()
     }
   )
@@ -263,7 +263,7 @@ test('array like urlencoded form posts are correctly parsed', t => {
     },
     function(err, res) {
       if (err) throw err
-      assert.equal(res.statusCode, 200)
+      assert.strictEqual(res.statusCode, 200)
       t.end()
     }
   )
@@ -290,7 +290,7 @@ test('urlencoded form posts are matched with non-string values', t => {
     },
     function(err, res) {
       if (err) throw err
-      assert.equal(res.statusCode, 200)
+      assert.strictEqual(res.statusCode, 200)
       t.end()
     }
   )
@@ -313,7 +313,7 @@ test('urlencoded form posts are matched with regexp', t => {
     },
     function(err, res) {
       if (err) throw err
-      assert.equal(res.statusCode, 200)
+      assert.strictEqual(res.statusCode, 200)
       t.end()
     }
   )
@@ -333,7 +333,7 @@ test('match utf-8 buffer body with utf-8 buffer', t => {
     },
     function(err, res) {
       if (err) throw err
-      assert.equal(res.statusCode, 200)
+      assert.strictEqual(res.statusCode, 200)
       t.end()
     }
   )
@@ -372,7 +372,7 @@ test('match binary buffer body with binary buffer', t => {
     },
     function(err, res) {
       if (err) throw err
-      assert.equal(res.statusCode, 200)
+      assert.strictEqual(res.statusCode, 200)
       t.end()
     }
   )
