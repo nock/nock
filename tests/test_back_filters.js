@@ -12,7 +12,7 @@ const originalMode = nockBack.currentMode
 nock.enableNetConnect()
 nockBack.fixtures = `${__dirname}/fixtures`
 nockBack.setMode('record')
-const fixtureFilename = `recording_filters_test.json`;
+const fixtureFilename = `recording_filters_test.json`
 const fixture = `${nockBack.fixtures}/${fixtureFilename}`
 
 function rimrafOnEnd(t) {
