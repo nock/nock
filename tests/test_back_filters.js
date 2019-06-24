@@ -26,7 +26,7 @@ function createServer(t) {
     t.pass('server received a request')
 
     response.writeHead(200)
-    response.write(`server served a response at ${new Date().getTime()}`)
+    response.write(`server served a response at ${Date.now()}`)
     response.end()
   })
 }
