@@ -4,8 +4,6 @@
 // callback with the response body or an array containing the status code and
 // optional response body and headers.
 
-const assertRejects = require('assert-rejects')
-const http = require('http')
 const { test } = require('tap')
 const nock = require('..')
 const got = require('./got_client')
@@ -51,60 +49,30 @@ test('reply takes a callback for status code', async t => {
   scope.done()
 })
 
-test('reply should throw on error on the callback', t => {
-  let dataCalled = false
-
-  const scope = nock('http://example.com')
+test('reply should throw on error on the callback', async t => {
+  nock('http://example.test')
     .get('/')
     .reply(500, (path, requestBody, callback) =>
       callback(new Error('Database failed'))
     )
 
-  // TODO When this request is converted to `got`, it causes the request not
-  // to match.
-  const req = http.request(
-    {
-      host: 'example.com',
-      path: '/',
-      port: 80,
-    },
-    res => {
-      t.equal(res.statusCode, 500, 'Status code is 500')
-
-      res.on('data', data => {
-        dataCalled = true
-        t.ok(data instanceof Buffer, 'data should be buffer')
-        t.ok(
-          data.toString().indexOf('Error: Database failed') === 0,
-          'response should match'
-        )
-      })
-
-      res.on('end', () => {
-        t.ok(dataCalled, 'data handler was called')
-        scope.done()
-        t.end()
-      })
-    }
-  )
-
-  req.end()
+  t.rejects(got('http://example.test'), {
+    name: 'RequestError',
+    message: 'Database failed',
+  })
 })
 
 test('an error passed to the callback propagates when [err, fullResponseArray] is expected', async t => {
-  const scope = nock('http://example.test')
+  nock('http://example.test')
     .get('/')
     .reply((path, requestBody, callback) => {
       callback(Error('boom'))
     })
 
-  await assertRejects(got('http://example.test/'), ({ statusCode, body }) => {
-    t.is(statusCode, 500)
-    t.matches(body, 'Error: boom')
-    return true
+  t.rejects(got('http://example.test'), {
+    name: 'RequestError',
+    message: 'boom',
   })
-
-  scope.done()
 })
 
 test('subsequent calls to the reply callback are ignored', async t => {
@@ -154,35 +122,27 @@ test('reply can take a dynamic async function without a callback', async t => {
 })
 
 test('reply with a direct async function that rejects', async t => {
-  t.plan(2)
-
-  const scope = nock('http://example.com')
+  nock('http://example.test')
     .get('/')
     .reply(201, async () => {
       throw Error('oh no!')
     })
 
-  await got('http://example.com/').catch(reason => {
-    t.equal(reason.response.statusCode, 500)
-    t.match(reason.response.body, 'oh no!')
+  t.rejects(got('http://example.test'), {
+    name: 'RequestError',
+    message: 'oh no!',
   })
-
-  scope.done()
 })
 
 test('reply with a dynamic async function that rejects', async t => {
-  t.plan(2)
-
-  const scope = nock('http://example.com')
+  nock('http://example.test')
     .get('/')
     .reply(async () => {
       throw Error('oh no!')
     })
 
-  await got('http://example.com/').catch(reason => {
-    t.equal(reason.response.statusCode, 500)
-    t.match(reason.response.body, 'oh no!')
+  t.rejects(got('http://example.test'), {
+    name: 'RequestError',
+    message: 'oh no!',
   })
-
-  scope.done()
 })

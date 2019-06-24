@@ -396,8 +396,6 @@ const scope = nock('http://www.google.com')
   })
 ```
 
-> Note: When using a callback, if you call back with an error as the first argument, that error will be sent in the response body, with a 500 HTTP response status code.
-
 You can also return the status code and body using just one function:
 
 ```js
