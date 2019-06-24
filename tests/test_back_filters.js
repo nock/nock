@@ -12,7 +12,8 @@ const originalMode = nockBack.currentMode
 nock.enableNetConnect()
 nockBack.fixtures = `${__dirname}/fixtures`
 nockBack.setMode('record')
-const fixture = `${nockBack.fixtures}/recording_test.json`
+const fixtureFilename = `recording_filters_test.json`
+const fixture = `${nockBack.fixtures}/${fixtureFilename}`
 
 function rimrafOnEnd(t) {
   t.once('end', function() {
@@ -25,7 +26,7 @@ function createServer(t) {
     t.pass('server received a request')
 
     response.writeHead(200)
-    response.write(`server served a response at ${new Date()}`)
+    response.write(`server served a response at ${Date.now()}`)
     response.end()
   })
 }
@@ -36,18 +37,15 @@ function createRequest(options, callback) {
     path: '/',
     method: 'GET',
   }
-  const request = http.request(
-    Object.assign({}, baseOptions, options),
-    response => {
-      let rawData = ''
-      response.on('data', chunk => (rawData += chunk))
-      response.once('end', () => {
-        callback(rawData)
-        response.resume()
-      })
-    }
-  )
-  return request
+  return http.request({ ...baseOptions, ...options }, response => {
+    const rawData = []
+    response.on('data', chunk => rawData.push(chunk))
+    response.once('end', chunk => {
+      rawData.push(chunk)
+      callback(rawData.join(''))
+      response.resume()
+    })
+  })
 }
 
 test('nockBack passes filteringPath options', function(t) {
@@ -56,18 +54,15 @@ test('nockBack passes filteringPath options', function(t) {
   const server = createServer(t)
   const nockBackOptions = {
     before(scope) {
-      scope.filteringPath = path => {
-        let filteredPath = path
-        filteredPath = path.replace(/timestamp=[0-9]+/, 'timestamp=1111')
-        return filteredPath
-      }
+      scope.filteringPath = path =>
+        path.replace(/timestamp=[0-9]+/, 'timestamp=1111')
     },
   }
 
   server.listen(() => {
     const { port } = server.address()
 
-    nockBack('recording_test.json', nockBackOptions, function(nockDone) {
+    nockBack(fixtureFilename, nockBackOptions, function(nockDone) {
       const requestForRecord = createRequest(
         {
           path: '/?timestamp=1111',
@@ -75,7 +70,7 @@ test('nockBack passes filteringPath options', function(t) {
         },
         firstRawData => {
           nockDone()
-          t.pass('nockBack regords fixture')
+          t.pass('nockBack records fixture')
 
           const fixtureContent = JSON.parse(
             fs.readFileSync(fixture, { encoding: 'utf8' })
@@ -83,7 +78,7 @@ test('nockBack passes filteringPath options', function(t) {
           t.equal(fixtureContent.length, 1)
           t.equal(fixtureContent[0].path, '/?timestamp=1111')
 
-          nockBack('recording_test.json', nockBackOptions, function(nockDone) {
+          nockBack(fixtureFilename, nockBackOptions, function(nockDone) {
             const request = createRequest(
               {
                 path: '/?timestamp=2222',
@@ -134,20 +129,20 @@ test('nockBack passes filteringRequestBody option', function(t) {
   server.listen(() => {
     const { port } = server.address()
 
-    nockBack('recording_test.json', nockBackOptions, function(nockDone) {
+    nockBack(fixtureFilename, nockBackOptions, function(nockDone) {
       const postData = querystring.stringify({ token: 'aaa-bbb-ccc' })
       const requestForRecord = createRequest(
         {
           port,
           method: 'POST',
           headers: {
-            'Content-Type': 'applicaiotn/x-www-form-urlencoded',
+            'Content-Type': 'application/x-www-form-urlencoded',
             'Content-Length': Buffer.byteLength(postData),
           },
         },
         firstRawData => {
           nockDone()
-          t.pass('nockBack regords fixture')
+          t.pass('nockBack records fixture')
 
           const fixtureContent = JSON.parse(
             fs.readFileSync(fixture, { encoding: 'utf8' })
@@ -155,7 +150,7 @@ test('nockBack passes filteringRequestBody option', function(t) {
           t.equal(fixtureContent.length, 1)
           t.equal(fixtureContent[0].body, 'token=aaa-bbb-ccc')
 
-          nockBack('recording_test.json', nockBackOptions, function(nockDone) {
+          nockBack(fixtureFilename, nockBackOptions, function(nockDone) {
             const secondPostData = querystring.stringify({
               token: 'ddd-eee-fff',
             })
@@ -164,7 +159,7 @@ test('nockBack passes filteringRequestBody option', function(t) {
                 port,
                 method: 'POST',
                 headers: {
-                  'Content-Type': 'applicaiotn/x-www-form-urlencoded',
+                  'Content-Type': 'application/x-www-form-urlencoded',
                   'Content-Length': Buffer.byteLength(postData),
                 },
               },
