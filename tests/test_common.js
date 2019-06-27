@@ -547,6 +547,9 @@ test('formatQueryValue formats keys', t => {
   }
 
   // when stringFormattingFn is passed
-  t.deepEqual(common.formatQueryValue('FOO', 'BAZ', formatString), ['foo', 'baz'])
+  t.deepEqual(common.formatQueryValue('FOO', 'BAZ', formatString), [
+    'foo',
+    'baz',
+  ])
   t.done()
 })
