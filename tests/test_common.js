@@ -453,3 +453,100 @@ test('percentEncode encodes extra reserved characters', t => {
   t.equal(common.percentEncode('foo+(*)!'), 'foo%2B%28%2A%29%21')
   t.done()
 })
+
+test('formatQueryValue formats values with type "number"', t => {
+  t.deepEqual(common.formatQueryValue(0, 0), [0, '0'])
+  t.deepEqual(common.formatQueryValue(0, -1000), [0, '-1000'])
+  t.deepEqual(common.formatQueryValue(0, 500), [0, '500'])
+  t.done()
+})
+
+test('formatQueryValue formats null & undefined values', t => {
+  t.deepEqual(common.formatQueryValue(0, null), [0, ''])
+  t.deepEqual(common.formatQueryValue(0, undefined), [0, ''])
+  t.done()
+})
+
+test('formatQueryValue formats values with type "string"', t => {
+  // when stringFormattingFn is not passed
+  t.deepEqual(common.formatQueryValue(0, 'foo'), [0, 'foo'])
+
+  // when stringFormattingFn is passed
+  t.deepEqual(
+    common.formatQueryValue(0, 'FOO', function(str) {
+      return typeof str === 'string' ? str.toLowerCase() : str
+    }),
+    [0, 'foo']
+  )
+  t.done()
+})
+
+test('formatQueryValue does not format regex', t => {
+  t.deepEqual(common.formatQueryValue(0, /^foo(bar)?$/i), [0, /^foo(bar)?$/i])
+  t.done()
+})
+
+test('formatQueryValue formats arrays', t => {
+  t.deepEqual(
+    common.formatQueryValue(0, [
+      0,
+      -100,
+      'foo',
+      { sum: 10 },
+      null,
+      undefined,
+      /^foo(bar)?$/i,
+      ['baz', 100],
+    ]),
+    [
+      0,
+      [
+        '0',
+        '-100',
+        'foo',
+        { sum: '10' },
+        '',
+        '',
+        /^foo(bar)?$/i,
+        ['baz', '100'],
+      ],
+    ]
+  )
+  t.done()
+})
+
+test('formatQueryValue formats objects', t => {
+  t.deepEqual(
+    common.formatQueryValue(0, {
+      a: 5,
+      b: 5,
+      c: undefined,
+      d: null,
+      e: [10, undefined, 'foo'],
+    }),
+    [
+      0,
+      {
+        a: '5',
+        b: '5',
+        c: '',
+        d: '',
+        e: ['10', '', 'foo'],
+      },
+    ]
+  )
+  t.done()
+})
+
+test('formatQueryValue formats keys', t => {
+  // when stringFormattingFn is not passed
+  t.deepEqual(common.formatQueryValue(0, 'foo'), [0, 'foo'])
+
+  const formatString = function(str) {
+    return typeof str === 'string' ? str.toLowerCase() : str
+  }
+
+  // when stringFormattingFn is passed
+  t.deepEqual(common.formatQueryValue('FOO', 'BAZ', formatString), ['foo', 'baz'])
+  t.done()
+})
