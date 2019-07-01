@@ -429,3 +429,30 @@ test("mocked requests have 'method' property", t => {
   })
   req.end()
 })
+
+// https://github.com/nock/nock/issues/1493
+test("response have 'complete' property and it's true after end", t => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .reply(200, 'Hello World!')
+
+  const req = http.request(
+    {
+      host: 'example.test',
+      method: 'GET',
+      path: '/',
+      port: 80,
+    },
+    res => {
+      res.on('end', () => {
+        t.is(res.complete, true)
+        scope.done()
+        t.end()
+      })
+      // Streams start in 'paused' mode and must be started.
+      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+      res.resume()
+    }
+  )
+  req.end()
+})
