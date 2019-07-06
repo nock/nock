@@ -491,11 +491,11 @@ test('when badheaders are present, badheaders prevents match', async t => {
   const scope = nock('http://example.test', {
     badheaders: ['cookie'],
   })
-    .post('/')
-    .reply(200, { status: 'ok' })
+    .get('/')
+    .reply()
 
   await assertRejects(
-    got.post('http://example.test/', {
+    got('http://example.test/', {
       headers: { Cookie: 'cookie', Donut: 'donut' },
     }),
     Error,
@@ -509,10 +509,10 @@ test('when badheaders are absent but other headers are present, badheaders does 
   const scope = nock('http://example.test', {
     badheaders: ['cookie'],
   })
-    .post('/')
-    .reply(200, { status: 'ok' })
+    .get('/')
+    .reply()
 
-  await got.post('http://example.test/', { headers: { Donut: 'donut' } })
+  await got('http://example.test/', { headers: { Donut: 'donut' } })
 
   scope.done()
 })
