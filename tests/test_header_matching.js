@@ -487,29 +487,34 @@ test('done does not fail when specified request header is not missing', t => {
   )
 })
 
-test('done fails when specified bad request header is present', t => {
-  nock('http://example.test', {
+test('when badheaders are present, badheaders prevents match', async t => {
+  const scope = nock('http://example.test', {
     badheaders: ['cookie'],
   })
-    .post('/resource')
-    .reply(200, { status: 'ok' })
+    .get('/')
+    .reply()
 
-  const d = domain.create()
+  await assertRejects(
+    got('http://example.test/', {
+      headers: { Cookie: 'cookie', Donut: 'donut' },
+    }),
+    Error,
+    'Nock: No match for request'
+  )
 
-  d.run(function() {
-    mikealRequest({
-      method: 'POST',
-      uri: 'http://example.test/resource',
-      headers: {
-        Cookie: 'cookie',
-      },
-    })
+  t.false(scope.isDone())
+})
+
+test('when badheaders are absent but other headers are present, badheaders does not prevent match', async t => {
+  const scope = nock('http://example.test', {
+    badheaders: ['cookie'],
   })
+    .get('/')
+    .reply()
 
-  d.once('error', function(err) {
-    t.ok(err.message.match(/No match/))
-    t.end()
-  })
+  await got('http://example.test/', { headers: { Donut: 'donut' } })
+
+  scope.done()
 })
 
 test('mocking succeeds even when mocked and specified request header names have different cases', t => {

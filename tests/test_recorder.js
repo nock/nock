@@ -444,7 +444,45 @@ test('records nonstandard ports', t => {
     })
 })
 
-test('rec() throws when reenvoked with already recorder requests', t => {
+test('req.end accepts and calls a callback when recording', t => {
+  const server = http.createServer((request, response) => {
+    response.writeHead(200)
+    response.end()
+  })
+  t.once('end', () => server.close())
+
+  nock.restore()
+  nock.recorder.clear()
+  t.equal(nock.recorder.play().length, 0)
+
+  server.listen(() => {
+    nock.recorder.rec({ dont_print: true })
+
+    let callbackCalled = false
+    const req = http.request(
+      {
+        hostname: 'localhost',
+        port: server.address().port,
+        path: '/',
+        method: 'GET',
+      },
+      res => {
+        t.true(callbackCalled)
+        t.equal(res.statusCode, 200)
+        res.on('end', () => {
+          t.end()
+        })
+        res.resume()
+      }
+    )
+
+    req.end(() => {
+      callbackCalled = true
+    })
+  })
+})
+
+test('rec() throws when reinvoked with already recorder requests', t => {
   nock.restore()
   nock.recorder.clear()
   t.equal(nock.recorder.play().length, 0)
