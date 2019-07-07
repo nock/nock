@@ -135,6 +135,85 @@ test('end callback called when end has callback, but no buffer', t => {
   })
 })
 
+test('request.end called with all three arguments', t => {
+  const scope = nock('http://example.test')
+    .post('/', 'foobar')
+    .reply()
+
+  let callbackCalled = false
+  const req = http.request(
+    {
+      host: 'example.test',
+      method: 'POST',
+      path: '/',
+    },
+    res => {
+      t.true(callbackCalled)
+      res.on('end', () => {
+        scope.done()
+        t.end()
+      })
+      res.resume()
+    }
+  )
+
+  // hex(foobar) == 666F6F626172
+  req.end('666F6F626172', 'hex', () => {
+    callbackCalled = true
+  })
+})
+
+test('request.end called with only data and encoding', t => {
+  const scope = nock('http://example.test')
+    .post('/', 'foobar')
+    .reply()
+
+  const req = http.request(
+    {
+      host: 'example.test',
+      method: 'POST',
+      path: '/',
+    },
+    res => {
+      res.on('end', () => {
+        scope.done()
+        t.end()
+      })
+      res.resume()
+    }
+  )
+
+  // hex(foobar) == 666F6F626172
+  req.end('666F6F626172', 'hex')
+})
+
+test('request.end called with only data and a callback', t => {
+  const scope = nock('http://example.test')
+    .post('/', 'foobar')
+    .reply()
+
+  let callbackCalled = false
+  const req = http.request(
+    {
+      host: 'example.test',
+      method: 'POST',
+      path: '/',
+    },
+    res => {
+      t.true(callbackCalled)
+      res.on('end', () => {
+        scope.done()
+        t.end()
+      })
+      res.resume()
+    }
+  )
+
+  req.end('foobar', () => {
+    callbackCalled = true
+  })
+})
+
 // http://github.com/nock/nock/issues/139
 test('finish event fired before end event', t => {
   const scope = nock('http://example.test')
