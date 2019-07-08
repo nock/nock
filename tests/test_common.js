@@ -467,17 +467,20 @@ test('formatQueryValue formats null & undefined values', t => {
   t.done()
 })
 
-test('formatQueryValue formats values with type "string"', t => {
-  // when stringFormattingFn is not passed
+test('formatQueryValue formats values with type "string" (when stringFormattingFn is undefined)', t => {
   t.deepEqual(common.formatQueryValue(0, 'foo'), [0, 'foo'])
 
-  // when stringFormattingFn is passed
+  t.done()
+})
+
+test('formatQueryValue formats values with type "string" (when stringFormattingFn is defined)', t => {
   t.deepEqual(
     common.formatQueryValue(0, 'FOO', function(str) {
       return typeof str === 'string' ? str.toLowerCase() : str
     }),
     [0, 'foo']
   )
+
   t.done()
 })
 
@@ -538,15 +541,17 @@ test('formatQueryValue formats objects', t => {
   t.done()
 })
 
-test('formatQueryValue formats keys', t => {
-  // when stringFormattingFn is not passed
+test('formatQueryValue formats keys (when stringFormattingFn is undefined)', t => {
   t.deepEqual(common.formatQueryValue(0, 'foo'), [0, 'foo'])
 
+  t.done()
+})
+
+test('formatQueryValue formats keys (when stringFormattingFn is defined)', t => {
   const formatString = function(str) {
     return typeof str === 'string' ? str.toLowerCase() : str
   }
 
-  // when stringFormattingFn is passed
   t.deepEqual(common.formatQueryValue('FOO', 'BAZ', formatString), [
     'foo',
     'baz',
