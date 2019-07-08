@@ -10,11 +10,11 @@ const got = require('./got_client')
 require('./cleanup_after_each')()
 
 test('with allowUnmocked, mocked request still works', async t => {
-  const scope = nock('http://example.com', { allowUnmocked: true })
-    .post('/post')
+  const scope = nock('http://example.test', { allowUnmocked: true })
+    .post('/')
     .reply(200, '99problems')
 
-  const { body, statusCode } = await got.post('http://example.com/post')
+  const { body, statusCode } = await got.post('http://example.test/')
   t.equal(statusCode, 200)
   t.equal(body, '99problems')
 
