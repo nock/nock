@@ -7,6 +7,8 @@ const nock = require('..')
 
 require('./cleanup_after_each')()
 
+function ignore() {}
+
 test('emits request and replied events', function(t) {
   const scope = nock('http://example.test')
     .get('/please')
@@ -83,15 +85,12 @@ test('emits no match when no match and mocked', function(t) {
   http.get('http://example.test/definitelymaybe').once('error', ignore)
 })
 
-// TODO: Rewrite tests to use localhost server instead of google.com
 test('emits no match when netConnect is disabled', function(t) {
   nock.disableNetConnect()
   nock.emitter.on('no match', function(req) {
-    t.equal(req.hostname, 'google.com')
+    t.equal(req.hostname, 'example.test')
     nock.emitter.removeAllListeners('no match')
     t.end()
   })
-  http.get('http://google.com').once('error', ignore)
+  http.get('http://example.test').once('error', ignore)
 })
-
-function ignore() {}

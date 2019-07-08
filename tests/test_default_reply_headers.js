@@ -136,7 +136,7 @@ test('reply should not cause an error on header conflict', async t => {
 })
 
 test('direct reply headers override defaults when casing differs', async t => {
-  const scope = nock('http://example.com')
+  const scope = nock('http://example.test')
     .defaultReplyHeaders({
       'X-Default-Only': 'default',
       'X-Overridden': 'default',
@@ -147,7 +147,7 @@ test('direct reply headers override defaults when casing differs', async t => {
       'x-overridden': 'from-reply',
     })
 
-  const { headers, rawHeaders } = await got('http://example.com/')
+  const { headers, rawHeaders } = await got('http://example.test/')
 
   t.deepEqual(headers, {
     'x-default-only': 'default',
@@ -167,7 +167,7 @@ test('direct reply headers override defaults when casing differs', async t => {
 })
 
 test('dynamic reply headers override defaults when casing differs', async t => {
-  const scope = nock('http://example.com')
+  const scope = nock('http://example.test')
     .defaultReplyHeaders({
       'X-Default-Only': 'default',
       'X-Overridden': 'default',
@@ -182,7 +182,7 @@ test('dynamic reply headers override defaults when casing differs', async t => {
       },
     ])
 
-  const { headers, rawHeaders } = await got('http://example.com/')
+  const { headers, rawHeaders } = await got('http://example.test/')
 
   t.deepEqual(headers, {
     'x-default-only': 'default',
