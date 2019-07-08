@@ -1314,11 +1314,9 @@ test('no new keys were added to the global namespace', t => {
 test('first arg as URL instance', t => {
   const scope = nock('http://example.test')
     .get('/')
-    .reply(201, 'this is data')
+    .reply()
 
-  const req = http.get(new url.URL('http://example.test'))
-
-  req.on('response', () => {
+  http.get(new url.URL('http://example.test'), () => {
     scope.done()
     t.end()
   })
