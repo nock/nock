@@ -60,7 +60,7 @@
     "tap": "^14.0.0"
   },
   "scripts": {
-    "unit": "tap --coverage ./tests/test_*.js",
+    "unit": "tap --coverage --coverage-report=text ./tests/test_*.js",
     "pretest": "npm run -s lint",
     "test": "npm run -s unit",
     "posttest": "npm run -s prettier:check",
