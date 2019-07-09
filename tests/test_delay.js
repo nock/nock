@@ -180,7 +180,7 @@ test('delayBody works with a stream', async t => {
 })
 
 test('delayBody works with a stream of binary buffers', async t => {
-  const scope = nock('http://example.com')
+  const scope = nock('http://example.test')
     .get('/')
     .delayBody(100)
     // No encoding specified, which causes the file to be streamed using
@@ -190,7 +190,7 @@ test('delayBody works with a stream of binary buffers', async t => {
   await resolvesInAtLeast(
     t,
     async () => {
-      const { body } = await got('http://example.com/')
+      const { body } = await got('http://example.test/')
       t.equal(body, fs.readFileSync(textFile, { encoding: 'utf8' }))
     },
     100
@@ -207,14 +207,14 @@ test('delayBody works with a delayed stream', async t => {
     },
   })
 
-  const scope = nock('http://example.com')
+  const scope = nock('http://example.test')
     .get('/')
     .delayBody(100)
     .reply(200, (uri, requestBody) => passthrough)
 
   setTimeout(() => fs.createReadStream(textFile).pipe(passthrough), 125)
 
-  const { body } = await got('http://example.com/')
+  const { body } = await got('http://example.test/')
   t.equal(body, fs.readFileSync(textFile, { encoding: 'utf8' }))
 
   scope.done()

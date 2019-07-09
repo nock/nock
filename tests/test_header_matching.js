@@ -1,10 +1,8 @@
 'use strict'
 
 const http = require('http')
-const domain = require('domain')
 const assertRejects = require('assert-rejects')
 const { test } = require('tap')
-const mikealRequest = require('request')
 const nock = require('..')
 const got = require('./got_client')
 
@@ -313,57 +311,58 @@ test('header manipulation', t => {
   req.end()
 })
 
-test('done fails when specified request header is missing', t => {
+test('done fails when specified request header is missing', async t => {
   nock('http://example.test', {
     reqheaders: {
       'X-App-Token': 'apptoken',
       'X-Auth-Token': 'apptoken',
     },
   })
-    .post('/resource')
+    .post('/')
     .reply(200, { status: 'ok' })
 
-  const d = domain.create()
-
-  d.run(function() {
-    mikealRequest({
-      method: 'POST',
-      uri: 'http://example.test/resource',
-      headers: {
-        'X-App-Token': 'apptoken',
-      },
-    })
-  })
-
-  d.once('error', function(err) {
-    t.ok(err.message.match(/No match/))
-    t.end()
-  })
+  await assertRejects(
+    got.post('http://example.test/', {
+      headers: { 'X-App-Token': 'apptoken' },
+    }),
+    Error,
+    'Nock: No match for request'
+  )
 })
 
-test('matches request header with regular expression', t => {
-  nock('http://example.test', {
+test('matches when request header matches regular expression', async t => {
+  const scope = nock('http://example.test', {
+    reqheaders: { 'X-My-Super-Power': /.+/ },
+  })
+    .post('/')
+    .reply()
+
+  const { statusCode } = await got.post('http://example.test/', {
+    headers: { 'X-My-Super-Power': 'mullet growing' },
+  })
+
+  t.is(statusCode, 200)
+  scope.done()
+})
+
+test('does not match when request header does not match regular expression', async t => {
+  const scope = nock('http://example.test', {
     reqheaders: {
-      'X-My-Super-Power': /.+/,
+      'X-My-Super-Power': /Mullet.+/,
     },
   })
-    .post('/superpowers')
-    .reply(200, { status: 'ok' })
+    .post('/')
+    .reply()
 
-  mikealRequest(
-    {
-      method: 'POST',
-      uri: 'http://example.test/superpowers',
-      headers: {
-        'X-My-Super-Power': 'mullet growing',
-      },
-    },
-    function(err, res, body) {
-      t.strictEqual(err, null)
-      t.equal(body, '{"status":"ok"}')
-      t.end()
-    }
+  await assertRejects(
+    got.post('http://example.test/', {
+      headers: { 'X-My-Super-Power': 'mullet growing' },
+    }),
+    Error,
+    'Nock: No match'
   )
+
+  t.false(scope.isDone())
 })
 
 test('reqheaders throw if they are not an object', async t => {
@@ -377,114 +376,62 @@ test('reqheaders throw if they are not an object', async t => {
   )
 })
 
-test('request header satisfies the header function', t => {
-  nock('http://example.test', {
+test('matches when request header satisfies the header function', async t => {
+  const scope = nock('http://example.test', {
     reqheaders: {
-      'X-My-Super-Power': function(value) {
-        return value === 'mullet growing'
-      },
+      'X-My-Super-Power': value => value === 'mullet growing',
     },
   })
-    .post('/superpowers')
-    .reply(200, { status: 'ok' })
+    .post('/')
+    .reply()
 
-  mikealRequest(
-    {
-      method: 'POST',
-      uri: 'http://example.test/superpowers',
-      headers: {
-        'X-My-Super-Power': 'mullet growing',
-      },
+  const { statusCode } = await got.post('http://example.test/', {
+    headers: { 'X-My-Super-Power': 'mullet growing' },
+  })
+
+  t.is(statusCode, 200)
+  scope.done()
+})
+
+test("doesn't match when request header does not satisfy the header function", async t => {
+  const scope = nock('http://example.test', {
+    reqheaders: {
+      'X-My-Super-Power': value => value === 'Mullet Growing',
     },
-    function(err, res, body) {
-      t.strictEqual(err, null)
-      t.equal(body, '{"status":"ok"}')
-      t.end()
-    }
+  })
+    .post('/')
+    .reply()
+
+  await assertRejects(
+    got.post('http://example.test/', {
+      headers: { 'X-My-Super-Power': 'mullet growing' },
+    }),
+    Error,
+    'Nock: No match'
   )
+
+  t.false(scope.isDone())
 })
 
-test("done fails when specified request header doesn't match regular expression", t => {
-  nock('http://example.test', {
-    reqheaders: {
-      'X-My-Super-Power': /Mullet.+/,
-    },
-  })
-    .post('/resource')
-    .reply(200, { status: 'ok' })
-
-  const d = domain.create()
-
-  d.run(function() {
-    mikealRequest({
-      method: 'POST',
-      uri: 'http://example.test/superpowers',
-      headers: {
-        'X-My-Super-Power': 'mullet growing',
-      },
-    })
-  })
-
-  d.once('error', function(err) {
-    t.ok(err.message.match(/No match/))
-    t.end()
-  })
-})
-
-test("done fails when specified request header doesn't satisfy the header function", t => {
-  nock('http://example.test', {
-    reqheaders: {
-      'X-My-Super-Power': function(value) {
-        return value === 'Mullet Growing'
-      },
-    },
-  })
-    .post('/resource')
-    .reply(200, { status: 'ok' })
-
-  const d = domain.create()
-
-  d.run(function() {
-    mikealRequest({
-      method: 'POST',
-      uri: 'http://example.test/superpowers',
-      headers: {
-        'X-My-Super-Power': 'mullet growing',
-      },
-    })
-  })
-
-  d.once('error', function(err) {
-    t.ok(err.message.match(/No match/))
-    t.end()
-  })
-})
-
-test('done does not fail when specified request header is not missing', t => {
-  nock('http://example.test', {
+test('done does not fail when specified request header is not missing', async t => {
+  const scope = nock('http://example.test', {
     reqheaders: {
       'X-App-Token': 'apptoken',
       'X-Auth-Token': 'apptoken',
     },
   })
-    .post('/resource')
-    .reply(200, { status: 'ok' })
+    .post('/')
+    .reply()
 
-  mikealRequest(
-    {
-      method: 'POST',
-      uri: 'http://example.test/resource',
-      headers: {
-        'X-App-Token': 'apptoken',
-        'X-Auth-Token': 'apptoken',
-      },
+  const { statusCode } = await got.post('http://example.test/', {
+    headers: {
+      'X-App-Token': 'apptoken',
+      'X-Auth-Token': 'apptoken',
     },
-    function(err, res, body) {
-      t.type(err, 'null')
-      t.equal(res.statusCode, 200)
-      t.end()
-    }
-  )
+  })
+
+  t.is(statusCode, 200)
+  scope.done()
 })
 
 test('when badheaders are present, badheaders prevents match', async t => {
@@ -517,57 +464,45 @@ test('when badheaders are absent but other headers are present, badheaders does 
   scope.done()
 })
 
-test('mocking succeeds even when mocked and specified request header names have different cases', t => {
-  nock('http://example.test', {
+test('mocking succeeds even when mocked and specified request header names have different cases', async t => {
+  const scope = nock('http://example.test', {
     reqheaders: {
       'x-app-token': 'apptoken',
       'x-auth-token': 'apptoken',
     },
   })
-    .post('/resource')
-    .reply(200, { status: 'ok' })
+    .post('/')
+    .reply()
 
-  mikealRequest(
-    {
-      method: 'POST',
-      uri: 'http://example.test/resource',
-      headers: {
-        'X-App-TOKEN': 'apptoken',
-        'X-Auth-TOKEN': 'apptoken',
-      },
+  const { statusCode } = await got.post('http://example.test/', {
+    headers: {
+      'X-App-TOKEN': 'apptoken',
+      'X-Auth-TOKEN': 'apptoken',
     },
-    function(err, res, body) {
-      t.type(err, 'null')
-      t.equal(res.statusCode, 200)
-      t.end()
-    }
-  )
+  })
+
+  t.is(statusCode, 200)
+  scope.done()
 })
 
 // https://github.com/nock/nock/issues/966
-test('mocking succeeds when mocked and specified request headers have falsy values', t => {
-  nock('http://example.test', {
+test('mocking succeeds when mocked and specified request headers have falsy values', async t => {
+  const scope = nock('http://example.test', {
     reqheaders: {
       'x-foo': 0,
     },
   })
-    .post('/resource')
-    .reply(200, { status: 'ok' })
+    .post('/')
+    .reply()
 
-  mikealRequest(
-    {
-      method: 'POST',
-      uri: 'http://example.test/resource',
-      headers: {
-        'X-Foo': 0,
-      },
+  const { statusCode } = await got.post('http://example.test/', {
+    headers: {
+      'X-Foo': 0,
     },
-    function(err, res, body) {
-      t.error(err)
-      t.equal(res.statusCode, 200)
-      t.end()
-    }
-  )
+  })
+
+  t.is(statusCode, 200)
+  scope.done()
 })
 
 test('match basic authentication header', t => {
@@ -607,7 +542,7 @@ test('match basic authentication header', t => {
   )
 })
 
-test('multiple interceptors override headers from unrelated request', t => {
+test('multiple interceptors override headers from unrelated request', async t => {
   nock.define([
     {
       scope: 'https://example.test:443',
@@ -631,30 +566,13 @@ test('multiple interceptors override headers from unrelated request', t => {
     },
   ])
 
-  mikealRequest(
-    {
-      url: 'https://example.test/bar',
-      headers: {
-        'x-foo': 'bar',
-      },
-    },
-    function(err, res, body) {
-      t.error(err)
-      t.equal(res.statusCode, 200)
+  const res1 = await got('https://example.test/bar', {
+    headers: { 'x-foo': 'bar' },
+  })
+  t.is(res1.statusCode, 200)
 
-      mikealRequest.get(
-        {
-          url: 'https://example.test/baz',
-          headers: {
-            'x-foo': 'baz',
-          },
-        },
-        function(err, res, body) {
-          t.error(err)
-          t.equal(res.statusCode, 200)
-          t.end()
-        }
-      )
-    }
-  )
+  const res2 = await got('https://example.test/baz', {
+    headers: { 'x-foo': 'baz' },
+  })
+  t.is(res2.statusCode, 200)
 })
