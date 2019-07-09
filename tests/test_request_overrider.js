@@ -38,6 +38,19 @@ test('response is an http.IncomingMessage instance', t => {
     .end()
 })
 
+test('emits the response event', t => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .reply()
+
+  const req = http.get('http://example.test')
+
+  req.on('response', () => {
+    scope.done()
+    t.end()
+  })
+})
+
 test('write callback called', t => {
   const scope = nock('http://filterboddiezregexp.com')
     .filteringRequestBody(/mia/, 'nostra')
