@@ -8,6 +8,7 @@ const superagent = require('superagent')
 const restify = require('restify-clients')
 const assertRejects = require('assert-rejects')
 const hyperquest = require('hyperquest')
+const url = require('url')
 const nock = require('..')
 const got = require('./got_client')
 
@@ -1307,4 +1308,35 @@ test('no new keys were added to the global namespace', t => {
 
   t.deepEqual(leaks, [], 'No leaks')
   t.end()
+})
+
+// These tests use `http` directly because `got` never calls `http` with the three arg form
+test('first arg as URL instance', t => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .reply()
+
+  http.get(new url.URL('http://example.test'), () => {
+    scope.done()
+    t.end()
+  })
+})
+
+test('three argument form of http.request: URL, options, and callback', t => {
+  t.plan(2)
+
+  const scope = nock('http://example.test')
+    .get('/hello')
+    .reply(201, 'this is data')
+
+  http.get(new url.URL('http://example.test'), { path: '/hello' }, res => {
+    t.equal(res.statusCode, 201)
+    res.on('data', chunk => {
+      t.equal(chunk.toString(), 'this is data')
+    })
+    res.on('end', () => {
+      scope.done()
+      t.done()
+    })
+  })
 })
