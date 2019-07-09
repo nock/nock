@@ -463,21 +463,18 @@ test('normalizeClientRequestArgs throws for invalid URL', async t => {
   })
 })
 
-test('normalizeClientRequestArgs can include auth info', async t => {
+test('normalizeClientRequestArgs can include auth info', async () => {
   const scope = nock('http://example.test')
     .get('/')
-    .reply(function() {
-      // base64(user:pw) -> dXNlcjpwdw==
-      t.deepEqual(this.req.getHeader('authorization'), 'Basic dXNlcjpwdw==')
-      return [200]
-    })
+    .basicAuth({ user: 'user', pass: 'pw' })
+    .reply()
 
   http.get('http://user:pw@example.test')
   scope.isDone()
 })
 
 test('normalizeClientRequestArgs with a single callback', async t => {
-  // Only passing a callback isn't currently supported by Nock,
+  // TODO: Only passing a callback isn't currently supported by Nock,
   // but should be in the future as Node allows it.
   const cb = () => {}
 
