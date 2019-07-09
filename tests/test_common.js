@@ -1,5 +1,6 @@
 'use strict'
 
+const http = require('http')
 const { test } = require('tap')
 const common = require('../lib/common')
 const matchBody = require('../lib/match_body')
@@ -452,4 +453,33 @@ test('headersArrayToObject', function(t) {
 test('percentEncode encodes extra reserved characters', t => {
   t.equal(common.percentEncode('foo+(*)!'), 'foo%2B%28%2A%29%21')
   t.done()
+})
+
+test('normalizeClientRequestArgs throws for invalid URL', async t => {
+  // no schema
+  t.throws(() => http.get('example.test'), {
+    input: 'example.test',
+    name: /TypeError/,
+  })
+})
+
+test('normalizeClientRequestArgs can include auth info', async () => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .basicAuth({ user: 'user', pass: 'pw' })
+    .reply()
+
+  http.get('http://user:pw@example.test')
+  scope.isDone()
+})
+
+test('normalizeClientRequestArgs with a single callback', async t => {
+  // TODO: Only passing a callback isn't currently supported by Nock,
+  // but should be in the future as Node allows it.
+  const cb = () => {}
+
+  const { options, callback } = common.normalizeClientRequestArgs(cb)
+
+  t.deepEqual(options, {})
+  t.is(callback, cb)
 })
