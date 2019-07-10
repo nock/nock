@@ -259,6 +259,17 @@ test('match multiple paths to domain using regexp with allowUnmocked', async t =
   scope2.done()
 })
 
+test('match domain and path with literal query params and allowUnmocked', async t => {
+  const scope = nock('http://example.test', { allowUnmocked: true })
+    .get('/foo?bar=baz')
+    .reply()
+
+  const { statusCode } = await got('http://example.test/foo?bar=baz')
+
+  t.is(statusCode, 200)
+  scope.done()
+})
+
 test('match domain and path using regexp with query params and allowUnmocked', t => {
   const imgResponse = 'Matched Images Page'
   const opts = { allowUnmocked: true }

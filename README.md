@@ -254,7 +254,15 @@ nock('http://www.example.com')
 
 ### Specifying request query string
 
-Nock understands query strings. Instead of placing the entire URL, you can specify the query part as an object:
+Nock understands query strings. Search parameters can be included as part of the path:
+
+```js
+nock('http://example.com')
+  .get('/users?foo=bar')
+  .reply(200)
+```
+
+Instead of placing the entire URL, you can specify the query part as an object:
 
 ```js
 nock('http://example.com')
@@ -276,6 +284,17 @@ nock('http://example.com')
     },
   })
   .reply(200, { results: [{ id: 'pgte' }] })
+```
+
+A `URLSearchParams` instance can be provided.
+
+```js
+const params = new URLSearchParams({ foo: 'bar' })
+
+nock('http://example.com')
+  .get('/')
+  .query(params)
+  .reply(200)
 ```
 
 Nock supports passing a function to query. The function determines if the actual query matches or not.
