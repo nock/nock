@@ -1,5 +1,6 @@
 'use strict'
 
+const http = require('http')
 const { test } = require('tap')
 const common = require('../lib/common')
 const matchBody = require('../lib/match_body')
@@ -454,107 +455,31 @@ test('percentEncode encodes extra reserved characters', t => {
   t.done()
 })
 
-test('formatQueryValue formats values with type "number"', t => {
-  t.deepEqual(common.formatQueryValue(0, 0), [0, '0'])
-  t.deepEqual(common.formatQueryValue(0, -1000), [0, '-1000'])
-  t.deepEqual(common.formatQueryValue(0, 500), [0, '500'])
-  t.done()
+test('normalizeClientRequestArgs throws for invalid URL', async t => {
+  // no schema
+  t.throws(() => http.get('example.test'), {
+    input: 'example.test',
+    name: /TypeError/,
+  })
 })
 
-test('formatQueryValue formats null & undefined values', t => {
-  t.deepEqual(common.formatQueryValue(0, null), [0, ''])
-  t.deepEqual(common.formatQueryValue(0, undefined), [0, ''])
-  t.done()
+test('normalizeClientRequestArgs can include auth info', async () => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .basicAuth({ user: 'user', pass: 'pw' })
+    .reply()
+
+  http.get('http://user:pw@example.test')
+  scope.isDone()
 })
 
-test('formatQueryValue formats values with type "string" (when stringFormattingFn is undefined)', t => {
-  t.deepEqual(common.formatQueryValue(0, 'foo'), [0, 'foo'])
+test('normalizeClientRequestArgs with a single callback', async t => {
+  // TODO: Only passing a callback isn't currently supported by Nock,
+  // but should be in the future as Node allows it.
+  const cb = () => {}
 
-  t.done()
-})
+  const { options, callback } = common.normalizeClientRequestArgs(cb)
 
-test('formatQueryValue formats values with type "string" (when stringFormattingFn is defined)', t => {
-  t.deepEqual(
-    common.formatQueryValue(0, 'FOO', function(str) {
-      return typeof str === 'string' ? str.toLowerCase() : str
-    }),
-    [0, 'foo']
-  )
-
-  t.done()
-})
-
-test('formatQueryValue does not format regex', t => {
-  t.deepEqual(common.formatQueryValue(0, /^foo(bar)?$/i), [0, /^foo(bar)?$/i])
-  t.done()
-})
-
-test('formatQueryValue formats arrays', t => {
-  t.deepEqual(
-    common.formatQueryValue(0, [
-      0,
-      -100,
-      'foo',
-      { sum: 10 },
-      null,
-      undefined,
-      /^foo(bar)?$/i,
-      ['baz', 100],
-    ]),
-    [
-      0,
-      [
-        '0',
-        '-100',
-        'foo',
-        { sum: '10' },
-        '',
-        '',
-        /^foo(bar)?$/i,
-        ['baz', '100'],
-      ],
-    ]
-  )
-  t.done()
-})
-
-test('formatQueryValue formats objects', t => {
-  t.deepEqual(
-    common.formatQueryValue(0, {
-      a: 5,
-      b: 5,
-      c: undefined,
-      d: null,
-      e: [10, undefined, 'foo'],
-    }),
-    [
-      0,
-      {
-        a: '5',
-        b: '5',
-        c: '',
-        d: '',
-        e: ['10', '', 'foo'],
-      },
-    ]
-  )
-  t.done()
-})
-
-test('formatQueryValue formats keys (when stringFormattingFn is undefined)', t => {
-  t.deepEqual(common.formatQueryValue(0, 'foo'), [0, 'foo'])
-
-  t.done()
-})
-
-test('formatQueryValue formats keys (when stringFormattingFn is defined)', t => {
-  const formatString = function(str) {
-    return typeof str === 'string' ? str.toLowerCase() : str
-  }
-
-  t.deepEqual(common.formatQueryValue('FOO', 'BAZ', formatString), [
-    'foo',
-    'baz',
-  ])
-  t.done()
+  t.deepEqual(options, {})
+  t.is(callback, cb)
 })

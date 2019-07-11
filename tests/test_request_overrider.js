@@ -38,6 +38,19 @@ test('response is an http.IncomingMessage instance', t => {
     .end()
 })
 
+test('emits the response event', t => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .reply()
+
+  const req = http.get('http://example.test')
+
+  req.on('response', () => {
+    scope.done()
+    t.end()
+  })
+})
+
 test('write callback called', t => {
   const scope = nock('http://filterboddiezregexp.com')
     .filteringRequestBody(/mia/, 'nostra')
@@ -131,6 +144,85 @@ test('end callback called when end has callback, but no buffer', t => {
   )
 
   req.end(() => {
+    callbackCalled = true
+  })
+})
+
+test('request.end called with all three arguments', t => {
+  const scope = nock('http://example.test')
+    .post('/', 'foobar')
+    .reply()
+
+  let callbackCalled = false
+  const req = http.request(
+    {
+      host: 'example.test',
+      method: 'POST',
+      path: '/',
+    },
+    res => {
+      t.true(callbackCalled)
+      res.on('end', () => {
+        scope.done()
+        t.end()
+      })
+      res.resume()
+    }
+  )
+
+  // hex(foobar) == 666F6F626172
+  req.end('666F6F626172', 'hex', () => {
+    callbackCalled = true
+  })
+})
+
+test('request.end called with only data and encoding', t => {
+  const scope = nock('http://example.test')
+    .post('/', 'foobar')
+    .reply()
+
+  const req = http.request(
+    {
+      host: 'example.test',
+      method: 'POST',
+      path: '/',
+    },
+    res => {
+      res.on('end', () => {
+        scope.done()
+        t.end()
+      })
+      res.resume()
+    }
+  )
+
+  // hex(foobar) == 666F6F626172
+  req.end('666F6F626172', 'hex')
+})
+
+test('request.end called with only data and a callback', t => {
+  const scope = nock('http://example.test')
+    .post('/', 'foobar')
+    .reply()
+
+  let callbackCalled = false
+  const req = http.request(
+    {
+      host: 'example.test',
+      method: 'POST',
+      path: '/',
+    },
+    res => {
+      t.true(callbackCalled)
+      res.on('end', () => {
+        scope.done()
+        t.end()
+      })
+      res.resume()
+    }
+  )
+
+  req.end('foobar', () => {
     callbackCalled = true
   })
 })
