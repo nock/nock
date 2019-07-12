@@ -126,6 +126,40 @@ test('records objects', t => {
   })
 })
 
+test('logs recorded objects', async t => {
+  t.plan(3)
+
+  nock.restore()
+  nock.recorder.clear()
+  t.equal(nock.recorder.play().length, 0)
+
+  const server = http.createServer((request, response) => {
+    t.pass('server received a request')
+    response.writeHead(200)
+    response.end()
+  })
+  t.once('end', () => server.close())
+  await new Promise(resolve => server.listen(resolve))
+  const { port } = server.address()
+
+  const logging = log => {
+    t.true(
+      log.startsWith(
+        '\n<<<<<<-- cut here -->>>>>>\n{\n  "scope": "http://localhost:'
+      )
+    )
+  }
+
+  nock.recorder.rec({
+    logging,
+    output_objects: true,
+  })
+
+  await got.post(`http://localhost:${port}`)
+
+  nock.restore()
+})
+
 test('records objects and correctly stores JSON object in body', async t => {
   nock.restore()
   nock.recorder.clear()
