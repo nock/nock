@@ -11,6 +11,7 @@
 // the part of Nock that must interface with all http clients.
 
 const http = require('http')
+const https = require('https')
 const { URL } = require('url')
 const { test } = require('tap')
 const needle = require('needle')
@@ -431,6 +432,7 @@ test('socket is shared and aliased correctly', t => {
   req.once('response', res => {
     t.is(req.socket, req.connection)
     t.is(req.socket, res.socket)
+    t.is(res.socket, res.client)
     t.is(res.socket, res.connection)
     t.end()
   })
@@ -439,11 +441,11 @@ test('socket is shared and aliased correctly', t => {
 test('socket emits connect and secureConnect', t => {
   t.plan(3)
 
-  nock('http://example.test')
+  nock('https://example.test')
     .post('/')
     .reply(200, 'hey')
 
-  const req = http.request({
+  const req = https.request({
     host: 'example.test',
     path: '/',
     method: 'POST',
