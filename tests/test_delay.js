@@ -28,7 +28,7 @@ function checkDuration(t, ms) {
       fin[0] * 1000 + // seconds -> ms
       fin[1] * 1e-6 // nanoseconds -> ms
 
-    /// innaccurate timers
+    /// inaccurate timers
     ms = ms * 0.9
 
     t.ok(
