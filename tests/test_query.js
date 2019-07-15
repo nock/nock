@@ -2,7 +2,9 @@
 
 const mikealRequest = require('request')
 const { test } = require('tap')
+const url = require('url')
 const nock = require('..')
+const got = require('./got_client')
 
 require('./cleanup_after_each')()
 
@@ -30,6 +32,17 @@ test('query() matches multiple query strings of the same name=value', t => {
     t.equal(res.statusCode, 200)
     t.end()
   })
+})
+
+test('literal query params have the same behavior as calling query() directly', async t => {
+  const scope = nock('http://example.test')
+    .get('/foo?bar=baz')
+    .reply()
+
+  const { statusCode } = await got('http://example.test/foo?bar=baz')
+
+  t.is(statusCode, 200)
+  scope.done()
 })
 
 test('query() matches multiple query strings of the same name=value regardless of order', t => {
@@ -90,6 +103,35 @@ test('query() matches a query string using regexp', t => {
     t.equal(res.statusCode, 200)
     t.end()
   })
+})
+
+test('query() accepts URLSearchParams as input', async t => {
+  const params = new url.URLSearchParams({
+    foo: 'bar',
+  })
+
+  const scope = nock('http://example.test')
+    .get('/')
+    .query(params)
+    .reply()
+
+  const { statusCode } = await got('http://example.test?foo=bar')
+
+  t.is(statusCode, 200)
+  scope.done()
+})
+
+test('multiple set query keys use the first occurrence', async t => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .query({ foo: 'bar' })
+    .query({ foo: 'baz' })
+    .reply()
+
+  const { statusCode } = await got('http://example.test?foo=bar')
+
+  t.is(statusCode, 200)
+  scope.done()
 })
 
 test('query() matches a query string that contains special RFC3986 characters', t => {
