@@ -946,7 +946,7 @@ test('get correct filtering with scope and request headers filtering', t => {
     }
   )
 
-  t.equivalent(req._headers, { host: requestHeaders.host })
+  t.equivalent(req.getHeaders(), { host: requestHeaders.host })
 })
 
 test('different subdomain with reply callback and filtering scope', async t => {

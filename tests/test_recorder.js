@@ -126,6 +126,40 @@ test('records objects', t => {
   })
 })
 
+test('logs recorded objects', async t => {
+  t.plan(3)
+
+  nock.restore()
+  nock.recorder.clear()
+  t.equal(nock.recorder.play().length, 0)
+
+  const server = http.createServer((request, response) => {
+    t.pass('server received a request')
+    response.writeHead(200)
+    response.end()
+  })
+  t.once('end', () => server.close())
+  await new Promise(resolve => server.listen(resolve))
+  const { port } = server.address()
+
+  const logging = log => {
+    t.true(
+      log.startsWith(
+        '\n<<<<<<-- cut here -->>>>>>\n{\n  "scope": "http://localhost:'
+      )
+    )
+  }
+
+  nock.recorder.rec({
+    logging,
+    output_objects: true,
+  })
+
+  await got.post(`http://localhost:${port}`)
+
+  nock.restore()
+})
+
 test('records objects and correctly stores JSON object in body', async t => {
   nock.restore()
   nock.recorder.clear()
@@ -553,7 +587,7 @@ test('records https correctly', t => {
   })
 })
 
-test('records request headers correctly', t => {
+test('records request headers correctly as an object', t => {
   const server = http.createServer((request, response) => response.end())
   t.once('end', () => server.close())
 
@@ -596,6 +630,37 @@ test('records request headers correctly', t => {
       )
       .end()
   })
+})
+
+test('records request headers correctly when not outputting objects', async t => {
+  t.plan(5)
+
+  nock.restore()
+  nock.recorder.clear()
+  t.equal(nock.recorder.play().length, 0)
+
+  const server = http.createServer((request, response) => {
+    t.pass('server received a request')
+    response.writeHead(200)
+    response.end()
+  })
+  t.once('end', () => server.close())
+  await new Promise(resolve => server.listen(resolve))
+  const { port } = server.address()
+
+  nock.recorder.rec({
+    dont_print: true,
+    enable_reqheaders_recording: true,
+  })
+
+  await got.post(`http://localhost:${port}`, { headers: { 'X-Foo': 'bar' } })
+
+  nock.restore()
+
+  const recorded = nock.recorder.play()
+  t.equal(recorded.length, 1)
+  t.type(recorded[0], 'string')
+  t.true(recorded[0].includes('  .matchHeader("x-foo", "bar")'))
 })
 
 test('records and replays gzipped nocks correctly', t => {
@@ -907,7 +972,7 @@ test('includes query parameters from superagent', t => {
     superagent
       .get(`http://localhost:${server.address().port}`)
       .query({ q: 'test search' })
-      .end(res => {
+      .end(() => {
         nock.restore()
         const ret = nock.recorder.play()
         t.true(ret.length >= 1)
@@ -917,7 +982,7 @@ test('includes query parameters from superagent', t => {
   })
 })
 
-test('encodes the query parameters when not outputing objects', t => {
+test('encodes the query parameters when not outputting objects', t => {
   const server = http.createServer((request, response) => {
     response.writeHead(200)
     response.end()
@@ -937,7 +1002,7 @@ test('encodes the query parameters when not outputing objects', t => {
     superagent
       .get(`http://localhost:${server.address().port}`)
       .query({ q: 'test search++' })
-      .end(res => {
+      .end(() => {
         nock.restore()
         const recording = nock.recorder.play()
         t.true(recording.length >= 1)
@@ -1183,7 +1248,7 @@ test('records and replays binary response correctly', t => {
     '47494638396101000100800000000000ffffff21f90401000000002c000000000100010000020144003b'
   const transparentGifBuffer = Buffer.from(transparentGifHex, 'hex')
 
-  // start server that always respondes with transparent gif at available port
+  // start server that always responds with transparent gif at available port
   const server = http.createServer((request, response) => {
     response.writeHead(201, {
       'Content-Type': 'image/gif',
@@ -1220,7 +1285,7 @@ test('records and replays binary response correctly', t => {
 
         const recordedFixtures = nock.recorder.play()
 
-        // stope server, stope recording, start intercepting
+        // stop server, stop recording, start intercepting
         server.close(error => {
           t.error(error)
 
