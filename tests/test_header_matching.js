@@ -576,3 +576,49 @@ test('multiple interceptors override headers from unrelated request', async t =>
   })
   t.is(res2.statusCode, 200)
 })
+
+// The next three tests cover the special case for the Host header where it's only used for
+// matching if it's defined on the scope and the request. See https://github.com/nock/nock/pull/196
+test('Host header is used for matching if defined on the scope and request', async t => {
+  const scope = nock('http://example.test', {
+    reqheaders: { host: 'example.test' },
+  })
+    .get('/')
+    .reply()
+
+  const { statusCode } = await got('http://example.test/', {
+    headers: { Host: 'example.test' },
+  })
+
+  t.is(statusCode, 200)
+  scope.done()
+})
+
+test('Host header is ignored during matching if not defined on the request', async t => {
+  const scope = nock('http://example.test', {
+    reqheaders: { host: 'example.test' },
+  })
+    .get('/')
+    .reply()
+
+  const { statusCode } = await got('http://example.test/')
+
+  t.is(statusCode, 200)
+  scope.done()
+})
+
+test('Host header is used to reject a match if defined on the scope and request', async t => {
+  nock('http://example.test', {
+    reqheaders: { host: 'example.test' },
+  })
+    .get('/')
+    .reply()
+
+  await assertRejects(
+    got('http://example.test/', {
+      headers: { Host: 'some.other.domain.test' },
+    }),
+    Error,
+    'Nock: No match for request'
+  )
+})
