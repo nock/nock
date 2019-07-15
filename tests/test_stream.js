@@ -77,6 +77,43 @@ test('pause response after data', t => {
   }, 0)
 })
 
+// https://github.com/nock/nock/issues/1493
+test("response have 'complete' property and it's true after end", t => {
+  const response = new stream.PassThrough()
+  const scope = nock('http://example.test')
+    .get('/')
+    // Node does not pause the 'end' event so we need to use a stream to simulate
+    // multiple 'data' events.
+    .reply(200, response)
+
+  http.get(
+    {
+      host: 'example.test',
+      path: '/',
+    },
+    res => {
+      let hasData = false
+
+      res.on('data', () => {
+        hasData = true
+      })
+
+      res.on('end', () => {
+        t.true(hasData)
+        t.is(res.complete, true)
+        scope.done()
+        t.end()
+      })
+    }
+  )
+
+  // Manually simulate multiple 'data' events.
+  response.emit('data', 'one')
+  setTimeout(() => {
+    response.end()
+  }, 0)
+})
+
 // TODO Convert to async / got.
 test('response pipe', t => {
   const dest = (() => {
