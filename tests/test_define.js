@@ -249,7 +249,7 @@ test('define() uses reqheaders', t => {
       t.equal(res.statusCode, 200)
 
       res.once('end', () => {
-        t.equivalent(res.req._headers, reqheaders)
+        t.equivalent(res.req.getHeaders(), reqheaders)
         t.end()
       })
       // Streams start in 'paused' mode and must be started.
