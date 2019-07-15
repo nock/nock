@@ -596,7 +596,7 @@ test('Host header is used for matching if defined on the scope and request', asy
 
 test('Host header is ignored during matching if not defined on the request', async t => {
   const scope = nock('http://example.test', {
-    reqheaders: { host: 'example.test' },
+    reqheaders: { host: 'some.other.domain.test' },
   })
     .get('/')
     .reply()
