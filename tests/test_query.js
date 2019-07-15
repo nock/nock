@@ -121,6 +121,19 @@ test('query() accepts URLSearchParams as input', async t => {
   scope.done()
 })
 
+test('multiple set query keys use the first occurrence', async t => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .query({ foo: 'bar' })
+    .query({ foo: 'baz' })
+    .reply()
+
+  const { statusCode } = await got('http://example.test?foo=bar')
+
+  t.is(statusCode, 200)
+  scope.done()
+})
+
 test('query() matches a query string that contains special RFC3986 characters', t => {
   nock('http://example.test')
     .get('/')
