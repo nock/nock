@@ -121,7 +121,7 @@ test('query() accepts URLSearchParams as input', async t => {
   scope.done()
 })
 
-test('query() throws for duplicate keys', async t => {
+test('query() throws if query params have already been defined', async t => {
   const interceptor = nock('http://example.test').get('/?foo=bar')
 
   t.throws(
@@ -134,7 +134,22 @@ test('query() throws for duplicate keys', async t => {
   )
 })
 
-test('query() throws for invalid arguments', async t => {
+test('query() throws if query() was already called', async t => {
+  const interceptor = nock('http://example.test')
+    .get('/')
+    .query({ foo: 'bar' })
+
+  t.throws(
+    () => {
+      interceptor.query({ baz: 'qux' })
+    },
+    {
+      message: 'Query parameters have already been already defined',
+    }
+  )
+})
+
+test('query() throws for invalid arguments', t => {
   const interceptor = nock('http://example.test').get('/')
 
   t.throws(
@@ -145,6 +160,7 @@ test('query() throws for invalid arguments', async t => {
       message: 'Argument Error: foo=bar',
     }
   )
+  t.done()
 })
 
 test('query() matches a query string that contains special RFC3986 characters', t => {

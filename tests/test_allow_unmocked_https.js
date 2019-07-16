@@ -38,34 +38,6 @@ test('Nock with allowUnmocked and an url match', async t => {
   server.close()
 })
 
-test('Nock with allowUnmocked, url match and query false', async t => {
-  const options = {
-    key: fs.readFileSync('tests/ssl/ca.key'),
-    cert: fs.readFileSync('tests/ssl/ca.crt'),
-  }
-
-  const server = https
-    .createServer(options, (req, res) => {
-      res.writeHead(200)
-      res.end(JSON.stringify({ status: 'default' }))
-    })
-    .listen(3000)
-
-  const url = `https://127.0.0.1:3000`
-
-  nock(`${url}`, { allowUnmocked: true })
-    .get('/')
-    .reply(200, { status: 'intercepted' })
-
-  const { body } = await got(`${url}/otherpath`, {
-    rejectUnauthorized: false,
-  })
-
-  t.true(JSON.parse(body).status === 'default')
-
-  server.close()
-})
-
 test('allow unmocked option works with https', t => {
   t.plan(6)
 
