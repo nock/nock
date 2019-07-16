@@ -55,7 +55,6 @@ test('Nock with allowUnmocked, url match and query false', async t => {
 
   nock(`${url}`, { allowUnmocked: true })
     .get('/')
-    .query(false)
     .reply(200, { status: 'intercepted' })
 
   const { body } = await got(`${url}/otherpath`, {

@@ -122,16 +122,27 @@ test('query() accepts URLSearchParams as input', async t => {
 })
 
 test('query() throws for duplicate keys', async t => {
-  const interceptor = nock('http://example.test')
-    .get('/')
-    .query({ foo: 'bar' })
+  const interceptor = nock('http://example.test').get('/?foo=bar')
 
   t.throws(
     () => {
       interceptor.query({ foo: 'baz' })
     },
     {
-      message: 'foo already defined as a query parameter',
+      message: 'Query parameters have already been already defined',
+    }
+  )
+})
+
+test('query() throws for invalid arguments', async t => {
+  const interceptor = nock('http://example.test').get('/')
+
+  t.throws(
+    () => {
+      interceptor.query('foo=bar')
+    },
+    {
+      message: 'Argument Error: foo=bar',
     }
   )
 })
@@ -304,7 +315,7 @@ test('query() will not match when a query string is present that was not registe
     .query({ foo: 'bar' })
     .reply(200)
 
-  mikealRequest('https://example.test/c?foo=bar&baz=foz', function(err, res) {
+  mikealRequest('https://example.test/c?foo=bar&baz=foz', function(err) {
     t.equal(
       err.message.trim(),
       `Nock: No match for request ${JSON.stringify(
