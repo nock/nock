@@ -121,19 +121,46 @@ test('query() accepts URLSearchParams as input', async t => {
   scope.done()
 })
 
-test('query() throws for duplicate keys', async t => {
-  const interceptor = nock('http://example.test')
-    .get('/')
-    .query({ foo: 'bar' })
+test('query() throws if query params have already been defined', async t => {
+  const interceptor = nock('http://example.test').get('/?foo=bar')
 
   t.throws(
     () => {
       interceptor.query({ foo: 'baz' })
     },
     {
-      message: 'foo already defined as a query parameter',
+      message: 'Query parameters have already been already defined',
     }
   )
+})
+
+test('query() throws if query() was already called', async t => {
+  const interceptor = nock('http://example.test')
+    .get('/')
+    .query({ foo: 'bar' })
+
+  t.throws(
+    () => {
+      interceptor.query({ baz: 'qux' })
+    },
+    {
+      message: 'Query parameters have already been already defined',
+    }
+  )
+})
+
+test('query() throws for invalid arguments', t => {
+  const interceptor = nock('http://example.test').get('/')
+
+  t.throws(
+    () => {
+      interceptor.query('foo=bar')
+    },
+    {
+      message: 'Argument Error: foo=bar',
+    }
+  )
+  t.done()
 })
 
 test('query() matches a query string that contains special RFC3986 characters', t => {
@@ -304,7 +331,7 @@ test('query() will not match when a query string is present that was not registe
     .query({ foo: 'bar' })
     .reply(200)
 
-  mikealRequest('https://example.test/c?foo=bar&baz=foz', function(err, res) {
+  mikealRequest('https://example.test/c?foo=bar&baz=foz', function(err) {
     t.equal(
       err.message.trim(),
       `Nock: No match for request ${JSON.stringify(
