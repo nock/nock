@@ -53,7 +53,7 @@ test('emits the response event', t => {
 })
 
 test('write callback called', t => {
-  const scope = nock('http://filterboddiezregexp.com')
+  const scope = nock('http://example.test')
     .filteringRequestBody(/mia/, 'nostra')
     .post('/', 'mamma nostra')
     .reply(200, 'Hello World!')
@@ -61,7 +61,7 @@ test('write callback called', t => {
   let callbackCalled = false
   const req = http.request(
     {
-      host: 'filterboddiezregexp.com',
+      host: 'example.test',
       method: 'POST',
       path: '/',
       port: 80,

@@ -216,7 +216,7 @@ test('stop persisting a persistent nock', async t => {
 })
 
 test("should throw an error when persist flag isn't a boolean", t => {
-  t.throws(() => nock('http://persist.com').persist('string'), {
+  t.throws(() => nock('http://example.test').persist('string'), {
     message: 'Invalid arguments: argument should be a boolean',
   })
   t.end()

@@ -284,11 +284,11 @@ test('match all headers', async t => {
 
 test('header manipulation', t => {
   // This test seems to depend on behavior of the `http` module.
-  const scope = nock('http://example.com')
+  const scope = nock('http://example.test')
     .get('/accounts')
     .reply(200, { accounts: [{ id: 1, name: 'Joe Blow' }] })
 
-  const req = http.get({ host: 'example.com', path: '/accounts' }, res => {
+  const req = http.get({ host: 'example.test', path: '/accounts' }, res => {
     res.on('end', () => {
       scope.done()
       t.end()
