@@ -11,6 +11,7 @@ require('./cleanup_after_each')()
 test('matchBody ignores new line characters from strings', t => {
   t.true(
     matchBody(
+      {},
       'something //here is something more \n',
       'something //here is something more \n\r'
     )
@@ -21,16 +22,18 @@ test('matchBody ignores new line characters from strings', t => {
 test("when spec is a function, it's called with newline characters intact", t => {
   const exampleBody = 'something //here is something more \n'
   let param
-  matchBody(body => {
+  const matchCb = body => {
     param = body
-  }, exampleBody)
+  }
+
+  matchBody({}, matchCb, exampleBody)
   t.equal(param, exampleBody)
   t.end()
 })
 
 test('matchBody should not throw, when headers come node-fetch style as array', t => {
   t.false(
-    matchBody.call(
+    matchBody(
       { headers: { 'Content-Type': ['multipart/form-data;'] } },
       {},
       'test'
@@ -41,7 +44,7 @@ test('matchBody should not throw, when headers come node-fetch style as array', 
 
 test("matchBody should not ignore new line characters from strings when Content-Type contains 'multipart'", t => {
   t.true(
-    matchBody.call(
+    matchBody(
       { headers: { 'Content-Type': 'multipart/form-data;' } },
       'something //here is something more \nHello',
       'something //here is something more \nHello'
@@ -52,7 +55,7 @@ test("matchBody should not ignore new line characters from strings when Content-
 
 test("matchBody should not ignore new line characters from strings when Content-Type contains 'multipart' (arrays come node-fetch style as array)", t => {
   t.true(
-    matchBody.call(
+    matchBody(
       { headers: { 'Content-Type': ['multipart/form-data;'] } },
       'something //here is something more \nHello',
       'something //here is something more \nHello'
@@ -62,7 +65,7 @@ test("matchBody should not ignore new line characters from strings when Content-
 })
 
 test('matchBody uses strict equality for deep comparisons', t => {
-  t.false(matchBody({ number: 1 }, '{"number": "1"}'))
+  t.false(matchBody({}, { number: 1 }, '{"number": "1"}'))
   t.end()
 })
 
