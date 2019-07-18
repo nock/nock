@@ -34,7 +34,6 @@
     "acorn": "^6.1.1",
     "assert-rejects": "^1.0.0",
     "aws-sdk": "^2.437.0",
-    "coveralls": "^3.0.3",
     "eslint": "^6.0.0",
     "eslint-config-prettier": "^6.0.0",
     "eslint-config-standard": "^13.0.1",
@@ -60,12 +59,11 @@
     "tap": "^14.0.0"
   },
   "scripts": {
-    "unit": "tap --coverage --coverage-report=text ./tests/test_*.js",
+    "unit": "tap --100 --coverage --coverage-report=text ./tests/test_*.js",
     "pretest": "npm run -s lint",
     "test": "npm run -s unit",
     "posttest": "npm run -s prettier:check",
     "coverage": "tap --coverage-report=html && open coverage/lcov-report/index.html",
-    "coverage:upload": "tap --coverage-report=text-lcov | coveralls",
     "lint": "eslint \"**/*.js\"",
     "prettier": "prettier --write \"**/*.@(js|md|yml|json)\"",
     "prettier:check": "prettier --check \"**/*.@(js|md|yml|json)\"",
