@@ -41,7 +41,6 @@ jobs:
     - node_js: 8
       # Avoid running lint and prettier again.
       script: npm run --silent unit
-      after_script: npm run coverage:upload
     - stage: release
       node_js: lts/*
       env: semantic-release

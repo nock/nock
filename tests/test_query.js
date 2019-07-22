@@ -2,7 +2,9 @@
 
 const mikealRequest = require('request')
 const { test } = require('tap')
+const url = require('url')
 const nock = require('..')
+const got = require('./got_client')
 
 require('./cleanup_after_each')()
 
@@ -30,6 +32,17 @@ test('query() matches multiple query strings of the same name=value', t => {
     t.equal(res.statusCode, 200)
     t.end()
   })
+})
+
+test('literal query params have the same behavior as calling query() directly', async t => {
+  const scope = nock('http://example.test')
+    .get('/foo?bar=baz')
+    .reply()
+
+  const { statusCode } = await got('http://example.test/foo?bar=baz')
+
+  t.is(statusCode, 200)
+  scope.done()
 })
 
 test('query() matches multiple query strings of the same name=value regardless of order', t => {
@@ -90,6 +103,64 @@ test('query() matches a query string using regexp', t => {
     t.equal(res.statusCode, 200)
     t.end()
   })
+})
+
+test('query() accepts URLSearchParams as input', async t => {
+  const params = new url.URLSearchParams({
+    foo: 'bar',
+  })
+
+  const scope = nock('http://example.test')
+    .get('/')
+    .query(params)
+    .reply()
+
+  const { statusCode } = await got('http://example.test?foo=bar')
+
+  t.is(statusCode, 200)
+  scope.done()
+})
+
+test('query() throws if query params have already been defined', async t => {
+  const interceptor = nock('http://example.test').get('/?foo=bar')
+
+  t.throws(
+    () => {
+      interceptor.query({ foo: 'baz' })
+    },
+    {
+      message: 'Query parameters have already been already defined',
+    }
+  )
+})
+
+test('query() throws if query() was already called', async t => {
+  const interceptor = nock('http://example.test')
+    .get('/')
+    .query({ foo: 'bar' })
+
+  t.throws(
+    () => {
+      interceptor.query({ baz: 'qux' })
+    },
+    {
+      message: 'Query parameters have already been already defined',
+    }
+  )
+})
+
+test('query() throws for invalid arguments', t => {
+  const interceptor = nock('http://example.test').get('/')
+
+  t.throws(
+    () => {
+      interceptor.query('foo=bar')
+    },
+    {
+      message: 'Argument Error: foo=bar',
+    }
+  )
+  t.done()
 })
 
 test('query() matches a query string that contains special RFC3986 characters', t => {
@@ -260,7 +331,7 @@ test('query() will not match when a query string is present that was not registe
     .query({ foo: 'bar' })
     .reply(200)
 
-  mikealRequest('https://example.test/c?foo=bar&baz=foz', function(err, res) {
+  mikealRequest('https://example.test/c?foo=bar&baz=foz', function(err) {
     t.equal(
       err.message.trim(),
       `Nock: No match for request ${JSON.stringify(

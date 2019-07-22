@@ -18,7 +18,7 @@ test('disable net connect is default', function(t) {
 
   mikealRequest('https://google.com/', function(err, res) {
     assert(err)
-    assert.equal(
+    assert.strictEqual(
       err.message,
       'Nock: Disallowed net connect for "google.com:443/"'
     )
@@ -63,7 +63,7 @@ test('disallow request for other domains, via string', t => {
 
   http
     .get('http://www.amazon.com', function(res) {
-      throw 'should not deliver this request'
+      throw Error('should not deliver this request')
     })
     .on('error', function(err) {
       t.equal(
@@ -97,7 +97,7 @@ test('disallow request for other domains, via regexp', t => {
 
   http
     .get('http://www.amazon.com', function(res) {
-      throw 'should not deliver this request'
+      throw Error('should not deliver this request')
     })
     .on('error', function(err) {
       t.equal(

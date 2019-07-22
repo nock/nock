@@ -1,5 +1,6 @@
 'use strict'
 
+const http = require('http')
 const { test } = require('tap')
 const common = require('../lib/common')
 const matchBody = require('../lib/match_body')
@@ -115,7 +116,9 @@ test('isUtf8Representable works', t => {
 
 test('isJSONContent', t => {
   t.true(common.isJSONContent({ 'content-type': 'application/json' }))
-  t.true(common.isJSONContent({ 'content-type': ['application/json'] }))
+  t.true(
+    common.isJSONContent({ 'content-type': 'application/json; charset=utf-8' })
+  )
   t.false(common.isJSONContent({ 'content-type': 'text/plain' }))
   t.end()
 })
@@ -197,6 +200,30 @@ test('deleteHeadersField deletes fields with case-insensitive field names', t =>
   t.end()
 })
 
+test('deleteHeadersField removes multiple fields with same case-insensitive names', async t => {
+  const headers = {
+    foo: 'one',
+    FOO: 'two',
+    'X-Foo': 'three',
+  }
+
+  common.deleteHeadersField(headers, 'foo')
+
+  t.deepEqual(headers, { 'X-Foo': 'three' })
+})
+
+test('deleteHeadersField throws for invalid headers', async t => {
+  t.throws(() => common.deleteHeadersField('foo', 'Content-Type'), {
+    message: 'headers must be an object',
+  })
+})
+
+test('deleteHeadersField throws for invalid field name', async t => {
+  t.throws(() => common.deleteHeadersField({}, /cookie/), {
+    message: 'field name must be a string',
+  })
+})
+
 test('matchStringOrRegexp', function(t) {
   t.true(
     common.matchStringOrRegexp('to match', 'to match'),
@@ -249,48 +276,133 @@ test('restoreOverriddenRequests can be called more than once', t => {
   t.end()
 })
 
-test('stringifyRequest', function(t) {
-  const exampleOptions = {
-    method: 'POST',
-    port: 81,
+test('stringifyRequest includes non-default ports', t => {
+  const options = {
+    method: 'GET',
+    port: 3000,
     proto: 'http',
     hostname: 'example.test',
-    path: '/path/1',
-    headers: { cookie: 'fiz=baz' },
+    path: '/',
+    headers: {},
   }
 
-  t.deepEqual(
-    JSON.parse(common.stringifyRequest(exampleOptions, { foo: 'bar' })),
-    {
-      method: 'POST',
-      url: 'http://example.test:81/path/1',
-      headers: {
-        cookie: 'fiz=baz',
-      },
-      body: {
-        foo: 'bar',
-      },
-    }
-  )
+  const result = common.stringifyRequest(options, 'foo')
 
-  t.deepEqual(
-    JSON.parse(
-      common.stringifyRequest(
-        {
-          ...exampleOptions,
-          method: 'GET',
-        },
-        null
-      )
-    ),
-    {
-      method: 'GET',
-      url: 'http://example.test:81/path/1',
-      headers: {
-        cookie: 'fiz=baz',
-      },
-    }
-  )
+  // We have to parse the object instead of comparing the raw string because the order of keys are not guaranteed.
+  t.deepEqual(JSON.parse(result), {
+    method: 'GET',
+    url: 'http://example.test:3000/',
+    headers: {},
+    body: 'foo',
+  })
+
+  t.end()
+})
+
+test('stringifyRequest does not include default http port', t => {
+  const options = {
+    method: 'GET',
+    port: 80,
+    proto: 'http',
+    hostname: 'example.test',
+    path: '/',
+    headers: {},
+  }
+
+  const result = common.stringifyRequest(options, 'foo')
+
+  t.deepEqual(JSON.parse(result), {
+    method: 'GET',
+    url: 'http://example.test/',
+    headers: {},
+    body: 'foo',
+  })
+
+  t.end()
+})
+
+test('stringifyRequest does not include default https port', t => {
+  const options = {
+    method: 'POST',
+    port: 443,
+    proto: 'https',
+    hostname: 'example.test',
+    path: '/the/path',
+    headers: {},
+  }
+
+  const result = common.stringifyRequest(options, 'foo')
+
+  t.deepEqual(JSON.parse(result), {
+    method: 'POST',
+    url: 'https://example.test/the/path',
+    headers: {},
+    body: 'foo',
+  })
+
+  t.end()
+})
+
+test('stringifyRequest defaults optional options', t => {
+  const options = {
+    port: 80,
+    proto: 'http',
+    hostname: 'example.test',
+    headers: {},
+  }
+
+  const result = common.stringifyRequest(options, 'foo')
+
+  t.deepEqual(JSON.parse(result), {
+    method: 'GET',
+    url: 'http://example.test',
+    headers: {},
+    body: 'foo',
+  })
+
+  t.end()
+})
+
+test('stringifyRequest passes headers through', t => {
+  const options = {
+    method: 'GET',
+    port: 80,
+    proto: 'http',
+    hostname: 'example.test',
+    path: '/',
+    headers: { cookie: 'fiz=baz', 'set-cookie': ['hello', 'world'] },
+  }
+
+  const result = common.stringifyRequest(options, 'foo')
+
+  t.deepEqual(JSON.parse(result), {
+    method: 'GET',
+    url: 'http://example.test/',
+    headers: { cookie: 'fiz=baz', 'set-cookie': ['hello', 'world'] },
+    body: 'foo',
+  })
+
+  t.end()
+})
+
+test('stringifyRequest the body is always treated as a string', t => {
+  const options = {
+    method: 'GET',
+    port: 80,
+    proto: 'http',
+    hostname: 'example.test',
+    path: '/',
+    headers: {},
+  }
+
+  const result = common.stringifyRequest(options, '{"hello":"world"}')
+
+  t.deepEqual(JSON.parse(result), {
+    method: 'GET',
+    url: 'http://example.test/',
+    headers: {},
+    body: '{"hello":"world"}',
+  })
 
   t.end()
 })
@@ -336,4 +448,38 @@ test('headersArrayToObject', function(t) {
   })
 
   t.end()
+})
+
+test('percentEncode encodes extra reserved characters', t => {
+  t.equal(common.percentEncode('foo+(*)!'), 'foo%2B%28%2A%29%21')
+  t.done()
+})
+
+test('normalizeClientRequestArgs throws for invalid URL', async t => {
+  // no schema
+  t.throws(() => http.get('example.test'), {
+    input: 'example.test',
+    name: /TypeError/,
+  })
+})
+
+test('normalizeClientRequestArgs can include auth info', async () => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .basicAuth({ user: 'user', pass: 'pw' })
+    .reply()
+
+  http.get('http://user:pw@example.test')
+  scope.isDone()
+})
+
+test('normalizeClientRequestArgs with a single callback', async t => {
+  // TODO: Only passing a callback isn't currently supported by Nock,
+  // but should be in the future as Node allows it.
+  const cb = () => {}
+
+  const { options, callback } = common.normalizeClientRequestArgs(cb)
+
+  t.deepEqual(options, {})
+  t.is(callback, cb)
 })

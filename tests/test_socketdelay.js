@@ -112,3 +112,18 @@ test('Socket#setTimeout adds callback as a one-time listener for parity with a r
     socket.setTimeout(50, onTimeout)
   })
 })
+
+test('Socket#setTimeout can be called without a callback', t => {
+  nock('http://example.test')
+    .get('/')
+    .socketDelay(100)
+    .reply()
+
+  http.get('http://example.test').on('socket', socket => {
+    socket.setTimeout(50)
+
+    socket.on('timeout', () => {
+      t.end()
+    })
+  })
+})

@@ -11,6 +11,7 @@
 // the part of Nock that must interface with all http clients.
 
 const http = require('http')
+const https = require('https')
 const { URL } = require('url')
 const { test } = require('tap')
 const needle = require('needle')
@@ -38,8 +39,21 @@ test('response is an http.IncomingMessage instance', t => {
     .end()
 })
 
+test('emits the response event', t => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .reply()
+
+  const req = http.get('http://example.test')
+
+  req.on('response', () => {
+    scope.done()
+    t.end()
+  })
+})
+
 test('write callback called', t => {
-  const scope = nock('http://filterboddiezregexp.com')
+  const scope = nock('http://example.test')
     .filteringRequestBody(/mia/, 'nostra')
     .post('/', 'mamma nostra')
     .reply(200, 'Hello World!')
@@ -47,7 +61,7 @@ test('write callback called', t => {
   let callbackCalled = false
   const req = http.request(
     {
-      host: 'filterboddiezregexp.com',
+      host: 'example.test',
       method: 'POST',
       path: '/',
       port: 80,
@@ -131,6 +145,85 @@ test('end callback called when end has callback, but no buffer', t => {
   )
 
   req.end(() => {
+    callbackCalled = true
+  })
+})
+
+test('request.end called with all three arguments', t => {
+  const scope = nock('http://example.test')
+    .post('/', 'foobar')
+    .reply()
+
+  let callbackCalled = false
+  const req = http.request(
+    {
+      host: 'example.test',
+      method: 'POST',
+      path: '/',
+    },
+    res => {
+      t.true(callbackCalled)
+      res.on('end', () => {
+        scope.done()
+        t.end()
+      })
+      res.resume()
+    }
+  )
+
+  // hex(foobar) == 666F6F626172
+  req.end('666F6F626172', 'hex', () => {
+    callbackCalled = true
+  })
+})
+
+test('request.end called with only data and encoding', t => {
+  const scope = nock('http://example.test')
+    .post('/', 'foobar')
+    .reply()
+
+  const req = http.request(
+    {
+      host: 'example.test',
+      method: 'POST',
+      path: '/',
+    },
+    res => {
+      res.on('end', () => {
+        scope.done()
+        t.end()
+      })
+      res.resume()
+    }
+  )
+
+  // hex(foobar) == 666F6F626172
+  req.end('666F6F626172', 'hex')
+})
+
+test('request.end called with only data and a callback', t => {
+  const scope = nock('http://example.test')
+    .post('/', 'foobar')
+    .reply()
+
+  let callbackCalled = false
+  const req = http.request(
+    {
+      host: 'example.test',
+      method: 'POST',
+      path: '/',
+    },
+    res => {
+      t.true(callbackCalled)
+      res.on('end', () => {
+        scope.done()
+        t.end()
+      })
+      res.resume()
+    }
+  )
+
+  req.end('foobar', () => {
     callbackCalled = true
   })
 })
@@ -329,14 +422,30 @@ test('request emits socket', t => {
   })
 })
 
+test('socket is shared and aliased correctly', t => {
+  nock('http://example.test')
+    .get('/')
+    .reply()
+
+  const req = http.get('http://example.test')
+
+  req.once('response', res => {
+    t.is(req.socket, req.connection)
+    t.is(req.socket, res.socket)
+    t.is(res.socket, res.client)
+    t.is(res.socket, res.connection)
+    t.end()
+  })
+})
+
 test('socket emits connect and secureConnect', t => {
   t.plan(3)
 
-  nock('http://example.test')
+  nock('https://example.test')
     .post('/')
     .reply(200, 'hey')
 
-  const req = http.request({
+  const req = https.request({
     host: 'example.test',
     path: '/',
     method: 'POST',
@@ -392,4 +501,52 @@ test('should throw expected error when creating request with missing options', t
     message: 'Making a request with empty `options` is not supported in Nock',
   })
   t.end()
+})
+
+// https://github.com/nock/nock/issues/1558
+test("mocked requests have 'method' property", t => {
+  const scope = nock('http://example.test')
+    .get('/somepath')
+    .reply(200, {})
+
+  const req = http.request({
+    host: 'example.test',
+    path: '/somepath',
+    method: 'GET',
+    port: 80,
+  })
+  t.equal(req.method, 'GET')
+  req.on('response', function(res) {
+    t.equal(res.req.method, 'GET')
+    scope.done()
+    t.end()
+  })
+  req.end()
+})
+
+// https://github.com/nock/nock/issues/1493
+test("response have 'complete' property and it's true after end", t => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .reply(200, 'Hello World!')
+
+  const req = http.request(
+    {
+      host: 'example.test',
+      method: 'GET',
+      path: '/',
+      port: 80,
+    },
+    res => {
+      res.on('end', () => {
+        t.is(res.complete, true)
+        scope.done()
+        t.end()
+      })
+      // Streams start in 'paused' mode and must be started.
+      // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+      res.resume()
+    }
+  )
+  req.end()
 })

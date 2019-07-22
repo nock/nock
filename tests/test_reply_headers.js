@@ -12,43 +12,148 @@ const got = require('./got_client')
 
 require('./cleanup_after_each')()
 
-test('reply header is sent in the mock response', async t => {
+test('reply headers directly with a raw array', async t => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .reply(200, 'Hello World!', [
+      'X-My-Header',
+      'My Header value',
+      'X-Other-Header',
+      'My Other Value',
+    ])
+
+  const { headers, rawHeaders } = await got('http://example.test/')
+
+  t.equivalent(headers, {
+    'x-my-header': 'My Header value',
+    'x-other-header': 'My Other Value',
+  })
+  t.equivalent(rawHeaders, [
+    'X-My-Header',
+    'My Header value',
+    'X-Other-Header',
+    'My Other Value',
+  ])
+  scope.done()
+})
+
+test('reply headers directly with an object', async t => {
   const scope = nock('http://example.test')
     .get('/')
     .reply(200, 'Hello World!', { 'X-My-Headers': 'My Header value' })
 
-  const { headers } = await got('http://example.test/')
+  const { headers, rawHeaders } = await got('http://example.test/')
 
   t.equivalent(headers, { 'x-my-headers': 'My Header value' })
+  t.equivalent(rawHeaders, ['X-My-Headers', 'My Header value'])
   scope.done()
 })
 
-test('content-length header is sent with response', async t => {
-  const scope = nock('http://example.test')
-    .replyContentLength()
-    .get('/')
-    .reply(200, { hello: 'world' })
-
-  const { headers } = await got('http://example.test/')
-
-  t.equal(headers['content-length'], 17)
-  scope.done()
-})
-
-test('header array sends multiple reply headers', async t => {
+test('reply headers directly with a Map', async t => {
+  const replyHeaders = new Map([
+    ['X-My-Header', 'My Header value'],
+    ['X-Other-Header', 'My Other Value'],
+  ])
   const scope = nock('http://example.test')
     .get('/')
-    .reply(200, 'Hello World!', {
-      'Set-Cookie': ['cookie1=foo', 'cookie2=bar'],
-    })
+    .reply(200, 'Hello World!', replyHeaders)
 
   const { headers, rawHeaders } = await got('http://example.test/')
-  t.equivalent(headers, {
-    'set-cookie': ['cookie1=foo', 'cookie2=bar'],
-  })
-  t.equivalent(rawHeaders, ['Set-Cookie', ['cookie1=foo', 'cookie2=bar']])
 
+  t.equivalent(headers, {
+    'x-my-header': 'My Header value',
+    'x-other-header': 'My Other Value',
+  })
+  t.equivalent(rawHeaders, [
+    'X-My-Header',
+    'My Header value',
+    'X-Other-Header',
+    'My Other Value',
+  ])
   scope.done()
+})
+
+test('reply headers dynamically with a raw array', async t => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .reply(() => [
+      200,
+      'Hello World!',
+      ['X-My-Header', 'My Header value', 'X-Other-Header', 'My Other Value'],
+    ])
+
+  const { headers, rawHeaders } = await got('http://example.test/')
+
+  t.equivalent(headers, {
+    'x-my-header': 'My Header value',
+    'x-other-header': 'My Other Value',
+  })
+  t.equivalent(rawHeaders, [
+    'X-My-Header',
+    'My Header value',
+    'X-Other-Header',
+    'My Other Value',
+  ])
+  scope.done()
+})
+
+test('reply headers dynamically with an object', async t => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .reply(() => [200, 'Hello World!', { 'X-My-Headers': 'My Header value' }])
+
+  const { headers, rawHeaders } = await got('http://example.test/')
+
+  t.equivalent(headers, { 'x-my-headers': 'My Header value' })
+  t.equivalent(rawHeaders, ['X-My-Headers', 'My Header value'])
+  scope.done()
+})
+
+test('reply headers dynamically with a Map', async t => {
+  const replyHeaders = new Map([
+    ['X-My-Header', 'My Header value'],
+    ['X-Other-Header', 'My Other Value'],
+  ])
+  const scope = nock('http://example.test')
+    .get('/')
+    .reply(() => [200, 'Hello World!', replyHeaders])
+
+  const { headers, rawHeaders } = await got('http://example.test/')
+
+  t.equivalent(headers, {
+    'x-my-header': 'My Header value',
+    'x-other-header': 'My Other Value',
+  })
+  t.equivalent(rawHeaders, [
+    'X-My-Header',
+    'My Header value',
+    'X-Other-Header',
+    'My Other Value',
+  ])
+  scope.done()
+})
+
+test('reply headers throws for invalid data', async t => {
+  const scope = nock('http://example.test').get('/')
+
+  t.throws(() => scope.reply(200, 'Hello World!', 'foo: bar'), {
+    message:
+      'Headers must be provided as an array of raw values, a Map, or a plain Object. foo: bar',
+  })
+
+  t.throws(() => scope.reply(200, 'Hello World!', false), {
+    message:
+      'Headers must be provided as an array of raw values, a Map, or a plain Object. false',
+  })
+})
+
+test('reply headers throws for raw array with an odd number of items', async t => {
+  const scope = nock('http://example.test').get('/')
+
+  t.throws(() => scope.reply(200, 'Hello World!', ['one', 'two', 'three']), {
+    message:
+      'Raw headers must be provided as an array with an even number of items. [fieldName, value, ...]',
+  })
 })
 
 test('reply header function is evaluated and the result sent in the mock response', async t => {
@@ -75,10 +180,6 @@ test('reply header function receives the correct arguments', async t => {
       'X-My-Headers': (req, res, body) => {
         t.type(req, OverriddenClientRequest)
         t.type(res, IncomingMessage)
-        // TODO The current behavior is to pass the response body as a buffer.
-        // This doesn't seem at all helpful and seems like it is probably a
-        // bug.
-        // https://github.com/nock/nock/issues/1542
         t.type(body, Buffer)
         t.true(Buffer.from('boo!').equals(body))
         return 'gotcha'
@@ -108,6 +209,23 @@ test('reply headers function is evaluated exactly once', async t => {
   t.equal(counter, 1)
 })
 
+test('duplicate reply headers function is evaluated once per input field name, in correct order', async t => {
+  const replyHeaders = ['X-MY-HEADER', () => 'one', 'x-my-header', () => 'two']
+
+  const scope = nock('http://example.test')
+    .get('/')
+    .reply(200, 'Hello World!', replyHeaders)
+
+  const { headers, rawHeaders } = await got('http://example.test/')
+
+  t.equivalent(headers, {
+    'x-my-header': 'one, two',
+  })
+  t.equivalent(rawHeaders, ['X-MY-HEADER', 'one', 'x-my-header', 'two'])
+
+  scope.done()
+})
+
 test('reply header function are re-evaluated for every matching request', async t => {
   let counter = 0
   const scope = nock('http://example.test')
@@ -131,6 +249,55 @@ test('reply header function are re-evaluated for every matching request', async 
 
   t.equal(counter, 2)
 
+  scope.done()
+})
+
+// https://nodejs.org/api/http.html#http_message_headers
+test('duplicate headers are folded the same as Node', async t => {
+  const replyHeaders = [
+    'Content-Type',
+    'text/html; charset=utf-8',
+    'set-cookie',
+    ['set-cookie1=foo', 'set-cookie2=bar'],
+    'set-cookie',
+    'set-cookie3=baz',
+    'CONTENT-TYPE',
+    'text/xml',
+    'cookie',
+    'cookie1=foo; cookie2=bar',
+    'cookie',
+    'cookie3=baz',
+    'x-custom',
+    'custom1',
+    'X-Custom',
+    ['custom2', 'custom3'],
+  ]
+  const scope = nock('http://example.test')
+    .get('/')
+    .reply(200, 'Hello World!', replyHeaders)
+
+  const { headers, rawHeaders } = await got('http://example.test/')
+
+  t.equivalent(headers, {
+    'content-type': 'text/html; charset=utf-8',
+    'set-cookie': ['set-cookie1=foo', 'set-cookie2=bar', 'set-cookie3=baz'],
+    cookie: 'cookie1=foo; cookie2=bar; cookie3=baz',
+    'x-custom': 'custom1, custom2, custom3',
+  })
+  t.equivalent(rawHeaders, replyHeaders)
+
+  scope.done()
+})
+
+test('replyContentLength() sends explicit content-length header with response', async t => {
+  const scope = nock('http://example.test')
+    .replyContentLength()
+    .get('/')
+    .reply(200, { hello: 'world' })
+
+  const { headers } = await got('http://example.test/')
+
+  t.equal(headers['content-length'], '17')
   scope.done()
 })
 

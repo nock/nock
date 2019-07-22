@@ -3,14 +3,13 @@
 [![npm](https://img.shields.io/npm/v/nock.svg)][npmjs]
 [![npm@beta](https://img.shields.io/npm/v/nock/beta.svg)][npmjs]
 [![Build Status](https://travis-ci.org/nock/nock.svg?branch=beta)][build]
-[![Coverage Status](https://img.shields.io/coveralls/github/nock/nock/beta.svg)][coverage]
+![Coverage Status](http://img.shields.io/badge/coverage-100%25-brightgreen.svg)
 [![Greenkeeper](https://badges.greenkeeper.io/nock/nock.svg)](https://greenkeeper.io/)
 [![Backers on Open Collective](https://opencollective.com/nock/backers/badge.svg)](#backers)
 [![Sponsors on Open Collective](https://opencollective.com/nock/sponsors/badge.svg)](#sponsors)
 
 [npmjs]: https://www.npmjs.com/package/nock
 [build]: https://travis-ci.org/nock/nock
-[coverage]: https://coveralls.io/github/nock/nock
 
 HTTP server mocking and expectations library for Node.js
 
@@ -254,7 +253,15 @@ nock('http://www.example.com')
 
 ### Specifying request query string
 
-Nock understands query strings. Instead of placing the entire URL, you can specify the query part as an object:
+Nock understands query strings. Search parameters can be included as part of the path:
+
+```js
+nock('http://example.com')
+  .get('/users?foo=bar')
+  .reply(200)
+```
+
+Instead of placing the entire URL, you can specify the query part as an object:
 
 ```js
 nock('http://example.com')
@@ -276,6 +283,17 @@ nock('http://example.com')
     },
   })
   .reply(200, { results: [{ id: 'pgte' }] })
+```
+
+A `URLSearchParams` instance can be provided.
+
+```js
+const params = new URLSearchParams({ foo: 'bar' })
+
+nock('http://example.com')
+  .get('/')
+  .query(params)
+  .reply(200)
 ```
 
 Nock supports passing a function to query. The function determines if the actual query matches or not.
@@ -355,17 +373,23 @@ Instead of an object or a buffer you can also pass in a callback to be evaluated
 
 ```js
 const scope = nock('http://www.google.com')
-  .filteringRequestBody(/.*/, '*')
-  .post('/echo', '*')
+  .post('/echo')
   .reply(201, (uri, requestBody) => requestBody)
 ```
+
+In Nock 11.x it was possible to invoke `.reply()` with a status code and a
+function that returns an array containing a status code and body. (The status
+code from the array would take precedence over the one passed directly to
+reply.) This is no longer allowed. In 12.x, either call `.reply()` with a
+status code and a function that returns the body, or call it with a single
+argument: a function that returns an array containing both the status code and
+body.
 
 An asynchronous function that gets an error-first callback as its last argument also works:
 
 ```js
 const scope = nock('http://www.google.com')
-  .filteringRequestBody(/.*/, '*')
-  .post('/echo', '*')
+  .post('/echo')
   .reply(201, (uri, requestBody, cb) => {
     fs.readFile('cat-poems.txt', cb) // Error-first callback
   })
@@ -377,8 +401,7 @@ You can also return the status code and body using just one function:
 
 ```js
 const scope = nock('http://www.google.com')
-  .filteringRequestBody(/.*/, '*')
-  .post('/echo', '*')
+  .post('/echo')
   .reply((uri, requestBody) => {
     return [
       201,
@@ -392,8 +415,7 @@ or, use an error-first callback that also gets the status code:
 
 ```js
 const scope = nock('http://www.google.com')
-  .filteringRequestBody(/.*/, '*')
-  .post('/echo', '*')
+  .post('/echo')
   .reply((uri, requestBody, cb) => {
     setTimeout(() => cb(null, [201, 'THIS IS THE REPLY BODY']), 1000)
   })
@@ -518,14 +540,15 @@ const scope = nock('https://api.github.com')
 ```
 
 Or you can use a function to generate the headers values. The function will be
-passed the request, response, and body (if available). The body will be either a
-buffer, a stream, or undefined.
+passed the request, response, and response body (if available). The body will
+be either a buffer, a stream, or undefined.
 
 ```js
 const scope = nock('http://www.headdy.com')
   .get('/')
   .reply(200, 'Hello World!', {
-    'X-My-Headers': (req, res, body) => body.toString(),
+    'Content-Length': (req, res, body) => body.length,
+    ETag: () => `${Date.now()}`,
   })
 ```
 
@@ -548,9 +571,7 @@ Or you can use a function to generate the default headers values:
 ```js
 const scope = nock('http://www.headdy.com')
   .defaultReplyHeaders({
-    'Content-Length': function(req, res, body) {
-      return body.length
-    },
+    'Content-Length': (req, res, body) => body.length,
   })
   .get('/')
   .reply(200, 'The default headers should come too')
@@ -654,6 +675,8 @@ nock('http://zombo.com')
   .thrice()
   .reply(200, 'Ok')
 ```
+
+To repeat this response for as long as nock is active, use [.persist()](#persist).
 
 ### Delay the response body
 
@@ -830,12 +853,11 @@ const scope = nock('http://api.myservice.com')
   .reply(201, 'OK')
 ```
 
-If you don't want to match the request body you can return a wildcard match:
+If you don't want to match the request body you should omit the `body` argument from the method function:
 
 ```js
 const scope = nock('http://api.myservice.com')
-  .filteringRequestBody(body => '*')
-  .post('/some_uri', '*')
+  .post('/some_uri') // no body argument
   .reply(200, 'OK')
 ```
 
@@ -996,6 +1018,8 @@ const scope = nock('http://example.com')
 
 scope.persist(false)
 ```
+
+To specify an exact number of times that nock should repeat the response, use [.times()](#repeat-response-n-times).
 
 ### .pendingMocks()
 

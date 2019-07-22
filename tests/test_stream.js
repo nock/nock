@@ -77,6 +77,43 @@ test('pause response after data', t => {
   }, 0)
 })
 
+// https://github.com/nock/nock/issues/1493
+test("response have 'complete' property and it's true after end", t => {
+  const response = new stream.PassThrough()
+  const scope = nock('http://example.test')
+    .get('/')
+    // Node does not pause the 'end' event so we need to use a stream to simulate
+    // multiple 'data' events.
+    .reply(200, response)
+
+  http.get(
+    {
+      host: 'example.test',
+      path: '/',
+    },
+    res => {
+      let hasData = false
+
+      res.on('data', () => {
+        hasData = true
+      })
+
+      res.on('end', () => {
+        t.true(hasData)
+        t.is(res.complete, true)
+        scope.done()
+        t.end()
+      })
+    }
+  )
+
+  // Manually simulate multiple 'data' events.
+  response.emit('data', 'one')
+  setTimeout(() => {
+    response.end()
+  }, 0)
+})
+
 // TODO Convert to async / got.
 test('response pipe', t => {
   const dest = (() => {
@@ -236,7 +273,7 @@ test(
 
     nock('http://localhost')
       .get('/')
-      .reply(200, function(path, reqBody) {
+      .reply(201, function(path, reqBody) {
         return new SimpleStream()
       })
 
@@ -245,6 +282,7 @@ test(
       res.setEncoding('utf8')
 
       let body = ''
+      t.equal(res.statusCode, 201)
 
       res.on('data', function(chunk) {
         body += chunk
@@ -288,4 +326,33 @@ test('response readable pull stream works as expected', t => {
   )
 
   req.end()
+})
+
+test('error events on reply streams proxy to the response', async t => {
+  // This test could probably be written to use got, however, that lib has a lot of built in
+  // error handling and this test would get convoluted.
+  t.plan(1)
+
+  const replyBody = new stream.PassThrough()
+  const scope = nock('http://example.test')
+    .get('/')
+    .reply(201, replyBody)
+
+  const reqOpts = {
+    host: 'example.test',
+    method: 'GET',
+    path: '/',
+  }
+  http.get(reqOpts, res => {
+    res.on('error', err => {
+      t.is(err, 'oh no!')
+      t.done()
+    })
+  })
+
+  scope.done()
+
+  replyBody.end(() => {
+    replyBody.emit('error', 'oh no!')
+  })
 })

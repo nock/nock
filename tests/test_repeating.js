@@ -1,117 +1,121 @@
 'use strict'
 
-const http = require('http')
-const async = require('async')
 const { test } = require('tap')
 const nock = require('..')
+const got = require('./got_client')
+const assertRejects = require('assert-rejects')
 
 require('./cleanup_after_each')()
 
-test('repeating once', t => {
-  nock.disableNetConnect()
-
-  nock('http://example.test')
+test('repeating once', async t => {
+  const scope = nock('http://example.test')
     .get('/')
     .once()
     .reply(200, 'Hello World!')
 
-  http.get('http://example.test', function(res) {
-    t.equal(200, res.statusCode, 'first request')
-    t.end()
-  })
+  const { statusCode } = await got('http://example.test/')
+  t.is(statusCode, 200)
+
+  await assertRejects(
+    got('http://example.test/'),
+    Error,
+    'Nock: No match for request'
+  )
+
+  scope.done()
 })
 
-test('repeating twice', t => {
-  nock.disableNetConnect()
-
-  nock('http://example.test')
+test('repeating twice', async t => {
+  const scope = nock('http://example.test')
     .get('/')
     .twice()
     .reply(200, 'Hello World!')
 
-  async.each(
-    [1, 2],
-    function(_, cb) {
-      http.get('http://example.test', function(res) {
-        t.equal(200, res.statusCode)
-        cb()
-      })
-    },
-    t.end.bind(t)
+  // eslint-disable-next-line no-unused-vars
+  for (const _ of Array(2)) {
+    const { statusCode } = await got('http://example.test/')
+    t.is(statusCode, 200)
+  }
+
+  await assertRejects(
+    got('http://example.test/'),
+    Error,
+    'Nock: No match for request'
   )
+
+  scope.done()
 })
 
-test('repeating thrice', t => {
-  nock.disableNetConnect()
-
-  nock('http://example.test')
+test('repeating thrice', async t => {
+  const scope = nock('http://example.test')
     .get('/')
     .thrice()
     .reply(200, 'Hello World!')
 
-  async.each(
-    [1, 2, 3],
-    function(_, cb) {
-      http.get('http://example.test', function(res) {
-        t.equal(200, res.statusCode)
-        cb()
-      })
-    },
-    t.end.bind(t)
+  // eslint-disable-next-line no-unused-vars
+  for (const _ of Array(3)) {
+    const { statusCode } = await got('http://example.test/')
+    t.is(statusCode, 200)
+  }
+
+  await assertRejects(
+    got('http://example.test/'),
+    Error,
+    'Nock: No match for request'
   )
+
+  scope.done()
 })
 
-test('repeating response 4 times', t => {
-  nock.disableNetConnect()
-
-  nock('http://example.test')
+test('repeating response 4 times', async t => {
+  const scope = nock('http://example.test')
     .get('/')
     .times(4)
     .reply(200, 'Hello World!')
 
-  async.each(
-    [1, 2, 3, 4],
-    function(_, cb) {
-      http.get('http://example.test', function(res) {
-        t.equal(200, res.statusCode, 'first request')
-        cb()
-      })
-    },
-    t.end.bind(t)
+  // eslint-disable-next-line no-unused-vars
+  for (const _ of Array(4)) {
+    const { statusCode } = await got('http://example.test/')
+    t.is(statusCode, 200)
+  }
+
+  await assertRejects(
+    got('http://example.test/'),
+    Error,
+    'Nock: No match for request'
   )
+
+  scope.done()
 })
 
-test('isDone() must consider repeated responses', t => {
+test('times with invalid argument is ignored', async t => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .times(0)
+    .reply(200, 'Hello World!')
+
+  const { statusCode } = await got('http://example.test/')
+  t.is(statusCode, 200)
+
+  await assertRejects(
+    got('http://example.test/'),
+    Error,
+    'Nock: No match for request'
+  )
+
+  scope.done()
+})
+
+test('isDone() must consider repeated responses', async t => {
   const scope = nock('http://example.test')
     .get('/')
     .times(2)
     .reply(204)
 
-  function makeRequest(callback) {
-    const req = http.request(
-      {
-        host: 'example.test',
-        path: '/',
-        port: 80,
-      },
-      function(res) {
-        t.equal(res.statusCode, 204)
-        res.on('end', callback)
-        // Streams start in 'paused' mode and must be started.
-        // See https://nodejs.org/api/stream.html#stream_class_stream_readable
-        res.resume()
-      }
-    )
-    req.end()
+  // eslint-disable-next-line no-unused-vars
+  for (const _ of Array(2)) {
+    t.is(scope.isDone(), false)
+    await got('http://example.test/')
   }
-
-  t.notOk(scope.isDone(), 'should not be done before all requests')
-  makeRequest(function() {
-    t.notOk(scope.isDone(), 'should not yet be done after the first request')
-    makeRequest(function() {
-      t.ok(scope.isDone(), 'should be done after the two requests are made')
-      scope.done()
-      t.end()
-    })
-  })
+  t.is(scope.isDone(), true)
 })

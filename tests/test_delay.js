@@ -28,7 +28,7 @@ function checkDuration(t, ms) {
       fin[0] * 1000 + // seconds -> ms
       fin[1] * 1e-6 // nanoseconds -> ms
 
-    /// innaccurate timers
+    /// inaccurate timers
     ms = ms * 0.9
 
     t.ok(
@@ -180,7 +180,7 @@ test('delayBody works with a stream', async t => {
 })
 
 test('delayBody works with a stream of binary buffers', async t => {
-  const scope = nock('http://example.com')
+  const scope = nock('http://example.test')
     .get('/')
     .delayBody(100)
     // No encoding specified, which causes the file to be streamed using
@@ -190,7 +190,7 @@ test('delayBody works with a stream of binary buffers', async t => {
   await resolvesInAtLeast(
     t,
     async () => {
-      const { body } = await got('http://example.com/')
+      const { body } = await got('http://example.test/')
       t.equal(body, fs.readFileSync(textFile, { encoding: 'utf8' }))
     },
     100
@@ -207,14 +207,14 @@ test('delayBody works with a delayed stream', async t => {
     },
   })
 
-  const scope = nock('http://example.com')
+  const scope = nock('http://example.test')
     .get('/')
     .delayBody(100)
     .reply(200, (uri, requestBody) => passthrough)
 
   setTimeout(() => fs.createReadStream(textFile).pipe(passthrough), 125)
 
-  const { body } = await got('http://example.com/')
+  const { body } = await got('http://example.test/')
   t.equal(body, fs.readFileSync(textFile, { encoding: 'utf8' }))
 
   scope.done()
@@ -267,11 +267,21 @@ test('using reply callback with delay can reply JSON', t => {
       json: true,
     },
     function(err, res, body) {
+      t.error(err)
       t.equals(res.headers['content-type'], 'application/json')
       t.deepEqual(body, { a: 1 })
       t.end()
     }
   )
+})
+
+test('delay with invalid arguments', t => {
+  const interceptor = nock('http://example.test').get('/')
+  t.throws(
+    () => interceptor.delay('one million seconds'),
+    Error('Unexpected input')
+  )
+  t.end()
 })
 
 test('delay works with replyWithFile', t => {

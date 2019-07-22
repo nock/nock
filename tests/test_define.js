@@ -12,7 +12,7 @@ test('define() is backward compatible', async t => {
   t.ok(
     nock.define([
       {
-        scope: 'http://example.com',
+        scope: 'http://example.test',
         //  "port" has been deprecated
         port: 12345,
         method: 'GET',
@@ -24,7 +24,7 @@ test('define() is backward compatible', async t => {
   )
 
   await assertRejects(
-    got('http://example.com:12345/', { retry: 0 }),
+    got('http://example.test:12345/', { retry: 0 }),
     ({ statusCode }) => {
       t.is(statusCode, 500)
       return true
@@ -37,7 +37,7 @@ test('define() throws when reply is not a numeric string', t => {
     () =>
       nock.define([
         {
-          scope: 'http://example.com:1451',
+          scope: 'http://example.test:1451',
           method: 'GET',
           path: '/',
           reply: 'frodo',
@@ -158,7 +158,7 @@ test('define() works with non-JSON responses', async t => {
   })
 
   t.equal(statusCode, 200)
-  // TODO: beacuse `{ encoding: false }` is passed to `got`, `body` should be
+  // TODO: because `{ encoding: false }` is passed to `got`, `body` should be
   // a buffer, but it's a string. Is this a bug in nock or got?
   t.equal(body, exampleResponseBody)
 })
@@ -173,7 +173,7 @@ test('define() works with binary buffers', t => {
   t.ok(
     nock.define([
       {
-        scope: 'http://example.com',
+        scope: 'http://example.test',
         method: 'POST',
         path: '/',
         body: exampleBody,
@@ -183,9 +183,9 @@ test('define() works with binary buffers', t => {
     ])
   )
 
-  const req = new http.request(
+  const req = http.request(
     {
-      host: 'example.com',
+      host: 'example.test',
       method: 'POST',
       path: '/',
     },
@@ -206,7 +206,7 @@ test('define() works with binary buffers', t => {
     }
   )
 
-  req.on('error', err => {
+  req.on('error', () => {
     //  This should never happen.
     t.fail('Error should never occur.')
     t.end()
@@ -220,14 +220,14 @@ test('define() uses reqheaders', t => {
   const auth = 'foo:bar'
   const authHeader = `Basic ${Buffer.from('foo:bar').toString('base64')}`
   const reqheaders = {
-    host: 'example.com',
+    host: 'example.test',
     authorization: authHeader,
   }
 
   t.ok(
     nock.define([
       {
-        scope: 'http://example.com',
+        scope: 'http://example.test',
         method: 'GET',
         path: '/',
         status: 200,
@@ -238,9 +238,9 @@ test('define() uses reqheaders', t => {
 
   // Make a request which should match the mock that was configured above.
   // This does not hit the network.
-  const req = new http.request(
+  const req = http.request(
     {
-      host: 'example.com',
+      host: 'example.test',
       method: 'GET',
       path: '/',
       auth,
@@ -249,7 +249,7 @@ test('define() uses reqheaders', t => {
       t.equal(res.statusCode, 200)
 
       res.once('end', () => {
-        t.equivalent(res.req._headers, reqheaders)
+        t.equivalent(res.req.getHeaders(), reqheaders)
         t.end()
       })
       // Streams start in 'paused' mode and must be started.
@@ -264,14 +264,14 @@ test('define() uses badheaders', t => {
   t.ok(
     nock.define([
       {
-        scope: 'http://example.com',
+        scope: 'http://example.test',
         method: 'GET',
         path: '/',
         status: 401,
         badheaders: ['x-foo'],
       },
       {
-        scope: 'http://example.com',
+        scope: 'http://example.test',
         method: 'GET',
         path: '/',
         status: 200,
@@ -282,9 +282,9 @@ test('define() uses badheaders', t => {
     ])
   )
 
-  const req = new http.request(
+  const req = http.request(
     {
-      host: 'example.com',
+      host: 'example.test',
       method: 'GET',
       path: '/',
       headers: {
@@ -303,4 +303,30 @@ test('define() uses badheaders', t => {
     }
   )
   req.end()
+})
+
+test('define() treats a * body as a special case for not matching the request body', async t => {
+  t.plan(4)
+
+  nock.define([
+    {
+      scope: 'http://example.test',
+      method: 'POST',
+      path: '/',
+      body: '*',
+      response: 'matched',
+    },
+  ])
+
+  process.once('warning', warning => {
+    t.equal(warning.name, 'DeprecationWarning')
+    t.match(warning.message, 'Skipping body matching using')
+  })
+
+  const { statusCode, body } = await got.post('http://example.test/', {
+    body: 'foo bar',
+  })
+
+  t.equal(statusCode, 200)
+  t.equal(body, 'matched')
 })

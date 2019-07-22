@@ -13,19 +13,8 @@ extends:
   - prettier
 
 rules:
-  # Override some recommended rules.
-  no-unused-vars: ['error', { 'args': 'none' }]
-  no-empty: ['error', { 'allowEmptyCatch': true }]
-
-  # TODO These are included in standard and should be cleaned up and turned
-  # on.
-  node/no-deprecated-api: 'off'
-  no-path-concat: 'off'
-  no-throw-literal: 'off'
-  handle-callback-err: 'off'
-  eqeqeq: 'off'
-  new-cap: 'off'
-  camelcase: 'off'
+  # TODO These are included in standard and should be cleaned up and turned on.
+  node/no-deprecated-api: 'off' # we still make heavy use of url.parse
 
   # Nock additions.
   strict: ['error', 'safe']
