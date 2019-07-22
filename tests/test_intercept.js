@@ -440,7 +440,11 @@ test('emits error if https route is missing', t => {
     t.equal(
       err.message.trim(),
       `Nock: No match for request ${JSON.stringify(
-        { method: 'GET', url: 'https://example.test/abcdef892932' },
+        {
+          method: 'GET',
+          url: 'https://example.test/abcdef892932',
+          headers: {},
+        },
         null,
         2
       )}`
@@ -474,7 +478,11 @@ test('emits error if https route is missing', t => {
     t.equal(
       err.message.trim(),
       `Nock: No match for request ${JSON.stringify(
-        { method: 'GET', url: 'https://example.test:123/dsadsads' },
+        {
+          method: 'GET',
+          url: 'https://example.test:123/dsadsads',
+          headers: {},
+        },
         null,
         2
       )}`
@@ -1339,4 +1347,83 @@ test('three argument form of http.request: URL, options, and callback', t => {
       t.done()
     })
   })
+})
+
+/*
+ * This test imitates a feature of node-http-proxy (https://github.com/nodejitsu/node-http-proxy) -
+ * modifying headers for an in-flight request by modifying them.
+ */
+test('works when headers are removed on the socket event', t => {
+  // Set up a nock that will fail if it gets an "authorization" header.
+  const serviceScope = nock('http://service', {
+    badheaders: ['authorization'],
+  })
+    .get('/endpoint')
+    .reply(200)
+
+  // Create a server to act as our reverse proxy.
+  const server = http.createServer((request, response) => {
+    // Make a request to the nock instance with the same request that came in.
+    const proxyReq = http.request({
+      host: 'service',
+      // Get the path from the incoming request and pass it through
+      path: `/${request.url
+        .split('/')
+        .slice(1)
+        .join('/')}`,
+      headers: request.headers,
+    })
+
+    // When we connect, remove the authorization header (node-http-proxy uses this event to do it)
+    proxyReq.on('socket', function() {
+      proxyReq.removeHeader('authorization')
+
+      // End the request here, otherwise it ends up matching the request before socket gets called
+      // because socket runs on process.nextTick
+      proxyReq.end()
+    })
+
+    proxyReq.on('response', proxyRes => {
+      proxyRes.pipe(response)
+    })
+
+    proxyReq.on('error', error => {
+      console.error(error)
+      t.error(error)
+      t.end()
+    })
+  })
+
+  server
+    .listen(() => {
+      // Now that the server's started up, make a request to it with an authorization header.
+      const req = http.request(
+        {
+          hostname: 'localhost',
+          path: '/endpoint',
+          port: server.address().port,
+          method: 'GET',
+          headers: {
+            authorization: 'blah',
+          },
+        },
+        res => {
+          // If we get a request, all good :)
+          t.equal(200, res.statusCode)
+          serviceScope.done()
+          server.close(t.end)
+        }
+      )
+
+      req.on('error', error => {
+        t.error(error)
+        t.end()
+      })
+
+      req.end()
+    })
+    .on('error', error => {
+      t.error(error)
+      t.end()
+    })
 })
