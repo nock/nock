@@ -1353,7 +1353,7 @@ test('three argument form of http.request: URL, options, and callback', t => {
  * This test imitates a feature of node-http-proxy (https://github.com/nodejitsu/node-http-proxy) -
  * modifying headers for an in-flight request by modifying them.
  */
-test('works when headers removed by http-proxy', t => {
+test('works when headers are removed on the socket event', t => {
   // Set up a nock that will fail if it gets an "authorization" header.
   const serviceScope = nock('http://service', {
     badheaders: ['authorization'],
@@ -1376,8 +1376,11 @@ test('works when headers removed by http-proxy', t => {
 
     // When we connect, remove the authorization header (node-http-proxy uses this event to do it)
     proxyReq.on('socket', function() {
-      console.log('removing header')
       proxyReq.removeHeader('authorization')
+
+      // End the request here, otherwise it ends up matching the request before socket gets called
+      // because socket runs on process.nextTick
+      proxyReq.end()
     })
 
     proxyReq.on('response', proxyRes => {
@@ -1389,8 +1392,6 @@ test('works when headers removed by http-proxy', t => {
       t.error(error)
       t.end()
     })
-
-    proxyReq.end()
   })
 
   server
