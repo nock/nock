@@ -44,6 +44,15 @@ test('calling optionally(false) on a mock leaves it as required', t => {
   t.end()
 })
 
+test('calling optionally() with a non-boolean argument throws an error', t => {
+  const interceptor = nock('http://example.test').get('/')
+
+  t.throws(() => interceptor.optionally('foo'), {
+    message: 'Invalid arguments: argument should be a boolean',
+  })
+  t.end()
+})
+
 test('optional mocks are still functional', t => {
   nock('http://example.test')
     .get('/abc')
