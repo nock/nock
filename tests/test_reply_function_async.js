@@ -13,11 +13,11 @@ const got = require('./got_client')
 require('./cleanup_after_each')()
 
 test('reply can take a callback', async t => {
-  const scope = nock('http://example.com')
+  const scope = nock('http://example.test')
     .get('/')
     .reply(200, (path, requestBody, callback) => callback(null, 'Hello World!'))
 
-  const response = await got('http://example.com/', {
+  const response = await got('http://example.test/', {
     encoding: null,
   })
 
@@ -33,13 +33,13 @@ test('reply takes a callback for status code', async t => {
     'X-Custom-Header': 'abcdef',
   }
 
-  const scope = nock('http://example.com')
+  const scope = nock('http://example.test')
     .get('/')
     .reply((path, requestBody, cb) => {
       setTimeout(() => cb(null, [expectedStatusCode, responseBody, headers]), 1)
     })
 
-  const response = await got('http://example.com/')
+  const response = await got('http://example.test/')
 
   t.equal(response.statusCode, expectedStatusCode, 'sends status code')
   t.deepEqual(
@@ -54,7 +54,7 @@ test('reply takes a callback for status code', async t => {
 test('reply should throw on error on the callback', t => {
   let dataCalled = false
 
-  const scope = nock('http://example.com')
+  const scope = nock('http://example.test')
     .get('/')
     .reply(500, (path, requestBody, callback) =>
       callback(new Error('Database failed'))
@@ -64,7 +64,7 @@ test('reply should throw on error on the callback', t => {
   // to match.
   const req = http.request(
     {
-      host: 'example.com',
+      host: 'example.test',
       path: '/',
       port: 80,
     },
@@ -110,7 +110,7 @@ test('an error passed to the callback propagates when [err, fullResponseArray] i
 test('subsequent calls to the reply callback are ignored', async t => {
   t.plan(3)
 
-  const scope = nock('http://example.com')
+  const scope = nock('http://example.test')
     .get('/')
     .reply(201, (path, requestBody, callback) => {
       callback(null, 'one')
@@ -119,7 +119,7 @@ test('subsequent calls to the reply callback are ignored', async t => {
       t.pass()
     })
 
-  const { statusCode, body } = await got('http://example.com/')
+  const { statusCode, body } = await got('http://example.test/')
 
   scope.done()
   t.is(statusCode, 201)
