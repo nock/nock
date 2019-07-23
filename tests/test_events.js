@@ -62,7 +62,7 @@ test('emits request and request body', function(t) {
 })
 
 test('emits no match when no match and no mock', function(t) {
-  nock.emitter.once('no match', function(req) {
+  nock.emitter.once('no match', function() {
     t.end()
   })
 

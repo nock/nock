@@ -141,8 +141,8 @@ test('headersFieldNamesToLowerCase throws on conflicting keys', t => {
   t.throws(
     () =>
       common.headersFieldNamesToLowerCase({
-        HoSt: 'example.com',
-        HOST: 'example.com',
+        HoSt: 'example.test',
+        HOST: 'example.test',
       }),
     {
       message:
