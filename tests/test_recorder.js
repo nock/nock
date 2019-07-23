@@ -791,11 +791,11 @@ test("doesn't record request headers by default", t => {
       output_objects: true,
     })
 
-    // TODO: replace request to www.example.com with local server
     http
       .request(
         {
-          hostname: 'www.example.com',
+          hostname: 'localhost',
+          port: server.address().port,
           path: '/',
           method: 'GET',
           auth: 'foo:bar',
