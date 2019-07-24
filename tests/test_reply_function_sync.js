@@ -145,6 +145,29 @@ test('when content-type is json, reply function receives parsed body', async t =
   scope.done()
 })
 
+// Regression test for https://github.com/nock/nock/issues/1642
+test('when content-type is json (as array), reply function receives parsed body', async t => {
+  t.plan(4)
+  const exampleRequestBody = JSON.stringify({ id: 1, name: 'bob' })
+
+  const scope = nock('http://example.test')
+    .post('/')
+    .reply(201, (uri, requestBody) => {
+      t.type(requestBody, 'object')
+      t.deepEqual(requestBody, JSON.parse(exampleRequestBody))
+    })
+
+  const { statusCode, body } = await got('http://example.test/', {
+    // Providing the field value as an array is probably a bug on the callers behalf,
+    // but it is still allowed by Node
+    headers: { 'Content-Type': ['application/json', 'charset=utf8'] },
+    body: exampleRequestBody,
+  })
+  t.is(statusCode, 201)
+  t.equal(body, '')
+  scope.done()
+})
+
 test('without content-type header, body sent to reply function is not parsed', async t => {
   t.plan(4)
   const exampleRequestBody = JSON.stringify({ id: 1, name: 'bob' })
