@@ -25,7 +25,7 @@ const acceptableGlobalKeys = new Set([
 ])
 
 test('invalid or missing method parameter throws an exception', t => {
-  t.throws(() => nock('https://example.com').intercept('/somepath'), {
+  t.throws(() => nock('https://example.test').intercept('/somepath'), {
     message: 'The "method" parameter is required for an intercept call.',
   })
   t.end()
@@ -37,11 +37,11 @@ test("when the path doesn't include a leading slash it raises an error", functio
 })
 
 test('get gets mocked', async t => {
-  const scope = nock('http://example.com')
+  const scope = nock('http://example.test')
     .get('/')
     .reply(200, 'Hello World!')
 
-  const { statusCode, body } = await got('http://example.com/', {
+  const { statusCode, body } = await got('http://example.test/', {
     encoding: null,
   })
 
@@ -52,11 +52,11 @@ test('get gets mocked', async t => {
 })
 
 test('get gets mocked with relative base path', async t => {
-  const scope = nock('http://example.com/abc')
+  const scope = nock('http://example.test/abc')
     .get('/def')
     .reply(200, 'Hello World!')
 
-  const { statusCode, body } = await got('http://example.com/abc/def', {
+  const { statusCode, body } = await got('http://example.test/abc/def', {
     encoding: null,
   })
 
@@ -67,11 +67,11 @@ test('get gets mocked with relative base path', async t => {
 })
 
 test('post', async t => {
-  const scope = nock('http://example.com')
+  const scope = nock('http://example.test')
     .post('/form')
     .reply(201, 'OK!')
 
-  const { statusCode, body } = await got.post('http://example.com/form', {
+  const { statusCode, body } = await got.post('http://example.test/form', {
     encoding: null,
   })
 
@@ -82,11 +82,11 @@ test('post', async t => {
 })
 
 test('post with empty response body', async t => {
-  const scope = nock('http://example.com')
+  const scope = nock('http://example.test')
     .post('/form')
     .reply(200)
 
-  const { statusCode, body } = await got.post('http://example.com/form', {
+  const { statusCode, body } = await got.post('http://example.test/form', {
     encoding: null,
   })
 
@@ -99,14 +99,14 @@ test('post with empty response body', async t => {
 test('post, lowercase', t => {
   let dataCalled = false
 
-  const scope = nock('http://example.com')
+  const scope = nock('http://example.test')
     .post('/form')
     .reply(200, 'OK!')
 
   // Since this is testing a lowercase `method`, it's using the `http` module.
   const req = http.request(
     {
-      host: 'example.com',
+      host: 'example.test',
       method: 'post',
       path: '/form',
       port: 80,
@@ -132,22 +132,22 @@ test('post, lowercase', t => {
 test('post with regexp as spec', async t => {
   const input = 'key=val'
 
-  const scope = nock('http://example.com')
+  const scope = nock('http://example.test')
     .post('/echo', /key=v.?l/g)
     .reply(200, (uri, body) => ['OK', uri, body].join(' '))
 
-  const { body } = await got('http://example.com/echo', { body: input })
+  const { body } = await got('http://example.test/echo', { body: input })
 
   t.equal(body, 'OK /echo key=val')
   scope.done()
 })
 
 test('post with function as spec', async t => {
-  const scope = nock('http://example.com')
+  const scope = nock('http://example.test')
     .post('/echo', body => body === 'key=val')
     .reply(200, (uri, body) => ['OK', uri, body].join(' '))
 
-  const { body } = await got('http://example.com/echo', { body: 'key=val' })
+  const { body } = await got('http://example.test/echo', { body: 'key=val' })
 
   t.equal(body, 'OK /echo key=val')
   scope.done()
@@ -156,11 +156,11 @@ test('post with function as spec', async t => {
 test('post with chaining on call', async t => {
   const input = 'key=val'
 
-  const scope = nock('http://example.com')
+  const scope = nock('http://example.test')
     .post('/echo', input)
     .reply(200, (uri, body) => ['OK', uri, body].join(' '))
 
-  const { body } = await got('http://example.com/echo', { body: input })
+  const { body } = await got('http://example.test/echo', { body: input })
 
   t.equal(body, 'OK /echo key=val')
   scope.done()
@@ -180,7 +180,7 @@ test('delete request', async t => {
 test('reply with callback and filtered path and body', async t => {
   let noPrematureExecution = false
 
-  const scope = nock('http://example.com')
+  const scope = nock('http://example.test')
     .filteringPath(/.*/, '*')
     .filteringRequestBody(/.*/, '*')
     .post('*', '*')
@@ -190,7 +190,7 @@ test('reply with callback and filtered path and body', async t => {
     })
 
   noPrematureExecution = true
-  const { body } = await got.post('http://example.com/original/path', {
+  const { body } = await got.post('http://example.test/original/path', {
     body: 'original=body',
   })
 
@@ -440,7 +440,11 @@ test('emits error if https route is missing', t => {
     t.equal(
       err.message.trim(),
       `Nock: No match for request ${JSON.stringify(
-        { method: 'GET', url: 'https://example.test/abcdef892932' },
+        {
+          method: 'GET',
+          url: 'https://example.test/abcdef892932',
+          headers: {},
+        },
         null,
         2
       )}`
@@ -474,7 +478,11 @@ test('emits error if https route is missing', t => {
     t.equal(
       err.message.trim(),
       `Nock: No match for request ${JSON.stringify(
-        { method: 'GET', url: 'https://example.test:123/dsadsads' },
+        {
+          method: 'GET',
+          url: 'https://example.test:123/dsadsads',
+          headers: {},
+        },
         null,
         2
       )}`
@@ -864,12 +872,12 @@ test('handles 500 with restify JsonClient', t => {
 })
 
 test('test request timeout option', t => {
-  nock('http://example.com')
-    .get('/test')
+  nock('http://example.test')
+    .get('/path')
     .reply(200, JSON.stringify({ foo: 'bar' }))
 
   const options = {
-    url: 'http://example.com/test',
+    url: 'http://example.test/path',
     method: 'GET',
     timeout: 2000,
   }
@@ -914,23 +922,23 @@ test('do not match when conditionally = false but should match after trying agai
 test('get correct filtering with scope and request headers filtering', t => {
   const responseText = 'OK!'
   const responseHeaders = { 'Content-Type': 'text/plain' }
-  const requestHeaders = { host: 'a.subdomain.of.google.com' }
+  const requestHeaders = { host: 'foo.example.test' }
 
-  const scope = nock('http://a.subdomain.of.google.com', {
+  const scope = nock('http://foo.example.test', {
     filteringScope: function(scope) {
-      return /^http:\/\/.*\.google\.com/.test(scope)
+      return /^http:\/\/.*\.example\.test/.test(scope)
     },
   })
-    .get('/somepath')
+    .get('/path')
     .reply(200, responseText, responseHeaders)
 
   let dataCalled = false
-  const host = 'some.other.subdomain.of.google.com'
+  const host = 'bar.example.test'
   const req = http.get(
     {
       host,
       method: 'GET',
-      path: '/somepath',
+      path: '/path',
       port: 80,
     },
     function(res) {
@@ -950,8 +958,8 @@ test('get correct filtering with scope and request headers filtering', t => {
 })
 
 test('different subdomain with reply callback and filtering scope', async t => {
-  // We scope for www.example.com but through scope filtering we will accept
-  // any <subdomain>.example.com.
+  // We scope for www.example.test but through scope filtering we will accept
+  // any <subdomain>.example.test.
   const scope = nock('http://example.test', {
     filteringScope: scope => /^http:\/\/.*\.example/.test(scope),
   })
@@ -1339,4 +1347,83 @@ test('three argument form of http.request: URL, options, and callback', t => {
       t.done()
     })
   })
+})
+
+/*
+ * This test imitates a feature of node-http-proxy (https://github.com/nodejitsu/node-http-proxy) -
+ * modifying headers for an in-flight request by modifying them.
+ */
+test('works when headers are removed on the socket event', t => {
+  // Set up a nock that will fail if it gets an "authorization" header.
+  const serviceScope = nock('http://example.test', {
+    badheaders: ['authorization'],
+  })
+    .get('/endpoint')
+    .reply(200)
+
+  // Create a server to act as our reverse proxy.
+  const server = http.createServer((request, response) => {
+    // Make a request to the nock instance with the same request that came in.
+    const proxyReq = http.request({
+      host: 'example.test',
+      // Get the path from the incoming request and pass it through
+      path: `/${request.url
+        .split('/')
+        .slice(1)
+        .join('/')}`,
+      headers: request.headers,
+    })
+
+    // When we connect, remove the authorization header (node-http-proxy uses this event to do it)
+    proxyReq.on('socket', function() {
+      proxyReq.removeHeader('authorization')
+
+      // End the request here, otherwise it ends up matching the request before socket gets called
+      // because socket runs on process.nextTick
+      proxyReq.end()
+    })
+
+    proxyReq.on('response', proxyRes => {
+      proxyRes.pipe(response)
+    })
+
+    proxyReq.on('error', error => {
+      console.error(error)
+      t.error(error)
+      t.end()
+    })
+  })
+
+  server
+    .listen(() => {
+      // Now that the server's started up, make a request to it with an authorization header.
+      const req = http.request(
+        {
+          hostname: 'localhost',
+          path: '/endpoint',
+          port: server.address().port,
+          method: 'GET',
+          headers: {
+            authorization: 'blah',
+          },
+        },
+        res => {
+          // If we get a request, all good :)
+          t.equal(200, res.statusCode)
+          serviceScope.done()
+          server.close(t.end)
+        }
+      )
+
+      req.on('error', error => {
+        t.error(error)
+        t.end()
+      })
+
+      req.end()
+    })
+    .on('error', error => {
+      t.error(error)
+      t.end()
+    })
 })

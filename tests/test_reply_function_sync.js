@@ -12,11 +12,11 @@ const got = require('./got_client')
 require('./cleanup_after_each')()
 
 test('reply with status code and function returning body as string', async t => {
-  const scope = nock('http://example.com')
+  const scope = nock('http://example.test')
     .get('/')
     .reply(201, () => 'OK!')
 
-  const { statusCode, body } = await got('http://example.com')
+  const { statusCode, body } = await got('http://example.test')
   t.is(statusCode, 201)
   t.equal(body, 'OK!')
   scope.done()
@@ -145,6 +145,29 @@ test('when content-type is json, reply function receives parsed body', async t =
   scope.done()
 })
 
+// Regression test for https://github.com/nock/nock/issues/1642
+test('when content-type is json (as array), reply function receives parsed body', async t => {
+  t.plan(4)
+  const exampleRequestBody = JSON.stringify({ id: 1, name: 'bob' })
+
+  const scope = nock('http://example.test')
+    .post('/')
+    .reply(201, (uri, requestBody) => {
+      t.type(requestBody, 'object')
+      t.deepEqual(requestBody, JSON.parse(exampleRequestBody))
+    })
+
+  const { statusCode, body } = await got('http://example.test/', {
+    // Providing the field value as an array is probably a bug on the callers behalf,
+    // but it is still allowed by Node
+    headers: { 'Content-Type': ['application/json', 'charset=utf8'] },
+    body: exampleRequestBody,
+  })
+  t.is(statusCode, 201)
+  t.equal(body, '')
+  scope.done()
+})
+
 test('without content-type header, body sent to reply function is not parsed', async t => {
   t.plan(4)
   const exampleRequestBody = JSON.stringify({ id: 1, name: 'bob' })
@@ -168,11 +191,11 @@ test('without content-type header, body sent to reply function is not parsed', a
 // just as easily accomplished with a function returning an array:
 // `.reply(() => [201, 'ABC', { 'X-My-Headers': 'My custom header value' }])`
 test('reply with status code, function returning string body, and header object', async t => {
-  const scope = nock('http://example.com')
+  const scope = nock('http://example.test')
     .get('/')
     .reply(201, () => 'ABC', { 'X-My-Headers': 'My custom header value' })
 
-  const { headers } = await got('http://example.com/')
+  const { headers } = await got('http://example.test/')
 
   t.equivalent(headers, { 'x-my-headers': 'My custom header value' })
 
@@ -192,11 +215,11 @@ test('reply function returning array with only status code', async t => {
 })
 
 test('reply function returning array with status code and string body', async t => {
-  const scope = nock('http://example.com')
+  const scope = nock('http://example.test')
     .get('/')
     .reply(() => [401, 'This is a body'])
 
-  await assertRejects(got('http://example.com/'), ({ statusCode, body }) => {
+  await assertRejects(got('http://example.test/'), ({ statusCode, body }) => {
     t.is(statusCode, 401)
     t.equal(body, 'This is a body')
     return true

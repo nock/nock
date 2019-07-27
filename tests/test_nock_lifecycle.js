@@ -126,13 +126,13 @@ test('is done works', t => {
 })
 
 test('isDone', async t => {
-  const scope = nock('http://example.com')
+  const scope = nock('http://example.test')
     .get('/')
     .reply(200, 'Hello World!')
 
   t.notOk(scope.isDone(), 'not done when a request is outstanding')
 
-  await got('http://example.com/')
+  await got('http://example.test/')
 
   t.true(scope.isDone(), 'done after request is made')
   scope.done()
