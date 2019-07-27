@@ -1006,7 +1006,7 @@ const scope = nock('http://example.com')
 
 Note that while a persisted scope will always intercept the requests, it is considered "done" after the first interception.
 
-If you want to stop persisting a persistent nock you can call `persist(false)`:
+If you want to stop persisting an individual persisted mock you can call `persist(false)`:
 
 ```js
 const scope = nock('http://example.com')
@@ -1018,6 +1018,8 @@ const scope = nock('http://example.com')
 
 scope.persist(false)
 ```
+
+You can also use `nock.cleanAll()` which removes all mocks, including persistent mocks.
 
 To specify an exact number of times that nock should repeat the response, use [.times()](#repeat-response-n-times).
 

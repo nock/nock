@@ -61,6 +61,7 @@ test('(re-)activate after restore', async t => {
 test('clean all works', async t => {
   nock('http://example.test')
     .get('/')
+    .twice()
     .reply()
 
   await got('http://example.test/')
@@ -88,6 +89,20 @@ test('cleanAll should remove pending mocks from all scopes', t => {
   t.deepEqual(scope1.pendingMocks(), [])
   t.deepEqual(scope2.pendingMocks(), [])
   t.end()
+})
+
+test('cleanAll removes persistent mocks', async t => {
+  nock('http://example.test')
+    .persist()
+    .get('/')
+    .reply()
+
+  nock.cleanAll()
+
+  await t.rejects(got('http://example.test/'), {
+    name: 'RequestError',
+    code: 'ENOTFOUND',
+  })
 })
 
 test('is done works', async t => {
