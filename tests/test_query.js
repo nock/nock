@@ -412,3 +412,35 @@ test('query(true) will match when the path has no query', t => {
     t.end()
   })
 })
+
+test('query matching should not consider request arrays equal to comma-separated expectations', t => {
+  nock('http://example.test')
+    .get('/')
+    .query({
+      foo: 'bar,baz',
+    })
+    .reply()
+
+  t.rejects(got('http://example.test?foo[]=bar&foo[]=baz'), {
+    name: 'RequestError',
+    message: 'Nock: No match for request',
+  })
+
+  t.done()
+})
+
+test('query matching should not consider comma-separated requests equal to array expectations', t => {
+  nock('http://example.test')
+    .get('/')
+    .query({
+      foo: ['bar', 'baz'],
+    })
+    .reply()
+
+  t.rejects(got('http://example.test?foo=bar%2Cbaz'), {
+    name: 'RequestError',
+    message: 'Nock: No match for request',
+  })
+
+  t.done()
+})
