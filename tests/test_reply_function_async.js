@@ -56,7 +56,7 @@ test('reply should throw on error on the callback', async t => {
       callback(new Error('Database failed'))
     )
 
-  t.rejects(got('http://example.test'), {
+  await t.rejects(got('http://example.test'), {
     name: 'RequestError',
     message: 'Database failed',
   })
@@ -69,7 +69,7 @@ test('an error passed to the callback propagates when [err, fullResponseArray] i
       callback(Error('boom'))
     })
 
-  t.rejects(got('http://example.test'), {
+  await t.rejects(got('http://example.test'), {
     name: 'RequestError',
     message: 'boom',
   })
@@ -94,7 +94,7 @@ test('subsequent calls to the reply callback are ignored', async t => {
   t.equal(body, 'one')
 })
 
-test('reply can take a direct async function without a callback', async t => {
+test('reply can take a status code with an 2-arg async function, and passes it the correct arguments', async t => {
   const scope = nock('http://example.com')
     .get('/')
     .reply(200, async (path, requestBody) => {
@@ -109,7 +109,7 @@ test('reply can take a direct async function without a callback', async t => {
   scope.done()
 })
 
-test('reply can take a dynamic async function without a callback', async t => {
+test('reply can take a status code with a 0-arg async function, and passes it the correct arguments', async t => {
   const scope = nock('http://example.com')
     .get('/')
     .reply(async () => [201, 'Hello World!'])
@@ -121,20 +121,20 @@ test('reply can take a dynamic async function without a callback', async t => {
   scope.done()
 })
 
-test('reply with a direct async function that rejects', async t => {
+test('when reply is called with a status code and an async function that throws, it propagates the error', async t => {
   nock('http://example.test')
     .get('/')
     .reply(201, async () => {
       throw Error('oh no!')
     })
 
-  t.rejects(got('http://example.test'), {
+  await t.rejects(got('http://example.test'), {
     name: 'RequestError',
     message: 'oh no!',
   })
 })
 
-test('reply with a dynamic async function that rejects', async t => {
+test('when reply is called with an async function that throws, it propagates the error', async t => {
   nock('http://example.test')
     .get('/')
     .reply(async () => {
