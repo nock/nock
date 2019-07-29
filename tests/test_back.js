@@ -394,8 +394,6 @@ tap.test('nockBack record tests', nw => {
 
     t.false(exists(fixtureLoc));
 
-    // You would do some filtering here, but for this test we'll just return
-    // an empty array.
     const afterRecord = scopes => 'string-response';
 
     nockBack(fixture, {afterRecord: afterRecord}, function (done) {
