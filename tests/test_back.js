@@ -230,7 +230,7 @@ tap.test('nockBack dryrun tests', nw => {
 });
 
 
-tap.test('nockBack record tests', nw => {
+tap.test('nockBack record tests', { only: true }, nw => {
   nockBack.setMode('record');
 
   nw.test('it records when configured correctly', t => {
@@ -375,6 +375,51 @@ tap.test('nockBack record tests', nw => {
             t.is(200, response.statusCode)
             t.true(exists(fixtureLoc))
             t.equal(this.scopes.length, 0)
+            fs.unlinkSync(fixtureLoc)
+
+            server.close(t.end)
+          })
+        request.on('error', t.error)
+        request.end()
+      })
+    });
+    nw.end();
+  })
+
+  nw.test('it can format after recording', t => {
+    nockBack.fixtures = `${__dirname}/fixtures`;
+    setOriginalModeOnEnd(nw, nockBack);
+    const fixture = 'filteredFixture.json';
+    const fixtureLoc = `${nockBack.fixtures}/${fixture}`;
+
+    t.false(exists(fixtureLoc));
+
+    // You would do some filtering here, but for this test we'll just return
+    // an empty array.
+    const afterRecord = scopes => 'string-response';
+
+    nockBack(fixture, {afterRecord: afterRecord}, function (done) {
+      const server = http.createServer((request, response) => {
+        t.pass('server received a request')
+
+        response.writeHead(200)
+        response.write('server served a response')
+        response.end()
+      })
+
+      server.listen(() => {
+        const request = http.request(
+          {
+            host: 'localhost',
+            path: '/',
+            port: server.address().port
+          },
+          response => {
+            done()
+
+            t.is(200, response.statusCode)
+            t.true(exists(fixtureLoc))
+            t.is(fs.readFileSync(fixtureLoc, 'utf8'), 'string-response')
             fs.unlinkSync(fixtureLoc)
 
             server.close(t.end)
