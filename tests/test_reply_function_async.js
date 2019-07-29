@@ -96,16 +96,19 @@ test('subsequent calls to the reply callback are ignored', async t => {
 
 test('reply can take a status code with an 2-arg async function, and passes it the correct arguments', async t => {
   const scope = nock('http://example.com')
-    .get('/')
-    .reply(200, async (path, requestBody) => {
-      t.equal(path, '/')
-      t.equal(requestBody, '')
-      return 'Hello World!'
+    .post('/foo')
+    .reply(201, async (path, requestBody) => {
+      t.equal(path, '/foo')
+      t.equal(requestBody, 'request-body')
+      return 'response-body'
     })
 
-  const response = await got('http://example.com/')
+  const response = await got.post('http://example.com/foo', {
+    body: 'request-body',
+  })
 
-  t.equal(response.body, 'Hello World!')
+  t.equal(response.statusCode, 201)
+  t.equal(response.body, 'response-body')
   scope.done()
 })
 
@@ -141,7 +144,7 @@ test('when reply is called with an async function that throws, it propagates the
       throw Error('oh no!')
     })
 
-  t.rejects(got('http://example.test'), {
+  await t.rejects(got('http://example.test'), {
     name: 'RequestError',
     message: 'oh no!',
   })

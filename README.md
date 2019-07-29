@@ -395,6 +395,9 @@ const scope = nock('http://www.google.com')
   })
 ```
 
+In Nock 11 and later, if an error is passed to the callback, Nock will rethrow it as a programmer error.
+In Nock 10 and earlier, the error was sent in the response body, with a 500 HTTP response status code.
+
 You can also return the status code and body using just one function:
 
 ```js
