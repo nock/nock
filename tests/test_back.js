@@ -230,7 +230,7 @@ tap.test('nockBack dryrun tests', nw => {
 });
 
 
-tap.test('nockBack record tests', { only: true }, nw => {
+tap.test('nockBack record tests', nw => {
   nockBack.setMode('record');
 
   nw.test('it records when configured correctly', t => {
