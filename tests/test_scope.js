@@ -134,13 +134,31 @@ test('filter body with function', async t => {
       return 'mamma tua'
     })
     .post('/', 'mamma tua')
-    .reply(200, 'Hello World!')
+    .reply()
 
   const { statusCode } = await got('http://example.test/', {
     body: 'mamma mia',
   })
 
-  t.equal(statusCode, 200)
+  t.is(statusCode, 200)
+  scope.done()
+  t.equal(filteringRequestBodyCounter, 1)
+})
+
+test('filter body with function and empty body', async t => {
+  let filteringRequestBodyCounter = 0
+
+  const scope = nock('http://example.test')
+    .filteringRequestBody(body => {
+      ++filteringRequestBodyCounter
+      return true
+    })
+    .post('/')
+    .reply()
+
+  const { statusCode } = await got.post('http://example.test/')
+
+  t.is(statusCode, 200)
   scope.done()
   t.equal(filteringRequestBodyCounter, 1)
 })
