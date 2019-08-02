@@ -1,7 +1,6 @@
 'use strict'
 
 const http = require('http')
-const url = require('url')
 const { test } = require('tap')
 const nock = require('..')
 const got = require('./got_client')
@@ -22,75 +21,55 @@ test('double activation throws exception', t => {
   t.end()
 })
 
-test('(re-)activate after restore', t => {
+test('(re-)activate after restore', async t => {
   t.plan(7)
 
   const server = http.createServer((request, response) => {
     t.pass('server received a request')
 
-    switch (url.parse(request.url).pathname) {
-      case '/':
-        response.writeHead(200)
-        response.write('server served a response')
-        break
+    if (request.url === '/') {
+      response.writeHead(200)
+      response.write('server served a response')
     }
 
     response.end()
   })
 
-  server.listen(() => {
-    const scope = nock(`http://localhost:${server.address().port}`)
-      .get('/')
-      .reply(304, 'served from our mock')
+  t.once('end', () => server.close())
+  await new Promise(resolve => server.listen(resolve))
+  const url = `http://localhost:${server.address().port}`
 
-    nock.restore()
-    t.false(nock.isActive())
+  const scope = nock(url)
+    .get('/')
+    .reply(304, 'served from our mock')
 
-    http.get(`http://localhost:${server.address().port}`, function(res) {
-      res.resume()
+  nock.restore()
+  t.false(nock.isActive())
 
-      t.is(200, res.statusCode)
+  t.is((await got(url)).statusCode, 200)
 
-      res.on('end', function() {
-        t.ok(!scope.isDone())
+  t.false(scope.isDone())
 
-        nock.activate()
-        t.true(nock.isActive())
-        http.get(`http://localhost:${server.address().port}`, function(res) {
-          res.resume()
+  nock.activate()
+  t.true(nock.isActive())
 
-          t.is(304, res.statusCode)
+  t.is((await got(url)).statusCode, 304)
 
-          res.on('end', function() {
-            t.ok(scope.isDone())
-
-            server.close(t.end)
-          })
-        })
-      })
-    })
-  })
+  t.true(scope.isDone())
 })
 
-test('clean all works', t => {
+test('clean all works', async t => {
   nock('http://example.test')
-    .get('/nonexistent')
-    .reply(200)
+    .get('/')
+    .reply()
 
-  http.get({ host: 'example.test', path: '/nonexistent' }, function(res) {
-    t.assert(res.statusCode === 200, 'should mock before cleanup')
+  await got('http://example.test/')
 
-    nock.cleanAll()
+  nock.cleanAll()
 
-    http
-      .get({ host: 'example.test', path: '/nonexistent' }, function(res) {
-        res.destroy()
-        t.assert(res.statusCode !== 200, 'should clean up properly')
-        t.end()
-      })
-      .on('error', function() {
-        t.end()
-      })
+  await t.rejects(got('http://example.test/'), {
+    name: 'RequestError',
+    code: 'ENOTFOUND',
   })
 })
 
@@ -111,67 +90,60 @@ test('cleanAll should remove pending mocks from all scopes', t => {
   t.end()
 })
 
-test('is done works', t => {
+test('is done works', async t => {
   nock('http://example.test')
-    .get('/nonexistent')
+    .get('/')
     .reply(200)
 
-  t.ok(!nock.isDone())
+  t.false(nock.isDone())
 
-  http.get({ host: 'example.test', path: '/nonexistent' }, function(res) {
-    t.assert(res.statusCode === 200, 'should mock before cleanup')
-    t.ok(nock.isDone())
-    t.end()
-  })
+  await got('http://example.test/')
+
+  t.true(nock.isDone())
 })
 
 test('isDone', async t => {
   const scope = nock('http://example.test')
     .get('/')
-    .reply(200, 'Hello World!')
+    .reply()
 
-  t.notOk(scope.isDone(), 'not done when a request is outstanding')
+  t.false(scope.isDone())
 
   await got('http://example.test/')
 
-  t.true(scope.isDone(), 'done after request is made')
+  t.true(scope.isDone())
+
   scope.done()
 })
 
-test('pending mocks works', t => {
+test('pending mocks works', async t => {
   nock('http://example.test')
-    .get('/nonexistent')
-    .reply(200)
+    .get('/')
+    .reply()
 
-  t.deepEqual(nock.pendingMocks(), ['GET http://example.test:80/nonexistent'])
+  t.deepEqual(nock.pendingMocks(), ['GET http://example.test:80/'])
 
-  http.get({ host: 'example.test', path: '/nonexistent' }, function(res) {
-    t.assert(res.statusCode === 200, 'should mock before cleanup')
-    t.deepEqual(nock.pendingMocks(), [])
-    t.end()
-  })
+  await got('http://example.test/')
+
+  t.deepEqual(nock.pendingMocks(), [])
 })
 
 test('activeMocks returns incomplete mocks', t => {
-  nock.cleanAll()
   nock('http://example.test')
-    .get('/incomplete')
+    .get('/')
     .reply(200)
-
-  t.deepEqual(nock.activeMocks(), ['GET http://example.test:80/incomplete'])
+  t.deepEqual(nock.activeMocks(), ['GET http://example.test:80/'])
   t.end()
 })
 
-test("activeMocks doesn't return completed mocks", t => {
-  nock.cleanAll()
+test("activeMocks doesn't return completed mocks", async t => {
   nock('http://example.test')
-    .get('/complete-me')
-    .reply(200)
+    .get('/')
+    .reply()
 
-  http.get({ host: 'example.test', path: '/complete-me' }, function(res) {
-    t.deepEqual(nock.activeMocks(), [])
-    t.end()
-  })
+  await got('http://example.test/')
+  t.deepEqual(nock.activeMocks(), [])
+  t.end()
 })
 
 test('resetting nock catastrophically while a request is in progress is handled gracefully', async t => {
