@@ -50,7 +50,7 @@
     "proxyquire": "^2.1.0",
     "request": "^2.83.0",
     "restify-clients": "^2.2.0",
-    "rimraf": "^2.6.3",
+    "rimraf": "^3.0.0",
     "semantic-release": "^16.0.0-beta.18",
     "sinon": "^7.3.1",
     "superagent": "^5.0.2",
