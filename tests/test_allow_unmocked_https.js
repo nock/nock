@@ -109,3 +109,38 @@ test('allow unmocked option works with https', t => {
       .end()
   })
 })
+
+test('allow unmocked option works with https for a partial match', t => {
+  // The `allowUnmocked` option is processed in two places. Once in the intercept when there
+  // are no interceptors that come close to matching the request. And again in the overrider when
+  // there are interceptors that partially match, eg just path, but don't completely match.
+  // This explicitly tests the later case in the overrider by making an HTTPS request for a path
+  // that has an interceptor but fails to match the query constraint.
+
+  function middleware(request, response) {
+    response.writeHead(201)
+    response.write('foo')
+    response.end()
+  }
+
+  ssl.startServer(middleware, function(error, server) {
+    t.error(error)
+
+    const { port } = server.address()
+    const origin = `https://localhost:${port}`
+
+    nock(origin, { allowUnmocked: true })
+      .get('/foo')
+      .query({ foo: 'bar' })
+      .reply(418)
+
+    // no query so wont match the interceptor
+    got(`${origin}/foo`, { rejectUnauthorized: false }).then(
+      ({ body, statusCode }) => {
+        t.is(statusCode, 201)
+        t.is(body, 'foo')
+        server.close(t.end)
+      }
+    )
+  })
+})
