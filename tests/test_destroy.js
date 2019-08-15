@@ -14,12 +14,12 @@ test('req.destroy should emit error event if called with error', t => {
   http
     .get('http://example.test/', res => {
       if (res.statusCode !== 200) {
-        res.destroy(new Error("Response error"))
+        res.destroy(new Error('Response error'))
       }
     })
     .once('error', err => {
       t.type(err, Error)
-      t.equal(err.message, "Response error")
+      t.equal(err.message, 'Response error')
       t.end()
     })
 })
