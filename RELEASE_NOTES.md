@@ -19,38 +19,82 @@
 1. In Nock 10, when the method was not specified in a call to `nock.define()`,
    the method would default `GET`. In Nock 11, this raises an error.
 
-1. Legacy recordings may include the response status code as a string in the
-   `reply` field. In Nock 11, an error is raised if the string is not a number.
+1. In very old versions of nock, recordings may include a response status
+   code encoded as a string in the `reply` field. In Nock 10 these strings could
+   be non-numeric. In Nock 11 this raises an error.
 
-1. The returned value of a reply function is no longer ambiguously handled.
-   Returning an array from a reply function with status code, body, and headers
-   is only available if `.reply` is provided a callback as a single argument.
+1. In Nock 10, when `reply()` was invoked with a function, the return values were
+   handled ambiguously depending on their types.
 
-   The `.reply` function now has the following signature:
-
-   ```
-   .reply([statusCode=200, [bodyOrCallback='', [headers={}]]])
-   .reply((path, body) => [statusCode, body='', headers={}])
-   ```
-
-   In Nock 10, the following snippet would result in a response with a status
-   code of `500` and body of `'hello world'`.  
-   In Nock 11, this will result in a response with a status code of `200` and a
-   body of `'[500,"hello world"]'`.
+   Consider the following example:
 
    ```js
-   nock('http://example.com')
+   const scope = nock('http://example.com')
      .get('/')
      .reply(200, () => [500, 'hello world'])
    ```
 
-1. Uncaught errors thrown inside of user provided reply functions, whether
-   async or not, will no longer be caught, and will no longer generate a
-   successful response with a status code of 500.  
-   Instead, the error will be emitted by the request just like any other
-   unhandled error during the request processing.  
-   Using the following snippet for example, in Nock 10, if `readFile` errors,
-   the request will succeed with a response that has a 500 status code.
+   In Nock 10, the 200 was ignored, the 500 was interpreted as the status code, and the body would contain `'hello world'`. This caused problems when the goal was to return a numeric array, so in Nock 11, the 200 is properly interpreted as the status code, and `[500, 'hello world']` as the body.
+
+   These are the correct calls for Nock 11:
+
+   ```js
+   const scope = nock('http://example.com')
+     .get('/')
+     .reply(500, 'hello world')
+
+   const scope = nock('http://example.com')
+     .get('/')
+     .reply(500, () => 'hello world')
+   ```
+
+   The `.reply()` method can be called with explicit arguments:
+
+   ```js
+   .reply() // `statusCode` defaults to `200`.
+   .reply(statusCode) // `responseBody` defaults to `''`.
+   .reply(statusCode, responseBody) // `headers` defaults to `{}`.
+   .reply(statusCode, responseBody, headers)
+   ```
+
+   It can be caled with a status code and a function that returns an array:
+
+   ```js
+   .reply(statusCode, (path, requestBody) => [responseBody])
+   .reply(statusCode, (path, requestBody) => [responseBody, headers])
+   .reply(statusCode, (path, requestBody) => [responseBody], headers)
+   ```
+
+   Alternatively the status code can be included in the array:
+
+   ```js
+   .reply((path, requestBody) => [statusCode])
+   .reply((path, requestBody) => [statusCode, responseBody])
+   .reply((path, requestBody) => [statusCode, responseBody, headers])
+   .reply((path, requestBody) => [statusCode, responseBody], headers)
+   ```
+
+   `.reply()` can also be called with an `async` or promise-returning function. The
+   signatures are identical, e.g.
+
+   ```js
+   .reply(async (path, requestBody) => [statusCode, responseBody])
+   .reply(statusCode, async (path, requestBody) => [responseBody])
+   ```
+
+   Finally, an error-first callback can be used, e.g.:
+
+   ```js
+   .reply((path, requestBody, cb) => cb(undefined, [statusCode, responseBody]))
+   .reply(statusCode, (path, requestBody, cb) => cb(undefined, [responseBody]))
+   ```
+
+1. In Nock 10, errors in user-provided reply functions were caught by Nock, and
+   generated HTTP rersponses with status codes of 500. In Nock 11 these errors
+   are not caught, and instead are re-emitted through the request, like any
+   other error that occurs during request processing.
+
+   Consider the following example:
 
    ```js
    const scope = nock('http://example.com')
@@ -60,27 +104,31 @@
      })
    ```
 
-   To achieve the same affect in Nock 11, the code would have to be rewritten to:
+   When `fs.readFile()` errors in Nock 10, a 500 error was emitted. To get the
+   same effect in Nock 11, the example would need to be rewritten to:
 
    ```js
    const scope = nock('http://example.com')
      .post('/echo')
      .reply((uri, requestBody, cb) => {
        fs.readFile('cat-poems.txt', (err, contents) => {
-         if (err) cb([500, err.stack])
-         else cb([201, contents])
+         if (err) {
+           cb([500, err.stack])
+         } else {
+           cb([201, contents])
+         }
        })
      })
    ```
 
-1. New Error: `Invalid ... value for status code`.
-   If the `.reply` function is provided a first argument, it must be either a
-   callback function or a whole number.
+1. When `.reply()` is invoked with something other than a whole number status
+   code or a function, Nock 11 raises a new error **Invalid ... value for status code**.
 
-1. New Error: `Headers must be provided as an object`
-   In Nock 10, the following snippet would "work" in unpredictable ways.
-   Now an error is throw with a clear message stating that request headers
-   must be provided as a plain object.
+1. The `reqheaders` parameter should be provided as a plain object, e.g.
+   `nock('http://example.com', { reqheaders: { X-Foo: 'bar' }})`. When the
+   headers are specified incorrectly as e.g. `{ reqheaders: 1 }`, Nock 10 would
+   behave in unpredictable ways. In Nock 11, a new error
+   **Headers must be provided as an object** is thrown.
 
    ```js
    nock('http://example.com', { reqheaders: 1 })
@@ -89,17 +137,16 @@
    ```
 
 1. In Nock 10, the `ClientRequest` instance wrapped the native `on` method
-   and aliased `once` to it.  
-   This been removed and `request.once` once again only call registered
-   listeners...once.
+   and aliased `once` to it. In Nock 11, this been removed and `request.once`
+   will correctly call registered listeners...once.
 
-1. New Error: `Query parameters have already been already defined`  
-   In Nock 10, duplicate field names provided to the `.query` method where
+1. In Nock 10, duplicate field names provided to the `.query()` method were
    silently ignored. We decided this was probably hiding unintentionally bugs
-   and causing frustration with users. So starting in Nock 11, attempts to
-   provide query params more than once will throw an error. This could happen
-   by calling `.query` twice, or by calling `.query` after providing literal
-   search parameters in via the path.
+   and causing frustration with users. In Nock 11, attempts to provide query
+   params more than once will throw a new error
+   **Query parameters have aleady been defined**. This could happen by calling
+   `.query()` twice, or by calling `.query()` after specifying a literal query
+   string via the path.
 
    ```js
    nock('http://example.com')
@@ -117,8 +164,9 @@
 1. Callback functions provided to the `.query` method now receive the result of
    [`querystring.parse`](https://nodejs.org/api/querystring.html#querystring_querystring_parse_str_sep_eq_options)
    instead of [`qs.parse`](https://github.com/ljharb/qs#parsing-objects).
-   This will affect users whose query objects include keys that utilize
-   JSON path notation.
+
+   In particular, `querystring.parse` does not interpret keys with JSON
+   path notation:
 
    ```js
    querystring.parse('foo[bar]=baz') // { "foo[bar]": 'baz' }
