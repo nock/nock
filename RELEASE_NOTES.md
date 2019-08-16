@@ -5,24 +5,6 @@
 1. Nock 11 requires Node 8 or later. Nock supports and tests all the "current"
    and "maintenance" versions of Node. As of now, that's Node 8, 10, and 12.
 
-1. Paths in Nock have always required a leading slash. e.g.
-
-   ```js
-   const scope = nock('http://example.com')
-     .get('/path')
-     .reply()
-   ```
-
-   In Nock 10, if the leading slash was missing the mock would never match. In
-   Nock 11, this raises an error.
-
-1. In Nock 10, when the method was not specified in a call to `nock.define()`,
-   the method would default `GET`. In Nock 11, this raises an error.
-
-1. In very old versions of nock, recordings may include a response status
-   code encoded as a string in the `reply` field. In Nock 10 these strings could
-   be non-numeric. In Nock 11 this raises an error.
-
 1. In Nock 10, when `reply()` was invoked with a function, the return values were
    handled ambiguously depending on their types.
 
@@ -34,7 +16,11 @@
      .reply(200, () => [500, 'hello world'])
    ```
 
-   In Nock 10, the 200 was ignored, the 500 was interpreted as the status code, and the body would contain `'hello world'`. This caused problems when the goal was to return a numeric array, so in Nock 11, the 200 is properly interpreted as the status code, and `[500, 'hello world']` as the body.
+   In Nock 10, the 200 was ignored, the 500 was interpreted as the status
+   code, and the body would contain `'hello world'`. This caused problems
+   when the goal was to return a numeric array, so in Nock 11, the 200 is
+   properly interpreted as the status code, and `[500, 'hello world']` as the
+   body.
 
    These are the correct calls for Nock 11:
 
@@ -124,21 +110,17 @@
 1. When `.reply()` is invoked with something other than a whole number status
    code or a function, Nock 11 raises a new error **Invalid ... value for status code**.
 
-1. The `reqheaders` parameter should be provided as a plain object, e.g.
-   `nock('http://example.com', { reqheaders: { X-Foo: 'bar' }})`. When the
-   headers are specified incorrectly as e.g. `{ reqheaders: 1 }`, Nock 10 would
-   behave in unpredictable ways. In Nock 11, a new error
-   **Headers must be provided as an object** is thrown.
+1. Callback functions provided to the `.query` method now receive the result of
+   [`querystring.parse`](https://nodejs.org/api/querystring.html#querystring_querystring_parse_str_sep_eq_options)
+   instead of [`qs.parse`](https://github.com/ljharb/qs#parsing-objects).
+
+   In particular, `querystring.parse` does not interpret keys with JSON
+   path notation:
 
    ```js
-   nock('http://example.com', { reqheaders: 1 })
-     .get('/')
-     .reply()
+   querystring.parse('foo[bar]=baz') // { "foo[bar]": 'baz' }
+   qs.parse('foo[bar]=baz') // { foo: { bar: 'baz' } }
    ```
-
-1. In Nock 10, the `ClientRequest` instance wrapped the native `on` method
-   and aliased `once` to it. In Nock 11, this been removed and `request.once`
-   will correctly call registered listeners...once.
 
 1. In Nock 10, duplicate field names provided to the `.query()` method were
    silently ignored. We decided this was probably hiding unintentionally bugs
@@ -161,16 +143,38 @@
      .reply()
    ```
 
-1. Callback functions provided to the `.query` method now receive the result of
-   [`querystring.parse`](https://nodejs.org/api/querystring.html#querystring_querystring_parse_str_sep_eq_options)
-   instead of [`qs.parse`](https://github.com/ljharb/qs#parsing-objects).
-
-   In particular, `querystring.parse` does not interpret keys with JSON
-   path notation:
+1. Paths in Nock have always required a leading slash. e.g.
 
    ```js
-   querystring.parse('foo[bar]=baz') // { "foo[bar]": 'baz' }
-   qs.parse('foo[bar]=baz') // { foo: { bar: 'baz' } }
+   const scope = nock('http://example.com')
+     .get('/path')
+     .reply()
    ```
+
+   In Nock 10, if the leading slash was missing the mock would never match. In
+   Nock 11, this raises an error.
+
+1. The `reqheaders` parameter should be provided as a plain object, e.g.
+   `nock('http://example.com', { reqheaders: { X-Foo: 'bar' }})`. When the
+   headers are specified incorrectly as e.g. `{ reqheaders: 1 }`, Nock 10 would
+   behave in unpredictable ways. In Nock 11, a new error
+   **Headers must be provided as an object** is thrown.
+
+   ```js
+   nock('http://example.com', { reqheaders: 1 })
+     .get('/')
+     .reply()
+   ```
+
+1. In Nock 10, the `ClientRequest` instance wrapped the native `on` method
+   and aliased `once` to it. In Nock 11, this been removed and `request.once`
+   will correctly call registered listeners...once.
+
+1. In Nock 10, when the method was not specified in a call to `nock.define()`,
+   the method would default `GET`. In Nock 11, this raises an error.
+
+1. In very old versions of nock, recordings may include a response status
+   code encoded as a string in the `reply` field. In Nock 10 these strings could
+   be non-numeric. In Nock 11 this raises an error.
 
 https://github.com/nock/nock/compare/v10.0.6...next
