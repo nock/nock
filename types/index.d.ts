@@ -71,10 +71,17 @@ export namespace Nock {
     | Map<string, ReplyHeaderValue>
     | ReplyHeaderValue[]
 
-  type ReplyCallbackResult =
-    | readonly [number]
-    | readonly [number, ReplyBody]
-    | readonly [number, ReplyBody, ReplyHeaders]
+  type StatusCode = number
+  type ReplyFnResult =
+    | readonly [StatusCode]
+    | readonly [StatusCode, ReplyBody]
+    | readonly [StatusCode, ReplyBody, ReplyHeaders]
+
+  interface ReplyFnContext extends Interceptor {
+    req: ClientRequest & {
+      headers: Record<string, string>
+    }
+  }
 
   interface Scope extends NodeJS.EventEmitter {
     get: InterceptFunction
@@ -126,49 +133,49 @@ export namespace Nock {
     // tslint (as of 5.16) is under the impression that the callback types can be unified,
     // however, doing so causes the params to lose their inherited types during use.
     /* tslint:disable:unified-signatures */
+    reply(responseCode?: StatusCode, body?: Body, headers?: ReplyHeaders): Scope
     reply(
-      callback: (
-        this: ReplyCallbackContext,
+      replyFn: (
+        this: ReplyFnContext,
+        uri: string,
+        body: Body
+      ) => ReplyFnResult | Promise<ReplyFnResult>
+    ): Scope
+    reply(
+      statusCode: StatusCode,
+      replyBodyFn: (
+        this: ReplyFnContext,
+        uri: string,
+        body: Body
+      ) => ReplyBody | Promise<ReplyBody>,
+      headers?: ReplyHeaders
+    ): Scope
+    reply(
+      replyFnWithCallback: (
+        this: ReplyFnContext,
         uri: string,
         body: Body,
         callback: (
           err: NodeJS.ErrnoException | null,
-          result: ReplyCallbackResult
+          result: ReplyFnResult
         ) => void
       ) => void
     ): Scope
     reply(
-      callback: (
-        this: ReplyCallbackContext,
-        uri: string,
-        body: Body
-      ) => ReplyCallbackResult | Promise<ReplyCallbackResult>
-    ): Scope
-    reply(
-      responseCode: number,
-      callback: (
-        this: ReplyCallbackContext,
+      statusCode: StatusCode,
+      replyBodyFnWithCallback: (
+        this: ReplyFnContext,
         uri: string,
         body: Body,
         callback: (err: NodeJS.ErrnoException | null, result: ReplyBody) => void
       ) => void,
       headers?: ReplyHeaders
     ): Scope
-    reply(
-      responseCode: number,
-      callback: (
-        this: ReplyCallbackContext,
-        uri: string,
-        body: Body
-      ) => ReplyBody | Promise<ReplyBody>,
-      headers?: ReplyHeaders
-    ): Scope
-    reply(responseCode?: number, body?: Body, headers?: ReplyHeaders): Scope
     /* tslint:enable:unified-signatures */
 
     replyWithError(errorMessage: string | object): Scope
     replyWithFile(
-      responseCode: number,
+      statusCode: StatusCode,
       fileName: string,
       headers?: ReplyHeaders
     ): Scope
@@ -187,12 +194,6 @@ export namespace Nock {
     delayConnection(timeMs: number): this
     getTotalDelay(): number
     socketDelay(timeMs: number): this
-  }
-
-  interface ReplyCallbackContext extends Interceptor {
-    req: ClientRequest & {
-      headers: Record<string, string>
-    }
   }
 
   interface Options {
