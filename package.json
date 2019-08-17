@@ -29,7 +29,6 @@
     "propagate": "^2.0.0"
   },
   "devDependencies": {
-    "acorn": "^6.1.1",
     "assert-rejects": "^1.0.0",
     "aws-sdk": "^2.437.0",
     "eslint": "^6.0.0",
