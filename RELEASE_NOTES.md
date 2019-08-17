@@ -46,9 +46,8 @@
    It can be caled with a status code and a function that returns an array:
 
    ```js
-   .reply(statusCode, (path, requestBody) => [responseBody])
-   .reply(statusCode, (path, requestBody) => [responseBody, headers])
-   .reply(statusCode, (path, requestBody) => [responseBody], headers)
+   .reply(statusCode, (path, requestBody) => responseBody)
+   .reply(statusCode, (path, requestBody) => responseBody, headers)
    ```
 
    Alternatively the status code can be included in the array:
@@ -65,14 +64,14 @@
 
    ```js
    .reply(async (path, requestBody) => [statusCode, responseBody])
-   .reply(statusCode, async (path, requestBody) => [responseBody])
+   .reply(statusCode, async (path, requestBody) => responseBody)
    ```
 
    Finally, an error-first callback can be used, e.g.:
 
    ```js
    .reply((path, requestBody, cb) => cb(undefined, [statusCode, responseBody]))
-   .reply(statusCode, (path, requestBody, cb) => cb(undefined, [responseBody]))
+   .reply(statusCode, (path, requestBody, cb) => cb(undefined, responseBody))
    ```
 
 1. In Nock 10, errors in user-provided reply functions were caught by Nock, and
