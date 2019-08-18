@@ -109,7 +109,6 @@ export namespace Nock {
 
     log(out: (message: any, ...optionalParams: any[]) => void): this
     persist(flag?: boolean): this
-    shouldPersist(): boolean
     replyContentLength(): this
     replyDate(d?: Date): this
 
@@ -192,7 +191,6 @@ export namespace Nock {
     delay(opts: number | { head?: number; body?: number }): this
     delayBody(timeMs: number): this
     delayConnection(timeMs: number): this
-    getTotalDelay(): number
     socketDelay(timeMs: number): this
   }
 
