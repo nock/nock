@@ -359,7 +359,7 @@ test('checks that data is specified', t => {
   t.end()
 })
 
-test('when request body is json, it goes unstringified', t => {
+test('when request body is json, it goes unstringified', async t => {
   const server = http.createServer((request, response) => response.end())
   t.once('end', () => server.close())
 
@@ -369,30 +369,17 @@ test('when request body is json, it goes unstringified', t => {
 
   const payload = { a: 1, b: true }
 
-  server.listen(() => {
-    http
-      .request(
-        {
-          method: 'POST',
-          host: 'www.google.com',
-          path: '/',
-          port: 80,
-        },
-        res => {
-          res.resume()
-          res.once('end', () => {
-            const recorded = nock.recorder.play()
-            t.equal(recorded.length, 1)
-            t.ok(recorded[0].includes('.post(\'/\', {"a":1,"b":true})'))
-            t.end()
-          })
-        }
-      )
-      .end(JSON.stringify(payload))
-  })
+  await new Promise(resolve => server.listen(resolve))
+  const { port } = server.address()
+
+  await got.post(`http://localhost:${port}/`, { body: JSON.stringify(payload) })
+
+  const recorded = nock.recorder.play()
+  t.equal(recorded.length, 1)
+  t.ok(recorded[0].includes('.post(\'/\', {"a":1,"b":true})'))
 })
 
-test('when request body is json, it goes unstringified in objects', t => {
+test('when request body is json, it goes unstringified in objects', async t => {
   const server = http.createServer((request, response) => response.end())
   t.once('end', () => server.close())
 
@@ -402,29 +389,16 @@ test('when request body is json, it goes unstringified in objects', t => {
 
   const payload = { a: 1, b: true }
 
-  server.listen(() => {
-    http
-      .request(
-        {
-          method: 'POST',
-          host: 'www.google.com',
-          path: '/',
-          port: 80,
-        },
-        res => {
-          res.resume()
-          res.once('end', () => {
-            const recorded = nock.recorder.play()
-            t.equal(recorded.length, 1)
-            t.type(recorded[0], 'object')
-            t.type(recorded[0].body, 'object')
-            t.deepEqual(recorded[0].body, payload)
-            t.end()
-          })
-        }
-      )
-      .end(JSON.stringify(payload))
-  })
+  await new Promise(resolve => server.listen(resolve))
+  const { port } = server.address()
+
+  await got.post(`http://localhost:${port}/`, { body: JSON.stringify(payload) })
+
+  const recorded = nock.recorder.play()
+  t.equal(recorded.length, 1)
+  t.type(recorded[0], 'object')
+  t.type(recorded[0].body, 'object')
+  t.deepEqual(recorded[0].body, payload)
 })
 
 test('records nonstandard ports', t => {
