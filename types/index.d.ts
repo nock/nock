@@ -131,24 +131,8 @@ export namespace Nock {
 
     // tslint (as of 5.16) is under the impression that the callback types can be unified,
     // however, doing so causes the params to lose their inherited types during use.
+    // the order of the overrides is important for determining the param types in the replay fns.
     /* tslint:disable:unified-signatures */
-    reply(responseCode?: StatusCode, body?: Body, headers?: ReplyHeaders): Scope
-    reply(
-      replyFn: (
-        this: ReplyFnContext,
-        uri: string,
-        body: Body
-      ) => ReplyFnResult | Promise<ReplyFnResult>
-    ): Scope
-    reply(
-      statusCode: StatusCode,
-      replyBodyFn: (
-        this: ReplyFnContext,
-        uri: string,
-        body: Body
-      ) => ReplyBody | Promise<ReplyBody>,
-      headers?: ReplyHeaders
-    ): Scope
     reply(
       replyFnWithCallback: (
         this: ReplyFnContext,
@@ -161,6 +145,13 @@ export namespace Nock {
       ) => void
     ): Scope
     reply(
+      replyFn: (
+        this: ReplyFnContext,
+        uri: string,
+        body: Body
+      ) => ReplyFnResult | Promise<ReplyFnResult>
+    ): Scope
+    reply(
       statusCode: StatusCode,
       replyBodyFnWithCallback: (
         this: ReplyFnContext,
@@ -170,6 +161,16 @@ export namespace Nock {
       ) => void,
       headers?: ReplyHeaders
     ): Scope
+    reply(
+      statusCode: StatusCode,
+      replyBodyFn: (
+        this: ReplyFnContext,
+        uri: string,
+        body: Body
+      ) => ReplyBody | Promise<ReplyBody>,
+      headers?: ReplyHeaders
+    ): Scope
+    reply(responseCode?: StatusCode, body?: Body, headers?: ReplyHeaders): Scope
     /* tslint:enable:unified-signatures */
 
     replyWithError(errorMessage: string | object): Scope
