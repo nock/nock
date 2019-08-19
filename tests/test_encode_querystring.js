@@ -1,24 +1,29 @@
-'use strict';
+'use strict'
 
-var nock    = require('../.');
-var request = require('request');
-var test    = require('tap').test;
+const request = require('request')
+const { test } = require('tap')
+const nock = require('..')
 
-test('encode query string', function(t) {
-  var query1 = { q: '(nodejs)' };
+require('./cleanup_after_each')()
 
-  nock('https://encodeland.com')
+test('encode query string', t => {
+  const query1 = { q: '(nodejs)' }
+
+  nock('https://example.test')
     .get('/test')
     .query(query1)
     .reply(200, 'success')
 
-  request({
-    url: 'https://encodeland.com/test',
-    qs: query1,
-    method: 'GET'
-  }, function(error, response, body) {
-    t.ok(!error);
-    t.deepEqual(body, 'success');
-    t.end();
-  });
-});
+  request(
+    {
+      url: 'https://example.test/test',
+      qs: query1,
+      method: 'GET',
+    },
+    function(error, response, body) {
+      t.ok(!error)
+      t.deepEqual(body, 'success')
+      t.end()
+    }
+  )
+})

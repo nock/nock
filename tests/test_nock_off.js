@@ -1,44 +1,44 @@
-'use strict';
+'use strict'
 
-var test = require('tap').test;
-var mikealRequest = require('request');
+const { test } = require('tap')
+const mikealRequest = require('request')
+const ssl = require('./ssl')
 
-var ssl = require('./ssl')
+require('./cleanup_after_each')()
 
-// Do not copy tests that rely on the process.env.AIRPLANE, we are deprecating that via #1231
-test('NOCK_OFF=true works for https', function (t) {
-  var original = process.env.NOCK_OFF;
-  process.env.NOCK_OFF = 'true';
-  var nock = require('../');
+test('NOCK_OFF=true works for https', t => {
+  const original = process.env.NOCK_OFF
+  process.env.NOCK_OFF = 'true'
+  const nock = require('../')
 
-  t.plan(4);
+  t.plan(4)
 
-  function middleware (request, response) {
-    t.pass('server received a request');
-    response.writeHead(200);
-    response.end('the real thing');
+  function middleware(request, response) {
+    t.pass('server received a request')
+    response.writeHead(200)
+    response.end('the real thing')
   }
 
-  ssl.startServer(middleware, function (error, server) {
-    t.error(error);
+  ssl.startServer(middleware, function(error, server) {
+    t.error(error)
 
-    var port = server.address().port
-    var scope = nock(`https://localhost:${port}`, { allowUnmocked: true})
+    const url = `https://localhost:${server.address().port}`
+    const scope = nock(url, { allowUnmocked: true })
       .get('/')
       .reply(200, 'mock')
 
-    var options = {
+    const options = {
       method: 'GET',
-      uri: `https://localhost:${port}`,
-      ca: ssl.ca
-    };
+      uri: url,
+      ca: ssl.ca,
+    }
 
-    mikealRequest(options, function (err, resp, body) {
-      t.error(err);
-      t.equal(body, 'the real thing');
-      scope.done();
-      process.env.NOCK_OFF = original;
-      server.close(t.end);
-    });
-  });
-});
+    mikealRequest(options, function(err, resp, body) {
+      t.error(err)
+      t.equal(body, 'the real thing')
+      scope.done()
+      process.env.NOCK_OFF = original
+      server.close(t.end)
+    })
+  })
+})

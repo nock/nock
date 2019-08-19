@@ -1,28 +1,50 @@
-'use strict';
+'use strict'
 
-var zlib = require('zlib');
-var nock = require('../.');
-var http = require('http');
-var test = require('tap').test;
+const assertRejects = require('assert-rejects')
+const zlib = require('zlib')
+const { test } = require('tap')
+const nock = require('..')
+const got = require('./got_client')
 
-test('accepts gzipped content', {skip: !zlib.gzipSync | !zlib.gunzipSync}, function(t) {
-  var message = 'Lorem ipsum dolor sit amet';
+require('./cleanup_after_each')()
 
-  var compressedMessage = zlib.gzipSync(message);
+test('accepts gzipped content', async t => {
+  const message = 'Lorem ipsum dolor sit amet'
+  const compressed = zlib.gzipSync(message)
 
-  nock('http://gziplandpartywoo')
+  nock('http://example.test')
     .get('/foo')
-    .reply(200, compressedMessage, {
-      'X-Transfer-Length': String(compressedMessage.length),
+    .reply(200, compressed, {
+      'X-Transfer-Length': String(compressed.length),
       'Content-Length': undefined,
       'Content-Encoding': 'gzip',
-    });
+    })
+  const { body, statusCode } = await got('http://example.test/foo')
 
-  http.get('http://gziplandpartywoo/foo', function(res) {
-    res.once('data', function(d) {
-      var dd = zlib.gunzipSync(d);
-      t.equal(dd.toString(), message);
-      res.once('end', t.end.bind(t));
-    });
-  });
-});
+  t.equal(body, message)
+  t.equal(statusCode, 200)
+})
+
+test('Delaying the body is not available with content encoded responses', async t => {
+  const message = 'Lorem ipsum dolor sit amet'
+  const compressed = zlib.gzipSync(message)
+
+  nock('http://example.test')
+    .get('/')
+    .delay({
+      body: 100,
+    })
+    .reply(200, compressed, {
+      'Content-Encoding': 'gzip',
+    })
+
+  await assertRejects(got('http://example.test/'), err => {
+    t.match(
+      err,
+      Error(
+        'Response delay of the body is currently not supported with content-encoded responses.'
+      )
+    )
+    return true
+  })
+})

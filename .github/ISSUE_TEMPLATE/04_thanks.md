@@ -1,7 +1,6 @@
 ---
 name: ❤️ Say thank you
 about: Tell us how you use nock & support our efforts in maintaining Nock
-
 ---
 
 # ❤️ I'm using Nock

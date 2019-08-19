@@ -1,17 +1,19 @@
-'use strict';
+'use strict'
 
-var nock = require('../');
-var test = require('tap').test;
-var mikealRequest = require('request');
-var assert = require('assert');
+const { test } = require('tap')
+const mikealRequest = require('request')
+const nock = require('..')
 
-test('url encoding', function (t) {
+require('./cleanup_after_each')()
 
-  nock('http://encodingsareus.com').get('/key?a=[1]').reply(200);
+test('url encoding', t => {
+  nock('http://example.test')
+    .get('/key?a=[1]')
+    .reply(200)
 
-  mikealRequest('http://encodingsareus.com/key?a=[1]', function(err, res) {
-    if (err) throw err;
-    assert.equal(res.statusCode, 200);
-    t.end();
+  mikealRequest('http://example.test/key?a=[1]', function(err, res) {
+    if (err) throw err
+    t.equal(res.statusCode, 200)
+    t.end()
   })
-});
+})

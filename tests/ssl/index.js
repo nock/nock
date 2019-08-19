@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 // With OpenSSL installed, you can set up your CA and certificates with
 // the following commands, valid for 10 years:
@@ -12,22 +12,25 @@
 //   openssl x509 -req -in localhost.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out localhost.crt -days 3650
 //   rm ca.srl localhost.csr
 //
-var https = require('https');
-var readFileSync = require('fs').readFileSync;
-var resolve = require('path').resolve;
+const https = require('https')
+const path = require('path')
+const fs = require('fs')
 
-function startHttpsServer (middleware, done) {
-  var server = https.createServer({
-    key: readFileSync(resolve(__dirname, './localhost.key')),
-    cert: readFileSync(resolve(__dirname, './localhost.crt'))
-  }, middleware);
+function startServer(middleware, done) {
+  const server = https.createServer(
+    {
+      key: fs.readFileSync(path.resolve(__dirname, './localhost.key')),
+      cert: fs.readFileSync(path.resolve(__dirname, './localhost.crt')),
+    },
+    middleware
+  )
 
-  server.listen(0, function (error) {
+  server.listen(0, error => {
     done(error, server)
-  });
+  })
 }
 
 module.exports = {
-  ca: readFileSync(resolve(__dirname, './ca.crt')),
-  startServer: startHttpsServer
+  ca: fs.readFileSync(path.resolve(__dirname, './ca.crt')),
+  startServer,
 }

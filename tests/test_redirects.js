@@ -1,28 +1,24 @@
-'use strict';
+'use strict'
 
-var assert = require('assert');
-var test    = require('tap').test;
-var mikealRequest = require('request');
-var nock    = require('../');
+const { test } = require('tap')
+const nock = require('..')
+const got = require('./got_client')
 
-test("follows redirects", function(t) {
+require('./cleanup_after_each')()
 
-  nock('http://redirecter.com')
+test('follows redirects', async t => {
+  const scope = nock('http://example.test')
     .get('/YourAccount')
     .reply(302, undefined, {
-        'Location': 'http://redirecter.com/Login'
+      Location: 'http://example.test/Login',
     })
     .get('/Login')
-    .reply(200, 'Here is the login page');
+    .reply(200, 'Here is the login page')
 
-  mikealRequest('http://redirecter.com/YourAccount', function(err, res, body) {
-    if (err) {
-      throw err;
-    }
+  const { statusCode, body } = await got('http://example.test/YourAccount')
 
-    assert.equal(res.statusCode, 200);
-    assert.equal(body, 'Here is the login page');
-    t.end();
-  });
+  t.is(statusCode, 200)
+  t.equal(body, 'Here is the login page')
 
-});
+  scope.done()
+})

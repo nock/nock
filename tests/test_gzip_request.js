@@ -1,73 +1,70 @@
-'use strict';
+'use strict'
 
-var nock = require('../');
-var test = require('tap').test;
-var http = require('http');
-var zlib = require('zlib');
+const { test } = require('tap')
+const http = require('http')
+const zlib = require('zlib')
+const nock = require('..')
 
-if (zlib.gzipSync && zlib.gunzipSync) {
-  test('accepts and decodes gzip encoded application/json', function (t) {
-    var message = {
-      my: 'contents'
-    };
+require('./cleanup_after_each')()
 
-    t.plan(1);
+test('accepts and decodes gzip encoded application/json', t => {
+  const message = {
+    my: 'contents',
+  }
 
-    nock('http://gzipped.com')
-      .post('/')
-      .reply(function (url, actual) {
-        t.same(actual, message);
-        t.end();
-        return 200
-      });
+  t.plan(1)
 
-    var req = http.request({
-        hostname: 'gzipped.com',
-        path: '/',
-        method: 'POST',
-        headers: {
-          'content-encoding': 'gzip',
-          'content-type': 'application/json'
-        }
-      });
+  nock('http://example.test')
+    .post('/')
+    .reply(function(url, actual) {
+      t.same(actual, message)
+      t.end()
+      return [200]
+    })
 
-    var compressedMessage = zlib.gzipSync(JSON.stringify(message));
+  const req = http.request({
+    hostname: 'example.test',
+    path: '/',
+    method: 'POST',
+    headers: {
+      'content-encoding': 'gzip',
+      'content-type': 'application/json',
+    },
+  })
 
-    req.write(compressedMessage);
-    req.end();
-  });
-}
+  const compressedMessage = zlib.gzipSync(JSON.stringify(message))
 
-if (zlib.deflateSync && zlib.inflateSync) {
+  req.write(compressedMessage)
+  req.end()
+})
 
-  test('accepts and decodes deflate encoded application/json', function (t) {
-    var message = {
-      my: 'contents'
-    };
+test('accepts and decodes deflate encoded application/json', t => {
+  const message = {
+    my: 'contents',
+  }
 
-    t.plan(1);
+  t.plan(1)
 
-    nock('http://gzipped.com')
-      .post('/')
-      .reply(function (url, actual) {
-        t.same(actual, message);
-        t.end();
-        return 200
-      });
+  nock('http://example.test')
+    .post('/')
+    .reply(function(url, actual) {
+      t.same(actual, message)
+      t.end()
+      return [200]
+    })
 
-    var req = http.request({
-        hostname: 'gzipped.com',
-        path: '/',
-        method: 'POST',
-        headers: {
-          'content-encoding': 'deflate',
-          'content-type': 'application/json'
-        }
-      });
+  const req = http.request({
+    hostname: 'example.test',
+    path: '/',
+    method: 'POST',
+    headers: {
+      'content-encoding': 'deflate',
+      'content-type': 'application/json',
+    },
+  })
 
-    var compressedMessage = zlib.deflateSync(JSON.stringify(message));
+  const compressedMessage = zlib.deflateSync(JSON.stringify(message))
 
-    req.write(compressedMessage);
-    req.end();
-  });
-}
+  req.write(compressedMessage)
+  req.end()
+})

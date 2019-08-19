@@ -1,7 +1,6 @@
 ---
 name: 🚀 Feature request
 about: Let us know if you have a feature request 💡
-
 ---
 
 **Context**

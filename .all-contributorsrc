@@ -1,0 +1,123 @@
+{
+  "projectName": "nock",
+  "projectOwner": "nock",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "pgte",
+      "name": "Pedro Teixeira",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/47910?v=4",
+      "profile": "http://pgte.me",
+      "contributions": [
+        "code",
+        "maintenance"
+      ]
+    },
+    {
+      "login": "n30n0v",
+      "name": "n30n0v",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/10771967?v=4",
+      "profile": "https://github.com/n30n0v",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "RichardLitt",
+      "name": "Richard Littauer",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/910753?v=4",
+      "profile": "https://burntfen.com",
+      "contributions": [
+        "maintenance",
+        "code",
+        "blog"
+      ]
+    },
+    {
+      "login": "ianwsperber",
+      "name": "Ian Walker-Sperber",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/3731165?v=4",
+      "profile": "http://ianwsperber.com",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "ierceg",
+      "name": "Ivan Erceg",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/1505203?v=4",
+      "profile": "http://ilovacha.com",
+      "contributions": [
+        "code",
+        "maintenance"
+      ]
+    },
+    {
+      "login": "paulmelnikow",
+      "name": "Paul Melnikow",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/1487036?v=4",
+      "profile": "https://twitter.com/paulmelnikow",
+      "contributions": [
+        "code",
+        "maintenance"
+      ]
+    },
+    {
+      "login": "gr2m",
+      "name": "Gregor Martynus",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/39992?v=4",
+      "profile": "https://twitter.com/gr2m",
+      "contributions": [
+        "code",
+        "maintenance",
+        "business",
+        "financial",
+        "blog"
+      ]
+    },
+    {
+      "login": "hutson",
+      "name": "Hutson Betts",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/6701030?v=4",
+      "profile": "https://gitlab.com/hutson",
+      "contributions": [
+        "financial"
+      ]
+    },
+    {
+      "login": "jlilja",
+      "name": "Jonas Lilja",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/6105119?v=4",
+      "profile": "http://lilja.io",
+      "contributions": [
+        "financial",
+        "code"
+      ]
+    },
+    {
+      "login": "benrki",
+      "name": "Benjamin Ki",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/4446950?v=4",
+      "profile": "https://github.com/benrki",
+      "contributions": [
+        "financial"
+      ]
+    },
+    {
+      "login": "chadfawcett",
+      "name": "Chad Fawcett",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/3250463?v=4",
+      "profile": "http://chadf.ca",
+      "contributions": [
+        "financial"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7
+}
