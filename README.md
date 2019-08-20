@@ -1437,7 +1437,7 @@ As an optional second parameter you can pass the following options
 
 - `before`: a preprocessing function, gets called before nock.define
 - `after`: a postprocessing function, gets called after nock.define
-- `afterRecord`: a postprocessing function, gets called after recording. Is passed the array of scopes recorded and should return the array scopes to save to the fixture
+- `afterRecord`: a postprocessing function, gets called after recording. Is passed the array of scopes recorded and should return the intact array, a modified version of the array, or if custom formatting is desired, a stringified version of the array to save to the fixture
 - `recorder`: custom options to pass to the recorder
 
 ##### Example

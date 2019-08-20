@@ -408,6 +408,48 @@ test('nockBack record tests', nw => {
     })
     nw.end()
   })
+
+  nw.test('it can format after recording', t => {
+    const fixture = 'filteredFixture.json'
+    const fixtureLoc = `${nockBack.fixtures}/${fixture}`
+
+    t.false(exists(fixtureLoc))
+
+    const afterRecord = scopes => 'string-response'
+
+    nockBack(fixture, { afterRecord }, function(done) {
+      const server = http.createServer((request, response) => {
+        t.pass('server received a request')
+
+        response.writeHead(200)
+        response.write('server served a response')
+        response.end()
+      })
+
+      server.listen(() => {
+        const request = http.request(
+          {
+            host: 'localhost',
+            path: '/',
+            port: server.address().port,
+          },
+          response => {
+            done()
+
+            t.is(200, response.statusCode)
+            t.true(exists(fixtureLoc))
+            t.is(fs.readFileSync(fixtureLoc, 'utf8'), 'string-response')
+            fs.unlinkSync(fixtureLoc)
+
+            server.close(t.end)
+          }
+        )
+        request.on('error', t.error)
+        request.end()
+      })
+    })
+    nw.end()
+  })
 })
 
 test('nockBack lockdown tests', nw => {
