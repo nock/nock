@@ -32,7 +32,7 @@ jobs:
       node_js: lts/*
       env: linting
       # Show prettier errors, even if lint fails.
-      script: run-s --silent --continue-on-error lint prettier:check
+      script: run-s --silent --continue-on-error lint prettier:check dtslint
     - stage: test
       node_js: 12
     - node_js: 10
