@@ -35,7 +35,7 @@
     "dtslint": "^0.9.1",
     "eslint": "^6.0.0",
     "eslint-config-prettier": "^6.0.0",
-    "eslint-config-standard": "^13.0.1",
+    "eslint-config-standard": "^14.0.0",
     "eslint-plugin-import": "^2.16.0",
     "eslint-plugin-node": "^9.0.0",
     "eslint-plugin-promise": "^4.1.1",
