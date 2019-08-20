@@ -20,6 +20,7 @@
     "node": ">= 8.0"
   },
   "main": "./index",
+  "types": "types",
   "dependencies": {
     "chai": "^4.1.2",
     "debug": "^4.1.0",
@@ -29,9 +30,9 @@
     "propagate": "^2.0.0"
   },
   "devDependencies": {
-    "acorn": "^6.1.1",
     "assert-rejects": "^1.0.0",
     "aws-sdk": "^2.437.0",
+    "dtslint": "^0.9.1",
     "eslint": "^6.0.0",
     "eslint-config-prettier": "^6.0.0",
     "eslint-config-standard": "^13.0.1",
@@ -63,8 +64,9 @@
     "posttest": "npm run -s prettier:check",
     "coverage": "tap --coverage-report=html && open coverage/lcov-report/index.html",
     "lint": "eslint \"**/*.js\"",
-    "prettier": "prettier --write \"**/*.@(js|md|yml|json)\"",
-    "prettier:check": "prettier --check \"**/*.@(js|md|yml|json)\"",
+    "prettier": "prettier --write \"**/*.@(js|json|md|ts|yml)\"",
+    "prettier:check": "prettier --check \"**/*.@(js|json|md|ts|yml)\"",
+    "dtslint": "dtslint types",
     "semantic-release": "semantic-release"
   },
   "nyc": {
