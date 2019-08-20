@@ -2,6 +2,23 @@
 
 ## Upgrading from Nock 10 to Nock 11
 
+### Bug fixes and internal improvements
+
+Nock 11 includes many under-the-hood improvements, including a fully offline
+test suite and 100% test coverage. The codebase was also converted to ES6
+syntax and formatted with Prettier. Leaning on the test coverage, some
+substantial refactors have begun.
+
+Many bug fixes are included. See the [full changelog][changelog] for details.
+
+### Breaking changes
+
+For many developers no code changes will be needed. However, there are several
+minor changes to the API, and it's possible that you will need to update your
+code for Nock to keep working properly. It's unlikely that your tests will
+falsely pass; what's more probable is that your tests will fail until the
+necessary changes are made.
+
 1. Nock 11 requires Node 8 or later. Nock supports and tests all the "current"
    and "maintenance" versions of Node. As of now, that's Node 8, 10, and 12.
 
@@ -176,4 +193,4 @@
    code encoded as a string in the `reply` field. In Nock 10 these strings could
    be non-numeric. In Nock 11 this raises an error.
 
-https://github.com/nock/nock/compare/v10.0.6...next
+[changelog]: https://github.com/nock/nock/releases
