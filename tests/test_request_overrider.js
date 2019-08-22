@@ -550,3 +550,54 @@ test("response have 'complete' property and it's true after end", t => {
   )
   req.end()
 })
+
+test('Request with `Expect: 100-continue` triggers continue event', t => {
+  // This is a replacement for a wide-bracket regression test that was added
+  // for https://github.com/nock/nock/issues/256.
+  //
+  // The behavior was subsequently changed so 'continue' is emitted only when
+  // the `Expect: 100-continue` header is present.
+  //
+  // This test was adapted from this test from Node:
+  // https://github.com/nodejs/node/blob/1b2d3f7ae7f0391908b70b0333a5adef3c8cb79d/test/parallel/test-http-expect-continue.js#L35
+  //
+  // Related:
+  // https://tools.ietf.org/html/rfc2616#section-8.2.3
+  // https://github.com/nodejs/node/issues/10487
+  t.plan(3)
+
+  const exampleRequestBody = 'this is the full request body'
+  const exampleResponseBody = 'this is the full response body'
+
+  const scope = nock('http://example.test')
+    .post('/', exampleRequestBody)
+    .reply(200, exampleResponseBody)
+
+  const req = http.request({
+    host: 'example.test',
+    method: 'POST',
+    path: '/',
+    port: 80,
+    headers: { Expect: '100-continue' },
+  })
+
+  req.on('continue', () => {
+    t.pass()
+    req.end(exampleRequestBody)
+  })
+
+  let responseBody = ''
+  req.on('response', res => {
+    t.is(res.statusCode, 200)
+
+    res.setEncoding('utf8')
+    res.on('data', chunk => {
+      responseBody += chunk
+    })
+    res.on('end', () => {
+      t.equal(responseBody, exampleResponseBody)
+      scope.done()
+      t.end()
+    })
+  })
+})
