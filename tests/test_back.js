@@ -343,11 +343,11 @@ test('nockBack record tests', nw => {
     const fixture = 'wrongUri.json'
     nockBack(fixture, function(done) {
       http
-        .get('http://www.amazon.com', res => t.fail('Should not come here!'))
+        .get('http://www.commerce.test', res => t.fail('Should not come here!'))
         .on('error', err => {
           t.equal(
             err.message,
-            'Nock: Disallowed net connect for "www.amazon.com:80/"'
+            'Nock: Disallowed net connect for "www.commerce.test:80/"'
           )
           done()
           t.end()
@@ -465,7 +465,7 @@ test('nockBack lockdown tests', nw => {
   nw.test('no unnocked http calls work', t => {
     const req = http.request(
       {
-        host: 'google.com',
+        host: 'www.commerce.test',
         path: '/',
       },
       res => t.fail('Should not come here!')
@@ -474,7 +474,7 @@ test('nockBack lockdown tests', nw => {
     req.on('error', err => {
       t.equal(
         err.message.trim(),
-        'Nock: Disallowed net connect for "google.com:80/"'
+        'Nock: Disallowed net connect for "www.commerce.test:80/"'
       )
       t.end()
     })
