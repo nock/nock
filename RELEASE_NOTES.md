@@ -22,6 +22,9 @@ Many bug fixes are included. See the [full changelog][changelog] or
 1. Recorded mocks can be stringified using custom code in the `afterRecord()`
    post-processing hook. When `afterRecord()` returns a string, the
    recorder will no longer attempt to re-stringify it. (Added in v11.3)
+1. Reply functions passed to `.reply()` can now be async/promise-returning.
+1. Specifying reply headers, either via `.reply()` or `.defaultReplyHeaders()`,
+   can now be done consistently using an object, Map, or flat array.
 
 ### Breaking changes
 
