@@ -12,6 +12,17 @@ substantial refactors have begun.
 Many bug fixes are included. See the [full changelog][changelog] or
 [compare view][compare] for details.
 
+### Fabulous new features for developers
+
+1. The library ships with TypeScript definitions. (Added in v11.3)
+1. Add support for the `http.request` signatures added in Node 10.9
+1. Scopes can be filtered using the system environment or any external factor
+   using e.g. `.conditionally(() => true)`
+1. In-flight modifications to headers are preserved in mock requests.
+1. Recorded mocks can be stringified using custom code in the `afterRecord()`
+   post-processing hook. When `afterRecord()` returns a string, the
+   recorder will no longer attempt to re-stringify it. (Added in v11.3)
+
 ### Breaking changes
 
 For many developers no code changes will be needed. However, there are several
@@ -193,6 +204,18 @@ necessary changes are made.
 1. In very old versions of nock, recordings may include a response status
    code encoded as a string in the `reply` field. In Nock 10 these strings could
    be non-numeric. In Nock 11 this raises an error.
+
+### Updates to the mock surface
+
+1. For parity with a real response, a mock request correctly supports all
+   the overrides to `request.end()`, including `request.end(cb)` in Node 12.
+1. For parity with a real response, errors from the `.destroy()` method
+   are propagated correctly. (Added in v11.3)
+1. For parity with a real response, the `.complete` property is set when
+   ending the response.
+1. For parity with a real Socket, the mock Socket has an `unref()` function
+   (which does nothing).
+
 
 [changelog]: https://github.com/nock/nock/releases
 [compare]: https://github.com/nock/nock/compare/v10.0.6...v11.3.0@next
