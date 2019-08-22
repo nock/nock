@@ -11,14 +11,14 @@ require('./cleanup_after_each')()
 test('disable net connect is default', async t => {
   nock.disableNetConnect()
 
-  nock('http://example.test')
+  nock('http://www.example.test')
     .get('/')
     .reply(200)
 
   await assertRejects(
-    got('https://www.bigcorp.test/'),
+    got('https://other.example.test/'),
     Error,
-    'Nock: Disallowed net connect for "www.bigcorp.test:443/"'
+    'Nock: Disallowed net connect for "other.example.test:443/"'
   )
 })
 
@@ -52,9 +52,9 @@ test('disallow request for other domains, via string', async t => {
   nock.enableNetConnect('localhost')
 
   await assertRejects(
-    got('https://www.bigcorp.test/'),
+    got('https://example.test/'),
     Error,
-    'Nock: Disallowed net connect for "www.bigcorp.test:80/"'
+    'Nock: Disallowed net connect for "example.test:80/"'
   )
 })
 
@@ -78,8 +78,8 @@ test('disallow request for other domains, via regexp', async t => {
   nock.enableNetConnect(/ocalhos/)
 
   await assertRejects(
-    got('https://www.bigcorp.test/'),
+    got('https://example.test/'),
     Error,
-    'Nock: Disallowed net connect for "www.bigcorp.test:80/"'
+    'Nock: Disallowed net connect for "example.test:80/"'
   )
 })
