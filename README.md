@@ -87,6 +87,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
     - [Options](#options-1)
       - [Example](#example)
     - [Modes](#modes)
+- [Common issues](#common-issues)
 - [Debugging](#debugging)
 - [Contributing](#contributing)
 - [Contributors](#contributors)
@@ -1481,6 +1482,36 @@ To set the mode call `nockBack.setMode(mode)` or run the tests with the `NOCK_BA
 - record: use recorded nocks, record new nocks
 
 - lockdown: use recorded nocks, disables all http calls even when not nocked, doesn't record
+
+## Common issues
+
+#### "No match for response" when using got with error responses
+
+Got automatically retries failed requests twice. That means if you have a test
+which mocks a 4xx or 5xx response, got will immediately reissue it. At that
+point, the mock will have been consumed and the second request will error out
+with **Nock: No match for request**.
+
+The same is true for `.replyWithError()`.
+
+Adding `{ retry: 0 }` to the `got` invocations will disable retrying, e.g.:
+
+```
+await got("http://example.test/", { retry: 0 })
+```
+
+If you need to do this in all your tests, you can create a module
+`got_client.js` which exports a custom got instance:
+
+```
+const got = require('got')
+
+module.exports = got.extend({ retry: 0 })
+```
+
+This is how it's handled in Nock itself (see [#1523][]).
+
+[#1523]: https://github.com/nock/nock/issues/1523
 
 ## Debugging
 
