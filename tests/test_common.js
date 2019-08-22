@@ -157,16 +157,16 @@ test('headersFieldNamesToLowerCase throws on conflicting keys', t => {
 
 test('headersFieldsArrayToLowerCase works on arrays', function(t) {
   t.deepEqual(
-    // Sort for comparison beause order doesn't matter.
+    // Sort for comparison because order doesn't matter.
     common.headersFieldsArrayToLowerCase(['HoSt', 'Content-typE']).sort(),
     ['content-type', 'host']
   )
   t.end()
 })
 
-test('headersFieldsArrayToLowerCase deduplicates arrays', function(t) {
+test('headersFieldsArrayToLowerCase de-duplicates arrays', function(t) {
   t.deepEqual(
-    // Sort for comparison beause order doesn't matter.
+    // Sort for comparison because order doesn't matter.
     common
       .headersFieldsArrayToLowerCase([
         'hosT',
