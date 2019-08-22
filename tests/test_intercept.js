@@ -1452,3 +1452,25 @@ test('works when headers are removed on the socket event', t => {
       t.end()
     })
 })
+
+// https://github.com/nock/nock/issues/1061
+test('invalid URLs throw', t => {
+  ;['localhost:1234', 'localhost:1234/url'].forEach(invalidUrl => {
+    t.throws(() => nock('localhost:1234/url'), {
+      message: `Protocol 'localhost:' not recognized. This commonly occurs when a hostname and port are included without a protocol, producing a URL that is valid but confusing, and probably not what you want.`,
+    })
+  })
+  ;[
+    'localhost',
+    '127.0.0.1',
+    '127.0.0.1:1234',
+    '127.0.0.1:1234/url',
+    'foo.com/api',
+  ].forEach(invalidUrl => {
+    t.throws(() => nock(invalidUrl), {
+      input: invalidUrl,
+      name: 'TypeError [ERR_INVALID_URL]',
+    })
+  })
+  t.end()
+})
