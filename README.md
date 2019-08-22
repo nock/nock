@@ -1486,7 +1486,7 @@ To set the mode call `nockBack.setMode(mode)` or run the tests with the `NOCK_BA
 
 ## Common issues
 
-#### "No match for response" when using got with error responses
+**"No match for response" when using got with error responses**
 
 Got automatically retries failed requests twice. That means if you have a test
 which mocks a 4xx or 5xx response, got will immediately reissue it. At that
