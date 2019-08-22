@@ -9,7 +9,8 @@ test suite and 100% test coverage. The codebase was also converted to ES6
 syntax and formatted with Prettier. Leaning on the test coverage, some
 substantial refactors have begun.
 
-Many bug fixes are included. See the [full changelog][changelog] for details.
+Many bug fixes are included. See the [full changelog][changelog] or
+[compare view][compare] for details.
 
 ### Breaking changes
 
@@ -194,3 +195,4 @@ necessary changes are made.
    be non-numeric. In Nock 11 this raises an error.
 
 [changelog]: https://github.com/nock/nock/releases
+[compare]: https://github.com/nock/nock/compare/v10.0.6...v11.3.0@next
