@@ -19,7 +19,7 @@
   "engines": {
     "node": ">= 8.0"
   },
-  "main": "./index",
+  "main": "./index.js",
   "types": "types",
   "dependencies": {
     "chai": "^4.1.2",
