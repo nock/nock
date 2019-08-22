@@ -216,6 +216,5 @@ necessary changes are made.
 1. For parity with a real Socket, the mock Socket has an `unref()` function
    (which does nothing).
 
-
 [changelog]: https://github.com/nock/nock/releases
 [compare]: https://github.com/nock/nock/compare/v10.0.6...v11.3.0@next
