@@ -1487,10 +1487,10 @@ To set the mode call `nockBack.setMode(mode)` or run the tests with the `NOCK_BA
 
 **"No match for response" when using got with error responses**
 
-Got automatically retries failed requests twice. That means if you have a test
-which mocks a 4xx or 5xx response, got will immediately reissue it. At that
-point, the mock will have been consumed and the second request will error out
-with **Nock: No match for request**.
+[Got][] automatically retries failed requests twice. That means if you have a
+test which mocks a 4xx or 5xx response, got will immediately reissue it. At
+that point, the mock will have been consumed and the second request will error
+out with **Nock: No match for request**.
 
 The same is true for `.replyWithError()`.
 
@@ -1511,6 +1511,7 @@ module.exports = got.extend({ retry: 0 })
 
 This is how it's handled in Nock itself (see [#1523][]).
 
+[got]: https://github.com/sindresorhus/got
 [#1523]: https://github.com/nock/nock/issues/1523
 
 ## Debugging
