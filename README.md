@@ -88,7 +88,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
       - [Example](#example)
     - [Modes](#modes)
 - [Common issues](#common-issues)
-    - ["No match for response" when using got with error responses](#no-match-for-response-when-using-got-with-error-responses)
+  - ["No match for response" when using got with error responses](#no-match-for-response-when-using-got-with-error-responses)
 - [Debugging](#debugging)
 - [Contributing](#contributing)
 - [Contributors](#contributors)
