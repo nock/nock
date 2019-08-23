@@ -360,7 +360,7 @@ test('nockBack record tests', nw => {
   nw.test('it loads your recorded tests', t => {
     nockBack('goodRequest.json', function(done) {
       t.true(this.scopes.length > 0)
-      http.get('http://example.test/').end()
+      http.get('http://www.example.test/').end()
       this.assertScopesFinished()
       done()
       t.end()
