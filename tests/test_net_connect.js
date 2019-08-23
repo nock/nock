@@ -1,109 +1,85 @@
 'use strict'
 
-const assert = require('assert')
 const http = require('http')
-const mikealRequest = require('request')
 const { test } = require('tap')
+const assertRejects = require('assert-rejects')
 const nock = require('..')
 const got = require('./got_client')
 
 require('./cleanup_after_each')()
 
-test('disable net connect is default', function(t) {
+test('disable net connect is default', async t => {
   nock.disableNetConnect()
 
-  nock('http://example.test')
+  nock('http://www.example.test')
     .get('/')
     .reply(200)
 
-  mikealRequest('https://google.com/', function(err, res) {
-    assert(err)
-    assert.strictEqual(
-      err.message,
-      'Nock: Disallowed net connect for "google.com:443/"'
-    )
-    t.end()
-  })
+  await assertRejects(
+    got('https://other.example.test/'),
+    Error,
+    'Nock: Disallowed net connect for "other.example.test:443/"'
+  )
 })
 
 test('when net connect is disabled, throws the expected error ', async t => {
   nock.disableNetConnect()
 
-  try {
-    await got('http://example.test')
-    t.fail('Expected to throw')
-  } catch (err) {
-    t.type(err, 'Error')
+  await assertRejects(got('http://example.test'), Error, err => {
     t.equal(err.message, 'Nock: Disallowed net connect for "example.test:80/"')
     t.equal(err.code, 'ENETUNREACH')
     t.ok(err.stack)
-  }
+  })
 })
 
-test('enable real HTTP request only for specified domain, via string', t => {
+test('enable real HTTP request only for specified domain, via string', async t => {
   t.plan(1)
 
   const server = http.createServer((request, response) => {
     t.pass('server received a request')
     response.writeHead(200)
     response.end()
-    t.end()
   })
   t.once('end', () => server.close())
+  await new Promise(resolve => server.listen(resolve))
 
   nock.enableNetConnect('localhost')
 
-  server.listen(() =>
-    mikealRequest(`http://localhost:${server.address().port}/`)
+  await got(`http://localhost:${server.address().port}/`)
+})
+
+test('disallow request for other domains, via string', async t => {
+  nock.enableNetConnect('localhost')
+
+  await assertRejects(
+    got('https://example.test/'),
+    Error,
+    'Nock: Disallowed net connect for "example.test:80/"'
   )
 })
 
-test('disallow request for other domains, via string', t => {
-  nock.enableNetConnect('localhost')
-
-  http
-    .get('http://www.amazon.com', function(res) {
-      throw Error('should not deliver this request')
-    })
-    .on('error', function(err) {
-      t.equal(
-        err.message,
-        'Nock: Disallowed net connect for "www.amazon.com:80/"'
-      )
-      t.end()
-    })
-})
-
-test('enable real HTTP request only for specified domain, via regexp', t => {
+test('enable real HTTP request only for specified domain, via regexp', async t => {
   t.plan(1)
 
   const server = http.createServer((request, response) => {
     t.pass('server received a request')
     response.writeHead(200)
     response.end()
-    t.end()
   })
   t.once('end', () => server.close())
+  await new Promise(resolve => server.listen(resolve))
 
   nock.enableNetConnect(/ocalhos/)
 
-  server.listen(() =>
-    mikealRequest(`http://localhost:${server.address().port}/`)
-  )
+  await got(`http://localhost:${server.address().port}/`)
 })
 
-test('disallow request for other domains, via regexp', t => {
+test('disallow request for other domains, via regexp', async t => {
   nock.enableNetConnect(/ocalhos/)
 
-  http
-    .get('http://www.amazon.com', function(res) {
-      throw Error('should not deliver this request')
-    })
-    .on('error', function(err) {
-      t.equal(
-        err.message,
-        'Nock: Disallowed net connect for "www.amazon.com:80/"'
-      )
-      t.end()
-    })
+  await assertRejects(
+    got('https://example.test/'),
+    Error,
+    'Nock: Disallowed net connect for "example.test:80/"'
+  )
 })
