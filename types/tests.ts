@@ -1,12 +1,11 @@
 import nock from 'nock'
 import * as fs from 'fs'
-import { URL } from 'url'
+import { URL, URLSearchParams } from 'url'
 
 let scope: nock.Scope = nock('http://example.test')
 let inst: nock.Interceptor
 let str = 'foo'
 let strings: string[]
-let bool = true
 let defs: nock.Definition[]
 let options: nock.Options = {}
 
@@ -55,7 +54,7 @@ inst = scope.merge(str, obj)
 inst = scope.merge(str, regex)
 
 inst = inst.query(obj)
-inst = inst.query(bool)
+inst = inst.query(true)
 
 inst = scope.intercept(str, str)
 inst = scope.intercept(str, str, str)
@@ -117,9 +116,9 @@ inst = inst.delayBody(2000)
 inst = inst.delayConnection(2000)
 inst = inst.socketDelay(2000)
 
-scope.done()
-bool = scope.isDone()
-scope.restore()
+scope.done() // $ExpectType void
+scope.isDone() // $ExpectType boolean
+scope.restore() // $ExpectType void
 
 nock.recorder.rec()
 nock.recorder.rec(true)
@@ -249,6 +248,11 @@ nock('http://example.test', { encodedQueryParams: true })
   .get('/users')
   .query('foo%5Bbar%5D%3Dhello%20world%21')
   .reply(200, { results: [{ id: 'foo' }] })
+
+nock('http://example.test',)
+  .get('/')
+  .query(new URLSearchParams([['foo', 'one'], ['foo', 'two']]))
+  .reply()
 
 // Specifying replies
 scope = nock('http://example.test')
