@@ -249,7 +249,7 @@ nock('http://example.test', { encodedQueryParams: true })
   .query('foo%5Bbar%5D%3Dhello%20world%21')
   .reply(200, { results: [{ id: 'foo' }] })
 
-nock('http://example.test',)
+nock('http://example.test')
   .get('/')
   .query(new URLSearchParams([['foo', 'one'], ['foo', 'two']]))
   .reply()
