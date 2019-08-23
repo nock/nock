@@ -562,3 +562,57 @@ test("response have 'complete' property and it's true after end", t => {
   )
   req.end()
 })
+
+test('Request with `Expect: 100-continue` triggers continue event', t => {
+  // This is a replacement for a wide-bracket regression test that was added
+  // for https://github.com/nock/nock/issues/256.
+  //
+  // The behavior was subsequently changed so 'continue' is emitted only when
+  // the `Expect: 100-continue` header is present.
+  //
+  // This test was adapted from this test from Node:
+  // https://github.com/nodejs/node/blob/1b2d3f7ae7f0391908b70b0333a5adef3c8cb79d/test/parallel/test-http-expect-continue.js#L35
+  //
+  // Related:
+  // https://tools.ietf.org/html/rfc2616#section-8.2.3
+  // https://github.com/nodejs/node/issues/10487
+  t.plan(3)
+
+  const exampleRequestBody = 'this is the full request body'
+
+  const scope = nock('http://example.test')
+    .post('/', exampleRequestBody)
+    .reply()
+
+  const req = http.request({
+    host: 'example.test',
+    method: 'POST',
+    path: '/',
+    port: 80,
+    headers: { Expect: '100-continue' },
+  })
+
+  let gotResponse = false
+
+  req.on('continue', () => {
+    t.pass()
+
+    // This is a confidence check. It's not really possible to get the response
+    // until the request has matched, and it won't match until the request body
+    // is sent.
+    t.false(gotResponse)
+
+    req.end(exampleRequestBody)
+  })
+
+  req.on('response', res => {
+    t.is(res.statusCode, 200)
+
+    gotResponse = true
+
+    res.on('end', () => {
+      scope.done()
+      t.end()
+    })
+  })
+})
