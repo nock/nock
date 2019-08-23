@@ -579,11 +579,10 @@ test('Request with `Expect: 100-continue` triggers continue event', t => {
   t.plan(3)
 
   const exampleRequestBody = 'this is the full request body'
-  const exampleResponseBody = 'this is the full response body'
 
   const scope = nock('http://example.test')
     .post('/', exampleRequestBody)
-    .reply(200, exampleResponseBody)
+    .reply()
 
   const req = http.request({
     host: 'example.test',
@@ -593,21 +592,25 @@ test('Request with `Expect: 100-continue` triggers continue event', t => {
     headers: { Expect: '100-continue' },
   })
 
+  let gotResponse = false
+
   req.on('continue', () => {
     t.pass()
+
+    // This is a confidence check. It's not really possible to get the response
+    // until the request has matched, and it won't match until the request body
+    // is sent.
+    t.false(gotResponse)
+
     req.end(exampleRequestBody)
   })
 
-  let responseBody = ''
   req.on('response', res => {
     t.is(res.statusCode, 200)
 
-    res.setEncoding('utf8')
-    res.on('data', chunk => {
-      responseBody += chunk
-    })
+    gotResponse = true
+
     res.on('end', () => {
-      t.equal(responseBody, exampleResponseBody)
       scope.done()
       t.end()
     })
