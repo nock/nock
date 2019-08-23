@@ -5,14 +5,14 @@ import { ClientRequest, IncomingMessage, RequestOptions } from 'http'
 import { ParsedUrlQuery } from 'querystring'
 import { Url, URLSearchParams } from 'url'
 
-export default Nock
+export = nock
 
-export function Nock(
+declare function nock(
   basePath: string | RegExp | Url,
-  options?: Nock.Options
-): Nock.Scope
+  options?: nock.Options
+): nock.Scope
 
-export namespace Nock {
+declare namespace nock {
   function cleanAll(): void
   function activate(): void
   function isActive(): boolean

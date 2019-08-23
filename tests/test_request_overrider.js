@@ -469,7 +469,7 @@ test('socket emits connect and secureConnect', t => {
   })
 })
 
-test('socket setKeepAlive', t => {
+test('socket has setKeepAlive() method', t => {
   nock('http://example.test')
     .get('/')
     .reply(200, 'hey')
@@ -477,6 +477,18 @@ test('socket setKeepAlive', t => {
   const req = http.get('http://example.test')
   req.once('socket', socket => {
     socket.setKeepAlive(true)
+    t.end()
+  })
+})
+
+test('socket has unref() method', t => {
+  nock('http://example.test')
+    .get('/')
+    .reply(200, 'hey')
+
+  const req = http.get('http://example.test')
+  req.once('socket', socket => {
+    socket.unref()
     t.end()
   })
 })
