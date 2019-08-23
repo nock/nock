@@ -31,7 +31,6 @@
   },
   "devDependencies": {
     "assert-rejects": "^1.0.0",
-    "aws-sdk": "^2.437.0",
     "dtslint": "^0.9.1",
     "eslint": "^6.0.0",
     "eslint-config-prettier": "^6.0.0",
