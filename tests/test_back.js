@@ -20,14 +20,14 @@ const exists = fs.existsSync
 function testNock(t) {
   let dataCalled = false
 
-  const scope = nock('http://example.test')
+  const scope = nock('http://www.example.test')
     .get('/')
     .reply(200, 'Hello World!')
 
   http
     .request(
       {
-        host: 'example.test',
+        host: 'www.example.test',
         path: '/',
         port: 80,
       },
@@ -53,7 +53,7 @@ function nockBackWithFixture(t, scopesLoaded) {
 
   nockBack('goodRequest.json', function(done) {
     t.equal(this.scopes.length, scopesLength)
-    http.get('http://www.google.com').end()
+    http.get('http://www.example.test/').end()
     this.assertScopesFinished()
     done()
     t.end()
@@ -343,11 +343,13 @@ test('nockBack record tests', nw => {
     const fixture = 'wrongUri.json'
     nockBack(fixture, function(done) {
       http
-        .get('http://www.amazon.com', res => t.fail('Should not come here!'))
+        .get('http://other.example.test', res =>
+          t.fail('Should not come here!')
+        )
         .on('error', err => {
           t.equal(
             err.message,
-            'Nock: Disallowed net connect for "www.amazon.com:80/"'
+            'Nock: Disallowed net connect for "other.example.test:80/"'
           )
           done()
           t.end()
@@ -358,7 +360,7 @@ test('nockBack record tests', nw => {
   nw.test('it loads your recorded tests', t => {
     nockBack('goodRequest.json', function(done) {
       t.true(this.scopes.length > 0)
-      http.get('http://www.google.com').end()
+      http.get('http://www.example.test/').end()
       this.assertScopesFinished()
       done()
       t.end()
@@ -465,7 +467,7 @@ test('nockBack lockdown tests', nw => {
   nw.test('no unnocked http calls work', t => {
     const req = http.request(
       {
-        host: 'google.com',
+        host: 'other.example.test',
         path: '/',
       },
       res => t.fail('Should not come here!')
@@ -474,7 +476,7 @@ test('nockBack lockdown tests', nw => {
     req.on('error', err => {
       t.equal(
         err.message.trim(),
-        'Nock: Disallowed net connect for "google.com:80/"'
+        'Nock: Disallowed net connect for "other.example.test:80/"'
       )
       t.end()
     })
