@@ -1,6 +1,6 @@
 [
   {
-    "scope": "http://www.google.com:80",
+    "scope": "http://www.example.test:80",
     "method": "GET",
     "path": "/",
     "body": "",
