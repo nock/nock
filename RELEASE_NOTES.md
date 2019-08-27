@@ -75,7 +75,7 @@ necessary changes are made.
    .reply(statusCode, responseBody, headers)
    ```
 
-   It can be caled with a status code and a function that returns an array:
+   It can be called with a status code and a function that returns an array:
 
    ```js
    .reply(statusCode, (path, requestBody) => responseBody)
