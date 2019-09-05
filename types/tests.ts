@@ -182,15 +182,6 @@ scope = nock('http://example.test')
     rev: '946B7D1C',
   })
 
-nock('https://example.test')
-  .post('/path', {
-    number: 1,
-    bool: false,
-    empty: null,
-    array: ['foo', 2, true, null, { number: 3 }],
-  })
-  .reply(200)
-
 scope = nock('http://example.test')
   .post('/users', /email=.?@example.test/gi)
   .reply(201, {

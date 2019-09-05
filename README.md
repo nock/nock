@@ -1,7 +1,8 @@
 # Nock
 
 [![npm](https://img.shields.io/npm/v/nock.svg)][npmjs]
-[![Build Status](https://travis-ci.org/nock/nock.svg)][build]
+[![npm@beta](https://img.shields.io/npm/v/nock/beta.svg)][npmjs]
+[![Build Status](https://travis-ci.org/nock/nock.svg?branch=beta)][build]
 ![Coverage Status](http://img.shields.io/badge/coverage-100%25-brightgreen.svg)
 [![Greenkeeper](https://badges.greenkeeper.io/nock/nock.svg)](https://greenkeeper.io/)
 [![Backers on Open Collective](https://opencollective.com/nock/backers/badge.svg)](#backers)

@@ -37,16 +37,12 @@ declare namespace nock {
     interceptorOptions?: Options
   ) => Interceptor
 
-  // essentially valid decoded JSON with the addition of possible RegExp
   interface DataMatcher {
     [k: string]:
-      | boolean
-      | null
-      | number
       | string
       | RegExp
       | DataMatcher
-      | Array<boolean | null | number | string | RegExp | DataMatcher>
+      | Array<string | RegExp | DataMatcher>
   }
 
   type RequestBodyMatcher =

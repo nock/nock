@@ -25,6 +25,45 @@ test('socketDelay', function(t) {
       req.setTimeout(100, onTimeout)
       return
     }
+  })
+
+  req.end()
+})
+
+test('calling socketDelay not emit a timeout if not idle for long enough', t => {
+  nock('http://example.test')
+    .get('/')
+    .socketDelay(10000)
+    .reply(200, 'OK')
+
+  const req = http.request('http://example.test', function(res) {
+    res.setEncoding('utf8')
+
+    let body = ''
+
+    res.on('data', function(chunk) {
+      body += chunk
+    })
+
+    res.once('end', function() {
+      t.equal(body, 'OK')
+      t.end()
+    })
+  })
+
+  req.setTimeout(60000, function() {
+    t.fail('socket timed out unexpectedly')
+    t.end()
+  })
+
+  req.end()
+})
+
+test('Socket#setTimeout adds callback as a one-time listener for parity with a real socket', t => {
+  nock('http://example.test')
+    .get('/')
+    .socketDelay(100)
+    .reply(200, '<html></html>')
 
     socket.on('connect', () => {
       req.setTimeout(100, onTimeout)

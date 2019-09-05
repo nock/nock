@@ -41,13 +41,13 @@ test('reply with file with headers', async t => {
 })
 
 test('reply with file with no fs', t => {
-  const nockWithoutFs = proxyquire('../lib/scope', {
+  const { Scope: ScopeWithoutFs } = proxyquire('../lib/scope', {
     './interceptor': proxyquire('../lib/interceptor', { fs: null }),
   })
 
   t.throws(
     () =>
-      nockWithoutFs('http://example.test')
+      new ScopeWithoutFs('http://example.test')
         .get('/')
         .replyWithFile(200, textFile),
     {

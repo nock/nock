@@ -96,6 +96,10 @@ $ npm run toc
 
 All of the tests work offline. None of them should hit the network.
 
+```js
+test('description', { only: true }, t => {
+  // ...
+})
 ```
 $ npm test
 ```
