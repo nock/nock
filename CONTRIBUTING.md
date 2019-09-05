@@ -15,7 +15,6 @@ Please note that this project is released with a [Contributor Code of Conduct](.
 - [Commit Message conventions](#commit-message-conventions)
 - [Generate README TOC](#generate-readme-toc)
 - [Running tests](#running-tests)
-  - [Running only a single test](#running-only-a-single-test)
 - [Release Process](#release-process)
 - [GitHub Apps](#github-apps)
 - [Becoming a maintainer](#becoming-a-maintainer)
