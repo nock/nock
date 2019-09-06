@@ -898,29 +898,6 @@ const scope = nock('http://api.myservice.com')
   })
 ```
 
-### Axios
-
-As axios is very likely to use in many js apps, we would like to show the case by following sample code.
-For more detail you can go to https://github.com/nock/nock/issues/699#issuecomment-272708264
-```js
-// my-remote-call.test.js
-import test from 'ava';
-import axios from 'axios';
-import httpAdapter from 'axios/lib/adapters/http';
-import nock from 'nock';
-
-const host = 'http://localhost';
-axios.defaults.host = host;
-axios.defaults.adapter = httpAdapter;
-
-test('remote call with axios should pass', async t => {
-  const call = nock(host)
-    .get('/test').reply(200, 'test data');
-  await axios.get('/test');
-  t.is(call.isDone(), true);
-});
-```
-
 ### Optional Requests
 
 By default every mocked request is expected to be made exactly once, and until it is it'll appear in `scope.pendingMocks()`, and `scope.isDone()` will return false (see [expectations](#expectations)). In many cases this is fine, but in some (especially cross-test setup code) it's useful to be able to mock a request that may or may not happen. You can do this with `optionally()`. Optional requests are consumed just like normal ones once matched, but they do not appear in `pendingMocks()`, and `isDone()` will return true for scopes with only optional requests pending.
@@ -1536,6 +1513,42 @@ This is how it's handled in Nock itself (see [#1523][]).
 
 [got]: https://github.com/sindresorhus/got
 [#1523]: https://github.com/nock/nock/issues/1523
+
+### Axios
+
+To use Nock with [Axios][], you may need to configure Axios to use the Node
+adapter as in the example below:
+
+```js
+import axios from 'axios'
+import nock from 'nock'
+import test from 'ava' // You can use any test framework.
+
+// If you are using jsdom, axios will default to using the XHR adapter which
+// can't be intercepted by nock. So, configure axios to use the node adapter.
+//
+// References:
+// https://github.com/nock/nock/issues/699#issuecomment-272708264
+// https://github.com/axios/axios/issues/305
+axios.defaults.adapter = require('axios/lib/adapters/http')
+
+test('can fetch test response', async t => {
+  // Set up the mock request.
+  const scope = nock('http://localhost')
+    .get('/test')
+    .reply(200, 'test response')
+
+  // Make the request. Note that the hostname must match exactly what is passed
+  // to `nock()`. Alternatively you can set `axios.defaults.host = 'http://localhost'`
+  // and run `axios.get('/test')`.
+  await axios.get('http://localhost/test')
+
+  // Assert that the expected request was made.
+  scope.done()
+})
+```
+
+[axios]: https://github.com/axios/axios
 
 ## Debugging
 
