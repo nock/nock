@@ -19,8 +19,8 @@ _Having problem producing a test case? Try and ask the community for help. If th
 
 **Versions**
 
-| Software    | Version(s) |
-| ----------- | ---------- |
-| Nock        |            |
-| Node        |            |
-| TypeScript  |            |
+| Software   | Version(s) |
+| ---------- | ---------- |
+| Nock       |            |
+| Node       |            |
+| TypeScript |            |
