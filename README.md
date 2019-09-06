@@ -54,6 +54,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
   - [Request Body filtering](#request-body-filtering)
   - [Request Headers Matching](#request-headers-matching)
   - [Optional Requests](#optional-requests)
+  - [Axios](#axios)
   - [Allow **unmocked** requests on a mocked hostname](#allow-unmocked-requests-on-a-mocked-hostname)
 - [Expectations](#expectations)
   - [.isDone()](#isdone)
@@ -895,6 +896,29 @@ const scope = nock('http://api.myservice.com')
   .reply(200, {
     data: 'hello world',
   })
+```
+
+### Axios
+
+As axios is very likely to use in many js apps, we would like to show the case by following sample code.
+For more detail you can go to https://github.com/nock/nock/issues/699#issuecomment-272708264
+```js
+// my-remote-call.test.js
+import test from 'ava';
+import axios from 'axios';
+import httpAdapter from 'axios/lib/adapters/http';
+import nock from 'nock';
+
+const host = 'http://localhost';
+axios.defaults.host = host;
+axios.defaults.adapter = httpAdapter;
+
+test('remote call with axios should pass', async t => {
+  const call = nock(host)
+    .get('/test').reply(200, 'test data');
+  await axios.get('/test');
+  t.is(call.isDone(), true);
+});
 ```
 
 ### Optional Requests
