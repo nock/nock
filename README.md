@@ -54,6 +54,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
   - [Request Body filtering](#request-body-filtering)
   - [Request Headers Matching](#request-headers-matching)
   - [Optional Requests](#optional-requests)
+  - [Axios](#axios)
   - [Allow **unmocked** requests on a mocked hostname](#allow-unmocked-requests-on-a-mocked-hostname)
 - [Expectations](#expectations)
   - [.isDone()](#isdone)
@@ -1512,6 +1513,42 @@ This is how it's handled in Nock itself (see [#1523][]).
 
 [got]: https://github.com/sindresorhus/got
 [#1523]: https://github.com/nock/nock/issues/1523
+
+### Axios
+
+To use Nock with [Axios][], you may need to configure Axios to use the Node
+adapter as in the example below:
+
+```js
+import axios from 'axios'
+import nock from 'nock'
+import test from 'ava' // You can use any test framework.
+
+// If you are using jsdom, axios will default to using the XHR adapter which
+// can't be intercepted by nock. So, configure axios to use the node adapter.
+//
+// References:
+// https://github.com/nock/nock/issues/699#issuecomment-272708264
+// https://github.com/axios/axios/issues/305
+axios.defaults.adapter = require('axios/lib/adapters/http')
+
+test('can fetch test response', async t => {
+  // Set up the mock request.
+  const scope = nock('http://localhost')
+    .get('/test')
+    .reply(200, 'test response')
+
+  // Make the request. Note that the hostname must match exactly what is passed
+  // to `nock()`. Alternatively you can set `axios.defaults.host = 'http://localhost'`
+  // and run `axios.get('/test')`.
+  await axios.get('http://localhost/test')
+
+  // Assert that the expected request was made.
+  scope.done()
+})
+```
+
+[axios]: https://github.com/axios/axios
 
 ## Debugging
 
