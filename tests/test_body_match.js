@@ -214,6 +214,25 @@ test("doesn't match body with mismatching keys", t => {
   )
 })
 
+// https://github.com/nock/nock/issues/1713
+test("doesn't match body with same number of keys but different keys", t => {
+  nock('http://example.test')
+    .post('/', { a: {} })
+    .reply()
+
+  mikealRequest(
+    {
+      url: 'http://example.test',
+      method: 'post',
+      json: { b: 123 },
+    },
+    function(err) {
+      assert.ok(err)
+      t.end()
+    }
+  )
+})
+
 test('match body with form multipart', t => {
   nock('http://example.test')
     .post(
