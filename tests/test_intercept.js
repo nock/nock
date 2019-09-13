@@ -919,58 +919,6 @@ test('do not match when conditionally = false but should match after trying agai
   scope.done()
 })
 
-test('get correct filtering with scope and request headers filtering', t => {
-  const responseText = 'OK!'
-  const responseHeaders = { 'Content-Type': 'text/plain' }
-  const requestHeaders = { host: 'foo.example.test' }
-
-  const scope = nock('http://foo.example.test', {
-    filteringScope: function(scope) {
-      return /^http:\/\/.*\.example\.test/.test(scope)
-    },
-  })
-    .get('/path')
-    .reply(200, responseText, responseHeaders)
-
-  let dataCalled = false
-  const host = 'bar.example.test'
-  const req = http.get(
-    {
-      host,
-      method: 'GET',
-      path: '/path',
-      port: 80,
-    },
-    function(res) {
-      res.on('data', function(data) {
-        dataCalled = true
-        t.equal(data.toString(), responseText)
-      })
-      res.on('end', function() {
-        t.true(dataCalled)
-        scope.done()
-        t.end()
-      })
-    }
-  )
-
-  t.equivalent(req.getHeaders(), { host: requestHeaders.host })
-})
-
-test('different subdomain with reply callback and filtering scope', async t => {
-  // We scope for www.example.test but through scope filtering we will accept
-  // any <subdomain>.example.test.
-  const scope = nock('http://example.test', {
-    filteringScope: scope => /^http:\/\/.*\.example/.test(scope),
-  })
-    .get('/')
-    .reply(200, () => 'OK!')
-
-  const { body } = await got('http://a.example.test')
-  t.equal(body, 'OK!')
-  scope.done()
-})
-
 test('mocking succeeds even when host request header is not specified', t => {
   nock('http://example.test')
     .post('/resource')
