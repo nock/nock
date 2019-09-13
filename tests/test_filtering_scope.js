@@ -66,7 +66,8 @@ test("when using filteringScope, can match Host headers using the scope's host",
   scope.done()
 })
 
-test('when using filteringScope, can prevent match of an explicit Host header', async t => {
+// TODO This test is failing.
+test('when using filteringScope, reqheaders can prevent match of an explicit Host header', async t => {
   nock('http://example.test', {
     filteringScope: scope => true,
     reqheaders: { Host: 'example.test' },
@@ -176,6 +177,8 @@ test('when multiple scopes have filteringScope, correct host header is set on re
   scope2.done()
 })
 
+// TODO This test throws "no match for request" but the below it is passing.
+// The addition of the first scope should not prevent matching the second one.
 test('test 1a', async t => {
   nock('http://example.test', {
     reqheaders: { host: 'example.test' },
@@ -202,6 +205,8 @@ test('test 1b', async t => {
     .get('/')
     .reply(204)
 
+  // This test behaves the same with and without the block below. It's included
+  // to better illustrate the disparity between this test and the one before it.
   nock('http://example.test', {
     reqheaders: { host: 'example.test' },
   })
@@ -231,6 +236,19 @@ test('test 3', async t => {
   t.is(statusCode, 201)
 })
 
+// filteringScope ordinarily sets the Host header to match the Host scope.
+// Though, what should it do when there is an explicit Host header on the
+// request? Should it preserve the explicit Host header and then use it
+// for matching, or replace it with the host from the scope? (Don't
+// have a strong opinion on that, though we should do something consistent.)
+//
+// test 4a passes, suggesting the explicit Host header is preserved and
+// then used for matching. However test 4b passes too, which suggests the
+// opposite.
+//
+// If Host header constraints should be _ignored_ for matching purposes
+// in conjunction with filteringScope, this condition should raise an error,
+// and if we have any code solely for that purpose it should be removed.
 test('test 4a', async t => {
   nock('http://bogus.test', {
     filteringScope: () => true,
@@ -238,12 +256,6 @@ test('test 4a', async t => {
   })
     .get('/')
     .reply(204)
-
-  nock('http://example.test', {
-    reqheaders: { host: 'example.test' },
-  })
-    .get('/')
-    .reply(201)
 
   const { statusCode } = await got('http://example.test/', {
     headers: { Host: 'example.test' },
@@ -259,34 +271,8 @@ test('test 4b', async t => {
     .get('/')
     .reply(204)
 
-  nock('http://example.test', {
-    reqheaders: { host: 'example.test' },
-  })
-    .get('/')
-    .reply(201)
-
   const { statusCode } = await got('http://example.test/', {
     headers: { Host: 'example.test' },
   })
-  t.is(statusCode, 201)
-})
-
-test('test 4c', async t => {
-  nock('http://bogus.test', {
-    filteringScope: () => true,
-    headers: { Host: 'other.test' },
-  })
-    .get('/')
-    .reply(204)
-
-  nock('http://example.test', {
-    reqheaders: { host: 'example.test' },
-  })
-    .get('/')
-    .reply(201)
-
-  const { statusCode } = await got('http://example.test/', {
-    headers: { Host: 'example.test' },
-  })
-  t.is(statusCode, 201)
+  t.is(statusCode, 204)
 })
