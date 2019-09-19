@@ -42,6 +42,7 @@ declare namespace nock {
     [k: string]:
       | boolean
       | null
+      | undefined
       | number
       | string
       | RegExp

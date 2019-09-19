@@ -11,6 +11,7 @@ let options: nock.Options = {}
 
 const num = 42
 const obj: { [k: string]: any } = {}
+const objWithUndefinedValue: { a: string; b?: string } = { a: 'a' }
 const regex = /test/
 
 scope.head(str) // $ExpectType Interceptor
@@ -55,6 +56,7 @@ inst = scope.merge(str, regex)
 
 inst = inst.query(obj)
 inst = inst.query(true)
+inst = inst.query(objWithUndefinedValue)
 
 inst = scope.intercept(str, str)
 inst = scope.intercept(str, str, str)
