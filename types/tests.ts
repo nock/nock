@@ -5,12 +5,14 @@ import { URL, URLSearchParams } from 'url'
 let scope: nock.Scope = nock('http://example.test')
 let inst: nock.Interceptor
 let str = 'foo'
-let strings: string[]
+let strings = ['foo', 'bar']
 let defs: nock.Definition[]
 let options: nock.Options = {}
 
+const buffer = Buffer.from('')
 const num = 42
 const obj: { [k: string]: any } = {}
+const objWithUndefinedValue: { a: string; b?: string } = { a: 'a' }
 const regex = /test/
 
 scope.head(str) // $ExpectType Interceptor
@@ -34,6 +36,16 @@ inst = scope.post(str, str)
 inst = scope.post(str, str, options)
 inst = scope.post(str, obj)
 inst = scope.post(str, regex)
+inst = scope.post(str, objWithUndefinedValue)
+inst = scope.post(str, str)
+inst = scope.post(str, strings)
+inst = scope.post(str, [num, str, regex])
+inst = scope.post(str, [num, num, num])
+inst = scope.post(str, regex)
+inst = scope.post(str, buffer)
+inst = scope.post(str, true) // $ExpectError
+inst = scope.post(str, null) // $ExpectError
+inst = scope.post(str, num) // $ExpectError
 
 inst = scope.put(str)
 inst = scope.put(str, str)
@@ -53,8 +65,13 @@ inst = scope.merge(str, str, options)
 inst = scope.merge(str, obj)
 inst = scope.merge(str, regex)
 
-inst = inst.query(obj)
 inst = inst.query(true)
+inst = inst.query(obj)
+inst = inst.query(objWithUndefinedValue)
+inst = inst.query({ foo: regex })
+inst = inst.query(strings) // $ExpectError
+inst = inst.query(buffer) // $ExpectError
+inst = inst.query(regex) // $ExpectError
 
 inst = scope.intercept(str, str)
 inst = scope.intercept(str, str, str)
