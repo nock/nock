@@ -37,23 +37,29 @@ declare namespace nock {
     interceptorOptions?: Options
   ) => Interceptor
 
-  // essentially valid decoded JSON with the addition of possible RegExp
-  interface DataMatcher {
-    [k: string]:
-      | boolean
-      | null
-      | number
-      | string
-      | RegExp
-      | DataMatcher
-      | Array<boolean | null | number | string | RegExp | DataMatcher>
+  // Essentially valid, decoded JSON with the addition of possible RegExp. TS doesn't currently have
+  // a great way to represent JSON type data, this data matcher design is based off this comment.
+  // https://github.com/microsoft/TypeScript/issues/1897#issuecomment-338650717
+  type DataMatcher =
+    | boolean
+    | number
+    | string
+    | null
+    | undefined
+    | RegExp
+    | DataMatcherArray
+    | DataMatcherMap
+  interface DataMatcherArray extends Array<DataMatcher> {}
+  interface DataMatcherMap {
+    [key: string]: DataMatcher
   }
 
   type RequestBodyMatcher =
     | string
     | Buffer
     | RegExp
-    | DataMatcher
+    | DataMatcherArray
+    | DataMatcherMap
     | { (body: any): boolean }
 
   type RequestHeaderMatcher =
@@ -128,7 +134,7 @@ declare namespace nock {
       matcher:
         | boolean
         | string
-        | DataMatcher
+        | DataMatcherMap
         | URLSearchParams
         | { (parsedObj: ParsedUrlQuery): boolean }
     ): this
