@@ -37,7 +37,9 @@ declare namespace nock {
     interceptorOptions?: Options
   ) => Interceptor
 
-  // essentially valid decoded JSON with the addition of possible RegExp
+  // Essentially valid, decoded JSON with the addition of possible RegExp. TS doesn't currently have
+  // a great way to represent JSON type data, this data matcher design is based off this comment.
+  // https://github.com/microsoft/TypeScript/issues/1897#issuecomment-338650717
   type DataMatcher =
     | boolean
     | number
