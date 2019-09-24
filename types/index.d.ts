@@ -83,9 +83,9 @@ declare namespace nock {
 
   type StatusCode = number
   type ReplyFnResult =
-    | readonly [StatusCode]
-    | readonly [StatusCode, ReplyBody]
-    | readonly [StatusCode, ReplyBody, ReplyHeaders]
+    | Readonly<[StatusCode]>
+    | Readonly<[StatusCode, ReplyBody]>
+    | Readonly<[StatusCode, ReplyBody, ReplyHeaders]>
 
   interface ReplyFnContext extends Interceptor {
     req: ClientRequest & {
