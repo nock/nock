@@ -103,7 +103,7 @@ Nock works by overriding Node's `http.request` function. Also, it overrides `htt
 ## Install
 
 ```sh
-$ npm install --save nock
+$ npm install --save-dev nock
 ```
 
 ### Node version support
