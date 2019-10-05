@@ -129,7 +129,7 @@ test('query() throws if query params have already been defined', async t => {
       interceptor.query({ foo: 'baz' })
     },
     {
-      message: 'Query parameters have already been already defined',
+      message: 'Query parameters have already been defined',
     }
   )
 })
@@ -144,7 +144,7 @@ test('query() throws if query() was already called', async t => {
       interceptor.query({ baz: 'qux' })
     },
     {
-      message: 'Query parameters have already been already defined',
+      message: 'Query parameters have already been defined',
     }
   )
 })
