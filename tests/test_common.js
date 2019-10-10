@@ -145,11 +145,26 @@ test('headersFieldNamesToLowerCase throws on conflicting keys', t => {
     () =>
       common.headersFieldNamesToLowerCase({
         HoSt: 'example.test',
-        HOST: 'example.test',
+        HOST: 'example.tesT',
       }),
     {
       message:
         'Failed to convert header keys to lower case due to field name conflict: host',
+    }
+  )
+  t.end()
+})
+
+test('headersFieldNamesToLowerCase matches if the values are the same', t => {
+  t.deepEqual(
+    common.headersFieldNamesToLowerCase({
+      HoSt: 'example.test',
+      HOST: 'example.test',
+      'Content-typE': 'plain/text',
+    }),
+    {
+      host: 'example.test',
+      'content-type': 'plain/text',
     }
   )
   t.end()
