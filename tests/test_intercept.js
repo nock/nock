@@ -1344,6 +1344,18 @@ test('incorrect path structure is passed to http verb method', t => {
   t.end()
 })
 
+test('wildcard param passed should not throw error', t => {
+  nock('http://example.test', { filteringScope: () => {} }).get('*')
+
+  t.end()
+})
+
+test('incorrect path structure is passed but filteringScope option present should not throw error', t => {
+  nock('http://example.test', { filteringScope: () => {} }).get('')
+
+  t.end()
+})
+
 test('no new keys were added to the global namespace', t => {
   const leaks = Object.keys(global).filter(
     key => !acceptableGlobalKeys.has(key)
