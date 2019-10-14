@@ -1300,7 +1300,7 @@ test('match domain and path using regexp', t => {
 // https://github.com/nock/nock/issues/1003
 test('correctly parse request without specified path', t => {
   const scope1 = nock('https://example.test')
-    .get('')
+    .get('/')
     .reply(200)
 
   https
@@ -1317,7 +1317,7 @@ test('correctly parse request without specified path', t => {
 
 test('data is sent with flushHeaders', t => {
   const scope1 = nock('https://example.test')
-    .get('')
+    .get('/')
     .reply(200, 'this is data')
 
   https
@@ -1332,6 +1332,16 @@ test('data is sent with flushHeaders', t => {
       })
     })
     .flushHeaders()
+})
+
+// https://github.com/nock/nock/issues/1730
+test('incorrect path structure is passed to http verb method', t => {
+  t.throws(() => nock('http://example.test').get(''), {
+    message:
+      "Non-wildcard URL path strings must begin with a slash (otherwise they won't match anything) (got: )",
+  })
+
+  t.end()
 })
 
 test('no new keys were added to the global namespace', t => {
