@@ -77,5 +77,10 @@
       "tests/"
     ]
   },
-  "license": "MIT"
+  "license": "MIT",
+  "files": [
+    "index.js",
+    "lib",
+    "types/index.d.ts"
+  ]
 }
