@@ -140,10 +140,10 @@ test('headersFieldNamesToLowerCase works', t => {
   t.end()
 })
 
-test('headersFieldNamesToLowerCase deduplicates', t => {
+test('headersFieldNamesToLowerCase deduplicates in the order the header was added to the object', t => {
   t.deepEqual(
     common.headersFieldNamesToLowerCase({
-      HoSt: 'example.test',
+      HoSt: 'example.test1',
       HOST: 'example.test',
       'Content-typE': 'plain/text',
     }),
