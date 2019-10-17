@@ -1,6 +1,7 @@
 'use strict'
 
 const http = require('http')
+const sinon = require('sinon')
 const { test } = require('tap')
 const common = require('../lib/common')
 const matchBody = require('../lib/match_body')
@@ -485,4 +486,16 @@ test('normalizeClientRequestArgs with a single callback', async t => {
 
   t.deepEqual(options, {})
   t.is(callback, cb)
+})
+
+test('addTimeout / removeAllTimeouts', t => {
+  const timeoutSpy = sinon.spy()
+
+  setTimeout(() => {
+    t.equal(timeoutSpy.called, false)
+    t.end()
+  }, 1)
+
+  common.addTimeout(setTimeout(timeoutSpy, 0))
+  common.removeAllTimeouts()
 })

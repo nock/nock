@@ -3,6 +3,7 @@
 const fs = require('fs')
 const path = require('path')
 const http = require('http')
+const sinon = require('sinon')
 const stream = require('stream')
 const assertRejects = require('assert-rejects')
 const mikealRequest = require('request')
@@ -490,4 +491,21 @@ test('mikeal/request with delayConnection and request.timeout', t => {
       t.end()
     }
   )
+})
+
+test('remove midflight delay when cleanAll is called', t => {
+  const reqSpy = sinon.spy()
+
+  nock('http://example.test')
+    .get('/')
+    .delayConnection(100)
+    .reply(200, 'OK')
+
+  http.get('http://example.test', reqSpy)
+
+  setTimeout(() => {
+    t.equal(reqSpy.called, false)
+    t.end()
+  }, 200)
+  process.nextTick(nock.cleanAll)
 })
