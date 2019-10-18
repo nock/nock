@@ -1,5 +1,16 @@
 'use strict'
 
+// Nock's strategy is to test as much as possible either through the public API
+// or, when that is not possible, through the mock surface.
+//
+// Whenever tests can be written against the public API or the mock surface, do
+// that rather than add tests here.
+//
+// This helps ensure that the code in the common module stays tight, and that
+// it's all necessary for handling the supported use cases. The project enforces
+// 100% test coverage, so when utility code falls out of test, we know it's time
+// to remove it.
+
 const http = require('http')
 const { test } = require('tap')
 const common = require('../lib/common')
