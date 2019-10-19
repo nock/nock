@@ -104,14 +104,6 @@ test('normalizeRequestOptions', t => {
 })
 
 test('isUtf8Representable works', t => {
-  // Throws for non-buffers.
-  t.throws(() => common.isUtf8Representable(undefined), {
-    message: 'Expected a buffer',
-  })
-  t.throws(() => common.isUtf8Representable(''), {
-    message: 'Expected a buffer',
-  })
-
   // Returns false for buffers that aren't utf8 representable.
   t.false(common.isUtf8Representable(Buffer.from('8001', 'hex')))
 
