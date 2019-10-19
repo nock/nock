@@ -12,6 +12,7 @@ const {
   disableNetConnect,
   enableNetConnect,
   removeAll,
+  abortPendingRequests,
 } = require('./lib/intercept')
 const recorder = require('./lib/recorder')
 const { Scope, load, loadDefs, define } = require('./lib/scope')
@@ -35,6 +36,7 @@ Object.assign(module.exports, {
     removeAll()
     return module.exports
   },
+  abortPendingRequests,
   load,
   loadDefs,
   define,
