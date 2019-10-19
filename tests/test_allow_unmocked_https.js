@@ -56,7 +56,8 @@ test('allow unmocked option works with https', t => {
     t.error(error)
 
     const { port } = server.address()
-    const requestOptions = {
+
+    const commonRequestOptions = {
       host: 'localhost',
       port,
       ca: ssl.ca,
@@ -71,7 +72,7 @@ test('allow unmocked option works with https', t => {
     function secondIsDone() {
       t.ok(!scope.isDone())
       https
-        .request(Object.assign({ path: '/' }, requestOptions), res => {
+        .request({ path: '/', ...commonRequestOptions }, res => {
           res.resume()
           t.ok(true, 'Google replied to /')
           res.destroy()
@@ -88,19 +89,16 @@ test('allow unmocked option works with https', t => {
     function firstIsDone() {
       t.ok(!scope.isDone(), 'scope is not done')
       https
-        .request(
-          Object.assign({ path: '/does/not/exist' }, requestOptions),
-          res => {
-            t.equal(404, res.statusCode, 'real google response status code')
-            res.on('data', function() {})
-            res.on('end', secondIsDone)
-          }
-        )
+        .request({ path: '/does/not/exist', ...commonRequestOptions }, res => {
+          t.equal(404, res.statusCode, 'real google response status code')
+          res.on('data', function() {})
+          res.on('end', secondIsDone)
+        })
         .end()
     }
 
     https
-      .request(Object.assign({ path: '/abc' }, requestOptions), res => {
+      .request({ path: '/abc', ...commonRequestOptions }, res => {
         res.on('end', firstIsDone)
         // Streams start in 'paused' mode and must be started.
         // See https://nodejs.org/api/stream.html#stream_class_stream_readable
