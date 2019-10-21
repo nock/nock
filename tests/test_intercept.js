@@ -1335,7 +1335,7 @@ test('data is sent with flushHeaders', t => {
 })
 
 // https://github.com/nock/nock/issues/1730
-test('incorrect URL structure is passed to http verb method', t => {
+test('URL path without leading slash throws expected error', t => {
   t.throws(() => nock('http://example.test').get(''), {
     message:
       "Non-wildcard URL path strings must begin with a slash (otherwise they won't match anything) (got: )",
@@ -1350,7 +1350,7 @@ test('wildcard param URL should not throw error', t => {
   t.end()
 })
 
-test('incorrect URL structure is passed but filteringScope option present should not throw error', t => {
+test('with filteringScope, URL path without leading slash does not throw error', t => {
   nock('http://example.test', { filteringScope: () => {} }).get('')
 
   t.end()
