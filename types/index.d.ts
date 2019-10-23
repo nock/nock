@@ -1,7 +1,12 @@
 // TypeScript Version: 3.5
 
 import { ReadStream } from 'fs'
-import { ClientRequest, IncomingMessage, RequestOptions } from 'http'
+import {
+  ClientRequest,
+  IncomingMessage,
+  RequestOptions,
+  OutgoingHttpHeaders,
+} from 'http'
 import { ParsedUrlQuery } from 'querystring'
 import { Url, URLSearchParams } from 'url'
 
@@ -216,7 +221,19 @@ declare namespace nock {
   interface Recorder {
     rec(options?: boolean | RecorderOptions): void
     clear(): void
-    play(): string[] | Definition[]
+    play(): string[] | RecordedDefinition[]
+  }
+
+  interface RecordedDefinition {
+    scope: string
+    method: string
+    path: string
+    body: any
+    status: number
+    response: any
+    rawHeaders: string[]
+    reqheaders?: OutgoingHttpHeaders
+    responseIsBinary?: true
   }
 
   interface RecorderOptions {
@@ -236,8 +253,12 @@ declare namespace nock {
     body?: RequestBodyMatcher
     reqheaders?: Record<string, RequestHeaderMatcher>
     response?: ReplyBody
-    headers?: ReplyHeaders
-    options?: Options
+    rawHeaders?: ReplyHeaders
+    options?: Omit<Options, 'badheaders' | 'reqheaders'>
+    responseIsBinary?: boolean
+    badheaders?: string[]
+    filteringRequestBody?: [RegExp, string] | ((body: string) => string)
+    filteringPath?: [RegExp, string] | ((body: string) => string)
   }
 
   type BackMode = 'wild' | 'dryrun' | 'record' | 'lockdown'
@@ -267,7 +288,7 @@ declare namespace nock {
   interface BackOptions {
     before?: (def: Definition) => void
     after?: (scope: Scope) => void
-    afterRecord?: (defs: Definition[]) => Definition[]
+    afterRecord?: (defs: RecordedDefinition[]) => RecordedDefinition[]
     recorder?: RecorderOptions
   }
 }
