@@ -995,6 +995,14 @@ You can cleanup all the prepared mocks (could be useful to cleanup some state af
 nock.cleanAll()
 ```
 
+### .abortPendingRequests()
+
+You can abort all current pending request like this:
+
+```js
+nock.abortPendingRequests()
+```
+
 ### .persist()
 
 You can make all the interceptors for a scope persist by calling `.persist()` on it:
