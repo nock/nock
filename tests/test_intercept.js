@@ -1005,7 +1005,7 @@ test('mikeal/request with strictSSL: true', t => {
       uri: 'https://example.test/what',
       strictSSL: true,
     },
-    function(err, res, body) {
+    function(err, res) {
       t.type(err, 'null')
       t.equal(res && res.statusCode, 200)
       t.end()
