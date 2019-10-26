@@ -273,7 +273,7 @@ test(
 
     nock('http://localhost')
       .get('/')
-      .reply(201, (path, reqBody) => new SimpleStream())
+      .reply(201, () => new SimpleStream())
 
     http.get('http://localhost/', res => {
       responseEvent = true
