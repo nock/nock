@@ -3,8 +3,10 @@
 const nock = require('..')
 const { expect } = require('chai')
 const http = require('http')
+const sinon = require('sinon')
 const { test } = require('tap')
 
+require('./setup')
 require('./cleanup_after_each')()
 
 test('req.abort() should cause "abort" and "error" to be emitted', t => {
@@ -13,17 +15,14 @@ test('req.abort() should cause "abort" and "error" to be emitted', t => {
     .delayConnection(500)
     .reply()
 
-  let gotAbort = false
+  const cbSpy = sinon.spy()
   const req = http
     .get('http://example.test/')
-    .once('abort', () => {
-      // Should trigger first
-      gotAbort = true
-    })
+    .once('abort', cbSpy)
     .once('error', err => {
       // Should trigger last
       expect(err.code).to.equal('ECONNRESET')
-      expect(gotAbort).to.equal(true, "didn't get abort event")
+      expect(cbSpy).to.have.been.calledOnce()
       scope.done()
       t.end()
     })
@@ -41,7 +40,7 @@ test('abort is emitted before delay time', t => {
     .get('http://example.test/')
     .once('abort', () => {
       const actual = Date.now() - start
-      expect(actual, `abort took ${actual} ms`).to.be.below(250)
+      expect(actual).to.be.below(250)
       scope.done()
       t.end()
     })
