@@ -1,14 +1,14 @@
 'use strict'
 
-const { test } = require('tap')
 const http = require('http')
+const { test } = require('tap')
+const { expect } = require('chai')
+const sinon = require('sinon')
 const nock = require('..')
 
 require('./cleanup_after_each')()
 
-test('socketDelay', function(t) {
-  let timeouted = false
-
+test('socketDelay', t => {
   nock('http://example.test')
     .get('/')
     .socketDelay(200)
@@ -16,9 +16,7 @@ test('socketDelay', function(t) {
 
   const req = http.get('http://example.test')
 
-  const onTimeout = () => {
-    timeouted = true
-  }
+  const onTimeout = sinon.spy()
 
   req.on('socket', socket => {
     if (!socket.connecting) {
@@ -32,7 +30,7 @@ test('socketDelay', function(t) {
   })
 
   req.on('response', () => {
-    t.ok(timeouted)
+    expect(onTimeout).to.have.been.calledOnce()
     t.end()
   })
 })
@@ -43,59 +41,50 @@ test('calling socketDelay will emit a timeout', t => {
     .socketDelay(10000)
     .reply(200, 'OK')
 
-  let timedout = false
-  let ended = false
+  const onEnd = sinon.spy()
 
-  const req = http.request('http://example.test', function(res) {
+  const req = http.request('http://example.test', res => {
     res.setEncoding('utf8')
-
-    res.once('end', function() {
-      ended = true
-      if (!timedout) {
-        t.fail('socket did not timeout when idle')
-        t.end()
-      }
-    })
+    res.once('end', onEnd)
   })
 
-  req.setTimeout(5000, function() {
-    timedout = true
-    if (!ended) {
-      t.ok(true)
-      t.end()
-    }
+  req.setTimeout(5000, () => {
+    expect(onEnd).not.to.have.been.called()
+    t.end()
   })
 
   req.end()
 })
 
 test('calling socketDelay not emit a timeout if not idle for long enough', t => {
-  nock('http://example.test')
+  const responseText = 'okeydoke!'
+  const scope = nock('http://example.test')
     .get('/')
     .socketDelay(10000)
-    .reply(200, 'OK')
+    .reply(200, responseText)
 
-  const req = http.request('http://example.test', function(res) {
+  const req = http.request('http://example.test', res => {
     res.setEncoding('utf8')
 
     let body = ''
 
-    res.on('data', function(chunk) {
+    res.on('data', chunk => {
       body += chunk
     })
 
-    res.once('end', function() {
-      t.equal(body, 'OK')
+    res.once('end', () => {
+      expect(body).to.equal(responseText)
       t.end()
     })
   })
 
-  req.setTimeout(60000, function() {
-    t.fail('socket timed out unexpectedly')
+  req.setTimeout(60000, () => {
+    expect.fail('socket timed out unexpectedly')
     t.end()
   })
 
   req.end()
+  scope.done()
 })
 
 test('Socket#setTimeout adds callback as a one-time listener for parity with a real socket', t => {
