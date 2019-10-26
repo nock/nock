@@ -7,6 +7,7 @@ const sinon = require('sinon')
 const nock = require('..')
 
 require('./cleanup_after_each')()
+require('./setup')
 
 test('socketDelay', t => {
   nock('http://example.test')
