@@ -58,6 +58,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
 - [Expectations](#expectations)
   - [.isDone()](#isdone)
   - [.cleanAll()](#cleanall)
+  - [.abortPendingRequests()](#abortpendingrequests)
   - [.persist()](#persist)
   - [.pendingMocks()](#pendingmocks)
   - [.activeMocks()](#activemocks)

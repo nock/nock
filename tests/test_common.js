@@ -105,15 +105,11 @@ test('normalizeRequestOptions', t => {
 })
 
 test('isUtf8Representable works', t => {
-  //  Returns false for non-buffers.
-  t.false(common.isUtf8Representable())
-  t.false(common.isUtf8Representable(''))
+  // Returns false for buffers that aren't utf8 representable.
+  t.false(common.isUtf8Representable(Buffer.from('8001', 'hex')))
 
-  //  Returns true for buffers that aren't utf8 representable.
-  t.true(common.isUtf8Representable(Buffer.from('8001', 'hex')))
-
-  //  Returns false for buffers containing strings.
-  t.false(common.isUtf8Representable(Buffer.from('8001', 'utf8')))
+  // Returns true for buffers containing strings.
+  t.true(common.isUtf8Representable(Buffer.from('8001', 'utf8')))
 
   t.end()
 })
