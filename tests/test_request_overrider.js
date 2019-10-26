@@ -469,6 +469,38 @@ test('socket emits connect and secureConnect', t => {
   })
 })
 
+test('socket has address() method', t => {
+  nock('http://example.test')
+    .get('/')
+    .reply()
+
+  const req = http.get('http://example.test')
+  req.once('socket', socket => {
+    t.deepEqual(socket.address(), {
+      port: 80,
+      family: 'IPv4',
+      address: '127.0.0.1',
+    })
+    t.end()
+  })
+})
+
+test('socket has address() method, https/IPv6', t => {
+  nock('https://example.test')
+    .get('/')
+    .reply()
+
+  const req = https.get('https://example.test', { family: 6 })
+  req.once('socket', socket => {
+    t.deepEqual(socket.address(), {
+      port: 443,
+      family: 'IPv6',
+      address: '::1',
+    })
+    t.end()
+  })
+})
+
 test('socket has setKeepAlive() method', t => {
   nock('http://example.test')
     .get('/')
@@ -481,13 +513,14 @@ test('socket has setKeepAlive() method', t => {
   })
 })
 
-test('socket has unref() method', t => {
+test('socket has ref() and unref() method', t => {
   nock('http://example.test')
     .get('/')
     .reply(200, 'hey')
 
   const req = http.get('http://example.test')
   req.once('socket', socket => {
+    socket.ref()
     socket.unref()
     t.end()
   })
