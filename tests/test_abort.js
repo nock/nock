@@ -15,14 +15,14 @@ test('req.abort() should cause "abort" and "error" to be emitted', t => {
     .delayConnection(500)
     .reply()
 
-  const cbSpy = sinon.spy()
+  const onAbort = sinon.spy()
   const req = http
     .get('http://example.test/')
-    .once('abort', cbSpy)
+    .once('abort', onAbort)
     .once('error', err => {
       // Should trigger last
       expect(err.code).to.equal('ECONNRESET')
-      expect(cbSpy).to.have.been.calledOnce()
+      expect(onAbort).to.have.been.calledOnce()
       scope.done()
       t.end()
     })
