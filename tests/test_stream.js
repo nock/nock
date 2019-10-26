@@ -99,7 +99,7 @@ test("response have 'complete' property and it's true after end", t => {
       res.on('data', onData)
 
       res.on('end', () => {
-        expect(onData).to.have.been.calledOnce()
+        expect(onData).to.have.been.called()
         expect(res.complete).to.be.true()
         scope.done()
         t.end()
