@@ -3,6 +3,7 @@
 const http = require('http')
 const { test } = require('tap')
 const nock = require('..')
+const sinon = require('sinon')
 const got = require('./got_client')
 
 require('./cleanup_after_each')()
@@ -181,4 +182,21 @@ test('resetting nock catastrophically while a request is in progress is handled 
 
   t.equal(body, 'hi')
   scope.done()
+})
+
+test('abort pending request when abortPendingRequests is called', t => {
+  const reqSpy = sinon.spy()
+
+  nock('http://example.test')
+    .get('/')
+    .delayConnection(100)
+    .reply(200, 'OK')
+
+  http.get('http://example.test', reqSpy)
+
+  setTimeout(() => {
+    t.equal(reqSpy.called, false)
+    t.end()
+  }, 200)
+  process.nextTick(nock.abortPendingRequests)
 })

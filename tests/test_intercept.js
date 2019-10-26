@@ -1005,7 +1005,7 @@ test('mikeal/request with strictSSL: true', t => {
       uri: 'https://example.test/what',
       strictSSL: true,
     },
-    function(err, res, body) {
+    function(err, res) {
       t.type(err, 'null')
       t.equal(res && res.statusCode, 200)
       t.end()
@@ -1300,7 +1300,7 @@ test('match domain and path using regexp', t => {
 // https://github.com/nock/nock/issues/1003
 test('correctly parse request without specified path', t => {
   const scope1 = nock('https://example.test')
-    .get('')
+    .get('/')
     .reply(200)
 
   https
@@ -1317,7 +1317,7 @@ test('correctly parse request without specified path', t => {
 
 test('data is sent with flushHeaders', t => {
   const scope1 = nock('https://example.test')
-    .get('')
+    .get('/')
     .reply(200, 'this is data')
 
   https
@@ -1332,6 +1332,28 @@ test('data is sent with flushHeaders', t => {
       })
     })
     .flushHeaders()
+})
+
+// https://github.com/nock/nock/issues/1730
+test('URL path without leading slash throws expected error', t => {
+  t.throws(() => nock('http://example.test').get(''), {
+    message:
+      "Non-wildcard URL path strings must begin with a slash (otherwise they won't match anything) (got: )",
+  })
+
+  t.end()
+})
+
+test('wildcard param URL should not throw error', t => {
+  nock('http://example.test').get('*')
+
+  t.end()
+})
+
+test('with filteringScope, URL path without leading slash does not throw error', t => {
+  nock('http://example.test', { filteringScope: () => {} }).get('')
+
+  t.end()
 })
 
 test('no new keys were added to the global namespace', t => {
