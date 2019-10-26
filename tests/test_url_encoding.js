@@ -1,6 +1,6 @@
 'use strict'
 
-const { test } = require('tap')
+const { test } = require('./fake_tap')
 const { expect } = require('chai')
 const nock = require('..')
 const got = require('./got_client')
