@@ -10,6 +10,7 @@ const nock = require('..')
 const got = require('./got_client')
 
 require('./cleanup_after_each')()
+require('./setup')
 
 test('scope exposes interceptors', t => {
   const scopes = nock.load(path.join(__dirname, 'fixtures', 'goodRequest.json'))
