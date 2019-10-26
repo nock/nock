@@ -2,9 +2,11 @@
 
 function test(description, specBody) {
   if (specBody.constructor.name === 'AsyncFunction') {
-    it(description, async () => specBody())
+    it(description, async function() {
+      await specBody()
+    })
   } else {
-    it(description, done => {
+    it(description, function(done) {
       specBody({ end: done })
     })
   }

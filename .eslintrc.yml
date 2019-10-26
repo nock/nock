@@ -12,6 +12,18 @@ extends:
   - standard
   - prettier
 
+plugins:
+  - mocha
+
+overrides:
+  - files:
+      - 'tests/**/*.js'
+    env:
+      mocha: true
+    rules:
+      mocha/no-exclusive-tests: 'error'
+      mocha/no-mocha-arrows: 'error'
+
 rules:
   # TODO These are included in standard and should be cleaned up and turned on.
   node/no-deprecated-api: 'off' # we still make heavy use of url.parse
@@ -32,3 +44,4 @@ rules:
         'AssignmentExpression': { 'array': false, 'object': false },
       },
     ]
+
