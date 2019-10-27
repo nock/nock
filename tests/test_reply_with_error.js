@@ -4,6 +4,7 @@
 
 const http = require('http')
 const { test } = require('tap')
+const { expect } = require('chai')
 const nock = require('..')
 
 require('./cleanup_after_each')()
@@ -21,9 +22,11 @@ test('replyWithError returns an error on request', t => {
   })
 
   // An error should have have been raised
-  req.on('error', function(e) {
+  req.on('error', e => {
+    expect(e)
+      .to.be.an.instanceof(Error)
+      .and.include({ message: 'Service not found' })
     scope.done()
-    t.equal(e.message, 'Service not found')
     t.end()
   })
 
@@ -43,10 +46,12 @@ test('replyWithError allows json response', t => {
   })
 
   // An error should have have been raised
-  req.on('error', function(e) {
+  req.on('error', e => {
+    expect(e).to.deep.equal({
+      message: 'Service not found',
+      code: 'test',
+    })
     scope.done()
-    t.equal(e.message, 'Service not found')
-    t.equal(e.code, 'test')
     t.end()
   })
 

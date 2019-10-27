@@ -4,6 +4,7 @@
 
 const path = require('path')
 const { test } = require('tap')
+const { expect } = require('chai')
 const proxyquire = require('proxyquire').noPreserveCache()
 const nock = require('..')
 const got = require('./got_client')
@@ -20,8 +21,8 @@ test('reply with file', async t => {
 
   const { statusCode, body } = await got('http://example.test/')
 
-  t.equal(statusCode, 200)
-  t.equal(body, 'Hello from the file!')
+  expect(statusCode).to.equal(200)
+  expect(body).to.equal('Hello from the file!')
 
   scope.done()
 })
@@ -35,8 +36,8 @@ test('reply with file with headers', async t => {
 
   const { statusCode, body } = await got('http://example.test/')
 
-  t.equal(statusCode, 200)
-  t.equal(body.length, 20)
+  expect(statusCode).to.equal(200)
+  expect(body).to.have.lengthOf(20)
   scope.done()
 })
 
@@ -45,15 +46,11 @@ test('reply with file with no fs', t => {
     './interceptor': proxyquire('../lib/interceptor', { fs: null }),
   })
 
-  t.throws(
-    () =>
-      new ScopeWithoutFs('http://example.test')
-        .get('/')
-        .replyWithFile(200, textFile),
-    {
-      message: 'No fs',
-    }
-  )
+  expect(() =>
+    new ScopeWithoutFs('http://example.test')
+      .get('/')
+      .replyWithFile(200, textFile)
+  ).to.throw(Error, 'No fs')
 
   t.end()
 })
