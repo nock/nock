@@ -4,12 +4,10 @@ const nock = require('..')
 const { expect } = require('chai')
 const http = require('http')
 const sinon = require('sinon')
-const { test } = require('tap')
 
 require('./setup')
-require('./cleanup_after_each')()
 
-test('req.abort() should cause "abort" and "error" to be emitted', t => {
+it('req.abort() should cause "abort" and "error" to be emitted', done => {
   const scope = nock('http://example.test')
     .get('/')
     .delayConnection(500)
@@ -24,12 +22,12 @@ test('req.abort() should cause "abort" and "error" to be emitted', t => {
       expect(err.code).to.equal('ECONNRESET')
       expect(onAbort).to.have.been.calledOnce()
       scope.done()
-      t.end()
+      done()
     })
   process.nextTick(() => req.abort())
 })
 
-test('abort is emitted before delay time', t => {
+it('abort is emitted before delay time', done => {
   const scope = nock('http://example.test')
     .get('/')
     .delayConnection(500)
@@ -42,7 +40,7 @@ test('abort is emitted before delay time', t => {
       const actual = Date.now() - start
       expect(actual).to.be.below(250)
       scope.done()
-      t.end()
+      done()
     })
     .once('error', () => {}) // Don't care.
   // Don't bother with the response
@@ -50,7 +48,7 @@ test('abort is emitted before delay time', t => {
   setTimeout(() => req.abort(), 10)
 })
 
-test('Aborting an aborted request should not emit an error', t => {
+it('Aborting an aborted request should not emit an error', done => {
   const scope = nock('http://example.test')
     .get('/')
     .reply()
@@ -70,11 +68,11 @@ test('Aborting an aborted request should not emit an error', t => {
   setTimeout(() => {
     expect(errorCount).to.equal(1, 'Only one error should be sent')
     scope.done()
-    t.end()
+    done()
   }, 10)
 })
 
-test('Aborting a not-yet-ended request should end it', t => {
+it('Aborting a not-yet-ended request should end it', done => {
   // Set up.
   const scope = nock('http://example.test')
     .post('/')
@@ -93,10 +91,10 @@ test('Aborting a not-yet-ended request should end it', t => {
   // Assert.
   scope.done()
 
-  t.end()
+  done()
 })
 
-test('`req.write() on an aborted request should trigger the expected error', t => {
+it('`req.write() on an aborted request should trigger the expected error', done => {
   const scope = nock('http://example.test')
     .get('/')
     .reply()
@@ -112,7 +110,7 @@ test('`req.write() on an aborted request should trigger the expected error', t =
       // This is the abort error under test, triggered by `req.write()`
       expect(err.message).to.equal('Request aborted')
       scope.done()
-      t.end()
+      done()
     })
   })
 
@@ -120,7 +118,7 @@ test('`req.write() on an aborted request should trigger the expected error', t =
   process.nextTick(() => req.write('some nonsense'))
 })
 
-test('`req.end()` on an aborted request should trigger the expected error', t => {
+it('`req.end()` on an aborted request should trigger the expected error', done => {
   const scope = nock('http://example.test')
     .get('/')
     .reply()
@@ -136,7 +134,7 @@ test('`req.end()` on an aborted request should trigger the expected error', t =>
       // This is the abort error under test, triggered by `req.end()`
       expect(err.message).to.equal('Request aborted')
       scope.done()
-      t.end()
+      done()
     })
   })
 
@@ -144,7 +142,7 @@ test('`req.end()` on an aborted request should trigger the expected error', t =>
   process.nextTick(() => req.end())
 })
 
-test('`req.flushHeaders()` on an aborted request should trigger the expected error', t => {
+it('`req.flushHeaders()` on an aborted request should trigger the expected error', done => {
   const scope = nock('http://example.test')
     .get('/')
     .reply()
@@ -160,7 +158,7 @@ test('`req.flushHeaders()` on an aborted request should trigger the expected err
       // This is the abort error under test, triggered by `req.flushHeaders()`
       expect(err.message).to.equal('Request aborted')
       scope.done()
-      t.end()
+      done()
     })
   })
 
