@@ -4,6 +4,8 @@ const { expect } = require('chai')
 const nock = require('..')
 const got = require('./got_client')
 
+require('./setup')
+
 it('url encoding', async () => {
   const scope = nock('http://example.test')
     .get('/key?a=[1]')

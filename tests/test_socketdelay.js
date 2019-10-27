@@ -5,6 +5,8 @@ const { expect } = require('chai')
 const sinon = require('sinon')
 const nock = require('..')
 
+require('./setup')
+
 describe('socketDelay()', () => {
   it('socketDelay', done => {
     nock('http://example.test')
