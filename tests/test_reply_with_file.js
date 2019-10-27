@@ -8,7 +8,7 @@ const proxyquire = require('proxyquire').noPreserveCache()
 const nock = require('..')
 const got = require('./got_client')
 
-require('./cleanup_after_each')()
+require('./setup')
 
 const textFile = path.join(__dirname, '..', 'assets', 'reply_file_1.txt')
 const binaryFile = path.join(__dirname, '..', 'assets', 'reply_file_2.txt.gz')
