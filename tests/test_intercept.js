@@ -1250,6 +1250,7 @@ test('three argument form of http.request: URL, options, and callback', t => {
 /*
  * This test imitates a feature of node-http-proxy (https://github.com/nodejitsu/node-http-proxy) -
  * modifying headers for an in-flight request by modifying them.
+ * https://github.com/nock/nock/pull/1484
  */
 test('works when headers are removed on the socket event', t => {
   // Set up a nock that will fail if it gets an "authorization" header.
