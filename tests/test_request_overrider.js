@@ -570,7 +570,7 @@ test("mocked requests have 'method' property", t => {
 })
 
 // https://github.com/nock/nock/issues/1493
-test("response have 'complete' property and it's true after end", t => {
+test("response has 'complete' property and it's true after end", t => {
   const scope = nock('http://example.test')
     .get('/')
     .reply(200, 'Hello World!')

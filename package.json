@@ -66,7 +66,7 @@
     "test": "npm run -s unit",
     "posttest": "npm run -s prettier:check",
     "coverage": "tap --coverage-report=html && open coverage/lcov-report/index.html",
-    "mocha": "nyc mocha $(grep -lr '^it(' tests)",
+    "mocha": "nyc mocha $(grep -lr '^\\s*it(' tests)",
     "lint": "eslint \"**/*.js\"",
     "prettier": "prettier --write \"**/*.@(js|json|md|ts|yml)\"",
     "prettier:check": "prettier --check \"**/*.@(js|json|md|ts|yml)\"",
