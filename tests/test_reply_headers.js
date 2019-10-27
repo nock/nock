@@ -5,12 +5,15 @@
 
 const { IncomingMessage } = require('http')
 const { test } = require('tap')
+const { expect } = require('chai')
+const sinon = require('sinon')
 const mikealRequest = require('request')
 const lolex = require('lolex')
 const nock = require('..')
 const got = require('./got_client')
 
 require('./cleanup_after_each')()
+require('./setup')
 
 test('reply headers directly with a raw array', async t => {
   const scope = nock('http://example.test')
@@ -24,11 +27,11 @@ test('reply headers directly with a raw array', async t => {
 
   const { headers, rawHeaders } = await got('http://example.test/')
 
-  t.equivalent(headers, {
+  expect(headers).to.deep.equal({
     'x-my-header': 'My Header value',
     'x-other-header': 'My Other Value',
   })
-  t.equivalent(rawHeaders, [
+  expect(rawHeaders).to.deep.equal([
     'X-My-Header',
     'My Header value',
     'X-Other-Header',
@@ -44,8 +47,8 @@ test('reply headers directly with an object', async t => {
 
   const { headers, rawHeaders } = await got('http://example.test/')
 
-  t.equivalent(headers, { 'x-my-headers': 'My Header value' })
-  t.equivalent(rawHeaders, ['X-My-Headers', 'My Header value'])
+  expect(headers).to.deep.equal({ 'x-my-headers': 'My Header value' })
+  expect(rawHeaders).to.deep.equal(['X-My-Headers', 'My Header value'])
   scope.done()
 })
 
@@ -60,11 +63,11 @@ test('reply headers directly with a Map', async t => {
 
   const { headers, rawHeaders } = await got('http://example.test/')
 
-  t.equivalent(headers, {
+  expect(headers).to.deep.equal({
     'x-my-header': 'My Header value',
     'x-other-header': 'My Other Value',
   })
-  t.equivalent(rawHeaders, [
+  expect(rawHeaders).to.deep.equal([
     'X-My-Header',
     'My Header value',
     'X-Other-Header',
@@ -84,11 +87,11 @@ test('reply headers dynamically with a raw array', async t => {
 
   const { headers, rawHeaders } = await got('http://example.test/')
 
-  t.equivalent(headers, {
+  expect(headers).to.deep.equal({
     'x-my-header': 'My Header value',
     'x-other-header': 'My Other Value',
   })
-  t.equivalent(rawHeaders, [
+  expect(rawHeaders).to.deep.equal([
     'X-My-Header',
     'My Header value',
     'X-Other-Header',
@@ -104,8 +107,8 @@ test('reply headers dynamically with an object', async t => {
 
   const { headers, rawHeaders } = await got('http://example.test/')
 
-  t.equivalent(headers, { 'x-my-headers': 'My Header value' })
-  t.equivalent(rawHeaders, ['X-My-Headers', 'My Header value'])
+  expect(headers).to.deep.equal({ 'x-my-headers': 'My Header value' })
+  expect(rawHeaders).to.deep.equal(['X-My-Headers', 'My Header value'])
   scope.done()
 })
 
@@ -120,11 +123,11 @@ test('reply headers dynamically with a Map', async t => {
 
   const { headers, rawHeaders } = await got('http://example.test/')
 
-  t.equivalent(headers, {
+  expect(headers).to.deep.equal({
     'x-my-header': 'My Header value',
     'x-other-header': 'My Other Value',
   })
-  t.equivalent(rawHeaders, [
+  expect(rawHeaders).to.deep.equal([
     'X-My-Header',
     'My Header value',
     'X-Other-Header',
@@ -136,24 +139,26 @@ test('reply headers dynamically with a Map', async t => {
 test('reply headers throws for invalid data', async t => {
   const scope = nock('http://example.test').get('/')
 
-  t.throws(() => scope.reply(200, 'Hello World!', 'foo: bar'), {
-    message:
-      'Headers must be provided as an array of raw values, a Map, or a plain Object. foo: bar',
-  })
+  expect(() => scope.reply(200, 'Hello World!', 'foo: bar')).to.throw(
+    Error,
+    'Headers must be provided as an array of raw values, a Map, or a plain Object. foo: bar'
+  )
 
-  t.throws(() => scope.reply(200, 'Hello World!', false), {
-    message:
-      'Headers must be provided as an array of raw values, a Map, or a plain Object. false',
-  })
+  expect(() => scope.reply(200, 'Hello World!', false)).to.throw(
+    Error,
+    'Headers must be provided as an array of raw values, a Map, or a plain Object. false'
+  )
 })
 
 test('reply headers throws for raw array with an odd number of items', async t => {
   const scope = nock('http://example.test').get('/')
 
-  t.throws(() => scope.reply(200, 'Hello World!', ['one', 'two', 'three']), {
-    message:
-      'Raw headers must be provided as an array with an even number of items. [fieldName, value, ...]',
-  })
+  expect(() =>
+    scope.reply(200, 'Hello World!', ['one', 'two', 'three'])
+  ).to.throw(
+    Error,
+    'Raw headers must be provided as an array with an even number of items. [fieldName, value, ...]'
+  )
 })
 
 test('reply header function is evaluated and the result sent in the mock response', async t => {
@@ -165,48 +170,50 @@ test('reply header function is evaluated and the result sent in the mock respons
 
   const { headers, rawHeaders } = await got('http://example.test/')
 
-  t.equivalent(headers, { 'x-my-headers': 'yo!' })
-  t.equivalent(rawHeaders, ['X-My-Headers', 'yo!'])
+  expect(headers).to.deep.equal({ 'x-my-headers': 'yo!' })
+  expect(rawHeaders).to.deep.equal(['X-My-Headers', 'yo!'])
   scope.done()
 })
 
 test('reply header function receives the correct arguments', async t => {
-  t.plan(4)
+  const myHeaderFnCalled = sinon.spy()
 
   const { ClientRequest: OverriddenClientRequest } = require('http')
   const scope = nock('http://example.test')
     .post('/')
     .reply(200, 'boo!', {
       'X-My-Headers': (req, res, body) => {
-        t.type(req, OverriddenClientRequest)
-        t.type(res, IncomingMessage)
-        t.type(body, Buffer)
-        t.true(Buffer.from('boo!').equals(body))
+        myHeaderFnCalled()
+        expect(req).to.be.an.instanceof(OverriddenClientRequest)
+        expect(res).to.be.an.instanceof(IncomingMessage)
+        expect(body).to.be.an.instanceof(Buffer)
+        expect(Buffer.from('boo!').equals(body)).to.be.true()
         return 'gotcha'
       },
     })
 
   await got.post('http://example.test/')
 
+  expect(myHeaderFnCalled).to.have.been.called()
   scope.done()
 })
 
 test('reply headers function is evaluated exactly once', async t => {
-  let counter = 0
+  const myHeaderFnCalled = sinon.spy()
+
   const scope = nock('http://example.test')
     .get('/')
     .reply(200, 'boo!', {
       'X-My-Headers': () => {
-        ++counter
+        myHeaderFnCalled()
         return 'heya'
       },
     })
 
   await got('http://example.test/')
 
+  expect(myHeaderFnCalled).to.have.been.calledOnce()
   scope.done()
-
-  t.equal(counter, 1)
 })
 
 test('duplicate reply headers function is evaluated once per input field name, in correct order', async t => {
@@ -218,10 +225,8 @@ test('duplicate reply headers function is evaluated once per input field name, i
 
   const { headers, rawHeaders } = await got('http://example.test/')
 
-  t.equivalent(headers, {
-    'x-my-header': 'one, two',
-  })
-  t.equivalent(rawHeaders, ['X-MY-HEADER', 'one', 'x-my-header', 'two'])
+  expect(headers).to.deep.equal({ 'x-my-header': 'one, two' })
+  expect(rawHeaders).to.deep.equal(['X-MY-HEADER', 'one', 'x-my-header', 'two'])
 
   scope.done()
 })
@@ -236,18 +241,18 @@ test('reply header function are re-evaluated for every matching request', async 
     })
 
   const { headers, rawHeaders } = await got('http://example.test/')
-  t.equivalent(headers, { 'x-my-headers': '1' })
-  t.equivalent(rawHeaders, ['X-My-Headers', '1'])
+  expect(headers).to.deep.equal({ 'x-my-headers': '1' })
+  expect(rawHeaders).to.deep.equal(['X-My-Headers', '1'])
 
-  t.equal(counter, 1)
+  expect(counter).to.equal(1)
 
   const { headers: headers2, rawHeaders: rawHeaders2 } = await got(
     'http://example.test/'
   )
-  t.equivalent(headers2, { 'x-my-headers': '2' })
-  t.equivalent(rawHeaders2, ['X-My-Headers', '2'])
+  expect(headers2).to.deep.equal({ 'x-my-headers': '2' })
+  expect(rawHeaders2).to.deep.equal(['X-My-Headers', '2'])
 
-  t.equal(counter, 2)
+  expect(counter).to.equal(2)
 
   scope.done()
 })
@@ -278,26 +283,30 @@ test('duplicate headers are folded the same as Node', async t => {
 
   const { headers, rawHeaders } = await got('http://example.test/')
 
-  t.equivalent(headers, {
+  expect(headers).to.deep.equal({
     'content-type': 'text/html; charset=utf-8',
     'set-cookie': ['set-cookie1=foo', 'set-cookie2=bar', 'set-cookie3=baz'],
     cookie: 'cookie1=foo; cookie2=bar; cookie3=baz',
     'x-custom': 'custom1, custom2, custom3',
   })
-  t.equivalent(rawHeaders, replyHeaders)
+  expect(rawHeaders).to.deep.equal(replyHeaders)
 
   scope.done()
 })
 
 test('replyContentLength() sends explicit content-length header with response', async t => {
+  const response = { hello: 'world' }
+
   const scope = nock('http://example.test')
     .replyContentLength()
     .get('/')
-    .reply(200, { hello: 'world' })
+    .reply(200, response)
 
   const { headers } = await got('http://example.test/')
 
-  t.equal(headers['content-length'], '17')
+  expect(headers['content-length']).to.equal(
+    `${JSON.stringify(response).length}`
+  )
   scope.done()
 })
 
@@ -307,11 +316,11 @@ test('replyDate() sends explicit date header with response', async t => {
   const scope = nock('http://example.test')
     .replyDate(date)
     .get('/')
-    .reply(200, { hello: 'world' })
+    .reply()
 
   const { headers } = await got('http://example.test/')
 
-  t.equal(headers.date, date.toUTCString())
+  expect(headers.date).to.equal(date.toUTCString())
   scope.done()
 })
 
@@ -321,21 +330,19 @@ test('replyDate() sends date header with response', t => {
   const clock = lolex.install()
   const date = new Date()
 
+  t.on('end', () => {
+    clock.uninstall()
+  })
+
   const scope = nock('http://example.test')
     .replyDate()
     .get('/')
-    .reply(200)
+    .reply()
 
   mikealRequest.get('http://example.test', (err, resp) => {
-    clock.uninstall()
-
-    if (err) {
-      throw err
-    }
-
-    t.equal(resp.headers.date, date.toUTCString())
+    expect(err).to.be.null()
+    expect(resp.headers.date).to.equal(date.toUTCString())
     scope.done()
-
     t.end()
   })
 })

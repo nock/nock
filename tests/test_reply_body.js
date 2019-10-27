@@ -3,52 +3,57 @@
 // Tests for the body argument passed to `.reply()`.
 
 const { test } = require('tap')
+const { expect } = require('chai')
 const nock = require('..')
 const got = require('./got_client')
 
 require('./cleanup_after_each')()
+require('./setup')
 
 test('reply with JSON', async t => {
+  const responseBody = { hello: 'world' }
   const scope = nock('http://example.test')
     .get('/')
-    .reply(200, { hello: 'world' })
+    .reply(200, responseBody)
 
   const { statusCode, headers, body } = await got('http://example.test/')
 
-  t.equal(statusCode, 200)
-  t.type(headers.date, 'undefined')
-  t.type(headers['content-length'], 'undefined')
-  t.equal(headers['content-type'], 'application/json')
-  t.equal(body, '{"hello":"world"}', 'response should match')
+  expect(statusCode).to.equal(200)
+  expect(headers).not.to.have.property('date')
+  expect(headers).not.to.have.property('content-length')
+  expect(headers).to.include({ 'content-type': 'application/json' })
+  expect(body)
+    .to.be.a('string')
+    .and.equal(JSON.stringify(responseBody))
   scope.done()
 })
 
 test('reply with JSON array', async t => {
+  const responseBody = [{ hello: 'world' }]
   const scope = nock('http://example.test')
     .get('/')
-    .reply(200, [{ hello: 'world' }])
+    .reply(200, responseBody)
 
   const { statusCode, headers, body } = await got('http://example.test/')
 
-  t.equal(statusCode, 200)
-  t.type(headers.date, 'undefined')
-  t.type(headers['content-length'], 'undefined')
-  t.equal(headers['content-type'], 'application/json')
-  t.equal(body, '[{"hello":"world"}]', 'response should match')
+  expect(statusCode).to.equal(200)
+  expect(headers).not.to.have.property('date')
+  expect(headers).not.to.have.property('content-length')
+  expect(headers).to.include({ 'content-type': 'application/json' })
+  expect(body)
+    .to.be.a('string')
+    .and.equal(JSON.stringify(responseBody))
   scope.done()
 })
 
 test('JSON encoded replies set the content-type header', async t => {
   const scope = nock('http://example.test')
     .get('/')
-    .reply(200, {
-      A: 'b',
-    })
+    .reply(200, { A: 'b' })
 
-  t.equal(
-    (await got('http://example.test/')).headers['content-type'],
-    'application/json'
-  )
+  const { headers } = await got('http://example.test/')
+
+  expect(headers).to.include({ 'content-type': 'application/json' })
 
   scope.done()
 })
@@ -56,20 +61,11 @@ test('JSON encoded replies set the content-type header', async t => {
 test('JSON encoded replies does not overwrite existing content-type header', async t => {
   const scope = nock('http://example.test')
     .get('/')
-    .reply(
-      200,
-      {
-        A: 'b',
-      },
-      {
-        'Content-Type': 'unicorns',
-      }
-    )
+    .reply(200, { A: 'b' }, { 'Content-Type': 'unicorns' })
 
-  t.equal(
-    (await got('http://example.test/')).headers['content-type'],
-    'unicorns'
-  )
+  const { headers } = await got('http://example.test/')
+
+  expect(headers).to.include({ 'content-type': 'unicorns' })
 
   scope.done()
 })
@@ -77,12 +73,11 @@ test('JSON encoded replies does not overwrite existing content-type header', asy
 test("blank response doesn't have content-type application/json attached to it", async t => {
   const scope = nock('http://example.test')
     .get('/')
-    .reply(200)
+    .reply()
 
-  t.equal(
-    (await got('http://example.test/')).headers['content-type'],
-    undefined
-  )
+  const { headers } = await got('http://example.test/')
+
+  expect(headers).not.to.have.property('content-type')
 
   scope.done()
 })
@@ -94,15 +89,11 @@ test('unencodable object throws the expected error', t => {
     },
   }
 
-  t.throws(
-    () =>
-      nock('http://localhost')
-        .get('/')
-        .reply(200, unencodableObject),
-    {
-      message: 'Error encoding response body into JSON',
-    }
-  )
+  expect(() =>
+    nock('http://localhost')
+      .get('/')
+      .reply(200, unencodableObject)
+  ).to.throw(Error, 'Error encoding response body into JSON')
 
   t.end()
 })
@@ -114,8 +105,10 @@ test('reply with missing body defaults to empty', async t => {
 
   const { statusCode, body } = await got('http://example.test/')
 
-  t.is(statusCode, 204)
-  t.equal(body, '')
+  expect(statusCode).to.equal(204)
+  expect(body)
+    .to.be.a('string')
+    .and.equal('')
   scope.done()
 })
 
@@ -128,9 +121,11 @@ test('reply with native boolean as the body', async t => {
 
   const { statusCode, body } = await got('http://example.test/')
 
-  t.is(statusCode, 204)
+  expect(statusCode).to.equal(204)
   // `'false'` is json-stringified `false`.
-  t.equal(body, 'false')
+  expect(body)
+    .to.be.a('string')
+    .and.equal('false')
   scope.done()
 })
 
@@ -141,9 +136,11 @@ test('reply with native null as the body', async t => {
 
   const { statusCode, body } = await got('http://example.test/')
 
-  t.is(statusCode, 204)
+  expect(statusCode).to.equal(204)
   // `'null'` is json-stringified `null`.
-  t.equal(body, 'null')
+  expect(body)
+    .to.be.a('string')
+    .and.equal('null')
   scope.done()
 })
 
@@ -154,20 +151,24 @@ test('reply with missing status code defaults to 200', async t => {
 
   const { statusCode, body } = await got('http://example.test/')
 
-  t.is(statusCode, 200)
-  t.equal(body, '')
+  expect(statusCode).to.equal(200)
+  expect(body)
+    .to.be.a('string')
+    .and.equal('')
   scope.done()
 })
 
 test('reply with invalid status code throws', t => {
   const scope = nock('http://localhost').get('/')
 
-  t.throws(() => scope.reply('200'), {
-    message: 'Invalid string value for status code',
-  })
-  t.throws(() => scope.reply(false), {
-    message: 'Invalid boolean value for status code',
-  })
+  expect(() => scope.reply('200')).to.throw(
+    Error,
+    'Invalid string value for status code'
+  )
+  expect(() => scope.reply(false)).to.throw(
+    Error,
+    'Invalid boolean value for status code'
+  )
 
   t.end()
 })
