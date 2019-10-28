@@ -665,7 +665,7 @@ test('records and replays gzipped nocks correctly', t => {
 
   const server = http.createServer((request, response) => {
     zlib.gzip(exampleText, (err, result) => {
-      expect(err).to.be(null)
+      expect(err).to.be.null()
       response.writeHead(200, { 'content-encoding': 'gzip' })
       response.end(result)
     })
