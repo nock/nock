@@ -5,7 +5,6 @@ const http = require('http')
 const https = require('https')
 const fs = require('fs')
 const zlib = require('zlib')
-const mikealRequest = require('request')
 const superagent = require('superagent')
 const sinon = require('sinon')
 const { expect } = require('chai')
@@ -92,7 +91,7 @@ test('records', async t => {
   ).to.be.true()
 })
 
-test('records objects', t => {
+test('records objects', async t => {
   const gotRequest = sinon.spy()
 
   nock.restore()
@@ -109,32 +108,25 @@ test('records objects', t => {
     server.close()
   })
 
-  server.listen(() => {
-    nock.recorder.rec({
-      dont_print: true,
-      output_objects: true,
-    })
+  await new Promise(resolve => server.listen(resolve))
 
-    const url = `http://localhost:${server.address().port}`
-    mikealRequest(
-      {
-        method: 'POST',
-        url,
-        body: '012345',
-      },
-      () => {
-        expect(gotRequest).to.have.been.calledOnce()
-        nock.restore()
-        const recorded = nock.recorder.play()
-        expect(recorded).to.have.lengthOf(1)
-        expect(recorded[0]).to.include({
-          scope: url,
-          method: 'POST',
-          body: '012345',
-        })
-        t.end()
-      }
-    )
+  nock.recorder.rec({
+    dont_print: true,
+    output_objects: true,
+  })
+
+  const requestBody = '0123455'
+  const url = `http://localhost:${server.address().port}`
+  await got.post(url, { body: requestBody })
+
+  expect(gotRequest).to.have.been.calledOnce()
+  nock.restore()
+  const recorded = nock.recorder.play()
+  expect(recorded).to.have.lengthOf(1)
+  expect(recorded[0]).to.include({
+    scope: url,
+    method: 'POST',
+    body: requestBody,
   })
 })
 
@@ -711,7 +703,7 @@ test('records and replays gzipped nocks correctly', t => {
   })
 })
 
-test('records and replays nocks correctly', t => {
+test('records and replays nocks correctly', async t => {
   const exampleBody = '<html><body>example</body></html>'
 
   const server = http.createServer((request, response) => {
@@ -731,40 +723,30 @@ test('records and replays nocks correctly', t => {
   nock.recorder.clear()
   expect(nock.recorder.play()).to.be.empty()
 
-  server.listen(() => {
-    nock.recorder.rec({
-      dont_print: true,
-      output_objects: true,
-    })
+  await new Promise(resolve => server.listen(resolve))
 
-    const { port } = server.address()
-    mikealRequest(`http://localhost:${port}`, (err, resp, body) => {
-      expect(err).to.be.null()
-      expect(resp).to.be.ok()
-      expect(body).to.equal(exampleBody)
-
-      nock.restore()
-      const recorded = nock.recorder.play()
-      nock.recorder.clear()
-      nock.activate()
-
-      // Two requests, on account of the redirect.
-      expect(recorded).to.have.lengthOf(2)
-      const nocks = nock.define(recorded)
-
-      mikealRequest(
-        `http://localhost:${port}`,
-        (mockedErr, mockedResp, mockedBody) => {
-          expect(mockedErr).to.be.null()
-          expect(mockedBody).to.equal(exampleBody)
-
-          nocks.forEach(nock => nock.done())
-
-          t.end()
-        }
-      )
-    })
+  nock.recorder.rec({
+    dont_print: true,
+    output_objects: true,
   })
+
+  const { port } = server.address()
+
+  const response1 = await got(`http://localhost:${port}`)
+  expect(response1.body).to.equal(exampleBody)
+
+  nock.restore()
+  const recorded = nock.recorder.play()
+  nock.recorder.clear()
+  nock.activate()
+
+  // Two requests, on account of the redirect.
+  expect(recorded).to.have.lengthOf(2)
+  const nocks = nock.define(recorded)
+
+  const response2 = await got(`http://localhost:${port}`)
+  expect(response2.body).to.equal(exampleBody)
+  nocks.forEach(nock => nock.done())
 })
 
 test("doesn't record request headers by default", t => {
