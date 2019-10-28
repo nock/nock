@@ -1000,7 +1000,7 @@ test('encodes the query parameters when not outputting objects', t => {
 test('works with clients listening for readable', t => {
   nock.restore()
   nock.recorder.clear()
-  expect(nock.recorder).play()).to.be.empty()
+  expect(nock.recorder.play()).to.be.empty()
   t.once('end', () => nock.restore())
 
   const requestBody = 'ABCDEF'
