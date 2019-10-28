@@ -1,11 +1,13 @@
 'use strict'
 
 const { test } = require('tap')
+const { expect } = require('chai')
 const nock = require('..')
 const got = require('./got_client')
 const assertRejects = require('assert-rejects')
 
 require('./cleanup_after_each')()
+require('./setup')
 
 test('repeating once', async t => {
   const scope = nock('http://example.test')
@@ -14,7 +16,7 @@ test('repeating once', async t => {
     .reply(200, 'Hello World!')
 
   const { statusCode } = await got('http://example.test/')
-  t.is(statusCode, 200)
+  expect(statusCode).to.equal(200)
 
   await assertRejects(
     got('http://example.test/'),
@@ -34,7 +36,7 @@ test('repeating twice', async t => {
   // eslint-disable-next-line no-unused-vars
   for (const _ of Array(2)) {
     const { statusCode } = await got('http://example.test/')
-    t.is(statusCode, 200)
+    expect(statusCode).to.equal(200)
   }
 
   await assertRejects(
@@ -55,7 +57,7 @@ test('repeating thrice', async t => {
   // eslint-disable-next-line no-unused-vars
   for (const _ of Array(3)) {
     const { statusCode } = await got('http://example.test/')
-    t.is(statusCode, 200)
+    expect(statusCode).to.equal(200)
   }
 
   await assertRejects(
@@ -76,7 +78,7 @@ test('repeating response 4 times', async t => {
   // eslint-disable-next-line no-unused-vars
   for (const _ of Array(4)) {
     const { statusCode } = await got('http://example.test/')
-    t.is(statusCode, 200)
+    expect(statusCode).to.equal(200)
   }
 
   await assertRejects(
@@ -95,7 +97,7 @@ test('times with invalid argument is ignored', async t => {
     .reply(200, 'Hello World!')
 
   const { statusCode } = await got('http://example.test/')
-  t.is(statusCode, 200)
+  expect(statusCode).to.equal(200)
 
   await assertRejects(
     got('http://example.test/'),
@@ -114,8 +116,8 @@ test('isDone() must consider repeated responses', async t => {
 
   // eslint-disable-next-line no-unused-vars
   for (const _ of Array(2)) {
-    t.is(scope.isDone(), false)
+    expect(scope.isDone()).to.be.false()
     await got('http://example.test/')
   }
-  t.is(scope.isDone(), true)
+  expect(scope.isDone()).to.be.true()
 })
