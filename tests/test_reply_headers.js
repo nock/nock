@@ -364,8 +364,6 @@ describe('`replyDate()`', () => {
     })
 
     it('sends date header with response', async () => {
-      const date = new Date()
-
       const scope = nock('http://example.test')
         .replyDate()
         .get('/')
@@ -373,6 +371,7 @@ describe('`replyDate()`', () => {
 
       const req = got('http://example.test/')
       clock.tick()
+      const date = new Date()
       const { headers } = await req
       expect(headers).to.include({ date: date.toUTCString() })
 
