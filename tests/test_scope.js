@@ -3,7 +3,7 @@
 const path = require('path')
 const { expect } = require('chai')
 const sinon = require('sinon')
-const proxyquire = require('proxyquire').noPreserveCache()
+const proxyquire = require('proxyquire').preserveCache()
 const Interceptor = require('../lib/interceptor')
 const nock = require('..')
 const got = require('./got_client')
