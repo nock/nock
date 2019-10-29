@@ -415,6 +415,8 @@ test('request emits socket', t => {
   const req = http.get('http://example.test')
   // Using `this`, so can't use arrow function.
   req.once('socket', function(socket) {
+    // https://github.com/nock/nock/pull/769
+    // https://github.com/nock/nock/pull/779
     t.equal(this, req)
     t.type(socket, Object)
     t.type(socket.getPeerCertificate(), 'string')
