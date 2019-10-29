@@ -24,7 +24,7 @@ it('scope exposes interceptors', () => {
   })
 })
 
-describe('`remove()`', () => {
+describe('`Scope#remove()`', () => {
   it('removes an active mock', () => {
     const scope = nock('http://example.test')
       .get('/')
