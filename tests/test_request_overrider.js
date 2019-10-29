@@ -526,6 +526,18 @@ test('socket has ref() and unref() method', t => {
   })
 })
 
+test('socket has destroy() method', t => {
+  nock('http://example.test')
+    .get('/')
+    .reply(200, 'hey')
+
+  const req = http.get('http://example.test')
+  req.once('socket', socket => {
+    socket.destroy()
+    t.end()
+  })
+})
+
 test('abort destroys socket', t => {
   nock('http://example.test')
     .get('/')
