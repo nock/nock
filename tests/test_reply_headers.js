@@ -371,8 +371,8 @@ describe('`replyDate()`', () => {
 
       const req = got('http://example.test/')
       clock.tick()
-      const date = new Date()
       const { headers } = await req
+      const date = new Date()
       expect(headers).to.include({ date: date.toUTCString() })
 
       scope.done()
