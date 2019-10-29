@@ -3,6 +3,7 @@
 const { test } = require('tap')
 const http = require('http')
 const https = require('https')
+const { URLSearchParams } = require('url')
 const fs = require('fs')
 const zlib = require('zlib')
 const sinon = require('sinon')
