@@ -6,7 +6,6 @@
 const { IncomingMessage } = require('http')
 const { expect } = require('chai')
 const sinon = require('sinon')
-const mikealRequest = require('request')
 const lolex = require('lolex')
 const nock = require('..')
 const got = require('./got_client')
@@ -364,9 +363,7 @@ describe('`replyDate()`', () => {
       }
     })
 
-    // async / got version is returning "not ok test unfinished".
-    // https://github.com/nock/nock/issues/1305#issuecomment-451701657
-    it('sends date header with response', done => {
+    it('sends date header with response', async () => {
       const date = new Date()
 
       const scope = nock('http://example.test')
@@ -374,12 +371,12 @@ describe('`replyDate()`', () => {
         .get('/')
         .reply()
 
-      mikealRequest.get('http://example.test', (err, resp) => {
-        expect(err).to.be.null()
-        expect(resp.headers.date).to.equal(date.toUTCString())
-        scope.done()
-        done()
-      })
+      const req = got('http://example.test/')
+      clock.tick()
+      const { headers } = await req
+      expect(headers).to.include({ date: date.toUTCString() })
+
+      scope.done()
     })
   })
 })
