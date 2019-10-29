@@ -719,6 +719,60 @@ test('records and replays the response body', async t => {
   nocks.forEach(nock => nock.done())
 })
 
+test('when encoding is set during recording, body is still recorded correctly', t => {
+  const responseBody = '<html><body>example</body></html>'
+
+  const server = http.createServer((request, response) => {
+    response.write(responseBody)
+    response.end()
+  })
+  t.once('end', () => server.close())
+
+  nock.restore()
+  nock.recorder.clear()
+  expect(nock.recorder.play()).to.be.empty()
+
+  server.listen(() => {
+    nock.recorder.rec({
+      dont_print: true,
+      output_objects: true,
+    })
+
+    const { port } = server.address()
+
+    const req = http.request(
+      { host: 'localhost', port, path: '/', method: 'POST' },
+      res => {
+        res.setEncoding('hex')
+
+        const hexChunks = []
+        res.on('data', data => {
+          hexChunks.push(data)
+        })
+
+        res.on('end', () => {
+          nock.restore()
+          const recorded = nock.recorder.play()
+          nock.recorder.clear()
+          nock.activate()
+
+          // Confidence check: we're getting hex.
+          expect(hexChunks.join('')).to.equal(
+            Buffer.from(responseBody, 'utf8').toString('hex')
+          )
+
+          // Assert: we're recording utf-8.
+          expect(recorded).to.have.lengthOf(1)
+          expect(recorded[0]).to.include({ response: responseBody })
+
+          t.end()
+        })
+      }
+    )
+    req.end()
+  })
+})
+
 test("doesn't record request headers by default", t => {
   const server = http.createServer((request, response) => {
     response.writeHead(200)
@@ -945,6 +999,7 @@ test('encodes the query parameters when not outputting objects', async t => {
   expect(recorded[0]).to.include('test%20search%2B%2B')
 })
 
+// https://github.com/nock/nock/issues/193
 test('works with clients listening for readable', t => {
   nock.restore()
   nock.recorder.clear()
