@@ -6,7 +6,6 @@ const { test } = require('tap')
 const mikealRequest = require('request')
 const superagent = require('superagent')
 const assertRejects = require('assert-rejects')
-const hyperquest = require('hyperquest')
 const url = require('url')
 const nock = require('..')
 const got = require('./got_client')
@@ -879,22 +878,6 @@ test('mikeal/request with strictSSL: true', t => {
       t.end()
     }
   )
-})
-
-test('hyperquest works', t => {
-  nock('http://example.test')
-    .get('/somepath')
-    .reply(200, 'Yay hyperquest!')
-
-  const req = hyperquest('http://example.test/somepath')
-  let reply = ''
-  req.on('data', function(d) {
-    reply += d
-  })
-  req.once('end', function() {
-    t.equals(reply, 'Yay hyperquest!')
-    t.end()
-  })
 })
 
 test('match domain using regexp', t => {
