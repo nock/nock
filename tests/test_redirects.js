@@ -1,14 +1,12 @@
 'use strict'
 
-const { test } = require('tap')
 const { expect } = require('chai')
 const nock = require('..')
 const got = require('./got_client')
 
-require('./cleanup_after_each')()
 require('./setup')
 
-test('follows redirects', async t => {
+it('follows redirects', async () => {
   const scope = nock('http://example.test')
     .get('/YourAccount')
     .reply(302, undefined, {
