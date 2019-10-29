@@ -5,12 +5,14 @@ const http = require('http')
 const https = require('https')
 const fs = require('fs')
 const zlib = require('zlib')
-const mikealRequest = require('request')
 const superagent = require('superagent')
+const sinon = require('sinon')
+const { expect } = require('chai')
 const nock = require('..')
 const got = require('./got_client')
 
 require('./cleanup_after_each')()
+require('./setup')
 
 let globalCount
 
@@ -29,40 +31,40 @@ test('when request port is different, use the alternate port', async t => {
   await new Promise(resolve => server.listen(resolve))
 
   const { port } = server.address()
-  t.notEqual(port, 80)
+  expect(port).not.to.equal(80)
 
   await got.post(`http://localhost:${port}/`)
 
   const recorded = nock.recorder.play()
-  t.equal(recorded.length, 1)
-  t.true(recorded[0].includes(`nock('http://localhost:${port}',`))
+  expect(recorded).to.have.lengthOf(1)
+  expect(recorded[0]).to.include(`nock('http://localhost:${port}',`)
 })
 
 test('recording turns off nock interception (backward compatibility behavior)', t => {
   //  We ensure that there are no overrides.
   nock.restore()
-  t.false(nock.isActive())
+  expect(nock.isActive()).to.be.false()
   //  We active the nock overriding - as it's done by merely loading nock.
   nock.activate()
-  t.true(nock.isActive())
+  expect(nock.isActive()).to.be.true()
   //  We start recording.
   nock.recorder.rec()
   //  Nothing happens (nothing has been thrown) - which was the original behavior -
   //  and mocking has been deactivated.
-  t.false(nock.isActive())
+  expect(nock.isActive()).to.be.false()
 
   t.end()
 })
 
 test('records', async t => {
-  t.plan(5)
+  const gotRequest = sinon.spy()
 
   nock.restore()
   nock.recorder.clear()
-  t.equal(nock.recorder.play().length, 0)
+  expect(nock.recorder.play()).to.be.empty()
 
   const server = http.createServer((request, response) => {
-    t.pass('server received a request')
+    gotRequest()
     response.writeHead(200)
     response.end()
   })
@@ -74,25 +76,30 @@ test('records', async t => {
 
   await got.post(`http://localhost:${port}`)
 
+  expect(gotRequest).to.have.been.calledOnce()
+
   nock.restore()
 
   const recorded = nock.recorder.play()
-  t.equal(recorded.length, 1)
-  t.type(recorded[0], 'string')
-  t.true(
+  expect(recorded).to.have.lengthOf(1)
+  expect(recorded[0]).to.be.a('string')
+  // TODO: Use chai-string?
+  expect(
     recorded[0].startsWith(
       `\nnock('http://localhost:${port}', {"encodedQueryParams":true})\n  .post('/')`
     )
-  )
+  ).to.be.true()
 })
 
-test('records objects', t => {
+test('records objects', async t => {
+  const gotRequest = sinon.spy()
+
   nock.restore()
   nock.recorder.clear()
-  t.equal(nock.recorder.play().length, 0)
+  expect(nock.recorder.play()).to.be.empty()
 
   const server = http.createServer((request, response) => {
-    t.pass('server received a request')
+    gotRequest()
     response.writeHead(200)
     response.end()
   })
@@ -101,40 +108,38 @@ test('records objects', t => {
     server.close()
   })
 
-  server.listen(() => {
-    const url = `http://localhost:${server.address().port}`
-    const options = {
-      method: 'POST',
-      url,
-      body: '012345',
-    }
+  await new Promise(resolve => server.listen(resolve))
 
-    nock.recorder.rec({
-      dont_print: true,
-      output_objects: true,
-    })
+  nock.recorder.rec({
+    dont_print: true,
+    output_objects: true,
+  })
 
-    mikealRequest(options, () => {
-      nock.restore()
-      const ret = nock.recorder.play()
-      t.equal(ret.length, 1)
-      t.equal(ret[0].scope, url)
-      t.equal(ret[0].method, 'POST')
-      t.equal(ret[0].body, '012345')
-      t.end()
-    })
+  const requestBody = '0123455'
+  const url = `http://localhost:${server.address().port}`
+  await got.post(url, { body: requestBody })
+
+  expect(gotRequest).to.have.been.calledOnce()
+  nock.restore()
+  const recorded = nock.recorder.play()
+  expect(recorded).to.have.lengthOf(1)
+  expect(recorded[0]).to.include({
+    scope: url,
+    method: 'POST',
+    body: requestBody,
   })
 })
 
 test('logs recorded objects', async t => {
-  t.plan(3)
+  const gotRequest = sinon.spy()
+  const loggingFn = sinon.spy()
 
   nock.restore()
   nock.recorder.clear()
-  t.equal(nock.recorder.play().length, 0)
+  expect(nock.recorder.play()).to.be.empty()
 
   const server = http.createServer((request, response) => {
-    t.pass('server received a request')
+    gotRequest()
     response.writeHead(200)
     response.end()
   })
@@ -142,20 +147,22 @@ test('logs recorded objects', async t => {
   await new Promise(resolve => server.listen(resolve))
   const { port } = server.address()
 
-  const logging = log => {
-    t.true(
-      log.startsWith(
-        '\n<<<<<<-- cut here -->>>>>>\n{\n  "scope": "http://localhost:'
-      )
-    )
-  }
-
   nock.recorder.rec({
-    logging,
+    logging: loggingFn,
     output_objects: true,
   })
 
   await got.post(`http://localhost:${port}`)
+
+  expect(gotRequest).to.have.been.calledOnce()
+  expect(loggingFn).to.have.been.calledOnce()
+  expect(
+    loggingFn
+      .getCall(0)
+      .args[0].startsWith(
+        '\n<<<<<<-- cut here -->>>>>>\n{\n  "scope": "http://localhost:'
+      )
+  ).to.be.true()
 
   nock.restore()
 })
@@ -163,7 +170,7 @@ test('logs recorded objects', async t => {
 test('records objects and correctly stores JSON object in body', async t => {
   nock.restore()
   nock.recorder.clear()
-  t.equal(nock.recorder.play().length, 0)
+  expect(nock.recorder.play()).to.be.empty()
 
   const server = http.createServer((request, response) => response.end())
   t.once('end', () => server.close())
@@ -187,19 +194,19 @@ test('records objects and correctly stores JSON object in body', async t => {
   nock.recorder.clear()
   nock.activate()
 
-  t.equal(recorded.length, 1)
+  expect(recorded).to.have.lengthOf(1)
 
   // TODO See https://github.com/nock/nock/issues/1229
 
   // This is the current behavior: store body as decoded JSON.
-  t.deepEqual(recorded[0].body, exampleBody)
+  expect(recorded[0]).to.deep.include({ body: exampleBody })
 
   // This is the desired behavior: store the body as encoded JSON. The second
   // test shows desired behavior: store body as encoded JSON so that JSON
   // strings can be correctly matched at runtime. Because headers are not
   // stored in the recorder output, it is impossible for the loader to
   // differentiate a stored JSON string from a non-JSON body.
-  // t.equal(recorded[0].body, JSON.stringify(exampleBody))
+  // expect(recorded[0]).to.include({ body: JSON.stringify(exampleBody) })
 })
 
 test('records and replays objects correctly', t => {
@@ -220,7 +227,7 @@ test('records and replays objects correctly', t => {
 
   nock.restore()
   nock.recorder.clear()
-  t.equal(nock.recorder.play().length, 0)
+  expect(nock.recorder.play()).to.be.empty()
 
   nock.recorder.rec({
     dont_print: true,
@@ -229,24 +236,24 @@ test('records and replays objects correctly', t => {
 
   server.listen(() => {
     superagent.get(`http://localhost:${server.address().port}`, (err, resp) => {
-      t.ok(!err)
-      t.ok(resp)
-      t.ok(resp.headers)
-      t.strictEqual(resp.text, exampleText)
+      expect(err).to.be.null()
+      expect(resp).to.be.ok()
+      expect(resp.headers).to.be.ok()
+      expect(resp).to.include({ text: exampleText })
 
       nock.restore()
       const recorded = nock.recorder.play()
       nock.recorder.clear()
       nock.activate()
 
-      t.equal(recorded.length, 2)
+      expect(recorded).to.have.lengthOf(2)
       const nocks = nock.define(recorded)
 
       superagent.get(
         `http://localhost:${server.address().port}`,
         (mockedErr, mockedResp) => {
-          t.equal(err, mockedErr)
-          t.strictEqual(resp.text, exampleText)
+          expect(err).to.equal(mockedErr)
+          expect(resp).to.include({ text: exampleText })
 
           nocks.forEach(nock => nock.done())
 
@@ -266,7 +273,7 @@ test('records and replays correctly with filteringRequestBody', t => {
 
   nock.restore()
   nock.recorder.clear()
-  t.equal(nock.recorder.play().length, 0)
+  expect(nock.recorder.play()).to.be.empty()
 
   nock.recorder.rec({
     dont_print: true,
@@ -275,21 +282,21 @@ test('records and replays correctly with filteringRequestBody', t => {
 
   server.listen(() => {
     superagent.get(`http://localhost:${server.address().port}`, (err, resp) => {
-      t.ok(!err)
-      t.ok(resp)
-      t.ok(resp.headers)
+      expect(err).to.be.null()
+      expect(resp).to.be.ok()
+      expect(resp.headers).to.be.ok()
 
       nock.restore()
       const recorded = nock.recorder.play()
       nock.recorder.clear()
       nock.activate()
 
-      t.equal(recorded.length, 1)
-      let filteringRequestBodyCounter = 0
+      expect(recorded).to.have.lengthOf(1)
+      const onFilteringRequestBody = sinon.spy()
       const [definition] = recorded
       definition.filteringRequestBody = (body, aRecodedBody) => {
-        ++filteringRequestBodyCounter
-        t.strictEqual(body, aRecodedBody)
+        onFilteringRequestBody()
+        expect(body).to.equal(aRecodedBody)
         return body
       }
       const nocks = nock.define([definition])
@@ -297,12 +304,12 @@ test('records and replays correctly with filteringRequestBody', t => {
       superagent.get(
         `http://localhost:${server.address().port}`,
         (mockedErr, mockedResp) => {
-          t.equal(err, mockedErr)
-          t.deepEqual(mockedResp.body, resp.body)
+          expect(err).to.equal(mockedErr)
+          expect(mockedResp).to.deep.include({ body: resp.body })
 
           nocks.forEach(nock => nock.done())
 
-          t.strictEqual(filteringRequestBodyCounter, 1)
+          expect(onFilteringRequestBody).to.have.been.calledOnce()
           t.end()
         }
       )
@@ -311,20 +318,20 @@ test('records and replays correctly with filteringRequestBody', t => {
 })
 
 // https://github.com/nock/nock/issues/29
-test('checks if callback is specified', t => {
-  // Use t.plan() to make sure the test doesn't end until the request has
-  // returned _and_ the listen() callback has finished.
-  t.plan(3)
+test('http request without callback should not crash', t => {
+  const serverFinished = sinon.spy()
+
   const server = http.createServer((request, response) => {
     response.write('<html><body>example</body></html>')
     response.end()
-    t.pass()
+    expect(serverFinished).to.have.been.calledOnce()
+    t.end()
   })
   t.once('end', () => server.close())
 
   nock.restore()
   nock.recorder.clear()
-  t.equal(nock.recorder.play().length, 0)
+  expect(nock.recorder.play()).to.be.empty()
 
   server.listen(() => {
     nock.recorder.rec(true)
@@ -337,7 +344,7 @@ test('checks if callback is specified', t => {
       })
       .end()
     nock.restore()
-    t.pass()
+    serverFinished()
   })
 })
 
@@ -354,7 +361,7 @@ test('checks that data is specified', t => {
     body: undefined,
   })
 
-  t.throws(() => req.write(), { message: 'Data was undefined.' })
+  expect(() => req.write()).to.throw(Error, 'Data was undefined.')
   req.abort()
   t.end()
 })
@@ -375,8 +382,8 @@ test('when request body is json, it goes unstringified', async t => {
   await got.post(`http://localhost:${port}/`, { body: JSON.stringify(payload) })
 
   const recorded = nock.recorder.play()
-  t.equal(recorded.length, 1)
-  t.ok(recorded[0].includes('.post(\'/\', {"a":1,"b":true})'))
+  expect(recorded).to.have.lengthOf(1)
+  expect(recorded[0]).to.include('.post(\'/\', {"a":1,"b":true})')
 })
 
 test('when request body is json, it goes unstringified in objects', async t => {
@@ -395,64 +402,68 @@ test('when request body is json, it goes unstringified in objects', async t => {
   await got.post(`http://localhost:${port}/`, { body: JSON.stringify(payload) })
 
   const recorded = nock.recorder.play()
-  t.equal(recorded.length, 1)
-  t.type(recorded[0], 'object')
-  t.type(recorded[0].body, 'object')
-  t.deepEqual(recorded[0].body, payload)
+  expect(recorded).to.have.lengthOf(1)
+  expect(recorded[0]).to.be.an('object')
+  expect(recorded[0].body)
+    .to.be.an('object')
+    .and.deep.equal(payload)
 })
 
 test('records nonstandard ports', t => {
   nock.restore()
   nock.recorder.clear()
-  t.equal(nock.recorder.play().length, 0)
+  expect(nock.recorder.play()).to.be.empty()
 
-  const REQUEST_BODY = 'ABCDEF'
-  const RESPONSE_BODY = '012345'
+  const requestBody = 'ABCDEF'
+  const responseBody = '012345'
 
-  //  Create test http server and perform the tests while it's up.
-  const testServer = http
-    .createServer((req, res) => {
-      res.end(RESPONSE_BODY)
+  const server = http.createServer((req, res) => {
+    res.end(responseBody)
+  })
+
+  server.listen(() => {
+    nock.recorder.rec({
+      dont_print: true,
+      output_objects: true,
     })
-    .listen(8082, err => {
-      t.equal(err, undefined)
 
-      const options = {
+    const { port } = server.address()
+    // Confidence check that we have a non-standard port.
+    expect(port).to.be.greaterThan(8000)
+    const req = http.request(
+      {
         host: 'localhost',
-        port: testServer.address().port,
+        port,
         path: '/',
-      }
-      const recOptions = {
-        dont_print: true,
-        output_objects: true,
-      }
-
-      nock.recorder.rec(recOptions)
-
-      const req = http.request(options, res => {
+      },
+      res => {
         res.resume()
         res.once('end', () => {
           nock.restore()
-          const ret = nock.recorder.play()
-          t.equal(ret.length, 1)
-          t.type(ret[0], 'object')
-          t.equal(ret[0].scope, `http://localhost:${options.port}`)
-          t.equal(ret[0].method, 'GET')
-          t.equal(ret[0].body, REQUEST_BODY)
-          t.equal(ret[0].status, 200)
-          t.equal(ret[0].response, RESPONSE_BODY)
+          const recorded = nock.recorder.play()
+          expect(recorded).to.have.lengthOf(1)
+          expect(recorded[0])
+            .to.be.an('object')
+            .and.include({
+              scope: `http://localhost:${port}`,
+              method: 'GET',
+              body: requestBody,
+              status: 200,
+              response: responseBody,
+            })
           t.end()
-
-          // Close the test server, we are done with it.
-          testServer.close()
+          server.close()
         })
-      })
+      }
+    )
 
-      req.end(REQUEST_BODY)
-    })
+    req.end(requestBody)
+  })
 })
 
 test('req.end accepts and calls a callback when recording', t => {
+  const onEnd = sinon.spy()
+
   const server = http.createServer((request, response) => {
     response.writeHead(200)
     response.end()
@@ -461,12 +472,11 @@ test('req.end accepts and calls a callback when recording', t => {
 
   nock.restore()
   nock.recorder.clear()
-  t.equal(nock.recorder.play().length, 0)
+  expect(nock.recorder.play()).to.be.empty()
 
   server.listen(() => {
     nock.recorder.rec({ dont_print: true })
 
-    let callbackCalled = false
     const req = http.request(
       {
         hostname: 'localhost',
@@ -475,8 +485,8 @@ test('req.end accepts and calls a callback when recording', t => {
         method: 'GET',
       },
       res => {
-        t.true(callbackCalled)
-        t.equal(res.statusCode, 200)
+        expect(onEnd).to.have.been.calledOnce()
+        expect(res.statusCode).to.equal(200)
         res.on('end', () => {
           t.end()
         })
@@ -484,37 +494,34 @@ test('req.end accepts and calls a callback when recording', t => {
       }
     )
 
-    req.end(() => {
-      callbackCalled = true
-    })
+    req.end(onEnd)
   })
 })
 
 test('rec() throws when reinvoked with already recorder requests', t => {
   nock.restore()
   nock.recorder.clear()
-  t.equal(nock.recorder.play().length, 0)
+  expect(nock.recorder.play()).to.be.empty()
 
   nock.recorder.rec()
-  try {
-    nock.recorder.rec()
-    //  This line should never be reached.
-    t.ok(false)
-    t.end()
-  } catch (e) {
-    t.equal(e.toString(), 'Error: Nock recording already in progress')
-    t.end()
-  }
+  expect(() => nock.recorder.rec()).to.throw(
+    Error,
+    'Nock recording already in progress'
+  )
+  t.end()
 })
 
 test('records https correctly', t => {
+  const requestBody = '012345'
+  const responseBody = '<html><body>example</body></html>'
+
   const server = https.createServer(
     {
       key: fs.readFileSync('tests/ssl/ca.key'),
       cert: fs.readFileSync('tests/ssl/ca.crt'),
     },
     (request, response) => {
-      response.write('<html><body>example</body></html>')
+      response.write(responseBody)
       response.end()
     }
   )
@@ -522,7 +529,7 @@ test('records https correctly', t => {
 
   nock.restore()
   nock.recorder.clear()
-  t.equal(nock.recorder.play().length, 0)
+  expect(nock.recorder.play()).to.be.empty()
 
   nock.recorder.rec({
     dont_print: true,
@@ -530,12 +537,13 @@ test('records https correctly', t => {
   })
 
   server.listen(() => {
+    const { port } = server.address()
     https
       .request(
         {
           method: 'POST',
           host: 'localhost',
-          port: server.address().port,
+          port,
           path: '/',
           rejectUnauthorized: false,
         },
@@ -544,20 +552,21 @@ test('records https correctly', t => {
           res.once('end', () => {
             nock.restore()
             const recorded = nock.recorder.play()
-            t.equal(recorded.length, 1)
-            t.type(recorded[0], 'object')
-            t.equal(
-              recorded[0].scope,
-              `https://localhost:${server.address().port}`
-            )
-            t.equal(recorded[0].method, 'POST')
-            t.ok(typeof recorded[0].status !== 'undefined')
-            t.ok(typeof recorded[0].response !== 'undefined')
+            expect(recorded).to.have.lengthOf(1)
+            expect(recorded[0])
+              .to.be.an('object')
+              .and.to.include({
+                scope: `https://localhost:${port}`,
+                method: 'POST',
+                body: requestBody,
+                status: 200,
+                response: responseBody,
+              })
             t.end()
           })
         }
       )
-      .end('012345')
+      .end(requestBody)
   })
 })
 
@@ -567,7 +576,7 @@ test('records request headers correctly as an object', t => {
 
   nock.restore()
   nock.recorder.clear()
-  t.equal(nock.recorder.play().length, 0)
+  expect(nock.recorder.play()).to.be.empty()
 
   server.listen(() => {
     nock.recorder.rec({
@@ -576,11 +585,12 @@ test('records request headers correctly as an object', t => {
       enable_reqheaders_recording: true,
     })
 
+    const { port } = server.address()
     http
       .request(
         {
           hostname: 'localhost',
-          port: server.address().port,
+          port,
           path: '/',
           method: 'GET',
           auth: 'foo:bar',
@@ -590,14 +600,17 @@ test('records request headers correctly as an object', t => {
           res.once('end', () => {
             nock.restore()
             const recorded = nock.recorder.play()
-            t.equal(recorded.length, 1)
-            t.type(recorded[0], 'object')
-            t.equivalent(recorded[0].reqheaders, {
-              host: `localhost:${server.address().port}`,
-              authorization: `Basic ${Buffer.from('foo:bar').toString(
-                'base64'
-              )}`,
-            })
+            expect(recorded).to.have.lengthOf(1)
+            expect(recorded[0])
+              .to.be.an('object')
+              .and.deep.include({
+                reqheaders: {
+                  host: `localhost:${port}`,
+                  authorization: `Basic ${Buffer.from('foo:bar').toString(
+                    'base64'
+                  )}`,
+                },
+              })
             t.end()
           })
         }
@@ -607,14 +620,14 @@ test('records request headers correctly as an object', t => {
 })
 
 test('records request headers correctly when not outputting objects', async t => {
-  t.plan(5)
+  const gotRequest = sinon.spy()
 
   nock.restore()
   nock.recorder.clear()
-  t.equal(nock.recorder.play().length, 0)
+  expect(nock.recorder.play()).to.be.empty()
 
   const server = http.createServer((request, response) => {
-    t.pass('server received a request')
+    gotRequest()
     response.writeHead(200)
     response.end()
   })
@@ -628,13 +641,15 @@ test('records request headers correctly when not outputting objects', async t =>
   })
 
   await got.post(`http://localhost:${port}`, { headers: { 'X-Foo': 'bar' } })
+  expect(gotRequest).to.have.been.calledOnce()
 
   nock.restore()
 
   const recorded = nock.recorder.play()
-  t.equal(recorded.length, 1)
-  t.type(recorded[0], 'string')
-  t.true(recorded[0].includes('  .matchHeader("x-foo", "bar")'))
+  expect(recorded).to.have.lengthOf(1)
+  expect(recorded[0])
+    .to.be.a('string')
+    .and.include('  .matchHeader("x-foo", "bar")')
 })
 
 test('records and replays gzipped nocks correctly', t => {
@@ -642,7 +657,7 @@ test('records and replays gzipped nocks correctly', t => {
 
   const server = http.createServer((request, response) => {
     zlib.gzip(exampleText, (err, result) => {
-      t.notOk(err)
+      expect(err).to.be.null()
       response.writeHead(200, { 'content-encoding': 'gzip' })
       response.end(result)
     })
@@ -651,7 +666,7 @@ test('records and replays gzipped nocks correctly', t => {
 
   nock.restore()
   nock.recorder.clear()
-  t.equal(nock.recorder.play().length, 0)
+  expect(nock.recorder.play()).to.be.empty()
 
   nock.recorder.rec({
     dont_print: true,
@@ -659,38 +674,36 @@ test('records and replays gzipped nocks correctly', t => {
   })
 
   server.listen(() => {
-    superagent.get(`localhost:${server.address().port}`, (err, resp) => {
-      t.ok(!err)
-      t.ok(resp)
-      t.ok(resp.headers)
-      t.equal(resp.headers['content-encoding'], 'gzip')
-      t.equal(resp.text, exampleText)
+    const { port } = server.address()
+    superagent.get(`localhost:${port}`, (err, resp) => {
+      expect(err).to.be.null()
+      expect(resp).to.deep.include({
+        text: exampleText,
+      })
+      expect(resp.headers).to.include({ 'content-encoding': 'gzip' })
 
       nock.restore()
       const recorded = nock.recorder.play()
       nock.recorder.clear()
       nock.activate()
 
-      t.equal(recorded.length, 1)
+      expect(recorded).to.have.lengthOf(1)
       const nocks = nock.define(recorded)
 
-      superagent.get(
-        `localhost:${server.address().port}`,
-        (mockedErr, mockedResp) => {
-          t.equal(err, mockedErr)
-          t.deepEqual(mockedResp.text, exampleText)
-          t.equal(mockedResp.headers['content-encoding'], 'gzip')
+      superagent.get(`localhost:${port}`, (mockedErr, mockedResp) => {
+        expect(err).to.equal(mockedErr)
+        expect(mockedResp).to.include({ text: exampleText })
+        expect(mockedResp.headers).to.include({ 'content-encoding': 'gzip' })
 
-          nocks.forEach(nock => nock.done())
+        nocks.forEach(nock => nock.done())
 
-          t.end()
-        }
-      )
+        t.end()
+      })
     })
   })
 })
 
-test('records and replays nocks correctly', t => {
+test('records and replays nocks correctly', async t => {
   const exampleBody = '<html><body>example</body></html>'
 
   const server = http.createServer((request, response) => {
@@ -708,44 +721,32 @@ test('records and replays nocks correctly', t => {
 
   nock.restore()
   nock.recorder.clear()
-  t.equal(nock.recorder.play().length, 0)
+  expect(nock.recorder.play()).to.be.empty()
 
-  server.listen(() => {
-    nock.recorder.rec({
-      dont_print: true,
-      output_objects: true,
-    })
+  await new Promise(resolve => server.listen(resolve))
 
-    mikealRequest(
-      `http://localhost:${server.address().port}`,
-      (err, resp, body) => {
-        t.notOk(err)
-        t.ok(resp)
-        t.equal(body, exampleBody)
-
-        nock.restore()
-        const recorded = nock.recorder.play()
-        nock.recorder.clear()
-        nock.activate()
-
-        // Two requests, on account of the redirect.
-        t.equal(recorded.length, 2)
-        const nocks = nock.define(recorded)
-
-        mikealRequest(
-          `http://localhost:${server.address().port}`,
-          (mockedErr, mockedResp, mockedBody) => {
-            t.notOk(mockedErr)
-            t.equal(mockedBody, exampleBody)
-
-            nocks.forEach(nock => nock.done())
-
-            t.end()
-          }
-        )
-      }
-    )
+  nock.recorder.rec({
+    dont_print: true,
+    output_objects: true,
   })
+
+  const { port } = server.address()
+
+  const response1 = await got(`http://localhost:${port}`)
+  expect(response1.body).to.equal(exampleBody)
+
+  nock.restore()
+  const recorded = nock.recorder.play()
+  nock.recorder.clear()
+  nock.activate()
+
+  // Two requests, on account of the redirect.
+  expect(recorded).to.have.lengthOf(2)
+  const nocks = nock.define(recorded)
+
+  const response2 = await got(`http://localhost:${port}`)
+  expect(response2.body).to.equal(exampleBody)
+  nocks.forEach(nock => nock.done())
 })
 
 test("doesn't record request headers by default", t => {
@@ -757,7 +758,7 @@ test("doesn't record request headers by default", t => {
 
   nock.restore()
   nock.recorder.clear()
-  t.equal(nock.recorder.play().length, 0)
+  expect(nock.recorder.play()).to.be.empty()
 
   server.listen(() => {
     nock.recorder.rec({
@@ -778,10 +779,10 @@ test("doesn't record request headers by default", t => {
           res.resume()
           res.once('end', () => {
             nock.restore()
-            const ret = nock.recorder.play()
-            t.equal(ret.length, 1)
-            t.type(ret[0], 'object')
-            t.false(ret[0].reqheaders)
+            const recorded = nock.recorder.play()
+            expect(recorded).to.have.lengthOf(1)
+            expect(recorded[0]).to.be.an('object')
+            expect(recorded[0].reqheaders).to.be.undefined()
             t.end()
           })
         }
@@ -800,17 +801,11 @@ test('will call a custom logging function', t => {
   // This also tests that use_separator is on by default.
   nock.restore()
   nock.recorder.clear()
-  t.equal(nock.recorder.play().length, 0)
-
-  const record = []
-  const arrayLog = content => {
-    record.push(content)
-  }
+  expect(nock.recorder.play()).to.be.empty()
 
   server.listen(() => {
-    nock.recorder.rec({
-      logging: arrayLog,
-    })
+    const loggingFn = sinon.spy()
+    nock.recorder.rec({ logging: loggingFn })
 
     http
       .request(
@@ -826,8 +821,8 @@ test('will call a custom logging function', t => {
           res.once('end', () => {
             nock.restore()
 
-            t.equal(record.length, 1)
-            t.type(record[0], 'string')
+            expect(loggingFn).to.have.been.calledOnce()
+            expect(loggingFn.getCall(0).args[0]).to.be.a('string')
             t.end()
           })
         }
@@ -845,16 +840,12 @@ test('use_separator:false is respected', t => {
 
   nock.restore()
   nock.recorder.clear()
-  t.equal(nock.recorder.play().length, 0)
-
-  const record = []
-  const arrayLog = content => {
-    record.push(content)
-  }
+  expect(nock.recorder.play()).to.be.empty()
 
   server.listen(() => {
+    const loggingFn = sinon.spy()
     nock.recorder.rec({
-      logging: arrayLog,
+      logging: loggingFn,
       output_objects: true,
       use_separator: false,
     })
@@ -872,8 +863,10 @@ test('use_separator:false is respected', t => {
           res.resume()
           res.once('end', () => {
             nock.restore()
-            t.equal(record.length, 1)
-            t.type(record[0], 'object') // this is still an object, because the "cut here" strings have not been appended
+            expect(loggingFn).to.have.been.calledOnce()
+            // This is still an object, because the "cut here" strings have not
+            // been appended.
+            expect(loggingFn.getCall(0).args[0]).to.be.an('object')
             t.end()
           })
         }
@@ -891,7 +884,7 @@ test('records request headers except user-agent if enable_reqheaders_recording i
 
   nock.restore()
   nock.recorder.clear()
-  t.equal(nock.recorder.play().length, 0)
+  expect(nock.recorder.play()).to.be.empty()
 
   server.listen(() => {
     nock.recorder.rec({
@@ -913,11 +906,11 @@ test('records request headers except user-agent if enable_reqheaders_recording i
           res.resume()
           res.once('end', () => {
             nock.restore()
-            const ret = nock.recorder.play()
-            t.equal(ret.length, 1)
-            t.type(ret[0], 'object')
-            t.true(ret[0].reqheaders)
-            t.false(ret[0].reqheaders['user-agent'])
+            const recorded = nock.recorder.play()
+            expect(recorded).to.have.lengthOf(1)
+            expect(recorded[0]).to.be.an('object')
+            expect(recorded[0].reqheaders).to.be.an('object')
+            expect(recorded[0].reqheaders['user-agent']).to.be.undefined()
             t.end()
           })
         }
@@ -935,7 +928,7 @@ test('includes query parameters from superagent', t => {
 
   nock.restore()
   nock.recorder.clear()
-  t.equal(nock.recorder.play().length, 0)
+  expect(nock.recorder.play()).to.be.empty()
 
   server.listen(() => {
     nock.recorder.rec({
@@ -948,9 +941,9 @@ test('includes query parameters from superagent', t => {
       .query({ q: 'test search' })
       .end(() => {
         nock.restore()
-        const ret = nock.recorder.play()
-        t.true(ret.length >= 1)
-        t.equal(ret[0].path, '/?q=test%20search')
+        const recorded = nock.recorder.play()
+        expect(recorded).to.have.lengthOf(1)
+        expect(recorded[0]).to.include({ path: '/?q=test%20search' })
         t.end()
       })
   })
@@ -965,7 +958,7 @@ test('encodes the query parameters when not outputting objects', t => {
 
   nock.restore()
   nock.recorder.clear()
-  t.equal(nock.recorder.play().length, 0)
+  expect(nock.recorder.play()).to.be.empty()
 
   server.listen(() => {
     nock.recorder.rec({
@@ -978,9 +971,9 @@ test('encodes the query parameters when not outputting objects', t => {
       .query({ q: 'test search++' })
       .end(() => {
         nock.restore()
-        const recording = nock.recorder.play()
-        t.true(recording.length >= 1)
-        t.true(recording[0].indexOf('test%20search%2B%2B') !== -1)
+        const recorded = nock.recorder.play()
+        expect(recorded).to.have.lengthOf(1)
+        expect(recorded[0]).to.include('test%20search%2B%2B')
         t.end()
       })
   })
@@ -989,7 +982,7 @@ test('encodes the query parameters when not outputting objects', t => {
 test('works with clients listening for readable', t => {
   nock.restore()
   nock.recorder.clear()
-  t.equal(nock.recorder.play().length, 0)
+  expect(nock.recorder.play()).to.be.empty()
   t.once('end', () => nock.restore())
 
   const requestBody = 'ABCDEF'
@@ -1003,11 +996,12 @@ test('works with clients listening for readable', t => {
   server.listen(() => {
     nock.recorder.rec({ dont_print: true, output_objects: true })
 
+    const { port } = server.address()
     http
       .request(
         {
           host: 'localhost',
-          port: server.address().port,
+          port,
           path: '/',
         },
         res => {
@@ -1018,27 +1012,26 @@ test('works with clients listening for readable', t => {
             ++readableCount
             let chunk
             while ((chunk = res.read()) !== null) {
-              t.equal(chunk.toString(), responseBody)
+              expect(chunk.toString()).to.equal(responseBody)
               ++chunkCount
             }
           })
 
           res.once('end', () => {
-            t.equal(readableCount, 1)
-            t.equal(chunkCount, 1)
+            expect(readableCount).to.equal(1)
+            expect(chunkCount).to.equal(1)
 
             const recorded = nock.recorder.play()
-            t.equal(recorded.length, 1)
-            t.type(recorded[0], 'object')
-            t.equal(
-              recorded[0].scope,
-              `http://localhost:${server.address().port}`
-            )
-            t.equal(recorded[0].method, 'GET')
-            t.equal(recorded[0].body, requestBody)
-            t.equal(recorded[0].status, 200)
-            t.equal(recorded[0].response, responseBody)
-
+            expect(recorded).to.have.lengthOf(1)
+            expect(recorded[0])
+              .to.be.an('object')
+              .and.include({
+                scope: `http://localhost:${port}`,
+                method: 'GET',
+                body: requestBody,
+                status: 200,
+                response: responseBody,
+              })
             t.end()
           })
         }
@@ -1048,8 +1041,6 @@ test('works with clients listening for readable', t => {
 })
 
 test('outputs query string parameters using query()', t => {
-  t.plan(7)
-
   const server = http.createServer((request, response) => {
     response.writeHead(200)
     response.end()
@@ -1058,7 +1049,7 @@ test('outputs query string parameters using query()', t => {
 
   nock.restore()
   nock.recorder.clear()
-  t.equal(nock.recorder.play().length, 0)
+  expect(nock.recorder.play()).to.be.empty()
 
   server.listen(() => {
     nock.recorder.rec(true)
@@ -1067,22 +1058,21 @@ test('outputs query string parameters using query()', t => {
       .get(`http://localhost:${server.address().port}/`)
       .query({ param1: 1, param2: 2 })
       .end((err, resp) => {
-        t.notOk(err)
-        t.ok(resp, 'have response')
-        t.ok(resp.headers, 'have headers')
+        expect(err).to.be.null()
+        expect(resp).to.be.ok()
+        expect(resp.headers).to.be.ok()
 
         const recorded = nock.recorder.play()
-        t.equal(recorded.length, 1)
-        t.type(recorded[0], 'string')
-        t.ok(recorded[0].includes(`.query({"param1":"1","param2":"2"})`))
+        expect(recorded).to.have.lengthOf(1)
+        expect(recorded[0])
+          .to.be.a('string')
+          .and.include(`.query({"param1":"1","param2":"2"})`)
         t.end()
       })
   })
 })
 
 test('outputs query string arrays correctly', t => {
-  t.plan(7)
-
   const server = http.createServer((request, response) => {
     response.writeHead(200)
     response.end()
@@ -1091,7 +1081,7 @@ test('outputs query string arrays correctly', t => {
 
   nock.restore()
   nock.recorder.clear()
-  t.equal(nock.recorder.play().length, 0)
+  expect(nock.recorder.play()).to.be.empty()
 
   server.listen(() => {
     nock.recorder.rec(true)
@@ -1100,22 +1090,21 @@ test('outputs query string arrays correctly', t => {
       .get(`http://localhost:${server.address().port}/`)
       .query({ foo: ['bar', 'baz'] })
       .end((err, resp) => {
-        t.notOk(err)
-        t.ok(resp, 'have response')
-        t.ok(resp.headers, 'have headers')
+        expect(err).to.be.null()
+        expect(resp).to.be.ok()
+        expect(resp.headers).to.be.ok()
 
         const recorded = nock.recorder.play()
-        t.equal(recorded.length, 1)
-        t.type(recorded[0], 'string')
-        t.ok(recorded[0].includes(`.query({"foo":["bar","baz"]})`))
+        expect(recorded).to.have.lengthOf(1)
+        expect(recorded[0])
+          .to.be.a('string')
+          .and.include(`.query({"foo":["bar","baz"]})`)
         t.end()
       })
   })
 })
 
 test('removes query params from the path and puts them in query()', t => {
-  t.plan(5)
-
   const server = http.createServer((request, response) => {
     response.writeHead(200)
     response.end()
@@ -1124,7 +1113,7 @@ test('removes query params from the path and puts them in query()', t => {
 
   nock.restore()
   nock.recorder.clear()
-  t.equal(nock.recorder.play().length, 0)
+  expect(nock.recorder.play()).to.be.empty()
   t.once('end', () => nock.restore())
 
   server.listen(() => {
@@ -1141,14 +1130,11 @@ test('removes query params from the path and puts them in query()', t => {
           res.resume()
           res.once('end', () => {
             const recorded = nock.recorder.play()
-            t.equal(recorded.length, 1)
-            t.type(recorded[0], 'string')
-            t.ok(
-              recorded[0].includes(
-                `nock('http://localhost:${server.address().port}',`
-              )
-            )
-            t.ok(recorded[0].includes(`.query({"param1":"1","param2":"2"})`))
+            expect(recorded).to.have.lengthOf(1)
+            expect(recorded[0])
+              .to.be.a('string')
+              .and.include(`nock('http://localhost:${server.address().port}',`)
+              .and.include(`.query({"param1":"1","param2":"2"})`)
             t.end()
           })
         }
@@ -1158,60 +1144,55 @@ test('removes query params from the path and puts them in query()', t => {
 })
 
 test('respects http.request() consumers', t => {
-  //  Create test http server and perform the tests while it's up.
-  const testServer = http
-    .createServer((req, res) => {
-      res.write('foo')
-      setTimeout(() => {
-        res.end('bar')
-      }, 25)
+  const server = http.createServer((req, res) => {
+    res.write('foo')
+    setTimeout(() => {
+      res.end('bar')
+    }, 25)
+  })
+
+  server.listen(() => {
+    nock.restore()
+    nock.recorder.clear()
+    nock.recorder.rec({
+      dont_print: true,
+      output_objects: true,
     })
-    .listen(8083, err => {
-      t.equal(err, undefined)
 
-      nock.restore()
-      nock.recorder.clear()
-      nock.recorder.rec({
-        dont_print: true,
-        output_objects: true,
-      })
-
-      const options = {
+    const req = http.request(
+      {
         host: 'localhost',
-        port: testServer.address().port,
+        port: server.address().port,
         path: '/',
-      }
-      const req = http.request(
-        options,
-        res => {
-          let buffer = Buffer.from('')
+      },
+      res => {
+        let buffer = Buffer.from('')
 
-          setTimeout(() => {
-            res
-              .on('data', data => {
-                buffer = Buffer.concat([buffer, data])
-              })
-              .on('end', () => {
-                nock.restore()
-                t.equal(buffer.toString(), 'foobar')
-                t.end()
+        setTimeout(() => {
+          res
+            .on('data', data => {
+              buffer = Buffer.concat([buffer, data])
+            })
+            .on('end', () => {
+              nock.restore()
+              expect(buffer.toString()).to.equal('foobar')
+              t.end()
 
-                //  Close the test server, we are done with it.
-                testServer.close()
-              })
-          })
-        },
-        50
-      )
+              server.close()
+            })
+        })
+      },
+      50
+    )
 
-      req.end()
-    })
+    req.end()
+  })
 })
 
 test('records and replays binary response correctly', t => {
   nock.restore()
   nock.recorder.clear()
-  t.equal(nock.recorder.play().length, 0)
+  expect(nock.recorder.play()).to.be.empty()
 
   nock.recorder.rec({
     output_objects: true,
@@ -1222,7 +1203,6 @@ test('records and replays binary response correctly', t => {
     '47494638396101000100800000000000ffffff21f90401000000002c000000000100010000020144003b'
   const transparentGifBuffer = Buffer.from(transparentGifHex, 'hex')
 
-  // start server that always responds with transparent gif at available port
   const server = http.createServer((request, response) => {
     response.writeHead(201, {
       'Content-Type': 'image/gif',
@@ -1232,11 +1212,8 @@ test('records and replays binary response correctly', t => {
     response.end()
   })
 
-  server.listen(0, error => {
-    t.error(error)
-
-    // send post request upload the same image to server
-    const postRequestOptions = {
+  server.listen(() => {
+    const options = {
       method: 'PUT',
       host: 'localhost',
       port: server.address().port,
@@ -1246,7 +1223,8 @@ test('records and replays binary response correctly', t => {
         'Content-Length': transparentGifBuffer.length,
       },
     }
-    const postRequest1 = http.request(postRequestOptions, response => {
+
+    const postRequest1 = http.request(options, response => {
       const data = []
 
       response.on('data', chunk => {
@@ -1254,12 +1232,10 @@ test('records and replays binary response correctly', t => {
       })
 
       response.on('end', () => {
-        const result = Buffer.concat(data).toString('hex')
-        t.equal(result, transparentGifHex, 'received gif equals check value')
+        expect(Buffer.concat(data).toString('hex')).to.equal(transparentGifHex)
 
         const recordedFixtures = nock.recorder.play()
 
-        // stop server, stop recording, start intercepting
         server.close(error => {
           t.error(error)
 
@@ -1267,8 +1243,8 @@ test('records and replays binary response correctly', t => {
           nock.activate()
           nock.define(recordedFixtures)
 
-          // send same post request again
-          const postRequest2 = http.request(postRequestOptions, response => {
+          // Send same post request again.
+          const postRequest2 = http.request(options, response => {
             const data = []
 
             response.on('data', chunk => {
@@ -1276,13 +1252,8 @@ test('records and replays binary response correctly', t => {
             })
 
             response.on('end', () => {
-              const result = Buffer.concat(data).toString('hex')
-
-              // expect same outcome, end tests
-              t.equal(
-                result,
-                transparentGifHex,
-                'received gif equals check value'
+              expect(Buffer.concat(data).toString('hex')).to.equal(
+                transparentGifHex
               )
               t.end()
             })
@@ -1305,6 +1276,6 @@ test('teardown', t => {
   if (leaks.length === 1 && leaks[0] === '_key') {
     leaks = []
   }
-  t.deepEqual(leaks, [], 'No leaks')
+  expect(leaks).to.be.empty()
   t.end()
 })
