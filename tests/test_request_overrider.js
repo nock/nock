@@ -648,24 +648,23 @@ test('Request with `Expect: 100-continue` triggers continue event', t => {
     headers: { Expect: '100-continue' },
   })
 
-  const onResponse = sinon.spy()
-
-  req.on('continue', () => {
-    // This is a confidence check. It's not really possible to get the response
-    // until the request has matched, and it won't match until the request body
-    // is sent.
-    expect(onResponse).not.to.have.been.called()
-
-    req.end(exampleRequestBody)
-  })
+  const onData = sinon.spy()
 
   req.on('response', res => {
-    onResponse()
     expect(res.statusCode).to.equal(200)
-
+    // The `end` event will not fire without a `data` listener, though it
+    // will never fire since the body is empty. This is consistent with
+    // the Node docs:
+    // https://nodejs.org/api/http.html#http_class_http_clientrequest
+    res.on('data', onData)
     res.on('end', () => {
+      expect(onData).not.to.have.been.called()
       scope.done()
       t.end()
     })
+  })
+
+  req.on('continue', () => {
+    req.end(exampleRequestBody)
   })
 })
