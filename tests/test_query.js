@@ -1,446 +1,363 @@
 'use strict'
 
-const mikealRequest = require('request')
-const { test } = require('tap')
+const { expect } = require('chai')
+const sinon = require('sinon')
 const url = require('url')
 const nock = require('..')
 const got = require('./got_client')
+const assertRejects = require('assert-rejects')
 
 require('./cleanup_after_each')()
+require('./setup')
 
-test('query() matches a query string of the same name=value', t => {
-  nock('http://example.test')
-    .get('/')
-    .query({ foo: 'bar' })
-    .reply(200)
+describe('query params in path', () => {
+  it('matches that query string', async () => {
+    const scope = nock('http://example.test')
+      .get('/foo?bar=baz')
+      .reply()
 
-  mikealRequest('http://example.test/?foo=bar', function(err, res) {
-    if (err) throw err
-    t.equal(res.statusCode, 200)
-    t.end()
+    const { statusCode } = await got('http://example.test/foo?bar=baz')
+
+    expect(statusCode).to.equal(200)
+    scope.done()
   })
 })
 
-test('query() matches multiple query strings of the same name=value', t => {
-  nock('http://example.test')
-    .get('/')
-    .query({ foo: 'bar', baz: 'foz' })
-    .reply(200)
+describe('`query()`', () => {
+  describe('when called with an object', () => {
+    it('matches a query string of the same name=value', async () => {
+      const scope = nock('http://example.test')
+        .get('/')
+        .query({ foo: 'bar' })
+        .reply()
 
-  mikealRequest('http://example.test/?foo=bar&baz=foz', function(err, res) {
-    if (err) throw err
-    t.equal(res.statusCode, 200)
-    t.end()
-  })
-})
+      const { statusCode } = await got('http://example.test/?foo=bar')
 
-test('literal query params have the same behavior as calling query() directly', async t => {
-  const scope = nock('http://example.test')
-    .get('/foo?bar=baz')
-    .reply()
-
-  const { statusCode } = await got('http://example.test/foo?bar=baz')
-
-  t.is(statusCode, 200)
-  scope.done()
-})
-
-test('query() matches multiple query strings of the same name=value regardless of order', t => {
-  nock('http://example.test')
-    .get('/')
-    .query({ foo: 'bar', baz: 'foz' })
-    .reply(200)
-
-  mikealRequest('http://example.test/?baz=foz&foo=bar', function(err, res) {
-    if (err) throw err
-    t.equal(res.statusCode, 200)
-    t.end()
-  })
-})
-
-test('query() matches query values regardless of their type of declaration', t => {
-  nock('http://example.test')
-    .get('/')
-    .query({ num: 1, bool: true, empty: null, str: 'fou' })
-    .reply(200)
-
-  mikealRequest('http://example.test/?num=1&bool=true&empty=&str=fou', function(
-    err,
-    res
-  ) {
-    if (err) throw err
-    t.equal(res.statusCode, 200)
-    t.end()
-  })
-})
-
-test("query() doesn't match query values of requests without query string", t => {
-  nock('http://example.test')
-    .get('/')
-    .query({ num: 1, bool: true, empty: null, str: 'fou' })
-    .reply(200, 'scope1')
-
-  nock('http://example.test')
-    .get('/')
-    .reply(200, 'scope2')
-
-  mikealRequest('http://example.test', function(err, res) {
-    if (err) throw err
-    t.equal(res.statusCode, 200)
-    t.equal(res.body, 'scope2')
-    t.end()
-  })
-})
-
-test('query() matches a query string using regexp', t => {
-  nock('http://example.test')
-    .get('/')
-    .query({ foo: /.*/ })
-    .reply(200)
-
-  mikealRequest('http://example.test/?foo=bar', function(err, res) {
-    if (err) throw err
-    t.equal(res.statusCode, 200)
-    t.end()
-  })
-})
-
-test('query() accepts URLSearchParams as input', async t => {
-  const params = new url.URLSearchParams({
-    foo: 'bar',
-  })
-
-  const scope = nock('http://example.test')
-    .get('/')
-    .query(params)
-    .reply()
-
-  const { statusCode } = await got('http://example.test?foo=bar')
-
-  t.is(statusCode, 200)
-  scope.done()
-})
-
-test('query() throws if query params have already been defined', async t => {
-  const interceptor = nock('http://example.test').get('/?foo=bar')
-
-  t.throws(
-    () => {
-      interceptor.query({ foo: 'baz' })
-    },
-    {
-      message: 'Query parameters have already been defined',
-    }
-  )
-})
-
-test('query() throws if query() was already called', async t => {
-  const interceptor = nock('http://example.test')
-    .get('/')
-    .query({ foo: 'bar' })
-
-  t.throws(
-    () => {
-      interceptor.query({ baz: 'qux' })
-    },
-    {
-      message: 'Query parameters have already been defined',
-    }
-  )
-})
-
-test('query() throws for invalid arguments', t => {
-  const interceptor = nock('http://example.test').get('/')
-
-  t.throws(
-    () => {
-      interceptor.query('foo=bar')
-    },
-    {
-      message: 'Argument Error: foo=bar',
-    }
-  )
-  t.done()
-})
-
-test('query() matches a query string that contains special RFC3986 characters', t => {
-  nock('http://example.test')
-    .get('/')
-    .query({ 'foo&bar': 'hello&world' })
-    .reply(200)
-
-  const options = {
-    uri: 'http://example.test',
-    qs: {
-      'foo&bar': 'hello&world',
-    },
-  }
-
-  mikealRequest(options, function(err, res) {
-    if (err) throw err
-    t.equal(res.statusCode, 200)
-    t.end()
-  })
-})
-
-test('query() expects unencoded query params', t => {
-  nock('http://example.test')
-    .get('/')
-    .query({ foo: 'hello%20world' })
-    .reply(200)
-
-  mikealRequest('http://example.test?foo=hello%20world', function(err, res) {
-    t.similar(err.toString(), /Error: Nock: No match for request/)
-    t.end()
-  })
-})
-
-test('query() matches a query string with pre-encoded values', t => {
-  nock('http://example.test', { encodedQueryParams: true })
-    .get('/')
-    .query({ foo: 'hello%20world' })
-    .reply(200)
-
-  mikealRequest('http://example.test?foo=hello%20world', function(err, res) {
-    if (err) throw err
-    t.equal(res.statusCode, 200)
-    t.end()
-  })
-})
-
-test('query() with "true" will allow all query strings to pass', t => {
-  nock('http://example.test')
-    .get('/')
-    .query(true)
-    .reply(200)
-
-  mikealRequest('http://example.test/?foo=bar&a=1&b=2', function(err, res) {
-    if (err) throw err
-    t.equal(res.statusCode, 200)
-    t.end()
-  })
-})
-
-test('query() with "{}" will allow a match against ending in ?', t => {
-  nock('http://example.test')
-    .get('/noquerystring')
-    .query({})
-    .reply(200)
-
-  mikealRequest('http://example.test/noquerystring?', function(err, res) {
-    if (err) throw err
-    t.equal(res.statusCode, 200)
-    t.end()
-  })
-})
-
-test('query() with a function, function called with actual queryObject', t => {
-  let queryObject
-
-  const queryValidator = function(qs) {
-    queryObject = qs
-    return true
-  }
-
-  nock('http://example.test')
-    .get('/')
-    .query(queryValidator)
-    .reply(200)
-
-  mikealRequest('http://example.test/?foo=bar&a=1&b=2', function(err, res) {
-    if (err) throw err
-    t.deepEqual(queryObject, { foo: 'bar', a: '1', b: '2' })
-    t.equal(res.statusCode, 200)
-    t.end()
-  })
-})
-
-test('query() with a function, function return true the query treat as matched', t => {
-  const alwasyTrue = function() {
-    return true
-  }
-
-  nock('http://example.test')
-    .get('/')
-    .query(alwasyTrue)
-    .reply(200)
-
-  mikealRequest('http://example.test/?igore=the&actual=query', function(
-    err,
-    res
-  ) {
-    if (err) throw err
-    t.equal(res.statusCode, 200)
-    t.end()
-  })
-})
-
-test('query() with a function, function return false the query treat as Un-matched', t => {
-  const alwayFalse = function() {
-    return false
-  }
-
-  nock('http://example.test')
-    .get('/')
-    .query(alwayFalse)
-    .reply(200)
-
-  mikealRequest('http://example.test/?i=should&pass=?', function(err, res) {
-    t.equal(
-      err.message.trim(),
-      `Nock: No match for request ${JSON.stringify(
-        {
-          method: 'GET',
-          url: 'http://example.test/?i=should&pass=?',
-          headers: { host: 'example.test' },
-        },
-        null,
-        2
-      )}`
-    )
-    t.end()
-  })
-})
-
-test('query() will not match when a query string does not match name=value', t => {
-  nock('https://example.test')
-    .get('/b')
-    .query({ foo: 'bar' })
-    .reply(200)
-
-  mikealRequest('https://example.test/b?foo=baz', function(err, res) {
-    t.equal(
-      err.message.trim(),
-      `Nock: No match for request ${JSON.stringify(
-        {
-          method: 'GET',
-          url: 'https://example.test/b?foo=baz',
-          headers: { host: 'example.test' },
-        },
-        null,
-        2
-      )}`
-    )
-    t.end()
-  })
-})
-
-test('query() will not match when a query string is present that was not registered', t => {
-  nock('https://example.test')
-    .get('/c')
-    .query({ foo: 'bar' })
-    .reply(200)
-
-  mikealRequest('https://example.test/c?foo=bar&baz=foz', function(err) {
-    t.equal(
-      err.message.trim(),
-      `Nock: No match for request ${JSON.stringify(
-        {
-          method: 'GET',
-          url: 'https://example.test/c?foo=bar&baz=foz',
-          headers: { host: 'example.test' },
-        },
-        null,
-        2
-      )}`
-    )
-    t.end()
-  })
-})
-
-test('query() will not match when a query string is malformed', t => {
-  nock('https://example.test')
-    .get('/d')
-    .query({ foo: 'bar' })
-    .reply(200)
-
-  mikealRequest('https://example.test/d?foobar', function(err, res) {
-    t.equal(
-      err.message.trim(),
-      `Nock: No match for request ${JSON.stringify(
-        {
-          method: 'GET',
-          url: 'https://example.test/d?foobar',
-          headers: { host: 'example.test' },
-        },
-        null,
-        2
-      )}`
-    )
-    t.end()
-  })
-})
-
-test('query() will not match when a query string has fewer correct values than expected', t => {
-  nock('http://example.test')
-    .get('/')
-    .query({
-      num: 1,
-      bool: true,
-      empty: null,
-      str: 'fou',
+      expect(statusCode).to.equal(200)
+      scope.done()
     })
-    .reply(200)
 
-  mikealRequest('http://example.test/?num=1str=fou', function(err, res) {
-    t.equal(
-      err.message.trim(),
-      `Nock: No match for request ${JSON.stringify(
-        {
-          method: 'GET',
-          url: 'http://example.test/?num=1str=fou',
-          headers: { host: 'example.test' },
-        },
-        null,
-        2
-      )}`
-    )
-    t.end()
-  })
-})
+    it('matches multiple query strings of the same name=value', async () => {
+      const scope = nock('http://example.test')
+        .get('/')
+        .query({ foo: 'bar', baz: 'foz' })
+        .reply()
 
-test('query(true) will match when the path has no query', t => {
-  nock('http://example.test')
-    .get('/')
-    .query(true)
-    .reply(200)
+      const { statusCode } = await got('http://example.test/?foo=bar&baz=foz')
 
-  mikealRequest('http://example.test', function(err, res) {
-    t.ok(!err, 'no error')
-    t.ok(res)
-    t.equal(res.statusCode, 200)
-    t.end()
-  })
-})
-
-test('query matching should not consider request arrays equal to comma-separated expectations', t => {
-  nock('http://example.test')
-    .get('/')
-    .query({
-      foo: 'bar,baz',
+      expect(statusCode).to.equal(200)
+      scope.done()
     })
-    .reply()
 
-  t.rejects(got('http://example.test?foo[]=bar&foo[]=baz'), {
-    name: 'RequestError',
-    message: 'Nock: No match for request',
-  })
+    it('matches multiple query strings of the same name=value regardless of order', async () => {
+      const scope = nock('http://example.test')
+        .get('/')
+        .query({ foo: 'bar', baz: 'foz' })
+        .reply()
 
-  t.done()
-})
+      const { statusCode } = await got('http://example.test/?baz=foz&foo=bar')
 
-test('query matching should not consider comma-separated requests equal to array expectations', t => {
-  nock('http://example.test')
-    .get('/')
-    .query({
-      foo: ['bar', 'baz'],
+      expect(statusCode).to.equal(200)
+      scope.done()
     })
-    .reply()
 
-  t.rejects(got('http://example.test?foo=bar%2Cbaz'), {
-    name: 'RequestError',
-    message: 'Nock: No match for request',
+    it('matches query values regardless of their type of declaration', async () => {
+      const scope = nock('http://example.test')
+        .get('/')
+        .query({ num: 1, bool: true, empty: null, str: 'fou' })
+        .reply()
+
+      const { statusCode } = await got(
+        'http://example.test/?num=1&bool=true&empty=&str=fou'
+      )
+
+      expect(statusCode).to.equal(200)
+      scope.done()
+    })
+
+    it("doesn't match query values of requests without query string", async () => {
+      const scope1 = nock('http://example.test')
+        .get('/')
+        .query({ num: 1, bool: true, empty: null, str: 'fou' })
+        .reply(200, 'scope1')
+
+      const scope2 = nock('http://example.test')
+        .get('/')
+        .reply(200, 'scope2')
+
+      const { statusCode, body } = await got('http://example.test/')
+
+      expect(statusCode).to.equal(200)
+      expect(body).to.equal('scope2')
+      scope2.done()
+      expect(scope1.isDone()).to.be.false()
+    })
+
+    it('matches a query string using regexp', async () => {
+      const scope = nock('http://example.test')
+        .get('/')
+        .query({ foo: /.*/ })
+        .reply()
+
+      const { statusCode } = await got('http://example.test/?foo=bar')
+
+      expect(statusCode).to.equal(200)
+      scope.done()
+    })
+
+    it('throws if query params have already been defined', () => {
+      const interceptor = nock('http://example.test').get('/?foo=bar')
+
+      expect(() => {
+        interceptor.query({ foo: 'baz' })
+      }).to.throw(Error, 'Query parameters have already been defined')
+    })
+
+    it('throws if it was already called', () => {
+      const interceptor = nock('http://example.test')
+        .get('/')
+        .query({ foo: 'bar' })
+
+      expect(() => {
+        interceptor.query({ baz: 'qux' })
+      }).to.throw(Error, 'Query parameters have already been defined')
+    })
+
+    it('matches a query string that contains special RFC3986 characters', async () => {
+      const scope = nock('http://example.test')
+        .get('/')
+        .query({ 'foo&bar': 'hello&world' })
+        .reply()
+
+      const { statusCode } = await got('http://example.test/', {
+        query: { 'foo&bar': 'hello&world' },
+      })
+
+      expect(statusCode).to.equal(200)
+      scope.done()
+    })
+
+    it('expects unencoded query params', async () => {
+      const scope = nock('http://example.test')
+        .get('/')
+        .query({ foo: 'hello%20world' })
+        .reply()
+
+      await assertRejects(
+        got('http://example.test/?foo=hello%20world'),
+        Error,
+        'Nock: No match for request'
+      )
+
+      const { statusCode } = await got(
+        'http://example.test/?foo=hello%2520world'
+      )
+      expect(statusCode).to.equal(200)
+      scope.done()
+    })
+
+    it('matches a query string with pre-encoded values', async () => {
+      const scope = nock('http://example.test', { encodedQueryParams: true })
+        .get('/')
+        .query({ foo: 'hello%20world' })
+        .reply()
+
+      const { statusCode } = await got('http://example.test/?foo=hello%20world')
+      expect(statusCode).to.equal(200)
+      scope.done()
+    })
+
+    it('when called with "{}" will allow a match against ending in ?', async () => {
+      const scope = nock('http://example.test')
+        .get('/noquerystring')
+        .query({})
+        .reply()
+
+      const { statusCode } = await got('http://example.test/noquerystring?')
+      expect(statusCode).to.equal(200)
+      scope.done()
+    })
+
+    it('will not match when a query string does not match name=value', async () => {
+      nock('http://example.test')
+        .get('/')
+        .query({ foo: 'bar' })
+        .reply()
+
+      await assertRejects(
+        got('http://example.test/?foo=baz'),
+        Error,
+        'Nock: No match for request'
+      )
+    })
+
+    it('will not match when a query string is present that was not registered', async () => {
+      nock('http://example.test')
+        .get('/')
+        .query({ foo: 'bar' })
+        .reply()
+
+      await assertRejects(
+        got('http://example.test/?foo=bar&baz=foz'),
+        Error,
+        'Nock: No match for request'
+      )
+    })
+
+    it('will not match when a query string is malformed', async () => {
+      // This is a valid query string so it's not really malformed, just not
+      // matching. Should this test be removed?
+      nock('http://example.test')
+        .get('/')
+        .query({ foo: 'bar' })
+        .reply()
+
+      await assertRejects(
+        got('http://example.test/?foobar'),
+        Error,
+        'Nock: No match for request'
+      )
+    })
+
+    it('will not match when a query string has fewer correct values than expected', async () => {
+      nock('http://example.test')
+        .get('/')
+        .query({
+          num: 1,
+          bool: true,
+          empty: null,
+          str: 'fou',
+        })
+        .reply()
+
+      await assertRejects(
+        got('http://example.test/?num=1str=fou'),
+        Error,
+        'Nock: No match for request'
+      )
+    })
+
+    it('query matching should not consider request arrays equal to comma-separated expectations', async () => {
+      nock('http://example.test')
+        .get('/')
+        .query({ foo: 'bar,baz' })
+        .reply()
+
+      await assertRejects(
+        got('http://example.test?foo[]=bar&foo[]=baz'),
+        got.RequestError,
+        'Nock: No match for request'
+      )
+    })
+
+    it('query matching should not consider comma-separated requests equal to array expectations', async () => {
+      nock('http://example.test')
+        .get('/')
+        .query({ foo: ['bar', 'baz'] })
+        .reply()
+
+      await assertRejects(
+        got('http://example.test?foo=bar%2Cbaz'),
+        got.RequestError,
+        'Nock: No match for request'
+      )
+    })
   })
 
-  t.done()
+  describe('when called with URLSearchParams', () => {
+    it('matches', async () => {
+      const params = new url.URLSearchParams({ foo: 'bar' })
+
+      const scope = nock('http://example.test')
+        .get('/')
+        .query(params)
+        .reply()
+
+      const { statusCode } = await got('http://example.test?foo=bar')
+
+      expect(statusCode).to.equal(200)
+      scope.done()
+    })
+  })
+
+  describe('when called with invalid arguments', () => {
+    it('throws the expected error', () => {
+      const interceptor = nock('http://example.test').get('/')
+
+      expect(() => {
+        interceptor.query('foo=bar')
+      }).to.throw(Error, 'Argument Error: foo=bar')
+    })
+  })
+
+  describe('when called with `true`', () => {
+    it('will allow all query strings to pass', async () => {
+      const scope = nock('http://example.test')
+        .get('/')
+        .query(true)
+        .reply()
+
+      const { statusCode } = await got('http://example.test/?foo=hello%20world')
+      expect(statusCode).to.equal(200)
+      scope.done()
+    })
+
+    it('will match when the path has no query', async () => {
+      const scope = nock('http://example.test')
+        .get('/')
+        .query(true)
+        .reply()
+
+      const { statusCode } = await got('http://example.test/')
+      expect(statusCode).to.equal(200)
+      scope.done()
+    })
+  })
+
+  describe('when called with a function', () => {
+    it('function called with actual queryObject', async () => {
+      const queryFn = sinon.stub().returns(true)
+      const scope = nock('http://example.test')
+        .get('/')
+        .query(queryFn)
+        .reply()
+
+      const { statusCode } = await got('http://example.test/?foo=bar&a=1&b=2')
+      expect(statusCode).to.equal(200)
+
+      expect(queryFn).to.have.been.calledOnceWithExactly({
+        foo: 'bar',
+        a: '1',
+        b: '2',
+      })
+
+      scope.done()
+    })
+
+    it('function return true the query treat as matched', async () => {
+      const scope = nock('http://example.test')
+        .get('/')
+        .query(() => true)
+        .reply()
+
+      const { statusCode } = await got(
+        'http://example.test/?ignore=the&actual=query'
+      )
+      expect(statusCode).to.equal(200)
+      scope.done()
+    })
+
+    it('function return false the query treat as un-matched', async () => {
+      nock('http://example.test')
+        .get('/')
+        .query(() => false)
+        .reply()
+
+      await assertRejects(
+        got('http://example.test/?i=should&pass=?'),
+        Error,
+        'Nock: No match for request'
+      )
+    })
+  })
 })
