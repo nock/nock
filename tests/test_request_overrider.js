@@ -359,6 +359,21 @@ test('has a req property on the response', t => {
   req.end()
 })
 
+// Hopefully address https://github.com/nock/nock/issues/146, at least in
+// spirit.
+test('request with a large buffer', async t => {
+  const replyLength = 1024 * 1024
+  const replyBuffer = Buffer.from(new Array(replyLength + 1).join('.'))
+  expect(replyBuffer.length).to.equal(replyLength)
+
+  nock('http://example.test')
+    .get('/')
+    .reply(200, replyBuffer, { 'Content-Encoding': 'gzip' })
+
+  const resp = await got('http://example.test', { decompress: false })
+  expect(resp.body).to.deep.equal(replyBuffer)
+})
+
 test('.setNoDelay', t => {
   nock('http://example.test')
     .get('/yay')
