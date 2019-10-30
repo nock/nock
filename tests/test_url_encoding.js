@@ -1,13 +1,12 @@
 'use strict'
 
-const { test } = require('tap')
 const { expect } = require('chai')
 const nock = require('..')
 const got = require('./got_client')
 
-require('./cleanup_after_each')()
+require('./setup')
 
-test('url encoding', async t => {
+it('url encoding', async () => {
   const scope = nock('http://example.test')
     .get('/key?a=[1]')
     .reply(200)

@@ -4,148 +4,158 @@
 // callback with the response body or an array containing the status code and
 // optional response body and headers.
 
-const { test } = require('tap')
+const { expect } = require('chai')
+const assertRejects = require('assert-rejects')
+const sinon = require('sinon')
 const nock = require('..')
 const got = require('./got_client')
 
-require('./cleanup_after_each')()
+require('./setup')
 
-test('reply can take a callback', async t => {
-  const scope = nock('http://example.test')
-    .get('/')
-    .reply(200, (path, requestBody, callback) => callback(null, 'Hello World!'))
+describe('asynchronous `reply()` function', () => {
+  describe('using callback', () => {
+    it('reply can take a callback', async () => {
+      const scope = nock('http://example.test')
+        .get('/')
+        .reply(200, (path, requestBody, callback) =>
+          callback(null, 'Hello World!')
+        )
 
-  const response = await got('http://example.test/', {
-    encoding: null,
+      const { body } = await got('http://example.test/', { encoding: null })
+
+      expect(body).to.be.an.instanceOf(Buffer)
+      expect(body.toString('utf8')).to.equal('Hello World!')
+      scope.done()
+    })
+
+    it('reply takes a callback for status code', async () => {
+      const responseBody = 'Hello, world!'
+
+      const scope = nock('http://example.test')
+        .get('/')
+        .reply((path, requestBody, callback) => {
+          setTimeout(
+            () =>
+              callback(null, [
+                202,
+                responseBody,
+                { 'X-Custom-Header': 'abcdef' },
+              ]),
+            1
+          )
+        })
+
+      const { statusCode, headers, body } = await got('http://example.test/')
+
+      expect(statusCode).to.equal(202)
+      expect(headers).to.deep.equal({ 'x-custom-header': 'abcdef' })
+      expect(body).to.equal(responseBody)
+      scope.done()
+    })
+
+    it('reply should throw on error on the callback', async () => {
+      nock('http://example.test')
+        .get('/')
+        .reply(500, (path, requestBody, callback) =>
+          callback(new Error('Database failed'))
+        )
+
+      await assertRejects(
+        got('http://example.test'),
+        got.RequestError,
+        'Database failed'
+      )
+    })
+
+    it('an error passed to the callback propagates when [err, fullResponseArray] is expected', async () => {
+      nock('http://example.test')
+        .get('/')
+        .reply((path, requestBody, callback) => {
+          callback(Error('boom'))
+        })
+
+      await assertRejects(got('http://example.test'), got.RequestError, 'boom')
+    })
+
+    it('subsequent calls to the reply callback are ignored', async () => {
+      const replyFnCalled = sinon.spy()
+
+      const scope = nock('http://example.test')
+        .get('/')
+        .reply(201, (path, requestBody, callback) => {
+          replyFnCalled()
+          callback(null, 'one')
+          callback(null, 'two')
+          callback(new Error('three'))
+        })
+
+      const { statusCode, body } = await got('http://example.test/')
+
+      expect(replyFnCalled).to.have.been.calledOnce()
+      expect(statusCode).to.equal(201)
+      expect(body).to.equal('one')
+
+      scope.done()
+    })
   })
 
-  scope.done()
-  t.type(response.body, Buffer)
-  t.equal(response.body.toString('utf8'), 'Hello World!')
-})
+  describe('using async/promises', () => {
+    it('reply can take a status code with an 2-arg async function, and passes it the correct arguments', async () => {
+      const scope = nock('http://example.com')
+        .post('/foo')
+        .reply(201, async (path, requestBody) => {
+          expect(path).to.equal('/foo')
+          expect(requestBody).to.equal('request-body')
+          return 'response-body'
+        })
 
-test('reply takes a callback for status code', async t => {
-  const expectedStatusCode = 202
-  const responseBody = 'Hello, world!'
-  const headers = {
-    'X-Custom-Header': 'abcdef',
-  }
+      const { statusCode, body } = await got.post('http://example.com/foo', {
+        body: 'request-body',
+      })
 
-  const scope = nock('http://example.test')
-    .get('/')
-    .reply((path, requestBody, cb) => {
-      setTimeout(() => cb(null, [expectedStatusCode, responseBody, headers]), 1)
+      expect(statusCode).to.equal(201)
+      expect(body).to.equal('response-body')
+      scope.done()
     })
 
-  const response = await got('http://example.test/')
+    it('reply can take a status code with a 0-arg async function, and passes it the correct arguments', async () => {
+      const scope = nock('http://example.com')
+        .get('/')
+        .reply(async () => [201, 'Hello World!'])
 
-  t.equal(response.statusCode, expectedStatusCode, 'sends status code')
-  t.deepEqual(
-    response.headers,
-    { 'x-custom-header': 'abcdef' },
-    'sends headers'
-  )
-  t.equal(response.body, responseBody, 'sends request body')
-  scope.done()
-})
+      const { statusCode, body } = await got('http://example.com/')
 
-test('reply should throw on error on the callback', async t => {
-  nock('http://example.test')
-    .get('/')
-    .reply(500, (path, requestBody, callback) =>
-      callback(new Error('Database failed'))
-    )
-
-  await t.rejects(got('http://example.test'), {
-    name: 'RequestError',
-    message: 'Database failed',
-  })
-})
-
-test('an error passed to the callback propagates when [err, fullResponseArray] is expected', async t => {
-  nock('http://example.test')
-    .get('/')
-    .reply((path, requestBody, callback) => {
-      callback(Error('boom'))
+      expect(statusCode).to.equal(201)
+      expect(body).to.equal('Hello World!')
+      scope.done()
     })
 
-  await t.rejects(got('http://example.test'), {
-    name: 'RequestError',
-    message: 'boom',
-  })
-})
+    it('when reply is called with a status code and an async function that throws, it propagates the error', async () => {
+      nock('http://example.test')
+        .get('/')
+        .reply(201, async () => {
+          throw Error('oh no!')
+        })
 
-test('subsequent calls to the reply callback are ignored', async t => {
-  t.plan(3)
-
-  const scope = nock('http://example.test')
-    .get('/')
-    .reply(201, (path, requestBody, callback) => {
-      callback(null, 'one')
-      callback(null, 'two')
-      callback(new Error('three'))
-      t.pass()
+      await assertRejects(
+        got('http://example.test'),
+        got.RequestError,
+        'oh no!'
+      )
     })
 
-  const { statusCode, body } = await got('http://example.test/')
+    it('when reply is called with an async function that throws, it propagates the error', async () => {
+      nock('http://example.test')
+        .get('/')
+        .reply(async () => {
+          throw Error('oh no!')
+        })
 
-  scope.done()
-  t.is(statusCode, 201)
-  t.equal(body, 'one')
-})
-
-test('reply can take a status code with an 2-arg async function, and passes it the correct arguments', async t => {
-  const scope = nock('http://example.com')
-    .post('/foo')
-    .reply(201, async (path, requestBody) => {
-      t.equal(path, '/foo')
-      t.equal(requestBody, 'request-body')
-      return 'response-body'
+      await assertRejects(
+        got('http://example.test'),
+        got.RequestError,
+        'oh no!'
+      )
     })
-
-  const response = await got.post('http://example.com/foo', {
-    body: 'request-body',
-  })
-
-  t.equal(response.statusCode, 201)
-  t.equal(response.body, 'response-body')
-  scope.done()
-})
-
-test('reply can take a status code with a 0-arg async function, and passes it the correct arguments', async t => {
-  const scope = nock('http://example.com')
-    .get('/')
-    .reply(async () => [201, 'Hello World!'])
-
-  const response = await got('http://example.com/')
-
-  t.equal(response.statusCode, 201)
-  t.equal(response.body, 'Hello World!')
-  scope.done()
-})
-
-test('when reply is called with a status code and an async function that throws, it propagates the error', async t => {
-  nock('http://example.test')
-    .get('/')
-    .reply(201, async () => {
-      throw Error('oh no!')
-    })
-
-  await t.rejects(got('http://example.test'), {
-    name: 'RequestError',
-    message: 'oh no!',
-  })
-})
-
-test('when reply is called with an async function that throws, it propagates the error', async t => {
-  nock('http://example.test')
-    .get('/')
-    .reply(async () => {
-      throw Error('oh no!')
-    })
-
-  await t.rejects(got('http://example.test'), {
-    name: 'RequestError',
-    message: 'oh no!',
   })
 })

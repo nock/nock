@@ -5,9 +5,7 @@ const https = require('https')
 const { test } = require('tap')
 const mikealRequest = require('request')
 const superagent = require('superagent')
-const restify = require('restify-clients')
 const assertRejects = require('assert-rejects')
-const hyperquest = require('hyperquest')
 const url = require('url')
 const nock = require('..')
 const got = require('./got_client')
@@ -740,137 +738,6 @@ test('sending binary and receiving JSON should work ', t => {
   )
 })
 
-test('handles get with restify client', t => {
-  const scope = nock('https://example.test')
-    .get('/get')
-    .reply(200, 'get')
-
-  const client = restify.createClient({
-    url: 'https://example.test',
-  })
-
-  client.get('/get', function(err, req) {
-    t.error(err)
-    req.on('result', function(err, res) {
-      t.error(err)
-      res.body = ''
-      res.setEncoding('utf8')
-      res.on('data', function(chunk) {
-        res.body += chunk
-      })
-
-      res.on('end', function() {
-        t.equal(res.body, 'get')
-        t.end()
-        scope.done()
-      })
-    })
-  })
-})
-
-test('handles post with restify client', t => {
-  const scope = nock('https://example.test')
-    .post('/post', 'hello world')
-    .reply(200, 'post')
-
-  const client = restify.createClient({
-    url: 'https://example.test',
-  })
-
-  client.post('/post', function(err, req) {
-    t.error(err)
-    req.on('result', function(err, res) {
-      t.error(err)
-      res.body = ''
-      res.setEncoding('utf8')
-      res.on('data', function(chunk) {
-        res.body += chunk
-      })
-
-      res.on('end', function() {
-        t.equal(res.body, 'post')
-        t.end()
-        scope.done()
-      })
-    })
-
-    req.write('hello world')
-    req.end()
-  })
-})
-
-test('handles get with restify JsonClient', t => {
-  const scope = nock('https://example.test')
-    .get('/get')
-    .reply(200, { get: 'ok' })
-
-  const client = restify.createJsonClient({
-    url: 'https://example.test',
-  })
-
-  client.get('/get', function(err, req, res, obj) {
-    t.error(err)
-    t.equal(obj.get, 'ok')
-    t.end()
-    scope.done()
-  })
-})
-
-test('handles post with restify JsonClient', t => {
-  const scope = nock('https://example.test')
-    .post('/post', { username: 'banana' })
-    .reply(200, { post: 'ok' })
-
-  const client = restify.createJsonClient({
-    url: 'https://example.test',
-  })
-
-  client.post('/post', { username: 'banana' }, function(err, req, res, obj) {
-    t.error(err)
-    t.equal(obj.post, 'ok')
-    t.end()
-    scope.done()
-  })
-})
-
-test('handles 404 with restify JsonClient', t => {
-  const scope = nock('https://example.test')
-    .put('/404')
-    .reply(404)
-
-  const client = restify.createJsonClient({
-    url: 'https://example.test',
-  })
-
-  client.put('/404', function(err, req, res) {
-    if (!err) {
-      t.fail('No Error was provided')
-    }
-    t.equal(res.statusCode, 404)
-    t.end()
-    scope.done()
-  })
-})
-
-test('handles 500 with restify JsonClient', t => {
-  const scope = nock('https://example.test')
-    .delete('/500')
-    .reply(500)
-
-  const client = restify.createJsonClient({
-    url: 'https://example.test',
-  })
-
-  client.del('/500', function(err, req, res) {
-    if (!err) {
-      t.fail('No Error was provided')
-    }
-    t.equal(res.statusCode, 500)
-    t.end()
-    scope.done()
-  })
-})
-
 test('test request timeout option', t => {
   nock('http://example.test')
     .get('/path')
@@ -1011,22 +878,6 @@ test('mikeal/request with strictSSL: true', t => {
       t.end()
     }
   )
-})
-
-test('hyperquest works', t => {
-  nock('http://example.test')
-    .get('/somepath')
-    .reply(200, 'Yay hyperquest!')
-
-  const req = hyperquest('http://example.test/somepath')
-  let reply = ''
-  req.on('data', function(d) {
-    reply += d
-  })
-  req.once('end', function() {
-    t.equals(reply, 'Yay hyperquest!')
-    t.end()
-  })
 })
 
 test('match domain using regexp', t => {
@@ -1399,6 +1250,7 @@ test('three argument form of http.request: URL, options, and callback', t => {
 /*
  * This test imitates a feature of node-http-proxy (https://github.com/nodejitsu/node-http-proxy) -
  * modifying headers for an in-flight request by modifying them.
+ * https://github.com/nock/nock/pull/1484
  */
 test('works when headers are removed on the socket event', t => {
   // Set up a nock that will fail if it gets an "authorization" header.
