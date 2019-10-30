@@ -6,11 +6,13 @@
 const http = require('http')
 const path = require('path')
 const assertRejects = require('assert-rejects')
+const { expect } = require('chai')
 const { test } = require('tap')
 const nock = require('..')
 const got = require('./got_client')
 
 require('./cleanup_after_each')()
+require('./setup')
 
 const textFile = path.join(__dirname, '..', 'assets', 'reply_file_1.txt')
 
@@ -20,7 +22,7 @@ test("pending mocks doesn't include optional mocks", t => {
     .optionally()
     .reply(200)
 
-  t.deepEqual(nock.pendingMocks(), [])
+  expect(nock.pendingMocks()).to.be.empty()
   t.end()
 })
 
@@ -30,7 +32,7 @@ test('calling optionally(true) on a mock makes it optional', t => {
     .optionally(true)
     .reply(200)
 
-  t.deepEqual(nock.pendingMocks(), [])
+  expect(nock.pendingMocks()).to.be.empty()
   t.end()
 })
 
@@ -40,16 +42,17 @@ test('calling optionally(false) on a mock leaves it as required', t => {
     .optionally(false)
     .reply(200)
 
-  t.notEqual(nock.pendingMocks(), [])
+  expect(nock.pendingMocks()).to.have.lengthOf(1)
   t.end()
 })
 
 test('calling optionally() with a non-boolean argument throws an error', t => {
   const interceptor = nock('http://example.test').get('/')
 
-  t.throws(() => interceptor.optionally('foo'), {
-    message: 'Invalid arguments: argument should be a boolean',
-  })
+  expect(() => interceptor.optionally('foo')).to.throw(
+    Error,
+    'Invalid arguments: argument should be a boolean'
+  )
   t.end()
 })
 
@@ -59,9 +62,9 @@ test('optional mocks are still functional', t => {
     .optionally()
     .reply(200)
 
-  http.get({ host: 'example.test', path: '/abc' }, function(res) {
-    t.assert(res.statusCode === 200, 'should still mock requests')
-    t.deepEqual(nock.pendingMocks(), [])
+  http.get({ host: 'example.test', path: '/abc' }, res => {
+    expect(res.statusCode).to.equal(200)
+    expect(nock.pendingMocks()).to.be.empty()
     t.end()
   })
 })
@@ -72,7 +75,7 @@ test('isDone is true with optional mocks outstanding', t => {
     .optionally()
     .reply(200)
 
-  t.ok(scope.isDone())
+  expect(scope.isDone()).to.be.true()
   t.end()
 })
 
@@ -83,16 +86,16 @@ test('optional but persisted mocks persist, but never appear as pending', async 
     .reply(200)
     .persist()
 
-  t.deepEqual(nock.pendingMocks(), [])
+  expect(nock.pendingMocks()).to.be.empty()
 
   const response1 = await got('http://example.test/')
-  t.equal(response1.statusCode, 200)
+  expect(response1.statusCode).to.equal(200)
 
-  t.deepEqual(nock.pendingMocks(), [])
+  expect(nock.pendingMocks()).to.be.empty()
 
   const response2 = await got('http://example.test/')
-  t.equal(response2.statusCode, 200)
-  t.deepEqual(nock.pendingMocks(), [])
+  expect(response2.statusCode).to.equal(200)
+  expect(nock.pendingMocks()).to.be.empty()
 
   scope.done()
 })
@@ -104,14 +107,14 @@ test('optional repeated mocks execute repeatedly, but never appear as pending', 
     .times(2)
     .reply(200)
 
-  t.deepEqual(nock.pendingMocks(), [])
-  http.get({ host: 'example.test', path: '/456' }, function(res) {
-    t.assert(res.statusCode === 200, 'should mock first request')
-    t.deepEqual(nock.pendingMocks(), [])
+  expect(nock.pendingMocks()).to.be.empty()
+  http.get({ host: 'example.test', path: '/456' }, res => {
+    expect(res.statusCode).to.equal(200)
+    expect(nock.pendingMocks()).to.be.empty()
 
-    http.get({ host: 'example.test', path: '/456' }, function(res) {
-      t.assert(res.statusCode === 200, 'should mock second request')
-      t.deepEqual(nock.pendingMocks(), [])
+    http.get({ host: 'example.test', path: '/456' }, res => {
+      expect(res.statusCode).to.equal(200)
+      expect(nock.pendingMocks()).to.be.empty()
       t.end()
     })
   })
@@ -123,9 +126,11 @@ test("activeMocks returns optional mocks only before they're completed", t => {
     .optionally()
     .reply(200)
 
-  t.deepEqual(nock.activeMocks(), ['GET http://example.test:80/optional'])
+  expect(nock.activeMocks()).to.deep.equal([
+    'GET http://example.test:80/optional',
+  ])
   http.get({ host: 'example.test', path: '/optional' }, function(res) {
-    t.deepEqual(nock.activeMocks(), [])
+    expect(nock.activeMocks()).to.be.empty()
     t.end()
   })
 })
@@ -136,11 +141,15 @@ test('activeMocks always returns persisted mocks', async t => {
     .reply(200)
     .persist()
 
-  t.deepEqual(nock.activeMocks(), ['GET http://example.test:80/persisted'])
+  expect(nock.activeMocks()).to.deep.equal([
+    'GET http://example.test:80/persisted',
+  ])
 
   await got('http://example.test/persisted')
 
-  t.deepEqual(nock.activeMocks(), ['GET http://example.test:80/persisted'])
+  expect(nock.activeMocks()).to.deep.equal([
+    'GET http://example.test:80/persisted',
+  ])
 
   scope.done()
 })
@@ -151,15 +160,15 @@ test('persists interceptors', async t => {
     .get('/')
     .reply(200, 'Persisting all the way')
 
-  t.false(scope.isDone())
+  expect(scope.isDone()).to.be.false()
 
   await got('http://example.test/')
 
-  t.true(scope.isDone())
+  expect(scope.isDone()).to.be.true()
 
   await got('http://example.test/')
 
-  t.true(scope.isDone())
+  expect(scope.isDone()).to.be.true()
 })
 
 test('Persisted interceptors are in pendingMocks initially', async t => {
@@ -168,7 +177,7 @@ test('Persisted interceptors are in pendingMocks initially', async t => {
     .reply(200, 'Persisted reply')
     .persist()
 
-  t.deepEqual(scope.pendingMocks(), ['GET http://example.test:80/abc'])
+  expect(scope.pendingMocks()).to.deep.equal(['GET http://example.test:80/abc'])
 })
 
 test('Persisted interceptors are not in pendingMocks after the first request', async t => {
@@ -179,7 +188,7 @@ test('Persisted interceptors are not in pendingMocks after the first request', a
 
   await got('http://example.test/def')
 
-  t.deepEqual(scope.pendingMocks(), [])
+  expect(scope.pendingMocks()).to.deep.equal([])
 })
 
 test('persist reply with file', async t => {
@@ -192,8 +201,8 @@ test('persist reply with file', async t => {
 
   for (let i = 0; i < 2; ++i) {
     const { statusCode, body } = await got('http://example.test/')
-    t.equal(statusCode, 200)
-    t.equal(body, 'Hello from the file!')
+    expect(statusCode).to.equal(200)
+    expect(body).to.equal('Hello from the file!')
   }
 })
 
@@ -203,19 +212,19 @@ test('stop persisting a persistent nock', async t => {
     .get('/')
     .reply(200, 'Persisting all the way')
 
-  t.false(scope.isDone())
+  expect(scope.isDone()).to.be.false()
 
   await got('http://example.test/')
 
-  t.true(scope.isDone())
-  t.deepEqual(nock.activeMocks(), ['GET http://example.test:80/'])
+  expect(scope.isDone()).to.be.true()
+  expect(nock.activeMocks()).to.deep.equal(['GET http://example.test:80/'])
 
   scope.persist(false)
 
   await got('http://example.test/')
 
-  t.equal(nock.activeMocks().length, 0)
-  t.true(scope.isDone())
+  expect(nock.activeMocks()).to.be.empty()
+  expect(scope.isDone()).to.be.true()
 
   await assertRejects(
     got('http://example.test/'),
@@ -225,8 +234,9 @@ test('stop persisting a persistent nock', async t => {
 })
 
 test("should throw an error when persist flag isn't a boolean", t => {
-  t.throws(() => nock('http://example.test').persist('string'), {
-    message: 'Invalid arguments: argument should be a boolean',
-  })
+  expect(() => nock('http://example.test').persist('string')).to.throw(
+    Error,
+    'Invalid arguments: argument should be a boolean'
+  )
   t.end()
 })
