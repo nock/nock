@@ -723,38 +723,22 @@ test('superagent posts', t => {
     })
 })
 
-// TODO: Try to rewrite using got/async.
-test('sending binary and receiving JSON should work ', t => {
+test('sending binary and receiving JSON should work', async t => {
   const scope = nock('http://example.test')
     .filteringRequestBody(/.*/, '*')
     .post('/some/path', '*')
     .reply(201, { foo: '61' }, { 'Content-Type': 'application/json' })
 
-  mikealRequest(
-    {
-      method: 'POST',
-      uri: 'http://example.test/some/path',
-      body: Buffer.from('ffd8ffe000104a46494600010101006000600000ff', 'hex'),
-      headers: { Accept: 'application/json', 'Content-Length': 23861 },
-    },
-    function(err, res, body) {
-      t.error(err)
-      scope.done()
-
-      t.equal(res.statusCode, 201)
-      t.equal(body.length, 12)
-
-      let json
-      try {
-        json = JSON.parse(body)
-      } catch (e) {
-        json = {}
-      }
-
-      t.equal(json.foo, '61')
-      t.end()
-    }
-  )
+  const { statusCode, body } = await got.post('http://example.test/some/path', {
+    body: Buffer.from('ffd8ffe000104a46494600010101006000600000ff', 'hex'),
+    headers: { Accept: 'application/json', 'Content-Length': 23861 },
+  })
+  expect(statusCode).to.equal(201)
+  expect(body)
+    .to.be.a('string')
+    .and.have.lengthOf(12)
+  expect(JSON.parse(body)).to.deep.equal({ foo: '61' })
+  scope.done()
 })
 
 // TODO: What is the intention of this test? Should it be kept?
@@ -893,61 +877,44 @@ test('mikeal/request with strictSSL: true', t => {
   )
 })
 
-// TODO: Rewrite using got/async.
-test('match domain using regexp', t => {
-  nock(/regexexample\.test/)
+test('match domain using regexp', async t => {
+  const scope = nock(/regexexample\.test/)
     .get('/resources')
-    .reply(200, 'Match regex')
+    .reply()
 
-  mikealRequest.get('http://regexexample.test/resources', function(
-    err,
-    res,
-    body
-  ) {
-    t.type(err, 'null')
-    t.equal(res.statusCode, 200)
-    t.equal(body, 'Match regex')
-
-    t.end()
-  })
+  const { statusCode } = await got('http://regexexample.test/resources')
+  expect(statusCode).to.equal(200)
+  scope.done()
 })
 
 // https://github.com/nock/nock/issues/1137
-// TODO: Rewrite using got/async.
-test('match domain using regexp with path as callback', t => {
-  nock(/.*/)
+test('match domain using regexp with path as callback', async t => {
+  const scope = nock(/.*/)
     .get(() => true)
     .reply(200, 'Match regex')
 
-  mikealRequest.get('http://example.test/resources', function(err, res, body) {
-    t.type(err, 'null')
-    t.equal(res.statusCode, 200)
-    t.equal(body, 'Match regex')
-    t.end()
-  })
+  const { statusCode } = await got('http://example.test/resources')
+  expect(statusCode).to.equal(200)
+  scope.done()
 })
 
 // https://github.com/nock/nock/issues/508
-// TODO: Rewrite using got/async.
-test('match multiple interceptors with regexp domain', t => {
+test('match multiple interceptors with regexp domain', async t => {
   nock(/chainregex/)
     .get('/')
     .reply(200, 'Match regex')
     .get('/')
     .reply(500, 'Match second intercept')
 
-  mikealRequest.get('http://chainregex.test', function(err, res, body) {
-    t.type(err, 'null')
-    t.equal(res.statusCode, 200)
-    t.equal(body, 'Match regex')
+  const response1 = await got('http://chainregex.test/')
+  expect(response1).to.include({ statusCode: 200, body: 'Match regex' })
 
-    mikealRequest.get('http://chainregex.test', function(err, res, body) {
-      t.type(err, 'null')
-      t.equal(res.statusCode, 500)
-      t.equal(body, 'Match second intercept')
-
-      t.end()
-    })
+  const response2 = await got('http://chainregex.test/', {
+    throwHttpErrors: false,
+  })
+  expect(response2).to.include({
+    statusCode: 500,
+    body: 'Match second intercept',
   })
 })
 
@@ -974,8 +941,7 @@ test(
   }
 )
 
-// TODO: Rewrite using got/async.
-test('match domain using intercept callback', t => {
+test('match domain using intercept callback', async t => {
   const validUrl = ['/cats', '/dogs']
 
   nock('http://example.test')
@@ -986,137 +952,72 @@ test('match domain using intercept callback', t => {
     .get('/cats')
     .reply(200, 'Match intercept 2')
 
-  mikealRequest.get('http://example.test/cats', function(err, res, body) {
-    t.type(err, 'null')
-    t.equal(res.statusCode, 200)
-    t.equal(body, 'Match intercept')
+  const response1 = await got('http://example.test/cats')
+  expect(response1).to.include({ statusCode: 200, body: 'Match intercept' })
 
-    // This one should match the second .get()
-    mikealRequest.get('http://example.test/cats', function(err, res, body) {
-      t.type(err, 'null')
-      t.equal(res.statusCode, 200)
-      t.equal(body, 'Match intercept 2')
-      t.end()
-    })
-  })
+  const response2 = await got('http://example.test/cats')
+  expect(response2).to.include({ statusCode: 200, body: 'Match intercept 2' })
 })
 
-// TODO: Rewrite using got/async.
-test('match path using regexp', t => {
+test('match path using regexp', async t => {
   nock('http://example.test')
     .get(/regex$/)
     .reply(200, 'Match regex')
 
-  mikealRequest.get('http://example.test/resources/regex', function(
-    err,
-    res,
-    body
-  ) {
-    t.type(err, 'null')
-    t.equal(res.statusCode, 200)
-    t.equal(body, 'Match regex')
-    t.end()
-  })
+  const { statusCode, body } = await got('http://example.test/resources/regex')
+  expect(statusCode).to.equal(200)
+  expect(body).to.equal('Match regex')
 })
 
-// TODO: Rewrite using got/async.
-test('match path using function', t => {
+test('match path using function', async t => {
   const path = '/match/uri/function'
-  const options = {
-    hostname: 'example.test',
-    path,
-  }
-  const uriFunction = function(uri) {
-    return uri === path
-  }
+  const urlFunction = uri => uri === path
 
-  nock(`http://${options.hostname}`)
-    .delete(uriFunction)
+  nock(`http://example.test`)
+    .delete(urlFunction)
     .reply(200, 'Match DELETE')
-    .get(uriFunction)
+    .get(urlFunction)
     .reply(200, 'Match GET')
-    .head(uriFunction)
+    .head(urlFunction)
     .reply(200, 'Match HEAD')
-    .merge(uriFunction)
+    .merge(urlFunction)
     .reply(200, 'Match MERGE')
-    .options(uriFunction)
+    .options(urlFunction)
     .reply(200, 'Match OPTIONS')
-    .patch(uriFunction)
+    .patch(urlFunction)
     .reply(200, 'Match PATCH')
-    .post(uriFunction)
+    .post(urlFunction)
     .reply(200, 'Match POST')
-    .put(uriFunction)
+    .put(urlFunction)
     .reply(200, 'Match PUT')
 
-  options.method = 'POST'
-  http
-    .request(options, function(res) {
-      res.setEncoding('utf8')
-      t.equal(res.statusCode, 200)
-      let body = ''
-      res.on('data', function(data) {
-        body += data
-      })
-      res.on('end', function() {
-        t.equal(body, `Match ${options.method}`)
+  const postResponse = await got.post('http://example.test/match/uri/function')
+  expect(postResponse).to.include({ statusCode: 200, body: `Match POST` })
 
-        options.method = 'GET'
-        http
-          .request(options, function(res) {
-            res.setEncoding('utf8')
-            t.equal(res.statusCode, 200)
-            let body = ''
-            res.on('data', function(data) {
-              body += data
-            })
-            res.on('end', function() {
-              t.equal(body, `Match ${options.method}`)
+  const getResponse = await got('http://example.test/match/uri/function')
+  expect(getResponse).to.include({ statusCode: 200, body: `Match GET` })
 
-              options.method = 'OPTIONS'
-              options.path = '/no/match'
-              http
-                .request(options)
-                .on('error', e => {
-                  t.similar(e.toString(), /Error: Nock: No match for request/)
-                  t.end()
-                })
-                .end()
-            })
-          })
-          .end()
-      })
-    })
-    .end()
+  await assertRejects(
+    got.head('http://example.test/do/not/match'),
+    got.RequestError,
+    'Nock: No match for request'
+  )
 })
 
-// TODO: Rewrite using got/async.
-test('you must setup an interceptor for each request', t => {
-  const scope = nock('http://example.test')
+test('you must setup an interceptor for each request', async t => {
+  nock('http://example.test')
     .get('/hey')
     .reply(200, 'First match')
 
-  mikealRequest.get('http://example.test/hey', function(error, res, body) {
-    t.error(error)
-    t.equal(res.statusCode, 200)
-    t.equal(body, 'First match', 'should match first request response body')
+  const { statusCode, body } = await got('http://example.test/hey')
+  expect(statusCode).to.equal(200)
+  expect(body).to.equal('First match')
 
-    mikealRequest.get('http://example.test/hey', function(error, res, body) {
-      t.equal(
-        error && error.toString(),
-        `Error: Nock: No match for request ${JSON.stringify(
-          {
-            method: 'GET',
-            url: 'http://example.test/hey',
-            headers: { host: 'example.test' },
-          },
-          null,
-          2
-        )}`
-      )
-      scope.done()
-      t.end()
-    })
-  })
+  await assertRejects(
+    got('http://example.test/hey'),
+    Error,
+    'Nock: No match for request'
+  )
 })
 
 // TODO: What is the intention of this test?
@@ -1147,25 +1048,16 @@ test('no content type provided', t => {
 })
 
 // https://github.com/nock/nock/issues/835
-// TODO: Rewrite using got/async.
-test('match domain and path using regexp', t => {
-  const imgResponse = 'Matched Images Page'
-
+test('match domain and path using regexp', async t => {
+  const responseBody = 'this is the response'
   const scope = nock(/example/)
     .get(/img/)
-    .reply(200, imgResponse)
+    .reply(200, responseBody)
 
-  mikealRequest.get('http://example.test/imghp?hl=en', function(
-    err,
-    res,
-    body
-  ) {
-    scope.done()
-    t.type(err, 'null')
-    t.equal(res.statusCode, 200)
-    t.equal(body, imgResponse)
-    t.end()
-  })
+  const { statusCode, body } = await got('http://example.test/imghp?hl=en')
+  expect(statusCode).to.equal(200)
+  expect(body).to.equal(responseBody)
+  scope.done()
 })
 
 // https://github.com/nock/nock/issues/1003
