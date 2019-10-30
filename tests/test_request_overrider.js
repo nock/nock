@@ -14,7 +14,9 @@ const http = require('http')
 const https = require('https')
 const { URL } = require('url')
 const { test } = require('tap')
+const { expect } = require('chai')
 const nock = require('..')
+const got = require('./got_client')
 
 test('response is an http.IncomingMessage instance', t => {
   const responseText = 'incoming message!'
@@ -363,15 +365,16 @@ test('has a req property on the response', t => {
 // spirit.
 test('request with a large buffer', async t => {
   const replyLength = 1024 * 1024
-  const replyBuffer = Buffer.from(new Array(replyLength + 1).join('.'))
-  expect(replyBuffer.length).to.equal(replyLength)
+  const responseBody = Buffer.from(new Array(replyLength + 1).join('.'))
+  expect(responseBody.length).to.equal(replyLength)
 
-  nock('http://example.test')
+  const scope = nock('http://example.test')
     .get('/')
-    .reply(200, replyBuffer, { 'Content-Encoding': 'gzip' })
+    .reply(200, responseBody, { 'Content-Encoding': 'gzip' })
 
-  const resp = await got('http://example.test', { decompress: false })
-  expect(resp.body).to.deep.equal(replyBuffer)
+  const { body } = await got('http://example.test', { decompress: false })
+  expect(body).to.deep.equal(responseBody)
+  scope.done()
 })
 
 test('.setNoDelay', t => {
