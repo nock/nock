@@ -424,7 +424,6 @@ test('request emits socket', t => {
     // https://github.com/nock/nock/pull/779
     expect(this).to.equal(req)
     expect(socket).to.be.an.instanceof(Object)
-    expect(socket).to.respondTo('getPeerCertificate')
     t.end()
   })
 })
@@ -543,6 +542,23 @@ test('socket has destroy() method', t => {
   const req = http.get('http://example.test')
   req.once('socket', socket => {
     socket.destroy()
+    t.end()
+  })
+})
+
+test('socket has getPeerCertificate() method which returns a random base64 string', t => {
+  nock('http://example.test')
+    .get('/')
+    .reply()
+
+  const req = http.get('http://example.test')
+  req.once('socket', socket => {
+    const first = socket.getPeerCertificate()
+    const second = socket.getPeerCertificate()
+    expect(first).to.be.a('string')
+    expect(second)
+      .to.be.a('string')
+      .and.not.equal(first)
     t.end()
   })
 })
