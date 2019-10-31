@@ -7,7 +7,7 @@ const nock = require('..')
 
 require('./setup')
 
-describe('socketDelay()', () => {
+describe('`socketDelay()`', () => {
   it('socketDelay', done => {
     nock('http://example.test')
       .get('/')
@@ -87,7 +87,7 @@ describe('socketDelay()', () => {
   })
 })
 
-describe('Socket#setTimeout()', () => {
+describe('`Socket#setTimeout()`', () => {
   it('adds callback as a one-time listener for parity with a real socket', done => {
     nock('http://example.test')
       .get('/')

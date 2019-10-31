@@ -3,7 +3,7 @@
 const path = require('path')
 const { expect } = require('chai')
 const sinon = require('sinon')
-const proxyquire = require('proxyquire').noPreserveCache()
+const proxyquire = require('proxyquire').preserveCache()
 const Interceptor = require('../lib/interceptor')
 const nock = require('..')
 const got = require('./got_client')
@@ -24,8 +24,8 @@ it('scope exposes interceptors', () => {
   })
 })
 
-describe('scope#remove()', () => {
-  it('scope#remove() works', () => {
+describe('`Scope#remove()`', () => {
+  it('removes an active mock', () => {
     const scope = nock('http://example.test')
       .get('/')
       .reply(200)
@@ -41,7 +41,7 @@ describe('scope#remove()', () => {
     expect(scope.activeMocks()).to.deep.equal([])
   })
 
-  it('scope#remove() is a no-op on a persisted mock', () => {
+  it('when a mock is persisted, does nothing', () => {
     const scope = nock('http://example.test')
       .persist()
       .get('/')
@@ -58,7 +58,7 @@ describe('scope#remove()', () => {
     expect(scope.activeMocks()).to.deep.equal([key])
   })
 
-  it('scope#remove() is a no-op on a nonexistent key', () => {
+  it('when the key is nonexistent, does nothing', () => {
     const scope = nock('http://example.test')
       .get('/')
       .reply(200)
