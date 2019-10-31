@@ -16,7 +16,7 @@ const https = require('https')
 const path = require('path')
 const fs = require('fs')
 
-function startServer(middleware, done) {
+async function startServer(middleware) {
   const server = https.createServer(
     {
       key: fs.readFileSync(path.resolve(__dirname, './localhost.key')),
@@ -24,10 +24,8 @@ function startServer(middleware, done) {
     },
     middleware
   )
-
-  server.listen(0, error => {
-    done(error, server)
-  })
+  await new Promise(resolve => server.listen(resolve))
+  return server
 }
 
 module.exports = {
