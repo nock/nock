@@ -725,11 +725,10 @@ test('superagent posts', t => {
 
 test('sending binary and receiving JSON should work', async t => {
   const scope = nock('http://example.test')
-    .filteringRequestBody(/.*/, '*')
-    .post('/some/path', '*')
+    .post('/', body => true)
     .reply(201, { foo: '61' }, { 'Content-Type': 'application/json' })
 
-  const { statusCode, body } = await got.post('http://example.test/some/path', {
+  const { statusCode, body } = await got.post('http://example.test/', {
     // This is an encoded JPEG.
     body: Buffer.from('ffd8ffe000104a46494600010101006000600000ff', 'hex'),
     headers: { Accept: 'application/json', 'Content-Length': 23861 },
