@@ -2,6 +2,7 @@
 
 const { afterEach } = require('tap')
 const nock = require('..')
+const sinon = require('sinon')
 
 module.exports = function cleanupAfterEach() {
   // After each test, clean up all of nock's global state. Since tap creates a
@@ -12,6 +13,7 @@ module.exports = function cleanupAfterEach() {
     nock.cleanAll()
     nock.enableNetConnect()
     nock.activate()
+    sinon.restore()
     done()
   })
 }

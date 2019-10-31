@@ -58,6 +58,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
 - [Expectations](#expectations)
   - [.isDone()](#isdone)
   - [.cleanAll()](#cleanall)
+  - [.abortPendingRequests()](#abortpendingrequests)
   - [.persist()](#persist)
   - [.pendingMocks()](#pendingmocks)
   - [.activeMocks()](#activemocks)
@@ -993,6 +994,14 @@ You can cleanup all the prepared mocks (could be useful to cleanup some state af
 
 ```js
 nock.cleanAll()
+```
+
+### .abortPendingRequests()
+
+You can abort all current pending request like this:
+
+```js
+nock.abortPendingRequests()
 ```
 
 ### .persist()

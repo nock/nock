@@ -415,6 +415,8 @@ test('request emits socket', t => {
   const req = http.get('http://example.test')
   // Using `this`, so can't use arrow function.
   req.once('socket', function(socket) {
+    // https://github.com/nock/nock/pull/769
+    // https://github.com/nock/nock/pull/779
     t.equal(this, req)
     t.type(socket, Object)
     t.type(socket.getPeerCertificate(), 'string')
@@ -469,6 +471,38 @@ test('socket emits connect and secureConnect', t => {
   })
 })
 
+test('socket has address() method', t => {
+  nock('http://example.test')
+    .get('/')
+    .reply()
+
+  const req = http.get('http://example.test')
+  req.once('socket', socket => {
+    t.deepEqual(socket.address(), {
+      port: 80,
+      family: 'IPv4',
+      address: '127.0.0.1',
+    })
+    t.end()
+  })
+})
+
+test('socket has address() method, https/IPv6', t => {
+  nock('https://example.test')
+    .get('/')
+    .reply()
+
+  const req = https.get('https://example.test', { family: 6 })
+  req.once('socket', socket => {
+    t.deepEqual(socket.address(), {
+      port: 443,
+      family: 'IPv6',
+      address: '::1',
+    })
+    t.end()
+  })
+})
+
 test('socket has setKeepAlive() method', t => {
   nock('http://example.test')
     .get('/')
@@ -481,14 +515,27 @@ test('socket has setKeepAlive() method', t => {
   })
 })
 
-test('socket has unref() method', t => {
+test('socket has ref() and unref() method', t => {
   nock('http://example.test')
     .get('/')
     .reply(200, 'hey')
 
   const req = http.get('http://example.test')
   req.once('socket', socket => {
+    socket.ref()
     socket.unref()
+    t.end()
+  })
+})
+
+test('socket has destroy() method', t => {
+  nock('http://example.test')
+    .get('/')
+    .reply(200, 'hey')
+
+  const req = http.get('http://example.test')
+  req.once('socket', socket => {
+    socket.destroy()
     t.end()
   })
 })
@@ -537,7 +584,7 @@ test("mocked requests have 'method' property", t => {
 })
 
 // https://github.com/nock/nock/issues/1493
-test("response have 'complete' property and it's true after end", t => {
+test("response has 'complete' property and it's true after end", t => {
   const scope = nock('http://example.test')
     .get('/')
     .reply(200, 'Hello World!')
