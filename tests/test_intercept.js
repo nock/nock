@@ -730,6 +730,7 @@ test('sending binary and receiving JSON should work', async t => {
     .reply(201, { foo: '61' }, { 'Content-Type': 'application/json' })
 
   const { statusCode, body } = await got.post('http://example.test/some/path', {
+    // This is an encoded JPEG.
     body: Buffer.from('ffd8ffe000104a46494600010101006000600000ff', 'hex'),
     headers: { Accept: 'application/json', 'Content-Length': 23861 },
   })
