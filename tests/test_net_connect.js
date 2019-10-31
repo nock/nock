@@ -2,11 +2,14 @@
 
 const http = require('http')
 const { test } = require('tap')
+const { expect } = require('chai')
 const assertRejects = require('assert-rejects')
+const sinon = require('sinon')
 const nock = require('..')
 const got = require('./got_client')
 
 require('./cleanup_after_each')()
+require('./setup')
 
 test('disable net connect is default', async t => {
   nock.disableNetConnect()
@@ -26,17 +29,19 @@ test('when net connect is disabled, throws the expected error ', async t => {
   nock.disableNetConnect()
 
   await assertRejects(got('http://example.test'), Error, err => {
-    t.equal(err.message, 'Nock: Disallowed net connect for "example.test:80/"')
-    t.equal(err.code, 'ENETUNREACH')
-    t.ok(err.stack)
+    expect(err).to.include({
+      code: 'ENETUNREACH',
+      message: 'Nock: Disallowed net connect for "example.test:80/"',
+    })
+    expect(err.stack).to.be.a('string')
+    return true
   })
 })
 
 test('enable real HTTP request only for specified domain, via string', async t => {
-  t.plan(1)
-
+  const onResponse = sinon.spy()
   const server = http.createServer((request, response) => {
-    t.pass('server received a request')
+    onResponse()
     response.writeHead(200)
     response.end()
   })
@@ -46,6 +51,7 @@ test('enable real HTTP request only for specified domain, via string', async t =
   nock.enableNetConnect('localhost')
 
   await got(`http://localhost:${server.address().port}/`)
+  expect(onResponse).to.have.been.calledOnce()
 })
 
 test('disallow request for other domains, via string', async t => {
@@ -59,10 +65,9 @@ test('disallow request for other domains, via string', async t => {
 })
 
 test('enable real HTTP request only for specified domain, via regexp', async t => {
-  t.plan(1)
-
+  const onResponse = sinon.spy()
   const server = http.createServer((request, response) => {
-    t.pass('server received a request')
+    onResponse()
     response.writeHead(200)
     response.end()
   })
@@ -72,6 +77,7 @@ test('enable real HTTP request only for specified domain, via regexp', async t =
   nock.enableNetConnect(/ocalhos/)
 
   await got(`http://localhost:${server.address().port}/`)
+  expect(onResponse).to.have.been.calledOnce()
 })
 
 test('disallow request for other domains, via regexp', async t => {
