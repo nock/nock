@@ -35,6 +35,8 @@ jobs:
       script: run-s --silent --continue-on-error lint prettier:check dtslint
     - stage: test
       node_js: 12
+      # Avoid running lint and prettier again.
+      script: npm run --silent unit && npm run mocha
     - node_js: 10
       # Avoid running lint and prettier again.
       script: npm run --silent unit && npm run mocha
