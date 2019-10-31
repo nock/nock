@@ -26,8 +26,11 @@ test('match debugging works', async t => {
 
   expect(logFn).to.have.been.calledWithExactly(
     sinon.match.string,
-    sinon.match('http://example.test/deep/link'),
-    sinon.match(exampleBody)
+    // This is a JSON blob which contains, among other things the complete
+    // request URL.
+    sinon.match('"href":"http://example.test/deep/link"'),
+    // This is the JSON-stringified body.
+    `"${exampleBody}"`
   )
 })
 
