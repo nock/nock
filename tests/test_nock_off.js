@@ -1,44 +1,44 @@
 'use strict'
 
-const { test } = require('tap')
-const mikealRequest = require('request')
+const { expect } = require('chai')
+const nock = require('..')
+const got = require('./got_client')
 const ssl = require('./ssl')
 
-require('./cleanup_after_each')()
+require('./setup')
 
-test('NOCK_OFF=true works for https', t => {
-  const original = process.env.NOCK_OFF
-  process.env.NOCK_OFF = 'true'
-  const nock = require('../')
+describe('NOCK_OFF env var', () => {
+  let original
+  beforeEach(() => {
+    original = process.env.NOCK_OFF
+    process.env.NOCK_OFF = 'true'
+  })
+  afterEach(() => {
+    process.env.NOCK_OFF = original
+  })
 
-  t.plan(4)
+  let server
+  afterEach(() => {
+    if (server) {
+      server.close()
+      server = undefined
+    }
+  })
 
-  function middleware(request, response) {
-    t.pass('server received a request')
-    response.writeHead(200)
-    response.end('the real thing')
-  }
+  it('when true, https mocks reach the live server', async () => {
+    const responseBody = 'the real thing'
+    server = await ssl.startServer((request, response) => {
+      response.writeHead(200)
+      response.end(responseBody)
+    })
 
-  ssl.startServer(middleware, function(error, server) {
-    t.error(error)
-
-    const url = `https://localhost:${server.address().port}`
-    const scope = nock(url, { allowUnmocked: true })
+    const { port } = server.address()
+    const scope = nock(`https://localhost:${port}`, { allowUnmocked: true })
       .get('/')
       .reply(200, 'mock')
 
-    const options = {
-      method: 'GET',
-      uri: url,
-      ca: ssl.ca,
-    }
-
-    mikealRequest(options, function(err, resp, body) {
-      t.error(err)
-      t.equal(body, 'the real thing')
-      scope.done()
-      process.env.NOCK_OFF = original
-      server.close(t.end)
-    })
+    const { body } = await got(`https://localhost:${port}`, { ca: ssl.ca })
+    expect(body).to.equal(responseBody)
+    scope.done()
   })
 })
