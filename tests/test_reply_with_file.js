@@ -4,7 +4,7 @@
 
 const path = require('path')
 const { expect } = require('chai')
-const proxyquire = require('proxyquire').noPreserveCache()
+const proxyquire = require('proxyquire').preserveCache()
 const nock = require('..')
 const got = require('./got_client')
 
@@ -43,7 +43,9 @@ describe('`.replyWithFile()', () => {
 
   describe('with no fs', () => {
     const { Scope } = proxyquire('../lib/scope', {
-      './interceptor': proxyquire('../lib/interceptor', { fs: null }),
+      './interceptor': proxyquire('../lib/interceptor', {
+        fs: null,
+      }),
     })
 
     it('throws the expected error', () => {
