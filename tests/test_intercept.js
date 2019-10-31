@@ -725,7 +725,7 @@ test('superagent posts', t => {
 
 test('sending binary and receiving JSON should work', async t => {
   const scope = nock('http://example.test')
-    .post('/', body => true)
+    .post('/')
     .reply(201, { foo: '61' }, { 'Content-Type': 'application/json' })
 
   const { statusCode, body } = await got.post('http://example.test/', {
