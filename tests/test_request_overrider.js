@@ -415,6 +415,8 @@ test('request emits socket', t => {
   const req = http.get('http://example.test')
   // Using `this`, so can't use arrow function.
   req.once('socket', function(socket) {
+    // https://github.com/nock/nock/pull/769
+    // https://github.com/nock/nock/pull/779
     t.equal(this, req)
     t.type(socket, Object)
     t.type(socket.getPeerCertificate(), 'string')
@@ -526,6 +528,18 @@ test('socket has ref() and unref() method', t => {
   })
 })
 
+test('socket has destroy() method', t => {
+  nock('http://example.test')
+    .get('/')
+    .reply(200, 'hey')
+
+  const req = http.get('http://example.test')
+  req.once('socket', socket => {
+    socket.destroy()
+    t.end()
+  })
+})
+
 test('abort destroys socket', t => {
   nock('http://example.test')
     .get('/')
@@ -570,7 +584,7 @@ test("mocked requests have 'method' property", t => {
 })
 
 // https://github.com/nock/nock/issues/1493
-test("response have 'complete' property and it's true after end", t => {
+test("response has 'complete' property and it's true after end", t => {
   const scope = nock('http://example.test')
     .get('/')
     .reply(200, 'Hello World!')

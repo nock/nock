@@ -12,7 +12,6 @@ test('match debugging works', async t => {
   const log = sinon.stub(debug, 'log')
   debug.enable('nock.interceptor')
   t.once('end', () => {
-    sinon.restore()
     debug.disable('nock.interceptor')
   })
 

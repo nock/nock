@@ -40,106 +40,101 @@ test('Nock with allowUnmocked and an url match', async t => {
 })
 
 test('allow unmocked option works with https', t => {
-  t.plan(6)
+  t.plan(5)
 
-  function middleware(request, response) {
-    if (request.url === '/does/not/exist') {
-      response.writeHead(404)
+  ssl
+    .startServer((request, response) => {
+      if (request.url === '/does/not/exist') {
+        response.writeHead(404)
+        response.end()
+        return
+      }
+
+      response.writeHead(200)
       response.end()
-      return
-    }
+    })
+    .then(server => {
+      const { port } = server.address()
 
-    response.writeHead(200)
-    response.end()
-  }
+      const commonRequestOptions = {
+        host: 'localhost',
+        port,
+        ca: ssl.ca,
+      }
 
-  ssl.startServer(middleware, function(error, server) {
-    t.error(error)
+      const scope = nock(`https://localhost:${port}`, { allowUnmocked: true })
+        .get('/abc')
+        .reply(200, 'Hey!')
+        .get('/wont/get/here')
+        .reply(200, 'Hi!')
 
-    const { port } = server.address()
+      function secondIsDone() {
+        t.ok(!scope.isDone())
+        https
+          .request({ path: '/', ...commonRequestOptions }, res => {
+            res.resume()
+            t.ok(true, 'Google replied to /')
+            res.destroy()
+            t.assert(
+              res.statusCode < 400 && res.statusCode >= 200,
+              'GET Google Home page'
+            )
 
-    const commonRequestOptions = {
-      host: 'localhost',
-      port,
-      ca: ssl.ca,
-    }
+            server.close(t.end)
+          })
+          .end()
+      }
 
-    const scope = nock(`https://localhost:${port}`, { allowUnmocked: true })
-      .get('/abc')
-      .reply(200, 'Hey!')
-      .get('/wont/get/here')
-      .reply(200, 'Hi!')
-
-    function secondIsDone() {
-      t.ok(!scope.isDone())
-      https
-        .request({ path: '/', ...commonRequestOptions }, res => {
-          res.resume()
-          t.ok(true, 'Google replied to /')
-          res.destroy()
-          t.assert(
-            res.statusCode < 400 && res.statusCode >= 200,
-            'GET Google Home page'
+      function firstIsDone() {
+        t.ok(!scope.isDone(), 'scope is not done')
+        https
+          .request(
+            { path: '/does/not/exist', ...commonRequestOptions },
+            res => {
+              t.equal(404, res.statusCode, 'real google response status code')
+              res.on('data', function() {})
+              res.on('end', secondIsDone)
+            }
           )
+          .end()
+      }
 
-          server.close(t.end)
-        })
-        .end()
-    }
-
-    function firstIsDone() {
-      t.ok(!scope.isDone(), 'scope is not done')
       https
-        .request({ path: '/does/not/exist', ...commonRequestOptions }, res => {
-          t.equal(404, res.statusCode, 'real google response status code')
-          res.on('data', function() {})
-          res.on('end', secondIsDone)
+        .request({ path: '/abc', ...commonRequestOptions }, res => {
+          res.on('end', firstIsDone)
+          // Streams start in 'paused' mode and must be started.
+          // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+          res.resume()
         })
         .end()
-    }
-
-    https
-      .request({ path: '/abc', ...commonRequestOptions }, res => {
-        res.on('end', firstIsDone)
-        // Streams start in 'paused' mode and must be started.
-        // See https://nodejs.org/api/stream.html#stream_class_stream_readable
-        res.resume()
-      })
-      .end()
-  })
+    })
 })
 
-test('allow unmocked option works with https for a partial match', t => {
+test('allow unmocked option works with https for a partial match', async t => {
   // The `allowUnmocked` option is processed in two places. Once in the intercept when there
   // are no interceptors that come close to matching the request. And again in the overrider when
   // there are interceptors that partially match, eg just path, but don't completely match.
   // This explicitly tests the later case in the overrider by making an HTTPS request for a path
   // that has an interceptor but fails to match the query constraint.
-
-  function middleware(request, response) {
+  const server = await ssl.startServer((request, response) => {
     response.writeHead(201)
     response.write('foo')
     response.end()
-  }
-
-  ssl.startServer(middleware, function(error, server) {
-    t.error(error)
-
-    const { port } = server.address()
-    const origin = `https://localhost:${port}`
-
-    nock(origin, { allowUnmocked: true })
-      .get('/foo')
-      .query({ foo: 'bar' })
-      .reply(418)
-
-    // no query so wont match the interceptor
-    got(`${origin}/foo`, { rejectUnauthorized: false }).then(
-      ({ body, statusCode }) => {
-        t.is(statusCode, 201)
-        t.is(body, 'foo')
-        server.close(t.end)
-      }
-    )
   })
+
+  const { port } = server.address()
+  const origin = `https://localhost:${port}`
+
+  nock(origin, { allowUnmocked: true })
+    .get('/foo')
+    .query({ foo: 'bar' })
+    .reply(418)
+
+  // no query so wont match the interceptor
+  const { statusCode, body } = await got(`${origin}/foo`, {
+    rejectUnauthorized: false,
+  })
+  t.is(statusCode, 201)
+  t.is(body, 'foo')
+  server.close()
 })
