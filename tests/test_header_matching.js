@@ -2,6 +2,7 @@
 
 const http = require('http')
 const assertRejects = require('assert-rejects')
+const { expect } = require('chai')
 const { test } = require('tap')
 const nock = require('..')
 const got = require('./got_client')
@@ -20,6 +21,22 @@ test('match headers', async t => {
 
   t.equal(statusCode, 200)
   t.equal(body, 'Hello World!')
+  scope.done()
+})
+
+// https://github.com/nock/nock/issues/399
+// https://github.com/nock/nock/issues/822
+test('match headers coming in as an array', async t => {
+  const scope = nock('http://example.test')
+    .get('/')
+    .matchHeader('x-my-headers', 'My custom Header value')
+    .reply()
+
+  const { statusCode } = await got('http://example.test/', {
+    headers: { 'X-My-Headers': ['My custom Header value'] },
+  })
+
+  expect(statusCode).to.equal(200)
   scope.done()
 })
 
@@ -363,6 +380,23 @@ test('does not match when request header does not match regular expression', asy
   )
 
   t.false(scope.isDone())
+})
+
+// https://github.com/nock/nock/issues/399
+// https://github.com/nock/nock/issues/822
+test('req header, when headers are coming in as an array', async t => {
+  const scope = nock('http://example.test', {
+    reqheaders: { 'x-my-headers': 'My custom Header value' },
+  })
+    .get('/')
+    .reply()
+
+  const { statusCode } = await got('http://example.test/', {
+    headers: { 'X-My-Headers': ['My custom Header value'] },
+  })
+
+  expect(statusCode).to.equal(200)
+  scope.done()
 })
 
 test('reqheaders throw if they are not an object', async t => {
