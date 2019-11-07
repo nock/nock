@@ -531,6 +531,9 @@ test('socket has ref() and unref() method', t => {
     expect(socket)
       .to.respondTo('ref')
       .and.to.to.respondTo('unref')
+    // FIXME: These functions, and many of the other Socket functions, should
+    // actually return `this`.
+    // https://github.com/nock/nock/pull/1770#discussion_r343425097
     expect(socket.ref()).to.be.undefined()
     expect(socket.unref()).to.be.undefined()
     t.end()
