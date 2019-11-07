@@ -3,7 +3,7 @@
 const http = require('http')
 const fs = require('fs')
 const { beforeEach, test } = require('tap')
-const proxyquire = require('proxyquire').noPreserveCache()
+const proxyquire = require('proxyquire').preserveCache()
 const nock = require('..')
 
 require('./cleanup_after_each')()

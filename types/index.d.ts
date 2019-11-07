@@ -244,6 +244,7 @@ declare namespace nock {
   type BackMode = 'wild' | 'dryrun' | 'record' | 'lockdown'
 
   interface Back {
+    currentMode: BackMode
     fixtures: string
     setMode(mode: BackMode): void
 

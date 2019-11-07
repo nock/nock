@@ -94,6 +94,23 @@ describe('synchronous `reply()` function', () => {
       scope.done()
     })
 
+    it("isn't invoked until request matches", async () => {
+      const onReply = sinon.spy()
+
+      const scope = nock('http://example.test')
+        .get('/')
+        .reply(200, (uri, body) => {
+          onReply()
+          return ''
+        })
+
+      expect(onReply).not.to.have.been.called()
+      await got('http://example.test/')
+      expect(onReply).to.have.been.calledOnce()
+
+      scope.done()
+    })
+
     context('when the request has a string body', () => {
       it('passes through a string', async () => {
         const exampleRequestBody = 'key=val'
