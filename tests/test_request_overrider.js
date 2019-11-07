@@ -528,8 +528,11 @@ test('socket has ref() and unref() method', t => {
 
   const req = http.get('http://example.test')
   req.once('socket', socket => {
-    expect(socket).to.respondTo('ref')
-    expect(socket).to.respondTo('unref')
+    expect(socket)
+      .to.respondTo('ref')
+      .and.to.to.respondTo('unref')
+    expect(socket.ref()).to.be.undefined()
+    expect(socket.unref()).to.be.undefined()
     t.end()
   })
 })
