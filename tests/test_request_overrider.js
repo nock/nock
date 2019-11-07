@@ -14,8 +14,9 @@ const http = require('http')
 const https = require('https')
 const { URL } = require('url')
 const { test } = require('tap')
-const needle = require('needle')
+const { expect } = require('chai')
 const nock = require('..')
+const got = require('./got_client')
 
 test('response is an http.IncomingMessage instance', t => {
   const responseText = 'incoming message!'
@@ -360,26 +361,20 @@ test('has a req property on the response', t => {
   req.end()
 })
 
-// https://github.com/nock/nock/issues/146
-// TODO: This looks like an integration-related regression test, and should
-// be rewritten to test the root cause of the original bug, without use of the
-// needle library.
-test('resume() is automatically invoked when the response is drained', t => {
+// Hopefully address https://github.com/nock/nock/issues/146, at least in
+// spirit.
+test('request with a large buffer', async t => {
   const replyLength = 1024 * 1024
-  const replyBuffer = Buffer.from(new Array(replyLength + 1).join('.'))
-  t.equal(replyBuffer.length, replyLength)
+  const responseBody = Buffer.from(new Array(replyLength + 1).join('.'))
+  expect(responseBody.length).to.equal(replyLength)
 
-  nock('http://example.test')
-    .get('/abc')
-    .reply(200, replyBuffer)
+  const scope = nock('http://example.test')
+    .get('/')
+    .reply(200, responseBody, { 'Content-Encoding': 'gzip' })
 
-  needle.get('http://example.test/abc', (err, res, buffer) => {
-    t.notOk(err)
-    t.ok(res)
-    t.ok(buffer)
-    t.same(buffer, replyBuffer)
-    t.end()
-  })
+  const { body } = await got('http://example.test', { decompress: false })
+  expect(body).to.deep.equal(responseBody)
+  scope.done()
 })
 
 test('.setNoDelay', t => {
