@@ -15,8 +15,11 @@ const https = require('https')
 const { URL } = require('url')
 const { test } = require('tap')
 const { expect } = require('chai')
+const sinon = require('sinon')
 const nock = require('..')
 const got = require('./got_client')
+
+require('./setup')
 
 test('response is an http.IncomingMessage instance', t => {
   const responseText = 'incoming message!'
@@ -32,7 +35,7 @@ test('response is an http.IncomingMessage instance', t => {
       },
       res => {
         res.resume()
-        t.type(res, http.IncomingMessage)
+        expect(res).to.be.an.instanceof(http.IncomingMessage)
         scope.done()
         t.end()
       }
@@ -47,8 +50,9 @@ test('emits the response event', t => {
 
   const req = http.get('http://example.test')
 
+  scope.done()
+
   req.on('response', () => {
-    scope.done()
     t.end()
   })
 })
@@ -57,9 +61,10 @@ test('write callback called', t => {
   const scope = nock('http://example.test')
     .filteringRequestBody(/mia/, 'nostra')
     .post('/', 'mamma nostra')
-    .reply(200, 'Hello World!')
+    .reply()
 
-  let callbackCalled = false
+  const reqWriteCallback = sinon.spy()
+
   const req = http.request(
     {
       host: 'example.test',
@@ -68,8 +73,8 @@ test('write callback called', t => {
       port: 80,
     },
     res => {
-      t.equal(callbackCalled, true)
-      t.is(res.statusCode, 200)
+      expect(reqWriteCallback).to.have.been.calledOnce()
+      expect(res.statusCode).to.equal(200)
       res.on('end', () => {
         scope.done()
         t.end()
@@ -81,7 +86,7 @@ test('write callback called', t => {
   )
 
   req.write('mamma mia', null, () => {
-    callbackCalled = true
+    reqWriteCallback()
     req.end()
   })
 })
@@ -90,9 +95,10 @@ test('end callback called', t => {
   const scope = nock('http://example.test')
     .filteringRequestBody(/mia/, 'nostra')
     .post('/', 'mamma nostra')
-    .reply(200, 'Hello World!')
+    .reply()
 
-  let callbackCalled = false
+  const reqEndCallback = sinon.spy()
+
   const req = http.request(
     {
       host: 'example.test',
@@ -101,8 +107,8 @@ test('end callback called', t => {
       port: 80,
     },
     res => {
-      t.true(callbackCalled)
-      t.equal(res.statusCode, 200)
+      expect(reqEndCallback).to.have.been.calledOnce()
+      expect(res.statusCode).to.equal(200)
       res.on('end', () => {
         scope.done()
         t.end()
@@ -113,18 +119,17 @@ test('end callback called', t => {
     }
   )
 
-  req.end('mamma mia', null, () => {
-    callbackCalled = true
-  })
+  req.end('mamma mia', null, reqEndCallback)
 })
 
 // https://github.com/nock/nock/issues/1509
 test('end callback called when end has callback, but no buffer', t => {
   const scope = nock('http://example.test')
     .post('/')
-    .reply(200, 'Hello World!')
+    .reply()
 
-  let callbackCalled = false
+  const reqEndCallback = sinon.spy()
+
   const req = http.request(
     {
       host: 'example.test',
@@ -133,8 +138,8 @@ test('end callback called when end has callback, but no buffer', t => {
       port: 80,
     },
     res => {
-      t.true(callbackCalled)
-      t.is(res.statusCode, 200)
+      expect(reqEndCallback).to.have.been.calledOnce()
+      expect(res.statusCode).to.equal(200)
       res.on('end', () => {
         scope.done()
         t.end()
@@ -145,9 +150,7 @@ test('end callback called when end has callback, but no buffer', t => {
     }
   )
 
-  req.end(() => {
-    callbackCalled = true
-  })
+  req.end(reqEndCallback)
 })
 
 test('request.end called with all three arguments', t => {
@@ -155,7 +158,8 @@ test('request.end called with all three arguments', t => {
     .post('/', 'foobar')
     .reply()
 
-  let callbackCalled = false
+  const reqEndCallback = sinon.spy()
+
   const req = http.request(
     {
       host: 'example.test',
@@ -163,7 +167,7 @@ test('request.end called with all three arguments', t => {
       path: '/',
     },
     res => {
-      t.true(callbackCalled)
+      expect(reqEndCallback).to.have.been.calledOnce()
       res.on('end', () => {
         scope.done()
         t.end()
@@ -173,9 +177,7 @@ test('request.end called with all three arguments', t => {
   )
 
   // hex(foobar) == 666F6F626172
-  req.end('666F6F626172', 'hex', () => {
-    callbackCalled = true
-  })
+  req.end('666F6F626172', 'hex', reqEndCallback)
 })
 
 test('request.end called with only data and encoding', t => {
@@ -207,7 +209,8 @@ test('request.end called with only data and a callback', t => {
     .post('/', 'foobar')
     .reply()
 
-  let callbackCalled = false
+  const reqEndCallback = sinon.spy()
+
   const req = http.request(
     {
       host: 'example.test',
@@ -215,7 +218,7 @@ test('request.end called with only data and a callback', t => {
       path: '/',
     },
     res => {
-      t.true(callbackCalled)
+      expect(reqEndCallback).to.have.been.calledOnce()
       res.on('end', () => {
         scope.done()
         t.end()
@@ -224,9 +227,7 @@ test('request.end called with only data and a callback', t => {
     }
   )
 
-  req.end('foobar', () => {
-    callbackCalled = true
-  })
+  req.end('foobar', reqEndCallback)
 })
 
 // http://github.com/nock/nock/issues/139
@@ -234,9 +235,10 @@ test('finish event fired before end event', t => {
   const scope = nock('http://example.test')
     .filteringRequestBody(/mia/, 'nostra')
     .post('/', 'mamma nostra')
-    .reply(200, 'Hello World!')
+    .reply()
 
-  let finishCalled = false
+  const onFinish = sinon.spy()
+
   const req = http.request(
     {
       host: 'example.test',
@@ -245,8 +247,8 @@ test('finish event fired before end event', t => {
       port: 80,
     },
     res => {
-      t.true(finishCalled)
-      t.is(res.statusCode, 200)
+      expect(onFinish).to.have.been.calledOnce()
+      expect(res.statusCode).to.equal(200)
       res.on('end', () => {
         scope.done()
         t.end()
@@ -257,9 +259,7 @@ test('finish event fired before end event', t => {
     }
   )
 
-  req.on('finish', () => {
-    finishCalled = true
-  })
+  req.on('finish', onFinish)
 
   req.end('mamma mia')
 })
@@ -275,18 +275,24 @@ test('pause response before data', t => {
     path: '/pauser',
   })
 
+  const didTimeout = sinon.spy()
+  const onData = sinon.spy()
+
   req.on('response', res => {
     res.pause()
 
-    let waited = false
     setTimeout(() => {
-      waited = true
+      didTimeout()
       res.resume()
     }, 500)
 
-    res.on('data', data => t.true(waited))
+    res.on('data', () => {
+      onData()
+      expect(didTimeout).to.have.been.calledOnce()
+    })
 
     res.on('end', () => {
+      expect(onData).to.have.been.calledOnce()
       scope.done()
       t.end()
     })
@@ -296,22 +302,23 @@ test('pause response before data', t => {
 })
 
 test('accept URL as request target', t => {
-  let dataCalled = false
+  const onData = sinon.spy()
+
   const scope = nock('http://example.test')
     .get('/')
     .reply(200, 'Hello World!')
 
   http.get(new URL('http://example.test'), res => {
-    t.is(res.statusCode, 200)
+    expect(res.statusCode).to.equal(200)
 
     res.on('data', data => {
-      dataCalled = true
-      t.type(data, Buffer)
-      t.equal(data.toString(), 'Hello World!', 'response should match')
+      onData()
+      expect(data).to.be.an.instanceof(Buffer)
+      expect(data.toString()).to.equal('Hello World!')
     })
 
     res.on('end', () => {
-      t.ok(dataCalled)
+      expect(onData).to.have.been.calledOnce()
       scope.done()
       t.end()
     })
@@ -332,11 +339,7 @@ test('request has path', t => {
     },
     res => {
       scope.done()
-      t.equal(
-        req.path,
-        '/the/path/to/infinity',
-        'should have req.path set to /the/path/to/infinity'
-      )
+      expect(req.path).to.equal('/the/path/to/infinity')
       t.end()
     }
   )
@@ -350,7 +353,7 @@ test('has a req property on the response', t => {
 
   const req = http.request('http://example.test/like-wtf', res => {
     res.on('end', () => {
-      t.ok(res.req, "req property doesn't exist")
+      expect(res.req).to.be.an.instanceof(http.ClientRequest)
       scope.done()
       t.end()
     })
@@ -366,6 +369,7 @@ test('has a req property on the response', t => {
 test('request with a large buffer', async t => {
   const replyLength = 1024 * 1024
   const responseBody = Buffer.from(new Array(replyLength + 1).join('.'))
+  // Confidence check.
   expect(responseBody.length).to.equal(replyLength)
 
   const scope = nock('http://example.test')
@@ -389,7 +393,7 @@ test('.setNoDelay', t => {
       port: 80,
     },
     res => {
-      t.is(res.statusCode, 200)
+      expect(res.statusCode).to.equal(200)
       res.on('end', () => t.end())
       // Streams start in 'paused' mode and must be started.
       // See https://nodejs.org/api/stream.html#stream_class_stream_readable
@@ -412,9 +416,8 @@ test('request emits socket', t => {
   req.once('socket', function(socket) {
     // https://github.com/nock/nock/pull/769
     // https://github.com/nock/nock/pull/779
-    t.equal(this, req)
-    t.type(socket, Object)
-    t.type(socket.getPeerCertificate(), 'string')
+    expect(this).to.equal(req)
+    expect(socket).to.be.an.instanceof(Object)
     t.end()
   })
 })
@@ -427,17 +430,15 @@ test('socket is shared and aliased correctly', t => {
   const req = http.get('http://example.test')
 
   req.once('response', res => {
-    t.is(req.socket, req.connection)
-    t.is(req.socket, res.socket)
-    t.is(res.socket, res.client)
-    t.is(res.socket, res.connection)
+    expect(req.socket).to.equal(req.connection)
+    expect(req.socket).to.equal(res.socket)
+    expect(res.socket).to.equal(res.client)
+    expect(res.socket).to.equal(res.connection)
     t.end()
   })
 })
 
 test('socket emits connect and secureConnect', t => {
-  t.plan(3)
-
   nock('https://example.test')
     .post('/')
     .reply(200, 'hey')
@@ -448,20 +449,24 @@ test('socket emits connect and secureConnect', t => {
     method: 'POST',
   })
 
+  const onConnect = sinon.spy()
+  const onSecureConnect = sinon.spy()
+
   req.on('socket', socket => {
     socket.once('connect', () => {
+      onConnect()
       req.end()
-      t.ok(true)
     })
-    socket.once('secureConnect', () => {
-      t.ok(true)
-    })
+    socket.once('secureConnect', onSecureConnect)
   })
 
   req.once('response', res => {
     res.setEncoding('utf8')
-    res.on('data', d => {
-      t.equal(d, 'hey')
+    res.on('data', data => {
+      expect(data).to.equal('hey')
+      expect(onConnect).to.have.been.calledOnce()
+      expect(onSecureConnect).to.have.been.calledOnce()
+      t.end()
     })
   })
 })
@@ -473,7 +478,7 @@ test('socket has address() method', t => {
 
   const req = http.get('http://example.test')
   req.once('socket', socket => {
-    t.deepEqual(socket.address(), {
+    expect(socket.address()).to.deep.equal({
       port: 80,
       family: 'IPv4',
       address: '127.0.0.1',
@@ -489,7 +494,7 @@ test('socket has address() method, https/IPv6', t => {
 
   const req = https.get('https://example.test', { family: 6 })
   req.once('socket', socket => {
-    t.deepEqual(socket.address(), {
+    expect(socket.address()).to.deep.equal({
       port: 443,
       family: 'IPv6',
       address: '::1',
@@ -517,8 +522,14 @@ test('socket has ref() and unref() method', t => {
 
   const req = http.get('http://example.test')
   req.once('socket', socket => {
-    socket.ref()
-    socket.unref()
+    expect(socket)
+      .to.respondTo('ref')
+      .and.to.to.respondTo('unref')
+    // FIXME: These functions, and many of the other Socket functions, should
+    // actually return `this`.
+    // https://github.com/nock/nock/pull/1770#discussion_r343425097
+    expect(socket.ref()).to.be.undefined()
+    expect(socket.unref()).to.be.undefined()
     t.end()
   })
 })
@@ -535,6 +546,23 @@ test('socket has destroy() method', t => {
   })
 })
 
+test('socket has getPeerCertificate() method which returns a random base64 string', t => {
+  nock('http://example.test')
+    .get('/')
+    .reply()
+
+  const req = http.get('http://example.test')
+  req.once('socket', socket => {
+    const first = socket.getPeerCertificate()
+    const second = socket.getPeerCertificate()
+    expect(first).to.be.a('string')
+    expect(second)
+      .to.be.a('string')
+      .and.not.equal(first)
+    t.end()
+  })
+})
+
 test('abort destroys socket', t => {
   nock('http://example.test')
     .get('/')
@@ -545,15 +573,16 @@ test('abort destroys socket', t => {
   req.once('error', () => {})
   req.once('socket', socket => {
     req.abort()
-    t.true(socket.destroyed)
+    expect(socket.destroyed).to.be.true()
     t.end()
   })
 })
 
 test('should throw expected error when creating request with missing options', t => {
-  t.throws(() => http.request(), {
-    message: 'Making a request with empty `options` is not supported in Nock',
-  })
+  expect(() => http.request()).to.throw(
+    Error,
+    'Making a request with empty `options` is not supported in Nock'
+  )
   t.end()
 })
 
@@ -569,12 +598,15 @@ test("mocked requests have 'method' property", t => {
     method: 'GET',
     port: 80,
   })
-  t.equal(req.method, 'GET')
-  req.on('response', function(res) {
-    t.equal(res.req.method, 'GET')
+
+  expect(req.method).to.equal('GET')
+
+  req.on('response', res => {
+    expect(res.req.method).to.equal('GET')
     scope.done()
     t.end()
   })
+
   req.end()
 })
 
@@ -593,7 +625,7 @@ test("response has 'complete' property and it's true after end", t => {
     },
     res => {
       res.on('end', () => {
-        t.is(res.complete, true)
+        expect(res.complete).to.be.true()
         scope.done()
         t.end()
       })
@@ -618,8 +650,6 @@ test('Request with `Expect: 100-continue` triggers continue event', t => {
   // Related:
   // https://tools.ietf.org/html/rfc2616#section-8.2.3
   // https://github.com/nodejs/node/issues/10487
-  t.plan(3)
-
   const exampleRequestBody = 'this is the full request body'
 
   const scope = nock('http://example.test')
@@ -634,27 +664,23 @@ test('Request with `Expect: 100-continue` triggers continue event', t => {
     headers: { Expect: '100-continue' },
   })
 
-  let gotResponse = false
-
-  req.on('continue', () => {
-    t.pass()
-
-    // This is a confidence check. It's not really possible to get the response
-    // until the request has matched, and it won't match until the request body
-    // is sent.
-    t.false(gotResponse)
-
-    req.end(exampleRequestBody)
-  })
+  const onData = sinon.spy()
 
   req.on('response', res => {
-    t.is(res.statusCode, 200)
-
-    gotResponse = true
-
+    expect(res.statusCode).to.equal(200)
+    // The `end` event will not fire without a `data` listener, though it
+    // will never fire since the body is empty. This is consistent with
+    // the Node docs:
+    // https://nodejs.org/api/http.html#http_class_http_clientrequest
+    res.on('data', onData)
     res.on('end', () => {
+      expect(onData).not.to.have.been.called()
       scope.done()
       t.end()
     })
+  })
+
+  req.on('continue', () => {
+    req.end(exampleRequestBody)
   })
 })
