@@ -52,26 +52,10 @@ jobs:
           path: ~/.npm
           restore-keys: |
             npm-
-      - name: Cache local cache
-        uses: actions/cache@v1
-        with:
-          key: eslint-${{ github.sha }}
-          path: .cache
-          restore-keys: |
-            eslint-
       - name: Install dependencies
         run: npm ci --ignore-scripts --no-audit --prefer-offline --progress=false
       - name: Lint
-        run: |
-          # This is required to workaround a limitation of ESLint which uses
-          # file modification time in its cache, instead of file checksum.
-          #
-          # cspell:ignore iregex
-          find . \
-            -type d -name "node_modules" -prune -o \
-            -type f -iregex '.*.ts' \
-            -exec ./scripts/ci/set_mtime_to_md5.sh {} \;
-          npm run lint:js
+        run: npm run lint:js
   lint-typescript:
     name: Lint TypeScript declaration files
     runs-on: ubuntu-latest
