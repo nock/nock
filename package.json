@@ -57,16 +57,14 @@
     "tap": "^14.0.0"
   },
   "scripts": {
-    "unit": "tap --100 --coverage --coverage-report=text ./tests/test_*.js",
-    "pretest": "npm run -s lint",
-    "test": "npm run -s unit",
-    "posttest": "npm run -s prettier:check",
     "coverage": "tap --coverage-report=html && open coverage/lcov-report/index.html",
-    "lint": "eslint \"**/*.js\"",
-    "prettier": "prettier --write \"**/*.@(js|json|md|ts|yml)\"",
-    "prettier:check": "prettier --check \"**/*.@(js|json|md|ts|yml)\"",
     "dtslint": "dtslint types",
-    "semantic-release": "semantic-release"
+    "format:fix": "prettier --write '**/*.{js,json,md,ts,yml,yaml}'",
+    "format": "prettier --check '**/*.{js,json,md,ts,yml,yaml}'",
+    "lint": "eslint --cache --cache-location './.cache/eslint' '**/*.js'",
+    "lint:fix": "eslint --cache --cache-location './.cache/eslint' --fix '**/*.js'",
+    "semantic-release": "semantic-release",
+    "test": "tap --100 --coverage --coverage-report=text ./tests/test_*.js"
   },
   "nyc": {
     "reporter": [
