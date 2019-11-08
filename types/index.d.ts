@@ -26,6 +26,7 @@ declare namespace nock {
   function loadDefs(path: string): Definition[]
   function define(defs: Definition[]): Scope[]
   function restore(): void
+  function abortPendingRequests(): void
 
   let back: Back
   let emitter: NodeJS.EventEmitter
@@ -243,6 +244,7 @@ declare namespace nock {
   type BackMode = 'wild' | 'dryrun' | 'record' | 'lockdown'
 
   interface Back {
+    currentMode: BackMode
     fixtures: string
     setMode(mode: BackMode): void
 

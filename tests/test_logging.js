@@ -3,16 +3,17 @@
 const debug = require('debug')
 const sinon = require('sinon')
 const { test } = require('tap')
+const { expect } = require('chai')
 const nock = require('..')
 const got = require('./got_client')
 
 require('./cleanup_after_each')()
+require('./setup')
 
 test('match debugging works', async t => {
-  const log = sinon.stub(debug, 'log')
+  const logFn = sinon.stub(debug, 'log')
   debug.enable('nock.interceptor')
   t.once('end', () => {
-    sinon.restore()
     debug.disable('nock.interceptor')
   })
 
@@ -23,28 +24,29 @@ test('match debugging works', async t => {
   const exampleBody = 'Hello yourself!'
   await got.post('http://example.test/deep/link', { body: exampleBody })
 
-  t.ok(
-    log.calledWith(
-      sinon.match.string,
-      sinon.match('http://example.test/deep/link'),
-      sinon.match(exampleBody)
-    )
+  expect(logFn).to.have.been.calledWithExactly(
+    sinon.match.string,
+    // This is a JSON blob which contains, among other things the complete
+    // request URL.
+    sinon.match('"href":"http://example.test/deep/link"'),
+    // This is the JSON-stringified body.
+    `"${exampleBody}"`
   )
 })
 
 test('should log matching', async t => {
-  const messages = []
+  const logFn = sinon.spy()
 
   const scope = nock('http://example.test')
     .get('/')
     .reply(200, 'Hello, World!')
-    .log(message => messages.push(message))
+    .log(logFn)
 
   await got('http://example.test/')
 
-  t.deepEqual(messages, [
-    'matching http://example.test:80/ to GET http://example.test:80/: true',
-  ])
+  expect(logFn).to.have.been.calledOnceWithExactly(
+    'matching http://example.test:80/ to GET http://example.test:80/: true'
+  )
 
   scope.done()
 })
