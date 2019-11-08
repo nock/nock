@@ -1,0 +1,112 @@
+name: Continuous Integration
+
+on: push
+
+jobs:
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - name: Cache npm dependencies
+        uses: actions/cache@v1
+        with:
+          key: npm-${{ hashFiles('**/package-lock.json') }}
+          path: ~/.npm
+          restore-keys: |
+            npm-
+      - name: Install dependencies
+        run: npm ci --ignore-scripts --no-audit --prefer-offline --progress=false
+      - name: Format
+        run: npm run format
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - name: Cache npm dependencies
+        uses: actions/cache@v1
+        with:
+          key: npm-${{ hashFiles('**/package-lock.json') }}
+          path: ~/.npm
+          restore-keys: |
+            npm-
+      - name: Cache local cache
+        uses: actions/cache@v1
+        with:
+          key: eslint-${{ github.sha }}
+          path: .cache
+          restore-keys: |
+            eslint-
+      - name: Install dependencies
+        run: npm ci --ignore-scripts --no-audit --prefer-offline --progress=false
+      - name: Lint
+        run: |
+          # This is required to workaround a limitation of ESLint which uses
+          # file modification time in its cache, instead of file checksum.
+          #
+          # cspell:ignore iregex
+          find . \
+            -type d -name "node_modules" -prune -o \
+            -type f -iregex '.*.ts' \
+            -exec ./scripts/ci/set_mtime_to_md5.sh {} \;
+          npm run lint
+  test:
+    name: Test
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - name: Get npm cache directory
+        id: npm-cache
+        run: |
+          echo "::set-output name=dir::$(npm config get cache)"
+      # The following two steps can be greatly simplified once
+      # https://github.com/actions/cache/issues/39 is fixed.
+      - if: runner.os != 'Windows'
+        name: Cache npm dependencies
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: |
+            npm-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-
+      - if: runner.os == 'Windows'
+        name: Cache npm dependencies
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: |
+            npm-${{ runner.os }}-${{ hashFiles('**\package-lock.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-
+      - name: Install dependencies
+        run: npm ci --ignore-scripts --no-audit --prefer-offline --progress=false
+      - name: Test
+        run: npm run test
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        node: [8, 10, 12, 13]
