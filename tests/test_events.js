@@ -1,11 +1,13 @@
 'use strict'
 
+const { expect } = require('chai')
 const http = require('http')
 const querystring = require('querystring')
 const { test } = require('tap')
 const nock = require('..')
 
 require('./cleanup_after_each')()
+require('./setup')
 
 function ignore() {}
 
@@ -15,11 +17,11 @@ test('emits request and replied events', function(t) {
     .reply(200)
 
   scope.on('request', function(req, interceptor) {
-    t.equal(req.path, '/please')
-    t.equal(interceptor.interceptionCounter, 0)
+    expect(req.path).to.equal('/please')
+    expect(interceptor.interceptionCounter).to.equal(0)
     scope.on('replied', function(req, interceptor) {
-      t.equal(req.path, '/please')
-      t.equal(interceptor.interceptionCounter, 1)
+      expect(req.path).to.equal('/please')
+      expect(interceptor.interceptionCounter).to.equal(1)
       t.end()
     })
   })
@@ -37,12 +39,12 @@ test('emits request and request body', function(t) {
     .reply(200)
 
   scope.on('request', function(req, interceptor, body) {
-    t.equal(req.path, '/please')
-    t.equal(interceptor.interceptionCounter, 0)
-    t.equal(body, data)
+    expect(req.path).to.equal('/please')
+    expect(interceptor.interceptionCounter).to.equal(0)
+    expect(body).to.deep.equal(data)
     scope.on('replied', function(req, interceptor) {
-      t.equal(req.path, '/please')
-      t.equal(interceptor.interceptionCounter, 1)
+      expect(req.path).to.equal('/please')
+      expect(interceptor.interceptionCounter).to.equal(1)
       t.end()
     })
   })
@@ -76,7 +78,7 @@ test('emits no match when no match and mocked', function(t) {
     .reply(418)
 
   const assertion = function(req) {
-    t.equal(req.path, '/definitelymaybe')
+    expect(req.path).to.equal('/definitelymaybe')
     nock.emitter.removeAllListeners('no match')
     t.end()
   }
@@ -88,7 +90,7 @@ test('emits no match when no match and mocked', function(t) {
 test('emits no match when netConnect is disabled', function(t) {
   nock.disableNetConnect()
   nock.emitter.on('no match', function(req) {
-    t.equal(req.hostname, 'example.test')
+    expect(req.hostname).to.equal('example.test')
     nock.emitter.removeAllListeners('no match')
     t.end()
   })
