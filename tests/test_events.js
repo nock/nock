@@ -2,65 +2,70 @@
 
 const { expect } = require('chai')
 const http = require('http')
-const querystring = require('querystring')
+const sinon = require('sinon')
 const { test } = require('tap')
+
 const nock = require('..')
+const got = require('./got_client')
 
 require('./cleanup_after_each')()
 require('./setup')
 
 function ignore() {}
 
-test('emits request and replied events', function(t) {
+test('emits request and replied events when request has no body', async () => {
   const scope = nock('http://example.test')
-    .get('/please')
-    .reply(200)
+    .get('/')
+    .reply()
 
-  scope.on('request', function(req, interceptor) {
-    expect(req.path).to.equal('/please')
-    expect(interceptor.interceptionCounter).to.equal(0)
-    scope.on('replied', function(req, interceptor) {
-      expect(req.path).to.equal('/please')
-      expect(interceptor.interceptionCounter).to.equal(1)
-      t.end()
-    })
-  })
+  const onRequest = sinon.spy()
+  const onReplied = sinon.spy()
 
-  http.get('http://example.test/please')
+  scope.on('request', onRequest);
+  scope.on('replied', onReplied);
+
+  await got('http://example.test')
+
+  scope.done()
+  expect(onRequest).to.have.been.calledOnce()
+  expect(onReplied).to.have.been.calledOnce()
 })
 
-test('emits request and request body', function(t) {
-  const data = querystring.stringify({
-    example: 123,
-  })
+test('emits request and request body', async () => {
+  const data = 'example=123'
 
   const scope = nock('http://example.test')
     .post('/please')
-    .reply(200)
+    .reply()
+
+   const onRequest = sinon.spy()
+   const onReplied = sinon.spy()
 
   scope.on('request', function(req, interceptor, body) {
+    onRequest()
     expect(req.path).to.equal('/please')
     expect(interceptor.interceptionCounter).to.equal(0)
     expect(body).to.deep.equal(data)
-    scope.on('replied', function(req, interceptor) {
-      expect(req.path).to.equal('/please')
-      expect(interceptor.interceptionCounter).to.equal(1)
-      t.end()
-    })
+    expect(onReplied).to.not.have.been.called()
   })
 
-  const req = http.request({
-    hostname: 'example.test',
-    method: 'POST',
-    path: '/please',
+  scope.on('replied', function(req, interceptor) {
+    onReplied()
+    expect(req.path).to.equal('/please')
+    expect(interceptor.interceptionCounter).to.equal(1)
+  })
+
+  await got.post('http://example.test/please', {
+    body: data,
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
       'Content-Length': Buffer.byteLength(data),
-    },
+    }
   })
 
-  req.write(data)
-  req.end()
+  scope.done()
+  expect(onRequest).to.have.been.calledOnce()
+  expect(onReplied).to.have.been.calledOnce()
 })
 
 test('emits no match when no match and no mock', function(t) {
