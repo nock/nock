@@ -21,8 +21,8 @@ test('emits request and replied events when request has no body', async () => {
   const onRequest = sinon.spy()
   const onReplied = sinon.spy()
 
-  scope.on('request', onRequest);
-  scope.on('replied', onReplied);
+  scope.on('request', onRequest)
+  scope.on('replied', onReplied)
 
   await got('http://example.test')
 
@@ -38,8 +38,8 @@ test('emits request and request body', async () => {
     .post('/please')
     .reply()
 
-   const onRequest = sinon.spy()
-   const onReplied = sinon.spy()
+  const onRequest = sinon.spy()
+  const onReplied = sinon.spy()
 
   scope.on('request', function(req, interceptor, body) {
     onRequest()
@@ -60,7 +60,7 @@ test('emits request and request body', async () => {
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
       'Content-Length': Buffer.byteLength(data),
-    }
+    },
   })
 
   scope.done()
