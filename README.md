@@ -6,6 +6,7 @@
 [![Greenkeeper](https://badges.greenkeeper.io/nock/nock.svg)](https://greenkeeper.io/)
 [![Backers on Open Collective](https://opencollective.com/nock/backers/badge.svg)](#backers)
 [![Sponsors on Open Collective](https://opencollective.com/nock/sponsors/badge.svg)](#sponsors)
+[![run on repl.it](http://repl.it/badge/github/nock/nock)](https://repl.it/github/nock/nock)
 
 [npmjs]: https://www.npmjs.com/package/nock
 [build]: https://travis-ci.org/nock/nock
