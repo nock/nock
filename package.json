@@ -37,6 +37,7 @@
     "eslint-config-prettier": "^6.0.0",
     "eslint-config-standard": "^14.0.0",
     "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-jsdoc": "^19.2.0",
     "eslint-plugin-mocha": "^6.2.0",
     "eslint-plugin-node": "^11.0.0",
     "eslint-plugin-promise": "^4.1.1",
@@ -54,7 +55,8 @@
     "sinon": "^7.5.0",
     "sinon-chai": "^3.3.0",
     "superagent": "^5.0.2",
-    "tap": "^14.0.0"
+    "tap": "^14.0.0",
+    "typescript": "^3.7.4"
   },
   "scripts": {
     "unit": "tap --100 --coverage --coverage-report=text ./tests/test_*.js",

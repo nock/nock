@@ -1,0 +1,26 @@
+{
+  "files": [
+    "index.js"
+  ],
+  "include": [
+    "lib/**/*.js"
+  ],
+  "compilerOptions": {
+    /* Basic Options */
+    "target": "ES2016",
+    "module": "commonjs",
+    "allowJs": true,
+    "checkJs": true,
+    "resolveJsonModule": true,
+    "noEmit": true,
+
+    /* Strict Type-Checking Options */
+    "strict": true,
+    "noImplicitAny": false,
+    "noImplicitThis": false,
+    "strictNullChecks": false,
+
+    /* Additional Checks */
+    "noUnusedLocals": true
+  }
+}
