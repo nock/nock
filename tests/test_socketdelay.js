@@ -77,7 +77,7 @@ describe('`socketDelay()`', () => {
     req.end()
   })
 
-  it('emits a timeout if not idle for long enough', done => {
+  it('does not emit a timeout when timeout > socketDelay', done => {
     const responseText = 'okeydoke!'
     const scope = nock('http://example.test')
       .get('/')
