@@ -212,10 +212,7 @@ it('response pipe without implicit end', done => {
         done()
       })
 
-      res.pipe(
-        dest,
-        { end: false }
-      )
+      res.pipe(dest, { end: false })
     }
   )
 })
