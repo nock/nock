@@ -918,6 +918,52 @@ test('match multiple interceptors with regexp domain', async t => {
   })
 })
 
+test('interceptors should work in any order', async t => {
+  nock('http://some.test')
+    .get('/path1?query=1')
+    .reply(200, 'response for path1/query1')
+    .get('/path2?query=2')
+    .reply(200, 'response for path2/query2')
+
+  // Calling second request before first
+  const response2 = await got('http://some.test/path2?query=2')
+  expect(response2).to.include({
+    statusCode: 200,
+    body: 'response for path2/query2',
+  })
+
+  // Calling first request after second
+  const response1 = await got('http://some.test/path1?query=1')
+  expect(response1).to.include({
+    statusCode: 200,
+    body: 'response for path1/query1',
+  })
+})
+
+test('interceptors should work in any order with filteringScope', async t => {
+  nock('http://some.test', {
+    filteringScope: scope => true,
+  })
+    .get('/path1?query=1')
+    .reply(200, 'response for path1/query1')
+    .get('/path2?query=2')
+    .reply(200, 'response for path2/query2')
+
+  // Calling second request before first
+  const response2 = await got('http://other.test/path2?query=2')
+  expect(response2).to.include({
+    statusCode: 200,
+    body: 'response for path2/query2',
+  })
+
+  // Calling first request after second
+  const response1 = await got('http://other.test/path1?query=1')
+  expect(response1).to.include({
+    statusCode: 200,
+    body: 'response for path1/query1',
+  })
+})
+
 // FIXME: This marked as { todo: true } because it is an existing bug.
 // https://github.com/nock/nock/issues/1108
 test(
