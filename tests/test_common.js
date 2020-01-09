@@ -17,6 +17,7 @@ const common = require('../lib/common')
 const matchBody = require('../lib/match_body')
 const sinon = require('sinon')
 const nock = require('..')
+const { expect } = require('chai')
 
 require('./cleanup_after_each')()
 
@@ -531,6 +532,7 @@ test('correct node behavior', t => {
     res.on('end', () => {
       expect(req).to.have.been.notCalled()
       scope.done()
+      http.request = origHttpReq;
       t.end()
     })
   })
