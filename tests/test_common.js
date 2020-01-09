@@ -17,7 +17,6 @@ const common = require('../lib/common')
 const matchBody = require('../lib/match_body')
 const sinon = require('sinon')
 const nock = require('..')
-const { expect } = require('chai')
 
 require('./cleanup_after_each')()
 
@@ -519,18 +518,18 @@ test('correct node behavior', t => {
     .get('/')
     .reply()
 
-  const req = sinon.spy()
+  const reqSpy = sinon.spy()
   const origHttpReq = http.request
 
-  http.request = req
+  http.request = reqSpy
 
   http.get('http://example.test', res => {
     t.equal(res.statusCode, 200)
 
-    res.on('data', req)
+    res.on('data', reqSpy)
 
     res.on('end', () => {
-      expect(req).to.have.been.notCalled()
+      t.equal(reqSpy.called, false)
       scope.done()
       http.request = origHttpReq
       t.end()
