@@ -516,13 +516,13 @@ test('testing timers are deleted correctly', t => {
 
 test('correct node behavior', t => {
   const scope = nock('http://example.test')
-  .get('/')
-  .reply()
+    .get('/')
+    .reply()
 
   const req = sinon.spy()
-  const origHttpReq = http.request;
+  const origHttpReq = http.request
 
-  http.request = req;
+  http.request = req
 
   http.get('http://example.test', res => {
     t.equal(res.statusCode, 200)
@@ -532,7 +532,7 @@ test('correct node behavior', t => {
     res.on('end', () => {
       expect(req).to.have.been.notCalled()
       scope.done()
-      http.request = origHttpReq;
+      http.request = origHttpReq
       t.end()
     })
   })
