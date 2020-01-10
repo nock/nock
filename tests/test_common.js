@@ -530,9 +530,12 @@ test('correct node behavior', t => {
 
     res.on('end', () => {
       t.equal(reqSpy.called, false)
-      scope.done()
-      http.request = origHttpReq
       t.end()
     })
+  })
+
+  t.on('end', () => {
+    scope.done()
+    http.request = origHttpReq
   })
 })
