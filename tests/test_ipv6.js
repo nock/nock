@@ -1,61 +1,64 @@
 'use strict'
 
-const { test } = require('tap')
 const http = require('http')
+const { expect } = require('chai')
+const sinon = require('sinon')
 const nock = require('..')
 
-require('./cleanup_after_each')()
+require('./setup')
 
-test('IPV6 URL in http.get get gets mocked', function(t) {
-  let dataCalled = false
+describe('IPv6', () => {
+  it('IPV6 URL in http.get get gets mocked', done => {
+    const responseBody = 'Hello World!'
+    const scope = nock('http://[2607:f0d0:1002:51::4]:8080')
+      .get('/')
+      .reply(200, responseBody)
 
-  const scope = nock('http://[2607:f0d0:1002:51::4]:8080')
-    .get('/')
-    .reply(200, 'Hello World!')
-
-  http.get('http://[2607:f0d0:1002:51::4]:8080/', function(res) {
-    t.equal(res.statusCode, 200, 'Status code is 200')
-    res.on('end', function() {
-      t.ok(dataCalled, 'data handler was called')
-      scope.done()
-      t.end()
-    })
-    res.on('data', function(data) {
-      dataCalled = true
-      t.ok(data instanceof Buffer, 'data should be buffer')
-      t.equal(data.toString(), 'Hello World!', 'response should match')
+    http.get('http://[2607:f0d0:1002:51::4]:8080/', res => {
+      expect(res).to.include({ statusCode: 200 })
+      const onData = sinon.spy()
+      res.on('data', data => {
+        onData()
+        expect(data).to.be.an.instanceOf(Buffer)
+        expect(data.toString()).to.equal(responseBody)
+      })
+      res.on('end', () => {
+        expect(onData).to.have.been.calledOnce()
+        scope.done()
+        done()
+      })
     })
   })
-})
 
-test('IPV6 hostname in http.request get gets mocked', function(t) {
-  let dataCalled = false
+  it('IPV6 hostname in http.request get gets mocked', done => {
+    const responseBody = 'Hello World!'
+    const scope = nock('http://[2607:f0d0:1002:51::5]:8080')
+      .get('/')
+      .reply(200, responseBody)
 
-  const scope = nock('http://[2607:f0d0:1002:51::5]:8080')
-    .get('/')
-    .reply(200, 'Hello World!')
-
-  http
-    .request(
-      {
-        hostname: '2607:f0d0:1002:51::5',
-        path: '/',
-        method: 'GET',
-        port: 8080,
-      },
-      function(res) {
-        t.equal(res.statusCode, 200, 'Status code is 200')
-        res.on('end', function() {
-          t.ok(dataCalled, 'data handler was called')
-          scope.done()
-          t.end()
-        })
-        res.on('data', function(data) {
-          dataCalled = true
-          t.ok(data instanceof Buffer, 'data should be buffer')
-          t.equal(data.toString(), 'Hello World!', 'response should match')
-        })
-      }
-    )
-    .end()
+    http
+      .request(
+        {
+          hostname: '2607:f0d0:1002:51::5',
+          path: '/',
+          method: 'GET',
+          port: 8080,
+        },
+        res => {
+          expect(res).to.include({ statusCode: 200 })
+          const onData = sinon.spy()
+          res.on('data', data => {
+            onData()
+            expect(data).to.be.an.instanceOf(Buffer)
+            expect(data.toString()).to.equal(responseBody)
+          })
+          res.on('end', () => {
+            expect(onData).to.have.been.calledOnce()
+            scope.done()
+            done()
+          })
+        }
+      )
+      .end()
+  })
 })

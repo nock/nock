@@ -2,8 +2,9 @@
 
 const http = require('http')
 const fs = require('fs')
+const path = require('path')
 const { beforeEach, test } = require('tap')
-const proxyquire = require('proxyquire').noPreserveCache()
+const proxyquire = require('proxyquire').preserveCache()
 const nock = require('..')
 
 require('./cleanup_after_each')()
@@ -53,7 +54,7 @@ function nockBackWithFixture(t, scopesLoaded) {
 
   nockBack('goodRequest.json', function(done) {
     t.equal(this.scopes.length, scopesLength)
-    http.get('http://www.example.test/').end()
+    http.get('http://www.example.test/')
     this.assertScopesFinished()
     done()
     t.end()
@@ -485,6 +486,18 @@ test('nockBack lockdown tests', nw => {
   })
 
   nw.end()
+})
+
+test('assertScopesFinished throws exception when Back still has pending scopes', t => {
+  nockBack.setMode('record')
+  const fixtureName = 'goodRequest.json'
+  const fixturePath = path.join(nockBack.fixtures, fixtureName)
+  nockBack(fixtureName, function(done) {
+    const expected = `["GET http://www.example.test:80/"] was not used, consider removing ${fixturePath} to rerecord fixture`
+    t.throws(() => this.assertScopesFinished(), { message: expected })
+    done()
+    t.end()
+  })
 })
 
 test('nockBack dryrun throws the expected exception when fs is not available', t => {
