@@ -117,7 +117,7 @@ jobs:
         name: Test
         run: npm run test:tap
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
         node: [8, 10, 12, 13]
