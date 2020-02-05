@@ -513,7 +513,7 @@ test('testing timers are deleted correctly', t => {
   })
 })
 
-test('correct node behavior', t => {
+test('test correct node behavior by making sure that http.request is not called when using http.get', t => {
   const scope = nock('http://example.test')
     .get('/')
     .reply()
