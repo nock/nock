@@ -96,24 +96,12 @@ jobs:
         id: npm-cache
         run: |
           echo "::set-output name=dir::$(npm config get cache)"
-      # The following two steps can be greatly simplified once
-      # https://github.com/actions/cache/issues/39 is fixed.
-      - if: runner.os != 'Windows'
-        name: Cache npm dependencies
+      - name: Cache npm dependencies
         uses: actions/cache@v1
         with:
           path: ${{ steps.npm-cache.outputs.dir }}
           key: |
-            npm-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            npm-${{ runner.os }}-
-      - if: runner.os == 'Windows'
-        name: Cache npm dependencies
-        uses: actions/cache@v1
-        with:
-          path: ${{ steps.npm-cache.outputs.dir }}
-          key: |
-            npm-${{ runner.os }}-${{ hashFiles('**\package-lock.json') }}
+            npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
           restore-keys: |
             npm-${{ runner.os }}-
       - name: Install dependencies
