@@ -686,64 +686,58 @@ test('Request with `Expect: 100-continue` triggers continue event', t => {
 })
 
 // https://github.com/nock/nock/issues/1836
-test(
-  'when http.get and http.request have been overridden before nock overrides them, http.get calls through to the expected method',
-  async t => {
-    // TODO Investigate why this is needed when it's also in the `afterEach()`
-    // hook in ./setup.
-    t.on('end', () => {
-      nock.restore()
-      sinon.restore()
-    })
-
-    // Obtain the original `http.request()` and stub it out, as a library might.
+test('when http.get and http.request have been overridden before nock overrides them, http.get calls through to the expected method', async t => {
+  // TODO Investigate why this is needed when it's also in the `afterEach()`
+  // hook in ./setup.
+  t.on('end', () => {
     nock.restore()
-    const overriddenRequest = sinon.stub(http, 'request').callThrough()
-    const overriddenGet = sinon.stub(http, 'get').callThrough()
+    sinon.restore()
+  })
 
-    // Let Nock override them again.
-    nock.activate()
+  // Obtain the original `http.request()` and stub it out, as a library might.
+  nock.restore()
+  const overriddenRequest = sinon.stub(http, 'request').callThrough()
+  const overriddenGet = sinon.stub(http, 'get').callThrough()
 
-    const server = http.createServer((request, response) => {
-      response.writeHead(200)
-      response.end()
-    })
-    await new Promise(resolve => server.listen(resolve))
+  // Let Nock override them again.
+  nock.activate()
 
-    const req = http.get(`http://localhost:${server.address().port}`)
-    expect(overriddenGet).to.have.been.calledOnce()
-    expect(overriddenRequest).not.to.have.been.called()
+  const server = http.createServer((request, response) => {
+    response.writeHead(200)
+    response.end()
+  })
+  await new Promise(resolve => server.listen(resolve))
 
-    req.abort()
-    server.close()
-  }
-)
+  const req = http.get(`http://localhost:${server.address().port}`)
+  expect(overriddenGet).to.have.been.calledOnce()
+  expect(overriddenRequest).not.to.have.been.called()
+
+  req.abort()
+  server.close()
+})
 
 // https://github.com/nock/nock/issues/1836
-test(
-  'when http.get and http.request have been overridden before nock overrides them, http.request calls through to the expected method',
-  async t => {
-    t.on('end', () => {
-      nock.restore()
-      sinon.restore()
-    })
-
-    // Obtain the original `http.request()` and stub it out, as a library might.
+test('when http.get and http.request have been overridden before nock overrides them, http.request calls through to the expected method', async t => {
+  t.on('end', () => {
     nock.restore()
-    const overriddenRequest = sinon.stub(http, 'request').callThrough()
-    const overriddenGet = sinon.stub(http, 'get').callThrough()
+    sinon.restore()
+  })
 
-    // Let Nock override them again.
-    nock.activate()
+  // Obtain the original `http.request()` and stub it out, as a library might.
+  nock.restore()
+  const overriddenRequest = sinon.stub(http, 'request').callThrough()
+  const overriddenGet = sinon.stub(http, 'get').callThrough()
 
-    const req = http.request({
-      host: 'localhost',
-      path: '/',
-      port: 1234
-    })
-    expect(overriddenRequest).to.have.been.calledOnce()
-    expect(overriddenGet).not.to.have.been.called()
+  // Let Nock override them again.
+  nock.activate()
 
-    req.abort()
-  }
-)
+  const req = http.request({
+    host: 'localhost',
+    path: '/',
+    port: 1234,
+  })
+  expect(overriddenRequest).to.have.been.calledOnce()
+  expect(overriddenGet).not.to.have.been.called()
+
+  req.abort()
+})
