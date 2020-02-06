@@ -27,15 +27,30 @@ describe('Logging using the `debug` package', () => {
     const exampleBody = 'Hello yourself!'
     await got.post('http://example.test/deep/link', { body: exampleBody })
 
-    expect(logFn).to.have.been.calledWithExactly(
-      sinon.match.string,
-      // This is a JSON blob which contains, among other things the complete
-      // request URL.
-      sinon.match('"href":"http://example.test/deep/link"'),
-      // This is the JSON-stringified body.
-      `"${exampleBody}"`,
-      sinon.match.string
-    )
+    // TODO For some reason this is getting slightly different arugments in Tap
+    // vs Mocha. Remove this when Tap is removed.
+    const isMocha = process.argv.some(arg => arg.endsWith('mocha'))
+    if (isMocha) {
+      expect(logFn).to.have.been.calledWithExactly(
+        sinon.match.string,
+        // This is a JSON blob which contains, among other things the complete
+        // request URL.
+        sinon.match('"href":"http://example.test/deep/link"'),
+        // This is the JSON-stringified body.
+        `"${exampleBody}"`,
+        sinon.match.string
+      )
+    } else {
+      expect(logFn).to.have.been.calledWithExactly(
+        sinon.match.string,
+        // This is a JSON blob which contains, among other things the complete
+        // request URL.
+        sinon.match('"href":"http://example.test/deep/link"'),
+        // This is the JSON-stringified body.
+        `"${exampleBody}"`,
+      )
+
+    }
   })
 })
 
