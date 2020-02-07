@@ -28,14 +28,7 @@ Object.assign(module.exports, {
   removeInterceptor,
   disableNetConnect,
   enableNetConnect,
-  // TODO-12.x Historically `nock.cleanAll()` has returned the nock global.
-  // The other global methods do not do this, so it's not clear this was
-  // deliberate or is even helpful. This shim is included for backward
-  // compatibility and shoulud be replaced with an alias to `removeAll()`.
-  cleanAll() {
-    removeAll()
-    return module.exports
-  },
+  cleanAll: removeAll,
   abortPendingRequests,
   load,
   loadDefs,
