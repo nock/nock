@@ -1,6 +1,7 @@
 'use strict'
 
 const http = require('http')
+const { expect } = require('chai')
 const url = require('url')
 const mikealRequest = require('request')
 const { test } = require('tap')
@@ -231,6 +232,18 @@ test('match hostname using regexp with allowUnmocked (issue-1076)', t => {
     t.equal(body, 'Match regex')
     t.end()
   })
+})
+
+// https://github.com/nock/nock/issues/1867
+test('match path using callback with allowUnmocked', async t => {
+  const scope = nock('http://example.test', { allowUnmocked: true })
+    .get((uri => uri.endsWith('bar')))
+    .reply()
+
+  const { statusCode } = await got('http://example.test/foo/bar')
+  expect(statusCode).to.equal(200)
+
+  scope.done()
 })
 
 // https://github.com/nock/nock/issues/835
