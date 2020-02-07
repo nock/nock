@@ -125,11 +125,11 @@ describe('Nock lifecycle functions', () => {
         .get('/')
         .reply()
 
-      expect(scope.isDone()).to.be.false()
+      expect(nock.isDone()).to.be.false()
 
       await got('http://example.test/')
 
-      expect(scope.isDone()).to.be.true()
+      expect(nock.isDone()).to.be.true()
 
       scope.done()
     })

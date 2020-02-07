@@ -81,6 +81,22 @@ it('loadDefs throws expected when fs is not available', () => {
   expect(() => loadDefs()).to.throw(Error, 'No fs')
 })
 
+describe('`Scope#isDone()`', () => {
+  it('returns false while a mock is pending, and true after it is consumed', async () => {
+    const scope = nock('http://example.test')
+      .get('/')
+      .reply()
+
+    expect(scope.isDone()).to.be.false()
+
+    await got('http://example.test/')
+
+    expect(scope.isDone()).to.be.true()
+
+    scope.done()
+  })
+})
+
 describe('filteringPath()', function() {
   it('filter path with function', async function() {
     const scope = nock('http://example.test')
