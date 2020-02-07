@@ -212,10 +212,7 @@ it('response pipe without implicit end', done => {
         done()
       })
 
-      res.pipe(
-        dest,
-        { end: false }
-      )
+      res.pipe(dest, { end: false })
     }
   )
 })
@@ -285,6 +282,7 @@ it('when a stream is used for the response body, it will not be read until after
   })
 })
 
+// https://github.com/nock/nock/issues/193
 it('response readable pull stream works as expected', done => {
   nock('http://example.test')
     .get('/ssstream')
