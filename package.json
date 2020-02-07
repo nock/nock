@@ -57,12 +57,12 @@
     "tap": "^14.0.0"
   },
   "scripts": {
-    "coverage": "tap --coverage-report=html && open coverage/lcov-report/index.html",
-    "dtslint": "dtslint types",
     "format:fix": "prettier --write '**/*.{js,json,md,ts,yml,yaml}'",
     "format": "prettier --check '**/*.{js,json,md,ts,yml,yaml}'",
-    "lint": "eslint --cache --cache-location './.cache/eslint' '**/*.js'",
-    "lint:fix": "eslint --cache --cache-location './.cache/eslint' --fix '**/*.js'",
+    "lint": "run-p lint:js lint:ts",
+    "lint:js": "eslint --cache --cache-location './.cache/eslint' '**/*.js'",
+    "lint:js:fix": "eslint --cache --cache-location './.cache/eslint' --fix '**/*.js'",
+    "lint:ts": "dtslint types",
     "semantic-release": "semantic-release",
     "test": "run-p test:mocha test:tap",
     "test:coverage": "tap --coverage-report=html && open coverage/lcov-report/index.html",
