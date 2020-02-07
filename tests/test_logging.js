@@ -41,7 +41,7 @@ describe('Logging using the `debug` package', () => {
         sinon.match.string
       )
     } else {
-      expect(logFn).to.have.been.calledWithExactly(
+      expect(logFn).to.have.been.calledWith(
         sinon.match.string,
         // This is a JSON blob which contains, among other things the complete
         // request URL.
