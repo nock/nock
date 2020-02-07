@@ -47,9 +47,8 @@ describe('Logging using the `debug` package', () => {
         // request URL.
         sinon.match('"href":"http://example.test/deep/link"'),
         // This is the JSON-stringified body.
-        `"${exampleBody}"`,
+        `"${exampleBody}"`
       )
-
     }
   })
 })
