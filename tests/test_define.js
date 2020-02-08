@@ -24,7 +24,7 @@ test('define() is backward compatible', async t => {
   )
 
   await assertRejects(
-    got('http://example.test:12345/', { retry: 0 }),
+    got('http://example.test:12345/'),
     ({ statusCode }) => {
       t.is(statusCode, 500)
       return true
