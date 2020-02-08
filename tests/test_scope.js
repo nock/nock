@@ -89,7 +89,7 @@ describe('filteringPath()', function() {
       .reply()
 
     const { statusCode } = await got('http://example.test/', {
-      query: { a: '1', b: '2' },
+      searchParams: { a: '1', b: '2' },
     })
 
     expect(statusCode).to.equal(200)
@@ -103,7 +103,7 @@ describe('filteringPath()', function() {
       .reply()
 
     const { statusCode } = await got('http://example.test/', {
-      query: { a: '1', b: '2' },
+      searchParams: { a: '1', b: '2' },
     })
 
     expect(statusCode).to.equal(200)

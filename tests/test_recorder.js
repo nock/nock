@@ -943,7 +943,7 @@ it('records query parameters', async () => {
   })
 
   await got(`http://localhost:${server.address().port}`, {
-    query: { q: 'test search' },
+    searchParams: { q: 'test search' },
   })
 
   nock.restore()
@@ -970,7 +970,7 @@ it('encodes the query parameters when not outputting objects', async () => {
   })
 
   await got(`http://localhost:${server.address().port}`, {
-    query: { q: 'test search++' },
+    searchParams: { q: 'test search++' },
   })
 
   nock.restore()
@@ -1054,7 +1054,7 @@ it('outputs query string parameters using query()', async () => {
   nock.recorder.rec(true)
 
   await got(`http://localhost:${server.address().port}/`, {
-    query: { param1: 1, param2: 2 },
+    searchParams: { param1: 1, param2: 2 },
   })
 
   const recorded = nock.recorder.play()
@@ -1079,7 +1079,7 @@ it('outputs query string arrays correctly', async () => {
   nock.recorder.rec(true)
 
   await got(`http://localhost:${server.address().port}/`, {
-    query: new URLSearchParams([
+    searchParams: new URLSearchParams([
       ['foo', 'bar'],
       ['foo', 'baz'],
     ]),
