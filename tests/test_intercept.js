@@ -263,7 +263,7 @@ test('on interceptor, filter path with function', async t => {
     .reply(200, 'Hello World!')
 
   const { statusCode } = await got('http://example.test/', {
-    query: { a: '1', b: '2' },
+    searchParams: { a: '1', b: '2' },
   })
 
   t.equal(statusCode, 200)
