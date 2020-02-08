@@ -153,8 +153,8 @@ test('define() works with non-JSON responses', async t => {
   )
 
   const { statusCode, body } = await got.post('http://example.test/', {
-    encoding: false,
     body: exampleBody,
+    responseType: 'buffer',
   })
 
   t.equal(statusCode, 200)

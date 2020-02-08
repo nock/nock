@@ -43,7 +43,7 @@ test('get gets mocked', async t => {
     .reply(200, 'Hello World!')
 
   const { statusCode, body } = await got('http://example.test/', {
-    encoding: null,
+    responseType: 'buffer',
   })
 
   t.equal(statusCode, 200)
@@ -58,7 +58,7 @@ test('get gets mocked with relative base path', async t => {
     .reply(200, 'Hello World!')
 
   const { statusCode, body } = await got('http://example.test/abc/def', {
-    encoding: null,
+    responseType: 'buffer',
   })
 
   t.equal(statusCode, 200)
@@ -73,7 +73,7 @@ test('post', async t => {
     .reply(201, 'OK!')
 
   const { statusCode, body } = await got.post('http://example.test/form', {
-    encoding: null,
+    responseType: 'buffer',
   })
 
   t.equal(statusCode, 201)
@@ -88,7 +88,7 @@ test('post with empty response body', async t => {
     .reply()
 
   const { statusCode, body } = await got.post('http://example.test/form', {
-    encoding: null,
+    responseType: 'buffer',
   })
 
   t.equal(statusCode, 200)
@@ -402,7 +402,7 @@ test('can use https', async t => {
     .reply()
 
   const { statusCode } = await got('https://example.test/', {
-    encoding: null,
+    responseType: 'buffer',
   })
 
   t.equal(statusCode, 200)
