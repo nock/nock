@@ -131,7 +131,7 @@ describe('filteringRequestBody()', () => {
       .post('/', 'mamma tua')
       .reply()
 
-    const { statusCode } = await got('http://example.test/', {
+    const { statusCode } = await got.post('http://example.test/', {
       body: 'mamma mia',
     })
 
@@ -146,7 +146,7 @@ describe('filteringRequestBody()', () => {
       .post('/', 'mamma nostra')
       .reply(200, 'Hello World!')
 
-    const { statusCode } = await got('http://example.test/', {
+    const { statusCode } = await got.post('http://example.test/', {
       body: 'mamma mia',
     })
 

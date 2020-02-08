@@ -149,7 +149,7 @@ describe('synchronous `reply()` function', () => {
             })
 
           await assertRejects(
-            got('http://example.test/endpoint', {
+            got.post('http://example.test/endpoint', {
               body: exampleRequestBody,
             }),
             ({ statusCode, body }) => {
@@ -178,7 +178,7 @@ describe('synchronous `reply()` function', () => {
                 .and.to.deep.equal(JSON.parse(exampleRequestBody))
             })
 
-          const { statusCode } = await got('http://example.test/', {
+          const { statusCode } = await got.post('http://example.test/', {
             headers: { 'Content-Type': 'application/json' },
             body: exampleRequestBody,
           })
@@ -201,7 +201,7 @@ describe('synchronous `reply()` function', () => {
                 .and.to.to.deep.equal(JSON.parse(exampleRequestBody))
             })
 
-          const { statusCode } = await got('http://example.test/', {
+          const { statusCode } = await got.post('http://example.test/', {
             // Providing the field value as an array is probably a bug on the callers behalf,
             // but it is still allowed by Node
             headers: { 'Content-Type': ['application/json', 'charset=utf8'] },
