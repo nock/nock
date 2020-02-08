@@ -18,7 +18,8 @@ test('basic auth with username and password', async t => {
 
   await t.test('succeeds when it matches', async tt => {
     const response = await got('http://example.test/test', {
-      auth: 'foo:bar',
+      username: 'foo',
+      password: 'bar',
     })
     tt.equal(response.statusCode, 200)
     tt.equal(response.body, 'Here is the content')
@@ -43,7 +44,10 @@ test('basic auth with username only', async t => {
   })
 
   await t.test('succeeds when it matches', async tt => {
-    const response = await got('http://example.test/test', { auth: 'foo:' })
+    const response = await got('http://example.test/test', {
+      username: 'foo',
+      password: '',
+    })
     tt.equal(response.statusCode, 200)
     tt.equal(response.body, 'Here is the content')
   })
