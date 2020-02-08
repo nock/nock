@@ -124,7 +124,7 @@ describe('synchronous `reply()` function', () => {
           got.post('http://example.test/endpoint', {
             body: exampleRequestBody,
           }),
-          ({ statusCode, body }) => {
+          ({ response: { statusCode, body } }) => {
             expect(statusCode).to.equal(404)
             expect(body).to.equal(exampleResponseBody)
             return true
@@ -152,7 +152,7 @@ describe('synchronous `reply()` function', () => {
             got.post('http://example.test/endpoint', {
               body: exampleRequestBody,
             }),
-            ({ statusCode, body }) => {
+            ({ response: { statusCode, body } }) => {
               expect(statusCode).to.equal(404)
               expect(body).to.equal('')
               return true
@@ -272,7 +272,7 @@ describe('synchronous `reply()` function', () => {
 
       await assertRejects(
         got('http://example.test/'),
-        ({ statusCode, body }) => {
+        ({ response: { statusCode, body } }) => {
           expect(statusCode).to.equal(401)
           expect(body).to.equal(exampleResponse)
           return true
