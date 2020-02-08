@@ -1079,7 +1079,10 @@ it('outputs query string arrays correctly', async () => {
   nock.recorder.rec(true)
 
   await got(`http://localhost:${server.address().port}/`, {
-    query: new URLSearchParams([['foo', 'bar'], ['foo', 'baz']]),
+    query: new URLSearchParams([
+      ['foo', 'bar'],
+      ['foo', 'baz'],
+    ]),
   })
 
   const recorded = nock.recorder.play()

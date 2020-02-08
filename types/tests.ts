@@ -277,7 +277,12 @@ nock('http://example.test', { encodedQueryParams: true })
 
 nock('http://example.test')
   .get('/')
-  .query(new URLSearchParams([['foo', 'one'], ['foo', 'two']]))
+  .query(
+    new URLSearchParams([
+      ['foo', 'one'],
+      ['foo', 'two'],
+    ])
+  )
   .reply()
 
 // Specifying replies
