@@ -17,7 +17,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          persist-credentials: false
+          fetch-depth: 0
+          persist-credentials: true
+          ref: ${{ github.head_ref }}
       - name: Setup Node.js
         uses: actions/setup-node@v1
         with:
@@ -32,7 +34,17 @@ jobs:
       - name: Install dependencies
         run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
       - name: Format
-        run: npm run format
+        run: npm run format:fix
+      - if: >-
+          github.event_name == 'pull_request' &&
+          github.actor != 'github-actions[bot]'
+        name: Commit
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+          git add .
+          git commit -m "chore: format"
+          git push origin HEAD:${{ github.head_ref }}
   lint-javascript:
     name: Lint JavaScript
     runs-on: ubuntu-latest
