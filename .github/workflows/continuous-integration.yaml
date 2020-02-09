@@ -106,6 +106,8 @@ jobs:
             npm-${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('package-lock.json') }}
           restore-keys: |
             npm-${{ runner.os }}-${{ matrix.node-version }}-
+      - name: Update npm
+        run: npm install --global npm
       - name: Install dependencies
         run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
       # The following conditional can be removed once tests are fully migrated
