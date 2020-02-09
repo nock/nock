@@ -10,8 +10,12 @@ on:
       - master
 
 jobs:
-  format:
-    name: Format
+  fix-formatting:
+    if: >-
+      github.actor != 'github-actions[bot]' &&
+      github.event_name == 'pull_request' &&
+      github.repository == 'nock/nock'
+    name: Fix formating
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -33,23 +37,38 @@ jobs:
             npm-
       - name: Install dependencies
         run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
-      - if: github.repository != 'nock/nock'
-        name: Check formatting
-        run: npm run format
-      - if: github.repository == 'nock/nock'
-        name: Fix formatting
+      - name: Format
         run: npm run format:fix
-      - if: >-
-          github.actor != 'github-actions[bot]' &&
-          github.event_name == 'pull_request' &&
-          github.repository == 'nock/nock'
-        name: Commit
+      - name: Commit
         run: |
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
           git add .
           git commit -m "chore: format"
           git push origin HEAD:${{ github.head_ref }}
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - name: Cache npm dependencies
+        uses: actions/cache@v1
+        with:
+          key: npm-${{ hashFiles('package-lock.json') }}
+          path: ~/.npm
+          restore-keys: |
+            npm-
+      - name: Install dependencies
+        run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
+      - name: Format
+        run: npm run format
   lint-javascript:
     name: Lint JavaScript
     runs-on: ubuntu-latest
