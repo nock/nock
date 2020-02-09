@@ -92,11 +92,13 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Get npm cache directory
-        id: npm-cache
+      - id: npm-cache
+        if: runner.os == 'Linux'
+        name: Get npm cache directory
         run: |
           echo "::set-output name=dir::$(npm config get cache)"
-      - name: Cache npm dependencies
+      - if: runner.os == 'Linux'
+        name: Cache npm dependencies
         uses: actions/cache@v1
         with:
           path: ${{ steps.npm-cache.outputs.dir }}
