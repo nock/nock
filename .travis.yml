@@ -1,22 +1,11 @@
 language: node_js
 cache: npm
 
-# Trigger a push build on master and greenkeeper branches + PRs build on every branches
-# Avoid double build on PRs (See https://github.com/travis-ci/travis-ci/issues/1147)
 branches:
   only:
-    - master
-    - /^greenkeeper.*$/
-    - beta # semantic-release preview releases
-    - next # semantic-release @next releases
-    - /^\d+\.x$/ # semantic-release maintenance releases
+    - /^greenkeeper/prettier.*$/
 
-stages:
-  - name: release
-    if: branch =~ /^(\d+\.x|master|next|beta)$/ AND type IN (push)
-  - name: update-prettier
-    if: branch =~ ^greenkeeper/prettier
-
+# TODO: move over to separate action
 jobs:
   include:
     - stage: update-prettier
@@ -26,7 +15,3 @@ jobs:
         - npm run format:fix
         # commit changes and push back to branch on GitHub. If there are no changes then exit without error
         - 'git commit -a -m "style: prettier" && git push "https://${GH_TOKEN}@github.com/$TRAVIS_REPO_SLUG" ${TRAVIS_BRANCH} || true'
-    - stage: release
-      node_js: lts/*
-      env: semantic-release
-      script: npm run semantic-release
