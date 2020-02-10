@@ -225,8 +225,7 @@ describe('`persist()`', () => {
 
     await assertRejects(
       got('http://example.test/'),
-      Error,
-      'Nock: No match for request'
+      /Nock: No match for request/
     )
   })
 
