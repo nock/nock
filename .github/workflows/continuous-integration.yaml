@@ -1,0 +1,125 @@
+name: Continuous Integration
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+  push:
+    branches:
+      - master
+
+jobs:
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - name: Cache npm dependencies
+        uses: actions/cache@v1
+        with:
+          key: npm-${{ hashFiles('package-lock.json') }}
+          path: ~/.npm
+          restore-keys: |
+            npm-
+      - name: Install dependencies
+        run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
+      - name: Format
+        run: npm run format
+  lint-javascript:
+    name: Lint JavaScript
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - name: Cache npm dependencies
+        uses: actions/cache@v1
+        with:
+          key: npm-${{ hashFiles('package-lock.json') }}
+          path: ~/.npm
+          restore-keys: |
+            npm-
+      - name: Install dependencies
+        run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
+      - name: Lint
+        run: npm run lint:js
+  lint-typescript:
+    name: Lint TypeScript declaration files
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - name: Cache npm dependencies
+        uses: actions/cache@v1
+        with:
+          key: npm-${{ hashFiles('package-lock.json') }}
+          path: ~/.npm
+          restore-keys: |
+            npm-
+      - name: Install dependencies
+        run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
+      - name: Lint
+        run: |
+          npm run lint:ts
+  test:
+    name: Test
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - id: npm-cache
+        if: runner.os == 'Linux'
+        name: Get npm cache directory
+        run: |
+          echo "::set-output name=dir::$(npm config get cache)"
+      - if: runner.os == 'Linux'
+        name: Cache npm dependencies
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: |
+            npm-${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-${{ matrix.node-version }}-
+      - name: Install dependencies
+        run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
+      # The following conditional can be removed once tests are fully migrated
+      # to Mocha. Alternatively a grep command used to select correct files can
+      # be refactored to work on Windows. Ideally all tests should be run across
+      # all platforms.
+      - if: runner.os != 'Windows'
+        name: Test
+        run: npm run test
+      - if: runner.os == 'Windows'
+        name: Test
+        run: npm run test:tap
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [8, 10, 12, 13]
+        os: [macos-latest, ubuntu-latest, windows-latest]
