@@ -1164,7 +1164,9 @@ nock.enableNetConnect('amazon.com')
 nock.enableNetConnect(/(amazon|github)\.com/)
 
 // Or a Function
-nock.enableNetConnect(host => host.includes('amazon.com') || host.includes('github.com'))
+nock.enableNetConnect(
+  host => host.includes('amazon.com') || host.includes('github.com')
+)
 
 http.get('http://www.amazon.com/')
 http.get('http://github.com/')
