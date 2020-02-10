@@ -54,7 +54,7 @@
     "sinon": "^8.0.0",
     "sinon-chai": "^3.3.0",
     "superagent": "^5.0.2",
-    "tap": "^14.0.0"
+    "tap": "14.6.1"
   },
   "scripts": {
     "format:fix": "prettier --write '**/*.{js,json,md,ts,yml,yaml}'",
