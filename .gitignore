@@ -1,6 +1,7 @@
+.cache
+.nyc_output
+.vscode
+coverage
 node_modules
 npm-debug.log
-coverage
-.nyc_output/
 tests/browserify-public/browserify-bundle.js
-.vscode/
