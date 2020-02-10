@@ -6,7 +6,7 @@
 const { IncomingMessage } = require('http')
 const { expect } = require('chai')
 const sinon = require('sinon')
-const lolex = require('lolex')
+const fakeTimers = require('@sinonjs/fake-timers')
 const nock = require('..')
 const got = require('./got_client')
 
@@ -354,7 +354,7 @@ describe('`replyDate()`', () => {
   describe('with mock timers', () => {
     let clock
     beforeEach(() => {
-      clock = lolex.install()
+      clock = fakeTimers.install()
     })
     afterEach(() => {
       if (clock) {
