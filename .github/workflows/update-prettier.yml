@@ -1,0 +1,28 @@
+name: Update Prettier
+on:
+  push:
+    branches:
+      - greenkeeper/prettier-*
+jobs:
+  update_prettier:
+    runs-on: ubuntu-latest
+    steps:
+      # make your repository's code available to the action
+      - uses: actions/checkout@v2
+      # setup Node 12. Change the version number to your preference
+      - uses: actions/setup-node@v1
+        with:
+          version: 12
+      # Install your package dependencies
+      - run: npm ci
+      # Fix linting errors with the new prettier version
+      - run: npm run format:fix
+      # Create a pull request if there are any changes
+      - uses: gr2m/create-or-update-pull-request-action@v1.x
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          title: 'Prettier updated'
+          body: 'An update to prettier required updates to your code.'
+          branch: ${{ github.ref }}
+          commit-message: 'style: prettier'
