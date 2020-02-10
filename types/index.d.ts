@@ -21,7 +21,7 @@ declare namespace nock {
   function activeMocks(): string[]
   function removeInterceptor(interceptor: Interceptor | ReqOptions): boolean
   function disableNetConnect(): void
-  function enableNetConnect(matcher?: string | RegExp): void
+  function enableNetConnect(matcher?: string | RegExp | ((host: string) => boolean)): void
   function load(path: string): Scope[]
   function loadDefs(path: string): Definition[]
   function define(defs: Definition[]): Scope[]
