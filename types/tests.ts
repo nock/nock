@@ -1,6 +1,6 @@
 import nock from 'nock'
 import * as fs from 'fs'
-import { URL, URLSearchParams } from 'url'
+import url, { URLSearchParams } from 'url'
 
 let scope: nock.Scope = nock('http://example.test')
 let inst: nock.Interceptor
@@ -159,7 +159,13 @@ nock('http://example.test')
   })
 
 // Using URL as input
-scope = nock(new URL('https://example.test/'))
+// Not supported yet
+// scope = nock(new URL('https://example.test/'))
+//   .get('/resource')
+//   .reply(200, 'url matched')
+
+// specifying URL from url.parse output
+scope = nock(url.parse('https://example.test/'))
   .get('/resource')
   .reply(200, 'url matched')
 
