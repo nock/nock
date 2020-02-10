@@ -237,7 +237,7 @@ test('match hostname using regexp with allowUnmocked (issue-1076)', t => {
 // https://github.com/nock/nock/issues/1867
 test('match path using callback with allowUnmocked', async t => {
   const scope = nock('http://example.test', { allowUnmocked: true })
-    .get((uri => uri.endsWith('bar')))
+    .get(uri => uri.endsWith('bar'))
     .reply()
 
   const { statusCode } = await got('http://example.test/foo/bar')
