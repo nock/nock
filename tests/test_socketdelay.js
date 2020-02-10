@@ -35,7 +35,7 @@ describe('`socketDelay()`', () => {
     })
   })
 
-  it('emits a timeout', done => {
+  it('emits a timeout - with setTimeout', done => {
     nock('http://example.test')
       .get('/')
       .socketDelay(10000)
@@ -56,7 +56,28 @@ describe('`socketDelay()`', () => {
     req.end()
   })
 
-  it('emits a timeout if not idle for long enough', done => {
+  it('emits a timeout - with options.timeout', done => {
+    nock('http://example.test')
+      .get('/')
+      .socketDelay(10000)
+      .reply(200, 'OK')
+
+    const onEnd = sinon.spy()
+
+    const req = http.request('http://example.test', { timeout: 5000 }, res => {
+      res.setEncoding('utf8')
+      res.once('end', onEnd)
+    })
+
+    req.on('timeout', function() {
+      expect(onEnd).not.to.have.been.called()
+      done()
+    })
+
+    req.end()
+  })
+
+  it('does not emit a timeout when timeout > socketDelay', done => {
     const responseText = 'okeydoke!'
     const scope = nock('http://example.test')
       .get('/')
