@@ -1,6 +1,7 @@
 'use strict'
 
 const { expect } = require('chai')
+const http = require('http')
 const nock = require('..')
 const got = require('./got_client')
 const ssl = require('./ssl')
@@ -40,5 +41,16 @@ describe('NOCK_OFF env var', () => {
     const { body } = await got(`https://localhost:${port}`, { ca: ssl.ca })
     expect(body).to.equal(responseBody)
     scope.done()
+  })
+
+  it('when true before import, Nock does not activate', async () => {
+    nock.restore()
+    const originalClient = http.ClientRequest
+
+    delete require.cache[require.resolve('..')]
+    const newNock = require('..')
+
+    expect(http.ClientRequest).to.equal(originalClient)
+    expect(newNock.isActive()).to.equal(false)
   })
 })
