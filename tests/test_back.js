@@ -502,6 +502,7 @@ test('assertScopesFinished throws exception when Back still has pending scopes',
 
 test('nockBack dryrun throws the expected exception when fs is not available', t => {
   const nockBackWithoutFs = proxyquire('../lib/back', { fs: null })
+  nockBackWithoutFs.setMode('dryrun')
 
   nockBackWithoutFs.fixtures = `${__dirname}/fixtures`
   t.throws(() => nockBackWithoutFs('goodRequest.json'), { message: 'no fs' })
