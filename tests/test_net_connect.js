@@ -115,4 +115,13 @@ describe('`enableNetConnect()`', () => {
       /Nock: Disallowed net connect for "example.test:443\/"/
     )
   })
+
+  it('passes the domain to be tested, via function', async () => {
+    const matcher = sinon.stub().returns(false)
+    nock.enableNetConnect(matcher)
+
+    await got('https://example.test/').catch(() => undefined) // ignore rejection, expected
+
+    expect(matcher).to.have.been.calledOnceWithExactly('example.test:443')
+  })
 })
