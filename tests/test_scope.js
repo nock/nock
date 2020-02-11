@@ -134,7 +134,7 @@ describe('filteringPath()', function() {
       .reply()
 
     const { statusCode } = await got('http://example.test/', {
-      query: { a: '1', b: '2' },
+      searchParams: { a: '1', b: '2' },
     })
 
     expect(statusCode).to.equal(200)
@@ -148,7 +148,7 @@ describe('filteringPath()', function() {
       .reply()
 
     const { statusCode } = await got('http://example.test/', {
-      query: { a: '1', b: '2' },
+      searchParams: { a: '1', b: '2' },
     })
 
     expect(statusCode).to.equal(200)
@@ -176,7 +176,7 @@ describe('filteringRequestBody()', () => {
       .post('/', 'mamma tua')
       .reply()
 
-    const { statusCode } = await got('http://example.test/', {
+    const { statusCode } = await got.post('http://example.test/', {
       body: 'mamma mia',
     })
 
@@ -191,7 +191,7 @@ describe('filteringRequestBody()', () => {
       .post('/', 'mamma nostra')
       .reply(200, 'Hello World!')
 
-    const { statusCode } = await got('http://example.test/', {
+    const { statusCode } = await got.post('http://example.test/', {
       body: 'mamma mia',
     })
 

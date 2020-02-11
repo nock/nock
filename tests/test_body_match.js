@@ -27,8 +27,7 @@ test('match form body reagardless of field ordering', async t => {
     .reply(200, 'Heyyyy!')
 
   const { body } = await got.post('http://example.test/', {
-    form: true,
-    body: { bar: 'foo', foo: 'bar' },
+    form: { bar: 'foo', foo: 'bar' },
   })
 
   t.equal(body, 'Heyyyy!')
