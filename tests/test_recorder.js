@@ -433,7 +433,7 @@ it('records nonstandard ports', done => {
   })
 })
 
-it('req.end accepts and calls a callback when recording', done => {
+it('`req.end()` accepts and calls a callback when recording', done => {
   const onEnd = sinon.spy()
 
   server = http.createServer((request, response) => {
@@ -466,6 +466,51 @@ it('req.end accepts and calls a callback when recording', done => {
     )
 
     req.end(onEnd)
+  })
+})
+
+// https://nodejs.org/api/http.html#http_request_end_data_encoding_callback
+it('when recording, when `req.end()` is called with only data and a callback, the callback is invoked and the data is sent', done => {
+  const onEnd = sinon.spy()
+
+  let requestBody = ''
+  server = http.createServer((request, response) => {
+    request.on('data', data => {
+      requestBody += data
+    })
+    request.on('end', () => {
+      response.writeHead(200)
+      response.end()
+    })
+  })
+
+  nock.restore()
+  nock.recorder.clear()
+  expect(nock.recorder.play()).to.be.empty()
+
+  server.listen(() => {
+    nock.recorder.rec({ dont_print: true })
+
+    const req = http.request(
+      {
+        hostname: 'localhost',
+        port: server.address().port,
+        path: '/',
+        method: 'POST',
+      },
+      res => {
+        expect(onEnd).to.have.been.calledOnce()
+        expect(res.statusCode).to.equal(200)
+
+        res.on('end', () => {
+          expect(requestBody).to.equal('foobar')
+          done()
+        })
+        res.resume()
+      }
+    )
+
+    req.end('foobar', onEnd)
   })
 })
 
@@ -943,7 +988,7 @@ it('records query parameters', async () => {
   })
 
   await got(`http://localhost:${server.address().port}`, {
-    query: { q: 'test search' },
+    searchParams: { q: 'test search' },
   })
 
   nock.restore()
@@ -970,7 +1015,7 @@ it('encodes the query parameters when not outputting objects', async () => {
   })
 
   await got(`http://localhost:${server.address().port}`, {
-    query: { q: 'test search++' },
+    searchParams: { q: 'test search++' },
   })
 
   nock.restore()
@@ -1054,7 +1099,7 @@ it('outputs query string parameters using query()', async () => {
   nock.recorder.rec(true)
 
   await got(`http://localhost:${server.address().port}/`, {
-    query: { param1: 1, param2: 2 },
+    searchParams: { param1: 1, param2: 2 },
   })
 
   const recorded = nock.recorder.play()
@@ -1079,7 +1124,7 @@ it('outputs query string arrays correctly', async () => {
   nock.recorder.rec(true)
 
   await got(`http://localhost:${server.address().port}/`, {
-    query: new URLSearchParams([
+    searchParams: new URLSearchParams([
       ['foo', 'bar'],
       ['foo', 'baz'],
     ]),

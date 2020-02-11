@@ -43,7 +43,7 @@ test('get gets mocked', async t => {
     .reply(200, 'Hello World!')
 
   const { statusCode, body } = await got('http://example.test/', {
-    encoding: null,
+    responseType: 'buffer',
   })
 
   t.equal(statusCode, 200)
@@ -58,7 +58,7 @@ test('get gets mocked with relative base path', async t => {
     .reply(200, 'Hello World!')
 
   const { statusCode, body } = await got('http://example.test/abc/def', {
-    encoding: null,
+    responseType: 'buffer',
   })
 
   t.equal(statusCode, 200)
@@ -73,7 +73,7 @@ test('post', async t => {
     .reply(201, 'OK!')
 
   const { statusCode, body } = await got.post('http://example.test/form', {
-    encoding: null,
+    responseType: 'buffer',
   })
 
   t.equal(statusCode, 201)
@@ -88,7 +88,7 @@ test('post with empty response body', async t => {
     .reply()
 
   const { statusCode, body } = await got.post('http://example.test/form', {
-    encoding: null,
+    responseType: 'buffer',
   })
 
   t.equal(statusCode, 200)
@@ -137,7 +137,7 @@ test('post with regexp as spec', async t => {
     .post('/echo', /key=v.?l/g)
     .reply(200, (uri, body) => ['OK', uri, body].join(' '))
 
-  const { body } = await got('http://example.test/echo', { body: input })
+  const { body } = await got.post('http://example.test/echo', { body: input })
 
   t.equal(body, 'OK /echo key=val')
   scope.done()
@@ -148,7 +148,9 @@ test('post with function as spec', async t => {
     .post('/echo', body => body === 'key=val')
     .reply(200, (uri, body) => ['OK', uri, body].join(' '))
 
-  const { body } = await got('http://example.test/echo', { body: 'key=val' })
+  const { body } = await got.post('http://example.test/echo', {
+    body: 'key=val',
+  })
 
   t.equal(body, 'OK /echo key=val')
   scope.done()
@@ -161,7 +163,7 @@ test('post with chaining on call', async t => {
     .post('/echo', input)
     .reply(200, (uri, body) => ['OK', uri, body].join(' '))
 
-  const { body } = await got('http://example.test/echo', { body: input })
+  const { body } = await got.post('http://example.test/echo', { body: input })
 
   t.equal(body, 'OK /echo key=val')
   scope.done()
@@ -212,11 +214,11 @@ test('body data is differentiating', async t => {
     .post('/', 'def')
     .reply(200, 'Hey 2')
 
-  const response1 = await got('http://example.test/', { body: 'abc' })
+  const response1 = await got.post('http://example.test/', { body: 'abc' })
   t.equal(response1.statusCode, 200)
   t.equal(response1.body, 'Hey 1')
 
-  const response2 = await got('http://example.test/', { body: 'def' })
+  const response2 = await got.post('http://example.test/', { body: 'def' })
   t.equal(response2.statusCode, 200)
   t.equal(response2.body, 'Hey 2')
 
@@ -263,7 +265,7 @@ test('on interceptor, filter path with function', async t => {
     .reply(200, 'Hello World!')
 
   const { statusCode } = await got('http://example.test/', {
-    query: { a: '1', b: '2' },
+    searchParams: { a: '1', b: '2' },
   })
 
   t.equal(statusCode, 200)
@@ -402,7 +404,7 @@ test('can use https', async t => {
     .reply()
 
   const { statusCode } = await got('https://example.test/', {
-    encoding: null,
+    responseType: 'buffer',
   })
 
   t.equal(statusCode, 200)
