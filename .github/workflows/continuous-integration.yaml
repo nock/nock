@@ -14,8 +14,8 @@ jobs:
     if: >-
       github.actor != 'github-actions[bot]' &&
       github.event_name == 'pull_request' &&
-      github.repository == 'nock/nock'
-    name: Fix formating
+      github.pull_request.head.repo.fork == true
+    name: Fix formatting
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
