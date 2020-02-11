@@ -59,7 +59,7 @@ test('allow unmocked option works with https', async t => {
   const { port } = server.address()
   const url = `https://localhost:${port}`
   const client = got.extend({
-    baseUrl: url,
+    prefixUrl: url,
     ca: ssl.ca,
     throwHttpErrors: false,
   })
