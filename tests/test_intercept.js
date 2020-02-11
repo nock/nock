@@ -769,11 +769,7 @@ test('do not match when conditionally = false but should match after trying agai
     .get('/')
     .reply(200)
 
-  await assertRejects(
-    got('http://example.test/'),
-    Error,
-    'Nock: No match for request'
-  )
+  await assertRejects(got('http://example.test/'), /Nock: No match for request/)
   expect(scope.isDone()).to.be.false()
 
   enabled = true
@@ -1047,8 +1043,7 @@ test('match path using function', async t => {
 
   await assertRejects(
     got.head('http://example.test/do/not/match'),
-    got.RequestError,
-    'Nock: No match for request'
+    /Nock: No match for request/
   )
 })
 
@@ -1063,8 +1058,7 @@ test('you must setup an interceptor for each request', async t => {
 
   await assertRejects(
     got('http://example.test/hey'),
-    Error,
-    'Nock: No match for request'
+    /Nock: No match for request/
   )
 })
 

@@ -4,6 +4,7 @@ const path = require('path')
 const { expect } = require('chai')
 const sinon = require('sinon')
 const proxyquire = require('proxyquire').preserveCache()
+const url = require('url')
 const Interceptor = require('../lib/interceptor')
 const nock = require('..')
 const got = require('./got_client')
@@ -21,6 +22,34 @@ it('scope exposes interceptors', () => {
       expect(interceptor).to.be.an.instanceOf(Interceptor)
       interceptor.delayConnection(100)
     })
+  })
+})
+
+describe('`Scope#constructor`', () => {
+  it('accepts the output of url.parse', async () => {
+    const scope = nock(url.parse('http://example.test'))
+      .get('/')
+      .reply()
+
+    const { statusCode } = await got('http://example.test')
+    expect(statusCode).to.equal(200)
+    scope.done()
+  })
+
+  it.skip('accepts a WHATWG URL instance', async () => {
+    const scope = nock(new url.URL('http://example.test'))
+      .get('/')
+      .reply()
+
+    const { statusCode } = await got('http://example.test')
+    expect(statusCode).to.equal(200)
+    scope.done()
+  })
+
+  it('fails when provided a WHATWG URL instance', () => {
+    // This test just proves the lack of current support. When this feature is added,
+    // this test should be removed and the test above un-skipped.
+    expect(() => nock(new url.URL('http://example.test'))).to.throw()
   })
 })
 
@@ -79,6 +108,22 @@ it('loadDefs throws expected when fs is not available', () => {
   const { loadDefs } = proxyquire('../lib/scope', { fs: null })
 
   expect(() => loadDefs()).to.throw(Error, 'No fs')
+})
+
+describe('`Scope#isDone()`', () => {
+  it('returns false while a mock is pending, and true after it is consumed', async () => {
+    const scope = nock('http://example.test')
+      .get('/')
+      .reply()
+
+    expect(scope.isDone()).to.be.false()
+
+    await got('http://example.test/')
+
+    expect(scope.isDone()).to.be.true()
+
+    scope.done()
+  })
 })
 
 describe('filteringPath()', function() {

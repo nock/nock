@@ -62,11 +62,7 @@ describe('asynchronous `reply()` function', () => {
           callback(new Error('Database failed'))
         )
 
-      await assertRejects(
-        got('http://example.test'),
-        got.RequestError,
-        'Database failed'
-      )
+      await assertRejects(got('http://example.test'), /Database failed/)
     })
 
     it('an error passed to the callback propagates when [err, fullResponseArray] is expected', async () => {
@@ -76,7 +72,7 @@ describe('asynchronous `reply()` function', () => {
           callback(Error('boom'))
         })
 
-      await assertRejects(got('http://example.test'), got.RequestError, 'boom')
+      await assertRejects(got('http://example.test'), /boom/)
     })
 
     it('subsequent calls to the reply callback are ignored', async () => {
@@ -139,11 +135,7 @@ describe('asynchronous `reply()` function', () => {
           throw Error('oh no!')
         })
 
-      await assertRejects(
-        got('http://example.test'),
-        got.RequestError,
-        'oh no!'
-      )
+      await assertRejects(got('http://example.test'), /oh no!/)
     })
 
     it('when reply is called with an async function that throws, it propagates the error', async () => {
@@ -153,11 +145,7 @@ describe('asynchronous `reply()` function', () => {
           throw Error('oh no!')
         })
 
-      await assertRejects(
-        got('http://example.test'),
-        got.RequestError,
-        'oh no!'
-      )
+      await assertRejects(got('http://example.test'), /oh no!/)
     })
   })
 })

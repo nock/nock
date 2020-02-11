@@ -28,8 +28,7 @@ test('basic auth with username and password', async t => {
   await t.test('fails when it doesnt match', async tt => {
     await assertRejects(
       got('http://example.test/test'),
-      Error,
-      'Nock: No match for request'
+      /Nock: No match for request/
     )
   })
 })
@@ -55,8 +54,7 @@ test('basic auth with username only', async t => {
   await t.test('fails when it doesnt match', async tt => {
     await assertRejects(
       got('http://example.test/test'),
-      Error,
-      'Nock: No match for request'
+      /Nock: No match for request/
     )
   })
 })

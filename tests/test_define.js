@@ -23,13 +23,10 @@ test('define() is backward compatible', async t => {
     ])
   )
 
-  await assertRejects(
-    got('http://example.test:12345/', { retry: 0 }),
-    ({ response: { statusCode } }) => {
-      t.is(statusCode, 500)
-      return true
-    }
-  )
+  await assertRejects(got('http://example.test:12345/'), ({response: { statusCode }}) => {
+    t.is(statusCode, 500)
+    return true
+  })
 })
 
 test('define() throws when reply is not a numeric string', t => {
