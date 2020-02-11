@@ -76,18 +76,18 @@ describe('allowUnmocked option', () => {
       .reply(304, 'served from our mock')
       .get('/wont/get/here')
       .reply(304, 'served from our mock')
-    const client = got.extend({ baseUrl: url, throwHttpErrors: false })
+    const client = got.extend({ prefixUrl: url, throwHttpErrors: false })
 
-    const response1 = await client(`${url}/abc`)
+    const response1 = await client('abc')
     expect(response1.statusCode).to.equal(304)
     expect(response1.body).to.equal('served from our mock')
     expect(scope.isDone()).to.equal(false)
 
-    const response2 = await client(`${url}/not/available`)
+    const response2 = await client('not/available')
     expect(response2.statusCode).to.equal(404)
     expect(scope.isDone()).to.equal(false)
 
-    const response3 = await client(`${url}/`)
+    const response3 = await client('')
     expect(response3.statusCode).to.equal(200)
     expect(response3.body).to.equal('server served a response')
     expect(scope.isDone()).to.equal(false)
