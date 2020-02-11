@@ -23,10 +23,13 @@ test('define() is backward compatible', async t => {
     ])
   )
 
-  await assertRejects(got('http://example.test:12345/'), ({ statusCode }) => {
-    t.is(statusCode, 500)
-    return true
-  })
+  await assertRejects(
+    got('http://example.test:12345/'),
+    ({ response: { statusCode } }) => {
+      t.is(statusCode, 500)
+      return true
+    }
+  )
 })
 
 test('define() throws when reply is not a numeric string', t => {
@@ -150,19 +153,19 @@ test('define() works with non-JSON responses', async t => {
   )
 
   const { statusCode, body } = await got.post('http://example.test/', {
-    encoding: false,
     body: exampleBody,
+    responseType: 'buffer',
   })
 
   t.equal(statusCode, 200)
-  // TODO: because `{ encoding: false }` is passed to `got`, `body` should be
-  // a buffer, but it's a string. Is this a bug in nock or got?
-  t.equal(body, exampleResponseBody)
+  t.type(body, Buffer)
+  t.equal(body.toString(), exampleResponseBody)
 })
 
 // TODO: There seems to be a bug here. When testing via `got` with
 // `{ encoding: false }` the body that comes back should be a buffer, but is
 // not. It's difficult to get this test to pass after porting it.
+// I think this bug has been fixed in Got v10, so this should be unblocked.
 test('define() works with binary buffers', t => {
   const exampleBody = '8001'
   const exampleResponse = '8001'
