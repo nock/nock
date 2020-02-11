@@ -89,4 +89,39 @@ describe('`enableNetConnect()`', () => {
       /Nock: Disallowed net connect for "example.test:443\/"/
     )
   })
+
+  it('enables real HTTP request only for specified domain, via function', async () => {
+    const onResponse = sinon.spy()
+    const server = http.createServer((request, response) => {
+      onResponse()
+      response.writeHead(200)
+      response.end()
+    })
+    await new Promise(resolve => server.listen(resolve))
+
+    nock.enableNetConnect(host => host.includes('ocalhos'))
+
+    await got(`http://localhost:${server.address().port}/`)
+    expect(onResponse).to.have.been.calledOnce()
+
+    server.close()
+  })
+
+  it('disallows request for other domains, via function', async () => {
+    nock.enableNetConnect(host => host.includes('ocalhos'))
+
+    await assertRejects(
+      got('https://example.test/'),
+      /Nock: Disallowed net connect for "example.test:443\/"/
+    )
+  })
+
+  it('passes the domain to be tested, via function', async () => {
+    const matcher = sinon.stub().returns(false)
+    nock.enableNetConnect(matcher)
+
+    await got('https://example.test/').catch(() => undefined) // ignore rejection, expected
+
+    expect(matcher).to.have.been.calledOnceWithExactly('example.test:443')
+  })
 })
