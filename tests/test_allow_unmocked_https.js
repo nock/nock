@@ -1,6 +1,7 @@
 'use strict'
 
 const { test } = require('tap')
+const { expect } = require('chai')
 const fs = require('fs')
 const https = require('https')
 const nock = require('..')
@@ -8,6 +9,7 @@ const ssl = require('./ssl')
 const got = require('./got_client')
 
 require('./cleanup_after_each')()
+require('./setup')
 
 test('Nock with allowUnmocked and an url match', async t => {
   const server = https.createServer(
@@ -34,83 +36,56 @@ test('Nock with allowUnmocked and an url match', async t => {
     rejectUnauthorized: false,
   })
 
-  t.is(statusCode, 201)
-  t.equal(JSON.parse(body).status, 'intercepted')
+  expect(statusCode).to.equal(201)
+  expect(body).to.equal('{"status":"intercepted"}')
+
   scope.done()
 })
 
-test('allow unmocked option works with https', t => {
-  t.plan(5)
-
-  ssl
-    .startServer((request, response) => {
-      if (request.url === '/does/not/exist') {
-        response.writeHead(404)
-        response.end()
-        return
-      }
-
-      response.writeHead(200)
+test('allow unmocked option works with https', async t => {
+  const server = await ssl.startServer((request, response) => {
+    if (request.url === '/does/not/exist') {
+      response.writeHead(404)
       response.end()
-    })
-    .then(server => {
-      const { port } = server.address()
+      return
+    }
 
-      const commonRequestOptions = {
-        host: 'localhost',
-        port,
-        ca: ssl.ca,
-      }
+    response.writeHead(200)
+    response.write('server response')
+    response.end()
+  })
+  t.once('end', () => server.close())
 
-      const scope = nock(`https://localhost:${port}`, { allowUnmocked: true })
-        .get('/abc')
-        .reply(200, 'Hey!')
-        .get('/wont/get/here')
-        .reply(200, 'Hi!')
+  const { port } = server.address()
+  const url = `https://localhost:${port}`
+  const client = got.extend({
+    baseUrl: url,
+    ca: ssl.ca,
+    throwHttpErrors: false,
+  })
 
-      function secondIsDone() {
-        t.ok(!scope.isDone())
-        https
-          .request({ path: '/', ...commonRequestOptions }, res => {
-            res.resume()
-            t.ok(true, 'Google replied to /')
-            res.destroy()
-            t.assert(
-              res.statusCode < 400 && res.statusCode >= 200,
-              'GET Google Home page'
-            )
+  const scope = nock(url, { allowUnmocked: true })
+    .get('/abc')
+    .reply(200, 'mocked response')
+    .get('/wont/get/here')
+    .reply(500)
 
-            server.close(t.end)
-          })
-          .end()
-      }
+  const response1 = await client('/abc')
+  expect(response1.statusCode).to.equal(200)
+  expect(response1.body).to.equal('mocked response')
+  expect(scope.isDone()).to.equal(false)
+  const response2 = await client('/does/not/exist')
 
-      function firstIsDone() {
-        t.ok(!scope.isDone(), 'scope is not done')
-        https
-          .request(
-            { path: '/does/not/exist', ...commonRequestOptions },
-            res => {
-              t.equal(404, res.statusCode, 'real google response status code')
-              res.on('data', function() {})
-              res.on('end', secondIsDone)
-            }
-          )
-          .end()
-      }
+  expect(response2.statusCode).to.equal(404)
+  expect(scope.isDone()).to.equal(false)
+  const response3 = await client('/')
 
-      https
-        .request({ path: '/abc', ...commonRequestOptions }, res => {
-          res.on('end', firstIsDone)
-          // Streams start in 'paused' mode and must be started.
-          // See https://nodejs.org/api/stream.html#stream_class_stream_readable
-          res.resume()
-        })
-        .end()
-    })
+  expect(response3.statusCode).to.equal(200)
+  expect(response3.body).to.equal('server response')
+  expect(scope.isDone()).to.equal(false)
 })
 
-test('allow unmocked option works with https for a partial match', async t => {
+test('allow unmocked option works with https for a partial match', async () => {
   // The `allowUnmocked` option is processed in two places. Once in the intercept when there
   // are no interceptors that come close to matching the request. And again in the overrider when
   // there are interceptors that partially match, eg just path, but don't completely match.
@@ -131,10 +106,9 @@ test('allow unmocked option works with https for a partial match', async t => {
     .reply(418)
 
   // no query so wont match the interceptor
-  const { statusCode, body } = await got(`${origin}/foo`, {
-    rejectUnauthorized: false,
-  })
-  t.is(statusCode, 201)
-  t.is(body, 'foo')
+  const { statusCode, body } = await got(`${origin}/foo`, { ca: ssl.ca })
+
+  expect(statusCode).to.equal(201)
+  expect(body).to.equal('foo')
   server.close()
 })

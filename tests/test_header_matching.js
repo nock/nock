@@ -158,8 +158,7 @@ test('match header on scope with function: does not match when match declined', 
     got('http://example.test/', {
       headers: { 'X-My-Headers': 456 },
     }),
-    Error,
-    'Nock: No match for request'
+    /Nock: No match for request/
   )
 })
 
@@ -173,8 +172,7 @@ test('match header on scope with function: does not consume mock request when ma
     got('http://example.test/', {
       headers: { '-My-Headers': 456 },
     }),
-    Error,
-    'Nock: No match for request'
+    /Nock: No match for request/
   )
   t.throws(() => scope.done(), {
     message: 'Mocks not yet satisfied',
@@ -251,8 +249,7 @@ test('match header on interceptor with function: does not match when match decli
     got('http://example.test/', {
       headers: { 'X-My-Headers': 456 },
     }),
-    Error,
-    'Nock: No match for request'
+    /Nock: No match for request/
   )
 })
 
@@ -268,8 +265,7 @@ test('match header on interceptor with function: does not consume mock request w
     got('http://example.test/', {
       headers: { '-My-Headers': 456 },
     }),
-    Error,
-    'Nock: No match for request'
+    /Nock: No match for request/
   )
   t.throws(() => scope.done(), {
     message: 'Mocks not yet satisfied',
@@ -342,8 +338,7 @@ test('done fails when specified request header is missing', async t => {
     got.post('http://example.test/', {
       headers: { 'X-App-Token': 'apptoken' },
     }),
-    Error,
-    'Nock: No match for request'
+    /Nock: No match for request/
   )
 })
 
@@ -375,8 +370,7 @@ test('does not match when request header does not match regular expression', asy
     got.post('http://example.test/', {
       headers: { 'X-My-Super-Power': 'mullet growing' },
     }),
-    Error,
-    'Nock: No match'
+    /Nock: No match/
   )
 
   t.false(scope.isDone())
@@ -440,8 +434,7 @@ test("doesn't match when request header does not satisfy the header function", a
     got.post('http://example.test/', {
       headers: { 'X-My-Super-Power': 'mullet growing' },
     }),
-    Error,
-    'Nock: No match'
+    /Nock: No match/
   )
 
   t.false(scope.isDone())
@@ -479,8 +472,7 @@ test('when badheaders are present, badheaders prevents match', async t => {
     got('http://example.test/', {
       headers: { Cookie: 'cookie', Donut: 'donut' },
     }),
-    Error,
-    'Nock: No match for request'
+    /Nock: No match for request/
   )
 
   t.false(scope.isDone())
@@ -652,7 +644,6 @@ test('Host header is used to reject a match if defined on the scope and request'
     got('http://example.test/', {
       headers: { Host: 'some.other.domain.test' },
     }),
-    Error,
-    'Nock: No match for request'
+    /Nock: No match for request/
   )
 })
