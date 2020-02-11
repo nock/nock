@@ -101,8 +101,8 @@ test('allow unmocked post with json data', async t => {
     .reply(200, '{"message":"mocked response"}')
 
   const { body, statusCode } = await got.post(url, {
-    json: true,
-    body: { some: 'data' },
+    json: { some: 'data' },
+    responseType: 'json',
   })
   expect(statusCode).to.equal(200)
   expect(body).to.deep.equal({ message: 'server response' })
@@ -124,8 +124,8 @@ test('allow unmocked passthrough with mismatched bodies', async t => {
     .reply(404, '{"message":"server response"}')
 
   const { body, statusCode } = await got.post(`${url}/post`, {
-    json: true,
-    body: { some: 'data' },
+    json: { some: 'data' },
+    responseType: 'json',
   })
   expect(statusCode).to.equal(200)
   expect(body).to.deep.equal({ message: 'server response' })
