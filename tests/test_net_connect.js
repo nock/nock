@@ -19,15 +19,14 @@ describe('`disableNetConnect()`', () => {
 
     await assertRejects(
       got('https://other.example.test/'),
-      Error,
-      'Nock: Disallowed net connect for "other.example.test:443/"'
+      /Nock: Disallowed net connect for "other.example.test:443\/"/
     )
   })
 
   it('prevents connections when no hosts are mocked', async () => {
     nock.disableNetConnect()
 
-    await assertRejects(got('http://example.test'), Error, err => {
+    await assertRejects(got('http://example.test'), err => {
       expect(err).to.include({
         code: 'ENETUNREACH',
         message: 'Nock: Disallowed net connect for "example.test:80/"',
@@ -61,8 +60,7 @@ describe('`enableNetConnect()`', () => {
 
     await assertRejects(
       got('https://example.test/'),
-      Error,
-      'Nock: Disallowed net connect for "example.test:80/"'
+      /Nock: Disallowed net connect for "example.test:443\/"/
     )
   })
 
@@ -88,8 +86,7 @@ describe('`enableNetConnect()`', () => {
 
     await assertRejects(
       got('https://example.test/'),
-      Error,
-      'Nock: Disallowed net connect for "example.test:80/"'
+      /Nock: Disallowed net connect for "example.test:443\/"/
     )
   })
 })
