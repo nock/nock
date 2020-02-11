@@ -359,11 +359,7 @@ test('delay with replyWithError: response is delayed', async t => {
   await resolvesInAtLeast(
     t,
     async () =>
-      assertRejects(
-        got('http://example.test'),
-        Error,
-        'this is an error message'
-      ),
+      assertRejects(got('http://example.test'), /this is an error message/),
     100
   )
 })
