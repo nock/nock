@@ -17,7 +17,7 @@ describe('allowUnmocked option', () => {
     }
   })
 
-  const createServer = async requestListener => {
+  async function createServer(requestListener) {
     const server = http.createServer(requestListener)
     await new Promise(resolve => server.listen(resolve))
     _server = server
@@ -145,7 +145,8 @@ describe('allowUnmocked option', () => {
     scope.done()
   })
 
-  it('match hostname using regexp with allowUnmocked (issue-1076)', async () => {
+  // https://github.com/nock/nock/issues/1076
+  it('match hostname using regexp with allowUnmocked', async () => {
     const scope = nock(/localhost/, { allowUnmocked: true })
       .get('/no/regex/here')
       .reply(200, 'Match regex')
