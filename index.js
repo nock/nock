@@ -6,6 +6,7 @@ const {
   activate,
   isActive,
   isDone,
+  isOn,
   pendingMocks,
   activeMocks,
   removeInterceptor,
@@ -31,7 +32,7 @@ Object.assign(module.exports, {
   // TODO-12.x Historically `nock.cleanAll()` has returned the nock global.
   // The other global methods do not do this, so it's not clear this was
   // deliberate or is even helpful. This shim is included for backward
-  // compatibility and shoulud be replaced with an alias to `removeAll()`.
+  // compatibility and should be replaced with an alias to `removeAll()`.
   cleanAll() {
     removeAll()
     return module.exports
@@ -49,3 +50,11 @@ Object.assign(module.exports, {
   restore: recorder.restore,
   back,
 })
+
+// We always activate Nock on import, overriding the globals.
+// Setting the Back mode "activates" Nock by overriding the global entries in the `http/s` modules.
+// If Nock Back is configured, we need to honor that setting for backward compatibility,
+// otherwise we rely on Nock Back's default initializing side effect.
+if (isOn()) {
+  back.setMode(process.env.NOCK_BACK_MODE || 'dryrun')
+}

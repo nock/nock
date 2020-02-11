@@ -1,49 +1,17 @@
 language: node_js
 cache: npm
 
-# Trigger a push build on master and greenkeeper branches + PRs build on every branches
-# Avoid double build on PRs (See https://github.com/travis-ci/travis-ci/issues/1147)
 branches:
   only:
-    - master
-    - /^greenkeeper.*$/
-    - beta # semantic-release preview releases
-    - next # semantic-release @next releases
-    - /^\d+\.x$/ # semantic-release maintenance releases
+    - /^greenkeeper/prettier.*$/
 
-stages:
-  - lint
-  - test
-  - name: release
-    if: branch =~ /^(\d+\.x|master|next|beta)$/ AND type IN (push)
-  - name: update-prettier
-    if: branch =~ ^greenkeeper/prettier
-
+# TODO: move over to separate action
 jobs:
   include:
     - stage: update-prettier
       node_js: lts/*
       script:
         - git checkout $TRAVIS_BRANCH
-        - npm run prettier
+        - npm run format:fix
         # commit changes and push back to branch on GitHub. If there are no changes then exit without error
         - 'git commit -a -m "style: prettier" && git push "https://${GH_TOKEN}@github.com/$TRAVIS_REPO_SLUG" ${TRAVIS_BRANCH} || true'
-    - stage: lint
-      node_js: lts/*
-      env: linting
-      # Show prettier errors, even if lint fails.
-      script: run-s --silent --continue-on-error lint prettier:check dtslint
-    - stage: test
-      node_js: 12
-      # Avoid running lint and prettier again.
-      script: npm run --silent unit && npm run mocha
-    - node_js: 10
-      # Avoid running lint and prettier again.
-      script: npm run --silent unit && npm run mocha
-    - node_js: 8
-      # Avoid running lint and prettier again.
-      script: npm run --silent unit && npm run mocha
-    - stage: release
-      node_js: lts/*
-      env: semantic-release
-      script: npm run semantic-release
