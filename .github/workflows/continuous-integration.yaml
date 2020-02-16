@@ -14,7 +14,7 @@ jobs:
     if: >-
       github.actor != 'github-actions[bot]' &&
       github.event_name == 'pull_request' &&
-      github.event.pull_request.base.repo.fork == false
+      github.event.pull_request.head.repo.fork == false
     name: Fix formatting
     runs-on: ubuntu-latest
     steps:
