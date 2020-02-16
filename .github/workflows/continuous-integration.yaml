@@ -44,7 +44,7 @@ jobs:
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
           git add .
-          git commit -m "style: format files with Prettier"
+          git commit -m "style: format files with Prettier" | true # ignore error if there are no changes to commit
           git push origin HEAD:${{ github.head_ref }}
   format:
     name: Format
