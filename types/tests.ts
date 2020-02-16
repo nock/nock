@@ -703,9 +703,6 @@ nock.enableNetConnect('example.test')
 // or a RegExp
 nock.enableNetConnect(/example\.(com|test)/)
 
-// or a Function
-nock.enableNetConnect(host => host.includes('example.com'))
-
 nock.disableNetConnect()
 nock.enableNetConnect('127.0.0.1') // Allow localhost connections so we can test local routes and mock servers.
 

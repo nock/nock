@@ -1154,7 +1154,7 @@ For enabling any real HTTP requests (the default behavior):
 nock.enableNetConnect()
 ```
 
-You could allow real HTTP requests for certain host names by providing a string or a regular expression for the hostname, or a function that accepts the hostname and returns true or false:
+You could allow real HTTP requests for certain host names by providing a string or a regular expression for the hostname:
 
 ```js
 // Using a string
@@ -1162,11 +1162,6 @@ nock.enableNetConnect('amazon.com')
 
 // Or a RegExp
 nock.enableNetConnect(/(amazon|github)\.com/)
-
-// Or a Function
-nock.enableNetConnect(
-  host => host.includes('amazon.com') || host.includes('github.com')
-)
 
 http.get('http://www.amazon.com/')
 http.get('http://github.com/')
