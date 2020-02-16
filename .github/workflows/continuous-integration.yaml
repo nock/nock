@@ -93,11 +93,15 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - id: npm-cache
+        # Re-enable for all operating systems by removing the following once
+        # https://github.com/actions/cache/issues/187 is fixed.
         if: runner.os == 'Linux'
         name: Get npm cache directory
         run: |
           echo "::set-output name=dir::$(npm config get cache)"
-      - if: runner.os == 'Linux'
+      - # Enable for all operating systems by removing the following once
+        # https://github.com/actions/cache/issues/187 is fixed.
+        if: runner.os == 'Linux'
         name: Cache npm dependencies
         uses: actions/cache@v1
         with:
