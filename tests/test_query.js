@@ -130,7 +130,7 @@ describe('`query()`', () => {
         .reply()
 
       const { statusCode } = await got('http://example.test/', {
-        searchParams: { 'foo&bar': 'hello&world' },
+        query: { 'foo&bar': 'hello&world' },
       })
 
       expect(statusCode).to.equal(200)

@@ -52,7 +52,7 @@ describe('allowUnmocked option (https)', () => {
     const { port } = server.address()
     const url = `https://localhost:${port}`
     const client = got.extend({
-      prefixUrl: url,
+      baseUrl: url,
       ca: ssl.ca,
       throwHttpErrors: false,
     })
@@ -63,15 +63,15 @@ describe('allowUnmocked option (https)', () => {
       .get('/wont/get/here')
       .reply(500)
 
-    const response1 = await client('abc')
+    const response1 = await client('/abc')
     expect(response1.statusCode).to.equal(200)
     expect(response1.body).to.equal('mocked response')
     expect(scope.isDone()).to.equal(false)
-    const response2 = await client('does/not/exist')
+    const response2 = await client('/does/not/exist')
 
     expect(response2.statusCode).to.equal(404)
     expect(scope.isDone()).to.equal(false)
-    const response3 = await client('')
+    const response3 = await client('/')
 
     expect(response3.statusCode).to.equal(200)
     expect(response3.body).to.equal('server response')

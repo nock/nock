@@ -21,9 +21,7 @@ describe('asynchronous `reply()` function', () => {
           callback(null, 'Hello World!')
         )
 
-      const { body } = await got('http://example.test/', {
-        responseType: 'buffer',
-      })
+      const { body } = await got('http://example.test/', { encoding: null })
 
       expect(body).to.be.an.instanceOf(Buffer)
       expect(body.toString('utf8')).to.equal('Hello World!')
