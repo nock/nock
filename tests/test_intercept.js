@@ -571,7 +571,7 @@ test('Matches with a username and password in the URL', async t => {
       return [200]
     })
 
-  const {statusCode} = await got('http://username:password@example.test/abc')
+  const { statusCode } = await got('http://username:password@example.test/abc')
   expect(statusCode).to.equal(200)
 
   scope.done()
