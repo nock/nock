@@ -31,14 +31,13 @@ describe('Logging using the `debug` package', () => {
     // TODO For some reason this is getting slightly different arugments in Tap
     // vs Mocha. Remove this conditional when Tap is removed.
     if (isMocha) {
-      expect(logFn).to.have.been.calledWithExactly(
+      expect(logFn).to.have.been.calledWith(
         sinon.match.string,
         // This is a JSON blob which contains, among other things the complete
         // request URL.
         sinon.match('"href":"http://example.test/deep/link"'),
         // This is the JSON-stringified body.
-        `"${exampleBody}"`,
-        sinon.match.string
+        `"${exampleBody}"`
       )
     }
   })
