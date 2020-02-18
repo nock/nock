@@ -1117,7 +1117,7 @@ test('data is sent with flushHeaders', t => {
       expect(res.statusCode).to.equal(200)
       res.on('data', data => {
         onData()
-        expect(data.tostring()).to.equal('this is data')
+        expect(data.toString()).to.equal('this is data')
       })
       res.on('end', () => {
         expect(onData).to.have.been.calledOnce()
