@@ -32,7 +32,7 @@
     "assert-rejects": "^1.0.0",
     "chai": "^4.1.2",
     "dirty-chai": "^2.0.1",
-    "dtslint": "^2.0.5",
+    "dtslint": "^3.0.0",
     "eslint": "^6.0.0",
     "eslint-config-prettier": "^6.0.0",
     "eslint-config-standard": "^14.0.0",
