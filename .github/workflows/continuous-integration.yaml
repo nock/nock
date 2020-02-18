@@ -10,6 +10,42 @@ on:
       - master
 
 jobs:
+  fix-formatting:
+    if: >-
+      github.actor != 'github-actions[bot]' &&
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.fork == false
+    name: Fix formatting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+          ref: ${{ github.head_ref }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - name: Cache npm dependencies
+        uses: actions/cache@v1
+        with:
+          key: npm-${{ hashFiles('package-lock.json') }}
+          path: ~/.npm
+          restore-keys: |
+            npm-
+      - name: Install dependencies
+        run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
+      - name: Format
+        run: npm run format:fix
+      - name: Commit
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+          git add .
+          git commit -m "style: format files with Prettier" | true # ignore error if there are no changes to commit
+          git push origin HEAD:${{ github.head_ref }}
   format:
     name: Format
     runs-on: ubuntu-latest
@@ -93,11 +129,15 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - id: npm-cache
+        # Re-enable for all operating systems by removing the following once
+        # https://github.com/actions/cache/issues/187 is fixed.
         if: runner.os == 'Linux'
         name: Get npm cache directory
         run: |
           echo "::set-output name=dir::$(npm config get cache)"
-      - if: runner.os == 'Linux'
+      - # Enable for all operating systems by removing the following once
+        # https://github.com/actions/cache/issues/187 is fixed.
+        if: runner.os == 'Linux'
         name: Cache npm dependencies
         uses: actions/cache@v1
         with:
@@ -121,5 +161,5 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [8, 10, 12, 13]
+        node-version: [10, 12, 13]
         os: [macos-latest, ubuntu-latest, windows-latest]

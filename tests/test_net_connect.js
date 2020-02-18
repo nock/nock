@@ -19,15 +19,14 @@ describe('`disableNetConnect()`', () => {
 
     await assertRejects(
       got('https://other.example.test/'),
-      Error,
-      'Nock: Disallowed net connect for "other.example.test:443/"'
+      /Nock: Disallowed net connect for "other.example.test:443\/"/
     )
   })
 
   it('prevents connections when no hosts are mocked', async () => {
     nock.disableNetConnect()
 
-    await assertRejects(got('http://example.test'), Error, err => {
+    await assertRejects(got('http://example.test'), err => {
       expect(err).to.include({
         code: 'ENETUNREACH',
         message: 'Nock: Disallowed net connect for "example.test:80/"',
@@ -61,8 +60,7 @@ describe('`enableNetConnect()`', () => {
 
     await assertRejects(
       got('https://example.test/'),
-      Error,
-      'Nock: Disallowed net connect for "example.test:80/"'
+      /Nock: Disallowed net connect for "example.test:443\/"/
     )
   })
 
@@ -88,8 +86,42 @@ describe('`enableNetConnect()`', () => {
 
     await assertRejects(
       got('https://example.test/'),
-      Error,
-      'Nock: Disallowed net connect for "example.test:80/"'
+      /Nock: Disallowed net connect for "example.test:443\/"/
     )
+  })
+
+  it('enables real HTTP request only for specified domain, via function', async () => {
+    const onResponse = sinon.spy()
+    const server = http.createServer((request, response) => {
+      onResponse()
+      response.writeHead(200)
+      response.end()
+    })
+    await new Promise(resolve => server.listen(resolve))
+
+    nock.enableNetConnect(host => host.includes('ocalhos'))
+
+    await got(`http://localhost:${server.address().port}/`)
+    expect(onResponse).to.have.been.calledOnce()
+
+    server.close()
+  })
+
+  it('disallows request for other domains, via function', async () => {
+    nock.enableNetConnect(host => host.includes('ocalhos'))
+
+    await assertRejects(
+      got('https://example.test/'),
+      /Nock: Disallowed net connect for "example.test:443\/"/
+    )
+  })
+
+  it('passes the domain to be tested, via function', async () => {
+    const matcher = sinon.stub().returns(false)
+    nock.enableNetConnect(matcher)
+
+    await got('https://example.test/').catch(() => undefined) // ignore rejection, expected
+
+    expect(matcher).to.have.been.calledOnceWithExactly('example.test:443')
   })
 })

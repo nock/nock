@@ -130,7 +130,7 @@ describe('`query()`', () => {
         .reply()
 
       const { statusCode } = await got('http://example.test/', {
-        query: { 'foo&bar': 'hello&world' },
+        searchParams: { 'foo&bar': 'hello&world' },
       })
 
       expect(statusCode).to.equal(200)
@@ -145,8 +145,7 @@ describe('`query()`', () => {
 
       await assertRejects(
         got('http://example.test/?foo=hello%20world'),
-        Error,
-        'Nock: No match for request'
+        /Nock: No match for request/
       )
 
       const { statusCode } = await got(
@@ -186,8 +185,7 @@ describe('`query()`', () => {
 
       await assertRejects(
         got('http://example.test/?foo=baz'),
-        Error,
-        'Nock: No match for request'
+        /Nock: No match for request/
       )
     })
 
@@ -199,8 +197,7 @@ describe('`query()`', () => {
 
       await assertRejects(
         got('http://example.test/?foo=bar&baz=foz'),
-        Error,
-        'Nock: No match for request'
+        /Nock: No match for request/
       )
     })
 
@@ -214,8 +211,7 @@ describe('`query()`', () => {
 
       await assertRejects(
         got('http://example.test/?foobar'),
-        Error,
-        'Nock: No match for request'
+        /Nock: No match for request/
       )
     })
 
@@ -232,8 +228,7 @@ describe('`query()`', () => {
 
       await assertRejects(
         got('http://example.test/?num=1str=fou'),
-        Error,
-        'Nock: No match for request'
+        /Nock: No match for request/
       )
     })
 
@@ -245,8 +240,7 @@ describe('`query()`', () => {
 
       await assertRejects(
         got('http://example.test?foo[]=bar&foo[]=baz'),
-        got.RequestError,
-        'Nock: No match for request'
+        /Nock: No match for request/
       )
     })
 
@@ -258,8 +252,7 @@ describe('`query()`', () => {
 
       await assertRejects(
         got('http://example.test?foo=bar%2Cbaz'),
-        got.RequestError,
-        'Nock: No match for request'
+        /Nock: No match for request/
       )
     })
   })
@@ -355,8 +348,7 @@ describe('`query()`', () => {
 
       await assertRejects(
         got('http://example.test/?i=should&pass=?'),
-        Error,
-        'Nock: No match for request'
+        /Nock: No match for request/
       )
     })
   })
