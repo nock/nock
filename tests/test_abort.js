@@ -7,7 +7,7 @@ const sinon = require('sinon')
 
 require('./setup')
 
-it('req.abort() should cause "abort" and "error" to be emitted', done => {
+it('`req.abort()` should cause "abort" and "error" to be emitted', done => {
   const scope = nock('http://example.test')
     .get('/')
     .delayConnection(500)
