@@ -550,21 +550,19 @@ test('username and password works', t => {
     .end()
 })
 
-// TODO: Remove or rewrite this test.
-test('works with mikeal/request and username and password', t => {
+test('Matches with a username and password in the URL', async t => {
   const scope = nock('http://example.test')
     .get('/abc')
-    .reply(200, 'Welcome, username')
+    .reply(function() {
+      // TODO Investigate why we don't get an authorization header.
+      // expect(this.req.headers).to.include({ Authorization: 'foobar' })
+      return [200]
+    })
 
-  mikealRequest(
-    { uri: 'http://username:password@example.test/abc', log: true },
-    function(err, res, body) {
-      t.ok(!err, 'error')
-      t.ok(scope.isDone())
-      t.equal(body, 'Welcome, username')
-      t.end()
-    }
-  )
+  const { statusCode } = await got('http://username:password@example.test/abc')
+  expect(statusCode).to.equal(200)
+
+  scope.done()
 })
 
 test('different port works', t => {
@@ -585,24 +583,6 @@ test('different port works', t => {
       }
     )
     .end()
-})
-
-// TODO: Probably remove this test.
-test('different ports work work with Mikeal request', t => {
-  const scope = nock('http://example.test:8082')
-    .get('/pathhh')
-    .reply(200, 'Welcome to Mikeal Request!')
-
-  mikealRequest.get('http://example.test:8082/pathhh', function(
-    err,
-    res,
-    body
-  ) {
-    t.ok(!err, 'no error')
-    t.equal(body, 'Welcome to Mikeal Request!')
-    t.ok(scope.isDone())
-    t.end()
-  })
 })
 
 test('explicitly specifiying port 80 works', t => {
