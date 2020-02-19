@@ -13,7 +13,7 @@ require('./setup')
 const textFile = path.join(__dirname, '..', 'assets', 'reply_file_1.txt')
 const binaryFile = path.join(__dirname, '..', 'assets', 'reply_file_2.txt.gz')
 
-describe('`.replyWithFile()', () => {
+describe('`replyWithFile()`', () => {
   it('reply with file', async () => {
     const scope = nock('http://example.test')
       .get('/')

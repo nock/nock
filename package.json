@@ -51,7 +51,7 @@
     "request": "^2.83.0",
     "rimraf": "^3.0.0",
     "semantic-release": "^17.0.2",
-    "sinon": "^8.1.1",
+    "sinon": "^9.0.0",
     "sinon-chai": "^3.3.0",
     "superagent": "^5.0.2",
     "tap": "14.6.1"
@@ -64,7 +64,7 @@
     "lint:js:fix": "eslint --cache --cache-location './.cache/eslint' --fix '**/*.js'",
     "lint:ts": "dtslint types",
     "semantic-release": "semantic-release",
-    "test": "run-p test:mocha test:tap",
+    "test": "run-s test:mocha test:tap",
     "test:coverage": "tap --coverage-report=html && open coverage/lcov-report/index.html",
     "test:mocha": "nyc mocha $(grep -lr '^\\s*it(' tests)",
     "test:tap": "tap --100 --coverage --coverage-report=text ./tests/test_*.js"

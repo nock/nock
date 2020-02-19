@@ -514,7 +514,7 @@ it('when recording, when `req.end()` is called with only data and a callback, th
   })
 })
 
-it('rec() throws when reinvoked with already recorder requests', () => {
+it('`rec()` throws when reinvoked with already recorder requests', () => {
   nock.restore()
   nock.recorder.clear()
   expect(nock.recorder.play()).to.be.empty()

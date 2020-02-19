@@ -12,413 +12,422 @@
 // to remove it.
 
 const http = require('http')
-const { test } = require('tap')
-const common = require('../lib/common')
-const matchBody = require('../lib/match_body')
+const { expect } = require('chai')
 const sinon = require('sinon')
 const nock = require('..')
 
-require('./cleanup_after_each')()
+const common = require('../lib/common')
+const matchBody = require('../lib/match_body')
 
-test('matchBody ignores new line characters from strings', t => {
-  t.true(
-    matchBody(
-      {},
-      'something //here is something more \n',
-      'something //here is something more \n\r'
-    )
-  )
-  t.end()
+require('./setup')
+
+// match_body has its own test file that tests the functionality from the API POV.
+// Since it's not in common.js does it make more sense for these six unit tests to move into that file?
+describe('Body Match', () => {
+  describe('unit', () => {
+    it('ignores new line characters from strings', () => {
+      const result = matchBody(
+        {},
+        'something //here is something more \n',
+        'something //here is something more \n\r'
+      )
+      expect(result).to.equal(true)
+    })
+
+    it("when spec is a function, it's called with newline characters intact", () => {
+      const exampleBody = 'something //here is something more \n'
+      const matchCbSpy = sinon.spy()
+
+      matchBody({}, matchCbSpy, exampleBody)
+      expect(matchCbSpy).to.have.been.calledOnceWithExactly(exampleBody)
+    })
+
+    it('should not throw, when headers come node-fetch style as array', () => {
+      const result = matchBody(
+        { headers: { 'Content-Type': ['multipart/form-data;'] } },
+        {},
+        'test'
+      )
+      expect(result).to.equal(false)
+    })
+
+    it("should not ignore new line characters from strings when Content-Type contains 'multipart'", () => {
+      const result = matchBody(
+        { headers: { 'Content-Type': 'multipart/form-data;' } },
+        'something //here is something more \nHello',
+        'something //here is something more \nHello'
+      )
+      expect(result).to.equal(true)
+    })
+
+    it("should not ignore new line characters from strings when Content-Type contains 'multipart' (arrays come node-fetch style as array)", () => {
+      const result = matchBody(
+        { headers: { 'Content-Type': ['multipart/form-data;'] } },
+        'something //here is something more \nHello',
+        'something //here is something more \nHello'
+      )
+      expect(result).to.equal(true)
+    })
+
+    it('should use strict equality for deep comparisons', () => {
+      const result = matchBody({}, { number: 1 }, '{"number": "1"}')
+      expect(result).to.equal(false)
+    })
+  })
 })
 
-test("when spec is a function, it's called with newline characters intact", t => {
-  const exampleBody = 'something //here is something more \n'
-  let param
-  const matchCb = body => {
-    param = body
-  }
-
-  matchBody({}, matchCb, exampleBody)
-  t.equal(param, exampleBody)
-  t.end()
-})
-
-test('matchBody should not throw, when headers come node-fetch style as array', t => {
-  t.false(
-    matchBody(
-      { headers: { 'Content-Type': ['multipart/form-data;'] } },
-      {},
-      'test'
-    )
-  )
-  t.end()
-})
-
-test("matchBody should not ignore new line characters from strings when Content-Type contains 'multipart'", t => {
-  t.true(
-    matchBody(
-      { headers: { 'Content-Type': 'multipart/form-data;' } },
-      'something //here is something more \nHello',
-      'something //here is something more \nHello'
-    )
-  )
-  t.end()
-})
-
-test("matchBody should not ignore new line characters from strings when Content-Type contains 'multipart' (arrays come node-fetch style as array)", t => {
-  t.true(
-    matchBody(
-      { headers: { 'Content-Type': ['multipart/form-data;'] } },
-      'something //here is something more \nHello',
-      'something //here is something more \nHello'
-    )
-  )
-  t.end()
-})
-
-test('matchBody uses strict equality for deep comparisons', t => {
-  t.false(matchBody({}, { number: 1 }, '{"number": "1"}'))
-  t.end()
-})
-
-test('normalizeRequestOptions', t => {
-  t.deepEqual(
-    common.normalizeRequestOptions({
+describe('`normalizeRequestOptions()`', () => {
+  it('should normalize hosts with port', () => {
+    const result = common.normalizeRequestOptions({
       host: 'example.test:12345',
       port: 12345,
-    }),
-    {
+    })
+
+    const expected = {
       host: 'example.test:12345',
       hostname: 'example.test',
       port: 12345,
       proto: 'http',
     }
-  )
-  t.deepEqual(
-    common.normalizeRequestOptions({
+
+    expect(result).to.deep.equal(expected)
+  })
+
+  it('should normalize hosts without port', () => {
+    const result = common.normalizeRequestOptions({
       hostname: 'example.test',
-    }),
-    {
+    })
+
+    const expected = {
       host: 'example.test:80',
       hostname: 'example.test',
       port: 80,
       proto: 'http',
     }
-  )
-  t.deepEqual(common.normalizeRequestOptions({}), {
-    host: 'localhost:80',
-    // Should this be included?
-    // hostname: 'localhost'
-    port: 80,
-    proto: 'http',
+
+    expect(result).to.deep.equal(expected)
   })
-  t.end()
+
+  it('should not error and add defaults for empty options', () => {
+    const result = common.normalizeRequestOptions({})
+
+    const expected = {
+      host: 'localhost:80',
+      // Should this be included?
+      // hostname: 'localhost'
+      port: 80,
+      proto: 'http',
+    }
+
+    expect(result).to.deep.equal(expected)
+  })
 })
 
-test('isUtf8Representable works', t => {
-  // Returns false for buffers that aren't utf8 representable.
-  t.false(common.isUtf8Representable(Buffer.from('8001', 'hex')))
+describe('`isUtf8Representable()`', () => {
+  it("should return false for buffers that aren't utf8 representable", () => {
+    expect(common.isUtf8Representable(Buffer.from('8001', 'hex'))).to.equal(
+      false
+    )
+  })
 
-  // Returns true for buffers containing strings.
-  t.true(common.isUtf8Representable(Buffer.from('8001', 'utf8')))
-
-  t.end()
+  it('should returns true for buffers containing strings', () => {
+    expect(common.isUtf8Representable(Buffer.from('8001', 'utf8'))).to.equal(
+      true
+    )
+  })
 })
 
-test('isJSONContent', t => {
-  t.true(common.isJSONContent({ 'content-type': 'application/json' }))
-  t.true(
-    common.isJSONContent({ 'content-type': 'application/json; charset=utf-8' })
+it('`isJSONContent()`', () => {
+  expect(common.isJSONContent({ 'content-type': 'application/json' })).to.equal(
+    true
   )
-  t.false(common.isJSONContent({ 'content-type': 'text/plain' }))
-  t.end()
+
+  expect(
+    common.isJSONContent({ 'content-type': 'application/json; charset=utf-8' })
+  ).to.equal(true)
+
+  expect(common.isJSONContent({ 'content-type': 'text/plain' })).to.equal(false)
 })
 
-test('headersFieldNamesToLowerCase works', t => {
-  t.deepEqual(
-    common.headersFieldNamesToLowerCase({
+describe('`headersFieldNamesToLowerCase()`', () => {
+  it('should return a lower-cased copy of the input', () => {
+    const input = {
       HoSt: 'example.test',
       'Content-typE': 'plain/text',
-    }),
-    {
+    }
+    const inputClone = { ...input }
+    const result = common.headersFieldNamesToLowerCase(input)
+    const expected = {
       host: 'example.test',
       'content-type': 'plain/text',
     }
-  )
-  t.end()
-})
 
-test('headersFieldNamesToLowerCase throws on conflicting keys', t => {
-  t.throws(
-    () =>
+    expect(result).to.deep.equal(expected)
+    expect(input).to.deep.equal(inputClone) // assert the input is not mutated
+  })
+
+  it('throws on conflicting keys', () => {
+    expect(() =>
       common.headersFieldNamesToLowerCase({
         HoSt: 'example.test',
         HOST: 'example.test',
-      }),
-    {
-      message:
-        'Failed to convert header keys to lower case due to field name conflict: host',
-    }
-  )
-  t.end()
+      })
+    ).to.throw(
+      'Failed to convert header keys to lower case due to field name conflict: host'
+    )
+  })
 })
 
-test('headersFieldsArrayToLowerCase works on arrays', function(t) {
-  t.deepEqual(
+describe('`headersFieldsArrayToLowerCase()`', () => {
+  it('should work on arrays', () => {
     // Sort for comparison because order doesn't matter.
-    common.headersFieldsArrayToLowerCase(['HoSt', 'Content-typE']).sort(),
-    ['content-type', 'host']
-  )
-  t.end()
-})
+    const result = common
+      .headersFieldsArrayToLowerCase(['HoSt', 'Content-typE'])
+      .sort()
 
-test('headersFieldsArrayToLowerCase de-duplicates arrays', function(t) {
-  t.deepEqual(
+    expect(result).to.deep.equal(['content-type', 'host'])
+  })
+
+  it('should de-duplicate arrays', () => {
     // Sort for comparison because order doesn't matter.
-    common
+    const result = common
       .headersFieldsArrayToLowerCase([
         'hosT',
         'HoSt',
         'Content-typE',
         'conTenT-tYpe',
       ])
-      .sort(),
-    ['content-type', 'host']
-  )
-  t.end()
-})
+      .sort()
 
-test('deleteHeadersField deletes fields with case-insensitive field names', t => {
-  // Prepare.
-  const headers = {
-    HoSt: 'example.test',
-    'Content-typE': 'plain/text',
-  }
-
-  // Confidence check.
-  t.true(headers.HoSt)
-  t.true(headers['Content-typE'])
-
-  // Act.
-  common.deleteHeadersField(headers, 'HOST')
-  common.deleteHeadersField(headers, 'CONTENT-TYPE')
-
-  // Assert.
-  t.false(headers.HoSt)
-  t.false(headers['Content-typE'])
-
-  // Wrap up.
-  t.end()
-})
-
-test('deleteHeadersField removes multiple fields with same case-insensitive names', async t => {
-  const headers = {
-    foo: 'one',
-    FOO: 'two',
-    'X-Foo': 'three',
-  }
-
-  common.deleteHeadersField(headers, 'foo')
-
-  t.deepEqual(headers, { 'X-Foo': 'three' })
-})
-
-test('deleteHeadersField throws for invalid headers', async t => {
-  t.throws(() => common.deleteHeadersField('foo', 'Content-Type'), {
-    message: 'headers must be an object',
+    expect(result).to.deep.equal(['content-type', 'host'])
   })
 })
 
-test('deleteHeadersField throws for invalid field name', async t => {
-  t.throws(() => common.deleteHeadersField({}, /cookie/), {
-    message: 'field name must be a string',
+describe('`deleteHeadersField()`', () => {
+  it('should delete fields with case-insensitive field names', () => {
+    // Prepare.
+    const headers = {
+      HoSt: 'example.test',
+      'Content-typE': 'plain/text',
+    }
+
+    // Confidence check.
+    expect(headers).to.have.property('HoSt')
+    expect(headers).to.have.property('Content-typE')
+
+    // Act.
+    common.deleteHeadersField(headers, 'HOST')
+    common.deleteHeadersField(headers, 'CONTENT-TYPE')
+
+    // Assert.
+    expect(headers).to.not.have.property('HoSt')
+    expect(headers).to.not.have.property('Content-typE')
+  })
+
+  it('should remove multiple fields with same case-insensitive names', () => {
+    const headers = {
+      foo: 'one',
+      FOO: 'two',
+      'X-Foo': 'three',
+    }
+
+    common.deleteHeadersField(headers, 'foo')
+
+    expect(headers).to.deep.equal({ 'X-Foo': 'three' })
+  })
+
+  it('should throw for invalid headers', () => {
+    expect(() => common.deleteHeadersField('foo', 'Content-Type')).to.throw(
+      'headers must be an object'
+    )
+  })
+
+  it('should throw for invalid field name', () => {
+    expect(() => common.deleteHeadersField({}, /cookie/)).to.throw(
+      'field name must be a string'
+    )
   })
 })
 
-test('matchStringOrRegexp', function(t) {
-  t.true(
-    common.matchStringOrRegexp('to match', 'to match'),
-    'true if pattern is string and target matches'
-  )
-  t.false(
-    common.matchStringOrRegexp('to match', 'not to match'),
-    "false if pattern is string and target doesn't match"
-  )
-
-  t.true(
-    common.matchStringOrRegexp(123, 123),
-    'true if pattern is number and target matches'
-  )
-
-  t.false(
-    common.matchStringOrRegexp(undefined, 'to not match'),
-    'handle undefined target when pattern is string'
-  )
-  t.false(
-    common.matchStringOrRegexp(undefined, /not/),
-    'handle undefined target when pattern is regex'
-  )
-
-  t.ok(
-    common.matchStringOrRegexp('to match', /match/),
-    'match if pattern is regex and target matches'
-  )
-  t.false(
-    common.matchStringOrRegexp('to match', /not/),
-    "false if pattern is regex and target doesn't match"
-  )
-  t.end()
-})
-
-test('overrideRequests', t => {
-  t.on('end', () => common.restoreOverriddenRequests())
-  nock.restore()
-  common.overrideRequests()
-  // Second call throws.
-  t.throws(() => common.overrideRequests(), {
-    message: "Module's request already overridden for http protocol.",
+describe('`matchStringOrRegexp()`', () => {
+  it('should match if pattern is string and target matches', () => {
+    const result = common.matchStringOrRegexp('to match', 'to match')
+    expect(result).to.equal(true)
   })
-  t.end()
+
+  it("should not match if pattern is string and target doesn't match", () => {
+    const result = common.matchStringOrRegexp('to match', 'not to match')
+    expect(result).to.equal(false)
+  })
+
+  it('should match pattern is number and target matches', () => {
+    const result = common.matchStringOrRegexp(123, 123)
+    expect(result).to.equal(true)
+  })
+
+  it('should handle undefined target when pattern is string', () => {
+    const result = common.matchStringOrRegexp(undefined, 'to not match')
+    expect(result).to.equal(false)
+  })
+
+  it('should handle undefined target when pattern is regex', () => {
+    const result = common.matchStringOrRegexp(undefined, /not/)
+    expect(result).to.equal(false)
+  })
+
+  it('should match if pattern is regex and target matches', () => {
+    const result = common.matchStringOrRegexp('to match', /match/)
+    expect(result).to.equal(true)
+  })
+
+  it("should not match if pattern is regex and target doesn't match", () => {
+    const result = common.matchStringOrRegexp('to match', /not/)
+    expect(result).to.equal(false)
+  })
 })
 
-test('restoreOverriddenRequests can be called more than once', t => {
+describe('`overrideRequests()`', () => {
+  afterEach(() => {
+    common.restoreOverriddenRequests()
+  })
+
+  it('should throw if called a second time', () => {
+    nock.restore()
+    common.overrideRequests()
+    // Second call throws.
+    expect(() => common.overrideRequests()).to.throw(
+      "Module's request already overridden for http protocol."
+    )
+  })
+})
+
+it('`restoreOverriddenRequests()` can be called more than once', () => {
   common.restoreOverriddenRequests()
   common.restoreOverriddenRequests()
-  t.end()
 })
 
-test('stringifyRequest includes non-default ports', t => {
-  const options = {
-    method: 'GET',
-    port: 3000,
-    proto: 'http',
-    hostname: 'example.test',
-    path: '/',
-    headers: {},
-  }
+describe('`stringifyRequest()`', () => {
+  it('should include non-default ports', () => {
+    const options = {
+      method: 'GET',
+      port: 3000,
+      proto: 'http',
+      hostname: 'example.test',
+      path: '/',
+      headers: {},
+    }
 
-  const result = common.stringifyRequest(options, 'foo')
+    const result = common.stringifyRequest(options, 'foo')
 
-  // We have to parse the object instead of comparing the raw string because the order of keys are not guaranteed.
-  t.deepEqual(JSON.parse(result), {
-    method: 'GET',
-    url: 'http://example.test:3000/',
-    headers: {},
-    body: 'foo',
+    // We have to parse the object instead of comparing the raw string because the order of keys are not guaranteed.
+    expect(JSON.parse(result)).to.deep.equal({
+      method: 'GET',
+      url: 'http://example.test:3000/',
+      headers: {},
+      body: 'foo',
+    })
   })
 
-  t.end()
-})
+  it('should not include default http port', () => {
+    const options = {
+      method: 'GET',
+      port: 80,
+      proto: 'http',
+      hostname: 'example.test',
+      path: '/',
+      headers: {},
+    }
 
-test('stringifyRequest does not include default http port', t => {
-  const options = {
-    method: 'GET',
-    port: 80,
-    proto: 'http',
-    hostname: 'example.test',
-    path: '/',
-    headers: {},
-  }
+    const result = common.stringifyRequest(options, 'foo')
 
-  const result = common.stringifyRequest(options, 'foo')
-
-  t.deepEqual(JSON.parse(result), {
-    method: 'GET',
-    url: 'http://example.test/',
-    headers: {},
-    body: 'foo',
+    expect(JSON.parse(result)).to.deep.equal({
+      method: 'GET',
+      url: 'http://example.test/',
+      headers: {},
+      body: 'foo',
+    })
   })
 
-  t.end()
-})
+  it('should not include default https port', () => {
+    const options = {
+      method: 'POST',
+      port: 443,
+      proto: 'https',
+      hostname: 'example.test',
+      path: '/the/path',
+      headers: {},
+    }
 
-test('stringifyRequest does not include default https port', t => {
-  const options = {
-    method: 'POST',
-    port: 443,
-    proto: 'https',
-    hostname: 'example.test',
-    path: '/the/path',
-    headers: {},
-  }
+    const result = common.stringifyRequest(options, 'foo')
 
-  const result = common.stringifyRequest(options, 'foo')
-
-  t.deepEqual(JSON.parse(result), {
-    method: 'POST',
-    url: 'https://example.test/the/path',
-    headers: {},
-    body: 'foo',
+    expect(JSON.parse(result)).to.deep.equal({
+      method: 'POST',
+      url: 'https://example.test/the/path',
+      headers: {},
+      body: 'foo',
+    })
   })
 
-  t.end()
-})
+  it('should default optional options', () => {
+    const options = {
+      port: 80,
+      proto: 'http',
+      hostname: 'example.test',
+      headers: {},
+    }
 
-test('stringifyRequest defaults optional options', t => {
-  const options = {
-    port: 80,
-    proto: 'http',
-    hostname: 'example.test',
-    headers: {},
-  }
+    const result = common.stringifyRequest(options, 'foo')
 
-  const result = common.stringifyRequest(options, 'foo')
-
-  t.deepEqual(JSON.parse(result), {
-    method: 'GET',
-    url: 'http://example.test',
-    headers: {},
-    body: 'foo',
+    expect(JSON.parse(result)).to.deep.equal({
+      method: 'GET',
+      url: 'http://example.test',
+      headers: {},
+      body: 'foo',
+    })
   })
 
-  t.end()
-})
+  it('should pass headers through', () => {
+    const options = {
+      method: 'GET',
+      port: 80,
+      proto: 'http',
+      hostname: 'example.test',
+      path: '/',
+      headers: { cookie: 'fiz=baz', 'set-cookie': ['hello', 'world'] },
+    }
 
-test('stringifyRequest passes headers through', t => {
-  const options = {
-    method: 'GET',
-    port: 80,
-    proto: 'http',
-    hostname: 'example.test',
-    path: '/',
-    headers: { cookie: 'fiz=baz', 'set-cookie': ['hello', 'world'] },
-  }
+    const result = common.stringifyRequest(options, 'foo')
 
-  const result = common.stringifyRequest(options, 'foo')
-
-  t.deepEqual(JSON.parse(result), {
-    method: 'GET',
-    url: 'http://example.test/',
-    headers: { cookie: 'fiz=baz', 'set-cookie': ['hello', 'world'] },
-    body: 'foo',
+    expect(JSON.parse(result)).to.deep.equal({
+      method: 'GET',
+      url: 'http://example.test/',
+      headers: { cookie: 'fiz=baz', 'set-cookie': ['hello', 'world'] },
+      body: 'foo',
+    })
   })
 
-  t.end()
-})
+  it('should always treat the body as a string', () => {
+    const options = {
+      method: 'GET',
+      port: 80,
+      proto: 'http',
+      hostname: 'example.test',
+      path: '/',
+      headers: {},
+    }
 
-test('stringifyRequest the body is always treated as a string', t => {
-  const options = {
-    method: 'GET',
-    port: 80,
-    proto: 'http',
-    hostname: 'example.test',
-    path: '/',
-    headers: {},
-  }
+    const result = common.stringifyRequest(options, '{"hello":"world"}')
 
-  const result = common.stringifyRequest(options, '{"hello":"world"}')
-
-  t.deepEqual(JSON.parse(result), {
-    method: 'GET',
-    url: 'http://example.test/',
-    headers: {},
-    body: '{"hello":"world"}',
+    expect(JSON.parse(result)).to.deep.equal({
+      method: 'GET',
+      url: 'http://example.test/',
+      headers: {},
+      body: '{"hello":"world"}',
+    })
   })
-
-  t.end()
 })
 
-test('headersArrayToObject', function(t) {
+it('`headersArrayToObject()`', () => {
   const headers = [
     'Content-Type',
     'application/json; charset=utf-8',
@@ -428,7 +437,7 @@ test('headersArrayToObject', function(t) {
     'fizbuzz',
   ]
 
-  t.deepEqual(common.headersArrayToObject(headers), {
+  expect(common.headersArrayToObject(headers)).to.deep.equal({
     'content-type': 'application/json; charset=utf-8',
     'last-modified': 'foobar',
     expires: 'fizbuzz',
@@ -443,7 +452,7 @@ test('headersArrayToObject', function(t) {
     'foo=baz; Domain=.github.com; Path=/',
   ])
 
-  t.deepEqual(common.headersArrayToObject(headersMultipleSetCookies), {
+  expect(common.headersArrayToObject(headersMultipleSetCookies)).to.deep.equal({
     'content-type': 'application/json; charset=utf-8',
     'last-modified': 'foobar',
     expires: 'fizbuzz',
@@ -454,48 +463,44 @@ test('headersArrayToObject', function(t) {
     ],
   })
 
-  t.throws(() => common.headersArrayToObject(123), {
-    message: 'Expected a header array',
+  expect(() => common.headersArrayToObject(123)).to.throw(
+    'Expected a header array'
+  )
+})
+
+it('`percentEncode()` encodes extra reserved characters', () => {
+  expect(common.percentEncode('foo+(*)!')).to.equal('foo%2B%28%2A%29%21')
+})
+
+describe('`normalizeClientRequestArgs()`', () => {
+  it('should throw for invalid URL', () => {
+    // no schema
+    expect(() => http.get('example.test')).to.throw(TypeError, 'example.test')
   })
 
-  t.end()
-})
+  it('can include auth info', async () => {
+    const scope = nock('http://example.test')
+      .get('/')
+      .basicAuth({ user: 'user', pass: 'pw' })
+      .reply()
 
-test('percentEncode encodes extra reserved characters', t => {
-  t.equal(common.percentEncode('foo+(*)!'), 'foo%2B%28%2A%29%21')
-  t.done()
-})
+    http.get('http://user:pw@example.test')
+    scope.isDone()
+  })
 
-test('normalizeClientRequestArgs throws for invalid URL', async t => {
-  // no schema
-  t.throws(() => http.get('example.test'), {
-    input: 'example.test',
-    name: /TypeError/,
+  it('should handle a single callback', async () => {
+    // TODO: Only passing a callback isn't currently supported by Nock,
+    // but should be in the future as Node allows it.
+    const cb = () => {}
+
+    const { options, callback } = common.normalizeClientRequestArgs(cb)
+
+    expect(options).to.deep.equal({})
+    expect(callback).to.equal(cb)
   })
 })
 
-test('normalizeClientRequestArgs can include auth info', async () => {
-  const scope = nock('http://example.test')
-    .get('/')
-    .basicAuth({ user: 'user', pass: 'pw' })
-    .reply()
-
-  http.get('http://user:pw@example.test')
-  scope.isDone()
-})
-
-test('normalizeClientRequestArgs with a single callback', async t => {
-  // TODO: Only passing a callback isn't currently supported by Nock,
-  // but should be in the future as Node allows it.
-  const cb = () => {}
-
-  const { options, callback } = common.normalizeClientRequestArgs(cb)
-
-  t.deepEqual(options, {})
-  t.is(callback, cb)
-})
-
-test('testing timers are deleted correctly', t => {
+it('testing timers are deleted correctly', done => {
   const timeoutSpy = sinon.spy()
   const intervalSpy = sinon.spy()
   const immediateSpy = sinon.spy()
@@ -506,9 +511,9 @@ test('testing timers are deleted correctly', t => {
   common.removeAllTimers()
 
   setImmediate(() => {
-    t.equal(timeoutSpy.called, false)
-    t.equal(intervalSpy.called, false)
-    t.equal(immediateSpy.called, false)
-    t.end()
+    expect(timeoutSpy).to.not.have.been.called()
+    expect(intervalSpy).to.not.have.been.called()
+    expect(immediateSpy).to.not.have.been.called()
+    done()
   })
 })
