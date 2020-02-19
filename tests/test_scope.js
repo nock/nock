@@ -126,7 +126,7 @@ describe('`Scope#isDone()`', () => {
   })
 })
 
-describe('filteringPath()', function() {
+describe('`filteringPath()`', function() {
   it('filter path with function', async function() {
     const scope = nock('http://example.test')
       .filteringPath(() => '/?a=2&b=1')
