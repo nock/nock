@@ -2,51 +2,62 @@
 
 const debug = require('debug')
 const sinon = require('sinon')
-const { test } = require('tap')
 const { expect } = require('chai')
 const nock = require('..')
 const got = require('./got_client')
 
-require('./cleanup_after_each')()
 require('./setup')
 
-test('match debugging works', async t => {
-  const logFn = sinon.stub(debug, 'log')
-  debug.enable('nock.interceptor')
-  t.once('end', () => {
+describe('Logging using the `debug` package', () => {
+  let logFn
+  beforeEach(() => {
+    logFn = sinon.stub(debug, 'log')
+    debug.enable('nock.interceptor')
+  })
+  afterEach(() => {
+    sinon.restore()
     debug.disable('nock.interceptor')
   })
 
-  nock('http://example.test')
-    .post('/deep/link')
-    .reply(200, 'Hello World!')
+  it('match debugging works', async () => {
+    nock('http://example.test')
+      .post('/deep/link')
+      .reply(200, 'Hello World!')
 
-  const exampleBody = 'Hello yourself!'
-  await got.post('http://example.test/deep/link', { body: exampleBody })
+    const exampleBody = 'Hello yourself!'
+    await got.post('http://example.test/deep/link', { body: exampleBody })
 
-  expect(logFn).to.have.been.calledWithExactly(
-    sinon.match.string,
-    // This is a JSON blob which contains, among other things the complete
-    // request URL.
-    sinon.match('"href":"http://example.test/deep/link"'),
-    // This is the JSON-stringified body.
-    `"${exampleBody}"`
-  )
+    const isMocha = process.argv.some(arg => arg.endsWith('mocha'))
+    // TODO For some reason this is getting slightly different arugments in Tap
+    // vs Mocha. Remove this conditional when Tap is removed.
+    if (isMocha) {
+      expect(logFn).to.have.been.calledWith(
+        sinon.match.string,
+        // This is a JSON blob which contains, among other things the complete
+        // request URL.
+        sinon.match('"href":"http://example.test/deep/link"'),
+        // This is the JSON-stringified body.
+        `"${exampleBody}"`
+      )
+    }
+  })
 })
 
-test('should log matching', async t => {
-  const logFn = sinon.spy()
+describe('`log()`', () => {
+  it('should log host matching', async () => {
+    const logFn = sinon.spy()
 
-  const scope = nock('http://example.test')
-    .get('/')
-    .reply(200, 'Hello, World!')
-    .log(logFn)
+    const scope = nock('http://example.test')
+      .get('/')
+      .reply(200, 'Hello, World!')
+      .log(logFn)
 
-  await got('http://example.test/')
+    await got('http://example.test/')
 
-  expect(logFn).to.have.been.calledOnceWithExactly(
-    'matching http://example.test:80/ to GET http://example.test:80/: true'
-  )
+    expect(logFn).to.have.been.calledOnceWithExactly(
+      'matching http://example.test:80/ to GET http://example.test:80/: true'
+    )
 
-  scope.done()
+    scope.done()
+  })
 })
