@@ -99,20 +99,20 @@ test('match headers on number with regexp', async () => {
 })
 
 test('match header on scope with function: gets the expected argument', async () => {
-  const matchHeaderSpy = sinon.stub().returns(false)
-  // TODO: It's surprising that this function receives a number instead of
-  // a string. Probably this behavior should be changed.
-  matchHeaderSpy.withArgs(456).returns(true)
+  const matchHeaderStub = sinon.stub().returns(true)
 
   const scope = nock('http://example.test')
     .get('/')
-    .matchHeader('x-my-headers', matchHeaderSpy)
+    .matchHeader('x-my-headers', matchHeaderStub)
     .reply(200, 'Hello World!')
 
   const { statusCode, body } = await got('http://example.test/', {
     headers: { 'X-My-Headers': 456 },
   })
 
+  // TODO: It's surprising that this function receives a number instead of
+  // a string. Probably this behavior should be changed.
+  expect(matchHeaderStub).to.have.been.calledOnceWithExactly(456)
   expect(statusCode).to.equal(200)
   expect(body).to.equal('Hello World!')
   scope.done()
@@ -179,13 +179,10 @@ test('match header on scope with function: does not consume mock request when ma
 })
 
 test('match header on intercept with function: gets the expected argument', async () => {
-  const matchHeaderSpy = sinon.stub().returns(false)
-  // TODO: It's surprising that this function receives a number instead of
-  // a string. Probably this behavior should be changed.
-  matchHeaderSpy.withArgs(456).returns(true)
+  const matchHeaderStub = sinon.stub().returns(true)
 
   const scope = nock('http://example.test')
-    .matchHeader('x-my-headers', matchHeaderSpy)
+    .matchHeader('x-my-headers', matchHeaderStub)
     // `.matchHeader()` is called on the interceptor. It precedes the call to
     // `.get()`.
     .get('/')
@@ -195,6 +192,9 @@ test('match header on intercept with function: gets the expected argument', asyn
     headers: { 'X-My-Headers': 456 },
   })
 
+  // TODO: It's surprising that this function receives a number instead of
+  // a string. Probably this behavior should be changed.
+  expect(matchHeaderStub).to.have.been.calledOnceWithExactly(456)
   expect(statusCode).to.equal(200)
   expect(body).to.equal('Hello World!')
   scope.done()
