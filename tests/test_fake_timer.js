@@ -1,16 +1,14 @@
 'use strict'
 
 const { expect } = require('chai')
-const { test } = require('tap')
 const request = require('request')
 const fakeTimers = require('@sinonjs/fake-timers')
 const nock = require('..')
 
-require('./cleanup_after_each')()
 require('./setup')
 
 // https://github.com/nock/nock/issues/1334
-test('one function returns successfully when fake timer is enabled', t => {
+it('should still return successfully when fake timer is enabled', done => {
   const clock = fakeTimers.install()
   nock('http://example.test')
     .get('/')
@@ -21,6 +19,6 @@ test('one function returns successfully when fake timer is enabled', t => {
 
     expect(err).to.be.null()
     expect(resp.statusCode).to.equal(200)
-    t.end()
+    done()
   })
 })
