@@ -7,7 +7,6 @@ const nock = require('..')
 const got = require('./got_client')
 const assertRejects = require('assert-rejects')
 
-require('./cleanup_after_each')()
 require('./setup')
 
 describe('query params in path', () => {

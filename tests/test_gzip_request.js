@@ -1,15 +1,13 @@
 'use strict'
 
 const { expect } = require('chai')
-const { test } = require('tap')
 const http = require('http')
 const zlib = require('zlib')
 const nock = require('..')
 
-require('./cleanup_after_each')()
 require('./setup')
 
-test('accepts and decodes gzip encoded application/json', t => {
+it('should accept and decode gzip encoded application/json', done => {
   const message = {
     my: 'contents',
   }
@@ -18,7 +16,7 @@ test('accepts and decodes gzip encoded application/json', t => {
     .post('/')
     .reply(function(url, actual) {
       expect(actual).to.deep.equal(message)
-      t.end()
+      done()
       return [200]
     })
 
@@ -38,7 +36,7 @@ test('accepts and decodes gzip encoded application/json', t => {
   req.end()
 })
 
-test('accepts and decodes deflate encoded application/json', t => {
+it('should accept and decode deflate encoded application/json', done => {
   const message = {
     my: 'contents',
   }
@@ -47,7 +45,7 @@ test('accepts and decodes deflate encoded application/json', t => {
     .post('/')
     .reply(function(url, actual) {
       expect(actual).to.deep.equal(message)
-      t.end()
+      done()
       return [200]
     })
 
