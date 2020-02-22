@@ -3,13 +3,15 @@
 const http = require('http')
 const assertRejects = require('assert-rejects')
 const { expect } = require('chai')
+const sinon = require('sinon')
 const { test } = require('tap')
 const nock = require('..')
 const got = require('./got_client')
 
 require('./cleanup_after_each')()
+require('./setup')
 
-test('match headers', async t => {
+test('match headers', async () => {
   const scope = nock('http://example.test')
     .get('/')
     .matchHeader('x-my-headers', 'My custom Header value')
@@ -19,14 +21,14 @@ test('match headers', async t => {
     headers: { 'X-My-Headers': 'My custom Header value' },
   })
 
-  t.equal(statusCode, 200)
-  t.equal(body, 'Hello World!')
+  expect(statusCode).to.equal(200)
+  expect(body).to.equal('Hello World!')
   scope.done()
 })
 
 // https://github.com/nock/nock/issues/399
 // https://github.com/nock/nock/issues/822
-test('match headers coming in as an array', async t => {
+test('match headers coming in as an array', async () => {
   const scope = nock('http://example.test')
     .get('/')
     .matchHeader('x-my-headers', 'My custom Header value')
@@ -40,7 +42,7 @@ test('match headers coming in as an array', async t => {
   scope.done()
 })
 
-test('multiple match headers', async t => {
+test('multiple match headers', async () => {
   const scope = nock('http://example.test')
     .get('/')
     .matchHeader('x-my-headers', 'My custom Header value')
@@ -53,20 +55,20 @@ test('multiple match headers', async t => {
     headers: { 'X-My-Headers': 'other value' },
   })
 
-  t.equal(response1.statusCode, 200)
-  t.equal(response1.body, 'Hello World other value!')
+  expect(response1.statusCode).to.equal(200)
+  expect(response1.body).to.equal('Hello World other value!')
 
   const response2 = await got('http://example.test/', {
     headers: { 'X-My-Headers': 'My custom Header value' },
   })
 
-  t.equal(response2.statusCode, 200)
-  t.equal(response2.body, 'Hello World!')
+  expect(response2.statusCode).to.equal(200)
+  expect(response2.body).to.equal('Hello World!')
 
   scope.done()
 })
 
-test('match headers with regexp', async t => {
+test('match headers with regexp', async () => {
   const scope = nock('http://example.test')
     .get('/')
     .matchHeader('x-my-headers', /My He.d.r [0-9.]+/)
@@ -76,12 +78,12 @@ test('match headers with regexp', async t => {
     headers: { 'X-My-Headers': 'My Header 1.0' },
   })
 
-  t.equal(statusCode, 200)
-  t.equal(body, 'Hello World!')
+  expect(statusCode).to.equal(200)
+  expect(body).to.equal('Hello World!')
   scope.done()
 })
 
-test('match headers on number with regexp', async t => {
+test('match headers on number with regexp', async () => {
   const scope = nock('http://example.test')
     .get('/')
     .matchHeader('x-my-headers', /\d+/)
@@ -91,34 +93,32 @@ test('match headers on number with regexp', async t => {
     headers: { 'X-My-Headers': 123 },
   })
 
-  t.equal(statusCode, 200)
-  t.equal(body, 'Hello World!')
+  expect(statusCode).to.equal(200)
+  expect(body).to.equal('Hello World!')
   scope.done()
 })
 
-test('match header on scope with function: gets the expected argument', async t => {
-  t.plan(3)
+test('match header on scope with function: gets the expected argument', async () => {
+  const matchHeaderStub = sinon.stub().returns(true)
 
   const scope = nock('http://example.test')
     .get('/')
-    .matchHeader('x-my-headers', val => {
-      // TODO: It's surprising that this function receives a number instead of
-      // a string. Probably this behavior should be changed.
-      t.equal(val, 456)
-      return true
-    })
+    .matchHeader('x-my-headers', matchHeaderStub)
     .reply(200, 'Hello World!')
 
   const { statusCode, body } = await got('http://example.test/', {
     headers: { 'X-My-Headers': 456 },
   })
 
-  t.equal(statusCode, 200)
-  t.equal(body, 'Hello World!')
+  // TODO: It's surprising that this function receives a number instead of
+  // a string. Probably this behavior should be changed.
+  expect(matchHeaderStub).to.have.been.calledOnceWithExactly(456)
+  expect(statusCode).to.equal(200)
+  expect(body).to.equal('Hello World!')
   scope.done()
 })
 
-test('match header on scope with function: matches when match accepted', async t => {
+test('match header on scope with function: matches when match accepted', async () => {
   const scope = nock('http://example.test')
     .get('/')
     .matchHeader('x-my-headers', val => true)
@@ -128,12 +128,12 @@ test('match header on scope with function: matches when match accepted', async t
     headers: { 'X-My-Headers': 456 },
   })
 
-  t.equal(statusCode, 200)
-  t.equal(body, 'Hello World!')
+  expect(statusCode).to.equal(200)
+  expect(body).to.equal('Hello World!')
   scope.done()
 })
 
-test('match header on scope with function and allow unmocked: matches when match accepted', async t => {
+test('match header on scope with function and allow unmocked: matches when match accepted', async () => {
   const scope = nock('http://example.test', { allowUnmocked: true })
     .get('/')
     .matchHeader('x-my-headers', val => true)
@@ -143,12 +143,12 @@ test('match header on scope with function and allow unmocked: matches when match
     headers: { 'X-My-Headers': 456 },
   })
 
-  t.equal(statusCode, 200)
-  t.equal(body, 'Hello World!')
+  expect(statusCode).to.equal(200)
+  expect(body).to.equal('Hello World!')
   scope.done()
 })
 
-test('match header on scope with function: does not match when match declined', async t => {
+test('match header on scope with function: does not match when match declined', async () => {
   nock('http://example.test')
     .get('/')
     .matchHeader('x-my-headers', val => false)
@@ -162,7 +162,7 @@ test('match header on scope with function: does not match when match declined', 
   )
 })
 
-test('match header on scope with function: does not consume mock request when match declined', async t => {
+test('match header on scope with function: does not consume mock request when match declined', async () => {
   const scope = nock('http://example.test')
     .get('/')
     .matchHeader('x-my-headers', val => false)
@@ -174,21 +174,15 @@ test('match header on scope with function: does not consume mock request when ma
     }),
     /Nock: No match for request/
   )
-  t.throws(() => scope.done(), {
-    message: 'Mocks not yet satisfied',
-  })
+
+  expect(scope.isDone()).to.be.false()
 })
 
-test('match header on intercept with function: gets the expected argument', async t => {
-  t.plan(3)
+test('match header on intercept with function: gets the expected argument', async () => {
+  const matchHeaderStub = sinon.stub().returns(true)
 
   const scope = nock('http://example.test')
-    .matchHeader('x-my-headers', val => {
-      // TODO: It's surprising that this function receives a number instead of
-      // a string. Probably this behavior should be changed.
-      t.equal(val, 456)
-      return true
-    })
+    .matchHeader('x-my-headers', matchHeaderStub)
     // `.matchHeader()` is called on the interceptor. It precedes the call to
     // `.get()`.
     .get('/')
@@ -198,14 +192,17 @@ test('match header on intercept with function: gets the expected argument', asyn
     headers: { 'X-My-Headers': 456 },
   })
 
-  t.equal(statusCode, 200)
-  t.equal(body, 'Hello World!')
+  // TODO: It's surprising that this function receives a number instead of
+  // a string. Probably this behavior should be changed.
+  expect(matchHeaderStub).to.have.been.calledOnceWithExactly(456)
+  expect(statusCode).to.equal(200)
+  expect(body).to.equal('Hello World!')
   scope.done()
 })
 
-test('match header on interceptor with function: matches when match accepted', async t => {
+test('match header on interceptor with function: matches when match accepted', async () => {
   const scope = nock('http://example.test')
-    .matchHeader('x-my-headers', val => true)
+    .matchHeader('x-my-headers', () => true)
     // `.matchHeader()` is called on the interceptor. It precedes the call to
     // `.get()`.
     .get('/')
@@ -215,14 +212,14 @@ test('match header on interceptor with function: matches when match accepted', a
     headers: { 'X-My-Headers': 456 },
   })
 
-  t.equal(statusCode, 200)
-  t.equal(body, 'Hello World!')
+  expect(statusCode).to.equal(200)
+  expect(body).to.equal('Hello World!')
   scope.done()
 })
 
-test('match header on interceptor with function: matches when match accepted', async t => {
+test('match header on interceptor with function: matches when match accepted', async () => {
   const scope = nock('http://example.test', { allowUnmocked: true })
-    .matchHeader('x-my-headers', val => true)
+    .matchHeader('x-my-headers', () => true)
     // `.matchHeader()` is called on the interceptor. It precedes the call to
     // `.get()`.
     .get('/')
@@ -232,14 +229,14 @@ test('match header on interceptor with function: matches when match accepted', a
     headers: { 'X-My-Headers': 456 },
   })
 
-  t.equal(statusCode, 200)
-  t.equal(body, 'Hello World!')
+  expect(statusCode).to.equal(200)
+  expect(body).to.equal('Hello World!')
   scope.done()
 })
 
-test('match header on interceptor with function: does not match when match declined', async t => {
+test('match header on interceptor with function: does not match when match declined', async () => {
   nock('http://example.test')
-    .matchHeader('x-my-headers', val => false)
+    .matchHeader('x-my-headers', () => false)
     // `.matchHeader()` is called on the interceptor. It precedes the call to
     // `.get()`.
     .get('/')
@@ -253,9 +250,9 @@ test('match header on interceptor with function: does not match when match decli
   )
 })
 
-test('match header on interceptor with function: does not consume mock request when match declined', async t => {
+test('match header on interceptor with function: does not consume mock request when match declined', async () => {
   const scope = nock('http://example.test')
-    .matchHeader('x-my-headers', val => false)
+    .matchHeader('x-my-headers', () => false)
     // `.matchHeader()` is called on the interceptor. It precedes the call to
     // `.get()`.
     .get('/')
@@ -267,12 +264,11 @@ test('match header on interceptor with function: does not consume mock request w
     }),
     /Nock: No match for request/
   )
-  t.throws(() => scope.done(), {
-    message: 'Mocks not yet satisfied',
-  })
+
+  expect(scope.isDone()).to.be.false()
 })
 
-test('match all headers', async t => {
+test('match all headers', async () => {
   const scope = nock('http://example.test')
     .matchHeader('accept', 'application/json')
     .get('/one')
@@ -283,14 +279,15 @@ test('match all headers', async t => {
   const response1 = await got('http://example.test/one', {
     headers: { Accept: 'application/json' },
   })
-  t.equal(response1.statusCode, 200)
-  t.equal(response1.body, '{"hello":"world"}')
+
+  expect(response1.statusCode).to.equal(200)
+  expect(response1.body).to.equal('{"hello":"world"}')
 
   const response2 = await got('http://example.test/two', {
     headers: { Accept: 'application/json' },
   })
-  t.equal(response2.statusCode, 200)
-  t.equal(response2.body, '{"a":1,"b":2,"c":3}')
+  expect(response2.statusCode).to.equal(200)
+  expect(response2.body).to.equal('{"a":1,"b":2,"c":3}')
 
   scope.done()
 })
@@ -312,19 +309,15 @@ test('header manipulation', t => {
   })
 
   req.setHeader('X-Custom-Header', 'My Value')
-  t.equal(
-    req.getHeader('X-Custom-Header'),
-    'My Value',
-    'Custom header was not set'
-  )
+  expect(req.getHeader('X-Custom-Header')).to.equal('My Value')
 
   req.removeHeader('X-Custom-Header')
-  t.notOk(req.getHeader('X-Custom-Header'), 'Custom header was not removed')
+  expect(req.getHeader('X-Custom-Header')).to.be.undefined()
 
   req.end()
 })
 
-test('done fails when specified request header is missing', async t => {
+test('done fails when specified request header is missing', async () => {
   nock('http://example.test', {
     reqheaders: {
       'X-App-Token': 'apptoken',
@@ -342,7 +335,7 @@ test('done fails when specified request header is missing', async t => {
   )
 })
 
-test('matches when request header matches regular expression', async t => {
+test('matches when request header matches regular expression', async () => {
   const scope = nock('http://example.test', {
     reqheaders: { 'X-My-Super-Power': /.+/ },
   })
@@ -353,11 +346,11 @@ test('matches when request header matches regular expression', async t => {
     headers: { 'X-My-Super-Power': 'mullet growing' },
   })
 
-  t.is(statusCode, 200)
+  expect(statusCode).to.equal(200)
   scope.done()
 })
 
-test('does not match when request header does not match regular expression', async t => {
+test('does not match when request header does not match regular expression', async () => {
   const scope = nock('http://example.test', {
     reqheaders: {
       'X-My-Super-Power': /Mullet.+/,
@@ -373,12 +366,12 @@ test('does not match when request header does not match regular expression', asy
     /Nock: No match/
   )
 
-  t.false(scope.isDone())
+  expect(scope.isDone()).to.be.false()
 })
 
 // https://github.com/nock/nock/issues/399
 // https://github.com/nock/nock/issues/822
-test('req header, when headers are coming in as an array', async t => {
+test('req header, when headers are coming in as an array', async () => {
   const scope = nock('http://example.test', {
     reqheaders: { 'x-my-headers': 'My custom Header value' },
   })
@@ -393,18 +386,17 @@ test('req header, when headers are coming in as an array', async t => {
   scope.done()
 })
 
-test('reqheaders throw if they are not an object', async t => {
+test('reqheaders throw if they are not an object', async () => {
   const options = {
     reqheaders: 'Content-Type: text/plain',
   }
 
-  t.throws(
-    () => nock('http://example.test', options).get('/'),
-    Error('Headers must be provided as an object')
+  expect(() => nock('http://example.test', options).get('/')).to.throw(
+    'Headers must be provided as an object'
   )
 })
 
-test('matches when request header satisfies the header function', async t => {
+test('matches when request header satisfies the header function', async () => {
   const scope = nock('http://example.test', {
     reqheaders: {
       'X-My-Super-Power': value => value === 'mullet growing',
@@ -417,11 +409,11 @@ test('matches when request header satisfies the header function', async t => {
     headers: { 'X-My-Super-Power': 'mullet growing' },
   })
 
-  t.is(statusCode, 200)
+  expect(statusCode).to.equal(200)
   scope.done()
 })
 
-test("doesn't match when request header does not satisfy the header function", async t => {
+test("doesn't match when request header does not satisfy the header function", async () => {
   const scope = nock('http://example.test', {
     reqheaders: {
       'X-My-Super-Power': value => value === 'Mullet Growing',
@@ -437,10 +429,10 @@ test("doesn't match when request header does not satisfy the header function", a
     /Nock: No match/
   )
 
-  t.false(scope.isDone())
+  expect(scope.isDone()).to.be.false()
 })
 
-test('done does not fail when specified request header is not missing', async t => {
+test('done does not fail when specified request header is not missing', async () => {
   const scope = nock('http://example.test', {
     reqheaders: {
       'X-App-Token': 'apptoken',
@@ -457,11 +449,11 @@ test('done does not fail when specified request header is not missing', async t 
     },
   })
 
-  t.is(statusCode, 200)
+  expect(statusCode).to.equal(200)
   scope.done()
 })
 
-test('when badheaders are present, badheaders prevents match', async t => {
+test('when badheaders are present, badheaders prevents match', async () => {
   const scope = nock('http://example.test', {
     badheaders: ['cookie'],
   })
@@ -475,10 +467,10 @@ test('when badheaders are present, badheaders prevents match', async t => {
     /Nock: No match for request/
   )
 
-  t.false(scope.isDone())
+  expect(scope.isDone()).to.be.false()
 })
 
-test('when badheaders are absent but other headers are present, badheaders does not prevent match', async t => {
+test('when badheaders are absent but other headers are present, badheaders does not prevent match', async () => {
   const scope = nock('http://example.test', {
     badheaders: ['cookie'],
   })
@@ -490,7 +482,7 @@ test('when badheaders are absent but other headers are present, badheaders does 
   scope.done()
 })
 
-test('mocking succeeds even when mocked and specified request header names have different cases', async t => {
+test('mocking succeeds even when mocked and specified request header names have different cases', async () => {
   const scope = nock('http://example.test', {
     reqheaders: {
       'x-app-token': 'apptoken',
@@ -507,12 +499,12 @@ test('mocking succeeds even when mocked and specified request header names have 
     },
   })
 
-  t.is(statusCode, 200)
+  expect(statusCode).to.equal(200)
   scope.done()
 })
 
 // https://github.com/nock/nock/issues/966
-test('mocking succeeds when mocked and specified request headers have falsy values', async t => {
+test('mocking succeeds when mocked and specified request headers have falsy values', async () => {
   const scope = nock('http://example.test', {
     reqheaders: {
       'x-foo': 0,
@@ -527,48 +519,32 @@ test('mocking succeeds when mocked and specified request headers have falsy valu
     },
   })
 
-  t.is(statusCode, 200)
+  expect(statusCode).to.equal(200)
   scope.done()
 })
 
-test('match basic authentication header', t => {
+test('match basic authentication header', async () => {
   const username = 'testuser'
   const password = 'testpassword'
-  const authString = `${username}:${password}`
-
-  const expectedAuthHeader = `Basic ${Buffer.from(authString).toString(
-    'base64'
-  )}`
+  const authString = Buffer.from(`${username}:${password}`).toString('base64')
+  const expectedAuthHeader = `Basic ${authString}`
 
   const scope = nock('http://example.test')
     .get('/')
     .matchHeader('Authorization', val => val === expectedAuthHeader)
     .reply(200, 'Hello World!')
 
-  http.get(
-    {
-      host: 'example.test',
-      path: '/',
-      port: 80,
-      auth: authString,
-    },
-    function(res) {
-      res.setEncoding('utf8')
-      t.equal(res.statusCode, 200)
+  const { statusCode, body } = await got('http://example.test/', {
+    username,
+    password,
+  })
 
-      res.on('data', function(data) {
-        t.equal(data, 'Hello World!')
-      })
-
-      res.on('end', function() {
-        scope.done()
-        t.end()
-      })
-    }
-  )
+  expect(statusCode).to.equal(200)
+  expect(body).to.equal('Hello World!')
+  scope.done()
 })
 
-test('multiple interceptors override headers from unrelated request', async t => {
+test('multiple interceptors override headers from unrelated request', async () => {
   nock.define([
     {
       scope: 'https://example.test:443',
@@ -595,17 +571,17 @@ test('multiple interceptors override headers from unrelated request', async t =>
   const res1 = await got('https://example.test/bar', {
     headers: { 'x-foo': 'bar' },
   })
-  t.is(res1.statusCode, 200)
+  expect(res1.statusCode).to.equal(200)
 
   const res2 = await got('https://example.test/baz', {
     headers: { 'x-foo': 'baz' },
   })
-  t.is(res2.statusCode, 200)
+  expect(res2.statusCode).to.equal(200)
 })
 
 // The next three tests cover the special case for the Host header where it's only used for
 // matching if it's defined on the scope and the request. See https://github.com/nock/nock/pull/196
-test('Host header is used for matching if defined on the scope and request', async t => {
+test('Host header is used for matching if defined on the scope and request', async () => {
   const scope = nock('http://example.test', {
     reqheaders: { host: 'example.test' },
   })
@@ -616,11 +592,11 @@ test('Host header is used for matching if defined on the scope and request', asy
     headers: { Host: 'example.test' },
   })
 
-  t.is(statusCode, 200)
+  expect(statusCode).to.equal(200)
   scope.done()
 })
 
-test('Host header is ignored during matching if not defined on the request', async t => {
+test('Host header is ignored during matching if not defined on the request', async () => {
   const scope = nock('http://example.test', {
     reqheaders: { host: 'some.other.domain.test' },
   })
@@ -629,11 +605,11 @@ test('Host header is ignored during matching if not defined on the request', asy
 
   const { statusCode } = await got('http://example.test/')
 
-  t.is(statusCode, 200)
+  expect(statusCode).to.equal(200)
   scope.done()
 })
 
-test('Host header is used to reject a match if defined on the scope and request', async t => {
+test('Host header is used to reject a match if defined on the scope and request', async () => {
   nock('http://example.test', {
     reqheaders: { host: 'example.test' },
   })
