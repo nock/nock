@@ -81,7 +81,6 @@ it('emits no match when no match and mocked', done => {
 
   nock.emitter.on('no match', req => {
     expect(req.path).to.equal('/definitelymaybe')
-    nock.emitter.removeAllListeners('no match')
     done()
   })
 
@@ -93,7 +92,6 @@ it('emits no match when netConnect is disabled', done => {
 
   nock.emitter.on('no match', req => {
     expect(req.hostname).to.equal('example.test')
-    nock.emitter.removeAllListeners('no match')
     done()
   })
 
