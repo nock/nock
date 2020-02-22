@@ -3,17 +3,15 @@
 const { expect } = require('chai')
 const http = require('http')
 const sinon = require('sinon')
-const { test } = require('tap')
 
 const nock = require('..')
 const got = require('./got_client')
 
-require('./cleanup_after_each')()
 require('./setup')
 
 function ignore() {}
 
-test('emits request and replied events when request has no body', async () => {
+it('emits request and replied events when request has no body', async () => {
   const scope = nock('http://example.test')
     .get('/')
     .reply()
@@ -31,7 +29,7 @@ test('emits request and replied events when request has no body', async () => {
   expect(onReplied).to.have.been.calledOnce()
 })
 
-test('emits request and request body', async () => {
+it('emits request and request body', async () => {
   const data = 'example=123'
 
   const scope = nock('http://example.test')
@@ -68,36 +66,34 @@ test('emits request and request body', async () => {
   expect(onReplied).to.have.been.calledOnce()
 })
 
-test('emits no match when no match and no mock', function(t) {
-  nock.emitter.once('no match', function() {
-    t.end()
+it('emits no match when no match and no mock', done => {
+  nock.emitter.once('no match', () => {
+    done()
   })
 
-  const req = http.get('http://example.test/abc')
-  req.once('error', ignore)
+  http.get('http://example.test/abc').once('error', ignore)
 })
 
-test('emits no match when no match and mocked', function(t) {
+it('emits no match when no match and mocked', done => {
   nock('http://example.test')
     .get('/')
     .reply(418)
 
-  const assertion = function(req) {
+  nock.emitter.on('no match', req => {
     expect(req.path).to.equal('/definitelymaybe')
-    nock.emitter.removeAllListeners('no match')
-    t.end()
-  }
-  nock.emitter.on('no match', assertion)
+    done()
+  })
 
   http.get('http://example.test/definitelymaybe').once('error', ignore)
 })
 
-test('emits no match when netConnect is disabled', function(t) {
+it('emits no match when netConnect is disabled', done => {
   nock.disableNetConnect()
-  nock.emitter.on('no match', function(req) {
+
+  nock.emitter.on('no match', req => {
     expect(req.hostname).to.equal('example.test')
-    nock.emitter.removeAllListeners('no match')
-    t.end()
+    done()
   })
+
   http.get('http://example.test').once('error', ignore)
 })
