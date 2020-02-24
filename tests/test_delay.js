@@ -12,7 +12,7 @@ const got = require('./got_client')
 
 require('./cleanup_after_each')()
 
-const textFile = path.join(__dirname, '..', 'assets', 'reply_file_1.txt')
+const textFilePath = path.resolve(__dirname, './assets/reply_file_1.txt')
 
 function checkDuration(t, ms) {
   // Do not write new tests using this function. Write async tests using
@@ -164,14 +164,14 @@ test('delayBody works with a stream', async t => {
     .get('/')
     .delayBody(100)
     .reply(200, (uri, requestBody) =>
-      fs.createReadStream(textFile, { encoding: 'utf8' })
+      fs.createReadStream(textFilePath, { encoding: 'utf8' })
     )
 
   await resolvesInAtLeast(
     t,
     async () => {
       const { body } = await got('http://example.test')
-      t.equal(body, fs.readFileSync(textFile, { encoding: 'utf8' }))
+      t.equal(body, fs.readFileSync(textFilePath, { encoding: 'utf8' }))
     },
     100
   )
@@ -185,13 +185,13 @@ test('delayBody works with a stream of binary buffers', async t => {
     .delayBody(100)
     // No encoding specified, which causes the file to be streamed using
     // buffers instead of strings.
-    .reply(200, (uri, requestBody) => fs.createReadStream(textFile))
+    .reply(200, (uri, requestBody) => fs.createReadStream(textFilePath))
 
   await resolvesInAtLeast(
     t,
     async () => {
       const { body } = await got('http://example.test/')
-      t.equal(body, fs.readFileSync(textFile, { encoding: 'utf8' }))
+      t.equal(body, fs.readFileSync(textFilePath, { encoding: 'utf8' }))
     },
     100
   )
@@ -212,10 +212,10 @@ test('delayBody works with a delayed stream', async t => {
     .delayBody(100)
     .reply(200, (uri, requestBody) => passthrough)
 
-  setTimeout(() => fs.createReadStream(textFile).pipe(passthrough), 125)
+  setTimeout(() => fs.createReadStream(textFilePath).pipe(passthrough), 125)
 
   const { body } = await got('http://example.test/')
-  t.equal(body, fs.readFileSync(textFile, { encoding: 'utf8' }))
+  t.equal(body, fs.readFileSync(textFilePath, { encoding: 'utf8' }))
 
   scope.done()
 })
@@ -292,7 +292,7 @@ test('delay works with replyWithFile', t => {
   nock('http://localhost')
     .get('/')
     .delay(100)
-    .replyWithFile(200, `${__dirname}/../assets/reply_file_1.txt`)
+    .replyWithFile(200, textFilePath)
 
   http
     .request('http://localhost/', function(res) {
@@ -325,7 +325,7 @@ test('delay works with when you return a generic stream from the reply callback'
     .get('/')
     .delay(100)
     .reply(200, function(path, reqBody) {
-      return fs.createReadStream(`${__dirname}/../assets/reply_file_1.txt`)
+      return fs.createReadStream(textFilePath)
     })
 
   http
@@ -411,7 +411,7 @@ test('delayConnection works with replyWithFile', t => {
   nock('http://localhost')
     .get('/')
     .delayConnection(100)
-    .replyWithFile(200, `${__dirname}/../assets/reply_file_1.txt`)
+    .replyWithFile(200, textFilePath)
 
   http
     .request('http://localhost/', function(res) {
@@ -444,7 +444,7 @@ test('delayConnection works with when you return a generic stream from the reply
     .get('/')
     .delayConnection(100)
     .reply(200, function(path, reqBody) {
-      return fs.createReadStream(`${__dirname}/../assets/reply_file_1.txt`)
+      return fs.createReadStream(textFilePath)
     })
 
   http

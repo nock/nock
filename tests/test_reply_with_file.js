@@ -10,14 +10,14 @@ const got = require('./got_client')
 
 require('./setup')
 
-const textFile = path.join(__dirname, '..', 'assets', 'reply_file_1.txt')
-const binaryFile = path.join(__dirname, '..', 'assets', 'reply_file_2.txt.gz')
+const textFilePath = path.resolve(__dirname, './assets/reply_file_1.txt')
+const binaryFilePath = path.resolve(__dirname, './assets/reply_file_2.txt.gz')
 
 describe('`replyWithFile()`', () => {
   it('reply with file', async () => {
     const scope = nock('http://example.test')
       .get('/')
-      .replyWithFile(200, textFile)
+      .replyWithFile(200, textFilePath)
 
     const { statusCode, body } = await got('http://example.test/')
 
@@ -30,7 +30,7 @@ describe('`replyWithFile()`', () => {
   it('reply with file with headers', async () => {
     const scope = nock('http://example.test')
       .get('/')
-      .replyWithFile(200, binaryFile, {
+      .replyWithFile(200, binaryFilePath, {
         'content-encoding': 'gzip',
       })
 
@@ -50,7 +50,9 @@ describe('`replyWithFile()`', () => {
 
     it('throws the expected error', () => {
       expect(() =>
-        new Scope('http://example.test').get('/').replyWithFile(200, textFile)
+        new Scope('http://example.test')
+          .get('/')
+          .replyWithFile(200, textFilePath)
       ).to.throw(Error, 'No fs')
     })
   })

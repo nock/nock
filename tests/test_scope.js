@@ -12,7 +12,9 @@ const got = require('./got_client')
 require('./setup')
 
 it('scope exposes interceptors', () => {
-  const scopes = nock.load(path.join(__dirname, 'fixtures', 'goodRequest.json'))
+  const scopes = nock.load(
+    path.join(__dirname, 'fixtures', 'good_request.json')
+  )
 
   expect(scopes).to.be.an.instanceOf(Array)
   expect(scopes).to.have.lengthOf.at.least(1)
