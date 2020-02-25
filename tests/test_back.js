@@ -52,7 +52,7 @@ function testNock(t) {
 function nockBackWithFixture(t, scopesLoaded) {
   const scopesLength = scopesLoaded ? 1 : 0
 
-  nockBack('goodRequest.json', function(done) {
+  nockBack('good_request.json', function(done) {
     t.equal(this.scopes.length, scopesLength)
     http.get('http://www.example.test/')
     this.assertScopesFinished()
@@ -62,7 +62,7 @@ function nockBackWithFixture(t, scopesLoaded) {
 }
 
 // TODO: This was added as a temporary patch. It's possible that we don't need
-// both `goodRequest.json`/`nockBackWithFixture()` on google.com and a second
+// both `good_request.json`/`nockBackWithFixture()` on google.com and a second
 // pair on localhost. Consolidate them if possible. Otherwise remove this
 // comment.
 function nockBackWithFixtureLocalhost(t) {
@@ -124,7 +124,7 @@ test('nockBack returns a promise when neither options nor nockbackFn are specifi
 test('nockBack throws an exception when a hook is not a function', t => {
   nockBack.setMode('dryrun')
   t.throws(
-    () => nockBack('goodRequest.json', { before: 'not-a-function-innit' }),
+    () => nockBack('good_request.json', { before: 'not-a-function-innit' }),
     { message: 'processing hooks must be a function' }
   )
   t.end()
@@ -341,8 +341,7 @@ test('nockBack record tests', nw => {
   })
 
   nw.test("it shouldn't allow outside calls", t => {
-    const fixture = 'wrongUri.json'
-    nockBack(fixture, function(done) {
+    nockBack('wrong_uri.json', function(done) {
       http
         .get('http://other.example.test', res =>
           t.fail('Should not come here!')
@@ -359,7 +358,7 @@ test('nockBack record tests', nw => {
   })
 
   nw.test('it loads your recorded tests', t => {
-    nockBack('goodRequest.json', function(done) {
+    nockBack('good_request.json', function(done) {
       t.true(this.scopes.length > 0)
       http.get('http://www.example.test/').end()
       this.assertScopesFinished()
@@ -490,7 +489,7 @@ test('nockBack lockdown tests', nw => {
 
 test('assertScopesFinished throws exception when Back still has pending scopes', t => {
   nockBack.setMode('record')
-  const fixtureName = 'goodRequest.json'
+  const fixtureName = 'good_request.json'
   const fixturePath = path.join(nockBack.fixtures, fixtureName)
   nockBack(fixtureName, function(done) {
     const expected = `["GET http://www.example.test:80/"] was not used, consider removing ${fixturePath} to rerecord fixture`
@@ -505,7 +504,7 @@ test('nockBack dryrun throws the expected exception when fs is not available', t
   nockBackWithoutFs.setMode('dryrun')
 
   nockBackWithoutFs.fixtures = `${__dirname}/fixtures`
-  t.throws(() => nockBackWithoutFs('goodRequest.json'), { message: 'no fs' })
+  t.throws(() => nockBackWithoutFs('good_request.json'), { message: 'no fs' })
 
   t.end()
 })
@@ -515,6 +514,6 @@ test('nockBack record mode throws the expected exception when fs is not availabl
   nockBackWithoutFs.setMode('record')
 
   nockBackWithoutFs.fixtures = `${__dirname}/fixtures`
-  t.throws(() => nockBackWithoutFs('goodRequest.json'), { message: 'no fs' })
+  t.throws(() => nockBackWithoutFs('good_request.json'), { message: 'no fs' })
   t.end()
 })

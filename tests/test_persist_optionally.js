@@ -12,7 +12,7 @@ const got = require('./got_client')
 
 require('./setup')
 
-const textFile = path.join(__dirname, '..', 'assets', 'reply_file_1.txt')
+const textFilePath = path.resolve(__dirname, './assets/reply_file_1.txt')
 
 describe('`optionally()`', () => {
   it('optional mocks do not appear in `pendingMocks()`', () => {
@@ -191,7 +191,7 @@ describe('`persist()`', () => {
     nock('http://example.test')
       .persist()
       .get('/')
-      .replyWithFile(200, textFile)
+      .replyWithFile(200, textFilePath)
       .get('/test')
       .reply(200, 'Yay!')
 
