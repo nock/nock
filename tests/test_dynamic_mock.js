@@ -1,28 +1,30 @@
 'use strict'
 
+const { expect } = require('chai')
 const { test } = require('tap')
-const request = require('request')
 const nock = require('..')
+const got = require('./got_client')
 
 require('./cleanup_after_each')()
+require('./setup')
 
-test('one function returning the status code and body defines a full mock', function(t) {
-  nock('http://example.test')
+test('one function returning the status code and body defines a full mock', async t => {
+  const scope = nock('http://example.test')
     .get('/def')
     .reply(function() {
       return [201, 'DEF']
     })
 
-  request.get('http://example.test/def', function(err, resp, body) {
-    t.error(err)
-    t.equal(resp.statusCode, 201)
-    t.equal(body, 'DEF')
-    t.end()
-  })
+  const { statusCode, body } = await got('http://example.test/def')
+  expect(statusCode).to.equal(201)
+  expect(body).to.equal('DEF')
+
+  scope.done()
+  t.end()
 })
 
-test('one asynchronous function returning the status code and body defines a full mock', function(t) {
-  nock('http://example.test')
+test('one asynchronous function returning the status code and body defines a full mock', async t => {
+  const scope = nock('http://example.test')
     .get('/ghi')
     .reply(function(path, reqBody, cb) {
       setTimeout(function() {
@@ -30,20 +32,20 @@ test('one asynchronous function returning the status code and body defines a ful
       }, 1e3)
     })
 
-  request.get('http://example.test/ghi', function(err, resp, body) {
-    t.error(err)
-    t.equal(resp.statusCode, 201)
-    t.equal(body, 'GHI')
-    t.end()
-  })
+  const { statusCode, body } = await got('http://example.test/ghi')
+  expect(statusCode).to.equal(201)
+  expect(body).to.equal('GHI')
+
+  scope.done()
+  t.end()
 })
 
-test('asynchronous function gets request headers', function(t) {
-  nock('http://example.test')
+test('asynchronous function gets request headers', async t => {
+  const scope = nock('http://example.test')
     .get('/yo')
     .reply(201, function(path, reqBody, cb) {
-      t.equal(this.req.path, '/yo')
-      t.deepEqual(this.req.headers, {
+      expect(this.req.path).to.equal('/yo')
+      expect(this.req.headers).to.include({
         'x-my-header': 'some-value',
         'x-my-other-header': 'some-other-value',
         host: 'example.test',
@@ -53,20 +55,16 @@ test('asynchronous function gets request headers', function(t) {
       }, 1e3)
     })
 
-  request(
-    {
-      method: 'GET',
-      uri: 'http://example.test/yo',
-      headers: {
-        'x-my-header': 'some-value',
-        'x-my-other-header': 'some-other-value',
-      },
+  const { statusCode, body } = await got('http://example.test/yo', {
+    headers: {
+      'x-my-header': 'some-value',
+      'x-my-other-header': 'some-other-value',
     },
-    function(err, resp, body) {
-      t.error(err)
-      t.equal(resp.statusCode, 201)
-      t.equal(body, 'foobar')
-      t.end()
-    }
-  )
+  })
+
+  expect(statusCode).to.equal(201)
+  expect(body).to.equal('foobar')
+
+  scope.done()
+  t.end()
 })
