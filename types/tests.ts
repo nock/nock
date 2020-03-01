@@ -135,7 +135,6 @@ inst = inst.socketDelay(2000)
 
 scope.done() // $ExpectType void
 scope.isDone() // $ExpectType boolean
-scope.restore() // $ExpectType void
 
 nock.recorder.rec()
 nock.recorder.rec(true)
