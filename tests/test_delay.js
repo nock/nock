@@ -82,12 +82,13 @@ test('calling delay with "body" and "head" delays the response', t => {
     })
     .reply(200, 'OK')
 
-  const start = process.hrtime()
+  const resStart = process.hrtime()
 
   http.get('http://example.test', res => {
-    checkDuration(start, 200)
+    checkDuration(resStart, 200)
+    const dataStart = process.hrtime()
     res.once('data', function(data) {
-      checkDuration(start, 500)
+      checkDuration(dataStart, 300)
       expect(data.toString()).to.equal('OK')
       res.once('end', () => t.done())
     })
