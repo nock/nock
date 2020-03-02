@@ -26,7 +26,7 @@ async function resolvesInAtLeast(promise, durationMillis) {
 
 function checkDuration(start, durationMillis, bufferMillis = 50) {
   const hrtime = process.hrtime(start)
-  const milliseconds = ((hrtime[0] * 1e9 + hrtime[1]) / 1e6)
+  const milliseconds = ((hrtime[0] * 1e9 + hrtime[1]) / 1e6) | 0
 
   // When asserting delays, we know the code should take at least the delay amount of time to execute,
   // however, the overhead of running the code adds a few milliseconds to anything we are testing.
@@ -85,17 +85,20 @@ test('calling delay with "body" and "head" delays the response', t => {
   const resStart = process.hrtime()
 
   http.get('http://example.test', res => {
+    const dataStart = process.hrtime()
+    res.once('data', function(data) {
+      // NB this duration is slightly sorter than the "body" delay setting because the clock actually started before
+      // Node fired the "response" callback.
+      checkDuration(dataStart, 290)
+      expect(data.toString()).to.equal('OK')
+      res.once('end', () => t.done())
+    })
+
     // todo: flush out better way to test this response delay.
     //  Some systems seem to take an extra 100+ms to reach this callback,
     //  despite Got using the same mechanics under the hood without the extended time.
     // Is this a bug in Nock?
     checkDuration(resStart, 200, 200)
-    const dataStart = process.hrtime()
-    res.once('data', function(data) {
-      checkDuration(dataStart, 300)
-      expect(data.toString()).to.equal('OK')
-      res.once('end', () => t.done())
-    })
   })
 })
 
