@@ -24,17 +24,20 @@ async function resolvesInAtLeast(promise, durationMillis) {
   return result
 }
 
-function checkDuration(start, durationMillis, bufferMillis = 50) {
+function checkDuration(start, durationMillis) {
   const hrtime = process.hrtime(start)
   const milliseconds = ((hrtime[0] * 1e9 + hrtime[1]) / 1e6) | 0
 
   // When asserting delays, we know the code should take at least the delay amount of time to execute,
   // however, the overhead of running the code adds a few milliseconds to anything we are testing.
-  // Using an upper bound of +50 ms here is a bit arbitrary, it's a value that _should_ allow slower computers
-  // to still get the job done while not letting bugs of extra delays to provide false positives.
-  expect(milliseconds)
-    .to.be.at.least(durationMillis, 'delay minimum not satisfied')
-    .and.at.most(durationMillis + bufferMillis, 'delay upper bound exceeded')
+  // We'd like to test some sort of upper bound too, but that has been problematic with different systems
+  // having a wide rage of overhead
+  // TODO: find a better way to test delays while ensuring the delays aren't too long.
+  expect(milliseconds).to.be.at.least(
+    durationMillis,
+    'delay minimum not satisfied'
+  )
+  // .and.at.most(durationMillis + bufferMillis, 'delay upper bound exceeded')
 }
 
 test('calling delay could cause timeout error', async () => {
@@ -85,6 +88,8 @@ test('calling delay with "body" and "head" delays the response', t => {
   const resStart = process.hrtime()
 
   http.get('http://example.test', res => {
+    checkDuration(resStart, 200)
+
     const dataStart = process.hrtime()
     res.once('data', function(data) {
       // NB this duration is slightly sorter than the "body" delay setting because the clock actually started before
@@ -93,12 +98,6 @@ test('calling delay with "body" and "head" delays the response', t => {
       expect(data.toString()).to.equal('OK')
       res.once('end', () => t.done())
     })
-
-    // todo: flush out better way to test this response delay.
-    //  Some systems seem to take an extra 100+ms to reach this callback,
-    //  despite Got using the same mechanics under the hood without the extended time.
-    // Is this a bug in Nock?
-    checkDuration(resStart, 200, 200)
   })
 })
 
