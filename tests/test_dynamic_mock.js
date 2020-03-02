@@ -45,10 +45,12 @@ test('asynchronous function gets request headers', async t => {
     .get('/yo')
     .reply(201, function(path, reqBody, cb) {
       expect(this.req.path).to.equal('/yo')
-      expect(this.req.headers).to.include({
+      expect(this.req.headers).to.deep.equal({
+        'accept-encoding': 'gzip, deflate, br',
+        host: 'example.test',
         'x-my-header': 'some-value',
         'x-my-other-header': 'some-other-value',
-        host: 'example.test',
+        'user-agent': 'got (https://github.com/sindresorhus/got)',
       })
       setTimeout(function() {
         cb(null, 'foobar')
