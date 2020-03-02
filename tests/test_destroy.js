@@ -1,25 +1,27 @@
 'use strict'
 
-const nock = require('..')
+const { expect } = require('chai')
 const http = require('http')
 const { test } = require('tap')
+const nock = require('..')
 
 require('./cleanup_after_each')()
+require('./setup')
 
 test('req.destroy should emit error event if called with error', t => {
   nock('http://example.test')
     .get('/')
     .reply(404)
 
+  const respErr = new Error('Response error')
+
   http
     .get('http://example.test/', res => {
-      if (res.statusCode !== 200) {
-        res.destroy(new Error('Response error'))
-      }
+      expect(res.statusCode).to.equal(404)
+      res.destroy(respErr)
     })
     .once('error', err => {
-      t.type(err, Error)
-      t.equal(err.message, 'Response error')
+      expect(err).to.equal(respErr)
       t.end()
     })
 })
@@ -31,13 +33,11 @@ test('req.destroy should not emit error event if called without error', t => {
 
   http
     .get('http://example.test/', res => {
-      if (res.statusCode === 403) {
-        res.destroy()
-      }
-
+      expect(res.statusCode).to.equal(403)
+      res.destroy()
       t.end()
     })
     .once('error', () => {
-      t.fail('should not emit error')
+      expect.fail('should not emit error')
     })
 })
