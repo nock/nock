@@ -55,6 +55,36 @@ describe('asynchronous `reply()` function', () => {
       scope.done()
     })
 
+    it('should get request headers', async () => {
+      const scope = nock('http://example.test')
+        .get('/yo')
+        .reply(201, function(path, reqBody, cb) {
+          expect(this.req.path).to.equal('/yo')
+          expect(this.req.headers).to.deep.equal({
+            'accept-encoding': 'gzip, deflate, br',
+            host: 'example.test',
+            'x-my-header': 'some-value',
+            'x-my-other-header': 'some-other-value',
+            'user-agent': 'got (https://github.com/sindresorhus/got)',
+          })
+          setTimeout(function() {
+            cb(null, 'foobar')
+          }, 1e3)
+        })
+
+      const { statusCode, body } = await got('http://example.test/yo', {
+        headers: {
+          'x-my-header': 'some-value',
+          'x-my-other-header': 'some-other-value',
+        },
+      })
+
+      expect(statusCode).to.equal(201)
+      expect(body).to.equal('foobar')
+
+      scope.done()
+    })
+
     it('reply should throw on error on the callback', async () => {
       nock('http://example.test')
         .get('/')
