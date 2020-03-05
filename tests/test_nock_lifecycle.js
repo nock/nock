@@ -111,7 +111,7 @@ describe('Nock lifecycle functions', () => {
 
       await assertRejects(got('http://example.test/'), err => {
         expect(err).to.include({
-          host: 'http://example.test',
+          host: 'example.test:80',
           name: 'RequestError',
           code: 'ENOTFOUND',
           path: '/'
