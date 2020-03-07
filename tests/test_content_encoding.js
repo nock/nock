@@ -1,18 +1,20 @@
 'use strict'
 
 const assertRejects = require('assert-rejects')
-const zlib = require('zlib')
+const { expect } = require('chai')
 const { test } = require('tap')
+const zlib = require('zlib')
 const nock = require('..')
 const got = require('./got_client')
 
 require('./cleanup_after_each')()
+require('./setup')
 
-test('accepts gzipped content', async t => {
+test('accepts gzipped content', async () => {
   const message = 'Lorem ipsum dolor sit amet'
   const compressed = zlib.gzipSync(message)
 
-  nock('http://example.test')
+  const scope = nock('http://example.test')
     .get('/foo')
     .reply(200, compressed, {
       'X-Transfer-Length': String(compressed.length),
@@ -21,11 +23,12 @@ test('accepts gzipped content', async t => {
     })
   const { body, statusCode } = await got('http://example.test/foo')
 
-  t.equal(body, message)
-  t.equal(statusCode, 200)
+  expect(statusCode).to.equal(200)
+  expect(body).to.equal(message)
+  scope.done()
 })
 
-test('Delaying the body is not available with content encoded responses', async t => {
+test('Delaying the body is not available with content encoded responses', async () => {
   const message = 'Lorem ipsum dolor sit amet'
   const compressed = zlib.gzipSync(message)
 
@@ -38,13 +41,8 @@ test('Delaying the body is not available with content encoded responses', async 
       'Content-Encoding': 'gzip',
     })
 
-  await assertRejects(got('http://example.test/'), err => {
-    t.match(
-      err,
-      Error(
-        'Response delay of the body is currently not supported with content-encoded responses.'
-      )
-    )
-    return true
-  })
+  await assertRejects(
+    got('http://example.test/'),
+    /Response delay of the body is currently not supported with content-encoded responses/
+  )
 })
