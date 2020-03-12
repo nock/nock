@@ -1,14 +1,17 @@
 'use strict'
 
+const { expect } = require('chai')
 const http = require('http')
+const sinon = require('sinon')
 const { test } = require('tap')
-const nock = require('../.')
+const nock = require('..')
 
 require('./cleanup_after_each')()
+require('./setup')
 
 // This test seems to need `http`.
 test('can use ClientRequest using GET', t => {
-  let dataCalled = false
+  const dataSpy = sinon.spy()
 
   const scope = nock('http://example.test')
     .get('/dsad')
@@ -21,16 +24,16 @@ test('can use ClientRequest using GET', t => {
   req.end()
 
   req.on('response', function(res) {
-    t.equal(res.statusCode, 202)
+    expect(res.statusCode).to.equal(202)
     res.on('end', function() {
-      t.ok(dataCalled, 'data event was called')
+      expect(dataSpy).to.have.been.calledOnce()
       scope.done()
       t.end()
     })
     res.on('data', function(data) {
-      dataCalled = true
-      t.ok(data instanceof Buffer, 'data should be buffer')
-      t.equal(data.toString(), 'HEHE!', 'response should match')
+      dataSpy()
+      expect(data).to.be.instanceof(Buffer)
+      expect(data.toString()).to.equal('HEHE!')
     })
   })
 
@@ -39,7 +42,7 @@ test('can use ClientRequest using GET', t => {
 
 // This test seems to need `http`.
 test('can use ClientRequest using POST', t => {
-  let dataCalled = false
+  const dataSpy = sinon.spy()
 
   const scope = nock('http://example.test')
     .post('/posthere/please', 'heyhey this is the body')
@@ -54,16 +57,16 @@ test('can use ClientRequest using POST', t => {
   req.end()
 
   req.on('response', function(res) {
-    t.equal(res.statusCode, 201)
+    expect(res.statusCode).to.equal(201)
     res.on('end', function() {
-      t.ok(dataCalled, 'data event was called')
+      expect(dataSpy).to.have.been.calledOnce()
       scope.done()
       t.end()
     })
     res.on('data', function(data) {
-      dataCalled = true
-      t.ok(data instanceof Buffer, 'data should be buffer')
-      t.equal(data.toString(), 'DOOONE!', 'response should match')
+      dataSpy()
+      expect(data).to.be.instanceof(Buffer)
+      expect(data.toString()).to.equal('DOOONE!')
     })
   })
 
@@ -72,8 +75,6 @@ test('can use ClientRequest using POST', t => {
 
 // This test needs `http`.
 test('direct use of ClientRequest executes optional callback', async t => {
-  t.plan(1)
-
   const scope = nock('http://example.test')
     .get('/')
     .reply(201)
@@ -84,7 +85,8 @@ test('direct use of ClientRequest executes optional callback', async t => {
     method: 'GET',
   }
   const req = new http.ClientRequest(reqOpts, res => {
-    t.is(res.statusCode, 201)
+    expect(res.statusCode).to.equal(201)
+    t.done()
   })
   req.end()
 
@@ -92,10 +94,9 @@ test('direct use of ClientRequest executes optional callback', async t => {
 })
 
 test('creating ClientRequest with empty options throws expected error', t => {
-  t.throws(() => new http.ClientRequest(), {
-    message:
-      'Creating a ClientRequest with empty `options` is not supported in Nock',
-  })
+  expect(() => new http.ClientRequest()).to.throw(
+    'Creating a ClientRequest with empty `options` is not supported in Nock'
+  )
 
   t.end()
 })
@@ -110,7 +111,7 @@ test('when no interceptors and net connect is allowed, request via ClientRequest
   server.listen(() => {
     const req = new http.ClientRequest({ port: server.address().port })
     req.on('response', res => {
-      t.equal(res.statusCode, 201)
+      expect(res.statusCode).to.equal(201)
       t.end()
     })
     req.end()
@@ -120,7 +121,9 @@ test('when no interceptors and net connect is allowed, request via ClientRequest
 test('when no interceptors and net connect is disallowed, receive via ClientRequest emits the expected error', t => {
   nock.disableNetConnect()
   new http.ClientRequest({ port: 12345, path: '/' }).on('error', err => {
-    t.equal(err.message, 'Nock: Disallowed net connect for "localhost:12345/"')
+    expect(err.message).to.equal(
+      'Nock: Disallowed net connect for "localhost:12345/"'
+    )
     t.end()
   })
 })
