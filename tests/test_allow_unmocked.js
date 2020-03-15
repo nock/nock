@@ -2,6 +2,7 @@
 
 const http = require('http')
 const { expect } = require('chai')
+const sinon = require('sinon')
 const nock = require('..')
 const got = require('./got_client')
 
@@ -236,5 +237,36 @@ describe('allowUnmocked option', () => {
     expect((await got(`${url}/search?q=cat%20pictures`)).body).to.equal('😻')
 
     scope.done()
+  })
+
+  // https://github.com/nock/nock/issues/1832
+  it('should only emit "finish" once even if an unmocked request is created after playback as started', async () => {
+    const { server, url } = await createServer((request, response) =>
+      response.end()
+    )
+
+    const scope = nock(url, { allowUnmocked: true })
+      .post('/', 'foo')
+      .reply()
+
+    const req = http.request({
+      host: 'localhost',
+      port: server.address().port,
+      method: 'POST',
+      path: '/',
+    })
+
+    const finishSpy = sinon.spy()
+    req.on('finish', finishSpy)
+
+    return new Promise(resolve => {
+      req.on('response', () => {
+        expect(finishSpy).to.have.been.calledOnce()
+        expect(scope.isDone()).to.be.false()
+        resolve()
+      })
+      req.write('bar') // a mismatched body causes a late unmocked request
+      req.end()
+    })
   })
 })
