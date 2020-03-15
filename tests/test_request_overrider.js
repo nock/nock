@@ -278,16 +278,17 @@ describe('Request Overrider', () => {
     // `writableEnded` was added in v12.9.0 to rename `finished` which was deprecated in v13.4.0. it's just an alias,
     // but it only denotes that `end` was called on the request not that the socket has finished flushing (hence the rename).
     expect(req.finished).to.be.false()
-    expect(req.writableEnded).to.be.false()
+    const hasWriteable = 'writableEnded' in req // to support v10
+    expect(req.writableEnded).to.equal(hasWriteable ? false : undefined)
 
     // `writableFinished` denotes all data has been flushed to the underlying system, immediately before
     // the 'finish' event is emitted. Nock's "socket" is instantaneous so these attributes never differ.
-    expect(req.writableFinished).to.be.false()
+    expect(req.writableFinished).to.equal(hasWriteable ? false : undefined)
 
     req.on('finish', () => {
       expect(req.finished).to.be.true()
-      expect(req.writableEnded).to.be.true()
-      expect(req.writableFinished).to.be.true()
+      expect(req.writableEnded).to.equal(hasWriteable ? true : undefined)
+      expect(req.writableFinished).to.equal(hasWriteable ? true : undefined)
 
       done()
     })
