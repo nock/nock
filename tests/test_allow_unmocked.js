@@ -1,6 +1,7 @@
 'use strict'
 
 const { expect } = require('chai')
+const http = require('http')
 const sinon = require('sinon')
 const nock = require('..')
 
@@ -226,17 +227,17 @@ describe('allowUnmocked option', () => {
 
   // https://github.com/nock/nock/issues/1832
   it('should only emit "finish" once even if an unmocked request is created after playback as started', async () => {
-    const { server, url } = await createServer((request, response) =>
+    const { origin, port } = await startHttpServer((request, response) =>
       response.end()
     )
 
-    const scope = nock(url, { allowUnmocked: true })
+    const scope = nock(origin, { allowUnmocked: true })
       .post('/', 'foo')
       .reply()
 
     const req = http.request({
       host: 'localhost',
-      port: server.address().port,
+      port,
       method: 'POST',
       path: '/',
     })
