@@ -65,9 +65,10 @@ describe('`query()` complex encoding', () => {
         b: ['c', 'd'],
       },
       e: [1, 2, 3, 4],
-      q: '(nodejs)'
+      q: '(nodejs)',
     }
-    const encodedQuery = 'a[b][0]=c&a[b][1]=d&e[0]=1&e[1]=2&e[2]=3&e[3]=4&q=(nodejs)'
+    const encodedQuery =
+      'a[b][0]=c&a[b][1]=d&e[0]=1&e[1]=2&e[2]=3&e[3]=4&q=(nodejs)'
 
     const scope = nock('http://example.test')
       .get('/test')
