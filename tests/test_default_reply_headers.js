@@ -2,13 +2,15 @@
 
 // Tests of `.defaultReplyHeaders()`.
 
+const { expect } = require('chai')
 const { test } = require('tap')
 const nock = require('..')
 const got = require('./got_client')
 
 require('./cleanup_after_each')()
+require('./setup')
 
-test('when no headers are specified on the request, default reply headers work', async t => {
+test('when no headers are specified on the request, default reply headers work', async () => {
   nock('http://example.test')
     .defaultReplyHeaders({
       'X-Powered-By': 'Meeee',
@@ -19,12 +21,12 @@ test('when no headers are specified on the request, default reply headers work',
 
   const { headers, rawHeaders } = await got('http://example.test/')
 
-  t.deepEqual(headers, {
+  expect(headers).to.deep.equal({
     'x-powered-by': 'Meeee',
     'x-another-header': 'foo, bar',
   })
 
-  t.deepEqual(rawHeaders, [
+  expect(rawHeaders).to.deep.equal([
     'X-Powered-By',
     'Meeee',
     'X-Another-Header',
@@ -32,7 +34,7 @@ test('when no headers are specified on the request, default reply headers work',
   ])
 })
 
-test('default reply headers can be provided as a raw array', async t => {
+test('default reply headers can be provided as a raw array', async () => {
   const defaultHeaders = [
     'X-Powered-By',
     'Meeee',
@@ -46,15 +48,15 @@ test('default reply headers can be provided as a raw array', async t => {
 
   const { headers, rawHeaders } = await got('http://example.test/')
 
-  t.deepEqual(headers, {
+  expect(headers).to.deep.equal({
     'x-powered-by': 'Meeee',
     'x-another-header': 'foo, bar',
   })
 
-  t.deepEqual(rawHeaders, defaultHeaders)
+  expect(rawHeaders).to.deep.equal(defaultHeaders)
 })
 
-test('default reply headers can be provided as a Map', async t => {
+test('default reply headers can be provided as a Map', async () => {
   const defaultHeaders = new Map([
     ['X-Powered-By', 'Meeee'],
     ['X-Another-Header', ['foo', 'bar']],
@@ -66,12 +68,12 @@ test('default reply headers can be provided as a Map', async t => {
 
   const { headers, rawHeaders } = await got('http://example.test/')
 
-  t.deepEqual(headers, {
+  expect(headers).to.deep.equal({
     'x-powered-by': 'Meeee',
     'x-another-header': 'foo, bar',
   })
 
-  t.deepEqual(rawHeaders, [
+  expect(rawHeaders).to.deep.equal([
     'X-Powered-By',
     'Meeee',
     'X-Another-Header',
@@ -79,7 +81,7 @@ test('default reply headers can be provided as a Map', async t => {
   ])
 })
 
-test('when headers are specified on the request, they override default reply headers', async t => {
+test('when headers are specified on the request, they override default reply headers', async () => {
   nock('http://example.test')
     .defaultReplyHeaders({
       'X-Powered-By': 'Meeee',
@@ -90,14 +92,14 @@ test('when headers are specified on the request, they override default reply hea
 
   const { headers } = await got('http://example.test/')
 
-  t.deepEqual(headers, {
+  expect(headers).to.deep.equal({
     'x-powered-by': 'Meeee',
     'x-another-header': 'Hey man!',
     a: 'b',
   })
 })
 
-test('default reply headers as functions work', async t => {
+test('default reply headers as functions work', async () => {
   const date = new Date().toUTCString()
   const message = 'A message.'
 
@@ -112,14 +114,14 @@ test('default reply headers as functions work', async t => {
 
   const { headers } = await got('http://example.test')
 
-  t.deepEqual(headers, {
-    'content-length': message.length,
+  expect(headers).to.deep.equal({
+    'content-length': message.length.toString(),
     date,
     foo: 'bar',
   })
 })
 
-test('reply should not cause an error on header conflict', async t => {
+test('reply should not cause an error on header conflict', async () => {
   const scope = nock('http://example.test').defaultReplyHeaders({
     'content-type': 'application/json',
   })
@@ -130,12 +132,12 @@ test('reply should not cause an error on header conflict', async t => {
 
   const { statusCode, headers, body } = await got('http://example.test/')
 
-  t.equal(statusCode, 200)
-  t.equal(headers['content-type'], 'application/xml')
-  t.equal(body, '<html></html>')
+  expect(statusCode).to.equal(200)
+  expect(headers['content-type']).to.equal('application/xml')
+  expect(body).to.equal('<html></html>')
 })
 
-test('direct reply headers override defaults when casing differs', async t => {
+test('direct reply headers override defaults when casing differs', async () => {
   const scope = nock('http://example.test')
     .defaultReplyHeaders({
       'X-Default-Only': 'default',
@@ -149,12 +151,12 @@ test('direct reply headers override defaults when casing differs', async t => {
 
   const { headers, rawHeaders } = await got('http://example.test/')
 
-  t.deepEqual(headers, {
+  expect(headers).to.deep.equal({
     'x-default-only': 'default',
     'x-reply-only': 'from-reply',
     'x-overridden': 'from-reply', // note this overrode the default value, despite the case difference
   })
-  t.deepEqual(rawHeaders, [
+  expect(rawHeaders).to.deep.equal([
     'X-Reply-Only',
     'from-reply',
     'x-overridden',
@@ -166,7 +168,7 @@ test('direct reply headers override defaults when casing differs', async t => {
   scope.done()
 })
 
-test('dynamic reply headers override defaults when casing differs', async t => {
+test('dynamic reply headers override defaults when casing differs', async () => {
   const scope = nock('http://example.test')
     .defaultReplyHeaders({
       'X-Default-Only': 'default',
@@ -184,12 +186,12 @@ test('dynamic reply headers override defaults when casing differs', async t => {
 
   const { headers, rawHeaders } = await got('http://example.test/')
 
-  t.deepEqual(headers, {
+  expect(headers).to.deep.equal({
     'x-default-only': 'default',
     'x-reply-only': 'from-reply',
     'x-overridden': 'from-reply',
   })
-  t.deepEqual(rawHeaders, [
+  expect(rawHeaders).to.deep.equal([
     'X-Reply-Only',
     'from-reply',
     'x-overridden',

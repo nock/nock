@@ -1,11 +1,12 @@
 'use strict'
 
-const http = require('http')
 const { expect } = require('chai')
 const assertRejects = require('assert-rejects')
 const sinon = require('sinon')
 const nock = require('..')
+
 const got = require('./got_client')
+const servers = require('./servers')
 
 require('./setup')
 
@@ -40,19 +41,16 @@ describe('`disableNetConnect()`', () => {
 describe('`enableNetConnect()`', () => {
   it('enables real HTTP request only for specified domain, via string', async () => {
     const onResponse = sinon.spy()
-    const server = http.createServer((request, response) => {
+    const { origin } = await servers.startHttpServer((request, response) => {
       onResponse()
       response.writeHead(200)
       response.end()
     })
-    await new Promise(resolve => server.listen(resolve))
 
     nock.enableNetConnect('localhost')
 
-    await got(`http://localhost:${server.address().port}/`)
+    await got(origin)
     expect(onResponse).to.have.been.calledOnce()
-
-    server.close()
   })
 
   it('disallows request for other domains, via string', async () => {
@@ -66,19 +64,16 @@ describe('`enableNetConnect()`', () => {
 
   it('enables real HTTP request only for specified domain, via regexp', async () => {
     const onResponse = sinon.spy()
-    const server = http.createServer((request, response) => {
+    const { origin } = await servers.startHttpServer((request, response) => {
       onResponse()
       response.writeHead(200)
       response.end()
     })
-    await new Promise(resolve => server.listen(resolve))
 
     nock.enableNetConnect(/ocalhos/)
 
-    await got(`http://localhost:${server.address().port}/`)
+    await got(origin)
     expect(onResponse).to.have.been.calledOnce()
-
-    server.close()
   })
 
   it('disallows request for other domains, via regexp', async () => {
@@ -92,19 +87,16 @@ describe('`enableNetConnect()`', () => {
 
   it('enables real HTTP request only for specified domain, via function', async () => {
     const onResponse = sinon.spy()
-    const server = http.createServer((request, response) => {
+    const { origin } = await servers.startHttpServer((request, response) => {
       onResponse()
       response.writeHead(200)
       response.end()
     })
-    await new Promise(resolve => server.listen(resolve))
 
     nock.enableNetConnect(host => host.includes('ocalhos'))
 
-    await got(`http://localhost:${server.address().port}/`)
+    await got(origin)
     expect(onResponse).to.have.been.calledOnce()
-
-    server.close()
   })
 
   it('disallows request for other domains, via function', async () => {
