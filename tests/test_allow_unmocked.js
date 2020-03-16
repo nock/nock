@@ -1,32 +1,15 @@
 'use strict'
 
-const http = require('http')
 const { expect } = require('chai')
 const sinon = require('sinon')
 const nock = require('..')
+
 const got = require('./got_client')
+const { startHttpServer } = require('./servers')
 
 require('./setup')
 
 describe('allowUnmocked option', () => {
-  let _server
-
-  afterEach(() => {
-    if (_server) {
-      _server.close()
-      _server = null
-    }
-  })
-
-  async function createServer(requestListener) {
-    const server = http.createServer(requestListener)
-    await new Promise(resolve => server.listen(resolve))
-    _server = server
-
-    const url = `http://localhost:${server.address().port}`
-    return { server, url }
-  }
-
   it('with allowUnmocked, mocked request still works', async () => {
     const scope = nock('http://example.test', { allowUnmocked: true })
       .post('/')
@@ -40,21 +23,21 @@ describe('allowUnmocked option', () => {
   })
 
   it('allow unmocked works after one interceptor is removed', async () => {
-    const { url } = await createServer((request, response) => {
+    const { origin } = await startHttpServer((request, response) => {
       response.write('live')
       response.end()
     })
 
-    nock(url, { allowUnmocked: true })
+    nock(origin, { allowUnmocked: true })
       .get('/')
       .reply(200, 'Mocked')
 
-    expect((await got(url)).body).to.equal('Mocked')
-    expect((await got(url)).body).to.equal('live')
+    expect((await got(origin)).body).to.equal('Mocked')
+    expect((await got(origin)).body).to.equal('live')
   })
 
   it('allow unmocked option allows traffic to server', async () => {
-    const { url } = await createServer((request, response) => {
+    const { origin } = await startHttpServer((request, response) => {
       switch (request.url) {
         case '/':
           response.writeHead(200)
@@ -72,12 +55,12 @@ describe('allowUnmocked option', () => {
       response.end()
     })
 
-    const scope = nock(url, { allowUnmocked: true })
+    const scope = nock(origin, { allowUnmocked: true })
       .get('/abc')
       .reply(304, 'served from our mock')
       .get('/wont/get/here')
       .reply(304, 'served from our mock')
-    const client = got.extend({ prefixUrl: url, throwHttpErrors: false })
+    const client = got.extend({ prefixUrl: origin, throwHttpErrors: false })
 
     const response1 = await client('abc')
     expect(response1.statusCode).to.equal(304)
@@ -95,17 +78,17 @@ describe('allowUnmocked option', () => {
   })
 
   it('allow unmocked post with json data', async () => {
-    const { url } = await createServer((request, response) => {
+    const { origin } = await startHttpServer((request, response) => {
       response.writeHead(200)
       response.write('{"message":"server response"}')
       response.end()
     })
 
-    nock(url, { allowUnmocked: true })
+    nock(origin, { allowUnmocked: true })
       .get('/not/accessed')
       .reply(200, '{"message":"mocked response"}')
 
-    const { body, statusCode } = await got.post(url, {
+    const { body, statusCode } = await got.post(origin, {
       json: { some: 'data' },
       responseType: 'json',
     })
@@ -114,17 +97,17 @@ describe('allowUnmocked option', () => {
   })
 
   it('allow unmocked passthrough with mismatched bodies', async () => {
-    const { url } = await createServer((request, response) => {
+    const { origin } = await startHttpServer((request, response) => {
       response.writeHead(200)
       response.write('{"message":"server response"}')
       response.end()
     })
 
-    nock(url, { allowUnmocked: true })
+    nock(origin, { allowUnmocked: true })
       .post('/post', { some: 'other data' })
       .reply(404, '{"message":"server response"}')
 
-    const { body, statusCode } = await got.post(`${url}/post`, {
+    const { body, statusCode } = await got.post(`${origin}/post`, {
       json: { some: 'data' },
       responseType: 'json',
     })
@@ -175,7 +158,7 @@ describe('allowUnmocked option', () => {
 
   // https://github.com/nock/nock/issues/835
   it('match multiple paths to domain using regexp with allowUnmocked', async () => {
-    const { url } = await createServer((request, response) => {
+    const { origin } = await startHttpServer((request, response) => {
       response.write('live')
       response.end()
     })
@@ -188,9 +171,11 @@ describe('allowUnmocked option', () => {
       .get(/bravo/)
       .reply(200, 'bravo, bravo!')
 
-    expect((await got(`${url}`)).body).to.equal('live')
-    expect((await got(`${url}/alphalicious`)).body).to.equal('this is alpha')
-    expect((await got(`${url}/bravo-company`)).body).to.equal('bravo, bravo!')
+    expect((await got(origin)).body).to.equal('live')
+    expect((await got(`${origin}/alphalicious`)).body).to.equal('this is alpha')
+    expect((await got(`${origin}/bravo-company`)).body).to.equal(
+      'bravo, bravo!'
+    )
 
     scope1.done()
     scope2.done()
@@ -223,18 +208,18 @@ describe('allowUnmocked option', () => {
 
   // https://github.com/nock/nock/issues/490
   it('match when query is specified with allowUnmocked', async () => {
-    const { url } = await createServer((request, response) => {
+    const { origin } = await startHttpServer((request, response) => {
       response.write('live')
       response.end()
     })
 
-    const scope = nock(url, { allowUnmocked: true })
+    const scope = nock(origin, { allowUnmocked: true })
       .get('/search')
       .query({ q: 'cat pictures' })
       .reply(200, '😻')
 
-    expect((await got(url)).body).to.equal('live')
-    expect((await got(`${url}/search?q=cat%20pictures`)).body).to.equal('😻')
+    expect((await got(origin)).body).to.equal('live')
+    expect((await got(`${origin}/search?q=cat%20pictures`)).body).to.equal('😻')
 
     scope.done()
   })
