@@ -2,33 +2,26 @@
 
 const { expect } = require('chai')
 const nock = require('..')
-const ssl = require('./ssl')
+
 const got = require('./got_client')
+const servers = require('./servers')
 
 require('./setup')
 
 describe('allowUnmocked option (https)', () => {
-  let server
-
-  afterEach(() => {
-    if (server) {
-      server.close()
-      server = null
-    }
-  })
-
   it('Nock with allowUnmocked and an url match', async () => {
-    server = await ssl.startServer((req, res) => {
+    const { origin } = await servers.startHttpsServer((req, res) => {
       res.writeHead(200)
       res.end({ status: 'default' })
     })
-    const url = `https://127.0.0.1:${server.address().port}`
 
-    const scope = nock(url, { allowUnmocked: true })
+    const scope = nock(origin, { allowUnmocked: true })
       .get('/urlMatch')
       .reply(201, JSON.stringify({ status: 'intercepted' }))
 
-    const { body, statusCode } = await got(`${url}/urlMatch`, { ca: ssl.ca })
+    const { body, statusCode } = await got(`${origin}/urlMatch`, {
+      ca: servers.ca,
+    })
 
     expect(statusCode).to.equal(201)
     expect(body).to.equal('{"status":"intercepted"}')
@@ -37,7 +30,7 @@ describe('allowUnmocked option (https)', () => {
   })
 
   it('allow unmocked option works with https', async () => {
-    server = await ssl.startServer((request, response) => {
+    const { origin } = await servers.startHttpsServer((request, response) => {
       if (request.url === '/does/not/exist') {
         response.writeHead(404)
         response.end()
@@ -49,15 +42,13 @@ describe('allowUnmocked option (https)', () => {
       response.end()
     })
 
-    const { port } = server.address()
-    const url = `https://localhost:${port}`
     const client = got.extend({
-      prefixUrl: url,
-      ca: ssl.ca,
+      prefixUrl: origin,
+      ca: servers.ca,
       throwHttpErrors: false,
     })
 
-    const scope = nock(url, { allowUnmocked: true })
+    const scope = nock(origin, { allowUnmocked: true })
       .get('/abc')
       .reply(200, 'mocked response')
       .get('/wont/get/here')
@@ -84,14 +75,11 @@ describe('allowUnmocked option (https)', () => {
     // there are interceptors that partially match, eg just path, but don't completely match.
     // This explicitly tests the later case in the overrider by making an HTTPS request for a path
     // that has an interceptor but fails to match the query constraint.
-    server = await ssl.startServer((request, response) => {
+    const { origin } = await servers.startHttpsServer((request, response) => {
       response.writeHead(201)
       response.write('foo')
       response.end()
     })
-
-    const { port } = server.address()
-    const origin = `https://localhost:${port}`
 
     nock(origin, { allowUnmocked: true })
       .get('/foo')
@@ -99,7 +87,7 @@ describe('allowUnmocked option (https)', () => {
       .reply(418)
 
     // no query so wont match the interceptor
-    const { statusCode, body } = await got(`${origin}/foo`, { ca: ssl.ca })
+    const { statusCode, body } = await got(`${origin}/foo`, { ca: servers.ca })
 
     expect(statusCode).to.equal(201)
     expect(body).to.equal('foo')

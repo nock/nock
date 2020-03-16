@@ -16,7 +16,9 @@ const { URL } = require('url')
 const { expect } = require('chai')
 const sinon = require('sinon')
 const nock = require('..')
+
 const got = require('./got_client')
+const servers = require('./servers')
 
 require('./setup')
 
@@ -693,18 +695,16 @@ describe('Request Overrider', () => {
     // Let Nock override them again.
     nock.activate()
 
-    const server = http.createServer((request, response) => {
+    const { origin } = await servers.startHttpServer((request, response) => {
       response.writeHead(200)
       response.end()
     })
-    await new Promise(resolve => server.listen(resolve))
 
-    const req = http.get(`http://localhost:${server.address().port}`)
+    const req = http.get(origin)
     expect(overriddenGet).to.have.been.calledOnce()
     expect(overriddenRequest).not.to.have.been.called()
 
     req.abort()
-    server.close()
   })
 
   // https://github.com/nock/nock/issues/1836
