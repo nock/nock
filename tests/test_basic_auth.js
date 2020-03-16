@@ -1,11 +1,13 @@
 'use strict'
 
+const { expect } = require('chai')
 const { test } = require('tap')
 const assertRejects = require('assert-rejects')
 const nock = require('..')
 const got = require('./got_client')
 
 require('./cleanup_after_each')()
+require('./setup')
 
 test('basic auth with username and password', async t => {
   t.beforeEach(done => {
@@ -16,16 +18,16 @@ test('basic auth with username and password', async t => {
     done()
   })
 
-  await t.test('succeeds when it matches', async tt => {
+  await t.test('succeeds when it matches', async () => {
     const response = await got('http://example.test/test', {
       username: 'foo',
       password: 'bar',
     })
-    tt.equal(response.statusCode, 200)
-    tt.equal(response.body, 'Here is the content')
+    expect(response.statusCode).to.equal(200)
+    expect(response.body).to.equal('Here is the content')
   })
 
-  await t.test('fails when it doesnt match', async tt => {
+  await t.test('fails when it doesnt match', async () => {
     await assertRejects(
       got('http://example.test/test'),
       /Nock: No match for request/
@@ -42,16 +44,16 @@ test('basic auth with username only', async t => {
     done()
   })
 
-  await t.test('succeeds when it matches', async tt => {
+  await t.test('succeeds when it matches', async () => {
     const response = await got('http://example.test/test', {
       username: 'foo',
       password: '',
     })
-    tt.equal(response.statusCode, 200)
-    tt.equal(response.body, 'Here is the content')
+    expect(response.statusCode).to.equal(200)
+    expect(response.body).to.equal('Here is the content')
   })
 
-  await t.test('fails when it doesnt match', async tt => {
+  await t.test('fails when it doesnt match', async () => {
     await assertRejects(
       got('http://example.test/test'),
       /Nock: No match for request/
