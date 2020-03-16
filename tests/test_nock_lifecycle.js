@@ -5,7 +5,9 @@ const { expect } = require('chai')
 const nock = require('..')
 const sinon = require('sinon')
 const assertRejects = require('assert-rejects')
+
 const got = require('./got_client')
+const servers = require('./servers')
 
 require('./setup')
 
@@ -26,7 +28,7 @@ describe('Nock lifecycle functions', () => {
     it('(re-)activate after restore', async () => {
       const onResponse = sinon.spy()
 
-      const server = http.createServer((request, response) => {
+      const { origin } = await servers.startHttpServer((request, response) => {
         onResponse()
 
         if (request.url === '/') {
@@ -37,30 +39,25 @@ describe('Nock lifecycle functions', () => {
         response.end()
       })
 
-      await new Promise(resolve => server.listen(resolve))
-      const url = `http://localhost:${server.address().port}`
-
-      const scope = nock(url)
+      const scope = nock(origin)
         .get('/')
         .reply(304, 'served from our mock')
 
       nock.restore()
       expect(nock.isActive()).to.be.false()
 
-      expect(await got(url)).to.include({ statusCode: 200 })
+      expect(await got(origin)).to.include({ statusCode: 200 })
 
       expect(scope.isDone()).to.be.false()
 
       nock.activate()
       expect(nock.isActive()).to.be.true()
 
-      expect(await got(url)).to.include({ statusCode: 304 })
+      expect(await got(origin)).to.include({ statusCode: 304 })
 
       expect(scope.isDone()).to.be.true()
 
       expect(onResponse).to.have.been.calledOnce()
-
-      server.close()
     })
   })
 
