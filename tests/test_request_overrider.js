@@ -231,10 +231,9 @@ describe('Request Overrider', () => {
   })
 
   // http://github.com/nock/nock/issues/139
-  it('finish event fired before end event', done => {
+  it('should emit "finish" on the request before emitting "end" on the response', done => {
     const scope = nock('http://example.test')
-      .filteringRequestBody(/mia/, 'nostra')
-      .post('/', 'mamma nostra')
+      .post('/')
       .reply()
 
     const onFinish = sinon.spy()
@@ -249,7 +248,9 @@ describe('Request Overrider', () => {
       res => {
         expect(onFinish).to.have.been.calledOnce()
         expect(res.statusCode).to.equal(200)
+
         res.on('end', () => {
+          expect(onFinish).to.have.been.calledOnce()
           scope.done()
           done()
         })
@@ -260,6 +261,39 @@ describe('Request Overrider', () => {
     )
 
     req.on('finish', onFinish)
+
+    req.end('mamma mia')
+  })
+
+  it('should update the writable attributes before emitting the "finish" event', done => {
+    nock('http://example.test')
+      .post('/')
+      .reply()
+
+    const req = http.request({
+      host: 'example.test',
+      method: 'POST',
+      path: '/',
+      port: 80,
+    })
+
+    // `writableEnded` was added in v12.9.0 to rename `finished` which was deprecated in v13.4.0. it's just an alias,
+    // but it only denotes that `end` was called on the request not that the socket has finished flushing (hence the rename).
+    expect(req.finished).to.be.false()
+    const hasWriteable = 'writableEnded' in req // to support v10
+    expect(req.writableEnded).to.equal(hasWriteable ? false : undefined)
+
+    // `writableFinished` denotes all data has been flushed to the underlying system, immediately before
+    // the 'finish' event is emitted. Nock's "socket" is instantaneous so these attributes never differ.
+    expect(req.writableFinished).to.equal(hasWriteable ? false : undefined)
+
+    req.on('finish', () => {
+      expect(req.finished).to.be.true()
+      expect(req.writableEnded).to.equal(hasWriteable ? true : undefined)
+      expect(req.writableFinished).to.equal(hasWriteable ? true : undefined)
+
+      done()
+    })
 
     req.end('mamma mia')
   })
