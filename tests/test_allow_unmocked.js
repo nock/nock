@@ -29,9 +29,7 @@ describe('allowUnmocked option', () => {
       response.end()
     })
 
-    nock(origin, { allowUnmocked: true })
-      .get('/')
-      .reply(200, 'Mocked')
+    nock(origin, { allowUnmocked: true }).get('/').reply(200, 'Mocked')
 
     expect((await got(origin)).body).to.equal('Mocked')
     expect((await got(origin)).body).to.equal('live')
@@ -148,7 +146,7 @@ describe('allowUnmocked option', () => {
   // https://github.com/nock/nock/issues/1867
   it('match path using callback with allowUnmocked', async () => {
     const scope = nock('http://example.test', { allowUnmocked: true })
-      .get(uri => uri.endsWith('bar'))
+      .get((uri) => uri.endsWith('bar'))
       .reply()
 
     const { statusCode } = await got('http://example.test/foo/bar')
@@ -231,9 +229,7 @@ describe('allowUnmocked option', () => {
       response.end()
     )
 
-    const scope = nock(origin, { allowUnmocked: true })
-      .post('/', 'foo')
-      .reply()
+    const scope = nock(origin, { allowUnmocked: true }).post('/', 'foo').reply()
 
     const req = http.request({
       host: 'localhost',
@@ -245,7 +241,7 @@ describe('allowUnmocked option', () => {
     const finishSpy = sinon.spy()
     req.on('finish', finishSpy)
 
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       req.on('response', () => {
         expect(finishSpy).to.have.been.calledOnce()
         expect(scope.isDone()).to.be.false()

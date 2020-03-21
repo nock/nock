@@ -255,7 +255,7 @@ describe('Header matching', () => {
 
       const scope = nock('http://example.test')
         .get('/')
-        .matchHeader('Authorization', val => val === expectedAuthHeader)
+        .matchHeader('Authorization', (val) => val === expectedAuthHeader)
         .reply(200, 'Hello World!')
 
       const { statusCode, body } = await got('http://example.test/', {
@@ -352,7 +352,7 @@ describe('Header matching', () => {
     it('should matche when request header satisfies the header function', async () => {
       const scope = nock('http://example.test', {
         reqheaders: {
-          'X-My-Super-Power': value => value === 'mullet growing',
+          'X-My-Super-Power': (value) => value === 'mullet growing',
         },
       })
         .post('/')
@@ -369,7 +369,7 @@ describe('Header matching', () => {
     it('should not match when request header does not satisfy the header function', async () => {
       const scope = nock('http://example.test', {
         reqheaders: {
-          'X-My-Super-Power': value => value === 'Mullet Growing',
+          'X-My-Super-Power': (value) => value === 'Mullet Growing',
         },
       })
         .post('/')
@@ -562,13 +562,13 @@ describe('Header matching', () => {
   })
 })
 
-it('header manipulation', done => {
+it('header manipulation', (done) => {
   // This test seems to depend on behavior of the `http` module.
   const scope = nock('http://example.test')
     .get('/accounts')
     .reply(200, { accounts: [{ id: 1, name: 'Joe Blow' }] })
 
-  const req = http.get({ host: 'example.test', path: '/accounts' }, res => {
+  const req = http.get({ host: 'example.test', path: '/accounts' }, (res) => {
     res.on('end', () => {
       scope.done()
       done()

@@ -148,14 +148,12 @@ defs = nock.recorder.play() as nock.Definition[]
 
 // Usage
 // $ExpectType Scope
-nock('http://example.test')
-  .get('/users/1')
-  .reply(200, {
-    _id: '123ABC',
-    _rev: '946B7D1C',
-    username: 'foo',
-    email: 'foo.bar@example.test',
-  })
+nock('http://example.test').get('/users/1').reply(200, {
+  _id: '123ABC',
+  _rev: '946B7D1C',
+  username: 'foo',
+  email: 'foo.bar@example.test',
+})
 
 // Using URL as input
 // Not supported yet
@@ -178,16 +176,14 @@ scope = nock(/example\.com/)
   .reply(200, 'domain regex matched')
 
 // Specifying path
-scope = nock('http://example.test')
-  .get('/resource')
-  .reply(200, 'path matched')
+scope = nock('http://example.test').get('/resource').reply(200, 'path matched')
 
 scope = nock('http://example.test')
   .get(/source$/)
   .reply(200, 'path using regex matched')
 
 scope = nock('http://example.test')
-  .get(uri => {
+  .get((uri) => {
     return uri.indexOf('cats') >= 0
   })
   .reply(200, 'path using function matched')
@@ -234,7 +230,7 @@ scope = nock('http://example.test')
   })
 
 scope = nock('http://example.test')
-  .post('/users', body => {
+  .post('/users', (body) => {
     return body.id === '123ABC'
   })
   .reply(201, {
@@ -262,7 +258,7 @@ nock('http://example.test')
 
 nock('http://example.test')
   .get('/users')
-  .query(actualQueryObject => {
+  .query((actualQueryObject) => {
     // do some compare with the actual Query Object
     // return true for matched
     // return false for not matched
@@ -291,21 +287,15 @@ nock('http://example.test')
   .reply()
 
 // Specifying replies
-scope = nock('http://example.test')
-  .get('/users/1')
-  .reply(404)
+scope = nock('http://example.test').get('/users/1').reply(404)
 
-scope = nock('http://example.test')
-  .get('/')
-  .reply(200, 'Hello from Google!')
+scope = nock('http://example.test').get('/').reply(200, 'Hello from Google!')
 
-scope = nock('http://example.test')
-  .get('/')
-  .reply(200, {
-    username: 'foo',
-    email: 'foo.bar@example.test',
-    _id: '4324243fsd',
-  })
+scope = nock('http://example.test').get('/').reply(200, {
+  username: 'foo',
+  email: 'foo.bar@example.test',
+  _id: '4324243fsd',
+})
 
 scope = nock('http://example.test')
   .get('/resource')
@@ -363,7 +353,7 @@ scope = nock('http://example.test')
 /// Access original request and headers
 scope = nock('http://example.test')
   .get('/cat-poems')
-  .reply(function(uri, requestBody) {
+  .reply(function (uri, requestBody) {
     str = this.req.path
     console.log('path:', this.req.path)
     console.log('headers:', this.req.headers)
@@ -396,7 +386,7 @@ scope = nock('http://example.test', {
 
 scope = nock('http://example.test', {
   reqheaders: {
-    'X-My-Headers': headerValue => {
+    'X-My-Headers': (headerValue) => {
       if (headerValue) {
         return true
       }
@@ -423,11 +413,9 @@ scope = nock('http://example.test')
   .reply(200)
 
 /// Specifying Reply Headers
-scope = nock('http://example.test')
-  .get('/')
-  .reply(200, 'Hello World!', {
-    'X-My-Headers': 'My Header value',
-  })
+scope = nock('http://example.test').get('/').reply(200, 'Hello World!', {
+  'X-My-Headers': 'My Header value',
+})
 
 scope = nock('http://example.test')
   .get('/')
@@ -478,9 +466,7 @@ scope = nock('http://example.test')
   .reply(200, { hello: 'world' })
 
 // HTTP Verbs
-nock('http://example.test')
-  .intercept('/path', 'PATCH')
-  .reply(304)
+nock('http://example.test').intercept('/path', 'PATCH').reply(304)
 
 // Support for HTTP and HTTPS
 scope = nock('https://secure.example.test')
@@ -489,28 +475,13 @@ scope = nock('https://secure.example.test')
 scope = nock('http://example.test:8081')
 
 // Repeat response n times
-nock('http://example.test')
-  .get('/')
-  .times(4)
-  .reply(200, 'Ok')
-nock('http://example.test')
-  .get('/')
-  .once()
-  .reply(200, 'Ok')
-nock('http://example.test')
-  .get('/')
-  .twice()
-  .reply(200, 'Ok')
-nock('http://example.test')
-  .get('/')
-  .thrice()
-  .reply(200, 'Ok')
+nock('http://example.test').get('/').times(4).reply(200, 'Ok')
+nock('http://example.test').get('/').once().reply(200, 'Ok')
+nock('http://example.test').get('/').twice().reply(200, 'Ok')
+nock('http://example.test').get('/').thrice().reply(200, 'Ok')
 
 // Make responding optional
-nock('http://example.test')
-  .get('/')
-  .optionally()
-  .reply(200, 'Ok')
+nock('http://example.test').get('/').optionally().reply(200, 'Ok')
 
 // Delay the response body
 nock('http://example.test')
@@ -576,7 +547,7 @@ scope = nock('http://example.test')
   .reply(200, 'user')
 
 scope = nock('http://example.test')
-  .filteringPath(path => {
+  .filteringPath((path) => {
     return '/ABC'
   })
   .get('/ABC')
@@ -589,7 +560,7 @@ scope = nock('http://example.test')
   .reply(201, 'OK')
 
 scope = nock('http://example.test')
-  .filteringRequestBody(body => {
+  .filteringRequestBody((body) => {
     return 'ABC'
   })
   .post('/', 'ABC')
@@ -611,7 +582,7 @@ scope = nock('http://example.test')
   })
 
 scope = nock('http://example.test')
-  .matchHeader('content-length', val => {
+  .matchHeader('content-length', (val) => {
     return Number(val) >= 1000
   })
   .get('/')
@@ -636,7 +607,7 @@ scope = nock('http://example.test')
 
 scope = nock('http://example.test')
   .get('/')
-  .matchHeader('content-length', val => {
+  .matchHeader('content-length', (val) => {
     return Number(val) >= 1000
   })
   .reply(200, {
@@ -645,9 +616,7 @@ scope = nock('http://example.test')
 
 // Allow unmocked requests on a mocked hostname
 options = { allowUnmocked: true }
-scope = nock('http://example.test', options)
-  .get('/my/url')
-  .reply(200, 'OK!')
+scope = nock('http://example.test', options).get('/my/url').reply(200, 'OK!')
 
 // Expectations
 let google = nock('http://example.test')
@@ -658,9 +627,7 @@ setTimeout(() => {
 }, 5000)
 
 /// .isDone()
-scope = nock('http://example.test')
-  .get('/')
-  .reply(200)
+scope = nock('http://example.test').get('/').reply(200)
 scope.isDone() // will return false
 
 nock.isDone()
@@ -703,7 +670,7 @@ nock.enableNetConnect('example.test')
 nock.enableNetConnect(/example\.(com|test)/)
 
 // or a Function
-nock.enableNetConnect(host => host.includes('example.com'))
+nock.enableNetConnect((host) => host.includes('example.com'))
 
 nock.disableNetConnect()
 nock.enableNetConnect('127.0.0.1') // Allow localhost connections so we can test local routes and mock servers.
@@ -729,7 +696,7 @@ nock.recorder.rec({
 const nockCallObjects = nock.recorder.play()
 
 let nocks = nock.load(str)
-nocks.forEach(nock => {
+nocks.forEach((nock) => {
   nock = nock.filteringRequestBody((body: string) => {
     return body
   })
@@ -737,7 +704,7 @@ nocks.forEach(nock => {
 
 //  Pre-process the nock definitions as scope filtering has to be defined before the nocks are defined (due to its very hacky nature).
 const nockDefs = nock.loadDefs(str)
-nockDefs.forEach(def => {
+nockDefs.forEach((def) => {
   //  Do something with the definition object e.g. scope filtering.
   def.options = def.options || {}
   def.options.filteringScope = (scope: string) => {

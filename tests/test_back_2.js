@@ -11,7 +11,7 @@ const nockBack = nock.back
 require('./cleanup_after_each')()
 
 const fixture = `${__dirname}/fixtures/recording_test.json`
-beforeEach(done => {
+beforeEach((done) => {
   rimraf.sync(fixture)
 
   nockBack.fixtures = `${__dirname}/fixtures`
@@ -20,15 +20,15 @@ beforeEach(done => {
   done()
 })
 
-afterEach(done => {
+afterEach((done) => {
   rimraf.sync(fixture)
   done()
 })
 
-test('recording', t => {
+test('recording', (t) => {
   t.plan(5)
 
-  nockBack('recording_test.json', function(nockDone) {
+  nockBack('recording_test.json', function (nockDone) {
     const server = http.createServer((request, response) => {
       t.pass('server received a request')
 
@@ -46,7 +46,7 @@ test('recording', t => {
           port: server.address().port,
           method: 'GET',
         },
-        response => {
+        (response) => {
           response.once('end', () => {
             nockDone()
 
@@ -73,13 +73,13 @@ test('recording', t => {
   })
 })
 
-test('passes custom options to recorder', t => {
+test('passes custom options to recorder', (t) => {
   t.plan(3)
 
   nockBack(
     'recording_test.json',
     { recorder: { enable_reqheaders_recording: true } },
-    function(nockDone) {
+    function (nockDone) {
       const server = http.createServer((request, response) => {
         t.pass('server received a request')
 
@@ -96,7 +96,7 @@ test('passes custom options to recorder', t => {
             port: server.address().port,
             method: 'GET',
           },
-          response => {
+          (response) => {
             response.once('end', () => {
               nockDone()
 

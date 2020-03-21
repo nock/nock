@@ -105,7 +105,7 @@ $ npm test
 When you're writing a test for a specific purpose, it may be useful to only run that test. In order to do this, you can pass a `only` option as the second argument to the [`tap`](https://www.node-tap.org/) testrunner. For instance in `tests/example.js`, like so:
 
 ```js
-test('description', { only: true }, t => {
+test('description', { only: true }, (t) => {
   // ...
 })
 ```

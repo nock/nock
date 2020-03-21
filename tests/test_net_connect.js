@@ -14,9 +14,7 @@ describe('`disableNetConnect()`', () => {
   it('prevents connection to unmocked hosts', async () => {
     nock.disableNetConnect()
 
-    nock('http://www.example.test')
-      .get('/')
-      .reply(200)
+    nock('http://www.example.test').get('/').reply(200)
 
     await assertRejects(
       got('https://other.example.test/'),
@@ -27,7 +25,7 @@ describe('`disableNetConnect()`', () => {
   it('prevents connections when no hosts are mocked', async () => {
     nock.disableNetConnect()
 
-    await assertRejects(got('http://example.test'), err => {
+    await assertRejects(got('http://example.test'), (err) => {
       expect(err).to.include({
         code: 'ENETUNREACH',
         message: 'Nock: Disallowed net connect for "example.test:80/"',
@@ -93,14 +91,14 @@ describe('`enableNetConnect()`', () => {
       response.end()
     })
 
-    nock.enableNetConnect(host => host.includes('ocalhos'))
+    nock.enableNetConnect((host) => host.includes('ocalhos'))
 
     await got(origin)
     expect(onResponse).to.have.been.calledOnce()
   })
 
   it('disallows request for other domains, via function', async () => {
-    nock.enableNetConnect(host => host.includes('ocalhos'))
+    nock.enableNetConnect((host) => host.includes('ocalhos'))
 
     await assertRejects(
       got('https://example.test/'),

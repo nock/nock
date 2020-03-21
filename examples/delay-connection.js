@@ -8,7 +8,7 @@ nock('http://delayconnection.com')
   .delayConnection(1000)
   .reply(200, 'hey')
 
-const req = http.get('http://delayconnection.com', function(res) {
+const req = http.get('http://delayconnection.com', function (res) {
   events.forEach(log(res, 'res'))
 })
 

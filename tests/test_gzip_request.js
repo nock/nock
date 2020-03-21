@@ -7,14 +7,14 @@ const nock = require('..')
 
 require('./setup')
 
-it('should accept and decode gzip encoded application/json', done => {
+it('should accept and decode gzip encoded application/json', (done) => {
   const message = {
     my: 'contents',
   }
 
   nock('http://example.test')
     .post('/')
-    .reply(function(url, actual) {
+    .reply(function (url, actual) {
       expect(actual).to.deep.equal(message)
       done()
       return [200]
@@ -36,14 +36,14 @@ it('should accept and decode gzip encoded application/json', done => {
   req.end()
 })
 
-it('should accept and decode deflate encoded application/json', done => {
+it('should accept and decode deflate encoded application/json', (done) => {
   const message = {
     my: 'contents',
   }
 
   nock('http://example.test')
     .post('/')
-    .reply(function(url, actual) {
+    .reply(function (url, actual) {
       expect(actual).to.deep.equal(message)
       done()
       return [200]

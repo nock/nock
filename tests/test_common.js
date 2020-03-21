@@ -500,7 +500,7 @@ describe('`normalizeClientRequestArgs()`', () => {
   })
 })
 
-it('testing timers are deleted correctly', done => {
+it('testing timers are deleted correctly', (done) => {
   const timeoutSpy = sinon.spy()
   const intervalSpy = sinon.spy()
   const immediateSpy = sinon.spy()

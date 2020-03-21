@@ -86,9 +86,7 @@ describe('`removeInterceptor()`', () => {
 
   context('when invoked with an object', () => {
     it('removes a matching interceptor and returns true', async () => {
-      nock('http://example.test')
-        .get('/somepath')
-        .reply(200, 'hey')
+      nock('http://example.test').get('/somepath').reply(200, 'hey')
 
       expect(
         nock.removeInterceptor({
@@ -157,9 +155,7 @@ describe('`removeInterceptor()`', () => {
     })
 
     it('can match the default path `/` when no path is specified', () => {
-      const scope = nock('http://example.test')
-        .get('/')
-        .reply(200, 'hey')
+      const scope = nock('http://example.test').get('/').reply(200, 'hey')
       expect(scope.pendingMocks()).to.deep.equal([
         'GET http://example.test:80/',
       ])

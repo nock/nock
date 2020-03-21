@@ -14,7 +14,7 @@ require('./setup')
 
 const textFilePath = path.resolve(__dirname, './assets/reply_file_1.txt')
 
-it('reply with file and pipe response', done => {
+it('reply with file and pipe response', (done) => {
   const scope = nock('http://example.test')
     .get('/')
     .replyWithFile(200, textFilePath)
@@ -22,7 +22,7 @@ it('reply with file and pipe response', done => {
   let text = ''
   const fakeStream = new stream.Stream()
   fakeStream.writable = true
-  fakeStream.write = d => {
+  fakeStream.write = (d) => {
     text += d
   }
   fakeStream.end = () => {
@@ -35,7 +35,7 @@ it('reply with file and pipe response', done => {
 })
 
 // TODO Convert to async / got.
-it('pause response after data', done => {
+it('pause response after data', (done) => {
   const response = new stream.PassThrough()
   const scope = nock('http://example.test')
     .get('/')
@@ -48,7 +48,7 @@ it('pause response after data', done => {
       host: 'example.test',
       path: '/',
     },
-    res => {
+    (res) => {
       const didTimeout = sinon.spy()
 
       setTimeout(() => {
@@ -56,7 +56,7 @@ it('pause response after data', done => {
         res.resume()
       }, 500)
 
-      res.on('data', data => res.pause())
+      res.on('data', (data) => res.pause())
 
       res.on('end', () => {
         expect(didTimeout).to.have.been.calledOnce()
@@ -75,7 +75,7 @@ it('pause response after data', done => {
 })
 
 // https://github.com/nock/nock/issues/1493
-it("response has 'complete' property and it's true after end", done => {
+it("response has 'complete' property and it's true after end", (done) => {
   const response = new stream.PassThrough()
   const scope = nock('http://example.test')
     .get('/')
@@ -88,7 +88,7 @@ it("response has 'complete' property and it's true after end", done => {
       host: 'example.test',
       path: '/',
     },
-    res => {
+    (res) => {
       const onData = sinon.spy()
 
       res.on('data', onData)
@@ -110,7 +110,7 @@ it("response has 'complete' property and it's true after end", done => {
 })
 
 // TODO Convert to async / got.
-it('response pipe', done => {
+it('response pipe', (done) => {
   const dest = (() => {
     function Constructor() {
       events.EventEmitter.call(this)
@@ -121,11 +121,11 @@ it('response pipe', done => {
 
     util.inherits(Constructor, events.EventEmitter)
 
-    Constructor.prototype.end = function() {
+    Constructor.prototype.end = function () {
       this.emit('end')
     }
 
-    Constructor.prototype.write = function(chunk) {
+    Constructor.prototype.write = function (chunk) {
       const buf = Buffer.alloc(this.buffer.length + chunk.length)
 
       this.buffer.copy(buf)
@@ -139,16 +139,14 @@ it('response pipe', done => {
     return new Constructor()
   })()
 
-  const scope = nock('http://example.test')
-    .get('/')
-    .reply(200, 'nobody')
+  const scope = nock('http://example.test').get('/').reply(200, 'nobody')
 
   http.get(
     {
       host: 'example.test',
       path: '/',
     },
-    res => {
+    (res) => {
       const onPipeEvent = sinon.spy()
 
       dest.on('pipe', onPipeEvent)
@@ -166,7 +164,7 @@ it('response pipe', done => {
 })
 
 // TODO Convert to async / got.
-it('response pipe without implicit end', done => {
+it('response pipe without implicit end', (done) => {
   const dest = (() => {
     function Constructor() {
       events.EventEmitter.call(this)
@@ -177,11 +175,11 @@ it('response pipe without implicit end', done => {
 
     util.inherits(Constructor, events.EventEmitter)
 
-    Constructor.prototype.end = function() {
+    Constructor.prototype.end = function () {
       this.emit('end')
     }
 
-    Constructor.prototype.write = function(chunk) {
+    Constructor.prototype.write = function (chunk) {
       const buf = Buffer.alloc(this.buffer.length + chunk.length)
 
       this.buffer.copy(buf)
@@ -195,16 +193,14 @@ it('response pipe without implicit end', done => {
     return new Constructor()
   })()
 
-  const scope = nock('http://example.test')
-    .get('/')
-    .reply(200, 'nobody')
+  const scope = nock('http://example.test').get('/').reply(200, 'nobody')
 
   http.get(
     {
       host: 'example.test',
       path: '/',
     },
-    res => {
+    (res) => {
       dest.on('end', () => expect.fail('should not call end implicitly'))
 
       res.on('end', () => {
@@ -217,11 +213,9 @@ it('response pipe without implicit end', done => {
   )
 })
 
-it('response is streams2 compatible', done => {
+it('response is streams2 compatible', (done) => {
   const responseText = 'streams2 streams2 streams2'
-  nock('http://example.test')
-    .get('/somepath')
-    .reply(200, responseText)
+  nock('http://example.test').get('/somepath').reply(200, responseText)
 
   http
     .request(
@@ -229,17 +223,17 @@ it('response is streams2 compatible', done => {
         host: 'example.test',
         path: '/somepath',
       },
-      function(res) {
+      function (res) {
         res.setEncoding('utf8')
 
         let body = ''
 
-        res.on('readable', function() {
+        res.on('readable', function () {
           let buf
           while ((buf = res.read())) body += buf
         })
 
-        res.once('end', function() {
+        res.once('end', function () {
           expect(body).to.equal(responseText)
           done()
         })
@@ -248,7 +242,7 @@ it('response is streams2 compatible', done => {
     .end()
 })
 
-it('when a stream is used for the response body, it will not be read until after the response event', done => {
+it('when a stream is used for the response body, it will not be read until after the response event', (done) => {
   let responseEvent = false
   const responseText = 'Hello World\n'
 
@@ -264,18 +258,18 @@ it('when a stream is used for the response body, it will not be read until after
     .get('/')
     .reply(201, () => new SimpleStream())
 
-  http.get('http://localhost/', res => {
+  http.get('http://localhost/', (res) => {
     responseEvent = true
     res.setEncoding('utf8')
 
     let body = ''
     expect(res.statusCode).to.equal(201)
 
-    res.on('data', function(chunk) {
+    res.on('data', function (chunk) {
       body += chunk
     })
 
-    res.once('end', function() {
+    res.once('end', function () {
       expect(body).to.equal(responseText)
       done()
     })
@@ -283,7 +277,7 @@ it('when a stream is used for the response body, it will not be read until after
 })
 
 // https://github.com/nock/nock/issues/193
-it('response readable pull stream works as expected', done => {
+it('response readable pull stream works as expected', (done) => {
   nock('http://example.test')
     .get('/ssstream')
     .reply(200, 'this is the response body yeah')
@@ -294,11 +288,11 @@ it('response readable pull stream works as expected', done => {
       path: '/ssstream',
       port: 80,
     },
-    res => {
+    (res) => {
       let ended = false
       let responseBody = ''
       expect(res.statusCode).to.equal(200)
-      res.on('readable', function() {
+      res.on('readable', function () {
         let chunk
         while ((chunk = res.read()) !== null) {
           responseBody += chunk.toString()
@@ -315,14 +309,12 @@ it('response readable pull stream works as expected', done => {
   req.end()
 })
 
-it('error events on reply streams proxy to the response', done => {
+it('error events on reply streams proxy to the response', (done) => {
   // This test could probably be written to use got, however, that lib has a lot
   // of built in error handling and this test would get convoluted.
 
   const replyBody = new stream.PassThrough()
-  const scope = nock('http://example.test')
-    .get('/')
-    .reply(201, replyBody)
+  const scope = nock('http://example.test').get('/').reply(201, replyBody)
 
   http.get(
     {
@@ -330,8 +322,8 @@ it('error events on reply streams proxy to the response', done => {
       method: 'GET',
       path: '/',
     },
-    res => {
-      res.on('error', err => {
+    (res) => {
+      res.on('error', (err) => {
         expect(err).to.equal('oh no!')
         done()
       })

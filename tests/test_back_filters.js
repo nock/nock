@@ -16,7 +16,7 @@ const fixtureFilename = `recording_filters_test.json`
 const fixture = `${nockBack.fixtures}/${fixtureFilename}`
 
 function rimrafOnEnd(t) {
-  t.once('end', function() {
+  t.once('end', function () {
     rimraf.sync(fixture)
   })
 }
@@ -37,10 +37,10 @@ function createRequest(options, callback) {
     path: '/',
     method: 'GET',
   }
-  return http.request({ ...baseOptions, ...options }, response => {
+  return http.request({ ...baseOptions, ...options }, (response) => {
     const rawData = []
-    response.on('data', chunk => rawData.push(chunk))
-    response.once('end', chunk => {
+    response.on('data', (chunk) => rawData.push(chunk))
+    response.once('end', (chunk) => {
       rawData.push(chunk)
       callback(rawData.join(''))
       response.resume()
@@ -48,13 +48,13 @@ function createRequest(options, callback) {
   })
 }
 
-test('nockBack passes filteringPath options', function(t) {
+test('nockBack passes filteringPath options', function (t) {
   t.plan(5)
 
   const server = createServer(t)
   const nockBackOptions = {
     before(scope) {
-      scope.filteringPath = path =>
+      scope.filteringPath = (path) =>
         path.replace(/timestamp=[0-9]+/, 'timestamp=1111')
     },
   }
@@ -62,13 +62,13 @@ test('nockBack passes filteringPath options', function(t) {
   server.listen(() => {
     const { port } = server.address()
 
-    nockBack(fixtureFilename, nockBackOptions, function(nockDone) {
+    nockBack(fixtureFilename, nockBackOptions, function (nockDone) {
       const requestForRecord = createRequest(
         {
           path: '/?timestamp=1111',
           port,
         },
-        firstRawData => {
+        (firstRawData) => {
           nockDone()
           t.pass('nockBack records fixture')
 
@@ -78,13 +78,13 @@ test('nockBack passes filteringPath options', function(t) {
           t.equal(fixtureContent.length, 1)
           t.equal(fixtureContent[0].path, '/?timestamp=1111')
 
-          nockBack(fixtureFilename, nockBackOptions, function(nockDone) {
+          nockBack(fixtureFilename, nockBackOptions, function (nockDone) {
             const request = createRequest(
               {
                 path: '/?timestamp=2222',
                 port,
               },
-              secondRawData => {
+              (secondRawData) => {
                 nockDone()
 
                 t.equal(firstRawData, secondRawData)
@@ -107,7 +107,7 @@ test('nockBack passes filteringPath options', function(t) {
   rimrafOnEnd(t)
 })
 
-test('nockBack passes filteringRequestBody option', function(t) {
+test('nockBack passes filteringRequestBody option', function (t) {
   t.plan(5)
 
   const server = createServer(t)
@@ -129,7 +129,7 @@ test('nockBack passes filteringRequestBody option', function(t) {
   server.listen(() => {
     const { port } = server.address()
 
-    nockBack(fixtureFilename, nockBackOptions, function(nockDone) {
+    nockBack(fixtureFilename, nockBackOptions, function (nockDone) {
       const postData = querystring.stringify({ token: 'aaa-bbb-ccc' })
       const requestForRecord = createRequest(
         {
@@ -140,7 +140,7 @@ test('nockBack passes filteringRequestBody option', function(t) {
             'Content-Length': Buffer.byteLength(postData),
           },
         },
-        firstRawData => {
+        (firstRawData) => {
           nockDone()
           t.pass('nockBack records fixture')
 
@@ -150,7 +150,7 @@ test('nockBack passes filteringRequestBody option', function(t) {
           t.equal(fixtureContent.length, 1)
           t.equal(fixtureContent[0].body, 'token=aaa-bbb-ccc')
 
-          nockBack(fixtureFilename, nockBackOptions, function(nockDone) {
+          nockBack(fixtureFilename, nockBackOptions, function (nockDone) {
             const secondPostData = querystring.stringify({
               token: 'ddd-eee-fff',
             })
@@ -163,7 +163,7 @@ test('nockBack passes filteringRequestBody option', function(t) {
                   'Content-Length': Buffer.byteLength(postData),
                 },
               },
-              secondRawData => {
+              (secondRawData) => {
                 nockDone()
 
                 t.equal(firstRawData, secondRawData)
@@ -188,7 +188,7 @@ test('nockBack passes filteringRequestBody option', function(t) {
   rimrafOnEnd(t)
 })
 
-test('teardown', function(t) {
+test('teardown', function (t) {
   nockBack.setMode(originalMode)
   t.end()
 })

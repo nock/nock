@@ -58,7 +58,7 @@ describe('asynchronous `reply()` function', () => {
     it('should get request headers', async () => {
       const scope = nock('http://example.test')
         .get('/yo')
-        .reply(201, function(path, reqBody, cb) {
+        .reply(201, function (path, reqBody, cb) {
           expect(this.req.path).to.equal('/yo')
           expect(this.req.headers).to.deep.equal({
             'accept-encoding': 'gzip, deflate, br',
@@ -67,7 +67,7 @@ describe('asynchronous `reply()` function', () => {
             'x-my-other-header': 'some-other-value',
             'user-agent': 'got (https://github.com/sindresorhus/got)',
           })
-          setTimeout(function() {
+          setTimeout(function () {
             cb(null, 'foobar')
           }, 1e3)
         })

@@ -10,12 +10,10 @@ const events = ['socket', 'response', 'end', 'data', 'error']
 
 const nock = require('../')
 
-nock('http://someotherservice.com')
-  .get('/')
-  .reply(200, 'whaaa')
+nock('http://someotherservice.com').get('/').reply(200, 'whaaa')
 
 const http = require('http')
-const req = http.get('http://www.google.com/', function(res) {
+const req = http.get('http://www.google.com/', function (res) {
   console.log('request result: res.statusCode = %j', res.statusCode)
   events.forEach(log(res, 'res'))
 })
