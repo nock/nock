@@ -1569,9 +1569,10 @@ test('can fetch test response', async t => {
 
 ### Memory issues with Jest
 
+Memory issues can be avoided by calling [`nock.restore()`](#restoring) after each test suite.  
 One of the core principles of [Jest](https://jestjs.io/) is that it runs tests in isolation.
 It does this by manipulating the modules cache of Node in a way that conflicts with how Nock monkey patches the builtin `http` and `https` modules.
-Memory issues can be avoided by calling [`nock.restore()`](#restoring) after each test suite.
+[Related issue with more details](https://github.com/nock/nock/issues/1817).
 
 ## Debugging
 
