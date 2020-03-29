@@ -17,9 +17,7 @@ require('./setup')
 // Starting the top by aborting requests early on then aborting later and later.
 describe('`ClientRequest.abort()`', () => {
   it('should not emit an error when `write` is called on an aborted request', done => {
-    const scope = nock('http://example.test')
-      .get('/')
-      .reply()
+    const scope = nock('http://example.test').get('/').reply()
 
     const req = http.request('http://example.test')
     const emitSpy = sinon.spy(req, 'emit')
@@ -34,9 +32,7 @@ describe('`ClientRequest.abort()`', () => {
   })
 
   it('should not emit an error when `end` is called on an aborted request', done => {
-    const scope = nock('http://example.test')
-      .get('/')
-      .reply()
+    const scope = nock('http://example.test').get('/').reply()
 
     const req = http.request('http://example.test')
     const emitSpy = sinon.spy(req, 'emit')
@@ -51,9 +47,7 @@ describe('`ClientRequest.abort()`', () => {
   })
 
   it('should not emit an error when `flushHeaders` is called on an aborted request', done => {
-    const scope = nock('http://example.test')
-      .get('/')
-      .reply()
+    const scope = nock('http://example.test').get('/').reply()
 
     const req = http.request('http://example.test')
     const emitSpy = sinon.spy(req, 'emit')
@@ -68,9 +62,7 @@ describe('`ClientRequest.abort()`', () => {
   })
 
   it('should not emit an error when called immediately after `end`', done => {
-    const scope = nock('http://example.test')
-      .get('/')
-      .reply()
+    const scope = nock('http://example.test').get('/').reply()
 
     const req = http.request('http://example.test')
     const emitSpy = sinon.spy(req, 'emit')
@@ -85,9 +77,7 @@ describe('`ClientRequest.abort()`', () => {
   })
 
   it('should emit an ECONNRESET error when aborted inside a `socket` event listener', done => {
-    const scope = nock('http://example.test')
-      .get('/')
-      .reply()
+    const scope = nock('http://example.test').get('/').reply()
 
     const req = http.request('http://example.test')
     const emitSpy = sinon.spy(req, 'emit')
@@ -110,9 +100,7 @@ describe('`ClientRequest.abort()`', () => {
   })
 
   it('should only emit `abort` and `error` events once if aborted multiple times', done => {
-    const scope = nock('http://example.test')
-      .get('/')
-      .reply()
+    const scope = nock('http://example.test').get('/').reply()
 
     const req = http.request('http://example.test')
     const emitSpy = sinon.spy(req, 'emit')
@@ -134,9 +122,7 @@ describe('`ClientRequest.abort()`', () => {
   })
 
   it('should emit an ECONNRESET error when aborted inside a `finish` event listener', done => {
-    const scope = nock('http://example.test')
-      .get('/')
-      .reply()
+    const scope = nock('http://example.test').get('/').reply()
 
     const req = http.request('http://example.test')
     const emitSpy = sinon.spy(req, 'emit')
@@ -168,9 +154,7 @@ describe('`ClientRequest.abort()`', () => {
   // all tests below assert the Scope is done.
 
   it('should not emit an error when called inside a `response` event listener', done => {
-    const scope = nock('http://example.test')
-      .get('/')
-      .reply()
+    const scope = nock('http://example.test').get('/').reply()
 
     const req = http.request('http://example.test')
     const emitSpy = sinon.spy(req, 'emit')

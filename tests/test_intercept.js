@@ -255,36 +255,6 @@ test('on interceptor, filter path with function', async t => {
   scope.done()
 })
 
-// TODO: Move to test_request_overrider.
-test('abort request', t => {
-  const scope = nock('http://example.test')
-    .get('/hey')
-    .reply(200, 'nobody')
-
-  const req = http.request({
-    host: 'example.test',
-    path: '/hey',
-  })
-
-  req.on('response', res => {
-    res.on('close', err => {
-      expect(err.code).to.equal('aborted')
-      scope.done()
-    })
-
-    res.on('end', () => expect.fail())
-
-    req.once('error', err => {
-      expect(err.code).to.equal('ECONNRESET')
-      t.end()
-    })
-
-    req.abort()
-  })
-
-  req.end()
-})
-
 test('chaining API', async t => {
   const scope = nock('http://example.test')
     .get('/one')

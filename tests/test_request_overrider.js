@@ -222,9 +222,7 @@ describe('Request Overrider', () => {
   })
 
   it('should emit an error if `write` is called after `end`', done => {
-    nock('http://example.test')
-      .get('/')
-      .reply()
+    nock('http://example.test').get('/').reply()
 
     const req = http.request('http://example.test')
 
@@ -563,19 +561,14 @@ describe('Request Overrider', () => {
   })
 
   it('calling Socket#destroy() multiple times only emits a single `close` event', done => {
-    nock('http://example.test')
-      .get('/')
-      .reply(200, 'hey')
+    nock('http://example.test').get('/').reply(200, 'hey')
 
     const req = http.get('http://example.test')
     req.once('socket', socket => {
       const closeSpy = sinon.spy()
       socket.on('close', closeSpy)
 
-      socket
-        .destroy()
-        .destroy()
-        .destroy()
+      socket.destroy().destroy().destroy()
 
       setTimeout(() => {
         expect(closeSpy).to.have.been.calledOnce()
