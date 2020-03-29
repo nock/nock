@@ -8,7 +8,7 @@ const got = require('./got_client')
 
 require('./cleanup_after_each')()
 
-test('define() is backward compatible', async (t) => {
+test('define() is backward compatible', async t => {
   t.ok(
     nock.define([
       {
@@ -32,7 +32,7 @@ test('define() is backward compatible', async (t) => {
   )
 })
 
-test('define() throws when reply is not a numeric string', (t) => {
+test('define() throws when reply is not a numeric string', t => {
   t.throws(
     () =>
       nock.define([
@@ -50,7 +50,7 @@ test('define() throws when reply is not a numeric string', (t) => {
   t.end()
 })
 
-test('define() applies default status code when none is specified', async (t) => {
+test('define() applies default status code when none is specified', async t => {
   const body = '�'
 
   t.equal(
@@ -71,7 +71,7 @@ test('define() applies default status code when none is specified', async (t) =>
   t.equal(statusCode, 200)
 })
 
-test('define() works when scope and port are both specified', async (t) => {
+test('define() works when scope and port are both specified', async t => {
   const body = 'Hello, world!'
 
   t.ok(
@@ -94,7 +94,7 @@ test('define() works when scope and port are both specified', async (t) => {
   t.end()
 })
 
-test('define() throws the expected error when scope and port conflict', (t) => {
+test('define() throws the expected error when scope and port conflict', t => {
   t.throws(
     () =>
       nock.define([
@@ -116,7 +116,7 @@ test('define() throws the expected error when scope and port conflict', (t) => {
   t.end()
 })
 
-test('define() throws the expected error when method is missing', (t) => {
+test('define() throws the expected error when method is missing', t => {
   t.throws(
     () =>
       nock.define([
@@ -135,7 +135,7 @@ test('define() throws the expected error when method is missing', (t) => {
   t.end()
 })
 
-test('define() works with non-JSON responses', async (t) => {
+test('define() works with non-JSON responses', async t => {
   const exampleBody = '�'
   const exampleResponseBody = 'hey: �'
 
@@ -166,7 +166,7 @@ test('define() works with non-JSON responses', async (t) => {
 // `{ encoding: false }` the body that comes back should be a buffer, but is
 // not. It's difficult to get this test to pass after porting it.
 // I think this bug has been fixed in Got v10, so this should be unblocked.
-test('define() works with binary buffers', (t) => {
+test('define() works with binary buffers', t => {
   const exampleBody = '8001'
   const exampleResponse = '8001'
 
@@ -189,12 +189,12 @@ test('define() works with binary buffers', (t) => {
       method: 'POST',
       path: '/',
     },
-    (res) => {
+    res => {
       t.equal(res.statusCode, 200)
 
       const dataChunks = []
 
-      res.on('data', (chunk) => {
+      res.on('data', chunk => {
         dataChunks.push(chunk)
       })
 
@@ -216,7 +216,7 @@ test('define() works with binary buffers', (t) => {
   req.end()
 })
 
-test('define() uses reqheaders', (t) => {
+test('define() uses reqheaders', t => {
   const auth = 'foo:bar'
   const authHeader = `Basic ${Buffer.from('foo:bar').toString('base64')}`
   const reqheaders = {
@@ -245,7 +245,7 @@ test('define() uses reqheaders', (t) => {
       path: '/',
       auth,
     },
-    (res) => {
+    res => {
       t.equal(res.statusCode, 200)
 
       res.once('end', () => {
@@ -260,7 +260,7 @@ test('define() uses reqheaders', (t) => {
   req.end()
 })
 
-test('define() uses badheaders', (t) => {
+test('define() uses badheaders', t => {
   t.ok(
     nock.define([
       {
@@ -291,7 +291,7 @@ test('define() uses badheaders', (t) => {
         'x-foo': 'bar',
       },
     },
-    (res) => {
+    res => {
       t.equal(res.statusCode, 200)
 
       res.once('end', () => {
@@ -305,7 +305,7 @@ test('define() uses badheaders', (t) => {
   req.end()
 })
 
-test('define() treats a * body as a special case for not matching the request body', async (t) => {
+test('define() treats a * body as a special case for not matching the request body', async t => {
   t.plan(4)
 
   nock.define([
@@ -318,7 +318,7 @@ test('define() treats a * body as a special case for not matching the request bo
     },
   ])
 
-  process.once('warning', (warning) => {
+  process.once('warning', warning => {
     t.equal(warning.name, 'DeprecationWarning')
     t.match(warning.message, 'Skipping body matching using')
   })

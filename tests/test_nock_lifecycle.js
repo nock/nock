@@ -67,7 +67,7 @@ describe('Nock lifecycle functions', () => {
 
       nock.cleanAll()
 
-      await assertRejects(got('http://example.test/'), (err) => {
+      await assertRejects(got('http://example.test/'), err => {
         expect(err).to.include({ name: 'RequestError', code: 'ENOTFOUND' })
         return true
       })
@@ -98,7 +98,7 @@ describe('Nock lifecycle functions', () => {
 
       nock.cleanAll()
 
-      await assertRejects(got('http://example.test/'), (err) => {
+      await assertRejects(got('http://example.test/'), err => {
         expect(err).to.include({
           name: 'RequestError',
           code: 'ENOTFOUND',
@@ -174,7 +174,7 @@ describe('Nock lifecycle functions', () => {
   })
 
   describe('`abortPendingRequests()`', () => {
-    it('prevents the request from completing', (done) => {
+    it('prevents the request from completing', done => {
       const onRequest = sinon.spy()
 
       nock('http://example.test').get('/').delayConnection(100).reply(200, 'OK')

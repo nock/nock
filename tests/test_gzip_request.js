@@ -7,7 +7,7 @@ const nock = require('..')
 
 require('./setup')
 
-it('should accept and decode gzip encoded application/json', (done) => {
+it('should accept and decode gzip encoded application/json', done => {
   const message = {
     my: 'contents',
   }
@@ -36,7 +36,7 @@ it('should accept and decode gzip encoded application/json', (done) => {
   req.end()
 })
 
-it('should accept and decode deflate encoded application/json', (done) => {
+it('should accept and decode deflate encoded application/json', done => {
   const message = {
     my: 'contents',
   }

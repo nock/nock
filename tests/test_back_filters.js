@@ -37,10 +37,10 @@ function createRequest(options, callback) {
     path: '/',
     method: 'GET',
   }
-  return http.request({ ...baseOptions, ...options }, (response) => {
+  return http.request({ ...baseOptions, ...options }, response => {
     const rawData = []
-    response.on('data', (chunk) => rawData.push(chunk))
-    response.once('end', (chunk) => {
+    response.on('data', chunk => rawData.push(chunk))
+    response.once('end', chunk => {
       rawData.push(chunk)
       callback(rawData.join(''))
       response.resume()
@@ -54,7 +54,7 @@ test('nockBack passes filteringPath options', function (t) {
   const server = createServer(t)
   const nockBackOptions = {
     before(scope) {
-      scope.filteringPath = (path) =>
+      scope.filteringPath = path =>
         path.replace(/timestamp=[0-9]+/, 'timestamp=1111')
     },
   }
@@ -68,7 +68,7 @@ test('nockBack passes filteringPath options', function (t) {
           path: '/?timestamp=1111',
           port,
         },
-        (firstRawData) => {
+        firstRawData => {
           nockDone()
           t.pass('nockBack records fixture')
 
@@ -84,7 +84,7 @@ test('nockBack passes filteringPath options', function (t) {
                 path: '/?timestamp=2222',
                 port,
               },
-              (secondRawData) => {
+              secondRawData => {
                 nockDone()
 
                 t.equal(firstRawData, secondRawData)
@@ -140,7 +140,7 @@ test('nockBack passes filteringRequestBody option', function (t) {
             'Content-Length': Buffer.byteLength(postData),
           },
         },
-        (firstRawData) => {
+        firstRawData => {
           nockDone()
           t.pass('nockBack records fixture')
 
@@ -163,7 +163,7 @@ test('nockBack passes filteringRequestBody option', function (t) {
                   'Content-Length': Buffer.byteLength(postData),
                 },
               },
-              (secondRawData) => {
+              secondRawData => {
                 nockDone()
 
                 t.equal(firstRawData, secondRawData)

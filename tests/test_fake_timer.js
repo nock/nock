@@ -8,7 +8,7 @@ const nock = require('..')
 require('./setup')
 
 // https://github.com/nock/nock/issues/1334
-it('should still return successfully when fake timer is enabled', (done) => {
+it('should still return successfully when fake timer is enabled', done => {
   const clock = fakeTimers.install()
   nock('http://example.test').get('/').reply(200)
 

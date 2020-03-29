@@ -8,16 +8,16 @@ const nock = require('..')
 require('./setup')
 
 describe('IPv6', () => {
-  it('IPV6 URL in http.get get gets mocked', (done) => {
+  it('IPV6 URL in http.get get gets mocked', done => {
     const responseBody = 'Hello World!'
     const scope = nock('http://[2607:f0d0:1002:51::4]:8080')
       .get('/')
       .reply(200, responseBody)
 
-    http.get('http://[2607:f0d0:1002:51::4]:8080/', (res) => {
+    http.get('http://[2607:f0d0:1002:51::4]:8080/', res => {
       expect(res).to.include({ statusCode: 200 })
       const onData = sinon.spy()
-      res.on('data', (data) => {
+      res.on('data', data => {
         onData()
         expect(data).to.be.an.instanceOf(Buffer)
         expect(data.toString()).to.equal(responseBody)
@@ -30,7 +30,7 @@ describe('IPv6', () => {
     })
   })
 
-  it('IPV6 hostname in http.request get gets mocked', (done) => {
+  it('IPV6 hostname in http.request get gets mocked', done => {
     const responseBody = 'Hello World!'
     const scope = nock('http://[2607:f0d0:1002:51::5]:8080')
       .get('/')
@@ -44,10 +44,10 @@ describe('IPv6', () => {
           method: 'GET',
           port: 8080,
         },
-        (res) => {
+        res => {
           expect(res).to.include({ statusCode: 200 })
           const onData = sinon.spy()
-          res.on('data', (data) => {
+          res.on('data', data => {
             onData()
             expect(data).to.be.an.instanceOf(Buffer)
             expect(data.toString()).to.equal(responseBody)

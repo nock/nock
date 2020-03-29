@@ -42,10 +42,10 @@ describe('`optionally()`', () => {
     )
   })
 
-  it('optional mocks can be matched', (done) => {
+  it('optional mocks can be matched', done => {
     nock('http://example.test').get('/abc').optionally().reply(200)
 
-    http.get({ host: 'example.test', path: '/abc' }, (res) => {
+    http.get({ host: 'example.test', path: '/abc' }, res => {
       expect(res.statusCode).to.equal(200)
       expect(nock.pendingMocks()).to.be.empty()
       done()
@@ -84,25 +84,25 @@ describe('`optionally()`', () => {
     })
   })
 
-  it('optional repeated mocks execute repeatedly', (done) => {
+  it('optional repeated mocks execute repeatedly', done => {
     nock('http://example.test').get('/456').optionally().times(2).reply(200)
 
-    http.get({ host: 'example.test', path: '/456' }, (res) => {
+    http.get({ host: 'example.test', path: '/456' }, res => {
       expect(res.statusCode).to.equal(200)
-      http.get({ host: 'example.test', path: '/456' }, (res) => {
+      http.get({ host: 'example.test', path: '/456' }, res => {
         expect(res.statusCode).to.equal(200)
         done()
       })
     })
   })
 
-  it("optional mocks appear in `activeMocks()` only until they're matched", (done) => {
+  it("optional mocks appear in `activeMocks()` only until they're matched", done => {
     nock('http://example.test').get('/optional').optionally().reply(200)
 
     expect(nock.activeMocks()).to.deep.equal([
       'GET http://example.test:80/optional',
     ])
-    http.get({ host: 'example.test', path: '/optional' }, (res) => {
+    http.get({ host: 'example.test', path: '/optional' }, res => {
       expect(nock.activeMocks()).to.be.empty()
       done()
     })

@@ -31,7 +31,7 @@ afterEach(() => {
 
 async function startHttpServer(requestListener) {
   const server = http.createServer(requestListener)
-  await new Promise((resolve) => server.listen(resolve))
+  await new Promise(resolve => server.listen(resolve))
   servers.push(server)
   server.port = server.address().port
   server.origin = `http://localhost:${server.port}`
@@ -46,7 +46,7 @@ async function startHttpsServer(requestListener) {
     },
     requestListener
   )
-  await new Promise((resolve) => server.listen(resolve))
+  await new Promise(resolve => server.listen(resolve))
   servers.push(server)
   server.port = server.address().port
   server.origin = `https://localhost:${server.port}`

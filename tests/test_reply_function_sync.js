@@ -326,7 +326,7 @@ describe('synchronous `reply()` function', () => {
         .get('/abc')
         .reply(() => 'ABC')
 
-      await assertRejects(got('http://example.test/abc'), (err) => {
+      await assertRejects(got('http://example.test/abc'), err => {
         expect(err).to.be.an.instanceOf(Error).and.include({
           message: 'A single function provided to .reply MUST return an array',
         })
@@ -339,7 +339,7 @@ describe('synchronous `reply()` function', () => {
         .get('/abc')
         .reply(() => [])
 
-      await assertRejects(got('http://example.test/abc'), (err) => {
+      await assertRejects(got('http://example.test/abc'), err => {
         expect(err).to.be.an.instanceOf(Error).and.include({
           message: 'Invalid undefined value for status code',
         })
@@ -360,7 +360,7 @@ describe('synchronous `reply()` function', () => {
           'JSON',
         ])
 
-      await assertRejects(got('http://example.test/abc'), (err) => {
+      await assertRejects(got('http://example.test/abc'), err => {
         expect(err).to.be.an.instanceOf(Error).and.include({
           message:
             'The array returned from the .reply callback contains too many values',

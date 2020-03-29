@@ -25,7 +25,7 @@ describe('Logging using the `debug` package', () => {
     const exampleBody = 'Hello yourself!'
     await got.post('http://example.test/deep/link', { body: exampleBody })
 
-    const isMocha = process.argv.some((arg) => arg.endsWith('mocha'))
+    const isMocha = process.argv.some(arg => arg.endsWith('mocha'))
     // TODO For some reason this is getting slightly different arugments in Tap
     // vs Mocha. Remove this conditional when Tap is removed.
     if (isMocha) {

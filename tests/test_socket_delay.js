@@ -8,7 +8,7 @@ const nock = require('..')
 require('./setup')
 
 describe('`socketDelay()`', () => {
-  it('socketDelay', (done) => {
+  it('socketDelay', done => {
     nock('http://example.test')
       .get('/')
       .socketDelay(200)
@@ -18,7 +18,7 @@ describe('`socketDelay()`', () => {
 
     const onTimeout = sinon.spy()
 
-    req.on('socket', (socket) => {
+    req.on('socket', socket => {
       if (!socket.connecting) {
         req.setTimeout(100, onTimeout)
         return
@@ -35,12 +35,12 @@ describe('`socketDelay()`', () => {
     })
   })
 
-  it('emits a timeout - with setTimeout', (done) => {
+  it('emits a timeout - with setTimeout', done => {
     nock('http://example.test').get('/').socketDelay(10000).reply(200, 'OK')
 
     const onEnd = sinon.spy()
 
-    const req = http.request('http://example.test', (res) => {
+    const req = http.request('http://example.test', res => {
       res.setEncoding('utf8')
       res.once('end', onEnd)
     })
@@ -53,19 +53,15 @@ describe('`socketDelay()`', () => {
     req.end()
   })
 
-  it('emits a timeout - with options.timeout', (done) => {
+  it('emits a timeout - with options.timeout', done => {
     nock('http://example.test').get('/').socketDelay(10000).reply(200, 'OK')
 
     const onEnd = sinon.spy()
 
-    const req = http.request(
-      'http://example.test',
-      { timeout: 5000 },
-      (res) => {
-        res.setEncoding('utf8')
-        res.once('end', onEnd)
-      }
-    )
+    const req = http.request('http://example.test', { timeout: 5000 }, res => {
+      res.setEncoding('utf8')
+      res.once('end', onEnd)
+    })
 
     req.on('timeout', function () {
       expect(onEnd).not.to.have.been.called()
@@ -75,19 +71,19 @@ describe('`socketDelay()`', () => {
     req.end()
   })
 
-  it('does not emit a timeout when timeout > socketDelay', (done) => {
+  it('does not emit a timeout when timeout > socketDelay', done => {
     const responseText = 'okeydoke!'
     const scope = nock('http://example.test')
       .get('/')
       .socketDelay(10000)
       .reply(200, responseText)
 
-    const req = http.request('http://example.test', (res) => {
+    const req = http.request('http://example.test', res => {
       res.setEncoding('utf8')
 
       let body = ''
 
-      res.on('data', (chunk) => {
+      res.on('data', chunk => {
         body += chunk
       })
 
@@ -107,7 +103,7 @@ describe('`socketDelay()`', () => {
 })
 
 describe('`Socket#setTimeout()`', () => {
-  it('adds callback as a one-time listener for parity with a real socket', (done) => {
+  it('adds callback as a one-time listener for parity with a real socket', done => {
     nock('http://example.test')
       .get('/')
       .socketDelay(100)
@@ -117,15 +113,15 @@ describe('`Socket#setTimeout()`', () => {
       done()
     }
 
-    http.get('http://example.test').on('socket', (socket) => {
+    http.get('http://example.test').on('socket', socket => {
       socket.setTimeout(50, onTimeout)
     })
   })
 
-  it('can be called without a callback', (done) => {
+  it('can be called without a callback', done => {
     nock('http://example.test').get('/').socketDelay(100).reply()
 
-    http.get('http://example.test').on('socket', (socket) => {
+    http.get('http://example.test').on('socket', socket => {
       socket.setTimeout(50)
 
       socket.on('timeout', () => {

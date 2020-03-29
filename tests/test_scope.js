@@ -19,8 +19,8 @@ it('scope exposes interceptors', () => {
   expect(scopes).to.be.an.instanceOf(Array)
   expect(scopes).to.have.lengthOf.at.least(1)
 
-  scopes.forEach((scope) => {
-    scope.interceptors.forEach((interceptor) => {
+  scopes.forEach(scope => {
+    scope.interceptors.forEach(interceptor => {
       expect(interceptor).to.be.an.instanceOf(Interceptor)
       interceptor.delayConnection(100)
     })
@@ -157,7 +157,7 @@ describe('filteringRequestBody()', () => {
     const onFilteringRequestBody = sinon.spy()
 
     const scope = nock('http://example.test')
-      .filteringRequestBody((body) => {
+      .filteringRequestBody(body => {
         onFilteringRequestBody()
         expect(body).to.equal('mamma mia')
         return 'mamma tua'

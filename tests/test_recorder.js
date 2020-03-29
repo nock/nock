@@ -233,7 +233,7 @@ it('records and replays objects correctly', async () => {
 
   const response2 = await got(origin)
   expect(response2.body).to.equal(exampleText)
-  nocks.forEach((nock) => nock.done())
+  nocks.forEach(nock => nock.done())
 })
 
 it('records and replays correctly with filteringRequestBody', async () => {
@@ -273,12 +273,12 @@ it('records and replays correctly with filteringRequestBody', async () => {
 
   const response2 = await got(origin)
   expect(response2.body).to.equal(responseBody)
-  nocks.forEach((nock) => nock.done())
+  nocks.forEach(nock => nock.done())
   expect(onFilteringRequestBody).to.have.been.calledOnce()
 })
 
 // https://github.com/nock/nock/issues/29
-it('http request without callback should not crash', (done) => {
+it('http request without callback should not crash', done => {
   const serverFinished = sinon.spy()
 
   const requestListener = (request, response) => {
@@ -361,7 +361,7 @@ it('when request body is json, it goes unstringified in objects', async () => {
   expect(recorded[0].body).to.be.an('object').and.deep.equal(payload)
 })
 
-it('records nonstandard ports', (done) => {
+it('records nonstandard ports', done => {
   nock.restore()
   nock.recorder.clear()
   expect(nock.recorder.play()).to.be.empty()
@@ -387,7 +387,7 @@ it('records nonstandard ports', (done) => {
         port,
         path: '/',
       },
-      (res) => {
+      res => {
         res.resume()
         res.once('end', () => {
           nock.restore()
@@ -409,7 +409,7 @@ it('records nonstandard ports', (done) => {
   })
 })
 
-it('`req.end()` accepts and calls a callback when recording', (done) => {
+it('`req.end()` accepts and calls a callback when recording', done => {
   const onEnd = sinon.spy()
 
   const requestListener = (request, response) => {
@@ -431,7 +431,7 @@ it('`req.end()` accepts and calls a callback when recording', (done) => {
         path: '/',
         method: 'GET',
       },
-      (res) => {
+      res => {
         expect(onEnd).to.have.been.calledOnce()
         expect(res.statusCode).to.equal(200)
         res.on('end', () => {
@@ -446,12 +446,12 @@ it('`req.end()` accepts and calls a callback when recording', (done) => {
 })
 
 // https://nodejs.org/api/http.html#http_request_end_data_encoding_callback
-it('when recording, when `req.end()` is called with only data and a callback, the callback is invoked and the data is sent', (done) => {
+it('when recording, when `req.end()` is called with only data and a callback, the callback is invoked and the data is sent', done => {
   const onEnd = sinon.spy()
 
   let requestBody = ''
   const requestListener = (request, response) => {
-    request.on('data', (data) => {
+    request.on('data', data => {
       requestBody += data
     })
     request.on('end', () => {
@@ -474,7 +474,7 @@ it('when recording, when `req.end()` is called with only data and a callback, th
         path: '/',
         method: 'POST',
       },
-      (res) => {
+      res => {
         expect(onEnd).to.have.been.calledOnce()
         expect(res.statusCode).to.equal(200)
 
@@ -502,7 +502,7 @@ it('`rec()` throws when reinvoked with already recorder requests', () => {
   )
 })
 
-it('records https correctly', (done) => {
+it('records https correctly', done => {
   const requestBody = '012345'
   const responseBody = '<html><body>example</body></html>'
 
@@ -530,7 +530,7 @@ it('records https correctly', (done) => {
           path: '/',
           rejectUnauthorized: false,
         },
-        (res) => {
+        res => {
           res.resume()
           res.once('end', () => {
             nock.restore()
@@ -551,7 +551,7 @@ it('records https correctly', (done) => {
   })
 })
 
-it('records request headers correctly as an object', (done) => {
+it('records request headers correctly as an object', done => {
   const requestListener = (request, response) => response.end()
 
   nock.restore()
@@ -574,7 +574,7 @@ it('records request headers correctly as an object', (done) => {
           method: 'GET',
           auth: 'foo:bar',
         },
-        (res) => {
+        res => {
           res.resume()
           res.once('end', () => {
             nock.restore()
@@ -664,7 +664,7 @@ it('records and replays gzipped nocks correctly', async () => {
   expect(response2.body).to.equal(exampleText)
   expect(response2.headers).to.include({ 'content-encoding': 'gzip' })
 
-  nocks.forEach((nock) => nock.done())
+  nocks.forEach(nock => nock.done())
 })
 
 it('records and replays the response body', async () => {
@@ -705,10 +705,10 @@ it('records and replays the response body', async () => {
 
   const response2 = await got(origin)
   expect(response2.body).to.equal(exampleBody)
-  nocks.forEach((nock) => nock.done())
+  nocks.forEach(nock => nock.done())
 })
 
-it('when encoding is set during recording, body is still recorded correctly', (done) => {
+it('when encoding is set during recording, body is still recorded correctly', done => {
   const responseBody = '<html><body>example</body></html>'
 
   const requestListener = (request, response) => {
@@ -728,11 +728,11 @@ it('when encoding is set during recording, body is still recorded correctly', (d
 
     const req = http.request(
       { host: 'localhost', port, path: '/', method: 'POST' },
-      (res) => {
+      res => {
         res.setEncoding('hex')
 
         const hexChunks = []
-        res.on('data', (data) => {
+        res.on('data', data => {
           hexChunks.push(data)
         })
 
@@ -759,7 +759,7 @@ it('when encoding is set during recording, body is still recorded correctly', (d
   })
 })
 
-it("doesn't record request headers by default", (done) => {
+it("doesn't record request headers by default", done => {
   const requestListener = (request, response) => {
     response.writeHead(200)
     response.end()
@@ -784,7 +784,7 @@ it("doesn't record request headers by default", (done) => {
           method: 'GET',
           auth: 'foo:bar',
         },
-        (res) => {
+        res => {
           res.resume()
           res.once('end', () => {
             nock.restore()
@@ -800,7 +800,7 @@ it("doesn't record request headers by default", (done) => {
   })
 })
 
-it('will call a custom logging function', (done) => {
+it('will call a custom logging function', done => {
   const requestListener = (request, response) => {
     response.writeHead(200)
     response.end()
@@ -824,7 +824,7 @@ it('will call a custom logging function', (done) => {
           method: 'GET',
           auth: 'foo:bar',
         },
-        (res) => {
+        res => {
           res.resume()
           res.once('end', () => {
             nock.restore()
@@ -839,7 +839,7 @@ it('will call a custom logging function', (done) => {
   })
 })
 
-it('use_separator:false is respected', (done) => {
+it('use_separator:false is respected', done => {
   const requestListener = (request, response) => {
     response.writeHead(200)
     response.end()
@@ -866,7 +866,7 @@ it('use_separator:false is respected', (done) => {
           method: 'GET',
           auth: 'foo:bar',
         },
-        (res) => {
+        res => {
           res.resume()
           res.once('end', () => {
             nock.restore()
@@ -882,7 +882,7 @@ it('use_separator:false is respected', (done) => {
   })
 })
 
-it('records request headers except user-agent if enable_reqheaders_recording is set to true', (done) => {
+it('records request headers except user-agent if enable_reqheaders_recording is set to true', done => {
   const requestListener = (request, response) => {
     response.writeHead(200)
     response.end()
@@ -908,7 +908,7 @@ it('records request headers except user-agent if enable_reqheaders_recording is 
           method: 'GET',
           auth: 'foo:bar',
         },
-        (res) => {
+        res => {
           res.resume()
           res.once('end', () => {
             nock.restore()
@@ -976,7 +976,7 @@ it('encodes the query parameters when not outputting objects', async () => {
 })
 
 // https://github.com/nock/nock/issues/193
-it('works with clients listening for readable', (done) => {
+it('works with clients listening for readable', done => {
   nock.restore()
   nock.recorder.clear()
   expect(nock.recorder.play()).to.be.empty()
@@ -998,7 +998,7 @@ it('works with clients listening for readable', (done) => {
           port,
           path: '/',
         },
-        (res) => {
+        res => {
           let readableCount = 0
           let chunkCount = 0
 
@@ -1081,7 +1081,7 @@ it('outputs query string arrays correctly', async () => {
     .and.include(`.query({"foo":["bar","baz"]})`)
 })
 
-it('removes query params from the path and puts them in query()', (done) => {
+it('removes query params from the path and puts them in query()', done => {
   const requestListener = (request, response) => {
     response.writeHead(200)
     response.end()
@@ -1101,7 +1101,7 @@ it('removes query params from the path and puts them in query()', (done) => {
           port,
           path: '/?param1=1&param2=2',
         },
-        (res) => {
+        res => {
           res.resume()
           res.once('end', () => {
             const recorded = nock.recorder.play()
@@ -1118,7 +1118,7 @@ it('removes query params from the path and puts them in query()', (done) => {
   })
 })
 
-it('respects http.request() consumers', (done) => {
+it('respects http.request() consumers', done => {
   const requestListener = (req, res) => {
     res.write('foo')
     setTimeout(() => {
@@ -1140,12 +1140,12 @@ it('respects http.request() consumers', (done) => {
         port,
         path: '/',
       },
-      (res) => {
+      res => {
         let buffer = Buffer.from('')
 
         setTimeout(() => {
           res
-            .on('data', (data) => {
+            .on('data', data => {
               buffer = Buffer.concat([buffer, data])
             })
             .on('end', () => {
@@ -1162,7 +1162,7 @@ it('respects http.request() consumers', (done) => {
   })
 })
 
-it('records and replays binary response correctly', (done) => {
+it('records and replays binary response correctly', done => {
   nock.restore()
   nock.recorder.clear()
   expect(nock.recorder.play()).to.be.empty()
@@ -1185,7 +1185,7 @@ it('records and replays binary response correctly', (done) => {
     response.end()
   }
 
-  servers.startHttpServer(requestListener).then((server) => {
+  servers.startHttpServer(requestListener).then(server => {
     const options = {
       method: 'PUT',
       host: 'localhost',
@@ -1197,10 +1197,10 @@ it('records and replays binary response correctly', (done) => {
       },
     }
 
-    const postRequest1 = http.request(options, (response) => {
+    const postRequest1 = http.request(options, response => {
       const data = []
 
-      response.on('data', (chunk) => {
+      response.on('data', chunk => {
         data.push(chunk)
       })
 
@@ -1209,7 +1209,7 @@ it('records and replays binary response correctly', (done) => {
 
         const recordedFixtures = nock.recorder.play()
 
-        server.close((error) => {
+        server.close(error => {
           server = undefined
           expect(error).to.be.undefined()
 
@@ -1218,10 +1218,10 @@ it('records and replays binary response correctly', (done) => {
           nock.define(recordedFixtures)
 
           // Send same post request again.
-          const postRequest2 = http.request(options, (response) => {
+          const postRequest2 = http.request(options, response => {
             const data = []
 
-            response.on('data', (chunk) => {
+            response.on('data', chunk => {
               data.push(chunk)
             })
 

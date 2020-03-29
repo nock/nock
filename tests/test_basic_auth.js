@@ -9,8 +9,8 @@ const got = require('./got_client')
 require('./cleanup_after_each')()
 require('./setup')
 
-test('basic auth with username and password', async (t) => {
-  t.beforeEach((done) => {
+test('basic auth with username and password', async t => {
+  t.beforeEach(done => {
     nock('http://example.test')
       .get('/test')
       .basicAuth({ user: 'foo', pass: 'bar' })
@@ -35,8 +35,8 @@ test('basic auth with username and password', async (t) => {
   })
 })
 
-test('basic auth with username only', async (t) => {
-  t.beforeEach((done) => {
+test('basic auth with username only', async t => {
+  t.beforeEach(done => {
     nock('http://example.test')
       .get('/test')
       .basicAuth({ user: 'foo' })

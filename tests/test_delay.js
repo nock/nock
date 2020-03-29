@@ -50,7 +50,7 @@ test('calling delay could cause timeout error', async () => {
 
   await assertRejects(
     got('http://example.test', { timeout: 100 }),
-    (err) => err.code === 'ETIMEDOUT'
+    err => err.code === 'ETIMEDOUT'
   )
 
   scope.done()
@@ -76,7 +76,7 @@ test('Body delay does not have impact on timeout', async () => {
   scope.done()
 })
 
-test('calling delay with "body" and "head" delays the response', (t) => {
+test('calling delay with "body" and "head" delays the response', t => {
   nock('http://example.test')
     .get('/')
     .delay({
@@ -87,7 +87,7 @@ test('calling delay with "body" and "head" delays the response', (t) => {
 
   const resStart = process.hrtime()
 
-  http.get('http://example.test', (res) => {
+  http.get('http://example.test', res => {
     checkDuration(resStart, 200)
 
     // const dataStart = process.hrtime()
@@ -209,7 +209,7 @@ test('using reply callback with delay can reply JSON', async () => {
   scope.done()
 })
 
-test('delay with invalid arguments', (t) => {
+test('delay with invalid arguments', t => {
   const interceptor = nock('http://example.test').get('/')
 
   expect(() => interceptor.delay('one million seconds')).to.throw(
@@ -312,7 +312,7 @@ test('delayConnection works with when you return a generic stream from the reply
   scope.done()
 })
 
-test('request with delayConnection and request.timeout', async (t) => {
+test('request with delayConnection and request.timeout', async t => {
   const scope = nock('http://example.test')
     .get('/')
     .delayConnection(1000)
@@ -320,7 +320,7 @@ test('request with delayConnection and request.timeout', async (t) => {
 
   await assertRejects(
     got('http://example.test', { timeout: 10 }),
-    (err) => err.code === 'ETIMEDOUT'
+    err => err.code === 'ETIMEDOUT'
   )
 
   scope.done()
