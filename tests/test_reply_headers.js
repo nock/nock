@@ -340,10 +340,7 @@ describe('`replyDate()`', () => {
   it('sends explicit date header with response', async () => {
     const date = new Date()
 
-    const scope = nock('http://example.test')
-      .replyDate(date)
-      .get('/')
-      .reply()
+    const scope = nock('http://example.test').replyDate(date).get('/').reply()
 
     const { headers } = await got('http://example.test/')
 
@@ -364,10 +361,7 @@ describe('`replyDate()`', () => {
     })
 
     it('sends date header with response', async () => {
-      const scope = nock('http://example.test')
-        .replyDate()
-        .get('/')
-        .reply()
+      const scope = nock('http://example.test').replyDate().get('/').reply()
 
       const req = got('http://example.test/')
       clock.tick()

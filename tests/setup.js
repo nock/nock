@@ -14,7 +14,7 @@ if (!global.context) {
 chai.use(dirtyChai)
 chai.use(sinonChai)
 
-afterEach(function() {
+afterEach(function () {
   nock.restore()
   nock.cleanAll()
   nock.enableNetConnect()

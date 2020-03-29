@@ -23,7 +23,7 @@ describe('dynamic `reply()` function', () => {
   it('can provide the status code and body by returning an array', async () => {
     const scope = nock('http://example.test')
       .get('/')
-      .reply(function() {
+      .reply(function () {
         return [201, 'DEF']
       })
 
@@ -37,7 +37,7 @@ describe('dynamic `reply()` function', () => {
   it('can provide the status code, body, and headers by returning an array', async () => {
     const scope = nock('http://example.test')
       .get('/')
-      .reply(function() {
+      .reply(function () {
         return [201, 'DEF', { 'X-Foo': 'bar' }]
       })
 
@@ -52,8 +52,8 @@ describe('dynamic `reply()` function', () => {
   it('should provide the status code and body by passing them to the asynchronous callback', async () => {
     const scope = nock('http://example.test')
       .get('/')
-      .reply(function(path, reqBody, cb) {
-        setTimeout(function() {
+      .reply(function (path, reqBody, cb) {
+        setTimeout(function () {
           cb(null, [201, 'GHI'])
         }, 1e3)
       })

@@ -21,9 +21,7 @@ describe('synchronous `reply()` function', () => {
 
       const { statusCode, body } = await got('http://example.test')
       expect(statusCode).to.equal(201)
-      expect(body)
-        .to.be.a('string')
-        .and.to.equal('OK!')
+      expect(body).to.be.a('string').and.to.equal('OK!')
       scope.done()
     })
 
@@ -49,9 +47,7 @@ describe('synchronous `reply()` function', () => {
 
       const { statusCode, body } = await got('http://example.test')
       expect(statusCode).to.equal(201)
-      expect(body)
-        .to.be.a('string')
-        .and.to.equal('123')
+      expect(body).to.be.a('string').and.to.equal('123')
       scope.done()
     })
 
@@ -62,9 +58,7 @@ describe('synchronous `reply()` function', () => {
 
       const { statusCode, body } = await got('http://example.test')
       expect(statusCode).to.equal(201)
-      expect(body)
-        .to.be.a('string')
-        .and.to.equal('[123]')
+      expect(body).to.be.a('string').and.to.equal('[123]')
       scope.done()
     })
 
@@ -75,9 +69,7 @@ describe('synchronous `reply()` function', () => {
 
       const { statusCode, body } = await got('http://example.test')
       expect(statusCode).to.equal(201)
-      expect(body)
-        .to.be.a('string')
-        .and.to.equal('false')
+      expect(body).to.be.a('string').and.to.equal('false')
       scope.done()
     })
 
@@ -88,9 +80,7 @@ describe('synchronous `reply()` function', () => {
 
       const { statusCode, body } = await got('http://example.test')
       expect(statusCode).to.equal(201)
-      expect(body)
-        .to.be.a('string')
-        .and.to.equal('null')
+      expect(body).to.be.a('string').and.to.equal('null')
       scope.done()
     })
 
@@ -303,9 +293,7 @@ describe('synchronous `reply()` function', () => {
       const { statusCode, body } = await got('http://example.test/')
 
       expect(statusCode).to.equal(202)
-      expect(body)
-        .to.be.a('string')
-        .and.to.to.equal('123')
+      expect(body).to.be.a('string').and.to.to.equal('123')
       scope.done()
     })
 
@@ -339,12 +327,9 @@ describe('synchronous `reply()` function', () => {
         .reply(() => 'ABC')
 
       await assertRejects(got('http://example.test/abc'), err => {
-        expect(err)
-          .to.be.an.instanceOf(Error)
-          .and.include({
-            message:
-              'A single function provided to .reply MUST return an array',
-          })
+        expect(err).to.be.an.instanceOf(Error).and.include({
+          message: 'A single function provided to .reply MUST return an array',
+        })
         return true
       })
     })
@@ -355,11 +340,9 @@ describe('synchronous `reply()` function', () => {
         .reply(() => [])
 
       await assertRejects(got('http://example.test/abc'), err => {
-        expect(err)
-          .to.be.an.instanceOf(Error)
-          .and.include({
-            message: 'Invalid undefined value for status code',
-          })
+        expect(err).to.be.an.instanceOf(Error).and.include({
+          message: 'Invalid undefined value for status code',
+        })
         return true
       })
     })
@@ -378,12 +361,10 @@ describe('synchronous `reply()` function', () => {
         ])
 
       await assertRejects(got('http://example.test/abc'), err => {
-        expect(err)
-          .to.be.an.instanceOf(Error)
-          .and.include({
-            message:
-              'The array returned from the .reply callback contains too many values',
-          })
+        expect(err).to.be.an.instanceOf(Error).and.include({
+          message:
+            'The array returned from the .reply callback contains too many values',
+        })
         return true
       })
     })

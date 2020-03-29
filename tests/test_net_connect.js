@@ -14,9 +14,7 @@ describe('`disableNetConnect()`', () => {
   it('prevents connection to unmocked hosts', async () => {
     nock.disableNetConnect()
 
-    nock('http://www.example.test')
-      .get('/')
-      .reply(200)
+    nock('http://www.example.test').get('/').reply(200)
 
     await assertRejects(
       got('https://other.example.test/'),

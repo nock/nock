@@ -40,9 +40,7 @@ test("when the path doesn't include a leading slash it raises an error", t => {
 })
 
 test('get gets mocked', async t => {
-  const scope = nock('http://example.test')
-    .get('/')
-    .reply(200, 'Hello World!')
+  const scope = nock('http://example.test').get('/').reply(200, 'Hello World!')
 
   const { statusCode, body } = await got('http://example.test/', {
     responseType: 'buffer',
@@ -70,9 +68,7 @@ test('get gets mocked with relative base path', async t => {
 })
 
 test('post', async t => {
-  const scope = nock('http://example.test')
-    .post('/form')
-    .reply(201, 'OK!')
+  const scope = nock('http://example.test').post('/form').reply(201, 'OK!')
 
   const { statusCode, body } = await got.post('http://example.test/form', {
     responseType: 'buffer',
@@ -85,9 +81,7 @@ test('post', async t => {
 })
 
 test('post with empty response body', async t => {
-  const scope = nock('http://example.test')
-    .post('/form')
-    .reply()
+  const scope = nock('http://example.test').post('/form').reply()
 
   const { statusCode, body } = await got.post('http://example.test/form', {
     responseType: 'buffer',
@@ -102,9 +96,7 @@ test('post with empty response body', async t => {
 test('post, lowercase', t => {
   const onData = sinon.spy()
 
-  const scope = nock('http://example.test')
-    .post('/form')
-    .reply(200, 'OK!')
+  const scope = nock('http://example.test').post('/form').reply(200, 'OK!')
 
   // Since this is testing a lowercase `method`, it's using the `http` module.
   const req = http.request(
@@ -172,9 +164,7 @@ test('post with chaining on call', async t => {
 })
 
 test('delete request', async t => {
-  const scope = nock('https://example.test')
-    .delete('/')
-    .reply(204)
+  const scope = nock('https://example.test').delete('/').reply(204)
 
   const { statusCode } = await got.delete('https://example.test')
 
@@ -199,9 +189,7 @@ test('reply with callback and filtered path and body', async t => {
 })
 
 test('head', async t => {
-  const scope = nock('http://example.test')
-    .head('/')
-    .reply(201, 'OK!')
+  const scope = nock('http://example.test').head('/').reply(201, 'OK!')
 
   const { statusCode } = await got.head('http://example.test/')
 
@@ -242,15 +230,11 @@ test('chaining', async t => {
 })
 
 test('encoding', async t => {
-  const scope = nock('http://example.test')
-    .get('/')
-    .reply(200, 'Hello World!')
+  const scope = nock('http://example.test').get('/').reply(200, 'Hello World!')
 
   const { body } = await got('http://example.test/', { encoding: 'base64' })
 
-  expect(body)
-    .to.be.a('string')
-    .and.equal('SGVsbG8gV29ybGQh')
+  expect(body).to.be.a('string').and.equal('SGVsbG8gV29ybGQh')
 
   scope.done()
 })
@@ -273,9 +257,7 @@ test('on interceptor, filter path with function', async t => {
 
 // TODO: Move to test_request_overrider.
 test('abort request', t => {
-  const scope = nock('http://example.test')
-    .get('/hey')
-    .reply(200, 'nobody')
+  const scope = nock('http://example.test').get('/hey').reply(200, 'nobody')
 
   const req = http.request({
     host: 'example.test',
@@ -335,9 +317,7 @@ test('same URI', async t => {
 
 // TODO Should this test be kept?
 test('can use hostname instead of host', t => {
-  const scope = nock('http://example.test')
-    .get('/')
-    .reply(200, 'Hello World!')
+  const scope = nock('http://example.test').get('/').reply(200, 'Hello World!')
 
   const req = http.request(
     {
@@ -360,9 +340,7 @@ test('can use hostname instead of host', t => {
 })
 
 test('hostname is case insensitive', t => {
-  const scope = nock('http://example.test')
-    .get('/path')
-    .reply()
+  const scope = nock('http://example.test').get('/path').reply()
 
   const req = http.request(
     {
@@ -379,9 +357,7 @@ test('hostname is case insensitive', t => {
 })
 
 test('can take a port', async t => {
-  const scope = nock('http://example.test:3333')
-    .get('/')
-    .reply()
+  const scope = nock('http://example.test:3333').get('/').reply()
 
   const { statusCode } = await got('http://example.test:3333/')
 
@@ -390,9 +366,7 @@ test('can take a port', async t => {
 })
 
 test('can use https', async t => {
-  const scope = nock('https://example.test')
-    .get('/')
-    .reply()
+  const scope = nock('https://example.test').get('/').reply()
 
   const { statusCode } = await got('https://example.test/', {
     responseType: 'buffer',
@@ -403,9 +377,7 @@ test('can use https', async t => {
 })
 
 test('emits error when listeners are added after `req.end()` call', t => {
-  nock('http://example.test')
-    .get('/')
-    .reply()
+  nock('http://example.test').get('/').reply()
 
   const req = http.request(
     {
@@ -436,9 +408,7 @@ test('emits error when listeners are added after `req.end()` call', t => {
 })
 
 test('emits error if https route is missing', t => {
-  nock('https://example.test')
-    .get('/')
-    .reply(200, 'Hello World!')
+  nock('https://example.test').get('/').reply(200, 'Hello World!')
 
   const req = https.request(
     {
@@ -467,9 +437,7 @@ test('emits error if https route is missing', t => {
 })
 
 test('emits error if https route is missing', t => {
-  nock('https://example.test:123')
-    .get('/')
-    .reply(200, 'Hello World!')
+  nock('https://example.test:123').get('/').reply(200, 'Hello World!')
 
   const req = https.request(
     {
@@ -500,12 +468,8 @@ test('emits error if https route is missing', t => {
 })
 
 test('scopes are independent', async t => {
-  const scope1 = nock('http://example.test')
-    .get('/')
-    .reply(200, 'Hello World!')
-  const scope2 = nock('http://example.test')
-    .get('/')
-    .reply(200, 'Hello World!')
+  const scope1 = nock('http://example.test').get('/').reply(200, 'Hello World!')
+  const scope2 = nock('http://example.test').get('/').reply(200, 'Hello World!')
 
   await got('http://example.test/')
 
@@ -514,13 +478,9 @@ test('scopes are independent', async t => {
 })
 
 test('two scopes with the same request are consumed', async t => {
-  const scope1 = nock('http://example.test')
-    .get('/')
-    .reply(200, 'Hello World!')
+  const scope1 = nock('http://example.test').get('/').reply(200, 'Hello World!')
 
-  const scope2 = nock('http://example.test')
-    .get('/')
-    .reply(200, 'Hello World!')
+  const scope2 = nock('http://example.test').get('/').reply(200, 'Hello World!')
 
   await got('http://example.test/')
   await got('http://example.test/')
@@ -553,7 +513,7 @@ test('username and password works', t => {
 test('Matches with a username and password in the URL', async t => {
   const scope = nock('http://example.test')
     .get('/abc')
-    .reply(function() {
+    .reply(function () {
       // TODO Investigate why we don't get an authorization header.
       // expect(this.req.headers).to.include({ Authorization: 'foobar' })
       return [200]
@@ -566,9 +526,7 @@ test('Matches with a username and password in the URL', async t => {
 })
 
 test('different port works', t => {
-  const scope = nock('http://example.test:8081')
-    .get('/')
-    .reply()
+  const scope = nock('http://example.test:8081').get('/').reply()
 
   http
     .request(
@@ -586,9 +544,7 @@ test('different port works', t => {
 })
 
 test('explicitly specifiying port 80 works', t => {
-  const scope = nock('http://example.test:80')
-    .get('/')
-    .reply()
+  const scope = nock('http://example.test:80').get('/').reply()
 
   http
     .request(
@@ -629,9 +585,7 @@ test('post with object', t => {
 test('accept string as request target', t => {
   const responseBody = 'Hello World!'
   const onData = sinon.spy()
-  const scope = nock('http://example.test')
-    .get('/')
-    .reply(200, responseBody)
+  const scope = nock('http://example.test').get('/').reply(200, responseBody)
 
   http.get('http://example.test', res => {
     expect(res.statusCode).to.equal(200)
@@ -653,11 +607,9 @@ test('accept string as request target', t => {
 test('superagent works', t => {
   const responseText = 'Yay superagent!'
   const headers = { 'Content-Type': 'text/plain' }
-  nock('http://example.test')
-    .get('/somepath')
-    .reply(200, responseText, headers)
+  nock('http://example.test').get('/somepath').reply(200, responseText, headers)
 
-  superagent.get('http://example.test/somepath').end(function(err, res) {
+  superagent.get('http://example.test/somepath').end(function (err, res) {
     t.error(err)
     t.equal(res.text, responseText)
     t.end()
@@ -671,7 +623,7 @@ test('superagent works with query string', t => {
     .get('/somepath?a=b')
     .reply(200, responseText, headers)
 
-  superagent.get('http://example.test/somepath?a=b').end(function(err, res) {
+  superagent.get('http://example.test/somepath?a=b').end(function (err, res) {
     t.error(err)
     t.equal(res.text, responseText)
     t.end()
@@ -679,14 +631,12 @@ test('superagent works with query string', t => {
 })
 
 test('superagent posts', t => {
-  nock('http://example.test')
-    .post('/somepath?b=c')
-    .reply(204)
+  nock('http://example.test').post('/somepath?b=c').reply(204)
 
   superagent
     .post('http://example.test/somepath?b=c')
     .send('some data')
-    .end(function(err, res) {
+    .end(function (err, res) {
       t.error(err)
       t.equal(res.status, 204)
       t.end()
@@ -704,9 +654,7 @@ test('sending binary and receiving JSON should work', async t => {
     headers: { Accept: 'application/json', 'Content-Length': 23861 },
   })
   expect(statusCode).to.equal(201)
-  expect(body)
-    .to.be.a('string')
-    .and.have.lengthOf(12)
+  expect(body).to.be.a('string').and.have.lengthOf(12)
   expect(JSON.parse(body)).to.deep.equal({ foo: '61' })
   scope.done()
 })
@@ -723,7 +671,7 @@ test('test request timeout option', t => {
     timeout: 2000,
   }
 
-  mikealRequest(options, function(err, res, body) {
+  mikealRequest(options, function (err, res, body) {
     t.strictEqual(err, null)
     t.equal(body, '{"foo":"bar"}')
     t.end()
@@ -800,9 +748,7 @@ test('different subdomain with reply callback and filtering scope', async t => {
 
 // TODO: Rewrite using got or http.
 test('mocking succeeds even when host request header is not specified', t => {
-  nock('http://example.test')
-    .post('/resource')
-    .reply(200, { status: 'ok' })
+  nock('http://example.test').post('/resource').reply(200, { status: 'ok' })
 
   mikealRequest(
     {
@@ -813,7 +759,7 @@ test('mocking succeeds even when host request header is not specified', t => {
         'X-Auth-TOKEN': 'apptoken',
       },
     },
-    function(err, res, body) {
+    function (err, res, body) {
       t.type(err, 'null')
       expect(res.statusCode).to.equal(200)
       t.end()
@@ -824,9 +770,7 @@ test('mocking succeeds even when host request header is not specified', t => {
 // TODO: Investigate the underlying issue.
 // https://github.com/nock/nock/issues/158
 test('mikeal/request with strictSSL: true', t => {
-  nock('https://example.test')
-    .post('/what')
-    .reply(200, { status: 'ok' })
+  nock('https://example.test').post('/what').reply(200, { status: 'ok' })
 
   mikealRequest(
     {
@@ -834,7 +778,7 @@ test('mikeal/request with strictSSL: true', t => {
       uri: 'https://example.test/what',
       strictSSL: true,
     },
-    function(err, res) {
+    function (err, res) {
       expect(err).to.be.null()
       expect(res.statusCode).to.deep.equal(200)
       t.end()
@@ -935,12 +879,8 @@ test(
   'match hostname as regex and string in tandem',
   { todo: true },
   async t => {
-    const scope1 = nock(/.*/)
-      .get('/hello/world')
-      .reply()
-    const scope2 = nock('http://example.test')
-      .get('/hello/planet')
-      .reply()
+    const scope1 = nock(/.*/).get('/hello/world').reply()
+    const scope2 = nock('http://example.test').get('/hello/planet').reply()
 
     const response1 = await got('http://example.test/hello/world')
     expect(response1.statusCode).to.equal(200)
@@ -956,7 +896,7 @@ test('match domain using intercept callback', async t => {
   const validUrl = ['/cats', '/dogs']
 
   nock('http://example.test')
-    .get(function(uri) {
+    .get(function (uri) {
       return validUrl.indexOf(uri) >= 0
     })
     .reply(200, 'Match intercept')
@@ -1015,9 +955,7 @@ test('match path using function', async t => {
 })
 
 test('you must setup an interceptor for each request', async t => {
-  nock('http://example.test')
-    .get('/hey')
-    .reply(200, 'First match')
+  nock('http://example.test').get('/hey').reply(200, 'First match')
 
   const { statusCode, body } = await got('http://example.test/hey')
   expect(statusCode).to.equal(200)
@@ -1070,9 +1008,7 @@ test('match domain and path using regexp', async t => {
 
 // https://github.com/nock/nock/issues/1003
 test('correctly parse request without specified path', t => {
-  const scope1 = nock('https://example.test')
-    .get('/')
-    .reply(200)
+  const scope1 = nock('https://example.test').get('/').reply(200)
 
   https
     .request({ hostname: 'example.test' }, res => {
@@ -1139,9 +1075,7 @@ test('no new keys were added to the global namespace', t => {
 // These tests use `http` directly because `got` never calls `http` with the
 // three arg form.
 test('first arg as URL instance', t => {
-  const scope = nock('http://example.test')
-    .get('/')
-    .reply()
+  const scope = nock('http://example.test').get('/').reply()
 
   http.get(new url.URL('http://example.test'), () => {
     scope.done()
@@ -1189,10 +1123,7 @@ test('works when headers are removed on the socket event', t => {
     const proxyReq = http.request({
       host: 'example.test',
       // Get the path from the incoming request and pass it through.
-      path: `/${request.url
-        .split('/')
-        .slice(1)
-        .join('/')}`,
+      path: `/${request.url.split('/').slice(1).join('/')}`,
       headers: request.headers,
     })
 

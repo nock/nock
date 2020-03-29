@@ -105,10 +105,7 @@ describe('repeating', () => {
   })
 
   it('`isDone()` considers repeated responses', async () => {
-    const scope = nock('http://example.test')
-      .get('/')
-      .times(2)
-      .reply(204)
+    const scope = nock('http://example.test').get('/').times(2).reply(204)
 
     // eslint-disable-next-line no-unused-vars
     for (const _ of Array(2)) {

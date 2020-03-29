@@ -29,9 +29,7 @@ it('scope exposes interceptors', () => {
 
 describe('`Scope#constructor`', () => {
   it('accepts the output of url.parse', async () => {
-    const scope = nock(url.parse('http://example.test'))
-      .get('/')
-      .reply()
+    const scope = nock(url.parse('http://example.test')).get('/').reply()
 
     const { statusCode } = await got('http://example.test')
     expect(statusCode).to.equal(200)
@@ -39,9 +37,7 @@ describe('`Scope#constructor`', () => {
   })
 
   it.skip('accepts a WHATWG URL instance', async () => {
-    const scope = nock(new url.URL('http://example.test'))
-      .get('/')
-      .reply()
+    const scope = nock(new url.URL('http://example.test')).get('/').reply()
 
     const { statusCode } = await got('http://example.test')
     expect(statusCode).to.equal(200)
@@ -57,9 +53,7 @@ describe('`Scope#constructor`', () => {
 
 describe('`Scope#remove()`', () => {
   it('removes an active mock', () => {
-    const scope = nock('http://example.test')
-      .get('/')
-      .reply(200)
+    const scope = nock('http://example.test').get('/').reply(200)
     const key = 'GET http://example.test:80/'
 
     // Confidence check.
@@ -73,10 +67,7 @@ describe('`Scope#remove()`', () => {
   })
 
   it('when a mock is persisted, does nothing', () => {
-    const scope = nock('http://example.test')
-      .persist()
-      .get('/')
-      .reply(200)
+    const scope = nock('http://example.test').persist().get('/').reply(200)
     const key = 'GET http://example.test:80/'
 
     // Confidence check.
@@ -90,9 +81,7 @@ describe('`Scope#remove()`', () => {
   })
 
   it('when the key is nonexistent, does nothing', () => {
-    const scope = nock('http://example.test')
-      .get('/')
-      .reply(200)
+    const scope = nock('http://example.test').get('/').reply(200)
     const key = 'GET http://example.test:80/'
 
     // Confidence check.
@@ -114,9 +103,7 @@ it('loadDefs throws expected when fs is not available', () => {
 
 describe('`Scope#isDone()`', () => {
   it('returns false while a mock is pending, and true after it is consumed', async () => {
-    const scope = nock('http://example.test')
-      .get('/')
-      .reply()
+    const scope = nock('http://example.test').get('/').reply()
 
     expect(scope.isDone()).to.be.false()
 
@@ -128,8 +115,8 @@ describe('`Scope#isDone()`', () => {
   })
 })
 
-describe('`filteringPath()`', function() {
-  it('filter path with function', async function() {
+describe('`filteringPath()`', function () {
+  it('filter path with function', async function () {
     const scope = nock('http://example.test')
       .filteringPath(() => '/?a=2&b=1')
       .get('/?a=2&b=1')

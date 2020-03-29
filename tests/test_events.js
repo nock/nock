@@ -12,9 +12,7 @@ require('./setup')
 function ignore() {}
 
 it('emits request and replied events when request has no body', async () => {
-  const scope = nock('http://example.test')
-    .get('/')
-    .reply()
+  const scope = nock('http://example.test').get('/').reply()
 
   const onRequest = sinon.spy()
   const onReplied = sinon.spy()
@@ -32,14 +30,12 @@ it('emits request and replied events when request has no body', async () => {
 it('emits request and request body', async () => {
   const data = 'example=123'
 
-  const scope = nock('http://example.test')
-    .post('/please')
-    .reply()
+  const scope = nock('http://example.test').post('/please').reply()
 
   const onRequest = sinon.spy()
   const onReplied = sinon.spy()
 
-  scope.on('request', function(req, interceptor, body) {
+  scope.on('request', function (req, interceptor, body) {
     onRequest()
     expect(req.path).to.equal('/please')
     expect(interceptor.interceptionCounter).to.equal(0)
@@ -47,7 +43,7 @@ it('emits request and request body', async () => {
     expect(onReplied).to.not.have.been.called()
   })
 
-  scope.on('replied', function(req, interceptor) {
+  scope.on('replied', function (req, interceptor) {
     onReplied()
     expect(req.path).to.equal('/please')
     expect(interceptor.interceptionCounter).to.equal(1)
@@ -75,9 +71,7 @@ it('emits no match when no match and no mock', done => {
 })
 
 it('emits no match when no match and mocked', done => {
-  nock('http://example.test')
-    .get('/')
-    .reply(418)
+  nock('http://example.test').get('/').reply(418)
 
   nock.emitter.on('no match', req => {
     expect(req.path).to.equal('/definitelymaybe')

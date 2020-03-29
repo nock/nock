@@ -14,23 +14,21 @@ describe('Direct use of `ClientRequest`', () => {
   it('should intercept GET requests', done => {
     const dataSpy = sinon.spy()
 
-    const scope = nock('http://example.test')
-      .get('/dsad')
-      .reply(202, 'HEHE!')
+    const scope = nock('http://example.test').get('/dsad').reply(202, 'HEHE!')
 
     const req = new http.ClientRequest({
       host: 'example.test',
       path: '/dsad',
     })
 
-    req.on('response', function(res) {
+    req.on('response', function (res) {
       expect(res.statusCode).to.equal(202)
-      res.on('end', function() {
+      res.on('end', function () {
         expect(dataSpy).to.have.been.calledOnce()
         scope.done()
         done()
       })
-      res.on('data', function(data) {
+      res.on('data', function (data) {
         dataSpy()
         expect(data).to.be.instanceof(Buffer)
         expect(data.toString()).to.equal('HEHE!')
@@ -54,14 +52,14 @@ describe('Direct use of `ClientRequest`', () => {
     })
     req.write('heyhey this is the body')
 
-    req.on('response', function(res) {
+    req.on('response', function (res) {
       expect(res.statusCode).to.equal(201)
-      res.on('end', function() {
+      res.on('end', function () {
         expect(dataSpy).to.have.been.calledOnce()
         scope.done()
         done()
       })
-      res.on('data', function(data) {
+      res.on('data', function (data) {
         dataSpy()
         expect(data).to.be.instanceof(Buffer)
         expect(data.toString()).to.equal('DOOONE!')
@@ -72,9 +70,7 @@ describe('Direct use of `ClientRequest`', () => {
   })
 
   it('should execute optional callback', done => {
-    const scope = nock('http://example.test')
-      .get('/')
-      .reply(201)
+    const scope = nock('http://example.test').get('/').reply(201)
 
     const reqOpts = {
       host: 'example.test',

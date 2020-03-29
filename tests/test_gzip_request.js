@@ -14,7 +14,7 @@ it('should accept and decode gzip encoded application/json', done => {
 
   nock('http://example.test')
     .post('/')
-    .reply(function(url, actual) {
+    .reply(function (url, actual) {
       expect(actual).to.deep.equal(message)
       done()
       return [200]
@@ -43,7 +43,7 @@ it('should accept and decode deflate encoded application/json', done => {
 
   nock('http://example.test')
     .post('/')
-    .reply(function(url, actual) {
+    .reply(function (url, actual) {
       expect(actual).to.deep.equal(message)
       done()
       return [200]

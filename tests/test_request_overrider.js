@@ -46,9 +46,7 @@ describe('Request Overrider', () => {
   })
 
   it('emits the response event', done => {
-    const scope = nock('http://example.test')
-      .get('/')
-      .reply()
+    const scope = nock('http://example.test').get('/').reply()
 
     const req = http.get('http://example.test')
 
@@ -124,9 +122,7 @@ describe('Request Overrider', () => {
 
   // https://github.com/nock/nock/issues/1509
   it('end callback called when end has callback, but no buffer', done => {
-    const scope = nock('http://example.test')
-      .post('/')
-      .reply()
+    const scope = nock('http://example.test').post('/').reply()
 
     const reqEndCallback = sinon.spy()
 
@@ -154,9 +150,7 @@ describe('Request Overrider', () => {
   })
 
   it('request.end called with all three arguments', done => {
-    const scope = nock('http://example.test')
-      .post('/', 'foobar')
-      .reply()
+    const scope = nock('http://example.test').post('/', 'foobar').reply()
 
     const reqEndCallback = sinon.spy()
 
@@ -181,9 +175,7 @@ describe('Request Overrider', () => {
   })
 
   it('request.end called with only data and encoding', done => {
-    const scope = nock('http://example.test')
-      .post('/', 'foobar')
-      .reply()
+    const scope = nock('http://example.test').post('/', 'foobar').reply()
 
     const req = http.request(
       {
@@ -205,9 +197,7 @@ describe('Request Overrider', () => {
   })
 
   it('request.end called with only data and a callback', done => {
-    const scope = nock('http://example.test')
-      .post('/', 'foobar')
-      .reply()
+    const scope = nock('http://example.test').post('/', 'foobar').reply()
 
     const reqEndCallback = sinon.spy()
 
@@ -232,9 +222,7 @@ describe('Request Overrider', () => {
 
   // http://github.com/nock/nock/issues/139
   it('should emit "finish" on the request before emitting "end" on the response', done => {
-    const scope = nock('http://example.test')
-      .post('/')
-      .reply()
+    const scope = nock('http://example.test').post('/').reply()
 
     const onFinish = sinon.spy()
 
@@ -266,9 +254,7 @@ describe('Request Overrider', () => {
   })
 
   it('should update the writable attributes before emitting the "finish" event', done => {
-    nock('http://example.test')
-      .post('/')
-      .reply()
+    nock('http://example.test').post('/').reply()
 
     const req = http.request({
       host: 'example.test',
@@ -381,9 +367,7 @@ describe('Request Overrider', () => {
   })
 
   it('has a req property on the response', done => {
-    const scope = nock('http://example.test')
-      .get('/like-wtf')
-      .reply(200)
+    const scope = nock('http://example.test').get('/like-wtf').reply(200)
 
     const req = http.request('http://example.test/like-wtf', res => {
       res.on('end', () => {
@@ -416,9 +400,7 @@ describe('Request Overrider', () => {
   })
 
   it('.setNoDelay', done => {
-    nock('http://example.test')
-      .get('/yay')
-      .reply(200, 'Hi')
+    nock('http://example.test').get('/yay').reply(200, 'Hi')
 
     const req = http.request(
       {
@@ -441,13 +423,11 @@ describe('Request Overrider', () => {
   })
 
   it('request emits socket', done => {
-    nock('http://example.test')
-      .get('/')
-      .reply(200, 'hey')
+    nock('http://example.test').get('/').reply(200, 'hey')
 
     const req = http.get('http://example.test')
     // Using `this`, so can't use arrow function.
-    req.once('socket', function(socket) {
+    req.once('socket', function (socket) {
       // https://github.com/nock/nock/pull/769
       // https://github.com/nock/nock/pull/779
       expect(this).to.equal(req)
@@ -457,9 +437,7 @@ describe('Request Overrider', () => {
   })
 
   it('socket is shared and aliased correctly', done => {
-    nock('http://example.test')
-      .get('/')
-      .reply()
+    nock('http://example.test').get('/').reply()
 
     const req = http.get('http://example.test')
 
@@ -473,9 +451,7 @@ describe('Request Overrider', () => {
   })
 
   it('socket emits connect and secureConnect', done => {
-    nock('https://example.test')
-      .post('/')
-      .reply(200, 'hey')
+    nock('https://example.test').post('/').reply(200, 'hey')
 
     const req = https.request({
       host: 'example.test',
@@ -506,9 +482,7 @@ describe('Request Overrider', () => {
   })
 
   it('socket has address() method', done => {
-    nock('http://example.test')
-      .get('/')
-      .reply()
+    nock('http://example.test').get('/').reply()
 
     const req = http.get('http://example.test')
     req.once('socket', socket => {
@@ -522,9 +496,7 @@ describe('Request Overrider', () => {
   })
 
   it('socket has address() method, https/IPv6', done => {
-    nock('https://example.test')
-      .get('/')
-      .reply()
+    nock('https://example.test').get('/').reply()
 
     const req = https.get('https://example.test', { family: 6 })
     req.once('socket', socket => {
@@ -538,9 +510,7 @@ describe('Request Overrider', () => {
   })
 
   it('socket has setKeepAlive() method', done => {
-    nock('http://example.test')
-      .get('/')
-      .reply(200, 'hey')
+    nock('http://example.test').get('/').reply(200, 'hey')
 
     const req = http.get('http://example.test')
     req.once('socket', socket => {
@@ -550,15 +520,11 @@ describe('Request Overrider', () => {
   })
 
   it('socket has ref() and unref() method', done => {
-    nock('http://example.test')
-      .get('/')
-      .reply(200, 'hey')
+    nock('http://example.test').get('/').reply(200, 'hey')
 
     const req = http.get('http://example.test')
     req.once('socket', socket => {
-      expect(socket)
-        .to.respondTo('ref')
-        .and.to.to.respondTo('unref')
+      expect(socket).to.respondTo('ref').and.to.to.respondTo('unref')
       // FIXME: These functions, and many of the other Socket functions, should
       // actually return `this`.
       // https://github.com/nock/nock/pull/1770#discussion_r343425097
@@ -569,9 +535,7 @@ describe('Request Overrider', () => {
   })
 
   it('socket has destroy() method', done => {
-    nock('http://example.test')
-      .get('/')
-      .reply(200, 'hey')
+    nock('http://example.test').get('/').reply(200, 'hey')
 
     const req = http.get('http://example.test')
     req.once('socket', socket => {
@@ -581,26 +545,20 @@ describe('Request Overrider', () => {
   })
 
   it('socket has getPeerCertificate() method which returns a random base64 string', done => {
-    nock('http://example.test')
-      .get('/')
-      .reply()
+    nock('http://example.test').get('/').reply()
 
     const req = http.get('http://example.test')
     req.once('socket', socket => {
       const first = socket.getPeerCertificate()
       const second = socket.getPeerCertificate()
       expect(first).to.be.a('string')
-      expect(second)
-        .to.be.a('string')
-        .and.not.equal(first)
+      expect(second).to.be.a('string').and.not.equal(first)
       done()
     })
   })
 
   it('abort destroys socket', done => {
-    nock('http://example.test')
-      .get('/')
-      .reply(200, 'hey')
+    nock('http://example.test').get('/').reply(200, 'hey')
 
     const req = http.get('http://example.test')
     // Ignore errors.
@@ -622,9 +580,7 @@ describe('Request Overrider', () => {
 
   // https://github.com/nock/nock/issues/1558
   it("mocked requests have 'method' property", done => {
-    const scope = nock('http://example.test')
-      .get('/somepath')
-      .reply(200, {})
+    const scope = nock('http://example.test').get('/somepath').reply(200, {})
 
     const req = http.request({
       host: 'example.test',

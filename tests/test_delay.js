@@ -91,7 +91,7 @@ test('calling delay with "body" and "head" delays the response', t => {
     checkDuration(resStart, 200)
 
     // const dataStart = process.hrtime()
-    res.once('data', function(data) {
+    res.once('data', function (data) {
       // TODO: there is a bug in Nock that allows this delay to be less than the desired 300ms.
       //  there is a known issues with streams, but this needs further investigation.
       // checkDuration(dataStart, 300)
@@ -173,10 +173,7 @@ test('delayBody works with a delayed stream', async () => {
 })
 
 test('calling delay delays the response', async () => {
-  const scope = nock('http://example.test')
-    .get('/')
-    .delay(200)
-    .reply(200, 'OK')
+  const scope = nock('http://example.test').get('/').delay(200).reply(200, 'OK')
 
   const { body } = await resolvesInAtLeast(got('http://example.test'), 200)
 

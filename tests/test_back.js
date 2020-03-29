@@ -52,7 +52,7 @@ function testNock(t) {
 function nockBackWithFixture(t, scopesLoaded) {
   const scopesLength = scopesLoaded ? 1 : 0
 
-  nockBack('good_request.json', function(done) {
+  nockBack('good_request.json', function (done) {
     t.equal(this.scopes.length, scopesLength)
     http.get('http://www.example.test/')
     this.assertScopesFinished()
@@ -66,7 +66,7 @@ function nockBackWithFixture(t, scopesLoaded) {
 // pair on localhost. Consolidate them if possible. Otherwise remove this
 // comment.
 function nockBackWithFixtureLocalhost(t) {
-  nockBack('goodRequestLocalhost.json', function(done) {
+  nockBack('goodRequestLocalhost.json', function (done) {
     t.equal(this.scopes.length, 0)
 
     const server = http.createServer((request, response) => {
@@ -306,7 +306,7 @@ test('nockBack record tests', nw => {
 
     t.false(exists(fixtureLoc))
 
-    nockBack(fixture, function(done) {
+    nockBack(fixture, function (done) {
       const server = http.createServer((request, response) => {
         t.pass('server received a request')
 
@@ -341,7 +341,7 @@ test('nockBack record tests', nw => {
   })
 
   nw.test("it shouldn't allow outside calls", t => {
-    nockBack('wrong_uri.json', function(done) {
+    nockBack('wrong_uri.json', function (done) {
       http
         .get('http://other.example.test', res =>
           t.fail('Should not come here!')
@@ -358,7 +358,7 @@ test('nockBack record tests', nw => {
   })
 
   nw.test('it loads your recorded tests', t => {
-    nockBack('good_request.json', function(done) {
+    nockBack('good_request.json', function (done) {
       t.true(this.scopes.length > 0)
       http.get('http://www.example.test/').end()
       this.assertScopesFinished()
@@ -377,7 +377,7 @@ test('nockBack record tests', nw => {
     // an empty array.
     const afterRecord = scopes => []
 
-    nockBack(fixture, { afterRecord }, function(done) {
+    nockBack(fixture, { afterRecord }, function (done) {
       const server = http.createServer((request, response) => {
         t.pass('server received a request')
 
@@ -419,7 +419,7 @@ test('nockBack record tests', nw => {
 
     const afterRecord = scopes => 'string-response'
 
-    nockBack(fixture, { afterRecord }, function(done) {
+    nockBack(fixture, { afterRecord }, function (done) {
       const server = http.createServer((request, response) => {
         t.pass('server received a request')
 
@@ -491,7 +491,7 @@ test('assertScopesFinished throws exception when Back still has pending scopes',
   nockBack.setMode('record')
   const fixtureName = 'good_request.json'
   const fixturePath = path.join(nockBack.fixtures, fixtureName)
-  nockBack(fixtureName, function(done) {
+  nockBack(fixtureName, function (done) {
     const expected = `["GET http://www.example.test:80/"] was not used, consider removing ${fixturePath} to rerecord fixture`
     t.throws(() => this.assertScopesFinished(), { message: expected })
     done()

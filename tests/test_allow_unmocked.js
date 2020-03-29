@@ -29,9 +29,7 @@ describe('allowUnmocked option', () => {
       response.end()
     })
 
-    nock(origin, { allowUnmocked: true })
-      .get('/')
-      .reply(200, 'Mocked')
+    nock(origin, { allowUnmocked: true }).get('/').reply(200, 'Mocked')
 
     expect((await got(origin)).body).to.equal('Mocked')
     expect((await got(origin)).body).to.equal('live')
@@ -231,9 +229,7 @@ describe('allowUnmocked option', () => {
       response.end()
     )
 
-    const scope = nock(origin, { allowUnmocked: true })
-      .post('/', 'foo')
-      .reply()
+    const scope = nock(origin, { allowUnmocked: true }).post('/', 'foo').reply()
 
     const req = http.request({
       host: 'localhost',

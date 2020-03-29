@@ -94,7 +94,7 @@ test('match body with regex', t => {
         },
       },
     },
-    function(err, res) {
+    function (err, res) {
       if (err) throw err
       expect(res.statusCode).to.equal(200)
       t.end()
@@ -103,9 +103,7 @@ test('match body with regex', t => {
 })
 
 test('match body (with space character) with regex', t => {
-  nock('http://example.test')
-    .post('/', /a bc/)
-    .reply(200)
+  nock('http://example.test').post('/', /a bc/).reply(200)
 
   mikealRequest(
     {
@@ -117,7 +115,7 @@ test('match body (with space character) with regex', t => {
         },
       },
     },
-    function(err, res) {
+    function (err, res) {
       if (err) throw err
       expect(res.statusCode).to.equal(200)
       t.end()
@@ -142,7 +140,7 @@ test('match body with regex inside array', t => {
         ],
       },
     },
-    function(err, res) {
+    function (err, res) {
       if (err) throw err
       expect(res.statusCode).to.equal(200)
       t.end()
@@ -151,9 +149,7 @@ test('match body with regex inside array', t => {
 })
 
 test('match body with empty object inside', t => {
-  nock('http://example.test')
-    .post('/', { obj: {} })
-    .reply(200)
+  nock('http://example.test').post('/', { obj: {} }).reply(200)
 
   mikealRequest(
     {
@@ -163,7 +159,7 @@ test('match body with empty object inside', t => {
         obj: {},
       },
     },
-    function(err, res) {
+    function (err, res) {
       if (err) throw err
       expect(res.statusCode).to.equal(200)
       t.end()
@@ -172,9 +168,7 @@ test('match body with empty object inside', t => {
 })
 
 test('match body with nested object inside', t => {
-  nock('http://example.test')
-    .post('/', /x/)
-    .reply(200)
+  nock('http://example.test').post('/', /x/).reply(200)
 
   mikealRequest(
     {
@@ -186,7 +180,7 @@ test('match body with nested object inside', t => {
         },
       },
     },
-    function(err, res) {
+    function (err, res) {
       if (err) throw err
       expect(res.statusCode).to.equal(200)
       t.end()
@@ -195,9 +189,7 @@ test('match body with nested object inside', t => {
 })
 
 test("doesn't match body with mismatching keys", async () => {
-  nock('http://example.test')
-    .post('/', { a: 'a' })
-    .reply(200)
+  nock('http://example.test').post('/', { a: 'a' }).reply(200)
 
   const request = got.post('http://example.test', { json: { a: 'a', b: 'b' } })
   await assertRejects(request, /Nock: No match for request/)
@@ -205,9 +197,7 @@ test("doesn't match body with mismatching keys", async () => {
 
 // https://github.com/nock/nock/issues/1713
 test("doesn't match body with same number of keys but different keys", async () => {
-  nock('http://example.test')
-    .post('/', { a: {} })
-    .reply()
+  nock('http://example.test').post('/', { a: {} }).reply()
 
   const request = got.post('http://example.test', { json: { b: 123 } })
   await assertRejects(request, /Nock: No match for request/)
@@ -226,7 +216,7 @@ test('match body with form multipart', t => {
       url: 'http://example.test',
       method: 'post',
     },
-    function(err, res) {
+    function (err, res) {
       if (err) throw err
       expect(res.statusCode).to.equal(200)
       t.end()
@@ -289,7 +279,7 @@ test('urlencoded form posts are matched with non-string values', t => {
         values: [false, -1, 'test'],
       },
     },
-    function(err, res) {
+    function (err, res) {
       if (err) throw err
       expect(res.statusCode).to.equal(200)
       t.end()
@@ -315,9 +305,7 @@ test('urlencoded form posts are matched with regexp', async () => {
 })
 
 test('match utf-8 buffer body with utf-8 buffer', t => {
-  nock('http://example.test')
-    .post('/', Buffer.from('hello'))
-    .reply(200)
+  nock('http://example.test').post('/', Buffer.from('hello')).reply(200)
 
   mikealRequest(
     {
@@ -326,7 +314,7 @@ test('match utf-8 buffer body with utf-8 buffer', t => {
       encoding: null,
       body: Buffer.from('hello'),
     },
-    function(err, res) {
+    function (err, res) {
       if (err) throw err
       expect(res.statusCode).to.equal(200)
       t.end()
@@ -335,9 +323,7 @@ test('match utf-8 buffer body with utf-8 buffer', t => {
 })
 
 test("doesn't match utf-8 buffer body with mismatching utf-8 buffer", t => {
-  nock('http://example.test')
-    .post('/', Buffer.from('goodbye'))
-    .reply(200)
+  nock('http://example.test').post('/', Buffer.from('goodbye')).reply(200)
 
   mikealRequest(
     {
@@ -346,7 +332,7 @@ test("doesn't match utf-8 buffer body with mismatching utf-8 buffer", t => {
       encoding: null,
       body: Buffer.from('hello'),
     },
-    function(err) {
+    function (err) {
       expect(err).to.be.an('Error')
       t.end()
     }
@@ -365,7 +351,7 @@ test('match binary buffer body with binary buffer', t => {
       encoding: null,
       body: Buffer.from([0xff, 0xff, 0xff]),
     },
-    function(err, res) {
+    function (err, res) {
       if (err) throw err
       expect(res.statusCode).to.equal(200)
       t.end()
@@ -385,7 +371,7 @@ test("doesn't match binary buffer body with mismatching binary buffer", t => {
       encoding: null,
       body: Buffer.from([0xff, 0xff, 0xff]),
     },
-    function(err) {
+    function (err) {
       expect(err).to.be.an('Error')
       t.end()
     }
@@ -406,7 +392,7 @@ test("doesn't match binary buffer body with mismatching utf-8 buffer", t => {
       encoding: null,
       body: Buffer.from('hello'),
     },
-    function(err) {
+    function (err) {
       expect(err).to.be.an('Error')
       t.end()
     }
@@ -414,9 +400,7 @@ test("doesn't match binary buffer body with mismatching utf-8 buffer", t => {
 })
 
 test("doesn't match utf-8 buffer body with mismatching binary buffer", t => {
-  nock('http://example-2.test')
-    .post('/', Buffer.from('hello'))
-    .reply(200)
+  nock('http://example-2.test').post('/', Buffer.from('hello')).reply(200)
 
   mikealRequest(
     {
@@ -425,7 +409,7 @@ test("doesn't match utf-8 buffer body with mismatching binary buffer", t => {
       encoding: null,
       body: Buffer.from([0xff, 0xff, 0xff]),
     },
-    function(err) {
+    function (err) {
       expect(err).to.be.an('Error')
       t.end()
     }

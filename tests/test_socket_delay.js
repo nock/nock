@@ -36,10 +36,7 @@ describe('`socketDelay()`', () => {
   })
 
   it('emits a timeout - with setTimeout', done => {
-    nock('http://example.test')
-      .get('/')
-      .socketDelay(10000)
-      .reply(200, 'OK')
+    nock('http://example.test').get('/').socketDelay(10000).reply(200, 'OK')
 
     const onEnd = sinon.spy()
 
@@ -57,10 +54,7 @@ describe('`socketDelay()`', () => {
   })
 
   it('emits a timeout - with options.timeout', done => {
-    nock('http://example.test')
-      .get('/')
-      .socketDelay(10000)
-      .reply(200, 'OK')
+    nock('http://example.test').get('/').socketDelay(10000).reply(200, 'OK')
 
     const onEnd = sinon.spy()
 
@@ -69,7 +63,7 @@ describe('`socketDelay()`', () => {
       res.once('end', onEnd)
     })
 
-    req.on('timeout', function() {
+    req.on('timeout', function () {
       expect(onEnd).not.to.have.been.called()
       done()
     })
@@ -125,10 +119,7 @@ describe('`Socket#setTimeout()`', () => {
   })
 
   it('can be called without a callback', done => {
-    nock('http://example.test')
-      .get('/')
-      .socketDelay(100)
-      .reply()
+    nock('http://example.test').get('/').socketDelay(100).reply()
 
     http.get('http://example.test').on('socket', socket => {
       socket.setTimeout(50)

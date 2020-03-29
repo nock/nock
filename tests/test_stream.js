@@ -121,11 +121,11 @@ it('response pipe', done => {
 
     util.inherits(Constructor, events.EventEmitter)
 
-    Constructor.prototype.end = function() {
+    Constructor.prototype.end = function () {
       this.emit('end')
     }
 
-    Constructor.prototype.write = function(chunk) {
+    Constructor.prototype.write = function (chunk) {
       const buf = Buffer.alloc(this.buffer.length + chunk.length)
 
       this.buffer.copy(buf)
@@ -139,9 +139,7 @@ it('response pipe', done => {
     return new Constructor()
   })()
 
-  const scope = nock('http://example.test')
-    .get('/')
-    .reply(200, 'nobody')
+  const scope = nock('http://example.test').get('/').reply(200, 'nobody')
 
   http.get(
     {
@@ -177,11 +175,11 @@ it('response pipe without implicit end', done => {
 
     util.inherits(Constructor, events.EventEmitter)
 
-    Constructor.prototype.end = function() {
+    Constructor.prototype.end = function () {
       this.emit('end')
     }
 
-    Constructor.prototype.write = function(chunk) {
+    Constructor.prototype.write = function (chunk) {
       const buf = Buffer.alloc(this.buffer.length + chunk.length)
 
       this.buffer.copy(buf)
@@ -195,9 +193,7 @@ it('response pipe without implicit end', done => {
     return new Constructor()
   })()
 
-  const scope = nock('http://example.test')
-    .get('/')
-    .reply(200, 'nobody')
+  const scope = nock('http://example.test').get('/').reply(200, 'nobody')
 
   http.get(
     {
@@ -219,9 +215,7 @@ it('response pipe without implicit end', done => {
 
 it('response is streams2 compatible', done => {
   const responseText = 'streams2 streams2 streams2'
-  nock('http://example.test')
-    .get('/somepath')
-    .reply(200, responseText)
+  nock('http://example.test').get('/somepath').reply(200, responseText)
 
   http
     .request(
@@ -229,17 +223,17 @@ it('response is streams2 compatible', done => {
         host: 'example.test',
         path: '/somepath',
       },
-      function(res) {
+      function (res) {
         res.setEncoding('utf8')
 
         let body = ''
 
-        res.on('readable', function() {
+        res.on('readable', function () {
           let buf
           while ((buf = res.read())) body += buf
         })
 
-        res.once('end', function() {
+        res.once('end', function () {
           expect(body).to.equal(responseText)
           done()
         })
@@ -271,11 +265,11 @@ it('when a stream is used for the response body, it will not be read until after
     let body = ''
     expect(res.statusCode).to.equal(201)
 
-    res.on('data', function(chunk) {
+    res.on('data', function (chunk) {
       body += chunk
     })
 
-    res.once('end', function() {
+    res.once('end', function () {
       expect(body).to.equal(responseText)
       done()
     })
@@ -298,7 +292,7 @@ it('response readable pull stream works as expected', done => {
       let ended = false
       let responseBody = ''
       expect(res.statusCode).to.equal(200)
-      res.on('readable', function() {
+      res.on('readable', function () {
         let chunk
         while ((chunk = res.read()) !== null) {
           responseBody += chunk.toString()
@@ -320,9 +314,7 @@ it('error events on reply streams proxy to the response', done => {
   // of built in error handling and this test would get convoluted.
 
   const replyBody = new stream.PassThrough()
-  const scope = nock('http://example.test')
-    .get('/')
-    .reply(201, replyBody)
+  const scope = nock('http://example.test').get('/').reply(201, replyBody)
 
   http.get(
     {

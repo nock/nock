@@ -49,9 +49,7 @@ it('abort is emitted before delay time', done => {
 })
 
 it('Aborting an aborted request should not emit an error', done => {
-  const scope = nock('http://example.test')
-    .get('/')
-    .reply()
+  const scope = nock('http://example.test').get('/').reply()
 
   let errorCount = 0
   const req = http.get('http://example.test/').on('error', () => {
@@ -74,9 +72,7 @@ it('Aborting an aborted request should not emit an error', done => {
 
 it('Aborting a not-yet-ended request should end it', done => {
   // Set up.
-  const scope = nock('http://example.test')
-    .post('/')
-    .reply()
+  const scope = nock('http://example.test').post('/').reply()
 
   const req = http.request({
     host: 'example.test',
@@ -95,9 +91,7 @@ it('Aborting a not-yet-ended request should end it', done => {
 })
 
 it('`req.write() on an aborted request should trigger the expected error', done => {
-  const scope = nock('http://example.test')
-    .get('/')
-    .reply()
+  const scope = nock('http://example.test').get('/').reply()
 
   const req = http.get('http://example.test/')
 
@@ -119,9 +113,7 @@ it('`req.write() on an aborted request should trigger the expected error', done 
 })
 
 it('`req.end()` on an aborted request should trigger the expected error', done => {
-  const scope = nock('http://example.test')
-    .get('/')
-    .reply()
+  const scope = nock('http://example.test').get('/').reply()
 
   const req = http.get('http://example.test/')
 
@@ -143,9 +135,7 @@ it('`req.end()` on an aborted request should trigger the expected error', done =
 })
 
 it('`req.flushHeaders()` on an aborted request should trigger the expected error', done => {
-  const scope = nock('http://example.test')
-    .get('/')
-    .reply()
+  const scope = nock('http://example.test').get('/').reply()
 
   const req = http.get('http://example.test/')
 

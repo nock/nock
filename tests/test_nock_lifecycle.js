@@ -39,9 +39,7 @@ describe('Nock lifecycle functions', () => {
         response.end()
       })
 
-      const scope = nock(origin)
-        .get('/')
-        .reply(304, 'served from our mock')
+      const scope = nock(origin).get('/').reply(304, 'served from our mock')
 
       nock.restore()
       expect(nock.isActive()).to.be.false()
@@ -63,10 +61,7 @@ describe('Nock lifecycle functions', () => {
 
   describe('`cleanAll()`', () => {
     it('removes a half-consumed mock', async () => {
-      nock('http://example.test')
-        .get('/')
-        .twice()
-        .reply()
+      nock('http://example.test').get('/').twice().reply()
 
       await got('http://example.test/')
 
@@ -99,10 +94,7 @@ describe('Nock lifecycle functions', () => {
     })
 
     it('removes persistent mocks', async () => {
-      nock('http://example.test')
-        .persist()
-        .get('/')
-        .reply()
+      nock('http://example.test').persist().get('/').reply()
 
       nock.cleanAll()
 
@@ -118,9 +110,7 @@ describe('Nock lifecycle functions', () => {
 
   describe('`isDone()`', () => {
     it('returns false while a mock is pending, and true after it is consumed', async () => {
-      const scope = nock('http://example.test')
-        .get('/')
-        .reply()
+      const scope = nock('http://example.test').get('/').reply()
 
       expect(nock.isDone()).to.be.false()
 
@@ -134,9 +124,7 @@ describe('Nock lifecycle functions', () => {
 
   describe('`pendingMocks()`', () => {
     it('returns the expected array while a mock is pending, and an empty array after it is consumed', async () => {
-      nock('http://example.test')
-        .get('/')
-        .reply()
+      nock('http://example.test').get('/').reply()
 
       expect(nock.pendingMocks()).to.deep.equal(['GET http://example.test:80/'])
 
@@ -148,16 +136,12 @@ describe('Nock lifecycle functions', () => {
 
   describe('`activeMocks()`', () => {
     it('returns the expected array for incomplete mocks', () => {
-      nock('http://example.test')
-        .get('/')
-        .reply(200)
+      nock('http://example.test').get('/').reply(200)
       expect(nock.activeMocks()).to.deep.equal(['GET http://example.test:80/'])
     })
 
     it("activeMocks doesn't return completed mocks", async () => {
-      nock('http://example.test')
-        .get('/')
-        .reply()
+      nock('http://example.test').get('/').reply()
 
       await got('http://example.test/')
       expect(nock.activeMocks()).to.be.empty()
@@ -193,10 +177,7 @@ describe('Nock lifecycle functions', () => {
     it('prevents the request from completing', done => {
       const onRequest = sinon.spy()
 
-      nock('http://example.test')
-        .get('/')
-        .delayConnection(100)
-        .reply(200, 'OK')
+      nock('http://example.test').get('/').delayConnection(100).reply(200, 'OK')
 
       http.get('http://example.test', onRequest)
 

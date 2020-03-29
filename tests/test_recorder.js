@@ -358,9 +358,7 @@ it('when request body is json, it goes unstringified in objects', async () => {
   const recorded = nock.recorder.play()
   expect(recorded).to.have.lengthOf(1)
   expect(recorded[0]).to.be.an('object')
-  expect(recorded[0].body)
-    .to.be.an('object')
-    .and.deep.equal(payload)
+  expect(recorded[0].body).to.be.an('object').and.deep.equal(payload)
 })
 
 it('records nonstandard ports', done => {
@@ -395,15 +393,13 @@ it('records nonstandard ports', done => {
           nock.restore()
           const recorded = nock.recorder.play()
           expect(recorded).to.have.lengthOf(1)
-          expect(recorded[0])
-            .to.be.an('object')
-            .and.include({
-              scope: origin,
-              method: 'GET',
-              body: requestBody,
-              status: 200,
-              response: responseBody,
-            })
+          expect(recorded[0]).to.be.an('object').and.include({
+            scope: origin,
+            method: 'GET',
+            body: requestBody,
+            status: 200,
+            response: responseBody,
+          })
           done()
         })
       }
@@ -540,15 +536,13 @@ it('records https correctly', done => {
             nock.restore()
             const recorded = nock.recorder.play()
             expect(recorded).to.have.lengthOf(1)
-            expect(recorded[0])
-              .to.be.an('object')
-              .and.to.include({
-                scope: origin,
-                method: 'POST',
-                body: requestBody,
-                status: 200,
-                response: responseBody,
-              })
+            expect(recorded[0]).to.be.an('object').and.to.include({
+              scope: origin,
+              method: 'POST',
+              body: requestBody,
+              status: 200,
+              response: responseBody,
+            })
             done()
           })
         }
@@ -1023,15 +1017,13 @@ it('works with clients listening for readable', done => {
 
             const recorded = nock.recorder.play()
             expect(recorded).to.have.lengthOf(1)
-            expect(recorded[0])
-              .to.be.an('object')
-              .and.include({
-                scope: origin,
-                method: 'GET',
-                body: requestBody,
-                status: 200,
-                response: responseBody,
-              })
+            expect(recorded[0]).to.be.an('object').and.include({
+              scope: origin,
+              method: 'GET',
+              body: requestBody,
+              status: 200,
+              response: responseBody,
+            })
             done()
           })
         }

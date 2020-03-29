@@ -12,14 +12,12 @@ const nock = require('../')
 
 nock.disableNetConnect()
 
-nock('http://someotherservice.com')
-  .get('/')
-  .reply(200, 'whaaa')
+nock('http://someotherservice.com').get('/').reply(200, 'whaaa')
 
 const http = require('http')
 const req = http.get('http://www.google.com/')
 
-req.once('error', function(err) {
+req.once('error', function (err) {
   console.log(err.stack)
 })
 

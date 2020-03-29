@@ -261,9 +261,7 @@ nock('http://www.example.com')
 Nock understands query strings. Search parameters can be included as part of the path:
 
 ```js
-nock('http://example.com')
-  .get('/users?foo=bar')
-  .reply(200)
+nock('http://example.com').get('/users?foo=bar').reply(200)
 ```
 
 Instead of placing the entire URL, you can specify the query part as an object:
@@ -295,10 +293,7 @@ A `URLSearchParams` instance can be provided.
 ```js
 const params = new URLSearchParams({ foo: 'bar' })
 
-nock('http://example.com')
-  .get('/')
-  .query(params)
-  .reply(200)
+nock('http://example.com').get('/').query(params).reply(200)
 ```
 
 Nock supports passing a function to query. The function determines if the actual query matches or not.
@@ -339,9 +334,7 @@ nock('http://example.com', { encodedQueryParams: true })
 You can specify the return status code for a path on the first argument of reply like this:
 
 ```js
-const scope = nock('http://myapp.iriscouch.com')
-  .get('/users/1')
-  .reply(404)
+const scope = nock('http://myapp.iriscouch.com').get('/users/1').reply(404)
 ```
 
 You can also specify the reply body as a string:
@@ -355,13 +348,11 @@ const scope = nock('http://www.google.com')
 or as a JSON-encoded object:
 
 ```js
-const scope = nock('http://myapp.iriscouch.com')
-  .get('/')
-  .reply(200, {
-    username: 'pgte',
-    email: 'pedro.teixeira@gmail.com',
-    _id: '4324243fsd',
-  })
+const scope = nock('http://myapp.iriscouch.com').get('/').reply(200, {
+  username: 'pgte',
+  email: 'pedro.teixeira@gmail.com',
+  _id: '4324243fsd',
+})
 ```
 
 or even as a file:
@@ -444,7 +435,7 @@ If you're using the reply callback style, you can access the original client req
 ```js
 const scope = nock('http://www.google.com')
   .get('/cat-poems')
-  .reply(function(uri, requestBody) {
+  .reply(function (uri, requestBody) {
     console.log('path:', this.req.path)
     console.log('headers:', this.req.headers)
     // ...
@@ -466,12 +457,10 @@ nock('http://www.google.com')
 JSON error responses are allowed too:
 
 ```js
-nock('http://www.google.com')
-  .get('/cat-poems')
-  .replyWithError({
-    message: 'something awful happened',
-    code: 'AWFUL_ERROR',
-  })
+nock('http://www.google.com').get('/cat-poems').replyWithError({
+  message: 'something awful happened',
+  code: 'AWFUL_ERROR',
+})
 ```
 
 > Note: This will emit an `error` event on the `request` object, not the reply.
@@ -653,10 +642,7 @@ const scope = nock('http://my.server.com:8081')
 You are able to specify the number of times to repeat the same response.
 
 ```js
-nock('http://zombo.com')
-  .get('/')
-  .times(4)
-  .reply(200, 'Ok')
+nock('http://zombo.com').get('/').times(4).reply(200, 'Ok')
 
 http.get('http://zombo.com/') // respond body "Ok"
 http.get('http://zombo.com/') // respond body "Ok"
@@ -668,18 +654,9 @@ http.get('http://zombo.com/') // respond with zombo.com result
 Sugar syntax
 
 ```js
-nock('http://zombo.com')
-  .get('/')
-  .once()
-  .reply(200, 'Ok')
-nock('http://zombo.com')
-  .get('/')
-  .twice()
-  .reply(200, 'Ok')
-nock('http://zombo.com')
-  .get('/')
-  .thrice()
-  .reply(200, 'Ok')
+nock('http://zombo.com').get('/').once().reply(200, 'Ok')
+nock('http://zombo.com').get('/').twice().reply(200, 'Ok')
+nock('http://zombo.com').get('/').thrice().reply(200, 'Ok')
 ```
 
 To repeat this response for as long as nock is active, use [.persist()](#persist).
@@ -915,20 +892,14 @@ example.pendingMocks() // ["GET http://example.com:80/path"]
 // ...After a request to example.com/pathA:
 example.pendingMocks() // []
 
-example
-  .get('/pathB')
-  .optionally()
-  .reply(200)
+example.get('/pathB').optionally().reply(200)
 example.pendingMocks() // []
 
 // You can also pass a boolean argument to `optionally()`. This
 // is useful if you want to conditionally make a mocked request
 // optional.
 const getMock = optional =>
-  example
-    .get('/pathC')
-    .optionally(optional)
-    .reply(200)
+  example.get('/pathC').optionally(optional).reply(200)
 
 getMock(true)
 example.pendingMocks() // []
@@ -978,9 +949,7 @@ setTimeout(() => {
 You can call `isDone()` on a single expectation to determine if the expectation was met:
 
 ```js
-const scope = nock('http://google.com')
-  .get('/')
-  .reply(200)
+const scope = nock('http://google.com').get('/').reply(200)
 
 scope.isDone() // will return false
 ```
@@ -1023,10 +992,7 @@ Note that while a persisted scope will always intercept the requests, it is cons
 If you want to stop persisting an individual persisted mock you can call `persist(false)`:
 
 ```js
-const scope = nock('http://example.com')
-  .persist()
-  .get('/')
-  .reply(200, 'ok')
+const scope = nock('http://example.com').persist().get('/').reply(200, 'ok')
 
 // Do some tests ...
 
@@ -1261,7 +1227,7 @@ If you save this as a JSON file, you can load them directly through `nock.load(p
 
 ```js
 nocks = nock.load(pathToJson)
-nocks.forEach(function(nock) {
+nocks.forEach(function (nock) {
   nock.filteringRequestBody = (body, aRecordedBody) => {
     if (typeof body !== 'string' || typeof aRecordedBody !== 'string') {
       return body
@@ -1270,7 +1236,11 @@ nocks.forEach(function(nock) {
     const recordedBodyResult = /timestamp:([0-9]+)/.exec(aRecordedBody)
     if (recordedBodyResult) {
       const recordedTimestamp = recordedBodyResult[1]
-      return body.replace(/(timestamp):([0-9]+)/g, function(match, key, value) {
+      return body.replace(/(timestamp):([0-9]+)/g, function (
+        match,
+        key,
+        value
+      ) {
         return key + ':' + recordedTimestamp
       })
     } else {
@@ -1426,7 +1396,7 @@ nockBack('zomboFixture.json', nockDone => {
     nockDone()
 
     // usage of the created fixture
-    nockBack('zomboFixture.json', function(nockDone) {
+    nockBack('zomboFixture.json', function (nockDone) {
       http.get('http://zombo.com/').end() // respond body "Ok"
 
       this.assertScopesFinished() //throws an exception if all nocks in fixture were not satisfied

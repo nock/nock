@@ -28,7 +28,7 @@ afterEach(done => {
 test('recording', t => {
   t.plan(5)
 
-  nockBack('recording_test.json', function(nockDone) {
+  nockBack('recording_test.json', function (nockDone) {
     const server = http.createServer((request, response) => {
       t.pass('server received a request')
 
@@ -79,7 +79,7 @@ test('passes custom options to recorder', t => {
   nockBack(
     'recording_test.json',
     { recorder: { enable_reqheaders_recording: true } },
-    function(nockDone) {
+    function (nockDone) {
       const server = http.createServer((request, response) => {
         t.pass('server received a request')
 
