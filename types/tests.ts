@@ -653,9 +653,6 @@ console.error('pending mocks: %j', nock.pendingMocks())
 nock.activeMocks() // $ExpectType string[]
 nock('http://example.test').activeMocks() // $ExpectType string[]
 
-// Logging
-google = nock('http://example.test').log(console.log)
-
 // Restoring
 nock.restore()
 

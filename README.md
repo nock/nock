@@ -63,7 +63,6 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
   - [.pendingMocks()](#pendingmocks)
   - [.activeMocks()](#activemocks)
   - [.isActive()](#isactive)
-- [Logging](#logging)
 - [Restoring](#restoring)
 - [Activating](#activating)
 - [Turning Nock Off (experimental!)](#turning-nock-off-experimental)
@@ -1048,16 +1047,6 @@ if (!nock.isActive()) {
 }
 ```
 
-## Logging
-
-Nock can log matches if you pass in a log function like this:
-
-```js
-const scope = nock('http://google.com')
-                .log(console.log)
-                ...
-```
-
 ## Restoring
 
 You can restore the HTTP interceptor to the normal unmocked behaviour by calling:
@@ -1548,8 +1537,26 @@ It does this by manipulating the modules cache of Node in a way that conflicts w
 
 Nock uses [`debug`](https://github.com/visionmedia/debug), so just run with environmental variable `DEBUG` set to `nock.*`.
 
-```js
+```shell
 $ DEBUG=nock.* node my_test.js
+```
+
+Each step in the matching process is logged this way and can be useful when determining why a request was not intercepted by Nock.
+
+For example the following shows that matching failed because the request had an extra search parameter.
+
+```js
+nock('http://example.com').get('/').query({ foo: 'bar' }).reply()
+
+await got('http://example.com/?foo=bar&baz=foz')
+```
+
+```shell
+$ DEBUG= nock.scope:example.com node my_test.js
+...
+nock.scope:example.test Interceptor queries: {"foo":"bar"} +1ms
+nock.scope:example.test     Request queries: {"foo":"bar","baz":"foz"} +0ms
+nock.scope:example.test query matching failed +0ms
 ```
 
 ## Contributing
