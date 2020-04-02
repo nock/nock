@@ -16,7 +16,7 @@ require('./setup')
 // The order of tests run sequentially through a ClientRequest's lifetime.
 // Starting the top by aborting requests early on then aborting later and later.
 describe('`ClientRequest.abort()`', () => {
-  it('should not emit an error when `write` is called on an aborted request', done => {
+  it('Emits the expected event sequence when `write` is called on an aborted request', done => {
     const scope = nock('http://example.test').get('/').reply()
 
     const req = http.request('http://example.test')
@@ -31,7 +31,7 @@ describe('`ClientRequest.abort()`', () => {
     }, 10)
   })
 
-  it('should not emit an error when `end` is called on an aborted request', done => {
+  it('Emits the expected event sequence when `end` is called on an aborted request', done => {
     const scope = nock('http://example.test').get('/').reply()
 
     const req = http.request('http://example.test')
@@ -46,7 +46,7 @@ describe('`ClientRequest.abort()`', () => {
     }, 10)
   })
 
-  it('should not emit an error when `flushHeaders` is called on an aborted request', done => {
+  it('Emits the expected event sequence when `flushHeaders` is called on an aborted request', done => {
     const scope = nock('http://example.test').get('/').reply()
 
     const req = http.request('http://example.test')
@@ -61,7 +61,7 @@ describe('`ClientRequest.abort()`', () => {
     }, 10)
   })
 
-  it('should not emit an error when called immediately after `end`', done => {
+  it('Emits the expected event sequence when aborted immediately after `end`', done => {
     const scope = nock('http://example.test').get('/').reply()
 
     const req = http.request('http://example.test')
@@ -76,7 +76,7 @@ describe('`ClientRequest.abort()`', () => {
     }, 10)
   })
 
-  it('should emit an ECONNRESET error when aborted inside a `socket` event listener', done => {
+  it('Emits the expected event sequence when aborted inside a `socket` event listener', done => {
     const scope = nock('http://example.test').get('/').reply()
 
     const req = http.request('http://example.test')
@@ -99,7 +99,7 @@ describe('`ClientRequest.abort()`', () => {
     }, 10)
   })
 
-  it('should only emit `abort` and `error` events once if aborted multiple times', done => {
+  it('Emits the expected event sequence when aborted multiple times', done => {
     const scope = nock('http://example.test').get('/').reply()
 
     const req = http.request('http://example.test')
@@ -115,13 +115,14 @@ describe('`ClientRequest.abort()`', () => {
 
     setTimeout(() => {
       const events = emitSpy.args.map(i => i[0])
+      // important: `abort` and `error` events only fire once and the `close` event still fires at the end
       expect(events).to.deep.equal(['socket', 'abort', 'error', 'close'])
       expect(scope.isDone()).to.be.false()
       done()
     }, 10)
   })
 
-  it('should emit an ECONNRESET error when aborted inside a `finish` event listener', done => {
+  it('Emits the expected event sequence when aborted inside a `finish` event listener', done => {
     const scope = nock('http://example.test').get('/').reply()
 
     const req = http.request('http://example.test')
@@ -153,7 +154,7 @@ describe('`ClientRequest.abort()`', () => {
   // The Interceptor is considered consumed just prior to the `response` event on the request,
   // all tests below assert the Scope is done.
 
-  it('should not emit an error when called inside a `response` event listener', done => {
+  it('Emits the expected event sequence when aborted inside a `response` event listener', done => {
     const scope = nock('http://example.test').get('/').reply()
 
     const req = http.request('http://example.test')
