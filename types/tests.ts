@@ -120,7 +120,6 @@ scope = scope.filteringRequestBody((path: string) => {
   return str
 })
 
-scope = scope.log(() => {})
 scope = scope.persist()
 scope = scope.persist(false)
 scope = scope.replyContentLength()
@@ -619,7 +618,7 @@ options = { allowUnmocked: true }
 scope = nock('http://example.test', options).get('/my/url').reply(200, 'OK!')
 
 // Expectations
-let google = nock('http://example.test')
+const google = nock('http://example.test')
   .get('/')
   .reply(200, 'Hello from Google!')
 setTimeout(() => {

@@ -1537,8 +1537,8 @@ It does this by manipulating the modules cache of Node in a way that conflicts w
 
 Nock uses [`debug`](https://github.com/visionmedia/debug), so just run with environmental variable `DEBUG` set to `nock.*`.
 
-```shell
-$ DEBUG=nock.* node my_test.js
+```console
+user@local$ DEBUG=nock.* node my_test.js
 ```
 
 Each step in the matching process is logged this way and can be useful when determining why a request was not intercepted by Nock.
@@ -1551,12 +1551,12 @@ nock('http://example.com').get('/').query({ foo: 'bar' }).reply()
 await got('http://example.com/?foo=bar&baz=foz')
 ```
 
-```shell
-$ DEBUG= nock.scope:example.com node my_test.js
+```console
+user@local$ DEBUG=nock.scope:example.com node my_test.js
 ...
-nock.scope:example.test Interceptor queries: {"foo":"bar"} +1ms
-nock.scope:example.test     Request queries: {"foo":"bar","baz":"foz"} +0ms
-nock.scope:example.test query matching failed +0ms
+nock.scope:example.com Interceptor queries: {"foo":"bar"} +1ms
+nock.scope:example.com     Request queries: {"foo":"bar","baz":"foz"} +0ms
+nock.scope:example.com query matching failed +0ms
 ```
 
 ## Contributing
