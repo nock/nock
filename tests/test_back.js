@@ -54,10 +54,11 @@ function nockBackWithFixture(t, scopesLoaded) {
 
   nockBack('good_request.json', function (done) {
     t.equal(this.scopes.length, scopesLength)
-    http.get('http://www.example.test/')
-    this.assertScopesFinished()
-    done()
-    t.end()
+    http.get('http://www.example.test/', () => {
+      this.assertScopesFinished()
+      done()
+      t.end()
+    })
   })
 }
 
@@ -360,10 +361,11 @@ test('nockBack record tests', nw => {
   nw.test('it loads your recorded tests', t => {
     nockBack('good_request.json', function (done) {
       t.true(this.scopes.length > 0)
-      http.get('http://www.example.test/').end()
-      this.assertScopesFinished()
-      done()
-      t.end()
+      http.get('http://www.example.test/', () => {
+        this.assertScopesFinished()
+        done()
+        t.end()
+      })
     })
   })
 

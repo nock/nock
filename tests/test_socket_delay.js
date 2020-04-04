@@ -89,6 +89,7 @@ describe('`socketDelay()`', () => {
 
       res.once('end', () => {
         expect(body).to.equal(responseText)
+        scope.done()
         done()
       })
     })
@@ -98,7 +99,6 @@ describe('`socketDelay()`', () => {
     })
 
     req.end()
-    scope.done()
   })
 })
 
