@@ -96,8 +96,8 @@ describe('`delay()`', () => {
 
       const dataStart = process.hrtime()
       res.once('data', function (data) {
-        // this assertion is 10ms less than the delay because the clock actually started before the request callback was fired
-        checkDuration(dataStart, 290)
+        // this assertion is 30ms less than the delay because the clock actually started before the request callback was fired
+        checkDuration(dataStart, 270)
         expect(data.toString()).to.equal('OK')
         res.once('end', done)
       })
@@ -112,8 +112,8 @@ describe('`delayBody()`', () => {
     http.get('http://example.test', res => {
       const start = process.hrtime()
       res.once('data', () => {
-        // this assertion is 10ms less than the delay because the clock actually started before the request callback was fired
-        checkDuration(start, 190)
+        // this assertion is 30ms less than the delay because the clock actually started before the request callback was fired
+        checkDuration(start, 170)
         done()
       })
     })
