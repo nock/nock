@@ -43,6 +43,10 @@ describe('`delay()`', () => {
   let connSpy
   let bodySpy
 
+  // As a rule, the tests in this repo have a strategy of only testing the API and not spying on
+  // internals for unit tests. These next few tests break that rule to assert the proxy behavior of
+  // `delay()`. This is simply to reduce the need of double testing the behavior of `delayBody()`
+  // and `delayConnection()` and should not be used as an example for writing new tests.
   beforeEach(() => {
     interceptor = nock('http://example.test').get('/')
     connSpy = sinon.spy(interceptor, 'delayConnection')
