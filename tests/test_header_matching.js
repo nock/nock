@@ -427,6 +427,37 @@ describe('Header matching', () => {
       scope.done()
     })
 
+    it('should warn on duplicate request headers and only match the last', done => {
+      const scope = nock('http://example.test', {
+        reqheaders: {
+          'x-auth-token': 'foo',
+        },
+      })
+        .get('/')
+        .reply()
+
+      const warningSpy = sinon.spy()
+      process.on('warning', warningSpy)
+
+      const req = http.get('http://example.test', {
+        headers: {
+          'x-auth-token': 'foo',
+          'X-Auth-Token': 'bar',
+          'X-AUTH-TOKEN': 'biz',
+        },
+      })
+
+      req.on('error', err => {
+        expect(err.message).to.match(/Nock: No match for request/)
+        expect(warningSpy).to.have.been.calledOnce()
+        expect(warningSpy.firstCall.firstArg.name).to.equal(
+          'DuplicateHeaderWarning'
+        )
+        expect(scope.isDone()).to.be.false()
+        done()
+      })
+    })
+
     // https://github.com/nock/nock/issues/966
     it('mocking succeeds when mocked and specified request headers have falsy values', async () => {
       const scope = nock('http://example.test', {
