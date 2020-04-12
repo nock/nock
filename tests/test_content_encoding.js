@@ -1,6 +1,5 @@
 'use strict'
 
-const assertRejects = require('assert-rejects')
 const { expect } = require('chai')
 const zlib = require('zlib')
 const nock = require('..')
@@ -27,11 +26,11 @@ describe('Content Encoding', () => {
     scope.done()
   })
 
-  it('Delaying the body is not available with content encoded responses', async () => {
+  it('Delaying the body works with content encoded responses', async () => {
     const message = 'Lorem ipsum dolor sit amet'
     const compressed = zlib.gzipSync(message)
 
-    nock('http://example.test')
+    const scope = nock('http://example.test')
       .get('/')
       .delay({
         body: 100,
@@ -40,9 +39,10 @@ describe('Content Encoding', () => {
         'Content-Encoding': 'gzip',
       })
 
-    await assertRejects(
-      got('http://example.test/'),
-      /Response delay of the body is currently not supported with content-encoded responses/
-    )
+    const { statusCode, body } = await got('http://example.test/')
+
+    expect(statusCode).to.equal(200)
+    expect(body).to.equal(message)
+    scope.done()
   })
 })
