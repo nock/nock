@@ -107,10 +107,8 @@ describe('`delayBody()`', () => {
   it('should delay the clock between the `response` event and the first `data` event', done => {
     nock('http://example.test').get('/').delayBody(200).reply(201, 'OK')
 
-    // It would be preferable to get this start time inside the response callback, however, the delay starts just before
-    // the response event is emitted and the amount of time it takes to enter the callback varies wildly in the CI.
-    const start = process.hrtime()
     http.get('http://example.test', res => {
+      const start = process.hrtime()
       res.once('data', () => {
         checkDuration(start, 200)
         done()

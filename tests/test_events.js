@@ -2,6 +2,7 @@
 
 const { expect } = require('chai')
 const http = require('http')
+const path = require('path')
 const sinon = require('sinon')
 
 const nock = require('..')
@@ -38,7 +39,7 @@ it('emits request and request body', async () => {
   scope.on('request', function (req, interceptor, body) {
     onRequest()
     expect(req.path).to.equal('/please')
-    expect(interceptor.interceptionCounter).to.equal(0)
+    expect(interceptor.interceptionCounter).to.equal(1)
     expect(body).to.deep.equal(data)
     expect(onReplied).to.not.have.been.called()
   })
@@ -56,6 +57,25 @@ it('emits request and request body', async () => {
       'Content-Length': Buffer.byteLength(data),
     },
   })
+
+  scope.done()
+  expect(onRequest).to.have.been.calledOnce()
+  expect(onReplied).to.have.been.calledOnce()
+})
+
+it('emits request and replied events when response body is a stream', async () => {
+  const textFilePath = path.resolve(__dirname, './assets/reply_file_1.txt')
+  const scope = nock('http://example.test')
+    .get('/')
+    .replyWithFile(200, textFilePath)
+
+  const onRequest = sinon.spy()
+  const onReplied = sinon.spy()
+
+  scope.on('request', onRequest)
+  scope.on('replied', onReplied)
+
+  await got('http://example.test')
 
   scope.done()
   expect(onRequest).to.have.been.calledOnce()
