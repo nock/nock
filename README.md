@@ -43,10 +43,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
   - [Support for HTTP and HTTPS](#support-for-http-and-https)
   - [Non-standard ports](#non-standard-ports)
   - [Repeat response n times](#repeat-response-n-times)
-  - [Delay the response body](#delay-the-response-body)
   - [Delay the response](#delay-the-response)
-  - [Delay the connection](#delay-the-connection)
-  - [Socket timeout](#socket-timeout)
   - [Chaining](#chaining)
   - [Scope filtering](#scope-filtering)
   - [Conditional scope filtering](#conditional-scope-filtering)
@@ -660,22 +657,9 @@ nock('http://zombo.com').get('/').thrice().reply(200, 'Ok')
 
 To repeat this response for as long as nock is active, use [.persist()](#persist).
 
-### Delay the response body
-
-You are able to specify the number of milliseconds that the response body should be delayed. Response header will be replied immediately.
-`delayBody(1000)` is equivalent to `delay({body: 1000})`.
-
-```js
-nock('http://my.server.com')
-  .get('/')
-  .delayBody(2000) // 2 seconds
-  .reply(200, '<html></html>')
-```
-
-NOTE: the [`'response'`](http://nodejs.org/api/http.html#http_event_response) event will occur immediately, but the [IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage) will not emit its `'end'` event until after the delay.
-
 ### Delay the response
 
+Nock can simulate response latency to allow you to test timeouts, race conditions, an other timing related scenarios.  
 You are able to specify the number of milliseconds that your reply should be delayed.
 
 ```js
@@ -685,53 +669,40 @@ nock('http://my.server.com')
   .reply(200, '<html></html>')
 ```
 
-`delay()` could also be used as
+`delay(1000)` is an alias for `delayConnection(1000).delayBody(0)`  
+`delay({ head: 1000, body: 2000 })` is an alias for `delayConnection(1000).delayBody(2000)`  
+Both of which are covered in detail below.
 
-```
-delay({
-   head: headDelayInMs,
-   body: bodyDelayInMs
-})
-```
+#### Delay the connection
 
-for example
+You are able to specify the number of milliseconds that your connection should be idle before it starts to receive the response.
+To simulate a socket timeout, provide a larger value than the timeout setting on the request.
 
 ```js
 nock('http://my.server.com')
   .get('/')
-  .delay({
-    head: 2000, // header will be delayed for 2 seconds, i.e. the whole response will be delayed for 2 seconds.
-    body: 3000, // body will be delayed for another 3 seconds after header is sent out.
-  })
+  .delayConnection(2000) // 2 seconds
   .reply(200, '<html></html>')
+
+req = http.request('http://my.server.com', { timeout: 1000 })
 ```
 
-### Delay the connection
+The [`'timeout'`](https://nodejs.org/api/http.html#http_event_timeout) will be emitted almost immediately, so your tests don't have to wait for long timeout tests.  
+However, if you're not testing the timeout event, this setting will still wait the desired time before emitting the [`'response'`](http://nodejs.org/api/http.html#http_event_response).
 
-`delayConnection(1000)` is equivalent to `delay({ head: 1000 })`.
+#### Delay the response body
 
-### Socket timeout
-
-You are able to specify the number of milliseconds that your connection should be idle, to simulate a socket timeout.
+You are able to specify the number of milliseconds that the response body should be delayed.  
+This is the time between the headers being received and the body starting to be received.
 
 ```js
 nock('http://my.server.com')
   .get('/')
-  .socketDelay(2000) // 2 seconds
+  .delayBody(2000) // 2 seconds
   .reply(200, '<html></html>')
 ```
 
-To test a request like the following:
-
-```js
-req = http.request('http://my.server.com', res => {
-  ...
-})
-req.setTimeout(1000, () => { req.abort() })
-req.end()
-```
-
-NOTE: the timeout will be fired immediately, and will not leave the simulated connection idle for the specified period of time.
+The timer starts after the [`'response'`](http://nodejs.org/api/http.html#http_event_response) event and will delay the [IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage) from emitting its first `'data'` or `'end'` event.
 
 ### Chaining
 

@@ -106,6 +106,23 @@ describe('Nock lifecycle functions', () => {
         return true
       })
     })
+
+    it('should be safe to call in the middle of a request', done => {
+      // this covers a race-condition where cleanAll() is called while a request
+      // is in mid-flight.
+      nock('http://example.test').get('/').reply()
+
+      const req = http.request('http://example.test', res => {
+        res.once('end', (data) => {
+          done()
+        })
+      })
+      req.once('socket', () => {
+        nock.cleanAll()
+      })
+
+      req.end();
+    })
   })
 
   describe('`isDone()`', () => {

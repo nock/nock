@@ -312,4 +312,68 @@ describe('`delayConnection()`', () => {
       100
     )
   })
+
+  it('emits a timeout - with setTimeout', done => {
+    nock('http://example.test').get('/').delayConnection(10000).reply(200, 'OK')
+
+    const onEnd = sinon.spy()
+
+    const req = http.request('http://example.test', res => {
+      res.once('end', onEnd)
+    })
+
+    req.setTimeout(5000, () => {
+      expect(onEnd).not.to.have.been.called()
+      done()
+    })
+
+    req.end()
+  })
+
+  it('emits a timeout - with options.timeout', done => {
+    nock('http://example.test').get('/').delayConnection(10000).reply(200, 'OK')
+
+    const onEnd = sinon.spy()
+
+    const req = http.request('http://example.test', { timeout: 5000 }, res => {
+      res.once('end', onEnd)
+    })
+
+    req.on('timeout', function () {
+      expect(onEnd).not.to.have.been.called()
+      done()
+    })
+
+    req.end()
+  })
+
+  it('does not emit a timeout when timeout > delayConnection', done => {
+    const responseText = 'okeydoke!'
+    const scope = nock('http://example.test')
+      .get('/')
+      .delayConnection(300)
+      .reply(200, responseText)
+
+    const req = http.request('http://example.test', res => {
+      res.setEncoding('utf8')
+
+      let body = ''
+
+      res.on('data', chunk => {
+        body += chunk
+      })
+
+      res.once('end', () => {
+        expect(body).to.equal(responseText)
+        scope.done()
+        done()
+      })
+    })
+
+    req.setTimeout(60000, () => {
+      expect.fail('socket timed out unexpectedly')
+    })
+
+    req.end()
+  })
 })
