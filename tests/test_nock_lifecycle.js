@@ -113,15 +113,13 @@ describe('Nock lifecycle functions', () => {
       nock('http://example.test').get('/').reply()
 
       const req = http.request('http://example.test', res => {
-        res.once('end', (data) => {
-          done()
-        })
+        done()
       })
       req.once('socket', () => {
         nock.cleanAll()
       })
 
-      req.end();
+      req.end()
     })
   })
 
