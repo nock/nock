@@ -676,6 +676,7 @@ Both of which are covered in detail below.
 #### Delay the connection
 
 You are able to specify the number of milliseconds that your connection should be idle before it starts to receive the response.
+
 To simulate a socket timeout, provide a larger value than the timeout setting on the request.
 
 ```js
@@ -687,8 +688,18 @@ nock('http://my.server.com')
 req = http.request('http://my.server.com', { timeout: 1000 })
 ```
 
-The [`'timeout'`](https://nodejs.org/api/http.html#http_event_timeout) will be emitted almost immediately, so your tests don't have to wait for long timeout tests.  
-However, if you're not testing the timeout event, this setting will still wait the desired time before emitting the [`'response'`](http://nodejs.org/api/http.html#http_event_response).
+While all of Nock's delay functions will delay real clock time for the request/response lifetime,
+`timeout` events are emitted almost immediately by comparing the requested connection delay to the timeout parameter passed to `http.request()` or `http.ClientRequest#setTimeout()`.  
+This allows you to test timeouts without using fake timers or slowing down your tests.
+
+##### Technical Details
+
+Following the `'finish'` event being emitted by `ClientRequest`, Nock will wait for the next event loop iteration before checking if the request has been aborted.
+At this point, any connection delay value is compared against any request timeout setting and a [`'timeout'`](https://nodejs.org/api/http.html#http_event_timeout) is emitted when appropriate from the socket and the request objects.
+A Node timeout timer is then registered with any connection delay value to delay real time before checking again if the request has been aborted and the [`'response'`](http://nodejs.org/api/http.html#http_event_response) is emitted by the request.
+
+A similar method, `.socketDelay()` was removed in version 13. It was thought that having two methods so subtlety similar was confusing.  
+The discussion can be found at https://github.com/nock/nock/pull/1974.
 
 #### Delay the response body
 
@@ -702,7 +713,10 @@ nock('http://my.server.com')
   .reply(200, '<html></html>')
 ```
 
-The timer starts after the [`'response'`](http://nodejs.org/api/http.html#http_event_response) event and will delay the [IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage) from emitting its first `'data'` or `'end'` event.
+##### Technical Details
+
+Following the [`'response'`](http://nodejs.org/api/http.html#http_event_response) being emitted by `ClientRequest`,
+Nock will register a timeout timer with the body delay value to delay real time before the [IncomingMessage](http://nodejs.org/api/http.html#http_http_incomingmessage) emits its first `'data'` or the `'end'` event.
 
 ### Chaining
 

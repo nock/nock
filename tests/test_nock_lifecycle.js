@@ -108,11 +108,15 @@ describe('Nock lifecycle functions', () => {
     })
 
     it('should be safe to call in the middle of a request', done => {
-      // this covers a race-condition where cleanAll() is called while a request
-      // is in mid-flight.
+      // This covers a race-condition where cleanAll() is called while a request
+      // is in mid-flight. The request itself should continue to process normally.
+      // Notably, `cleanAll` is being called before the Interceptor is marked as
+      // consumed and removed from the global map. Having this test wait until the
+      // response event means we verify it didn't throw an error when attempting
+      // to remove an Interceptor that doesn't exist in the global map `allInterceptors`.
       nock('http://example.test').get('/').reply()
 
-      const req = http.request('http://example.test', res => {
+      const req = http.request('http://example.test', () => {
         done()
       })
       req.once('socket', () => {
