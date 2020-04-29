@@ -690,8 +690,8 @@ nock('http://my.server.com')
 
 ```js
 delay({
-   head: headDelayInMs,
-   body: bodyDelayInMs
+  head: headDelayInMs,
+  body: bodyDelayInMs,
 })
 ```
 
@@ -1484,7 +1484,7 @@ The same is true for `.replyWithError()`.
 Adding `{ retry: 0 }` to the `got` invocations will disable retrying, e.g.:
 
 ```js
-await got("http://example.test/", { retry: 0 })
+await got('http://example.test/', { retry: 0 })
 ```
 
 If you need to do this in all your tests, you can create a module
