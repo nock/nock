@@ -688,10 +688,10 @@ nock('http://my.server.com')
 
 `delay()` could also be used as
 
-```
+```js
 delay({
-   head: headDelayInMs,
-   body: bodyDelayInMs
+  head: headDelayInMs,
+  body: bodyDelayInMs,
 })
 ```
 
@@ -1410,7 +1410,7 @@ nockBack('zomboFixture.json', nockDone => {
 
 If your tests are using promises then use `nockBack` like this:
 
-```
+```js
 return nockBack('promisedFixture.json')
   .then(({ nockDone, context }) => {
     //  do your tests returning a promise and chain it with
@@ -1483,14 +1483,14 @@ The same is true for `.replyWithError()`.
 
 Adding `{ retry: 0 }` to the `got` invocations will disable retrying, e.g.:
 
-```
-await got("http://example.test/", { retry: 0 })
+```js
+await got('http://example.test/', { retry: 0 })
 ```
 
 If you need to do this in all your tests, you can create a module
 `got_client.js` which exports a custom got instance:
 
-```
+```js
 const got = require('got')
 
 module.exports = got.extend({ retry: 0 })
