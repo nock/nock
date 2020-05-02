@@ -689,8 +689,9 @@ req = http.request('http://my.server.com', { timeout: 1000 })
 ```
 
 While all of Nock's delay functions will delay real clock time for the request/response lifetime,
-`timeout` events are emitted almost immediately by comparing the requested connection delay to the timeout parameter passed to `http.request()` or `http.ClientRequest#setTimeout()`.  
+Nock emits timeout events almost immediately by comparing the requested connection delay to the timeout parameter passed to `http.request()` or `http.ClientRequest#setTimeout()`.  
 This allows you to test timeouts without using fake timers or slowing down your tests.
+If the client chooses to _not_ take an action (e.g. abort the request), the request and response will continue on as normal, after real clock time has passed.
 
 ##### Technical Details
 
