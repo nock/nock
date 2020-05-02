@@ -130,7 +130,6 @@ inst = inst.delay(2000)
 inst = inst.delay({ head: 1000, body: 1000 })
 inst = inst.delayBody(2000)
 inst = inst.delayConnection(2000)
-inst = inst.socketDelay(2000)
 
 scope.done() // $ExpectType void
 scope.isDone() // $ExpectType boolean
@@ -500,13 +499,6 @@ nock('http://example.test')
     head: 2000, // header will be delayed for 2 seconds, i.e. the whole response will be delayed for 2 seconds.
     body: 3000, // body will be delayed for another 3 seconds after header is sent out.
   })
-  .reply(200, '<html></html>')
-
-// Delay the connection
-nock('http://example.test')
-  .get('/')
-  .socketDelay(2000) // 2 seconds
-  .delayConnection(1000)
   .reply(200, '<html></html>')
 
 // Chaining
