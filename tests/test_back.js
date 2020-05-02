@@ -211,7 +211,7 @@ test('nockBack dryrun tests', nw => {
 
     expect(fs.existsSync(fixtureLoc)).to.be.false()
 
-    nockBack(fixture, done => {
+    nockBack(fixture, nockDone => {
       const server = http.createServer((request, response) => {
         onRequest()
         response.writeHead(200)
@@ -263,7 +263,7 @@ test('nockBack record tests', nw => {
 
     expect(fs.existsSync(fixtureLoc)).to.be.false()
 
-    nockBack(fixture, done => {
+    nockBack(fixture, nockDone => {
       const server = http.createServer((request, response) => {
         onRequest()
         response.writeHead(200)
@@ -279,7 +279,7 @@ test('nockBack record tests', nw => {
             port: server.address().port,
           },
           response => {
-            done()
+            nockDone()
 
             expect(onRequest).to.have.been.calledOnce()
             expect(response.statusCode).to.equal(200)
@@ -307,7 +307,7 @@ test('nockBack record tests', nw => {
 
     expect(fs.existsSync(fixtureLoc)).to.be.false()
 
-    nockBack(fixture, function (done) {
+    nockBack(fixture, function (nockDone) {
       const server = http.createServer((request, response) => {
         onRequest()
         response.writeHead(200)
@@ -323,7 +323,7 @@ test('nockBack record tests', nw => {
             port: server.address().port,
           },
           response => {
-            done()
+            nockDone()
 
             expect(onRequest).to.have.been.calledOnce()
             expect(response.statusCode).to.equal(200)
@@ -342,25 +342,25 @@ test('nockBack record tests', nw => {
   })
 
   nw.test("it shouldn't allow outside calls", t => {
-    nockBack('wrong_uri.json', function (done) {
+    nockBack('wrong_uri.json', nockDone => {
       http
         .get('http://other.example.test', res => expect.fail())
         .on('error', err => {
           expect(err.message).to.equal(
             'Nock: Disallowed net connect for "other.example.test:80/"'
           )
-          done()
+          nockDone()
           t.end()
         })
     })
   })
 
   nw.test('it loads your recorded tests', t => {
-    nockBack('good_request.json', function (done) {
+    nockBack('good_request.json', function (nockDone) {
       expect(this.scopes).to.have.lengthOf.at.least(1)
       http.get('http://www.example.test/', () => {
         this.assertScopesFinished()
-        done()
+        nockDone()
         t.end()
       })
     })
@@ -378,7 +378,7 @@ test('nockBack record tests', nw => {
     // an empty array.
     const afterRecord = scopes => []
 
-    nockBack(fixture, { afterRecord }, function (done) {
+    nockBack(fixture, { afterRecord }, function (nockDone) {
       const server = http.createServer((request, response) => {
         onRequest()
         response.writeHead(200)
@@ -394,7 +394,7 @@ test('nockBack record tests', nw => {
             port: server.address().port,
           },
           response => {
-            done()
+            nockDone()
 
             expect(onRequest).to.have.been.calledOnce()
             expect(response.statusCode).to.equal(200)
@@ -420,7 +420,7 @@ test('nockBack record tests', nw => {
 
     const afterRecord = scopes => 'string-response'
 
-    nockBack(fixture, { afterRecord }, function (done) {
+    nockBack(fixture, { afterRecord }, function (nockDone) {
       const server = http.createServer((request, response) => {
         t.pass('server received a request')
 
@@ -437,7 +437,7 @@ test('nockBack record tests', nw => {
             port: server.address().port,
           },
           response => {
-            done()
+            nockDone()
 
             expect(response.statusCode).to.equal(200)
             expect(fs.existsSync(fixtureLoc)).to.be.true()
@@ -493,11 +493,11 @@ test('assertScopesFinished throws exception when Back still has pending scopes',
   nockBack.setMode('record')
   const fixtureName = 'good_request.json'
   const fixturePath = path.join(nockBack.fixtures, fixtureName)
-  nockBack(fixtureName, function (done) {
+  nockBack(fixtureName, function (nockDone) {
     expect(() => this.assertScopesFinished()).to.throw(
       `["GET http://www.example.test:80/"] was not used, consider removing ${fixturePath} to rerecord fixture`
     )
-    done()
+    nockDone()
     t.end()
   })
 })
