@@ -203,7 +203,6 @@ declare namespace nock {
     delay(opts: number | { head?: number; body?: number }): this
     delayBody(timeMs: number): this
     delayConnection(timeMs: number): this
-    socketDelay(timeMs: number): this
   }
 
   interface Options {

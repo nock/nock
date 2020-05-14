@@ -2,11 +2,15 @@
 
 const http = require('http')
 const fs = require('fs')
+const { expect } = require('chai')
 const path = require('path')
+const sinon = require('sinon')
 const { beforeEach, test } = require('tap')
 const proxyquire = require('proxyquire').preserveCache()
 const nock = require('..')
+const { back: nockBack } = nock
 
+require('./setup')
 require('./cleanup_after_each')()
 
 beforeEach(done => {
@@ -15,11 +19,8 @@ beforeEach(done => {
   done()
 })
 
-const nockBack = nock.back
-const exists = fs.existsSync
-
 function testNock(t) {
-  let dataCalled = false
+  const onData = sinon.spy()
 
   const scope = nock('http://www.example.test')
     .get('/')
@@ -33,16 +34,16 @@ function testNock(t) {
         port: 80,
       },
       res => {
-        t.equal(res.statusCode, 200)
+        expect(res.statusCode).to.equal(200)
         res.once('end', () => {
-          t.ok(dataCalled)
+          expect(onData).to.have.been.called()
           scope.done()
           t.end()
         })
         res.on('data', data => {
-          dataCalled = true
-          t.ok(data instanceof Buffer, 'data should be a buffer')
-          t.equal(data.toString(), 'Hello World!', 'response should match')
+          onData()
+          expect(data).to.be.an.instanceOf(Buffer)
+          expect(data.toString()).to.equal('Hello World!')
         })
       }
     )
@@ -53,7 +54,7 @@ function nockBackWithFixture(t, scopesLoaded) {
   const scopesLength = scopesLoaded ? 1 : 0
 
   nockBack('good_request.json', function (done) {
-    t.equal(this.scopes.length, scopesLength)
+    expect(this.scopes).to.have.length(scopesLength)
     http.get('http://www.example.test/', () => {
       this.assertScopesFinished()
       done()
@@ -68,11 +69,12 @@ function nockBackWithFixture(t, scopesLoaded) {
 // comment.
 function nockBackWithFixtureLocalhost(t) {
   nockBack('goodRequestLocalhost.json', function (done) {
-    t.equal(this.scopes.length, 0)
+    const onRequest = sinon.spy()
+
+    expect(this.scopes).to.be.empty()
 
     const server = http.createServer((request, response) => {
-      t.pass('server received a request')
-
+      onRequest()
       response.writeHead(200)
       response.end()
     })
@@ -87,7 +89,8 @@ function nockBackWithFixtureLocalhost(t) {
           port: server.address().port,
         },
         response => {
-          t.is(200, response.statusCode)
+          expect(onRequest).to.have.been.calledOnce()
+          expect(response.statusCode).to.equal(200)
           this.assertScopesFinished()
           done()
           t.end()
@@ -103,45 +106,44 @@ function nockBackWithFixtureLocalhost(t) {
 test('nockBack throws an exception when fixtures is not set', t => {
   nockBack.fixtures = undefined
 
-  t.throws(nockBack, { message: 'Back requires nock.back.fixtures to be set' })
+  expect(nockBack).to.throw('Back requires nock.back.fixtures to be set')
   t.end()
 })
 
 test('nockBack throws an exception when fixtureName is not a string', t => {
-  t.throws(() => nockBack(), {
-    message: 'Parameter fixtureName must be a string',
-  })
+  expect(nockBack).to.throw('Parameter fixtureName must be a string')
   t.end()
 })
 
 test('nockBack returns a promise when neither options nor nockbackFn are specified', t => {
-  nockBack('test-promise-fixture.json').then(params => {
-    t.type(params.nockDone, 'function')
-    t.type(params.context, 'object')
+  nockBack('test-promise-fixture.json').then(({ nockDone, context }) => {
+    expect(nockDone).to.be.a('function')
+    expect(context).to.be.an('object')
     t.end()
   })
 })
 
 test('nockBack throws an exception when a hook is not a function', t => {
   nockBack.setMode('dryrun')
-  t.throws(
-    () => nockBack('good_request.json', { before: 'not-a-function-innit' }),
-    { message: 'processing hooks must be a function' }
-  )
+  expect(() =>
+    nockBack('good_request.json', { before: 'not-a-function-innit' })
+  ).to.throw('processing hooks must be a function')
   t.end()
 })
 
 test('nockBack.setMode throws an exception on unknown mode', t => {
-  t.throws(() => nockBack.setMode('bogus'), { message: 'Unknown mode: bogus' })
+  expect(() => nockBack.setMode('bogus')).to.throw('Unknown mode: bogus')
   t.end()
 })
 
 test('nockBack returns a promise when nockbackFn is not specified', t => {
-  nockBack('test-promise-fixture.json', { test: 'options' }).then(params => {
-    t.type(params.nockDone, 'function')
-    t.type(params.context, 'object')
-    t.end()
-  })
+  nockBack('test-promise-fixture.json', { test: 'options' }).then(
+    ({ nockDone, context }) => {
+      expect(nockDone).to.be.a('function')
+      expect(context).to.be.an('object')
+      t.end()
+    }
+  )
 })
 
 test('with wild, normal nocks work', t => testNock(t))
@@ -167,10 +169,10 @@ test('nockBack dryrun tests', nw => {
   })
 
   nw.test('goes to internet even when no nockBacks are running', t => {
-    t.plan(2)
+    const onRequest = sinon.spy()
 
     const server = http.createServer((request, response) => {
-      t.pass('server received a request')
+      onRequest()
 
       response.writeHead(200)
       response.end()
@@ -184,7 +186,8 @@ test('nockBack dryrun tests', nw => {
           port: server.address().port,
         },
         response => {
-          t.is(200, response.statusCode)
+          expect(response.statusCode).to.equal(200)
+          expect(onRequest).to.have.been.calledOnce()
 
           server.close(t.end)
         }
@@ -200,19 +203,17 @@ test('nockBack dryrun tests', nw => {
   nw.test('uses recorded fixtures', t => nockBackWithFixture(t, true))
 
   nw.test("goes to internet, doesn't record new fixtures", t => {
-    t.plan(5)
-
-    let dataCalled = false
+    const onData = sinon.spy()
+    const onRequest = sinon.spy()
 
     const fixture = 'someDryrunFixture.json'
     const fixtureLoc = `${nockBack.fixtures}/${fixture}`
 
-    t.false(exists(fixtureLoc))
+    expect(fs.existsSync(fixtureLoc)).to.be.false()
 
-    nockBack(fixture, done => {
+    nockBack(fixture, nockDone => {
       const server = http.createServer((request, response) => {
-        t.pass('server received a request')
-
+        onRequest()
         response.writeHead(200)
         response.write('server served a response')
         response.end()
@@ -226,15 +227,14 @@ test('nockBack dryrun tests', nw => {
             port: server.address().port,
           },
           response => {
-            t.is(200, response.statusCode)
+            expect(response.statusCode).to.equal(200)
 
-            response.on('data', data => {
-              dataCalled = true
-            })
+            response.on('data', onData)
 
             response.on('end', () => {
-              t.ok(dataCalled)
-              t.false(exists(fixtureLoc))
+              expect(onRequest).to.have.been.calledOnce()
+              expect(onData).to.have.been.called()
+              expect(fs.existsSync(fixtureLoc)).to.be.false()
 
               server.close(t.end)
             })
@@ -256,17 +256,16 @@ test('nockBack record tests', nw => {
   })
 
   nw.test('it records when configured correctly', t => {
-    t.plan(4)
+    const onRequest = sinon.spy()
 
     const fixture = 'someFixture.txt'
     const fixtureLoc = `${nockBack.fixtures}/${fixture}`
 
-    t.false(exists(fixtureLoc))
+    expect(fs.existsSync(fixtureLoc)).to.be.false()
 
-    nockBack(fixture, done => {
+    nockBack(fixture, nockDone => {
       const server = http.createServer((request, response) => {
-        t.pass('server received a request')
-
+        onRequest()
         response.writeHead(200)
         response.write('server served a response')
         response.end()
@@ -280,10 +279,11 @@ test('nockBack record tests', nw => {
             port: server.address().port,
           },
           response => {
-            done()
+            nockDone()
 
-            t.is(200, response.statusCode)
-            t.true(exists(fixtureLoc))
+            expect(onRequest).to.have.been.calledOnce()
+            expect(response.statusCode).to.equal(200)
+            expect(fs.existsSync(fixtureLoc)).to.be.true()
 
             fs.unlinkSync(fixtureLoc)
 
@@ -300,17 +300,16 @@ test('nockBack record tests', nw => {
   // Adding this test because there was an issue when not calling
   // nock.activate() after calling nock.restore().
   nw.test('it can record twice', t => {
-    t.plan(4)
+    const onRequest = sinon.spy()
 
     const fixture = 'someFixture2.txt'
     const fixtureLoc = `${nockBack.fixtures}/${fixture}`
 
-    t.false(exists(fixtureLoc))
+    expect(fs.existsSync(fixtureLoc)).to.be.false()
 
-    nockBack(fixture, function (done) {
+    nockBack(fixture, function (nockDone) {
       const server = http.createServer((request, response) => {
-        t.pass('server received a request')
-
+        onRequest()
         response.writeHead(200)
         response.write('server served a response')
         response.end()
@@ -324,10 +323,11 @@ test('nockBack record tests', nw => {
             port: server.address().port,
           },
           response => {
-            done()
+            nockDone()
 
-            t.is(200, response.statusCode)
-            t.true(exists(fixtureLoc))
+            expect(onRequest).to.have.been.calledOnce()
+            expect(response.statusCode).to.equal(200)
+            expect(fs.existsSync(fixtureLoc)).to.be.true()
 
             fs.unlinkSync(fixtureLoc)
 
@@ -342,47 +342,45 @@ test('nockBack record tests', nw => {
   })
 
   nw.test("it shouldn't allow outside calls", t => {
-    nockBack('wrong_uri.json', function (done) {
+    nockBack('wrong_uri.json', nockDone => {
       http
-        .get('http://other.example.test', res =>
-          t.fail('Should not come here!')
-        )
+        .get('http://other.example.test', res => expect.fail())
         .on('error', err => {
-          t.equal(
-            err.message,
+          expect(err.message).to.equal(
             'Nock: Disallowed net connect for "other.example.test:80/"'
           )
-          done()
+          nockDone()
           t.end()
         })
     })
   })
 
   nw.test('it loads your recorded tests', t => {
-    nockBack('good_request.json', function (done) {
-      t.true(this.scopes.length > 0)
+    nockBack('good_request.json', function (nockDone) {
+      expect(this.scopes).to.have.lengthOf.at.least(1)
       http.get('http://www.example.test/', () => {
         this.assertScopesFinished()
-        done()
+        nockDone()
         t.end()
       })
     })
   })
 
   nw.test('it can filter after recording', t => {
+    const onRequest = sinon.spy()
+
     const fixture = 'filteredFixture.json'
     const fixtureLoc = `${nockBack.fixtures}/${fixture}`
 
-    t.false(exists(fixtureLoc))
+    expect(fs.existsSync(fixtureLoc)).to.be.false()
 
     // You would do some filtering here, but for this test we'll just return
     // an empty array.
     const afterRecord = scopes => []
 
-    nockBack(fixture, { afterRecord }, function (done) {
+    nockBack(fixture, { afterRecord }, function (nockDone) {
       const server = http.createServer((request, response) => {
-        t.pass('server received a request')
-
+        onRequest()
         response.writeHead(200)
         response.write('server served a response')
         response.end()
@@ -396,11 +394,12 @@ test('nockBack record tests', nw => {
             port: server.address().port,
           },
           response => {
-            done()
+            nockDone()
 
-            t.is(200, response.statusCode)
-            t.true(exists(fixtureLoc))
-            t.equal(this.scopes.length, 0)
+            expect(onRequest).to.have.been.calledOnce()
+            expect(response.statusCode).to.equal(200)
+            expect(fs.existsSync(fixtureLoc)).to.be.true()
+            expect(this.scopes).to.be.empty()
             fs.unlinkSync(fixtureLoc)
 
             server.close(t.end)
@@ -417,11 +416,11 @@ test('nockBack record tests', nw => {
     const fixture = 'filteredFixture.json'
     const fixtureLoc = `${nockBack.fixtures}/${fixture}`
 
-    t.false(exists(fixtureLoc))
+    expect(fs.existsSync(fixtureLoc)).to.be.false()
 
     const afterRecord = scopes => 'string-response'
 
-    nockBack(fixture, { afterRecord }, function (done) {
+    nockBack(fixture, { afterRecord }, function (nockDone) {
       const server = http.createServer((request, response) => {
         t.pass('server received a request')
 
@@ -438,11 +437,13 @@ test('nockBack record tests', nw => {
             port: server.address().port,
           },
           response => {
-            done()
+            nockDone()
 
-            t.is(200, response.statusCode)
-            t.true(exists(fixtureLoc))
-            t.is(fs.readFileSync(fixtureLoc, 'utf8'), 'string-response')
+            expect(response.statusCode).to.equal(200)
+            expect(fs.existsSync(fixtureLoc)).to.be.true()
+            expect(fs.readFileSync(fixtureLoc, 'utf8')).to.equal(
+              'string-response'
+            )
             fs.unlinkSync(fixtureLoc)
 
             server.close(t.end)
@@ -476,8 +477,7 @@ test('nockBack lockdown tests', nw => {
     )
 
     req.on('error', err => {
-      t.equal(
-        err.message.trim(),
+      expect(err.message.trim()).to.equal(
         'Nock: Disallowed net connect for "other.example.test:80/"'
       )
       t.end()
@@ -493,10 +493,11 @@ test('assertScopesFinished throws exception when Back still has pending scopes',
   nockBack.setMode('record')
   const fixtureName = 'good_request.json'
   const fixturePath = path.join(nockBack.fixtures, fixtureName)
-  nockBack(fixtureName, function (done) {
-    const expected = `["GET http://www.example.test:80/"] was not used, consider removing ${fixturePath} to rerecord fixture`
-    t.throws(() => this.assertScopesFinished(), { message: expected })
-    done()
+  nockBack(fixtureName, function (nockDone) {
+    expect(() => this.assertScopesFinished()).to.throw(
+      `["GET http://www.example.test:80/"] was not used, consider removing ${fixturePath} to rerecord fixture`
+    )
+    nockDone()
     t.end()
   })
 })
@@ -506,7 +507,7 @@ test('nockBack dryrun throws the expected exception when fs is not available', t
   nockBackWithoutFs.setMode('dryrun')
 
   nockBackWithoutFs.fixtures = `${__dirname}/fixtures`
-  t.throws(() => nockBackWithoutFs('good_request.json'), { message: 'no fs' })
+  expect(() => nockBackWithoutFs('good_request.json')).to.throw('no fs')
 
   t.end()
 })
@@ -516,6 +517,6 @@ test('nockBack record mode throws the expected exception when fs is not availabl
   nockBackWithoutFs.setMode('record')
 
   nockBackWithoutFs.fixtures = `${__dirname}/fixtures`
-  t.throws(() => nockBackWithoutFs('good_request.json'), { message: 'no fs' })
+  expect(() => nockBackWithoutFs('good_request.json')).to.throw('no fs')
   t.end()
 })
