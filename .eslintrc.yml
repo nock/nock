@@ -29,6 +29,7 @@ rules:
 
   # Nock additions.
   strict: ['error', 'safe']
+  no-console: 'error'
   no-loop-func: 'error'
   no-var: 'error'
   prefer-const: 'error'
