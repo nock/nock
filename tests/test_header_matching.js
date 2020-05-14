@@ -427,18 +427,16 @@ describe('Header matching', () => {
       scope.done()
     })
 
-    it('should warn on duplicate request headers and only match the last', done => {
+    it('should only match the last duplicate request header', done => {
       const scope = nock('http://example.test', {
         reqheaders: {
-          'x-auth-token': 'foo',
+          'x-auth-token': 'biz',
         },
       })
         .get('/')
         .reply()
 
-      const warningSpy = sinon.spy()
-      process.on('warning', warningSpy)
-
+      // Can't use Got here because it would change these headers
       const req = http.get('http://example.test', {
         headers: {
           'x-auth-token': 'foo',
@@ -447,13 +445,9 @@ describe('Header matching', () => {
         },
       })
 
-      req.on('error', err => {
-        expect(err.message).to.match(/Nock: No match for request/)
-        expect(warningSpy).to.have.been.calledOnce()
-        expect(warningSpy.firstCall.firstArg.name).to.equal(
-          'DuplicateHeaderWarning'
-        )
-        expect(scope.isDone()).to.be.false()
+      req.on('response', res => {
+        expect(res.statusCode).to.equal(200)
+        scope.done()
         done()
       })
     })
