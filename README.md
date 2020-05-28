@@ -3,7 +3,7 @@
 [![npm](https://img.shields.io/npm/v/nock.svg)][npmjs]
 [![Build Status](https://travis-ci.org/nock/nock.svg)][build]
 ![Coverage Status](http://img.shields.io/badge/coverage-100%25-brightgreen.svg)
-[![Greenkeeper](https://badges.greenkeeper.io/nock/nock.svg)](https://greenkeeper.io/)
+![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=nock/nock)
 [![Backers on Open Collective](https://opencollective.com/nock/backers/badge.svg)](#backers)
 [![Sponsors on Open Collective](https://opencollective.com/nock/sponsors/badge.svg)](#sponsors)
 
@@ -1388,7 +1388,7 @@ nockBack('zomboFixture.json', nockDone => {
 
 If your tests are using promises then use `nockBack` like this:
 
-```
+```js
 return nockBack('promisedFixture.json')
   .then(({ nockDone, context }) => {
     //  do your tests returning a promise and chain it with
@@ -1461,14 +1461,14 @@ The same is true for `.replyWithError()`.
 
 Adding `{ retry: 0 }` to the `got` invocations will disable retrying, e.g.:
 
-```
-await got("http://example.test/", { retry: 0 })
+```js
+await got('http://example.test/', { retry: 0 })
 ```
 
 If you need to do this in all your tests, you can create a module
 `got_client.js` which exports a custom got instance:
 
-```
+```js
 const got = require('got')
 
 module.exports = got.extend({ retry: 0 })
