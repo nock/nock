@@ -3,7 +3,7 @@
 [![npm](https://img.shields.io/npm/v/nock.svg)][npmjs]
 [![Build Status](https://travis-ci.org/nock/nock.svg)][build]
 ![Coverage Status](http://img.shields.io/badge/coverage-100%25-brightgreen.svg)
-[![Greenkeeper](https://badges.greenkeeper.io/nock/nock.svg)](https://greenkeeper.io/)
+![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=nock/nock)
 [![Backers on Open Collective](https://opencollective.com/nock/backers/badge.svg)](#backers)
 [![Sponsors on Open Collective](https://opencollective.com/nock/sponsors/badge.svg)](#sponsors)
 
@@ -141,8 +141,8 @@ const scope = nock('https://api.github.com')
       name: 'MIT License',
       spdx_id: 'MIT',
       url: 'https://api.github.com/licenses/mit',
-      node_id: 'MDc6TGljZW5zZTEz',
-    },
+      node_id: 'MDc6TGljZW5zZTEz'
+    }
   })
 ```
 
@@ -261,7 +261,9 @@ nock('http://www.example.com')
 Nock understands query strings. Search parameters can be included as part of the path:
 
 ```js
-nock('http://example.com').get('/users?foo=bar').reply(200)
+nock('http://example.com')
+  .get('/users?foo=bar')
+  .reply(200)
 ```
 
 Instead of placing the entire URL, you can specify the query part as an object:
@@ -282,8 +284,8 @@ nock('http://example.com')
     names: ['alice', 'bob'],
     tags: {
       alice: ['admin', 'tester'],
-      bob: ['tester'],
-    },
+      bob: ['tester']
+    }
   })
   .reply(200, { results: [{ id: 'pgte' }] })
 ```
@@ -293,7 +295,10 @@ A `URLSearchParams` instance can be provided.
 ```js
 const params = new URLSearchParams({ foo: 'bar' })
 
-nock('http://example.com').get('/').query(params).reply(200)
+nock('http://example.com')
+  .get('/')
+  .query(params)
+  .reply(200)
 ```
 
 Nock supports passing a function to query. The function determines if the actual query matches or not.
@@ -334,7 +339,9 @@ nock('http://example.com', { encodedQueryParams: true })
 You can specify the return status code for a path on the first argument of reply like this:
 
 ```js
-const scope = nock('http://myapp.iriscouch.com').get('/users/1').reply(404)
+const scope = nock('http://myapp.iriscouch.com')
+  .get('/users/1')
+  .reply(404)
 ```
 
 You can also specify the reply body as a string:
@@ -348,11 +355,13 @@ const scope = nock('http://www.google.com')
 or as a JSON-encoded object:
 
 ```js
-const scope = nock('http://myapp.iriscouch.com').get('/').reply(200, {
-  username: 'pgte',
-  email: 'pedro.teixeira@gmail.com',
-  _id: '4324243fsd',
-})
+const scope = nock('http://myapp.iriscouch.com')
+  .get('/')
+  .reply(200, {
+    username: 'pgte',
+    email: 'pedro.teixeira@gmail.com',
+    _id: '4324243fsd'
+  })
 ```
 
 or even as a file:
@@ -361,7 +370,7 @@ or even as a file:
 const scope = nock('http://myapp.iriscouch.com')
   .get('/')
   .replyWithFile(200, __dirname + '/replies/user.json', {
-    'Content-Type': 'application/json',
+    'Content-Type': 'application/json'
   })
 ```
 
@@ -403,7 +412,7 @@ const scope = nock('http://www.google.com')
     return [
       201,
       'THIS IS THE REPLY BODY',
-      { header: 'value' }, // optional headers
+      { header: 'value' } // optional headers
     ]
   })
 ```
@@ -435,7 +444,7 @@ If you're using the reply callback style, you can access the original client req
 ```js
 const scope = nock('http://www.google.com')
   .get('/cat-poems')
-  .reply(function (uri, requestBody) {
+  .reply(function(uri, requestBody) {
     console.log('path:', this.req.path)
     console.log('headers:', this.req.headers)
     // ...
@@ -457,10 +466,12 @@ nock('http://www.google.com')
 JSON error responses are allowed too:
 
 ```js
-nock('http://www.google.com').get('/cat-poems').replyWithError({
-  message: 'something awful happened',
-  code: 'AWFUL_ERROR',
-})
+nock('http://www.google.com')
+  .get('/cat-poems')
+  .replyWithError({
+    message: 'something awful happened',
+    code: 'AWFUL_ERROR'
+  })
 ```
 
 > Note: This will emit an `error` event on the `request` object, not the reply.
@@ -478,8 +489,8 @@ You can specify the request headers like this:
 ```js
 const scope = nock('http://www.example.com', {
   reqheaders: {
-    authorization: 'Basic Auth',
-  },
+    authorization: 'Basic Auth'
+  }
 })
   .get('/')
   .reply(200)
@@ -492,8 +503,8 @@ function will be passed the header value.
 const scope = nock('http://www.example.com', {
   reqheaders: {
     'X-My-Headers': headerValue => headerValue.includes('cats'),
-    'X-My-Awesome-Header': /Awesome/i,
-  },
+    'X-My-Awesome-Header': /Awesome/i
+  }
 })
   .get('/')
   .reply(200)
@@ -507,7 +518,7 @@ You can also have Nock fail the request if certain headers are present:
 
 ```js
 const scope = nock('http://www.example.com', {
-  badheaders: ['cookie', 'x-forwarded-for'],
+  badheaders: ['cookie', 'x-forwarded-for']
 })
   .get('/')
   .reply(200)
@@ -543,7 +554,7 @@ const scope = nock('http://www.headdy.com')
   .get('/')
   .reply(200, 'Hello World!', {
     'Content-Length': (req, res, body) => body.length,
-    ETag: () => `${Date.now()}`,
+    ETag: () => `${Date.now()}`
   })
 ```
 
@@ -555,7 +566,7 @@ You can also specify default reply headers for all responses like this:
 const scope = nock('http://www.headdy.com')
   .defaultReplyHeaders({
     'X-Powered-By': 'Rails',
-    'Content-Type': 'application/json',
+    'Content-Type': 'application/json'
   })
   .get('/')
   .reply(200, 'The default headers should come too')
@@ -566,7 +577,7 @@ Or you can use a function to generate the default headers values:
 ```js
 const scope = nock('http://www.headdy.com')
   .defaultReplyHeaders({
-    'Content-Length': (req, res, body) => body.length,
+    'Content-Length': (req, res, body) => body.length
   })
   .get('/')
   .reply(200, 'The default headers should come too')
@@ -642,7 +653,10 @@ const scope = nock('http://my.server.com:8081')
 You are able to specify the number of times to repeat the same response.
 
 ```js
-nock('http://zombo.com').get('/').times(4).reply(200, 'Ok')
+nock('http://zombo.com')
+  .get('/')
+  .times(4)
+  .reply(200, 'Ok')
 
 http.get('http://zombo.com/') // respond body "Ok"
 http.get('http://zombo.com/') // respond body "Ok"
@@ -654,9 +668,18 @@ http.get('http://zombo.com/') // respond with zombo.com result
 Sugar syntax
 
 ```js
-nock('http://zombo.com').get('/').once().reply(200, 'Ok')
-nock('http://zombo.com').get('/').twice().reply(200, 'Ok')
-nock('http://zombo.com').get('/').thrice().reply(200, 'Ok')
+nock('http://zombo.com')
+  .get('/')
+  .once()
+  .reply(200, 'Ok')
+nock('http://zombo.com')
+  .get('/')
+  .twice()
+  .reply(200, 'Ok')
+nock('http://zombo.com')
+  .get('/')
+  .thrice()
+  .reply(200, 'Ok')
 ```
 
 To repeat this response for as long as nock is active, use [.persist()](#persist).
@@ -732,19 +755,19 @@ const scope = nock('http://myapp.iriscouch.com')
   .reply(404)
   .post('/users', {
     username: 'pgte',
-    email: 'pedro.teixeira@gmail.com',
+    email: 'pedro.teixeira@gmail.com'
   })
   .reply(201, {
     ok: true,
     id: '123ABC',
-    rev: '946B7D1C',
+    rev: '946B7D1C'
   })
   .get('/users/123ABC')
   .reply(200, {
     _id: '123ABC',
     _rev: '946B7D1C',
     username: 'pgte',
-    email: 'pedro.teixeira@gmail.com',
+    email: 'pedro.teixeira@gmail.com'
   })
 ```
 
@@ -756,7 +779,7 @@ This can be useful if you have a node module that randomly changes subdomains to
 
 ```js
 const scope = nock('https://api.dropbox.com', {
-  filteringScope: scope => /^https:\/\/api[0-9]*.dropbox.com/.test(scope),
+  filteringScope: scope => /^https:\/\/api[0-9]*.dropbox.com/.test(scope)
 })
   .get('/1/metadata/auto/Photos?include_deleted=false&list=true')
   .reply(200)
@@ -770,7 +793,7 @@ This can be useful if you only want certain scopes to apply depending on how you
 
 ```js
 const scope = nock('https://api.myservice.com', {
-  conditionally: () => true,
+  conditionally: () => true
 })
 ```
 
@@ -841,7 +864,7 @@ const scope = nock('http://api.myservice.com')
   .matchHeader('accept', 'application/json')
   .get('/')
   .reply(200, {
-    data: 'hello world',
+    data: 'hello world'
   })
 ```
 
@@ -852,7 +875,7 @@ const scope = nock('http://api.myservice.com')
   .matchHeader('User-Agent', /Mozilla\/.*/)
   .get('/')
   .reply(200, {
-    data: 'hello world',
+    data: 'hello world'
   })
 ```
 
@@ -863,7 +886,7 @@ const scope = nock('http://api.myservice.com')
   .matchHeader('content-length', val => val >= 1000)
   .get('/')
   .reply(200, {
-    data: 'hello world',
+    data: 'hello world'
   })
 ```
 
@@ -880,14 +903,20 @@ example.pendingMocks() // ["GET http://example.com:80/path"]
 // ...After a request to example.com/pathA:
 example.pendingMocks() // []
 
-example.get('/pathB').optionally().reply(200)
+example
+  .get('/pathB')
+  .optionally()
+  .reply(200)
 example.pendingMocks() // []
 
 // You can also pass a boolean argument to `optionally()`. This
 // is useful if you want to conditionally make a mocked request
 // optional.
 const getMock = optional =>
-  example.get('/pathC').optionally(optional).reply(200)
+  example
+    .get('/pathC')
+    .optionally(optional)
+    .reply(200)
 
 getMock(true)
 example.pendingMocks() // []
@@ -937,7 +966,9 @@ setTimeout(() => {
 You can call `isDone()` on a single expectation to determine if the expectation was met:
 
 ```js
-const scope = nock('http://google.com').get('/').reply(200)
+const scope = nock('http://google.com')
+  .get('/')
+  .reply(200)
 
 scope.isDone() // will return false
 ```
@@ -980,7 +1011,10 @@ Note that while a persisted scope will always intercept the requests, it is cons
 If you want to stop persisting an individual persisted mock you can call `persist(false)`:
 
 ```js
-const scope = nock('http://example.com').persist().get('/').reply(200, 'ok')
+const scope = nock('http://example.com')
+  .persist()
+  .get('/')
+  .reply(200, 'ok')
 
 // Do some tests ...
 
@@ -1166,7 +1200,7 @@ If you just want to capture the generated code into a var as an array you can us
 
 ```js
 nock.recorder.rec({
-  dont_print: true,
+  dont_print: true
 })
 // ... some HTTP calls
 const nockCalls = nock.recorder.play()
@@ -1184,7 +1218,7 @@ In case you want to generate the code yourself or use the test data in some othe
 
 ```js
 nock.recorder.rec({
-  output_objects: true,
+  output_objects: true
 })
 // ... some HTTP calls
 const nockCallObjects = nock.recorder.play()
@@ -1205,7 +1239,7 @@ If you save this as a JSON file, you can load them directly through `nock.load(p
 
 ```js
 nocks = nock.load(pathToJson)
-nocks.forEach(function (nock) {
+nocks.forEach(function(nock) {
   nock.filteringRequestBody = (body, aRecordedBody) => {
     if (typeof body !== 'string' || typeof aRecordedBody !== 'string') {
       return body
@@ -1214,11 +1248,7 @@ nocks.forEach(function (nock) {
     const recordedBodyResult = /timestamp:([0-9]+)/.exec(aRecordedBody)
     if (recordedBodyResult) {
       const recordedTimestamp = recordedBodyResult[1]
-      return body.replace(/(timestamp):([0-9]+)/g, function (
-        match,
-        key,
-        value
-      ) {
+      return body.replace(/(timestamp):([0-9]+)/g, function(match, key, value) {
         return key + ':' + recordedTimestamp
       })
     } else {
@@ -1240,7 +1270,7 @@ nockDefs.forEach(def => {
   //  Do something with the definition object e.g. scope filtering.
   def.options = {
     ...def.options,
-    filteringScope: scope => /^https:\/\/api[0-9]*.dropbox.com/.test(scope),
+    filteringScope: scope => /^https:\/\/api[0-9]*.dropbox.com/.test(scope)
   }
 })
 
@@ -1258,7 +1288,7 @@ The genuine use cases for recording request headers (e.g. checking authorization
 nock.recorder.rec({
   dont_print: true,
   output_objects: true,
-  enable_reqheaders_recording: true,
+  enable_reqheaders_recording: true
 })
 ```
 
@@ -1273,7 +1303,7 @@ const appendLogToFile = content => {
   fs.appendFile('record.txt', content)
 }
 nock.recorder.rec({
-  logging: appendLogToFile,
+  logging: appendLogToFile
 })
 ```
 
@@ -1285,7 +1315,7 @@ To disable this, set `use_separator` to false.
 
 ```js
 nock.recorder.rec({
-  use_separator: false,
+  use_separator: false
 })
 ```
 
@@ -1298,7 +1328,7 @@ Examples:
 ```js
 nock.removeInterceptor({
   hostname: 'localhost',
-  path: '/mockedResource',
+  path: '/mockedResource'
 })
 ```
 
@@ -1374,7 +1404,7 @@ nockBack('zomboFixture.json', nockDone => {
     nockDone()
 
     // usage of the created fixture
-    nockBack('zomboFixture.json', function (nockDone) {
+    nockBack('zomboFixture.json', function(nockDone) {
       http.get('http://zombo.com/').end() // respond body "Ok"
 
       this.assertScopesFinished() //throws an exception if all nocks in fixture were not satisfied
@@ -1388,7 +1418,7 @@ nockBack('zomboFixture.json', nockDone => {
 
 If your tests are using promises then use `nockBack` like this:
 
-```
+```js
 return nockBack('promisedFixture.json')
   .then(({ nockDone, context }) => {
     //  do your tests returning a promise and chain it with
@@ -1461,14 +1491,14 @@ The same is true for `.replyWithError()`.
 
 Adding `{ retry: 0 }` to the `got` invocations will disable retrying, e.g.:
 
-```
-await got("http://example.test/", { retry: 0 })
+```js
+await got('http://example.test/', { retry: 0 })
 ```
 
 If you need to do this in all your tests, you can create a module
 `got_client.js` which exports a custom got instance:
 
-```
+```js
 const got = require('got')
 
 module.exports = got.extend({ retry: 0 })
