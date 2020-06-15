@@ -568,7 +568,7 @@ it('header manipulation', done => {
     .get('/accounts')
     .reply(200, { accounts: [{ id: 1, name: 'Joe Blow' }] })
 
-  const req = http.get({ host: 'example.test', path: '/accounts' }, res => {
+  const req = http.request({ host: 'example.test', path: '/accounts' }, res => {
     res.on('end', () => {
       scope.done()
       done()

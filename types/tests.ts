@@ -120,7 +120,6 @@ scope = scope.filteringRequestBody((path: string) => {
   return str
 })
 
-scope = scope.log(() => {})
 scope = scope.persist()
 scope = scope.persist(false)
 scope = scope.replyContentLength()
@@ -131,7 +130,6 @@ inst = inst.delay(2000)
 inst = inst.delay({ head: 1000, body: 1000 })
 inst = inst.delayBody(2000)
 inst = inst.delayConnection(2000)
-inst = inst.socketDelay(2000)
 
 scope.done() // $ExpectType void
 scope.isDone() // $ExpectType boolean
@@ -503,13 +501,6 @@ nock('http://example.test')
   })
   .reply(200, '<html></html>')
 
-// Delay the connection
-nock('http://example.test')
-  .get('/')
-  .socketDelay(2000) // 2 seconds
-  .delayConnection(1000)
-  .reply(200, '<html></html>')
-
 // Chaining
 scope = nock('http://example.test')
   .get('/users/1')
@@ -619,7 +610,7 @@ options = { allowUnmocked: true }
 scope = nock('http://example.test', options).get('/my/url').reply(200, 'OK!')
 
 // Expectations
-let google = nock('http://example.test')
+const google = nock('http://example.test')
   .get('/')
   .reply(200, 'Hello from Google!')
 setTimeout(() => {
@@ -652,9 +643,6 @@ console.error('pending mocks: %j', nock.pendingMocks())
 /// .activeMocks()
 nock.activeMocks() // $ExpectType string[]
 nock('http://example.test').activeMocks() // $ExpectType string[]
-
-// Logging
-google = nock('http://example.test').log(console.log)
 
 // Restoring
 nock.restore()

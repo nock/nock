@@ -120,7 +120,6 @@ declare namespace nock {
     filteringRequestBody(regex: RegExp, replace: string): this
     filteringRequestBody(fn: (body: string) => string): this
 
-    log(out: (message: any, ...optionalParams: any[]) => void): this
     persist(flag?: boolean): this
     replyContentLength(): this
     replyDate(d?: Date): this
@@ -204,7 +203,6 @@ declare namespace nock {
     delay(opts: number | { head?: number; body?: number }): this
     delayBody(timeMs: number): this
     delayConnection(timeMs: number): this
-    socketDelay(timeMs: number): this
   }
 
   interface Options {

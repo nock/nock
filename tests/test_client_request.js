@@ -79,11 +79,10 @@ describe('Direct use of `ClientRequest`', () => {
     }
     const req = new http.ClientRequest(reqOpts, res => {
       expect(res.statusCode).to.equal(201)
+      scope.done()
       done()
     })
     req.end()
-
-    scope.done()
   })
 
   it('should throw an expected error when creating with empty options', () => {

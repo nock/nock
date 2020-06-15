@@ -50,9 +50,10 @@ describe('Request Overrider', () => {
 
     const req = http.get('http://example.test')
 
-    scope.done()
-
-    req.on('response', () => done())
+    req.on('response', () => {
+      scope.done()
+      done()
+    })
   })
 
   it('write callback called', done => {
@@ -218,6 +219,21 @@ describe('Request Overrider', () => {
     )
 
     req.end('foobar', reqEndCallback)
+  })
+
+  it('should emit an error if `write` is called after `end`', done => {
+    nock('http://example.test').get('/').reply()
+
+    const req = http.request('http://example.test')
+
+    req.on('error', err => {
+      expect(err.message).to.equal('write after end')
+      expect(err.code).to.equal('ERR_STREAM_WRITE_AFTER_END')
+      done()
+    })
+
+    req.end()
+    req.write('foo')
   })
 
   // http://github.com/nock/nock/issues/139
@@ -538,9 +554,28 @@ describe('Request Overrider', () => {
     nock('http://example.test').get('/').reply(200, 'hey')
 
     const req = http.get('http://example.test')
+    req.on('error', () => {}) // listen for error so it doesn't bubble
     req.once('socket', socket => {
       socket.destroy()
       done()
+    })
+  })
+
+  it('calling Socket#destroy() multiple times only emits a single `close` event', done => {
+    nock('http://example.test').get('/').reply(200, 'hey')
+
+    const req = http.get('http://example.test')
+    req.on('error', () => {}) // listen for error so it doesn't bubble
+    req.once('socket', socket => {
+      const closeSpy = sinon.spy()
+      socket.on('close', closeSpy)
+
+      socket.destroy().destroy().destroy()
+
+      setTimeout(() => {
+        expect(closeSpy).to.have.been.calledOnce()
+        done()
+      }, 10)
     })
   })
 
