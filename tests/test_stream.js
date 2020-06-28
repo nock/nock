@@ -43,35 +43,29 @@ it('pause response after data', done => {
     // multiple 'data' events.
     .reply(200, response)
 
-  http.get(
-    {
-      host: 'example.test',
-      path: '/',
-    },
-    res => {
-      const didTimeout = sinon.spy()
+  http.get('http://example.test', res => {
+    const didTimeout = sinon.spy()
 
-      setTimeout(() => {
-        didTimeout()
-        res.resume()
-      }, 500)
+    setTimeout(() => {
+      didTimeout()
+      res.resume()
+    }, 500)
 
-      res.on('data', data => res.pause())
+    res.on('data', () => res.pause())
 
-      res.on('end', () => {
-        expect(didTimeout).to.have.been.calledOnce()
-        scope.done()
-        done()
-      })
-    }
-  )
+    res.on('end', () => {
+      expect(didTimeout).to.have.been.calledOnce()
+      scope.done()
+      done()
+    })
 
-  // Manually simulate multiple 'data' events.
-  response.emit('data', 'one')
-  setTimeout(() => {
-    response.emit('data', 'two')
-    response.end()
-  }, 0)
+    // Manually simulate multiple 'data' events.
+    response.emit('data', 'one')
+    setTimeout(() => {
+      response.emit('data', 'two')
+      response.end()
+    }, 0)
+  })
 })
 
 // https://github.com/nock/nock/issues/1493
@@ -83,30 +77,22 @@ it("response has 'complete' property and it's true after end", done => {
     // multiple 'data' events.
     .reply(200, response)
 
-  http.get(
-    {
-      host: 'example.test',
-      path: '/',
-    },
-    res => {
-      const onData = sinon.spy()
+  http.get('http://example.test', res => {
+    const onData = sinon.spy()
 
-      res.on('data', onData)
+    res.on('data', onData)
 
-      res.on('end', () => {
-        expect(onData).to.have.been.called()
-        expect(res.complete).to.be.true()
-        scope.done()
-        done()
-      })
-    }
-  )
+    res.on('end', () => {
+      expect(onData).to.have.been.called()
+      expect(res.complete).to.be.true()
+      scope.done()
+      done()
+    })
 
-  // Manually simulate multiple 'data' events.
-  response.emit('data', 'one')
-  setTimeout(() => {
+    // Manually simulate multiple 'data' events.
+    response.emit('data', 'one')
     response.end()
-  }, 0)
+  })
 })
 
 // TODO Convert to async / got.
@@ -325,14 +311,13 @@ it('error events on reply streams proxy to the response', done => {
     res => {
       res.on('error', err => {
         expect(err).to.equal('oh no!')
+        scope.done()
         done()
+      })
+
+      replyBody.end(() => {
+        replyBody.emit('error', 'oh no!')
       })
     }
   )
-
-  scope.done()
-
-  replyBody.end(() => {
-    replyBody.emit('error', 'oh no!')
-  })
 })

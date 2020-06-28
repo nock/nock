@@ -2,12 +2,14 @@
 
 const http = require('http')
 const fs = require('fs')
+const sinon = require('sinon')
+const { expect } = require('chai')
 const { beforeEach, afterEach, test } = require('tap')
 const rimraf = require('rimraf')
 const nock = require('..')
+const { back: nockBack } = nock
 
-const nockBack = nock.back
-
+require('./setup')
 require('./cleanup_after_each')()
 
 const fixture = `${__dirname}/fixtures/recording_test.json`
@@ -26,12 +28,11 @@ afterEach(done => {
 })
 
 test('recording', t => {
-  t.plan(5)
+  const onRequest = sinon.spy()
 
   nockBack('recording_test.json', function (nockDone) {
     const server = http.createServer((request, response) => {
-      t.pass('server received a request')
-
+      onRequest()
       response.writeHead(301)
       response.write('server served a response')
       response.end()
@@ -50,15 +51,19 @@ test('recording', t => {
           response.once('end', () => {
             nockDone()
 
+            expect(onRequest).to.have.been.calledOnce()
+
             const fixtureContent = JSON.parse(
               fs.readFileSync(fixture, { encoding: 'utf8' })
             )
-            t.equal(fixtureContent.length, 1)
+            expect(fixtureContent).to.have.length(1)
 
             const [firstFixture] = fixtureContent
-            t.equal(firstFixture.method, 'GET')
-            t.equal(firstFixture.path, '/')
-            t.equal(firstFixture.status, 301)
+            expect(firstFixture).to.include({
+              method: 'GET',
+              path: '/',
+              status: 301,
+            })
 
             server.close(t.end)
           })
@@ -74,15 +79,14 @@ test('recording', t => {
 })
 
 test('passes custom options to recorder', t => {
-  t.plan(3)
+  const onRequest = sinon.spy()
 
   nockBack(
     'recording_test.json',
     { recorder: { enable_reqheaders_recording: true } },
     function (nockDone) {
       const server = http.createServer((request, response) => {
-        t.pass('server received a request')
-
+        onRequest()
         response.writeHead(200)
         response.write('server served a response')
         response.end()
@@ -100,12 +104,14 @@ test('passes custom options to recorder', t => {
             response.once('end', () => {
               nockDone()
 
+              expect(onRequest).to.have.been.calledOnce()
+
               const fixtureContent = JSON.parse(
                 fs.readFileSync(fixture, { encoding: 'utf8' })
               )
 
-              t.equal(fixtureContent.length, 1)
-              t.ok(fixtureContent[0].reqheaders)
+              expect(fixtureContent).to.have.length(1)
+              expect(fixtureContent[0].reqheaders).to.be.ok()
 
               server.close(t.end)
             })
