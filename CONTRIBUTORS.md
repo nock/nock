@@ -315,7 +315,6 @@ Gio d'Amelio @giodamelio https://github.com/giodamelio
 Girish Ramakrishnan @gramakri https://github.com/gramakri
 Golo Roden @goloroden https://github.com/goloroden
 Goran Gajic @gorangajic https://github.com/gorangajic
-Greenkeeper @greenkeeperio-bot https://github.com/greenkeeperio-bot
 Greg Leppert @leppert https://github.com/leppert
 Gregor Martynus @gr2m https://github.com/gr2m
 Gregory Cowan @KrekkieD https://github.com/KrekkieD
@@ -903,7 +902,6 @@ narendra @reddynr https://github.com/reddynr
 @galenus https://github.com/galenus
 @getlittletech https://github.com/getlittletech
 @gmatroskin https://github.com/gmatroskin
-@greenkeeper null
 @handane123 https://github.com/handane123
 @hellboy81 https://github.com/hellboy81
 @hermano360 https://github.com/hermano360

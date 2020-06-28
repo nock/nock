@@ -31,7 +31,7 @@ Please note that this project is released with a [Contributor Code of Conduct](.
 
 We use [semantic-release](https://github.com/semantic-release/semantic-release) to automate the release of new versions based on semantic commit messages as described above. Depending on the branch that a new pull request is merged into, it is published to different versions using different [npm dist-tags](https://docs.npmjs.com/cli/dist-tag).
 
-- `master`: Publish with `@latest`, or if the commits have been merged into `next` branch before, update the `@latest` dist-tag to point at the new version
+- `main`: Publish with `@latest`, or if the commits have been merged into `next` branch before, update the `@latest` dist-tag to point at the new version
 - `next`: Publish with `@next`
 - `beta`: Publish to `X.0.0-beta.Y`, where `X` is the next breaking version and `Y` is number that gets increased with each release.
 - `[Version].x`: For example `10.x`, where `10` is the major release number. No breaking changes are allowed on this branch. Publishes fix/feature versions to `[Version]` using a `@release-@[version].x` release tag
@@ -48,7 +48,7 @@ If you want to **backport a fix** to version 10, and the last version released o
 
 ### Submit a Beta / Next release
 
-Create a new branch based off `beta` or `next`, depending on what you want. Make your changes and submit them to the same branches. If either `beta` or `next` is outdated, ask a maintainer to re-create them from `master`
+Create a new branch based off `beta` or `next`, depending on what you want. Make your changes and submit them to the same branches. If either `beta` or `next` is outdated, ask a maintainer to re-create them from `main`
 
 ## Formatting & linting
 
@@ -118,7 +118,7 @@ $ tap --only tests/example_file.js
 
 ## Release Process
 
-All of our releases are automated using [semantic-release](https://github.com/semantic-release/semantic-release). The commit messages pushed to the master branch trigger new releases. Semantic-release requires that commits follow certain conventions, [described above](#commit-message-conventions). semantic-release creates a GitHub release, adds release notes and publishes the new version to npm. This is why we do not store release notes in the [`CHANGELOG`](CHANGELOG.md) file - they're already on GitHub.
+All of our releases are automated using [semantic-release](https://github.com/semantic-release/semantic-release). The commit messages pushed to the main branch trigger new releases. Semantic-release requires that commits follow certain conventions, [described above](#commit-message-conventions). semantic-release creates a GitHub release, adds release notes and publishes the new version to npm. This is why we do not store release notes in the [`CHANGELOG`](CHANGELOG.md) file - they're already on GitHub.
 
 We use @nockbot as a separate account for releases, because npm tokens cannot be scoped to a single package. This improves our security model in case of a data breach involving npm tokens. @nockbot's credentials were set up by @gr2m; contact him if for any reason you need to change this in the future.
 
