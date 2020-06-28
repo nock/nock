@@ -161,5 +161,5 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [10, 12, 13, 14]
+        node-version: [10, 12, 14]
         os: [macos-latest, ubuntu-latest, windows-latest]
