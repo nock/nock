@@ -3,9 +3,9 @@ name: Continuous Delivery
 on:
   push:
     branches:
-      - '*.x' # maintenance releases such as 15.x
+      - '*.x' # maintenance releases such as 12.x
+      - main
       - beta
-      - master
       - next
 
 jobs:

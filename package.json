@@ -62,7 +62,6 @@
     "lint:js": "eslint --cache --cache-location './.cache/eslint' '**/*.js'",
     "lint:js:fix": "eslint --cache --cache-location './.cache/eslint' --fix '**/*.js'",
     "lint:ts": "dtslint types",
-    "semantic-release": "semantic-release",
     "test": "run-s test:mocha test:tap",
     "test:coverage": "tap --coverage-report=html && open coverage/lcov-report/index.html",
     "test:mocha": "nyc mocha $(grep -lr '^\\s*it(' tests)",
@@ -82,5 +81,21 @@
     "index.js",
     "lib",
     "types/index.d.ts"
-  ]
+  ],
+  "release": {
+    "branches": [
+      "+([0-9])?(.{+([0-9]),x}).x",
+      "main",
+      "next",
+      "next-major",
+      {
+        "name": "beta",
+        "prerelease": true
+      },
+      {
+        "name": "alpha",
+        "prerelease": true
+      }
+    ]
+  }
 }

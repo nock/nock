@@ -7,7 +7,7 @@ on:
       - synchronize
   push:
     branches:
-      - master
+      - main
 
 jobs:
   fix-formatting:
