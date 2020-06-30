@@ -18,7 +18,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Setup Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2.1.0
         with:
           node-version: 12
       - name: Cache npm dependencies
