@@ -288,21 +288,6 @@ describe('`matchStringOrRegexp()`', () => {
   })
 })
 
-describe('`overrideRequests()`', () => {
-  afterEach(() => {
-    common.restoreOverriddenRequests()
-  })
-
-  it('should throw if called a second time', () => {
-    nock.restore()
-    common.overrideRequests()
-    // Second call throws.
-    expect(() => common.overrideRequests()).to.throw(
-      "Module's request already overridden for http protocol."
-    )
-  })
-})
-
 it('`restoreOverriddenRequests()` can be called more than once', () => {
   common.restoreOverriddenRequests()
   common.restoreOverriddenRequests()
