@@ -65,7 +65,7 @@
     "test": "run-s test:mocha test:tap",
     "test:coverage": "tap --coverage-report=html && open coverage/lcov-report/index.html",
     "test:mocha": "nyc mocha $(grep -lr '^\\s*it(' tests)",
-    "test:tap": "tap --100 --coverage --coverage-report=text ./tests/test_*.js"
+    "test:tap": "tap --coverage --coverage-report=text ./tests/test_*.js"
   },
   "nyc": {
     "reporter": [
