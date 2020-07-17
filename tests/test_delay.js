@@ -29,10 +29,13 @@ function checkDuration(start, durationMillis) {
   // When asserting delays, we know the code should take at least the delay amount of time to execute,
   // however, the overhead of running the code adds a few milliseconds to anything we are testing.
   // We'd like to test some sort of upper bound too, but that has been problematic with different systems
-  // having a wide rage of overhead
+  // having a wide rage of overhead.
+  // We've also seen discrepancies with timings that sometimes result in the passed milliseconds
+  // being one shy of the expected duration. Subtracting 5ms makes it more resilient.
+  // https://github.com/nock/nock/issues/2045
   // TODO: find a better way to test delays while ensuring the delays aren't too long.
   expect(milliseconds).to.be.at.least(
-    durationMillis,
+    durationMillis - 5,
     'delay minimum not satisfied'
   )
   // .and.at.most(durationMillis + bufferMillis, 'delay upper bound exceeded')
