@@ -516,6 +516,10 @@ describe('`dataEqual()`', () => {
     )
     expect(result).to.equal(true)
   })
+  it('does not equate arrays of different length', () => {
+    const result = common.dataEqual(['a'], ['a','b'])
+    expect(result).to.equal(false)
+  })
 })
 
 it('testing timers are deleted correctly', done => {
