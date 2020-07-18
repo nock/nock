@@ -500,6 +500,24 @@ describe('`normalizeClientRequestArgs()`', () => {
   })
 })
 
+describe('`dataEqual()`', () => {
+  it('treats explicit and implicit undefined object values as equal', () => {
+    const result = common.dataEqual({ a: 'a', b: undefined }, { a: 'a' })
+    expect(result).to.equal(true)
+  })
+  it('does not conflate object and array keys', () => {
+    const result = common.dataEqual(['a', 'b'], { '0': 'a', '1': 'b' })
+    expect(result).to.equal(false)
+  })
+  it('treats JSON path notated and nested objects as equal', () => {
+    const result = common.dataEqual(
+      { 'foo[bar][0]': 'baz' },
+      { foo: { bar: ['baz'] } }
+    )
+    expect(result).to.equal(true)
+  })
+})
+
 it('testing timers are deleted correctly', done => {
   const timeoutSpy = sinon.spy()
   const intervalSpy = sinon.spy()
