@@ -574,7 +574,7 @@ const scope = nock('http://www.headdy.com')
 
 #### Including Content-Length Header Automatically
 
-When using `scope.reply()` to set a response body manually, you can have the
+When using `interceptor.reply()` to set a response body manually, you can have the
 `Content-Length` header calculated automatically.
 
 ```js

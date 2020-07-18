@@ -398,8 +398,7 @@ describe('Request Overrider', () => {
     req.end()
   })
 
-  // Hopefully address https://github.com/nock/nock/issues/146, at least in
-  // spirit.
+  // Hopefully address https://github.com/nock/nock/issues/146, at least in spirit.
   it('request with a large buffer', async () => {
     const replyLength = 1024 * 1024
     const responseBody = Buffer.from(new Array(replyLength + 1).join('.'))
@@ -410,7 +409,10 @@ describe('Request Overrider', () => {
       .get('/')
       .reply(200, responseBody, { 'Content-Encoding': 'gzip' })
 
-    const { body } = await got('http://example.test', { decompress: false })
+    const { body } = await got('http://example.test', {
+      responseType: 'buffer',
+      decompress: false,
+    })
     expect(body).to.deep.equal(responseBody)
     scope.done()
   })
