@@ -11,8 +11,8 @@ require('./setup')
 
 describe('interception in parallel', () => {
   const origin = 'https://example.test'
-  const makeRequest = () =>
-    got(origin)
+  const makeRequest = opts =>
+    got(origin, opts)
       .then(res => res.statusCode)
       .catch(reason => {
         if (reason.code === 'ERR_NOCK_NO_MATCH') return 418
@@ -59,6 +59,25 @@ describe('interception in parallel', () => {
     ])
 
     expect(results.sort()).to.deep.equal([200, 201, 418])
+    expect(nock.isDone()).to.equal(true)
+  })
+
+  it('provides the correct request instance on the Interceptor inside reply callbacks', async () => {
+    const seenFooHeaders = []
+    nock(origin)
+      .persist()
+      .get('/')
+      .reply(function () {
+        seenFooHeaders.push(this.req.headers.foo)
+        return [200]
+      })
+
+    await Promise.all([
+      makeRequest({ headers: { foo: 'A' } }),
+      makeRequest({ headers: { foo: 'B' } }),
+    ])
+
+    expect(seenFooHeaders.sort()).to.deep.equal(['A', 'B'])
     expect(nock.isDone()).to.equal(true)
   })
 })
