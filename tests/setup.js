@@ -16,6 +16,7 @@ chai.use(sinonChai)
 
 afterEach(function () {
   nock.restore()
+  nock.abortPendingRequests()
   nock.cleanAll()
   nock.enableNetConnect()
   nock.emitter.removeAllListeners()

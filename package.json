@@ -24,7 +24,7 @@
   "dependencies": {
     "debug": "^4.1.0",
     "json-stringify-safe": "^5.0.1",
-    "lodash": "^4.17.13",
+    "lodash.set": "^4.3.2",
     "propagate": "^2.0.0"
   },
   "devDependencies": {
@@ -33,16 +33,17 @@
     "chai": "^4.1.2",
     "dirty-chai": "^2.0.1",
     "dtslint": "^3.0.0",
-    "eslint": "^6.0.0",
+    "eslint": "^7.3.1",
     "eslint-config-prettier": "^6.0.0",
     "eslint-config-standard": "^14.0.0",
     "eslint-plugin-import": "^2.16.0",
-    "eslint-plugin-mocha": "^6.2.0",
+    "eslint-plugin-mocha": "^7.0.1",
     "eslint-plugin-node": "^11.0.0",
     "eslint-plugin-promise": "^4.1.1",
     "eslint-plugin-standard": "^4.0.0",
-    "got": "^10.5.2",
-    "mocha": "^7.0.1",
+    "form-data": "^3.0.0",
+    "got": "^11.3.0",
+    "mocha": "^8.0.1",
     "npm-run-all": "^4.1.5",
     "nyc": "^15.0.0",
     "prettier": "2.0.5",
@@ -62,7 +63,6 @@
     "lint:js": "eslint --cache --cache-location './.cache/eslint' '**/*.js'",
     "lint:js:fix": "eslint --cache --cache-location './.cache/eslint' --fix '**/*.js'",
     "lint:ts": "dtslint types",
-    "semantic-release": "semantic-release",
     "test": "run-s test:mocha test:tap",
     "test:coverage": "tap --coverage-report=html && open coverage/lcov-report/index.html",
     "test:mocha": "nyc mocha $(grep -lr '^\\s*it(' tests)",
@@ -82,5 +82,21 @@
     "index.js",
     "lib",
     "types/index.d.ts"
-  ]
+  ],
+  "release": {
+    "branches": [
+      "+([0-9])?(.{+([0-9]),x}).x",
+      "main",
+      "next",
+      "next-major",
+      {
+        "name": "beta",
+        "prerelease": true
+      },
+      {
+        "name": "alpha",
+        "prerelease": true
+      }
+    ]
+  }
 }

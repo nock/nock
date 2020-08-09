@@ -235,8 +235,7 @@ describe('`reply()` headers', () => {
             myHeaderFnCalled()
             expect(req).to.be.an.instanceof(OverriddenClientRequest)
             expect(res).to.be.an.instanceof(IncomingMessage)
-            expect(body).to.be.an.instanceof(Buffer)
-            expect(Buffer.from('boo!').equals(body)).to.be.true()
+            expect(body).to.equal('boo!')
             return 'gotcha'
           },
         })

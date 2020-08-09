@@ -255,34 +255,6 @@ test('on interceptor, filter path with function', async t => {
   scope.done()
 })
 
-// TODO: Move to test_request_overrider.
-test('abort request', t => {
-  const scope = nock('http://example.test').get('/hey').reply(200, 'nobody')
-
-  const req = http.request({
-    host: 'example.test',
-    path: '/hey',
-  })
-
-  req.on('response', res => {
-    res.on('close', err => {
-      expect(err.code).to.equal('aborted')
-      scope.done()
-    })
-
-    res.on('end', () => expect.fail())
-
-    req.once('error', err => {
-      expect(err.code).to.equal('ECONNRESET')
-      t.end()
-    })
-
-    req.abort()
-  })
-
-  req.end()
-})
-
 test('chaining API', async t => {
   const scope = nock('http://example.test')
     .get('/one')
@@ -708,27 +680,19 @@ test('get correct filtering with scope and request headers filtering', t => {
     .reply(200, responseText, { 'Content-Type': 'text/plain' })
 
   const onData = sinon.spy()
-  const req = http.get(
-    {
-      host: 'bar.example.test',
-      method: 'GET',
-      path: '/path',
-      port: 80,
-    },
-    res => {
-      res.on('data', data => {
-        onData()
-        expect(data.toString()).to.equal(responseText)
-      })
-      res.on('end', () => {
-        expect(onData).to.have.been.calledOnce()
-        scope.done()
-        t.end()
-      })
-    }
-  )
+  const req = http.get('http://bar.example.test/path', res => {
+    expect(req.getHeaders()).to.deep.equal({ host: requestHeaders.host })
 
-  expect(req.getHeaders()).to.deep.equal({ host: requestHeaders.host })
+    res.on('data', data => {
+      onData()
+      expect(data.toString()).to.equal(responseText)
+    })
+    res.on('end', () => {
+      expect(onData).to.have.been.calledOnce()
+      scope.done()
+      t.end()
+    })
+  })
 })
 
 test('different subdomain with reply callback and filtering scope', async t => {

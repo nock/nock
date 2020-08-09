@@ -7,11 +7,9 @@ const http = require('http')
 const stream = require('stream')
 const assertRejects = require('assert-rejects')
 const sinon = require('sinon')
-const { test } = require('tap')
 const nock = require('..')
 const got = require('./got_client')
 
-require('./cleanup_after_each')()
 require('./setup')
 
 const textFilePath = path.resolve(__dirname, './assets/reply_file_1.txt')
@@ -31,298 +29,354 @@ function checkDuration(start, durationMillis) {
   // When asserting delays, we know the code should take at least the delay amount of time to execute,
   // however, the overhead of running the code adds a few milliseconds to anything we are testing.
   // We'd like to test some sort of upper bound too, but that has been problematic with different systems
-  // having a wide rage of overhead
+  // having a wide rage of overhead.
+  // We've also seen discrepancies with timings that sometimes result in the passed milliseconds
+  // being one shy of the expected duration. Subtracting 5ms makes it more resilient.
+  // https://github.com/nock/nock/issues/2045
   // TODO: find a better way to test delays while ensuring the delays aren't too long.
   expect(milliseconds).to.be.at.least(
-    durationMillis,
+    durationMillis - 5,
     'delay minimum not satisfied'
   )
   // .and.at.most(durationMillis + bufferMillis, 'delay upper bound exceeded')
 }
 
-test('calling delay could cause timeout error', async () => {
-  const scope = nock('http://example.test')
-    .get('/')
-    .delay({
-      head: 300,
-    })
-    .reply(200, 'OK')
+describe('`delay()`', () => {
+  let interceptor
+  let connSpy
+  let bodySpy
 
-  await assertRejects(
-    got('http://example.test', { timeout: 100 }),
-    err => err.code === 'ETIMEDOUT'
-  )
-
-  scope.done()
-})
-
-test('Body delay does not have impact on timeout', async () => {
-  const scope = nock('http://example.test')
-    .get('/')
-    .delay({
-      head: 300,
-      body: 300,
-    })
-    .reply(201, 'OK')
-
-  const { body, statusCode } = await got('http://example.test/', {
-    timeout: {
-      response: 500,
-    },
+  // As a rule, the tests in this repo have a strategy of only testing the API and not spying on
+  // internals for unit tests. These next few tests break that rule to assert the proxy behavior of
+  // `delay()`. This is simply to reduce the need of double testing the behavior of `delayBody()`
+  // and `delayConnection()` and should not be used as an example for writing new tests.
+  beforeEach(() => {
+    interceptor = nock('http://example.test').get('/')
+    connSpy = sinon.spy(interceptor, 'delayConnection')
+    bodySpy = sinon.spy(interceptor, 'delayBody')
   })
 
-  expect(statusCode).to.equal(201)
-  expect(body).to.equal('OK')
-  scope.done()
-})
+  it('should proxy a single number argument', () => {
+    interceptor.delay(42)
 
-test('calling delay with "body" and "head" delays the response', t => {
-  nock('http://example.test')
-    .get('/')
-    .delay({
-      head: 200,
-      body: 300,
-    })
-    .reply(200, 'OK')
+    expect(connSpy).to.have.been.calledOnceWithExactly(42)
+    expect(bodySpy).to.have.been.calledOnceWithExactly(0)
+  })
 
-  const resStart = process.hrtime()
+  it('should proxy values from an object argument', () => {
+    interceptor.delay({ head: 42, body: 17 })
 
-  http.get('http://example.test', res => {
-    checkDuration(resStart, 200)
+    expect(connSpy).to.have.been.calledOnceWithExactly(42)
+    expect(bodySpy).to.have.been.calledOnceWithExactly(17)
+  })
 
-    // const dataStart = process.hrtime()
-    res.once('data', function (data) {
-      // TODO: there is a bug in Nock that allows this delay to be less than the desired 300ms.
-      //  there is a known issues with streams, but this needs further investigation.
-      // checkDuration(dataStart, 300)
-      expect(data.toString()).to.equal('OK')
-      res.once('end', () => t.done())
+  it('should default missing values from an object argument', () => {
+    interceptor.delay({})
+
+    expect(connSpy).to.have.been.calledOnceWithExactly(0)
+    expect(bodySpy).to.have.been.calledOnceWithExactly(0)
+  })
+
+  it('should throw on invalid arguments', () => {
+    expect(() => interceptor.delay('one million seconds')).to.throw(
+      'Unexpected input'
+    )
+  })
+
+  it('should delay the response when called with "body" and "head"', done => {
+    nock('http://example.test')
+      .get('/')
+      .delay({
+        head: 200,
+        body: 300,
+      })
+      .reply(200, 'OK')
+
+    const start = process.hrtime()
+
+    http.get('http://example.test', res => {
+      checkDuration(start, 200)
+
+      res.once('data', function (data) {
+        checkDuration(start, 500)
+        expect(data.toString()).to.equal('OK')
+        res.once('end', done)
+      })
     })
   })
 })
 
-test('calling delay with "body" delays the response body', async () => {
-  const scope = nock('http://example.test')
-    .get('/')
-    .delay({ body: 200 })
-    .reply(200, 'OK')
+describe('`delayBody()`', () => {
+  it('should delay the clock between the `response` event and the first `data` event', done => {
+    nock('http://example.test').get('/').delayBody(200).reply(201, 'OK')
 
-  const { body } = await resolvesInAtLeast(got('http://example.test/'), 200)
-
-  expect(body).to.equal('OK')
-  scope.done()
-})
-
-test('calling delayBody delays the response', async () => {
-  const scope = nock('http://example.test')
-    .get('/')
-    .delayBody(200)
-    .reply(200, 'OK')
-
-  const { body } = await resolvesInAtLeast(got('http://example.test/'), 200)
-
-  expect(body).to.equal('OK')
-  scope.done()
-})
-
-test('delayBody works with a stream', async () => {
-  const scope = nock('http://example.test')
-    .get('/')
-    .delayBody(200)
-    .reply(200, () => fs.createReadStream(textFilePath, { encoding: 'utf8' }))
-
-  const { body } = await resolvesInAtLeast(got('http://example.test/'), 200)
-
-  expect(body).to.equal(textFileContents)
-  scope.done()
-})
-
-test('delayBody works with a stream of binary buffers', async () => {
-  const scope = nock('http://example.test')
-    .get('/')
-    .delayBody(200)
-    // No encoding specified, which causes the file to be streamed using
-    // buffers instead of strings.
-    .reply(200, () => fs.createReadStream(textFilePath))
-
-  const { body } = await resolvesInAtLeast(got('http://example.test/'), 200)
-
-  expect(body).to.equal(textFileContents)
-  scope.done()
-})
-
-test('delayBody works with a delayed stream', async () => {
-  const passthrough = new stream.Transform({
-    transform(chunk, encoding, callback) {
-      this.push(chunk.toString())
-      callback()
-    },
+    http.get('http://example.test', res => {
+      const start = process.hrtime()
+      res.once('data', () => {
+        checkDuration(start, 200)
+        done()
+      })
+    })
   })
 
-  const scope = nock('http://example.test')
-    .get('/')
-    .delayBody(100)
-    .reply(200, () => passthrough)
+  it('should delay the overall response', async () => {
+    const scope = nock('http://example.test')
+      .get('/')
+      .delayBody(200)
+      .reply(200, 'OK')
 
-  setTimeout(() => fs.createReadStream(textFilePath).pipe(passthrough), 125)
+    const { body } = await resolvesInAtLeast(got('http://example.test/'), 200)
 
-  const { body } = await got('http://example.test/')
+    expect(body).to.equal('OK')
+    scope.done()
+  })
 
-  expect(body).to.equal(textFileContents)
-  scope.done()
+  it('should not have an impact on a response timeout', async () => {
+    const scope = nock('http://example.test')
+      .get('/')
+      .delayConnection(300)
+      .delayBody(300)
+      .reply(201, 'OK')
+
+    const { body, statusCode } = await got('http://example.test/', {
+      timeout: {
+        response: 500,
+      },
+    })
+
+    expect(statusCode).to.equal(201)
+    expect(body).to.equal('OK')
+    scope.done()
+  })
+
+  it('should work with a response stream', async () => {
+    const scope = nock('http://example.test')
+      .get('/')
+      .delayBody(200)
+      .reply(200, () => fs.createReadStream(textFilePath, { encoding: 'utf8' }))
+
+    const { body } = await resolvesInAtLeast(got('http://example.test/'), 200)
+
+    expect(body).to.equal(textFileContents)
+    scope.done()
+  })
+
+  it('should work with a response stream of binary buffers', async () => {
+    const scope = nock('http://example.test')
+      .get('/')
+      .delayBody(200)
+      // No encoding specified, which causes the file to be streamed using
+      // buffers instead of strings.
+      .reply(200, () => fs.createReadStream(textFilePath))
+
+    const { body } = await resolvesInAtLeast(got('http://example.test/'), 200)
+
+    expect(body).to.equal(textFileContents)
+    scope.done()
+  })
+
+  it('should work with a delayed response stream', async () => {
+    const passthrough = new stream.Transform({
+      transform(chunk, encoding, callback) {
+        this.push(chunk.toString())
+        callback()
+      },
+    })
+
+    const scope = nock('http://example.test')
+      .get('/')
+      .delayBody(100)
+      .reply(200, () => passthrough)
+
+    setTimeout(() => fs.createReadStream(textFilePath).pipe(passthrough), 125)
+
+    const { body } = await got('http://example.test/')
+
+    expect(body).to.equal(textFileContents)
+    scope.done()
+  })
 })
 
-test('calling delay delays the response', async () => {
-  const scope = nock('http://example.test').get('/').delay(200).reply(200, 'OK')
+describe('`delayConnection()`', () => {
+  it('should cause a timeout error when larger than options.timeout', async () => {
+    const scope = nock('http://example.test')
+      .get('/')
+      .delayConnection(1000)
+      .reply(200, {})
 
-  const { body } = await resolvesInAtLeast(got('http://example.test'), 200)
+    await assertRejects(
+      got('http://example.test', { timeout: 10 }),
+      err => err.code === 'ETIMEDOUT'
+    )
 
-  expect(body).to.equal('OK')
-  scope.done()
-})
+    scope.done()
+  })
 
-test('using reply callback with delay provides proper arguments', async () => {
-  const replyStub = sinon.stub().returns('')
+  it('should delay the clock before the `response` event', done => {
+    nock('http://example.test').get('/').delayConnection(200).reply()
 
-  const scope = nock('http://example.test')
-    .post('/')
-    .delay(100)
-    .reply(200, replyStub)
+    const req = http.request('http://example.test', () => {
+      checkDuration(start, 200)
+      done()
+    })
 
-  await got.post('http://example.test', { body: 'OK' })
+    req.end()
+    const start = process.hrtime()
+  })
 
-  expect(replyStub).to.have.been.calledOnceWithExactly('/', 'OK')
-  scope.done()
-})
+  it('should delay the overall response', async () => {
+    const scope = nock('http://example.test')
+      .get('/')
+      .delayConnection(200)
+      .reply(200, 'OK')
 
-test('using reply callback with delay can reply JSON', async () => {
-  const scope = nock('http://example.test')
-    .get('/')
-    .delay(100)
-    .reply(200, () => ({ a: 1 }))
+    const { body } = await resolvesInAtLeast(got('http://example.test'), 200)
 
-  const { body, headers, statusCode } = await got('http://example.test')
+    expect(body).to.equal('OK')
+    scope.done()
+  })
 
-  expect(body).to.equal('{"a":1}')
-  expect(headers).to.have.property('content-type', 'application/json')
-  expect(statusCode).to.equal(200)
-  scope.done()
-})
+  it('should provide the proper arguments when using reply a callback', async () => {
+    const replyStub = sinon.stub().returns('')
 
-test('delay with invalid arguments', t => {
-  const interceptor = nock('http://example.test').get('/')
+    const scope = nock('http://example.test')
+      .post('/')
+      .delayConnection(100)
+      .reply(200, replyStub)
 
-  expect(() => interceptor.delay('one million seconds')).to.throw(
-    'Unexpected input'
-  )
-  t.end()
-})
+    await got.post('http://example.test', { body: 'OK' })
 
-test('delay works with replyWithFile', async () => {
-  const scope = nock('http://example.test')
-    .get('/')
-    .delay(200)
-    .replyWithFile(200, textFilePath)
+    expect(replyStub).to.have.been.calledOnceWithExactly('/', 'OK')
+    scope.done()
+  })
 
-  const { body, statusCode } = await resolvesInAtLeast(
-    got('http://example.test'),
-    200
-  )
+  it('should delay a JSON response when using a reply callback', async () => {
+    const scope = nock('http://example.test')
+      .get('/')
+      .delayConnection(100)
+      .reply(200, () => ({ a: 1 }))
 
-  expect(statusCode).to.equal(200)
-  expect(body).to.equal(textFileContents)
-  scope.done()
-})
+    const { body, headers, statusCode } = await got('http://example.test')
 
-test('delay works with when you return a generic stream from the reply callback', async () => {
-  const scope = nock('http://example.test')
-    .get('/')
-    .delay(200)
-    .reply(200, () => fs.createReadStream(textFilePath))
+    expect(body).to.equal('{"a":1}')
+    expect(headers).to.have.property('content-type', 'application/json')
+    expect(statusCode).to.equal(200)
+    scope.done()
+  })
 
-  const { body, statusCode } = await resolvesInAtLeast(
-    got('http://example.test'),
-    200
-  )
+  it('should work with `replyWithFile()`', async () => {
+    const scope = nock('http://example.test')
+      .get('/')
+      .delayConnection(200)
+      .replyWithFile(200, textFilePath)
 
-  expect(statusCode).to.equal(200)
-  expect(body).to.equal(textFileContents)
-  scope.done()
-})
+    const { body } = await resolvesInAtLeast(got('http://example.test'), 200)
 
-test('delay with replyWithError: response is delayed', async () => {
-  nock('http://example.test')
-    .get('/')
-    .delay(100)
-    .replyWithError('this is an error message')
+    expect(body).to.equal(textFileContents)
+    scope.done()
+  })
 
-  await resolvesInAtLeast(
-    assertRejects(got('http://example.test'), /this is an error message/),
-    100
-  )
-})
+  it('should work with a generic stream from the reply callback', async () => {
+    const scope = nock('http://example.test')
+      .get('/')
+      .delayConnection(200)
+      .reply(200, () => fs.createReadStream(textFilePath))
 
-test('calling delayConnection delays the connection', async () => {
-  const scope = nock('http://example.test')
-    .get('/')
-    .delayConnection(200)
-    .reply(200, 'OK')
+    const { body } = await resolvesInAtLeast(got('http://example.test'), 200)
 
-  const { body } = await resolvesInAtLeast(got('http://example.test'), 200)
+    expect(body).to.equal(textFileContents)
+    scope.done()
+  })
 
-  expect(body).to.equal('OK')
-  scope.done()
-})
+  it('should work with a generic stream from the reply callback', async () => {
+    const scope = nock('http://example.test')
+      .get('/')
+      .delayConnection(200)
+      .reply(200, () => fs.createReadStream(textFilePath))
 
-test('using reply callback with delayConnection provides proper arguments', async () => {
-  const replyStub = sinon.stub().returns('')
+    const { body, statusCode } = await resolvesInAtLeast(
+      got('http://example.test'),
+      200
+    )
 
-  const scope = nock('http://example.test')
-    .post('/')
-    .delayConnection(100)
-    .reply(200, replyStub)
+    expect(statusCode).to.equal(200)
+    expect(body).to.equal(textFileContents)
+    scope.done()
+  })
 
-  await got.post('http://example.test', { body: 'OK' })
+  it('should delay errors when `replyWithError()` is used', async () => {
+    nock('http://example.test')
+      .get('/')
+      .delayConnection(100)
+      .replyWithError('this is an error message')
 
-  expect(replyStub).to.have.been.calledOnceWithExactly('/', 'OK')
-  scope.done()
-})
+    await resolvesInAtLeast(
+      assertRejects(got('http://example.test'), /this is an error message/),
+      100
+    )
+  })
 
-test('delayConnection works with replyWithFile', async () => {
-  const scope = nock('http://example.test')
-    .get('/')
-    .delayConnection(200)
-    .replyWithFile(200, textFilePath)
+  it('emits a timeout - with setTimeout', done => {
+    nock('http://example.test').get('/').delayConnection(10000).reply(200, 'OK')
 
-  const { body } = await resolvesInAtLeast(got('http://example.test'), 200)
+    const onEnd = sinon.spy()
 
-  expect(body).to.equal(textFileContents)
-  scope.done()
-})
+    const req = http.request('http://example.test', res => {
+      res.once('end', onEnd)
+    })
 
-test('delayConnection works with when you return a generic stream from the reply callback', async () => {
-  const scope = nock('http://example.test')
-    .get('/')
-    .delayConnection(200)
-    .reply(200, () => fs.createReadStream(textFilePath))
+    req.setTimeout(5000, () => {
+      expect(onEnd).not.to.have.been.called()
+      done()
+    })
 
-  const { body } = await resolvesInAtLeast(got('http://example.test'), 200)
+    req.end()
+  })
 
-  expect(body).to.equal(textFileContents)
-  scope.done()
-})
+  it('emits a timeout - with options.timeout', done => {
+    nock('http://example.test').get('/').delayConnection(10000).reply(200, 'OK')
 
-test('request with delayConnection and request.timeout', async t => {
-  const scope = nock('http://example.test')
-    .get('/')
-    .delayConnection(1000)
-    .reply(200, {})
+    const onEnd = sinon.spy()
 
-  await assertRejects(
-    got('http://example.test', { timeout: 10 }),
-    err => err.code === 'ETIMEDOUT'
-  )
+    const req = http.request('http://example.test', { timeout: 5000 }, res => {
+      res.once('end', onEnd)
+    })
 
-  scope.done()
-  t.done()
+    req.on('timeout', function () {
+      expect(onEnd).not.to.have.been.called()
+      done()
+    })
+
+    req.end()
+  })
+
+  it('does not emit a timeout when timeout > delayConnection', done => {
+    const responseText = 'okeydoke!'
+    const scope = nock('http://example.test')
+      .get('/')
+      .delayConnection(300)
+      .reply(200, responseText)
+
+    const req = http.request('http://example.test', res => {
+      res.setEncoding('utf8')
+
+      let body = ''
+
+      res.on('data', chunk => {
+        body += chunk
+      })
+
+      res.once('end', () => {
+        expect(body).to.equal(responseText)
+        scope.done()
+        done()
+      })
+    })
+
+    req.setTimeout(60000, () => {
+      expect.fail('socket timed out unexpectedly')
+    })
+
+    req.end()
+  })
 })

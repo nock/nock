@@ -1,157 +1,213 @@
 'use strict'
 
-const nock = require('..')
 const { expect } = require('chai')
 const http = require('http')
 const sinon = require('sinon')
+const nock = require('..')
 
 require('./setup')
 
-it('`req.abort()` should cause "abort" and "error" to be emitted', done => {
-  const scope = nock('http://example.test')
-    .get('/')
-    .delayConnection(500)
-    .reply()
+// These tests use `setTimeout` before verifying emitted events to ensure any
+// number of `nextTicks` or `setImmediate` can process first.
 
-  const onAbort = sinon.spy()
-  const req = http
-    .get('http://example.test/')
-    .once('abort', onAbort)
-    .once('error', err => {
-      // Should trigger last
-      expect(err.code).to.equal('ECONNRESET')
-      expect(onAbort).to.have.been.calledOnce()
-      scope.done()
+// Node will emit a `prefinish` event after `socket`, but it's an internal,
+// undocumented event that Nock does not emulate.
+
+// The order of tests run sequentially through a ClientRequest's lifetime.
+// Starting the top by aborting requests early on then aborting later and later.
+describe('`ClientRequest.abort()`', () => {
+  it('Emits the expected event sequence when `write` is called on an aborted request', done => {
+    const scope = nock('http://example.test').get('/').reply()
+
+    const req = http.request('http://example.test')
+    const emitSpy = sinon.spy(req, 'emit')
+    req.abort()
+    req.write('foo')
+
+    setTimeout(() => {
+      expect(emitSpy).to.have.been.calledOnceWithExactly('abort')
+      expect(scope.isDone()).to.be.false()
       done()
-    })
-  process.nextTick(() => req.abort())
-})
+    }, 10)
+  })
 
-it('abort is emitted before delay time', done => {
-  const scope = nock('http://example.test')
-    .get('/')
-    .delayConnection(500)
-    .reply()
+  it('Emits the expected event sequence when `end` is called on an aborted request', done => {
+    const scope = nock('http://example.test').get('/').reply()
 
-  const start = Date.now()
-  const req = http
-    .get('http://example.test/')
-    .once('abort', () => {
-      const actual = Date.now() - start
-      expect(actual).to.be.below(250)
-      scope.done()
+    const req = http.request('http://example.test')
+    const emitSpy = sinon.spy(req, 'emit')
+    req.abort()
+    req.end()
+
+    setTimeout(() => {
+      expect(emitSpy).to.have.been.calledOnceWithExactly('abort')
+      expect(scope.isDone()).to.be.false()
       done()
-    })
-    .once('error', () => {}) // Don't care.
-  // Don't bother with the response
+    }, 10)
+  })
 
-  setTimeout(() => req.abort(), 10)
-})
+  it('Emits the expected event sequence when `flushHeaders` is called on an aborted request', done => {
+    const scope = nock('http://example.test').get('/').reply()
 
-it('Aborting an aborted request should not emit an error', done => {
-  const scope = nock('http://example.test').get('/').reply()
+    const req = http.request('http://example.test')
+    const emitSpy = sinon.spy(req, 'emit')
+    req.abort()
+    req.flushHeaders()
 
-  let errorCount = 0
-  const req = http.get('http://example.test/').on('error', () => {
-    errorCount++
-    if (errorCount < 3) {
-      // Abort 3 times at max, otherwise this would be an endless loop.
-      // https://github.com/nock/nock/issues/882
+    setTimeout(() => {
+      expect(emitSpy).to.have.been.calledOnceWithExactly('abort')
+      expect(scope.isDone()).to.be.false()
+      done()
+    }, 10)
+  })
+
+  it('Emits the expected event sequence when aborted immediately after `end`', done => {
+    const scope = nock('http://example.test').get('/').reply()
+
+    const req = http.request('http://example.test')
+    const emitSpy = sinon.spy(req, 'emit')
+    req.end()
+    req.abort()
+
+    setTimeout(() => {
+      expect(emitSpy).to.have.been.calledOnceWithExactly('abort')
+      expect(scope.isDone()).to.be.false()
+      done()
+    }, 10)
+  })
+
+  it('Emits the expected event sequence when aborted inside a `socket` event listener', done => {
+    const scope = nock('http://example.test').get('/').reply()
+
+    const req = http.request('http://example.test')
+    const emitSpy = sinon.spy(req, 'emit')
+
+    req.on('socket', () => {
       req.abort()
-    }
+    })
+    req.on('error', err => {
+      expect(err.message).to.equal('socket hang up')
+      expect(err.code).to.equal('ECONNRESET')
+    })
+    req.end()
+
+    setTimeout(() => {
+      const events = emitSpy.args.map(i => i[0])
+      expect(events).to.deep.equal(['socket', 'abort', 'error', 'close'])
+      expect(scope.isDone()).to.be.false()
+      done()
+    }, 10)
   })
-  req.abort()
 
-  // Allow some time to fail.
-  setTimeout(() => {
-    expect(errorCount).to.equal(1, 'Only one error should be sent')
-    scope.done()
-    done()
-  }, 10)
-})
+  it('Emits the expected event sequence when aborted multiple times', done => {
+    const scope = nock('http://example.test').get('/').reply()
 
-it('Aborting a not-yet-ended request should end it', done => {
-  // Set up.
-  const scope = nock('http://example.test').post('/').reply()
+    const req = http.request('http://example.test')
+    const emitSpy = sinon.spy(req, 'emit')
 
-  const req = http.request({
-    host: 'example.test',
-    method: 'post',
-    path: '/',
+    req.on('error', () => {}) // listen for error so it doesn't bubble
+    req.on('socket', () => {
+      req.abort()
+      req.abort()
+      req.abort()
+    })
+    req.end()
+
+    setTimeout(() => {
+      const events = emitSpy.args.map(i => i[0])
+      // important: `abort` and `error` events only fire once and the `close` event still fires at the end
+      expect(events).to.deep.equal(['socket', 'abort', 'error', 'close'])
+      expect(scope.isDone()).to.be.false()
+      done()
+    }, 10)
   })
-  req.on('error', () => {})
 
-  // Act.
-  req.abort()
+  // The Interceptor is considered consumed just prior to the `finish` event on the request,
+  // all tests below assert the Scope is done.
 
-  // Assert.
-  scope.done()
+  it('Emits the expected event sequence when aborted inside a `finish` event listener', done => {
+    const scope = nock('http://example.test').get('/').reply()
 
-  done()
-})
+    const req = http.request('http://example.test')
+    const emitSpy = sinon.spy(req, 'emit')
 
-it('`req.write() on an aborted request should trigger the expected error', done => {
-  const scope = nock('http://example.test').get('/').reply()
+    req.on('finish', () => {
+      req.abort()
+    })
+    req.on('error', err => {
+      expect(err.message).to.equal('socket hang up')
+      expect(err.code).to.equal('ECONNRESET')
+    })
+    req.end()
 
-  const req = http.get('http://example.test/')
-
-  req.once('error', err => {
-    // This is the expected first error event emitted, triggered by
-    // `req.abort()`.
-    expect(err.code).to.equal('ECONNRESET')
-
-    req.once('error', err => {
-      // This is the abort error under test, triggered by `req.write()`
-      expect(err.message).to.equal('Request aborted')
+    setTimeout(() => {
+      const events = emitSpy.args.map(i => i[0])
+      expect(events).to.deep.equal([
+        'socket',
+        'finish',
+        'abort',
+        'error',
+        'close',
+      ])
       scope.done()
       done()
-    })
+    }, 10)
   })
 
-  process.nextTick(() => req.abort())
-  process.nextTick(() => req.write('some nonsense'))
-})
+  it('Emits the expected event sequence when aborted after a delay from the `finish` event', done => {
+    // use the delay functionality to create a window where the abort is called during the artificial connection wait.
+    const scope = nock('http://example.test').get('/').delay(100).reply()
 
-it('`req.end()` on an aborted request should trigger the expected error', done => {
-  const scope = nock('http://example.test').get('/').reply()
+    const req = http.request('http://example.test')
+    const emitSpy = sinon.spy(req, 'emit')
 
-  const req = http.get('http://example.test/')
+    req.on('finish', () => {
+      setTimeout(() => {
+        req.abort()
+      }, 10)
+    })
+    req.on('error', err => {
+      expect(err.message).to.equal('socket hang up')
+      expect(err.code).to.equal('ECONNRESET')
+    })
+    req.end()
 
-  req.once('error', err => {
-    // This is the expected first error event emitted, triggered by
-    // `req.abort()`.
-    expect(err.code).to.equal('ECONNRESET')
-
-    req.once('error', err => {
-      // This is the abort error under test, triggered by `req.end()`
-      expect(err.message).to.equal('Request aborted')
+    setTimeout(() => {
+      const events = emitSpy.args.map(i => i[0])
+      expect(events).to.deep.equal([
+        'socket',
+        'finish',
+        'abort',
+        'error',
+        'close',
+      ])
       scope.done()
       done()
-    })
+    }, 200)
   })
 
-  process.nextTick(() => req.abort())
-  process.nextTick(() => req.end())
-})
+  it('Emits the expected event sequence when aborted inside a `response` event listener', done => {
+    const scope = nock('http://example.test').get('/').reply()
 
-it('`req.flushHeaders()` on an aborted request should trigger the expected error', done => {
-  const scope = nock('http://example.test').get('/').reply()
+    const req = http.request('http://example.test')
+    const emitSpy = sinon.spy(req, 'emit')
 
-  const req = http.get('http://example.test/')
+    req.on('response', () => {
+      req.abort()
+    })
+    req.end()
 
-  req.once('error', err => {
-    // This is the expected first error event emitted, triggered by
-    // `req.abort()`.
-    expect(err.code).to.equal('ECONNRESET')
-
-    req.once('error', err => {
-      // This is the abort error under test, triggered by `req.flushHeaders()`
-      expect(err.message).to.equal('Request aborted')
+    setTimeout(() => {
+      const events = emitSpy.args.map(i => i[0])
+      expect(events).to.deep.equal([
+        'socket',
+        'finish',
+        'response',
+        'abort',
+        'close',
+      ])
       scope.done()
       done()
-    })
+    }, 10)
   })
-
-  process.nextTick(() => req.abort())
-  process.nextTick(() => req.flushHeaders())
 })

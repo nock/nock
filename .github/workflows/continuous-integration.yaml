@@ -7,7 +7,7 @@ on:
       - synchronize
   push:
     branches:
-      - master
+      - main
 
 jobs:
   fix-formatting:
@@ -29,7 +29,7 @@ jobs:
         with:
           node-version: 12
       - name: Cache npm dependencies
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           key: npm-${{ hashFiles('package-lock.json') }}
           path: ~/.npm
@@ -59,7 +59,7 @@ jobs:
         with:
           node-version: 12
       - name: Cache npm dependencies
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           key: npm-${{ hashFiles('package-lock.json') }}
           path: ~/.npm
@@ -82,7 +82,7 @@ jobs:
         with:
           node-version: 12
       - name: Cache npm dependencies
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           key: npm-${{ hashFiles('package-lock.json') }}
           path: ~/.npm
@@ -105,7 +105,7 @@ jobs:
         with:
           node-version: 12
       - name: Cache npm dependencies
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           key: npm-${{ hashFiles('package-lock.json') }}
           path: ~/.npm
@@ -139,7 +139,7 @@ jobs:
         # https://github.com/actions/cache/issues/187 is fixed.
         if: runner.os == 'Linux'
         name: Cache npm dependencies
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: ${{ steps.npm-cache.outputs.dir }}
           key: |
@@ -161,5 +161,5 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [10, 12, 13]
+        node-version: [10, 12, 14]
         os: [macos-latest, ubuntu-latest, windows-latest]

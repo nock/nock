@@ -50,9 +50,10 @@ describe('Request Overrider', () => {
 
     const req = http.get('http://example.test')
 
-    scope.done()
-
-    req.on('response', () => done())
+    req.on('response', () => {
+      scope.done()
+      done()
+    })
   })
 
   it('write callback called', done => {
@@ -220,6 +221,21 @@ describe('Request Overrider', () => {
     req.end('foobar', reqEndCallback)
   })
 
+  it('should emit an error if `write` is called after `end`', done => {
+    nock('http://example.test').get('/').reply()
+
+    const req = http.request('http://example.test')
+
+    req.on('error', err => {
+      expect(err.message).to.equal('write after end')
+      expect(err.code).to.equal('ERR_STREAM_WRITE_AFTER_END')
+      done()
+    })
+
+    req.end()
+    req.write('foo')
+  })
+
   // http://github.com/nock/nock/issues/139
   it('should emit "finish" on the request before emitting "end" on the response', done => {
     const scope = nock('http://example.test').post('/').reply()
@@ -382,8 +398,7 @@ describe('Request Overrider', () => {
     req.end()
   })
 
-  // Hopefully address https://github.com/nock/nock/issues/146, at least in
-  // spirit.
+  // Hopefully address https://github.com/nock/nock/issues/146, at least in spirit.
   it('request with a large buffer', async () => {
     const replyLength = 1024 * 1024
     const responseBody = Buffer.from(new Array(replyLength + 1).join('.'))
@@ -394,7 +409,10 @@ describe('Request Overrider', () => {
       .get('/')
       .reply(200, responseBody, { 'Content-Encoding': 'gzip' })
 
-    const { body } = await got('http://example.test', { decompress: false })
+    const { body } = await got('http://example.test', {
+      responseType: 'buffer',
+      decompress: false,
+    })
     expect(body).to.deep.equal(responseBody)
     scope.done()
   })
@@ -538,9 +556,28 @@ describe('Request Overrider', () => {
     nock('http://example.test').get('/').reply(200, 'hey')
 
     const req = http.get('http://example.test')
+    req.on('error', () => {}) // listen for error so it doesn't bubble
     req.once('socket', socket => {
       socket.destroy()
       done()
+    })
+  })
+
+  it('calling Socket#destroy() multiple times only emits a single `close` event', done => {
+    nock('http://example.test').get('/').reply(200, 'hey')
+
+    const req = http.get('http://example.test')
+    req.on('error', () => {}) // listen for error so it doesn't bubble
+    req.once('socket', socket => {
+      const closeSpy = sinon.spy()
+      socket.on('close', closeSpy)
+
+      socket.destroy().destroy().destroy()
+
+      setTimeout(() => {
+        expect(closeSpy).to.have.been.calledOnce()
+        done()
+      }, 10)
     })
   })
 
