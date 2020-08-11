@@ -1,6 +1,7 @@
 'use strict'
 
 const { expect } = require('chai')
+const sinon = require('sinon')
 const nock = require('..')
 const got = require('./got_client')
 
@@ -63,12 +64,13 @@ describe('interception in parallel', () => {
   })
 
   it('provides the correct request instance on the Interceptor inside reply callbacks', async () => {
-    const seenFooHeaders = []
+    const fooHeadersStub = sinon.stub()
+
     nock(origin)
       .persist()
       .get('/')
       .reply(function () {
-        seenFooHeaders.push(this.req.headers.foo)
+        fooHeadersStub(this.req.headers.foo)
         return [200]
       })
 
@@ -77,7 +79,9 @@ describe('interception in parallel', () => {
       makeRequest({ headers: { foo: 'B' } }),
     ])
 
-    expect(seenFooHeaders.sort()).to.deep.equal(['A', 'B'])
+    expect(fooHeadersStub).to.have.calledTwice()
+    expect(fooHeadersStub).to.have.been.calledWithExactly('A')
+    expect(fooHeadersStub).to.have.been.calledWithExactly('B')
     expect(nock.isDone()).to.equal(true)
   })
 })
