@@ -1,6 +1,7 @@
 'use strict'
 
 const { expect } = require('chai')
+const sinon = require('sinon')
 const nock = require('..')
 const got = require('./got_client')
 
@@ -11,8 +12,8 @@ require('./setup')
 
 describe('interception in parallel', () => {
   const origin = 'https://example.test'
-  const makeRequest = () =>
-    got(origin)
+  const makeRequest = opts =>
+    got(origin, opts)
       .then(res => res.statusCode)
       .catch(reason => {
         if (reason.code === 'ERR_NOCK_NO_MATCH') return 418
@@ -59,6 +60,28 @@ describe('interception in parallel', () => {
     ])
 
     expect(results.sort()).to.deep.equal([200, 201, 418])
+    expect(nock.isDone()).to.equal(true)
+  })
+
+  it('provides the correct request instance on the Interceptor inside reply callbacks', async () => {
+    const fooHeadersStub = sinon.stub()
+
+    nock(origin)
+      .persist()
+      .get('/')
+      .reply(function () {
+        fooHeadersStub(this.req.headers.foo)
+        return [200]
+      })
+
+    await Promise.all([
+      makeRequest({ headers: { foo: 'A' } }),
+      makeRequest({ headers: { foo: 'B' } }),
+    ])
+
+    expect(fooHeadersStub).to.have.calledTwice()
+    expect(fooHeadersStub).to.have.been.calledWithExactly('A')
+    expect(fooHeadersStub).to.have.been.calledWithExactly('B')
     expect(nock.isDone()).to.equal(true)
   })
 })
