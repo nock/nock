@@ -82,11 +82,8 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
   - [Global no match event](#global-no-match-event)
 - [Nock Back](#nock-back)
   - [Setup](#setup)
-    - [Options](#options)
   - [Usage](#usage-1)
-    - [Options](#options-1)
-      - [Example](#example)
-    - [Modes](#modes)
+  - [Modes](#modes)
 - [Common issues](#common-issues)
   - [Axios](#axios)
   - [Memory issues with Jest](#memory-issues-with-jest)
@@ -574,7 +571,7 @@ const scope = nock('http://www.headdy.com')
 
 #### Including Content-Length Header Automatically
 
-When using `scope.reply()` to set a response body manually, you can have the
+When using `interceptor.reply()` to set a response body manually, you can have the
 `Content-Length` header calculated automatically.
 
 ```js
@@ -634,7 +631,6 @@ You are able to specify a non-standard port like this:
 
 ```js
 const scope = nock('http://my.server.com:8081')
-  ...
 ```
 
 ### Repeat response n times
@@ -1064,7 +1060,7 @@ You can bypass Nock completely by setting the `NOCK_OFF` environment variable to
 
 This way you can have your tests hit the real servers just by switching on this environment variable.
 
-```js
+```shell script
 $ NOCK_OFF=true node my_test.js
 ```
 
@@ -1304,10 +1300,10 @@ nock.removeInterceptor({
 
 ```js
 nock.removeInterceptor({
-  hostname : 'localhost',
-  path : '/login'
-  method: 'POST'
-  proto : 'https'
+  hostname: 'localhost',
+  path: '/login',
+  method: 'POST',
+  proto: 'https',
 })
 ```
 
@@ -1389,11 +1385,9 @@ nockBack('zomboFixture.json', nockDone => {
 If your tests are using promises then use `nockBack` like this:
 
 ```js
-return nockBack('promisedFixture.json')
-  .then(({ nockDone, context }) => {
-    //  do your tests returning a promise and chain it with
-    //  `.then(nockDone)`
-  })
+return nockBack('promisedFixture.json').then(({ nockDone, context }) => {
+  //  do your tests returning a promise and chain it with
+  //  `.then(nockDone)`
 })
 ```
 
@@ -1411,7 +1405,7 @@ As an optional second parameter you can pass the following options
 ```js
 function prepareScope(scope) {
   scope.filteringRequestBody = (body, aRecordedBody) => {
-    if (typeof(body) !== 'string' || typeof(aRecordedBody) !== 'string') {
+    if (typeof body !== 'string' || typeof aRecordedBody !== 'string') {
       return body
     }
 
@@ -1428,15 +1422,15 @@ function prepareScope(scope) {
   }
 }
 
-nockBack('zomboFixture.json', { before: prepareScope }, nockDone => {
-  request.get('http://zombo.com', function(err, res, body) {
+nockBack('exampleFixture.json', { before: prepareScope }, nockDone => {
+  request.get('http://example.com', function (err, res, body) {
     // do your tests
     nockDone()
-  }
-}
+  })
+})
 ```
 
-#### Modes
+### Modes
 
 To set the mode call `nockBack.setMode(mode)` or run the tests with the `NOCK_BACK_MODE` environment variable set before loading nock. If the mode needs to be changed programmatically, the following is valid: `nockBack.setMode(nockBack.currentMode)`
 

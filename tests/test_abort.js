@@ -122,6 +122,9 @@ describe('`ClientRequest.abort()`', () => {
     }, 10)
   })
 
+  // The Interceptor is considered consumed just prior to the `finish` event on the request,
+  // all tests below assert the Scope is done.
+
   it('Emits the expected event sequence when aborted inside a `finish` event listener', done => {
     const scope = nock('http://example.test').get('/').reply()
 
@@ -146,13 +149,10 @@ describe('`ClientRequest.abort()`', () => {
         'error',
         'close',
       ])
-      expect(scope.isDone()).to.be.false()
+      scope.done()
       done()
     }, 10)
   })
-
-  // The Interceptor is considered consumed just prior to the `response` event on the request,
-  // all tests below assert the Scope is done.
 
   it('Emits the expected event sequence when aborted after a delay from the `finish` event', done => {
     // use the delay functionality to create a window where the abort is called during the artificial connection wait.

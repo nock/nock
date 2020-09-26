@@ -1,16 +1,14 @@
 'use strict'
 
 const { expect } = require('chai')
-const { test } = require('tap')
 const assertRejects = require('assert-rejects')
 const nock = require('..')
 const got = require('./got_client')
 
-require('./cleanup_after_each')()
 require('./setup')
 
-test('basic auth with username and password', async t => {
-  t.beforeEach(done => {
+describe('basic auth with username and password', () => {
+  beforeEach(done => {
     nock('http://example.test')
       .get('/test')
       .basicAuth({ user: 'foo', pass: 'bar' })
@@ -18,7 +16,7 @@ test('basic auth with username and password', async t => {
     done()
   })
 
-  await t.test('succeeds when it matches', async () => {
+  it('succeeds when it matches', async () => {
     const response = await got('http://example.test/test', {
       username: 'foo',
       password: 'bar',
@@ -27,7 +25,7 @@ test('basic auth with username and password', async t => {
     expect(response.body).to.equal('Here is the content')
   })
 
-  await t.test('fails when it doesnt match', async () => {
+  it('fails when it doesnt match', async () => {
     await assertRejects(
       got('http://example.test/test'),
       /Nock: No match for request/
@@ -35,8 +33,8 @@ test('basic auth with username and password', async t => {
   })
 })
 
-test('basic auth with username only', async t => {
-  t.beforeEach(done => {
+describe('basic auth with username only', () => {
+  beforeEach(done => {
     nock('http://example.test')
       .get('/test')
       .basicAuth({ user: 'foo' })
@@ -44,7 +42,7 @@ test('basic auth with username only', async t => {
     done()
   })
 
-  await t.test('succeeds when it matches', async () => {
+  it('succeeds when it matches', async () => {
     const response = await got('http://example.test/test', {
       username: 'foo',
       password: '',
@@ -53,7 +51,7 @@ test('basic auth with username only', async t => {
     expect(response.body).to.equal('Here is the content')
   })
 
-  await t.test('fails when it doesnt match', async () => {
+  it('fails when it doesnt match', async () => {
     await assertRejects(
       got('http://example.test/test'),
       /Nock: No match for request/

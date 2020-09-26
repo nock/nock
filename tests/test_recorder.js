@@ -25,6 +25,32 @@ afterEach(() => {
   expect(leaks).to.be.empty()
 })
 
+it('does not record requests from previous sessions', async () => {
+  const { origin } = await servers.startHttpServer((req, res) => res.end())
+
+  nock.restore()
+  nock.recorder.clear()
+  nock.recorder.rec(true)
+
+  const req1 = http.get(`${origin}/foo`)
+  const req1Promise = new Promise(resolve => {
+    req1.on('response', res => res.on('end', resolve))
+  })
+
+  // start a new recording session while the first request is still in flight
+  nock.restore()
+  nock.recorder.rec(true)
+  await got.post(`${origin}/bar`)
+
+  // wait for the first request to end
+  await req1Promise
+
+  // validate only the request from the second session is in the outputs
+  const outputs = nock.recorder.play()
+  expect(outputs).to.have.lengthOf(1)
+  expect(outputs[0]).to.match(/\.post\('\/bar'\)/)
+})
+
 it('when request port is different, use the alternate port', async () => {
   nock.restore()
   nock.recorder.clear()
@@ -284,8 +310,6 @@ it('http request without callback should not crash', done => {
   const requestListener = (request, response) => {
     response.write('<html><body>example</body></html>')
     response.end()
-    expect(serverFinished).to.have.been.calledOnce()
-    done()
   }
 
   nock.restore()
@@ -294,15 +318,21 @@ it('http request without callback should not crash', done => {
 
   servers.startHttpServer(requestListener).then(({ port }) => {
     nock.recorder.rec(true)
-    http
-      .request({
-        host: 'localhost',
-        port,
-        method: 'GET',
-        path: '/',
+    const req = http.request({
+      host: 'localhost',
+      port,
+      method: 'GET',
+      path: '/',
+    })
+
+    req.on('response', res => {
+      res.once('end', () => {
+        expect(serverFinished).to.have.been.calledOnce()
+        done()
       })
-      .end()
-    nock.restore()
+    })
+
+    req.end()
     serverFinished()
   })
 })
