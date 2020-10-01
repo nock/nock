@@ -506,7 +506,7 @@ describe('`dataEqual()`', () => {
     expect(result).to.equal(true)
   })
   it('does not conflate object and array keys', () => {
-    const result = common.dataEqual(['a', 'b'], { '0': 'a', '1': 'b' })
+    const result = common.dataEqual(['a', 'b'], { 0: 'a', 1: 'b' })
     expect(result).to.equal(false)
   })
   it('treats JSON path notated and nested objects as equal', () => {
