@@ -373,7 +373,7 @@ const scope = nock('http://www.google.com')
 In Nock 11.x it was possible to invoke `.reply()` with a status code and a
 function that returns an array containing a status code and body. (The status
 code from the array would take precedence over the one passed directly to
-reply.) This is no longer allowed. In 12.x, either call `.reply()` with a
+reply.) This is no longer allowed. In Nock 12 and later, either call `.reply()` with a
 status code and a function that returns the body, or call it with a single
 argument: a function that returns an array containing both the status code and
 body.
