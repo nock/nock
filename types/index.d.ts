@@ -128,6 +128,8 @@ declare namespace nock {
     isDone(): boolean
     pendingMocks(): string[]
     activeMocks(): string[]
+
+    on(event: 'request' | 'replied', listener: (...args: any[]) => void): this
   }
 
   interface Interceptor {
