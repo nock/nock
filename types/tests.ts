@@ -1,6 +1,7 @@
-import nock from 'nock'
+import nock, { Interceptor } from 'nock'
 import * as fs from 'fs'
 import url, { URLSearchParams } from 'url'
+import { ClientRequest } from 'http'
 
 let scope: nock.Scope = nock('http://example.test')
 let inst: nock.Interceptor
@@ -16,6 +17,12 @@ const objWithUndefinedValue: { a: string; b?: string } = { a: 'a' }
 const regex = /test/
 
 scope.head(str) // $ExpectType Interceptor
+
+scope.on(
+  'request',
+  (req: ClientRequest, interceptor: Interceptor, body: string) => {}
+)
+scope.on('replied', (req: ClientRequest, interceptor: Interceptor) => {})
 
 inst = scope.get(str)
 inst = scope.get(str, str)
