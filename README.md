@@ -5,7 +5,7 @@
 ![Coverage Status](http://img.shields.io/badge/coverage-100%25-brightgreen.svg)
 ![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=nock/nock)
 [![Backers on Open Collective](https://opencollective.com/nock/backers/badge.svg)](#backers)
-[![Sponsors on Open Collective](https://opencollective.com/nock/sponsors/badge.svg)](#sponsors)
+[![Sponsors on Open Collective](https://opencollective.com/nock/sponsors/badge.svg)](#sponsors) [![Meercode CI Score](https://meercode.io/badge/nock/nock?type=ci-score&branch=main)](https://meercode.io/nock/nock)
 
 [npmjs]: https://www.npmjs.com/package/nock
 [build]: https://travis-ci.org/nock/nock
