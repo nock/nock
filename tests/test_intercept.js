@@ -884,6 +884,15 @@ test('match path using regexp', async t => {
   expect(body).to.equal('Match regex')
 })
 
+// https://github.com/nock/nock/issues/2134
+test('match path using regexp with global flag', async t => {
+  nock('http://example.test').get(/foo/g).reply(200, 'Match regex')
+
+  const { statusCode, body } = await got('http://example.test/foo/bar')
+  expect(statusCode).to.equal(200)
+  expect(body).to.equal('Match regex')
+})
+
 test('match path using function', async t => {
   const path = '/match/uri/function'
   const urlFunction = uri => uri === path
