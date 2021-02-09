@@ -735,6 +735,9 @@ nock.removeInterceptor({
 const interceptor = nock('http://example.test').get('somePath')
 nock.removeInterceptor(interceptor)
 
+// .removeInterceptorByPredictor()
+nock.removeInterceptorByPredictor(({ interceptor }) => interceptor.path === '')
+
 // Events
 /// Global no match event
 nock.emitter.on('no match', (req: any) => {})

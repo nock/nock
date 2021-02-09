@@ -20,6 +20,12 @@ declare namespace nock {
   function pendingMocks(): string[]
   function activeMocks(): string[]
   function removeInterceptor(interceptor: Interceptor | ReqOptions): boolean
+  function removeInterceptorByPredictor(
+    predictor: (arg: {
+      interceptor: Interceptor & ReqOptions
+      basePath: string
+    }) => void
+  ): Interceptor[] | undefined
   function disableNetConnect(): void
   function enableNetConnect(
     matcher?: string | RegExp | ((host: string) => boolean)
