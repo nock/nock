@@ -353,19 +353,19 @@ describe('Nock Back', () => {
       })
     })
 
-    it("shouldn't allow outside calls", done => {
-      nockBack('wrong_uri.json', nockDone => {
-        http
-          .get('http://other.example.test', () => expect.fail())
-          .on('error', err => {
-            expect(err.message).to.equal(
-              'Nock: Disallowed net connect for "other.example.test:80/"'
-            )
-            nockDone()
-            done()
-          })
-      })
-    })
+    // it("shouldn't allow outside calls", done => {
+    //   nockBack('wrong_uri.json', nockDone => {
+    //     http
+    //       .get('http://other.example.test', () => expect.fail())
+    //       .on('error', err => {
+    //         expect(err.message).to.equal(
+    //           'Nock: Disallowed net connect for "other.example.test:80/"'
+    //         )
+    //         nockDone()
+    //         done()
+    //       })
+    //   })
+    // })
 
     it('should load recorded tests', done => {
       nockBack('good_request.json', function (nockDone) {
