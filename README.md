@@ -1425,7 +1425,7 @@ function prepareScope(scope) {
   }
 }
 
-nockBack('exampleFixture.json', { before: prepareScope }, nockDone => {
+nockBack('exampleFixture.json', { after: prepareScope }, nockDone => {
   request.get('http://example.com', function (err, res, body) {
     // do your tests
     nockDone()
