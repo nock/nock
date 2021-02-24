@@ -11,8 +11,6 @@ const proxyquire = require('proxyquire').preserveCache()
 const nock = require('..')
 const { startHttpServer } = require('./servers')
 
-require('./setup')
-
 const { back: nockBack } = nock
 
 function testNock(done) {

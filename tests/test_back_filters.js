@@ -9,8 +9,6 @@ const { startHttpServer } = require('./servers')
 
 const nock = require('../')
 
-require('./setup')
-
 const nockBack = nock.back
 const originalMode = nockBack.currentMode
 const fixturesDir = `${__dirname}/fixtures`

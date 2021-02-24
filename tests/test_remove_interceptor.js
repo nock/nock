@@ -4,8 +4,6 @@ const { expect } = require('chai')
 const nock = require('..')
 const got = require('./got_client')
 
-require('./setup')
-
 describe('`removeInterceptor()`', () => {
   context('when invoked with an Interceptor instance', () => {
     it('remove interceptor removes given interceptor', async () => {

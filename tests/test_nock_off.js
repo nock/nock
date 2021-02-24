@@ -7,8 +7,6 @@ const nock = require('..')
 const got = require('./got_client')
 const httpsServer = require('./servers')
 
-require('./setup')
-
 describe('NOCK_OFF env var', () => {
   let original
   beforeEach(() => {

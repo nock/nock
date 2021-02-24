@@ -4,8 +4,6 @@ const { expect } = require('chai')
 const http = require('http')
 const nock = require('..')
 
-require('./setup')
-
 describe('`res.destroy()`', () => {
   it('should emit error event if called with error', done => {
     nock('http://example.test').get('/').reply(404)

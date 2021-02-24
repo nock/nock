@@ -6,8 +6,6 @@ const FormData = require('form-data')
 const nock = require('../')
 const got = require('./got_client')
 
-require('./setup')
-
 describe('`matchBody()`', () => {
   it('match json body regardless of key ordering', async () => {
     const scope = nock('http://example.test')

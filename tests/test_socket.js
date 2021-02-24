@@ -5,8 +5,6 @@ const http = require('http')
 const https = require('https')
 const nock = require('..')
 
-require('./setup')
-
 it('should expose TLSSocket attributes for HTTPS requests', done => {
   nock('https://example.test').get('/').reply()
 

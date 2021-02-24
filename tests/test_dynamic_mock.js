@@ -4,8 +4,6 @@ const { expect } = require('chai')
 const nock = require('..')
 const got = require('./got_client')
 
-require('./setup')
-
 // "dynamic" refers to `reply` getting a single callback argument that returns or calls the callback with an array of [status, [body, headers]]]
 describe('dynamic `reply()` function', () => {
   it('can provide only the status code by returning an array', async () => {

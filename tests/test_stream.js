@@ -10,8 +10,6 @@ const sinon = require('sinon')
 const nock = require('..')
 const got = require('./got_client')
 
-require('./setup')
-
 const textFilePath = path.resolve(__dirname, './assets/reply_file_1.txt')
 
 it('reply with file and pipe response', done => {

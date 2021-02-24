@@ -19,8 +19,6 @@ const nock = require('..')
 const common = require('../lib/common')
 const matchBody = require('../lib/match_body')
 
-require('./setup')
-
 // match_body has its own test file that tests the functionality from the API POV.
 // Since it's not in common.js does it make more sense for these six unit tests to move into that file?
 describe('Body Match', () => {

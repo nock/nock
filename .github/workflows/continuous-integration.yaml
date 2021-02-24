@@ -148,16 +148,8 @@ jobs:
             npm-${{ runner.os }}-${{ matrix.node-version }}-
       - name: Install dependencies
         run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
-      # The following conditional can be removed once tests are fully migrated
-      # to Mocha. Alternatively a grep command used to select correct files can
-      # be refactored to work on Windows. Ideally all tests should be run across
-      # all platforms.
-      - if: runner.os != 'Windows'
-        name: Test
+      - name: Test
         run: npm run test
-      - if: runner.os == 'Windows'
-        name: Test
-        run: npm run test:tap
     strategy:
       fail-fast: false
       matrix:

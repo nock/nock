@@ -11,8 +11,6 @@ const url = require('url')
 const nock = require('..')
 const got = require('./got_client')
 
-require('./setup')
-
 const acceptableGlobalKeys = new Set([
   ...Object.keys(global),
   '_key',
