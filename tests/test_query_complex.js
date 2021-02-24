@@ -3,8 +3,6 @@
 const nock = require('..')
 const got = require('./got_client')
 
-require('./setup')
-
 describe('`query()` complex encoding', () => {
   it('query with array', async () => {
     // In Node 10.x this can be updated:

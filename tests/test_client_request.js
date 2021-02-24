@@ -7,8 +7,6 @@ const nock = require('..')
 
 const { startHttpServer } = require('./servers')
 
-require('./setup')
-
 // Because `Got` makes use of the `http(s).request` convenience function, it can not be used during these tests.
 describe('Direct use of `ClientRequest`', () => {
   it('should intercept GET requests', done => {

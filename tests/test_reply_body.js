@@ -6,8 +6,6 @@ const { expect } = require('chai')
 const nock = require('..')
 const got = require('./got_client')
 
-require('./setup')
-
 describe('`reply()` body', () => {
   it('stringifies an object', async () => {
     const responseBody = { hello: 'world' }

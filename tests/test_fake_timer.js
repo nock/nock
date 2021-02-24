@@ -5,8 +5,6 @@ const request = require('request')
 const fakeTimers = require('@sinonjs/fake-timers')
 const nock = require('..')
 
-require('./setup')
-
 // https://github.com/nock/nock/issues/1334
 it('should still return successfully when fake timer is enabled', done => {
   const clock = fakeTimers.install()

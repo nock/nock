@@ -5,8 +5,6 @@ const sinon = require('sinon')
 const nock = require('..')
 const got = require('./got_client')
 
-require('./setup')
-
 // Tests for a regression where multiple ClientRequests call `.end` during the
 // same event loop iteration. https://github.com/nock/nock/issues/1937
 

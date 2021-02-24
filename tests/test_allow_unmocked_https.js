@@ -6,8 +6,6 @@ const nock = require('..')
 const got = require('./got_client')
 const servers = require('./servers')
 
-require('./setup')
-
 describe('allowUnmocked option (https)', () => {
   it('Nock with allowUnmocked and an url match', async () => {
     const { origin } = await servers.startHttpsServer((req, res) => {
@@ -20,7 +18,7 @@ describe('allowUnmocked option (https)', () => {
       .reply(201, JSON.stringify({ status: 'intercepted' }))
 
     const { body, statusCode } = await got(`${origin}/urlMatch`, {
-      ca: servers.ca,
+      https: { certificateAuthority: servers.ca },
     })
 
     expect(statusCode).to.equal(201)
@@ -44,8 +42,8 @@ describe('allowUnmocked option (https)', () => {
 
     const client = got.extend({
       prefixUrl: origin,
-      ca: servers.ca,
       throwHttpErrors: false,
+      https: { certificateAuthority: servers.ca },
     })
 
     const scope = nock(origin, { allowUnmocked: true })
@@ -87,7 +85,9 @@ describe('allowUnmocked option (https)', () => {
       .reply(418)
 
     // no query so wont match the interceptor
-    const { statusCode, body } = await got(`${origin}/foo`, { ca: servers.ca })
+    const { statusCode, body } = await got(`${origin}/foo`, {
+      https: { certificateAuthority: servers.ca },
+    })
 
     expect(statusCode).to.equal(201)
     expect(body).to.equal('foo')
