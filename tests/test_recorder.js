@@ -13,6 +13,8 @@ const servers = require('./servers')
 
 require('./setup')
 
+// TODO: the guts of this file should be wrapped in a `describe`.
+// These before and afters run for every test in the repo under Mocha.
 let globalCount
 beforeEach(() => {
   globalCount = Object.keys(global).length
@@ -1146,6 +1148,26 @@ it('removes query params from the path and puts them in query()', done => {
       )
       .end('ABCDEF')
   })
+})
+
+// https://github.com/nock/nock/issues/2136
+it('escapes single quotes in the path', async () => {
+  const { origin } = await servers.startHttpServer((request, response) => {
+    response.writeHead(200)
+    response.end()
+  })
+
+  nock.restore()
+  nock.recorder.clear()
+  expect(nock.recorder.play()).to.be.empty()
+
+  nock.recorder.rec(true)
+
+  await got(`${origin}/foo'bar'baz`)
+
+  const recorded = nock.recorder.play()
+  expect(recorded).to.have.lengthOf(1)
+  expect(recorded[0]).to.be.a('string').and.include(`.get('/foo\\'bar\\'baz')`)
 })
 
 it('respects http.request() consumers', done => {

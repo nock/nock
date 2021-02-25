@@ -90,6 +90,35 @@ describe('Request Overrider', () => {
     })
   })
 
+  it('write callback is not called if the provided chunk is an empty buffer', done => {
+    const scope = nock('http://example.test').post('/').reply()
+
+    const reqWriteCallback = sinon.spy()
+
+    const req = http.request(
+      {
+        host: 'example.test',
+        method: 'POST',
+        path: '/',
+      },
+      res => {
+        expect(res.statusCode).to.equal(200)
+        res.on('end', () => {
+          expect(reqWriteCallback).to.not.have.been.called()
+          scope.done()
+          done()
+        })
+        // Streams start in 'paused' mode and must be started.
+        // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+        res.resume()
+      }
+    )
+
+    const buf = Buffer.from('')
+    req.write(buf, null, reqWriteCallback)
+    req.end()
+  })
+
   it('end callback called', done => {
     const scope = nock('http://example.test')
       .filteringRequestBody(/mia/, 'nostra')
@@ -219,6 +248,30 @@ describe('Request Overrider', () => {
     )
 
     req.end('foobar', reqEndCallback)
+  })
+
+  // https://github.com/nock/nock/issues/2112
+  it('request.end can be called multiple times without a chunk and not error', done => {
+    const scope = nock('http://example.test').get('/').reply()
+
+    const req = http.request(
+      {
+        host: 'example.test',
+        method: 'GET',
+        path: '/',
+      },
+      res => {
+        res.on('end', () => {
+          scope.done()
+          done()
+        })
+        res.resume()
+      }
+    )
+
+    req.end()
+    req.end()
+    req.end()
   })
 
   it('should emit an error if `write` is called after `end`', done => {
