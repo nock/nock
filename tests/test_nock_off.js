@@ -30,7 +30,9 @@ describe('NOCK_OFF env var', () => {
       .get('/')
       .reply(200, 'mock')
 
-    const { body } = await got(origin, { ca: httpsServer.ca })
+    const { body } = await got(origin, {
+      https: { certificateAuthority: httpsServer.ca },
+    })
     expect(body).to.equal(responseBody)
     scope.done()
   })
