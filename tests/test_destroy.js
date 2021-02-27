@@ -34,4 +34,20 @@ describe('`res.destroy()`', () => {
         expect.fail('should not emit error')
       })
   })
+
+  it('should not emit an response if destroyed first', done => {
+    nock('http://example.test').get('/').reply()
+
+    const req = http
+      .get('http://example.test/', () => {
+        expect.fail('should not emit a response')
+      })
+      .on('error', () => {}) // listen for error so "socket hang up" doesn't bubble
+      .on('socket', () => {
+        setImmediate(() => req.destroy())
+      })
+
+    // give the `setImmediate` calls enough time to cycle.
+    setTimeout(() => done(), 10)
+  })
 })
