@@ -4,8 +4,6 @@ const { expect } = require('chai')
 const nock = require('..')
 const got = require('./got_client')
 
-require('./setup')
-
 describe('`defaultReplyHeaders()`', () => {
   it('when no headers are specified on the request, default reply headers work', async () => {
     nock('http://example.test')

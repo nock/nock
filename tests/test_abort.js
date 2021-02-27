@@ -5,8 +5,6 @@ const http = require('http')
 const sinon = require('sinon')
 const nock = require('..')
 
-require('./setup')
-
 // These tests use `setTimeout` before verifying emitted events to ensure any
 // number of `nextTicks` or `setImmediate` can process first.
 

@@ -11,8 +11,6 @@ const nock = require('..')
 const got = require('./got_client')
 const servers = require('./servers')
 
-require('./setup')
-
 // TODO: the guts of this file should be wrapped in a `describe`.
 // These before and afters run for every test in the repo under Mocha.
 let globalCount

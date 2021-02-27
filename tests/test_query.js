@@ -7,8 +7,6 @@ const nock = require('..')
 const got = require('./got_client')
 const assertRejects = require('assert-rejects')
 
-require('./setup')
-
 describe('query params in path', () => {
   it('matches that query string', async () => {
     const scope = nock('http://example.test').get('/foo?bar=baz').reply()

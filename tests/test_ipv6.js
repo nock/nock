@@ -5,8 +5,6 @@ const { expect } = require('chai')
 const sinon = require('sinon')
 const nock = require('..')
 
-require('./setup')
-
 describe('IPv6', () => {
   it('IPV6 URL in http.get get gets mocked', done => {
     const responseBody = 'Hello World!'

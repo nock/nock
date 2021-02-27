@@ -40,13 +40,13 @@
     "eslint-plugin-mocha": "^8.0.0",
     "eslint-plugin-node": "^11.0.0",
     "eslint-plugin-promise": "^4.1.1",
-    "eslint-plugin-standard": "^4.0.0",
+    "eslint-plugin-standard": "^5.0.0",
     "form-data": "^3.0.0",
     "got": "^11.3.0",
     "mocha": "^8.0.1",
     "npm-run-all": "^4.1.5",
     "nyc": "^15.0.0",
-    "prettier": "2.0.5",
+    "prettier": "2.2.1",
     "proxyquire": "^2.1.0",
     "request": "^2.83.0",
     "rimraf": "^3.0.0",
@@ -54,7 +54,7 @@
     "sinon": "^9.0.0",
     "sinon-chai": "^3.3.0",
     "superagent": "^6.1.0",
-    "tap": "14.6.1"
+    "typescript": "^4.2.2"
   },
   "scripts": {
     "format:fix": "prettier --write '**/*.{js,json,md,ts,yml,yaml}'",
@@ -63,19 +63,8 @@
     "lint:js": "eslint --cache --cache-location './.cache/eslint' '**/*.js'",
     "lint:js:fix": "eslint --cache --cache-location './.cache/eslint' --fix '**/*.js'",
     "lint:ts": "dtslint types",
-    "test": "run-s test:mocha test:tap",
-    "test:coverage": "tap --coverage-report=html && open coverage/lcov-report/index.html",
-    "test:mocha": "nyc mocha $(grep -lr '^\\s*it(' tests)",
-    "test:tap": "tap --100 --coverage --coverage-report=text ./tests/test_*.js"
-  },
-  "nyc": {
-    "reporter": [
-      "lcov",
-      "text-summary"
-    ],
-    "exclude": [
-      "tests/"
-    ]
+    "test": "nyc mocha tests",
+    "test:coverage": "open coverage/lcov-report/index.html"
   },
   "license": "MIT",
   "files": [

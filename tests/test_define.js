@@ -6,8 +6,6 @@ const assertRejects = require('assert-rejects')
 const nock = require('..')
 const got = require('./got_client')
 
-require('./setup')
-
 describe('`define()`', () => {
   it('is backward compatible', async () => {
     expect(

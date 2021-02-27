@@ -19,8 +19,6 @@ const nock = require('..')
 const common = require('../lib/common')
 const matchBody = require('../lib/match_body')
 
-require('./setup')
-
 // match_body has its own test file that tests the functionality from the API POV.
 // Since it's not in common.js does it make more sense for these six unit tests to move into that file?
 describe('Body Match', () => {
@@ -509,7 +507,7 @@ describe('`dataEqual()`', () => {
     expect(result).to.equal(true)
   })
   it('does not conflate object and array keys', () => {
-    const result = common.dataEqual(['a', 'b'], { '0': 'a', '1': 'b' })
+    const result = common.dataEqual(['a', 'b'], { 0: 'a', 1: 'b' })
     expect(result).to.equal(false)
   })
   it('treats JSON path notated and nested objects as equal', () => {

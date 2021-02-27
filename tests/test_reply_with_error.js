@@ -6,8 +6,6 @@ const http = require('http')
 const { expect } = require('chai')
 const nock = require('..')
 
-require('./setup')
-
 describe('`replyWithError()`', () => {
   it('returns an error through the request', done => {
     const scope = nock('http://example.test')

@@ -7,8 +7,6 @@ const sinon = require('sinon')
 const nock = require('..')
 const got = require('./got_client')
 
-require('./setup')
-
 describe('Header matching', () => {
   describe('`Scope.matchHeader()`', () => {
     it('should match headers with function: gets the expected argument', async () => {

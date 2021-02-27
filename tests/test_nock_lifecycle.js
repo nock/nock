@@ -9,8 +9,6 @@ const assertRejects = require('assert-rejects')
 const got = require('./got_client')
 const servers = require('./servers')
 
-require('./setup')
-
 describe('Nock lifecycle functions', () => {
   describe('`activate()`', () => {
     it('double activation throws exception', () => {
