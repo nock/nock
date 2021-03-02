@@ -33,7 +33,10 @@ describe('Recorder', () => {
 
     const req1 = http.get(`${origin}/foo`)
     const req1Promise = new Promise(resolve => {
-      req1.on('response', res => res.on('end', resolve))
+      req1.on('response', res => {
+        res.on('end', resolve)
+        res.resume()
+      })
     })
 
     // start a new recording session while the first request is still in flight
@@ -320,6 +323,7 @@ describe('Recorder', () => {
           expect(serverFinished).to.have.been.calledOnce()
           done()
         })
+        res.resume()
       })
 
       req.end()
@@ -1234,6 +1238,27 @@ describe('Recorder', () => {
 
       postRequest1.write(transparentGifBuffer)
       postRequest1.end()
+    })
+  })
+
+  // https://github.com/nock/nock/issues/2086
+  it('should not resume the response stream', done => {
+    nock.recorder.rec(true)
+
+    servers.startHttpServer().then(({ origin }) => {
+      const req = http.request(origin)
+
+      req.on('response', res => {
+        // wait for an iteration of the event loop to prove that the `end`
+        // listener is being added after a delay. We want to show that callers
+        // have time to register listeners before they manually call `resume`.
+        setImmediate(() => {
+          res.on('end', () => done())
+          res.resume()
+        })
+      })
+
+      req.end()
     })
   })
 })
