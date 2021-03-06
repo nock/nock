@@ -2,6 +2,7 @@
 
 const { expect } = require('chai')
 const fs = require('fs')
+const path = require('path')
 const rimraf = require('rimraf')
 
 const got = require('./got_client')
@@ -11,9 +12,9 @@ const nock = require('../')
 
 const nockBack = nock.back
 const originalMode = nockBack.currentMode
-const fixturesDir = `${__dirname}/fixtures`
-const fixtureFilename = `recording_filters_test.json`
-const fixtureFullPath = `${fixturesDir}/${fixtureFilename}`
+const fixturesDir = path.resolve(__dirname, 'fixtures')
+const fixtureFilename = 'recording_filters_test.json'
+const fixtureFullPath = path.resolve(fixturesDir, fixtureFilename)
 
 const getFixtureContent = () =>
   JSON.parse(fs.readFileSync(fixtureFullPath).toString())

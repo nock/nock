@@ -94,7 +94,7 @@ function nockBackWithFixtureLocalhost(mochaDone) {
 
 describe('Nock Back', () => {
   beforeEach(() => {
-    nockBack.fixtures = `${__dirname}/fixtures`
+    nockBack.fixtures = path.resolve(__dirname, 'fixtures')
   })
 
   it('should throw an exception when fixtures is not set', () => {
@@ -237,7 +237,7 @@ describe('Nock Back', () => {
       const nockBackWithoutFs = proxyquire('../lib/back', { fs: null })
       nockBackWithoutFs.setMode('dryrun')
 
-      nockBackWithoutFs.fixtures = `${__dirname}/fixtures`
+      nockBackWithoutFs.fixtures = path.resolve(__dirname, 'fixtures')
       expect(() => nockBackWithoutFs('good_request.json')).to.throw('no fs')
     })
   })
@@ -250,12 +250,12 @@ describe('Nock Back', () => {
       // random fixture file so tests don't interfere with each other
       const token = crypto.randomBytes(4).toString('hex')
       fixture = `temp_${token}.json`
-      fixtureLoc = `${__dirname}/fixtures/${fixture}`
+      fixtureLoc = path.resolve(__dirname, 'fixtures', fixture)
       nockBack.setMode('record')
     })
 
     after(() => {
-      rimraf.sync(`${__dirname}/fixtures/temp_*.json`)
+      rimraf.sync(path.resolve(__dirname, 'fixtures', 'temp_*.json'))
     })
 
     it('should record when configured correctly', done => {
@@ -477,7 +477,7 @@ describe('Nock Back', () => {
       const nockBackWithoutFs = proxyquire('../lib/back', { fs: null })
       nockBackWithoutFs.setMode('record')
 
-      nockBackWithoutFs.fixtures = `${__dirname}/fixtures`
+      nockBackWithoutFs.fixtures = path.resolve(__dirname, 'fixtures')
       expect(() => nockBackWithoutFs('good_request.json')).to.throw('no fs')
     })
   })
