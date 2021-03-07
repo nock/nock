@@ -3,9 +3,7 @@
 const http = require('http')
 const https = require('https')
 const { expect } = require('chai')
-const mikealRequest = require('request')
 const sinon = require('sinon')
-const superagent = require('superagent')
 const assertRejects = require('assert-rejects')
 const url = require('url')
 const nock = require('..')
@@ -587,47 +585,6 @@ describe('Intercept', () => {
     })
   })
 
-  it('superagent works', done => {
-    const responseText = 'Yay superagent!'
-    const headers = { 'Content-Type': 'text/plain' }
-    nock('http://example.test')
-      .get('/somepath')
-      .reply(200, responseText, headers)
-
-    superagent.get('http://example.test/somepath').end(function (err, res) {
-      expect(err).to.equal(null)
-      expect(res.text).to.equal(responseText)
-      done()
-    })
-  })
-
-  it('superagent works with query string', done => {
-    const responseText = 'Yay superagentzzz'
-    const headers = { 'Content-Type': 'text/plain' }
-    nock('http://example.test')
-      .get('/somepath?a=b')
-      .reply(200, responseText, headers)
-
-    superagent.get('http://example.test/somepath?a=b').end(function (err, res) {
-      expect(err).to.equal(null)
-      expect(res.text).to.equal(responseText)
-      done()
-    })
-  })
-
-  it('superagent posts', done => {
-    nock('http://example.test').post('/somepath?b=c').reply(204)
-
-    superagent
-      .post('http://example.test/somepath?b=c')
-      .send('some data')
-      .end(function (err, res) {
-        expect(err).to.equal(null)
-        expect(res.status).to.equal(204)
-        done()
-      })
-  })
-
   it('sending binary and receiving JSON should work', async () => {
     const scope = nock('http://example.test')
       .post('/')
@@ -642,25 +599,6 @@ describe('Intercept', () => {
     expect(body).to.be.a('string').and.have.lengthOf(12)
     expect(JSON.parse(body)).to.deep.equal({ foo: '61' })
     scope.done()
-  })
-
-  // TODO: What is the intention of this test? Should it be kept?
-  it('test request timeout option', done => {
-    nock('http://example.test')
-      .get('/path')
-      .reply(200, JSON.stringify({ foo: 'bar' }))
-
-    const options = {
-      url: 'http://example.test/path',
-      method: 'GET',
-      timeout: 2000,
-    }
-
-    mikealRequest(options, function (err, res, body) {
-      expect(err).to.equal(null)
-      expect(body).to.equal('{"foo":"bar"}')
-      done()
-    })
   })
 
   it('do not match when conditionally = false but should match after trying again when = true', async () => {
@@ -726,44 +664,43 @@ describe('Intercept', () => {
     scope.done()
   })
 
-  // TODO: Rewrite using got or http.
-  it('mocking succeeds even when host request header is not specified', done => {
-    nock('http://example.test').post('/resource').reply(200, { status: 'ok' })
+  it('succeeds even when host request header is not specified', done => {
+    const scope = nock('http://example.test').post('/resource').reply()
 
-    mikealRequest(
-      {
-        method: 'POST',
-        uri: 'http://example.test/resource',
-        headers: {
-          'X-App-TOKEN': 'apptoken',
-          'X-Auth-TOKEN': 'apptoken',
-        },
+    const opts = {
+      method: 'POST',
+      headers: {
+        'X-App-TOKEN': 'apptoken',
+        'X-Auth-TOKEN': 'apptoken',
       },
-      function (err, res) {
-        expect(err).to.equal(null)
-        expect(res.statusCode).to.equal(200)
+    }
+
+    const req = http.request('http://example.test/resource', opts, res => {
+      res.on('end', () => {
+        scope.done()
         done()
-      }
-    )
+      })
+      res.resume()
+    })
+
+    req.end()
   })
 
-  // TODO: Investigate the underlying issue.
   // https://github.com/nock/nock/issues/158
-  it('mikeal/request with strictSSL: true', done => {
-    nock('https://example.test').post('/what').reply(200, { status: 'ok' })
+  // mikeal/request with strictSSL: true
+  // https://github.com/request/request/blob/3c0cddc7c8eb60b470e9519da85896ed7ee0081e/request.js#L943-L950
+  it('should denote the response client is authorized for HTTPS requests', done => {
+    const scope = nock('https://example.test').get('/what').reply()
 
-    mikealRequest(
-      {
-        method: 'POST',
-        uri: 'https://example.test/what',
-        strictSSL: true,
-      },
-      function (err, res) {
-        expect(err).to.be.null()
-        expect(res.statusCode).to.deep.equal(200)
+    https.get('https://example.test/what', res => {
+      expect(res).to.have.nested.property('socket.authorized').that.is.true()
+
+      res.on('end', () => {
+        scope.done()
         done()
-      }
-    )
+      })
+      res.resume()
+    })
   })
 
   it('match domain using regexp', async () => {
