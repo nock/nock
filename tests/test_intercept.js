@@ -26,39 +26,52 @@ describe('Intercept', () => {
     )
   })
 
-  it("when the path doesn't include a leading slash it raises an error", () => {
+  it("should throw when the path doesn't include a leading slash and there is no base path", () => {
     expect(() => nock('http://example.test').get('no-leading-slash')).to.throw(
       "Non-wildcard URL path strings must begin with a slash (otherwise they won't match anything)"
     )
   })
 
+  // https://github.com/nock/nock/issues/1730
+  it('should throw when the path is empty and there is no base path', () => {
+    expect(() => nock('http://example.test').get('')).to.throw(
+      "Non-wildcard URL path strings must begin with a slash (otherwise they won't match anything) (got: )"
+    )
+  })
+
   it('should intercept a basic GET request', async () => {
-    const scope = nock('http://example.test')
-      .get('/')
-      .reply(200, 'Hello World!')
+    const scope = nock('http://example.test').get('/').reply(201)
 
-    const { statusCode, body } = await got('http://example.test/', {
-      responseType: 'buffer',
-    })
+    const { statusCode } = await got('http://example.test/')
 
-    expect(statusCode).to.equal(200)
-    expect(body).to.be.an.instanceOf(Buffer)
-    expect(body.toString('utf8')).to.equal('Hello World!')
+    expect(statusCode).to.equal(201)
     scope.done()
   })
 
-  it('get gets mocked with relative base path', async () => {
-    const scope = nock('http://example.test/abc')
-      .get('/def')
-      .reply(200, 'Hello World!')
+  it('should intercept a request with a base path', async () => {
+    const scope = nock('http://example.test/abc').get('/def').reply(201)
 
-    const { statusCode, body } = await got('http://example.test/abc/def', {
-      responseType: 'buffer',
-    })
+    const { statusCode } = await got('http://example.test/abc/def')
 
-    expect(statusCode).to.equal(200)
-    expect(body).to.be.an.instanceOf(Buffer)
-    expect(body.toString('utf8')).to.equal('Hello World!')
+    expect(statusCode).to.equal(201)
+    scope.done()
+  })
+
+  it('should intercept a request with a base path and no interceptor path', async () => {
+    const scope = nock('http://example.test/abc').get('').reply(201)
+
+    const { statusCode } = await got('http://example.test/abc')
+
+    expect(statusCode).to.equal(201)
+    scope.done()
+  })
+
+  it('should intercept a request with a base path and an interceptor path without a leading slash', async () => {
+    const scope = nock('http://example.test/abc').get('def').reply(201)
+
+    const { statusCode } = await got('http://example.test/abcdef')
+
+    expect(statusCode).to.equal(201)
     scope.done()
   })
 
@@ -968,14 +981,6 @@ describe('Intercept', () => {
         })
       })
       .flushHeaders()
-  })
-
-  // https://github.com/nock/nock/issues/1730
-  it('URL path without leading slash throws expected error', done => {
-    expect(() => nock('http://example.test').get('')).to.throw(
-      "Non-wildcard URL path strings must begin with a slash (otherwise they won't match anything) (got: )"
-    )
-    done()
   })
 
   it('wildcard param URL should not throw error', done => {
