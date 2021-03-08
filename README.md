@@ -652,10 +652,10 @@ http.get('http://zombo.com/') // respond body "Ok"
 
 // This code will get an error with message:
 // Nock: No match for request
-http.get('http://zombo.com/') 
+http.get('http://zombo.com/')
 
 // clean your interceptor
-nock.cleanAll() 
+nock.cleanAll()
 
 http.get('http://zombo.com/') // real respond with zombo.com result
 ```
