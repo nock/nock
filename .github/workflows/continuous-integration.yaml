@@ -8,13 +8,18 @@ on:
   push:
     branches:
       - main
+  # the `fix-formatting` step needs access to GITHUB_TOKEN in order to `git push`
+  # see https://github.blog/changelog/2021-02-19-github-actions-workflows-triggered-by-dependabot-prs-will-run-with-read-only-permissions/
+  pull_request_target:
+    types:
+      - opened
+      - synchronize
+    branches: dependabot/npm_and_yarn/eslint-*
 
 jobs:
   fix-formatting:
     if: >-
-      github.actor != 'github-actions[bot]' &&
-      github.event_name == 'pull_request' &&
-      github.event.pull_request.head.repo.fork == false
+      github.event_name == 'pull_request_target'
     name: Fix formatting
     runs-on: ubuntu-latest
     steps:
@@ -45,7 +50,7 @@ jobs:
           git config user.name "GitHub Actions"
           git add .
           git commit -m "style: format files with Prettier" | true # ignore error if there are no changes to commit
-          git push origin HEAD:${{ github.head_ref }}
+          git push
   format:
     name: Format
     runs-on: ubuntu-latest
