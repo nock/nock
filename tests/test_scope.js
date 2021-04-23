@@ -25,6 +25,38 @@ it('scope exposes interceptors', () => {
   })
 })
 
+describe('`Scope#loadDefs`', () => {
+  it('should load only the request matching id', () => {
+    const scopes = nock.loadDefs(
+      path.join(__dirname, 'fixtures', 'filtered_by_id_requests.json'),
+      { filter: { id: '435544' } }
+    )
+
+    expect(scopes).to.be.an.instanceOf(Array)
+    expect(scopes).to.have.lengthOf.at.least(1)
+  })
+
+  it('should load no request given the id does not match definition', () => {
+    const scopes = nock.loadDefs(
+      path.join(__dirname, 'fixtures', 'filtered_by_id_requests.json'),
+      { filter: { id: 'no-match' } }
+    )
+
+    expect(scopes).to.be.an.instanceOf(Array)
+    expect(scopes).to.have.lengthOf.at.least(0)
+  })
+
+  it('should load only requests matching group', () => {
+    const scopes = nock.loadDefs(
+      path.join(__dirname, 'fixtures', 'filtered_by_id_requests.json'),
+      { filter: { group: '345666' } }
+    )
+
+    expect(scopes).to.be.an.instanceOf(Array)
+    expect(scopes).to.have.lengthOf.at.least(2)
+  })
+})
+
 describe('`Scope#constructor`', () => {
   it('accepts the output of url.parse', async () => {
     const scope = nock(url.parse('http://example.test')).get('/').reply()

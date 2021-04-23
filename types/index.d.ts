@@ -25,7 +25,7 @@ declare namespace nock {
     matcher?: string | RegExp | ((host: string) => boolean)
   ): void
   function load(path: string): Scope[]
-  function loadDefs(path: string): Definition[]
+  function loadDefs(path: string, options?: OptionsDefs): Definition[]
   function define(defs: Definition[]): Scope[]
   function restore(): void
   function abortPendingRequests(): void
@@ -34,6 +34,9 @@ declare namespace nock {
   let emitter: NodeJS.EventEmitter
   let recorder: Recorder
 
+  type OptionsDefs = {
+    filter?: { id?: string; group?: string }
+  }
   type InterceptFunction = (
     uri: string | RegExp | { (uri: string): boolean },
     requestBody?: RequestBodyMatcher,
@@ -270,6 +273,7 @@ declare namespace nock {
     after?: (scope: Scope) => void
     afterRecord?: (defs: Definition[]) => Definition[]
     recorder?: RecorderOptions
+    filter?: OptionsDefs
   }
 }
 
