@@ -29,7 +29,7 @@ jobs:
         with:
           node-version: 12
       - name: Cache npm dependencies
-        uses: actions/cache@v2.1.4
+        uses: actions/cache@v2.1.5
         with:
           key: npm-${{ hashFiles('package-lock.json') }}
           path: ~/.npm
@@ -41,8 +41,8 @@ jobs:
         run: npm run format:fix
       - name: Commit
         run: |
-          git config user.email "actions@github.com"
-          git config user.name "GitHub Actions"
+          git config user.email "github-actions@github.com"
+          git config user.name "github-actions"
           git add .
           git commit -m "style: format files with Prettier" | true # ignore error if there are no changes to commit
           git push origin HEAD:${{ github.head_ref }}
@@ -59,7 +59,7 @@ jobs:
         with:
           node-version: 12
       - name: Cache npm dependencies
-        uses: actions/cache@v2.1.4
+        uses: actions/cache@v2.1.5
         with:
           key: npm-${{ hashFiles('package-lock.json') }}
           path: ~/.npm
@@ -82,7 +82,7 @@ jobs:
         with:
           node-version: 12
       - name: Cache npm dependencies
-        uses: actions/cache@v2.1.4
+        uses: actions/cache@v2.1.5
         with:
           key: npm-${{ hashFiles('package-lock.json') }}
           path: ~/.npm
@@ -105,7 +105,7 @@ jobs:
         with:
           node-version: 12
       - name: Cache npm dependencies
-        uses: actions/cache@v2.1.4
+        uses: actions/cache@v2.1.5
         with:
           key: npm-${{ hashFiles('package-lock.json') }}
           path: ~/.npm
@@ -139,7 +139,7 @@ jobs:
         # https://github.com/actions/cache/issues/187 is fixed.
         if: runner.os == 'Linux'
         name: Cache npm dependencies
-        uses: actions/cache@v2.1.4
+        uses: actions/cache@v2.1.5
         with:
           path: ${{ steps.npm-cache.outputs.dir }}
           key: |
