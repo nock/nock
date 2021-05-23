@@ -20,8 +20,6 @@ const nock = require('..')
 const got = require('./got_client')
 const servers = require('./servers')
 
-require('./setup')
-
 describe('Request Overrider', () => {
   it('response is an http.IncomingMessage instance', done => {
     const responseText = 'incoming message!'

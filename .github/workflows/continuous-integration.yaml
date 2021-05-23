@@ -25,11 +25,11 @@ jobs:
           persist-credentials: true
           ref: ${{ github.head_ref }}
       - name: Setup Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2.1.5
         with:
           node-version: 12
       - name: Cache npm dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v2.1.5
         with:
           key: npm-${{ hashFiles('package-lock.json') }}
           path: ~/.npm
@@ -41,8 +41,8 @@ jobs:
         run: npm run format:fix
       - name: Commit
         run: |
-          git config user.email "actions@github.com"
-          git config user.name "GitHub Actions"
+          git config user.email "github-actions@github.com"
+          git config user.name "github-actions"
           git add .
           git commit -m "style: format files with Prettier" | true # ignore error if there are no changes to commit
           git push origin HEAD:${{ github.head_ref }}
@@ -55,11 +55,11 @@ jobs:
         with:
           persist-credentials: false
       - name: Setup Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2.1.5
         with:
           node-version: 12
       - name: Cache npm dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v2.1.5
         with:
           key: npm-${{ hashFiles('package-lock.json') }}
           path: ~/.npm
@@ -78,11 +78,11 @@ jobs:
         with:
           persist-credentials: false
       - name: Setup Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2.1.5
         with:
           node-version: 12
       - name: Cache npm dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v2.1.5
         with:
           key: npm-${{ hashFiles('package-lock.json') }}
           path: ~/.npm
@@ -101,11 +101,11 @@ jobs:
         with:
           persist-credentials: false
       - name: Setup Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2.1.5
         with:
           node-version: 12
       - name: Cache npm dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v2.1.5
         with:
           key: npm-${{ hashFiles('package-lock.json') }}
           path: ~/.npm
@@ -125,7 +125,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Setup Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2.1.5
         with:
           node-version: ${{ matrix.node-version }}
       - id: npm-cache
@@ -139,7 +139,7 @@ jobs:
         # https://github.com/actions/cache/issues/187 is fixed.
         if: runner.os == 'Linux'
         name: Cache npm dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v2.1.5
         with:
           path: ${{ steps.npm-cache.outputs.dir }}
           key: |
@@ -148,16 +148,8 @@ jobs:
             npm-${{ runner.os }}-${{ matrix.node-version }}-
       - name: Install dependencies
         run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
-      # The following conditional can be removed once tests are fully migrated
-      # to Mocha. Alternatively a grep command used to select correct files can
-      # be refactored to work on Windows. Ideally all tests should be run across
-      # all platforms.
-      - if: runner.os != 'Windows'
-        name: Test
+      - name: Test
         run: npm run test
-      - if: runner.os == 'Windows'
-        name: Test
-        run: npm run test:tap
     strategy:
       fail-fast: false
       matrix:

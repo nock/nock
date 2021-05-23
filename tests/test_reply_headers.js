@@ -10,8 +10,6 @@ const fakeTimers = require('@sinonjs/fake-timers')
 const nock = require('..')
 const got = require('./got_client')
 
-require('./setup')
-
 describe('`reply()` headers', () => {
   describe('using parameter value', () => {
     it('as array', async () => {

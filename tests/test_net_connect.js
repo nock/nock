@@ -8,8 +8,6 @@ const nock = require('..')
 const got = require('./got_client')
 const servers = require('./servers')
 
-require('./setup')
-
 describe('`disableNetConnect()`', () => {
   it('prevents connection to unmocked hosts', async () => {
     nock.disableNetConnect()

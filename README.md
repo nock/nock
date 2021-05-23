@@ -640,6 +640,8 @@ const scope = nock('http://my.server.com:8081')
 
 You are able to specify the number of times to repeat the same response.
 
+**NOTE:** When request times is more than the number you specified, you will get an error before cleaning this interceptor.
+
 ```js
 nock('http://zombo.com').get('/').times(4).reply(200, 'Ok')
 
@@ -647,7 +649,15 @@ http.get('http://zombo.com/') // respond body "Ok"
 http.get('http://zombo.com/') // respond body "Ok"
 http.get('http://zombo.com/') // respond body "Ok"
 http.get('http://zombo.com/') // respond body "Ok"
-http.get('http://zombo.com/') // respond with zombo.com result
+
+// This code will get an error with message:
+// Nock: No match for request
+http.get('http://zombo.com/')
+
+// clean your interceptor
+nock.cleanAll()
+
+http.get('http://zombo.com/') // real respond with zombo.com result
 ```
 
 Sugar syntax
@@ -1213,13 +1223,12 @@ nocks.forEach(function (nock) {
     const recordedBodyResult = /timestamp:([0-9]+)/.exec(aRecordedBody)
     if (recordedBodyResult) {
       const recordedTimestamp = recordedBodyResult[1]
-      return body.replace(/(timestamp):([0-9]+)/g, function (
-        match,
-        key,
-        value
-      ) {
-        return key + ':' + recordedTimestamp
-      })
+      return body.replace(
+        /(timestamp):([0-9]+)/g,
+        function (match, key, value) {
+          return key + ':' + recordedTimestamp
+        }
+      )
     } else {
       return body
     }

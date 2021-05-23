@@ -5,8 +5,6 @@ const nock = require('..')
 const got = require('./got_client')
 const assertRejects = require('assert-rejects')
 
-require('./setup')
-
 describe('repeating', () => {
   it('`once()`', async () => {
     const scope = nock('http://example.test')

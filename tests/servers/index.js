@@ -17,9 +17,6 @@ const https = require('https')
 const path = require('path')
 const fs = require('fs')
 
-// setup is only required here for Tap
-require('../setup')
-
 const servers = []
 
 afterEach(() => {
@@ -29,7 +26,13 @@ afterEach(() => {
   }
 })
 
-async function startHttpServer(requestListener) {
+const defaultRequestListener = (req, res) => {
+  res.writeHead(200)
+  res.write('OK')
+  res.end()
+}
+
+async function startHttpServer(requestListener = defaultRequestListener) {
   const server = http.createServer(requestListener)
   await new Promise(resolve => server.listen(resolve))
   servers.push(server)
@@ -38,7 +41,7 @@ async function startHttpServer(requestListener) {
   return server
 }
 
-async function startHttpsServer(requestListener) {
+async function startHttpsServer(requestListener = defaultRequestListener) {
   const server = https.createServer(
     {
       key: fs.readFileSync(path.resolve(__dirname, './localhost.key')),

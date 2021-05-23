@@ -7,8 +7,6 @@ const nock = require('..')
 const got = require('./got_client')
 const httpsServer = require('./servers')
 
-require('./setup')
-
 describe('NOCK_OFF env var', () => {
   let original
   beforeEach(() => {
@@ -32,7 +30,9 @@ describe('NOCK_OFF env var', () => {
       .get('/')
       .reply(200, 'mock')
 
-    const { body } = await got(origin, { ca: httpsServer.ca })
+    const { body } = await got(origin, {
+      https: { certificateAuthority: httpsServer.ca },
+    })
     expect(body).to.equal(responseBody)
     scope.done()
   })
