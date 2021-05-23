@@ -1,194 +1,103 @@
 'use strict'
 
+const { expect } = require('chai')
 const fs = require('fs')
-const http = require('http')
-const nock = require('../')
-const nockBack = nock.back
-const querystring = require('querystring')
+const path = require('path')
 const rimraf = require('rimraf')
-const { test } = require('tap')
 
+const got = require('./got_client')
+const { startHttpServer } = require('./servers')
+
+const nock = require('../')
+
+const nockBack = nock.back
 const originalMode = nockBack.currentMode
-nock.enableNetConnect()
-nockBack.fixtures = `${__dirname}/fixtures`
-nockBack.setMode('record')
-const fixtureFilename = `recording_filters_test.json`
-const fixture = `${nockBack.fixtures}/${fixtureFilename}`
+const fixturesDir = path.resolve(__dirname, 'fixtures')
+const fixtureFilename = 'recording_filters_test.json'
+const fixtureFullPath = path.resolve(fixturesDir, fixtureFilename)
 
-function rimrafOnEnd(t) {
-  t.once('end', function () {
-    rimraf.sync(fixture)
+const getFixtureContent = () =>
+  JSON.parse(fs.readFileSync(fixtureFullPath).toString())
+
+describe('nockBack filters', () => {
+  beforeEach(() => {
+    nockBack.fixtures = fixturesDir
+    nockBack.setMode('record')
   })
-}
 
-function createServer(t) {
-  return http.createServer((request, response) => {
-    t.pass('server received a request')
-
-    response.writeHead(200)
-    response.write(`server served a response at ${Date.now()}`)
-    response.end()
+  afterEach(() => {
+    rimraf.sync(fixtureFullPath)
   })
-}
 
-function createRequest(options, callback) {
-  const baseOptions = {
-    host: 'localhost',
-    path: '/',
-    method: 'GET',
-  }
-  return http.request({ ...baseOptions, ...options }, response => {
-    const rawData = []
-    response.on('data', chunk => rawData.push(chunk))
-    response.once('end', chunk => {
-      rawData.push(chunk)
-      callback(rawData.join(''))
-      response.resume()
-    })
+  it('should pass filteringPath options', async () => {
+    const server = await startHttpServer()
+    const nockBackOptions = {
+      before(scope) {
+        scope.filteringPath = path =>
+          path.replace(/timestamp=[0-9]+/, 'timestamp=1111')
+      },
+    }
+
+    const back1 = await nockBack(fixtureFilename, nockBackOptions)
+    const response1 = await got(`${server.origin}/?timestamp=1111`)
+    back1.nockDone()
+
+    const fixtureContent = getFixtureContent()
+    expect(fixtureContent).to.have.lengthOf(1)
+    expect(fixtureContent[0].path).to.equal('/?timestamp=1111')
+
+    const back2 = await nockBack(fixtureFilename, nockBackOptions)
+    const response2 = await got(`${server.origin}/?timestamp=2222`)
+    back2.nockDone()
+
+    expect(response2.body).to.deep.equal(response1.body)
+
+    const fixtureContentReloaded = getFixtureContent()
+    expect(fixtureContentReloaded).to.have.lengthOf(1)
+    expect(fixtureContentReloaded[0].path).to.equal('/?timestamp=1111')
   })
-}
 
-test('nockBack passes filteringPath options', function (t) {
-  t.plan(5)
+  it('should pass filteringRequestBody options', async () => {
+    const server = await startHttpServer()
+    const nockBackOptions = {
+      before(scope) {
+        scope.filteringRequestBody = (body, recordedBody) => {
+          const regExp = /token=[a-z-]+/
+          const recordedBodyMatched = recordedBody.match(regExp)
 
-  const server = createServer(t)
-  const nockBackOptions = {
-    before(scope) {
-      scope.filteringPath = path =>
-        path.replace(/timestamp=[0-9]+/, 'timestamp=1111')
-    },
-  }
+          if (recordedBodyMatched && regExp.test(body)) {
+            return body.replace(regExp, recordedBodyMatched[0])
+          }
 
-  server.listen(() => {
-    const { port } = server.address()
-
-    nockBack(fixtureFilename, nockBackOptions, function (nockDone) {
-      const requestForRecord = createRequest(
-        {
-          path: '/?timestamp=1111',
-          port,
-        },
-        firstRawData => {
-          nockDone()
-          t.pass('nockBack records fixture')
-
-          const fixtureContent = JSON.parse(
-            fs.readFileSync(fixture, { encoding: 'utf8' })
-          )
-          t.equal(fixtureContent.length, 1)
-          t.equal(fixtureContent[0].path, '/?timestamp=1111')
-
-          nockBack(fixtureFilename, nockBackOptions, function (nockDone) {
-            const request = createRequest(
-              {
-                path: '/?timestamp=2222',
-                port,
-              },
-              secondRawData => {
-                nockDone()
-
-                t.equal(firstRawData, secondRawData)
-
-                server.close(t.end)
-              }
-            )
-
-            request.on('error', t.error)
-            request.end()
-          })
+          return body
         }
-      )
+      },
+    }
 
-      requestForRecord.on('error', t.error)
-      requestForRecord.end()
+    const back1 = await nockBack(fixtureFilename, nockBackOptions)
+    const response1 = await got.post(server.origin, {
+      form: { token: 'aaa-bbb-ccc' },
     })
+    back1.nockDone()
+
+    const fixtureContent = getFixtureContent()
+    expect(fixtureContent).to.have.lengthOf(1)
+    expect(fixtureContent[0].body).to.equal('token=aaa-bbb-ccc')
+
+    const back2 = await nockBack(fixtureFilename, nockBackOptions)
+    const response2 = await got.post(server.origin, {
+      form: { token: 'ddd-eee-fff' },
+    })
+    back2.nockDone()
+
+    expect(response2.text).to.deep.equal(response1.text)
+
+    const fixtureContentReloaded = getFixtureContent()
+    expect(fixtureContentReloaded).to.have.lengthOf(1)
+    expect(fixtureContentReloaded[0].body).to.equal('token=aaa-bbb-ccc')
   })
 
-  rimrafOnEnd(t)
-})
-
-test('nockBack passes filteringRequestBody option', function (t) {
-  t.plan(5)
-
-  const server = createServer(t)
-  const nockBackOptions = {
-    before(scope) {
-      scope.filteringRequestBody = (body, recordedBody) => {
-        const regExp = /token=[a-z-]+/
-        const recordedBodyMatched = recordedBody.match(regExp)
-
-        if (recordedBodyMatched && regExp.test(body)) {
-          return body.replace(regExp, recordedBodyMatched[0])
-        }
-
-        return body
-      }
-    },
-  }
-
-  server.listen(() => {
-    const { port } = server.address()
-
-    nockBack(fixtureFilename, nockBackOptions, function (nockDone) {
-      const postData = querystring.stringify({ token: 'aaa-bbb-ccc' })
-      const requestForRecord = createRequest(
-        {
-          port,
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Content-Length': Buffer.byteLength(postData),
-          },
-        },
-        firstRawData => {
-          nockDone()
-          t.pass('nockBack records fixture')
-
-          const fixtureContent = JSON.parse(
-            fs.readFileSync(fixture, { encoding: 'utf8' })
-          )
-          t.equal(fixtureContent.length, 1)
-          t.equal(fixtureContent[0].body, 'token=aaa-bbb-ccc')
-
-          nockBack(fixtureFilename, nockBackOptions, function (nockDone) {
-            const secondPostData = querystring.stringify({
-              token: 'ddd-eee-fff',
-            })
-            const request = createRequest(
-              {
-                port,
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/x-www-form-urlencoded',
-                  'Content-Length': Buffer.byteLength(postData),
-                },
-              },
-              secondRawData => {
-                nockDone()
-
-                t.equal(firstRawData, secondRawData)
-
-                server.close(t.end)
-              }
-            )
-
-            request.write(secondPostData)
-            request.on('error', t.error)
-            request.end()
-          })
-        }
-      )
-
-      requestForRecord.write(postData)
-      requestForRecord.on('error', t.error)
-      requestForRecord.end()
-    })
+  it('should be able to reset the mode', () => {
+    nockBack.setMode(originalMode)
   })
-
-  rimrafOnEnd(t)
-})
-
-test('teardown', function (t) {
-  nockBack.setMode(originalMode)
-  t.end()
 })

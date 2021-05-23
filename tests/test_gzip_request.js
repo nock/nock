@@ -5,8 +5,6 @@ const http = require('http')
 const zlib = require('zlib')
 const nock = require('..')
 
-require('./setup')
-
 it('should accept and decode gzip encoded application/json', done => {
   const message = {
     my: 'contents',

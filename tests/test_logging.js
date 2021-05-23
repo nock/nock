@@ -6,14 +6,13 @@ const { expect } = require('chai')
 const nock = require('..')
 const got = require('./got_client')
 
-require('./setup')
-
 describe('Logging using the `debug` package', () => {
   let logFn
   beforeEach(() => {
     logFn = sinon.stub(debug, 'log')
     debug.enable('nock*')
   })
+
   afterEach(() => {
     debug.disable('nock*')
   })
@@ -24,40 +23,33 @@ describe('Logging using the `debug` package', () => {
     const exampleBody = 'Hello yourself!'
     await got.post('http://example.test/deep/link', { body: exampleBody })
 
-    const isMocha = process.argv.some(arg => arg.endsWith('mocha'))
-    // TODO For some reason this is getting slightly different arguments in Tap
-    // vs Mocha. Remove this conditional when Tap is removed.
-    if (isMocha) {
-      // the log function will have been a few dozen times, there are a few specific to matching we want to validate:
+    // the log function will have been a few dozen times, there are a few specific to matching we want to validate:
 
-      // the log when an interceptor is chosen
-      expect(logFn).to.have.been.calledWith(
-        sinon.match('matched base path (1 interceptor)')
-      )
+    // the log when an interceptor is chosen
+    expect(logFn).to.have.been.calledWith(
+      sinon.match('matched base path (1 interceptor)')
+    )
 
-      // the log of the Interceptor match
-      expect(logFn).to.have.been.calledWith(
-        // debug namespace for the scope that includes the host
-        sinon.match('nock.scope:example.test'),
-        // This is a JSON blob which contains, among other things the complete
-        // request URL.
-        sinon.match('"href":"http://example.test/deep/link"'),
-        // This is the JSON-stringified body.
-        `"${exampleBody}"`
-      )
+    // the log of the Interceptor match
+    expect(logFn).to.have.been.calledWith(
+      // debug namespace for the scope that includes the host
+      sinon.match('nock.scope:example.test'),
+      // This is a JSON blob which contains, among other things the complete
+      // request URL.
+      sinon.match('"href":"http://example.test/deep/link"'),
+      // This is the JSON-stringified body.
+      `"${exampleBody}"`
+    )
 
-      expect(logFn).to.have.been.calledWith(
-        sinon.match('query matching skipped')
-      )
+    expect(logFn).to.have.been.calledWith(sinon.match('query matching skipped'))
 
-      expect(logFn).to.have.been.calledWith(
-        sinon.match(
-          'matching http://example.test:80/deep/link to POST http://example.test:80/deep/link: true'
-        )
+    expect(logFn).to.have.been.calledWith(
+      sinon.match(
+        'matching http://example.test:80/deep/link to POST http://example.test:80/deep/link: true'
       )
-      expect(logFn).to.have.been.calledWith(
-        sinon.match('interceptor identified, starting mocking')
-      )
-    }
+    )
+    expect(logFn).to.have.been.calledWith(
+      sinon.match('interceptor identified, starting mocking')
+    )
   })
 })

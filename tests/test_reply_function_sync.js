@@ -10,8 +10,6 @@ const sinon = require('sinon')
 const nock = require('..')
 const got = require('./got_client')
 
-require('./setup')
-
 describe('synchronous `reply()` function', () => {
   describe('when invoked with status code followed by function', () => {
     it('passes through a string', async () => {

@@ -10,8 +10,6 @@ const sinon = require('sinon')
 const nock = require('..')
 const got = require('./got_client')
 
-require('./setup')
-
 describe('asynchronous `reply()` function', () => {
   describe('using callback', () => {
     it('reply can take a callback', async () => {

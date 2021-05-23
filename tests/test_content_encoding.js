@@ -5,8 +5,6 @@ const zlib = require('zlib')
 const nock = require('..')
 const got = require('./got_client')
 
-require('./setup')
-
 describe('Content Encoding', () => {
   it('should accept gzipped content', async () => {
     const message = 'Lorem ipsum dolor sit amet'

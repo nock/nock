@@ -8,8 +8,6 @@ const sinon = require('sinon')
 const nock = require('..')
 const got = require('./got_client')
 
-require('./setup')
-
 function ignore() {}
 
 it('emits request and replied events when request has no body', async () => {

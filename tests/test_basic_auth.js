@@ -5,8 +5,6 @@ const assertRejects = require('assert-rejects')
 const nock = require('..')
 const got = require('./got_client')
 
-require('./setup')
-
 describe('basic auth with username and password', () => {
   beforeEach(done => {
     nock('http://example.test')

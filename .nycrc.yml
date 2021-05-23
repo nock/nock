@@ -1,0 +1,12 @@
+all: true
+check-coverage: true
+
+branches: 100
+lines: 100
+
+include:
+  - lib
+
+reporters:
+  - lcov
+  - text-summary

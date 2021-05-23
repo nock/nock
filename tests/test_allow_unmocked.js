@@ -8,8 +8,6 @@ const nock = require('..')
 const got = require('./got_client')
 const { startHttpServer } = require('./servers')
 
-require('./setup')
-
 describe('allowUnmocked option', () => {
   it('with allowUnmocked, mocked request still works', async () => {
     const scope = nock('http://example.test', { allowUnmocked: true })

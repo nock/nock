@@ -9,8 +9,6 @@ const Interceptor = require('../lib/interceptor')
 const nock = require('..')
 const got = require('./got_client')
 
-require('./setup')
-
 it('scope exposes interceptors', () => {
   const scopes = nock.load(
     path.join(__dirname, 'fixtures', 'good_request.json')
