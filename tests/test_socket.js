@@ -3,6 +3,7 @@
 const { expect } = require('chai')
 const http = require('http')
 const https = require('https')
+const { Readable } = require('stream')
 const nock = require('..')
 
 it('should expose TLSSocket attributes for HTTPS requests', done => {
@@ -50,3 +51,48 @@ describe('`Socket#setTimeout()`', () => {
     })
   })
 })
+
+describe('`Socket#destroy()`', () => {
+  it('can destroy the socket if stream is not finished', async () => {
+    const scope = nock('http://example.test')
+
+    scope.intercept('/somepath', 'GET').reply(() => {
+      const buffer = Buffer.allocUnsafe(10000000)
+      const data = new MemoryReadableStream(buffer, { highWaterMark: 128 })
+      return [200, data]
+    })
+
+    const req = http.get('http://example.test/somepath')
+    const stream = await new Promise(resolve => req.on('response', resolve))
+
+    // close after first chunk of data
+    stream.on('data', () => stream.destroy())
+
+    await new Promise((resolve, reject) => {
+      stream.on('error', reject)
+      stream.on('close', resolve)
+      stream.on('end', resolve)
+    })
+  })
+})
+
+class MemoryReadableStream extends Readable {
+  constructor(content) {
+    super()
+    this._content = content
+    this._currentOffset = 0
+  }
+
+  _read(size) {
+    if (this._currentOffset >= this._content.length) {
+      this.push(null)
+      return
+    }
+
+    const nextOffset = this._currentOffset + size
+    const content = this._content.slice(this._currentOffset, nextOffset)
+    this._currentOffset = nextOffset
+
+    this.push(content)
+  }
+}
