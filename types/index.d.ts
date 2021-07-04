@@ -52,7 +52,7 @@ declare namespace nock {
     | RegExp
     | DataMatcherArray
     | DataMatcherMap
-  interface DataMatcherArray extends Array<DataMatcher> {}
+  interface DataMatcherArray extends ReadonlyArray<DataMatcher> {}
   interface DataMatcherMap {
     [key: string]: DataMatcher
   }
