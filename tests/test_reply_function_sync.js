@@ -336,10 +336,18 @@ describe('synchronous `reply()` function', () => {
       expect(statusCode).to.equal(202)
       expect(body).to.equal(JSON.stringify(exampleBody))
       expect(headers).to.deep.equal({
+        'content-type': 'application/json',
         'x-key': 'value',
         'x-key-2': 'value 2',
       })
-      expect(rawHeaders).to.deep.equal(['x-key', 'value', 'x-key-2', 'value 2'])
+      expect(rawHeaders).to.deep.equal([
+        'x-key',
+        'value',
+        'x-key-2',
+        'value 2',
+        'Content-Type',
+        'application/json',
+      ])
       scope.done()
     })
 
