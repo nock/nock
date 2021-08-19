@@ -198,7 +198,7 @@ declare namespace nock {
     once(): this
     twice(): this
     thrice(): this
-    optionally(): this
+    optionally(flag?: boolean): this
 
     delay(opts: number | { head?: number; body?: number }): this
     delayBody(timeMs: number): this
