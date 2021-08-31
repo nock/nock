@@ -1402,6 +1402,14 @@ return nockBack('promisedFixture.json').then(({ nockDone, context }) => {
 })
 ```
 
+Or, with async/await:
+
+```js
+const { nockDone, context } = await nockBack('promisedFixture.json')
+//  your test code
+nockDone()
+```
+
 #### Options
 
 As an optional second parameter you can pass the following options
