@@ -25,11 +25,11 @@ jobs:
           persist-credentials: true
           ref: ${{ github.head_ref }}
       - name: Setup Node.js
-        uses: actions/setup-node@v2.1.5
+        uses: actions/setup-node@v2
         with:
           node-version: 12
       - name: Cache npm dependencies
-        uses: actions/cache@v2.1.5
+        uses: actions/cache@v2
         with:
           key: npm-${{ hashFiles('package-lock.json') }}
           path: ~/.npm
@@ -55,11 +55,11 @@ jobs:
         with:
           persist-credentials: false
       - name: Setup Node.js
-        uses: actions/setup-node@v2.1.5
+        uses: actions/setup-node@v2
         with:
           node-version: 12
       - name: Cache npm dependencies
-        uses: actions/cache@v2.1.5
+        uses: actions/cache@v2
         with:
           key: npm-${{ hashFiles('package-lock.json') }}
           path: ~/.npm
@@ -78,11 +78,11 @@ jobs:
         with:
           persist-credentials: false
       - name: Setup Node.js
-        uses: actions/setup-node@v2.1.5
+        uses: actions/setup-node@v2
         with:
           node-version: 12
       - name: Cache npm dependencies
-        uses: actions/cache@v2.1.5
+        uses: actions/cache@v2
         with:
           key: npm-${{ hashFiles('package-lock.json') }}
           path: ~/.npm
@@ -101,11 +101,11 @@ jobs:
         with:
           persist-credentials: false
       - name: Setup Node.js
-        uses: actions/setup-node@v2.1.5
+        uses: actions/setup-node@v2
         with:
           node-version: 12
       - name: Cache npm dependencies
-        uses: actions/cache@v2.1.5
+        uses: actions/cache@v2
         with:
           key: npm-${{ hashFiles('package-lock.json') }}
           path: ~/.npm
@@ -125,7 +125,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Setup Node.js
-        uses: actions/setup-node@v2.1.5
+        uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
       - id: npm-cache
@@ -139,7 +139,7 @@ jobs:
         # https://github.com/actions/cache/issues/187 is fixed.
         if: runner.os == 'Linux'
         name: Cache npm dependencies
-        uses: actions/cache@v2.1.5
+        uses: actions/cache@v2
         with:
           path: ${{ steps.npm-cache.outputs.dir }}
           key: |

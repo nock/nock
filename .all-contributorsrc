@@ -117,7 +117,17 @@
       "contributions": [
         "financial"
       ]
+    },
+    {
+      "login": "laurence-myers",
+      "name": "Laurence Dougal Myers",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6336048?v=4",
+      "profile": "http://www.laurencemyers.com.au",
+      "contributions": [
+        "code"
+      ]
     }
   ],
-  "contributorsPerLine": 7
+  "contributorsPerLine": 7,
+  "skipCi": true
 }
