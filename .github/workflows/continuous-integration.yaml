@@ -1,6 +1,5 @@
 name: Continuous Integration
-
-on:
+"on":
   pull_request:
     types:
       - opened
@@ -8,13 +7,11 @@ on:
   push:
     branches:
       - main
-
 jobs:
   fix-formatting:
     if: >-
-      github.actor != 'github-actions[bot]' &&
-      github.event_name == 'pull_request' &&
-      github.event.pull_request.head.repo.fork == false
+      github.actor != 'github-actions[bot]' && github.event_name ==
+      'pull_request' && github.event.pull_request.head.repo.fork == false
     name: Fix formatting
     runs-on: ubuntu-latest
     steps:
@@ -27,7 +24,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: 12
+          node-version: 16
       - name: Cache npm dependencies
         uses: actions/cache@v2
         with:
@@ -40,11 +37,16 @@ jobs:
       - name: Format
         run: npm run format:fix
       - name: Commit
-        run: |
+        run: >
           git config user.email "github-actions@github.com"
+
           git config user.name "github-actions"
+
           git add .
-          git commit -m "style: format files with Prettier" | true # ignore error if there are no changes to commit
+
+          git commit -m "style: format files with Prettier" | true # ignore
+          error if there are no changes to commit
+
           git push origin HEAD:${{ github.head_ref }}
   format:
     name: Format
@@ -57,7 +59,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: 12
+          node-version: 16
       - name: Cache npm dependencies
         uses: actions/cache@v2
         with:
@@ -80,7 +82,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: 12
+          node-version: 16
       - name: Cache npm dependencies
         uses: actions/cache@v2
         with:
@@ -103,7 +105,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: 12
+          node-version: 16
       - name: Cache npm dependencies
         uses: actions/cache@v2
         with:
@@ -129,21 +131,18 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - id: npm-cache
-        # Re-enable for all operating systems by removing the following once
-        # https://github.com/actions/cache/issues/187 is fixed.
         if: runner.os == 'Linux'
         name: Get npm cache directory
         run: |
           echo "::set-output name=dir::$(npm config get cache)"
-      - # Enable for all operating systems by removing the following once
-        # https://github.com/actions/cache/issues/187 is fixed.
-        if: runner.os == 'Linux'
+      - if: runner.os == 'Linux'
         name: Cache npm dependencies
         uses: actions/cache@v2
         with:
           path: ${{ steps.npm-cache.outputs.dir }}
-          key: |
-            npm-${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('package-lock.json') }}
+          key: >
+            npm-${{ runner.os }}-${{ matrix.node-version }}-${{
+            hashFiles('package-lock.json') }}
           restore-keys: |
             npm-${{ runner.os }}-${{ matrix.node-version }}-
       - name: Install dependencies
@@ -153,5 +152,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [10, 12, 14, 16]
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        node-version:
+          - 10
+          - 12
+          - 14
+          - 16
+        os:
+          - macos-latest
+          - ubuntu-latest
+          - windows-latest
