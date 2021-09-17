@@ -1,13 +1,11 @@
 name: Continuous Delivery
-
-on:
+"on":
   push:
     branches:
-      - '*.x' # maintenance releases such as 12.x
+      - "*.x"
       - main
       - beta
       - next
-
 jobs:
   build:
     name: Release
@@ -20,7 +18,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: 12
+          node-version: 16
       - name: Cache npm dependencies
         uses: actions/cache@v2
         with:
