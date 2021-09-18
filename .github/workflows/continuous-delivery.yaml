@@ -1,8 +1,8 @@
 name: Continuous Delivery
-"on":
+'on':
   push:
     branches:
-      - "*.x"
+      - '*.x'
       - main
       - beta
       - next
