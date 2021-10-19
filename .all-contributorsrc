@@ -126,6 +126,16 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "Beretta1979",
+      "name": "Sébastien Van Bruaene",
+      "avatar_url": "https://avatars.githubusercontent.com/u/10073962?v=4",
+      "profile": "https://github.com/Beretta1979",
+      "contributions": [
+        "code",
+        "test"
+      ]
     }
   ],
   "contributorsPerLine": 7,
