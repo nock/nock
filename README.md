@@ -1591,6 +1591,7 @@ Thanks goes to these wonderful people ([emoji key](https://github.com/all-contri
     <td align="center"><a href="https://github.com/benrki"><img src="https://avatars0.githubusercontent.com/u/4446950?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Benjamin Ki</b></sub></a><br /><a href="#financial-benrki" title="Financial">💵</a></td>
     <td align="center"><a href="http://chadf.ca"><img src="https://avatars2.githubusercontent.com/u/3250463?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Chad Fawcett</b></sub></a><br /><a href="#financial-chadfawcett" title="Financial">💵</a></td>
     <td align="center"><a href="http://www.laurencemyers.com.au"><img src="https://avatars.githubusercontent.com/u/6336048?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Laurence Dougal Myers</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=laurence-myers" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/Beretta1979"><img src="https://avatars.githubusercontent.com/u/10073962?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Sébastien Van Bruaene</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=Beretta1979" title="Code">💻</a> <a href="https://github.com/nock/nock/commits?author=Beretta1979" title="Tests">⚠️</a></td>
   </tr>
 </table>
 
