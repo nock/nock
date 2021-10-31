@@ -19,13 +19,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 16
-      - name: Cache npm dependencies
-        uses: actions/cache@v2
-        with:
-          key: npm-${{ hashFiles('package-lock.json') }}
-          path: ~/.npm
-          restore-keys: |
-            npm-
+          cache: 'npm'
       - name: Install dependencies
         run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
       - env:

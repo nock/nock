@@ -25,13 +25,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 16
-      - name: Cache npm dependencies
-        uses: actions/cache@v2
-        with:
-          key: npm-${{ hashFiles('package-lock.json') }}
-          path: ~/.npm
-          restore-keys: |
-            npm-
+          cache: 'npm'
       - name: Install dependencies
         run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
       - name: Format
@@ -60,13 +54,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 16
-      - name: Cache npm dependencies
-        uses: actions/cache@v2
-        with:
-          key: npm-${{ hashFiles('package-lock.json') }}
-          path: ~/.npm
-          restore-keys: |
-            npm-
+          cache: 'npm'
       - name: Install dependencies
         run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
       - name: Format
@@ -83,13 +71,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 16
-      - name: Cache npm dependencies
-        uses: actions/cache@v2
-        with:
-          key: npm-${{ hashFiles('package-lock.json') }}
-          path: ~/.npm
-          restore-keys: |
-            npm-
+          cache: 'npm'
       - name: Install dependencies
         run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
       - name: Lint
@@ -106,13 +88,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 16
-      - name: Cache npm dependencies
-        uses: actions/cache@v2
-        with:
-          key: npm-${{ hashFiles('package-lock.json') }}
-          path: ~/.npm
-          restore-keys: |
-            npm-
+          cache: 'npm'
       - name: Install dependencies
         run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
       - name: Lint
@@ -130,21 +106,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
-      - id: npm-cache
-        if: runner.os == 'Linux'
-        name: Get npm cache directory
-        run: |
-          echo "::set-output name=dir::$(npm config get cache)"
-      - if: runner.os == 'Linux'
-        name: Cache npm dependencies
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.npm-cache.outputs.dir }}
-          key: >
-            npm-${{ runner.os }}-${{ matrix.node-version }}-${{
-            hashFiles('package-lock.json') }}
-          restore-keys: |
-            npm-${{ runner.os }}-${{ matrix.node-version }}-
+          cache: 'npm'
       - name: Install dependencies
         run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
       - name: Test
