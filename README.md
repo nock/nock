@@ -1471,6 +1471,8 @@ To set the mode call `nockBack.setMode(mode)` or run the tests with the `NOCK_BA
 
 - record: use recorded nocks, record new nocks
 
+- update: remove recorded nocks, record nocks
+
 - lockdown: use recorded nocks, disables all http calls even when not nocked, doesn't record
 
 ## Common issues
