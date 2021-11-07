@@ -58,7 +58,7 @@ declare namespace nock {
     | RegExp
     | DataMatcherArray
     | DataMatcherMap
-  interface DataMatcherArray extends Array<DataMatcher> {}
+  interface DataMatcherArray extends ReadonlyArray<DataMatcher> {}
   interface DataMatcherMap {
     [key: string]: DataMatcher
   }
@@ -204,7 +204,7 @@ declare namespace nock {
     once(): this
     twice(): this
     thrice(): this
-    optionally(): this
+    optionally(flag?: boolean): this
 
     delay(opts: number | { head?: number; body?: number }): this
     delayBody(timeMs: number): this
