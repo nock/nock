@@ -1323,6 +1323,18 @@ const interceptor = nock('http://example.org').get('somePath')
 nock.removeInterceptor(interceptor)
 ```
 
+**Note** `.reply(...)` method returns Scope, not Interceptor, and so it is not a valid argument for `nock.removeInterceptor`. So if your method chain ends with `.reply` to be used with `nock.removeInterceptor` the chain need to be break in between:
+
+```js
+// this will NOT work
+const interceptor = nock('http://example.org').get('somePath').reply(200, 'OK')
+nock.removeInterceptor(interceptor)
+// this is how it should be
+const interceptor = nock('http://example.org').get('somePath')
+interceptor.reply(200, 'OK')
+nock.removeInterceptor(interceptor)
+```
+
 ## Events
 
 A scope emits the following events:
