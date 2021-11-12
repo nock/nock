@@ -240,7 +240,7 @@ declare namespace nock {
     options?: Options
   }
 
-  type BackMode = 'wild' | 'dryrun' | 'record' | 'lockdown'
+  type BackMode = 'wild' | 'dryrun' | 'record' | 'update' | 'lockdown'
 
   interface Back {
     currentMode: BackMode
