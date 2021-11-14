@@ -34,6 +34,7 @@ describe('`Scope#constructor`', () => {
     scope.done()
   })
 
+  // TODO: https://github.com/nock/nock/pull/1879
   it.skip('accepts a WHATWG URL instance', async () => {
     const scope = nock(new url.URL('http://example.test')).get('/').reply()
 
