@@ -1,0 +1,63 @@
+---
+name: '🐛 Bug Report'
+description: "Something isn't working as expected 🤔"
+labels:
+  - bug
+body:
+  - type: checkboxes
+    id: search
+    attributes:
+      label: Please avoid duplicates
+      options:
+        - label: I checked [all open bugs](https://github.com/nock/nock.js/issues?q=is%3Aissue+is%3Aopen+label%3Abug) and none of them matched my problem.
+          required: true
+  - type: input
+    id: testcase
+    attributes:
+      label: Reproducible test case
+      description: |
+        If possible, please create a minimal test case that reproduces your problem and share the URL.
+
+        For code-related issues, please create a RunKit Notebook ([example](https://runkit.com/gr2m/nock-nock-1076)).
+
+        For TypeScript-only problems, you can create TypeScript playground ([example](https://www.typescriptlang.org/play?#code/JYWwDg9gTgLgBAOwgYwNZwGZQiOByJNPAKGOQgQGd5LywBTOAXkRVQAo8ALGGMSgFwB6IQEMwwAHQBzYDC4BXAEaTyIPAEpicODPoxOQqPUiUxMHOcsAbYMnpV6m7buNhrAT3YAmAAy+AGjgAbxcdW3tHARCwnThUeg9ovBA5PADYnQRREHpkgFkASQAVOAAZOwdKJwy4uMowABMADwB9YEaCkvTMuAUoa2SePkERcSlZeWVVG0rHM1SYHrqsiEb6ds78fIARZAA2YoBxawArAC0AdQBWAC9z4oBRW+W4gF9auDetYhE4AAEYJQALT0ZoMZAwUFQbBQYi0CAMSSNCD0SgAOQgMEezWA1HYWiAA)).
+    validations:
+      required: true
+  - type: input
+    id: nock_version
+    attributes:
+      label: Nock Version
+      description: |
+        Please share the version of nock you are using.
+
+        You can find out using `npm ls nock`
+    validations:
+      required: true
+  - type: input
+    id: node_version
+    attributes:
+      label: Node Version
+      description: |
+        Please share the version of Node you are using.
+
+        You can find out using `node --version`
+    validations:
+      required: true
+  - type: textarea
+    id: typescript_info
+    attributes:
+      label: TypeScript Version
+      description: If this is a TypeScript version, please share the version and configuration you are using.
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: Please share any other relevant information not mentioned above. What did you expect to happen? What do you think the problem might be?
+  - type: checkboxes
+    id: contributor
+    attributes:
+      label: Would you be interested in contributing a fix?
+      description: |
+        If you haven't send a pull request before that is okay. We are happy to walk you through the process, just let us know that you will need help.
+      options:
+        - label: 'yes'

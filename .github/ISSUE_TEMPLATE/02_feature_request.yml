@@ -1,0 +1,31 @@
+---
+name: '🚀 Feature request'
+description: 'Let us know if you have a feature request 💡'
+labels:
+  - feature
+body:
+  - type: checkboxes
+    id: search
+    attributes:
+      label: Please avoid duplicates
+      options:
+        - label: I checked [all open feature requests](https://github.com/nock/nock.js/issues?q=is%3Aissue+is%3Aopen+label%3Afeature) and none of them matched my request.
+          required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What are you trying to do and how would you want to do it differently? Is it something you currently you cannot do? Is this related to an issue/problem?
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives
+      description: Can you achieve the same result doing it in an alternative way? Is the alternative considerable?
+  - type: checkboxes
+    id: contributor
+    attributes:
+      label: If the feature request is accepted, would you be willing to submit a PR?
+      description: |
+        If you haven't send a pull request before that is okay. We are happy to walk you through the process, just let us know that you will need help.
+      options:
+        - label: 'yes'
