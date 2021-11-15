@@ -1,0 +1,2 @@
+- when importing `nock`, `back.setMode("dryrun")` is run by default, which runs `nock.activate()`.
+- `nock.activate()` disables all net requests by default. `back.setMode("dryrun")` enables unmocked net requests explicitly.
