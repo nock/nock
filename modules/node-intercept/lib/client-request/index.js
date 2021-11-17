@@ -1,13 +1,24 @@
+// @ts-check
+
 const { inherits } = require('util')
 const http = require('http')
+const stream = require('stream')
 
 const debug = require('debug')('nock.request_overrider')
 const propagate = require('propagate')
 
-const { isRequestDestroyed } = require('./utils')
-const Socket = require('./socket')
-const normalizeNodeRequestArguments = require('./normalize-request-arguments')
+const { isRequestDestroyed } = require('../utils')
+const Socket = require('../socket')
+const normalizeNodeRequestArguments = require('../normalize-request-arguments')
 
+const MOCK_RESPONSE = {
+  statusCode: 200,
+  rawHeaders: [],
+  headers: {},
+  body: 'Hello, world!',
+}
+
+// @ts-expect-error - socket is incompatible with Node's Socket type
 class NockInterceptedClientRequest extends http.OutgoingMessage {
   constructor(...args) {
     super()
@@ -15,6 +26,18 @@ class NockInterceptedClientRequest extends http.OutgoingMessage {
     const { options, callback } = normalizeNodeRequestArguments(...args)
 
     // TODO: handle empty {} options
+
+    /** @type {import("./types").State} */
+    const state = {
+      options,
+      requestBodyBuffers: [],
+      playbackStarted: false,
+
+      // For parity with Node, it's important the socket event is emitted before we begin playback.
+      // This flag is set when playback is triggered if we haven't yet gotten the
+      // socket event to indicate that playback should start as soon as it comes in.
+      readyToStartPlaybackOnSocketEvent: false,
+    }
 
     // set headers
     for (const [name, val] of Object.entries(options.headers)) {
@@ -62,18 +85,6 @@ class NockInterceptedClientRequest extends http.OutgoingMessage {
       this.socket.setTimeout(options.timeout)
     }
 
-    const state = {
-      options: options,
-      response: new http.IncomingMessage(this.socket),
-      requestBodyBuffers: [],
-      playbackStarted: false,
-    }
-
-    // For parity with Node, it's important the socket event is emitted before we begin playback.
-    // This flag is set when playback is triggered if we haven't yet gotten the
-    // socket event to indicate that playback should start as soon as it comes in.
-    state.readyToStartPlaybackOnSocketEvent = false
-
     // Emit a fake socket event on the next tick to mimic what would happen on a real request.
     // Some clients listen for a 'socket' event to be emitted before calling end(),
     // which causes Nock to hang.
@@ -116,8 +127,10 @@ function handleWrite(request, state, buffer, encoding, callback) {
   debug('request write')
 
   if (request.finished) {
-    const err = new Error('write after end')
-    err.code = 'ERR_STREAM_WRITE_AFTER_END'
+    const err = Object.assign(new Error('write after end'), {
+      code: 'ERR_STREAM_WRITE_AFTER_END',
+    })
+
     process.nextTick(() => request.emit('error', err))
 
     // It seems odd to return `true` here, not sure why you'd want to have
@@ -234,16 +247,90 @@ function startPlayback(request, state) {
   })
 
   // set host header
-  let hostHeader = options.hostname
+  let hostHeader = options.host
   if (options.port === 80 || options.port === 443) {
     hostHeader = hostHeader.split(':')[0]
   }
-
   request.setHeader('host', hostHeader)
 
-  // wait to emit the finish event until we know for sure an Interceptor is going to playback.
-  // otherwise an unmocked request might emit finish twice.
+  // wait to emit the finish event until we know for sure that the request will be intercepted,
+  // Otherwise an unmocked request might emit finish twice.
   request.emit('finish')
+
+  // Calling `start` immediately could take the request all the way to the connection delay
+  // during a single microtask execution. This setImmediate stalls the playback to ensure the
+  // correct events are emitted first ('socket', 'finish') and any aborts in the in the queue or
+  // called during a 'finish' listener can be called.
+  setImmediate(() => {
+    if (isRequestDestroyed(request)) return
+
+    start(request, state)
+  })
+}
+
+/**
+ *
+ * @param {http.ClientRequest} request
+ * @param {import("./types").State} state
+ * @returns
+ */
+function start(request, state) {
+  const response = new http.IncomingMessage(request.socket)
+
+  response.statusCode = MOCK_RESPONSE.statusCode
+  response.rawHeaders = MOCK_RESPONSE.rawHeaders
+  response.headers = MOCK_RESPONSE.headers
+  let responseBody = MOCK_RESPONSE.body
+
+  const bodyAsStream = new ReadableBuffers([Buffer.from(responseBody)])
+  bodyAsStream.pause()
+
+  // IncomingMessage extends Readable so we can't simply pipe.
+  bodyAsStream.on('data', function (chunk) {
+    response.push(chunk)
+  })
+  bodyAsStream.on('end', function () {
+    // https://nodejs.org/api/http.html#http_message_complete
+    response.complete = true
+    response.push(null)
+  })
+  bodyAsStream.on('error', function (err) {
+    response.emit('error', err)
+  })
+
+  if (isRequestDestroyed(request)) {
+    return
+  }
+
+  // Even though we've had the response object for a while at this point,
+  // we only attach it to the request immediately before the `response`
+  // event because, as in Node, it alters the error handling around aborts.
+  // @ts-expect-error - no idea why `.req` is not typed on ClientRequest
+  request.res = response
+  // @ts-expect-error - no idea why `.res` is not typed on IncomingMessage
+  response.req = request
+
+  request.emit('response', response)
+
+  bodyAsStream.resume()
+}
+
+// Presents a list of Buffers as a Readable
+class ReadableBuffers extends stream.Readable {
+  constructor(buffers, opts = {}) {
+    super(opts)
+
+    this.buffers = buffers
+  }
+
+  _read(size) {
+    while (this.buffers.length) {
+      if (!this.push(this.buffers.shift())) {
+        return
+      }
+    }
+    this.push(null)
+  }
 }
 
 module.exports = NockInterceptedClientRequest

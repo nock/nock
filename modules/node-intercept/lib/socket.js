@@ -1,8 +1,8 @@
-'use strict'
+// @ts-check
 
 const { EventEmitter } = require('events')
 
-module.exports = class Socket extends EventEmitter {
+class Socket extends EventEmitter {
   constructor(options) {
     super()
 
@@ -102,3 +102,5 @@ module.exports = class Socket extends EventEmitter {
     return this
   }
 }
+
+module.exports = Socket

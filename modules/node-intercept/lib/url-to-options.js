@@ -30,5 +30,20 @@ function urlToOptions(url) {
   if (url.username || url.password) {
     options.auth = `${url.username}:${url.password}`
   }
+
+  options.protocol = options.protocol || 'http'
+  options.port = options.port || (options.protocol === 'http' ? 80 : 443)
+  if (options.host && !options.hostname) {
+    options.hostname = options.host.split(':')[0]
+  }
+  options.host = `${options.hostname || 'localhost'}:${options.port}`
+
+  /// lowercase host names
+  ;['hostname', 'host'].forEach(function (attr) {
+    if (options[attr]) {
+      options[attr] = options[attr].toLowerCase()
+    }
+  })
+
   return options
 }
