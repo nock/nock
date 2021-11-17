@@ -8,23 +8,6 @@ const { isRequestDestroyed } = require('./utils')
 const Socket = require('./socket')
 const normalizeNodeRequestArguments = require('./normalize-request-arguments')
 
-function socketOnClose(req) {
-  debug('socket close')
-
-  if (!req.res && !req.socket._hadError) {
-    // If we don't have a response then we know that the socket
-    // ended prematurely and we need to emit an error on the request.
-    req.socket._hadError = true
-    req.emit(
-      'error',
-      Object.assign(new Error('socket hang up'), {
-        code: 'ECONNRESET',
-      })
-    )
-  }
-  req.emit('close')
-}
-
 class NockInterceptedClientRequest extends http.OutgoingMessage {
   constructor(...args) {
     super()
@@ -61,9 +44,9 @@ class NockInterceptedClientRequest extends http.OutgoingMessage {
     this.connection = this.socket
 
     // override public API methods
-    this.write = (...args) => this.handleWrite(...args)
-    this.end = (...args) => this.handleEnd(...args)
-    this.flushHeaders = () => this.handleFlushHeaders()
+    this.write = (...args) => handleWrite(this, state, ...args)
+    this.end = (...args) => handleEnd(this, state, ...args)
+    this.flushHeaders = () => handleFlushHeaders(state, this)
 
     // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expect
     if (options.headers.expect === '100-continue') {
@@ -79,173 +62,188 @@ class NockInterceptedClientRequest extends http.OutgoingMessage {
       this.socket.setTimeout(options.timeout)
     }
 
-    this._nock = {}
-    this._nock.options = options
-    this._nock.response = new http.IncomingMessage(this.socket)
-    this._nock.requestBodyBuffers = []
-    this._nock.playbackStarted = false
+    const state = {
+      options: options,
+      response: new http.IncomingMessage(this.socket),
+      requestBodyBuffers: [],
+      playbackStarted: false,
+    }
 
     // For parity with Node, it's important the socket event is emitted before we begin playback.
     // This flag is set when playback is triggered if we haven't yet gotten the
     // socket event to indicate that playback should start as soon as it comes in.
-    this._nock.readyToStartPlaybackOnSocketEvent = false
+    state.readyToStartPlaybackOnSocketEvent = false
 
     // Emit a fake socket event on the next tick to mimic what would happen on a real request.
     // Some clients listen for a 'socket' event to be emitted before calling end(),
     // which causes Nock to hang.
-    process.nextTick(() => this.connectSocket())
+    process.nextTick(() => connectSocket(this, state))
 
     if (callback) {
       this.once('response', callback)
     }
   }
+}
+inherits(NockInterceptedClientRequest, http.ClientRequest)
 
-  connectSocket() {
-    if (isRequestDestroyed(this)) {
-      return
-    }
-
-    propagate(['error', 'timeout'], this.socket, this)
-    this.socket.on('close', () => socketOnClose(this))
-
-    this.socket.connecting = false
-    this.emit('socket', this.socket)
-
-    // https://nodejs.org/api/net.html#net_event_connect
-    this.socket.emit('connect')
-
-    // https://nodejs.org/api/tls.html#tls_event_secureconnect
-    if (this.socket.authorized) {
-      this.socket.emit('secureConnect')
-    }
-
-    if (this._nock.readyToStartPlaybackOnSocketEvent) {
-      this.maybeStartPlayback()
-    }
+function connectSocket(request, state) {
+  if (isRequestDestroyed(request)) {
+    return
   }
 
-  // from docs: When write function is called with empty string or buffer, it does nothing and waits for more input.
-  // However, actually implementation checks the state of finished and aborted before checking if the first arg is empty.
-  handleWrite(buffer, encoding, callback) {
-    debug('request write')
+  propagate(['error', 'timeout'], request.socket, request)
+  request.socket.on('close', () => handleSocketClose(request))
 
-    if (this.finished) {
-      const err = new Error('write after end')
-      err.code = 'ERR_STREAM_WRITE_AFTER_END'
-      process.nextTick(() => this.emit('error', err))
+  request.socket.connecting = false
+  request.emit('socket', request.socket)
 
-      // It seems odd to return `true` here, not sure why you'd want to have
-      // the stream potentially written to more, but it's what Node does.
-      // https://github.com/nodejs/node/blob/a9270dcbeba4316b1e179b77ecb6c46af5aa8c20/lib/_http_outgoing.js#L662-L665
-      return true
-    }
+  // https://nodejs.org/api/net.html#net_event_connect
+  request.socket.emit('connect')
 
-    if (this.socket && this.socket.destroyed) {
-      return false
-    }
-
-    if (!buffer) {
-      return true
-    }
-
-    if (!Buffer.isBuffer(buffer)) {
-      buffer = Buffer.from(buffer, encoding)
-    }
-    this._nock.requestBodyBuffers.push(buffer)
-
-    // can't use instanceof Function because some test runners
-    // run tests in vm.runInNewContext where Function is not same
-    // as that in the current context
-    // https://github.com/nock/nock/pull/1754#issuecomment-571531407
-    if (typeof callback === 'function') {
-      callback()
-    }
-
-    setImmediate(function () {
-      this.emit('drain')
-    })
-
-    return false
+  // https://nodejs.org/api/tls.html#tls_event_secureconnect
+  if (request.socket.authorized) {
+    request.socket.emit('secureConnect')
   }
 
-  handleEnd(chunk, encoding, callback) {
-    debug('request end')
-
-    // handle the different overloaded arg signatures
-    if (typeof chunk === 'function') {
-      callback = chunk
-      chunk = null
-    } else if (typeof encoding === 'function') {
-      callback = encoding
-      encoding = null
-    }
-
-    if (typeof callback === 'function') {
-      this.once('finish', callback)
-    }
-
-    if (chunk) {
-      this.write(chunk, encoding)
-    }
-    this.finished = true
-    this.maybeStartPlayback()
-
-    return this
-  }
-
-  handleFlushHeaders() {
-    debug('request flushHeaders')
-    this.maybeStartPlayback()
-  }
-
-  maybeStartPlayback() {
-    // In order to get the events in the right order we need to delay playback
-    // if we get here before the `socket` event is emitted.
-    if (this.socket.connecting) {
-      this._nock.readyToStartPlaybackOnSocketEvent = true
-      return
-    }
-
-    if (!isRequestDestroyed(this) && !this._nock.playbackStarted) {
-      this.startPlayback()
-    }
-  }
-
-  startPlayback() {
-    debug('ending')
-
-    this._nock.playbackStarted = true
-
-    const options = this._nock.options
-
-    Object.assign(options, {
-      // Re-update `options` with the current value of `this.path` because badly
-      // behaving agents like superagent like to change `this.path` mid-flight.
-      path: this.path,
-      // Similarly, node-http-proxy will modify headers in flight, so we have
-      // to put the headers back into options.
-      // https://github.com/nock/nock/pull/1484
-      headers: this.getHeaders(),
-      // Fixes https://github.com/nock/nock/issues/976
-      protocol: `${options.proto}:`,
-    })
-
-    // set host header
-    let hostHeader = options.hostname
-    if (options.port === 80 || options.port === 443) {
-      hostHeader = hostHeader.split(':')[0]
-    }
-
-    this.setHeader('host', hostHeader)
-
-    // wait to emit the finish event until we know for sure an Interceptor is going to playback.
-    // otherwise an unmocked request might emit finish twice.
-    this.emit('finish')
-
-    // callback(req, res)
+  if (state.readyToStartPlaybackOnSocketEvent) {
+    maybeStartPlayback(request, state)
   }
 }
 
-inherits(NockInterceptedClientRequest, http.ClientRequest)
+// from docs: When write function is called with empty string or buffer, it does nothing and waits for more input.
+// However, actually implementation checks the state of finished and aborted before checking if the first arg is empty.
+function handleWrite(request, state, buffer, encoding, callback) {
+  debug('request write')
+
+  if (request.finished) {
+    const err = new Error('write after end')
+    err.code = 'ERR_STREAM_WRITE_AFTER_END'
+    process.nextTick(() => request.emit('error', err))
+
+    // It seems odd to return `true` here, not sure why you'd want to have
+    // the stream potentially written to more, but it's what Node does.
+    // https://github.com/nodejs/node/blob/a9270dcbeba4316b1e179b77ecb6c46af5aa8c20/lib/_http_outgoing.js#L662-L665
+    return true
+  }
+
+  if (request.socket && request.socket.destroyed) {
+    return false
+  }
+
+  if (!buffer) {
+    return true
+  }
+
+  if (!Buffer.isBuffer(buffer)) {
+    buffer = Buffer.from(buffer, encoding)
+  }
+  state.requestBodyBuffers.push(buffer)
+
+  // can't use instanceof Function because some test runners
+  // run tests in vm.runInNewContext where Function is not same
+  // as that in the current context
+  // https://github.com/nock/nock/pull/1754#issuecomment-571531407
+  if (typeof callback === 'function') {
+    callback()
+  }
+
+  setImmediate(function () {
+    request.emit('drain')
+  })
+
+  return false
+}
+
+function handleEnd(request, state, chunk, encoding, callback) {
+  debug('request end')
+
+  // handle the different overloaded arg signatures
+  if (typeof chunk === 'function') {
+    callback = chunk
+    chunk = null
+  } else if (typeof encoding === 'function') {
+    callback = encoding
+    encoding = null
+  }
+
+  if (typeof callback === 'function') {
+    request.once('finish', callback)
+  }
+
+  if (chunk) {
+    request.write(chunk, encoding)
+  }
+  request.finished = true
+  maybeStartPlayback(request, state)
+
+  return request
+}
+
+function handleFlushHeaders(request, state) {
+  debug('request flushHeaders')
+  maybeStartPlayback(request, state)
+}
+
+function handleSocketClose(request) {
+  debug('socket close')
+
+  if (!request.res && !request.socket._hadError) {
+    // If we don't have a response then we know that the socket
+    // ended prematurely and we need to emit an error on the request.
+    request.socket._hadError = true
+    request.emit(
+      'error',
+      Object.assign(new Error('socket hang up'), {
+        code: 'ECONNRESET',
+      })
+    )
+  }
+  request.emit('close')
+}
+
+function maybeStartPlayback(request, state) {
+  // In order to get the events in the right order we need to delay playback
+  // if we get here before the `socket` event is emitted.
+  if (request.socket.connecting) {
+    state.readyToStartPlaybackOnSocketEvent = true
+    return
+  }
+
+  if (!isRequestDestroyed(request) && !state.playbackStarted) {
+    startPlayback(request, state)
+  }
+}
+
+function startPlayback(request, state) {
+  debug('ending')
+
+  state.playbackStarted = true
+
+  const options = state.options
+
+  Object.assign(options, {
+    // Re-update `options` with the current value of `request.path` because badly
+    // behaving agents like superagent like to change `request.path` mid-flight.
+    path: request.path,
+    // Similarly, node-http-proxy will modify headers in flight, so we have
+    // to put the headers back into options.
+    // https://github.com/nock/nock/pull/1484
+    headers: request.getHeaders(),
+    // Fixes https://github.com/nock/nock/issues/976
+    protocol: `${options.proto}:`,
+  })
+
+  // set host header
+  let hostHeader = options.hostname
+  if (options.port === 80 || options.port === 443) {
+    hostHeader = hostHeader.split(':')[0]
+  }
+
+  request.setHeader('host', hostHeader)
+
+  // wait to emit the finish event until we know for sure an Interceptor is going to playback.
+  // otherwise an unmocked request might emit finish twice.
+  request.emit('finish')
+}
 
 module.exports = NockInterceptedClientRequest

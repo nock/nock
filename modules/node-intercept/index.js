@@ -1,8 +1,6 @@
 const http = require('http')
 const https = require('https')
-const { inherits } = require('util')
 
-const normalizeNodeRequestArguments = require('./lib/normalize-request-arguments')
 const overrideRequests = require('./lib/override-requests')
 const NockInterceptedClientRequest = require('./lib/client-request')
 
