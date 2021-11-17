@@ -1,11 +1,10 @@
-module.exports = NockInterceptedClientRequest
-
+const { inherits } = require('util')
 const http = require('http')
 
 const debug = require('debug')('nock.request_overrider')
 const propagate = require('propagate')
 
-const { isRequestDestroyed, isUtf8Representable } = require('./utils')
+const { isRequestDestroyed } = require('./utils')
 const Socket = require('./socket')
 const normalizeNodeRequestArguments = require('./normalize-request-arguments')
 
@@ -26,19 +25,63 @@ function socketOnClose(req) {
   req.emit('close')
 }
 
-class NockInterceptedClientRequest extends http.ClientRequest {
+class NockInterceptedClientRequest extends http.OutgoingMessage {
   constructor(...args) {
+    super()
+
     const { options, callback } = normalizeNodeRequestArguments(...args)
 
-    // TODO: handle Object.keys(options).length === 0
+    // TODO: handle empty {} options
 
-    http.OutgoingMessage.call(this)
+    // set headers
+    for (const [name, val] of Object.entries(options.headers)) {
+      this.setHeader(name.toLowerCase(), val)
+    }
 
-    prepare(this, options, socket)
+    if (options.auth && !options.headers.authorization) {
+      this.setHeader(
+        // We use lower-case header field names throughout Nock.
+        'authorization',
+        `Basic ${Buffer.from(options.auth).toString('base64')}`
+      )
+    }
+
+    // set method & path
+    this.method = options.method
+    this.path = options.path
+
+    // set socket
+    this.socket = new Socket({
+      // We may be changing the options object and we don't want those changes
+      // affecting the user so we use a clone of the object.
+      ...options,
+    })
+
+    // .connection is a deprecated alias for .socket
+    this.connection = this.socket
+
+    // override public API methods
+    this.write = (...args) => this.handleWrite(...args)
+    this.end = (...args) => this.handleEnd(...args)
+    this.flushHeaders = () => this.handleFlushHeaders()
+
+    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expect
+    if (options.headers.expect === '100-continue') {
+      setImmediate(() => {
+        debug('continue')
+        this.emit('continue')
+      })
+    }
+
+    // support setting `timeout` using request `options`
+    // https://nodejs.org/docs/latest-v12.x/api/http.html#http_http_request_url_options_callback
+    if (options.timeout) {
+      this.socket.setTimeout(options.timeout)
+    }
 
     this._nock = {}
     this._nock.options = options
-    this._nock.response = new http.IncomingMessage(socket)
+    this._nock.response = new http.IncomingMessage(this.socket)
     this._nock.requestBodyBuffers = []
     this._nock.playbackStarted = false
 
@@ -83,7 +126,7 @@ class NockInterceptedClientRequest extends http.ClientRequest {
 
   // from docs: When write function is called with empty string or buffer, it does nothing and waits for more input.
   // However, actually implementation checks the state of finished and aborted before checking if the first arg is empty.
-  handleWrite(socket, buffer, encoding, callback) {
+  handleWrite(buffer, encoding, callback) {
     debug('request write')
 
     if (this.finished) {
@@ -97,7 +140,7 @@ class NockInterceptedClientRequest extends http.ClientRequest {
       return true
     }
 
-    if (socket && socket.destroyed) {
+    if (this.socket && this.socket.destroyed) {
       return false
     }
 
@@ -127,7 +170,6 @@ class NockInterceptedClientRequest extends http.ClientRequest {
 
   handleEnd(chunk, encoding, callback) {
     debug('request end')
-    const { req } = this
 
     // handle the different overloaded arg signatures
     if (typeof chunk === 'function') {
@@ -139,16 +181,16 @@ class NockInterceptedClientRequest extends http.ClientRequest {
     }
 
     if (typeof callback === 'function') {
-      req.once('finish', callback)
+      this.once('finish', callback)
     }
 
     if (chunk) {
-      req.write(chunk, encoding)
+      this.write(chunk, encoding)
     }
-    req.finished = true
+    this.finished = true
     this.maybeStartPlayback()
 
-    return req
+    return this
   }
 
   handleFlushHeaders() {
@@ -171,81 +213,39 @@ class NockInterceptedClientRequest extends http.ClientRequest {
 
   startPlayback() {
     debug('ending')
+
     this._nock.playbackStarted = true
 
     const options = this._nock.options
 
     Object.assign(options, {
-      // Re-update `options` with the current value of `req.path` because badly
-      // behaving agents like superagent like to change `req.path` mid-flight.
-      path: req.path,
+      // Re-update `options` with the current value of `this.path` because badly
+      // behaving agents like superagent like to change `this.path` mid-flight.
+      path: this.path,
       // Similarly, node-http-proxy will modify headers in flight, so we have
       // to put the headers back into options.
       // https://github.com/nock/nock/pull/1484
-      headers: req.getHeaders(),
+      headers: this.getHeaders(),
       // Fixes https://github.com/nock/nock/issues/976
       protocol: `${options.proto}:`,
     })
 
     // set host header
-    let hostHeader = options.host
+    let hostHeader = options.hostname
     if (options.port === 80 || options.port === 443) {
       hostHeader = hostHeader.split(':')[0]
     }
-    req.setHeader(HOST_HEADER, hostHeader)
+
+    this.setHeader('host', hostHeader)
 
     // wait to emit the finish event until we know for sure an Interceptor is going to playback.
     // otherwise an unmocked request might emit finish twice.
-    req.emit('finish')
+    this.emit('finish')
 
     // callback(req, res)
   }
 }
 
-function prepare(req, options) {
-  // set headers
-  for (const [name, val] of Object.entries(options.headers)) {
-    req.setHeader(name.toLowerCase(), val)
-  }
+inherits(NockInterceptedClientRequest, http.ClientRequest)
 
-  if (options.auth && !options.headers.authorization) {
-    req.setHeader(
-      // We use lower-case header field names throughout Nock.
-      'authorization',
-      `Basic ${Buffer.from(options.auth).toString('base64')}`
-    )
-  }
-
-  // set method & path
-  req.method = options.method
-  req.path = options.path
-
-  // set socket
-  this.socket = new Socket({
-    // We may be changing the options object and we don't want those changes
-    // affecting the user so we use a clone of the object.
-    ...options,
-  })
-
-  // .connection is a deprecated alias for .socket
-  this.connection = this.socket
-
-  // override public API methods
-  req.write = (...args) => req.handleWrite(options, ...args)
-  req.end = (...args) => req.handleEnd(options, ...args)
-  req.flushHeaders = () => req.handleFlushHeaders(options)
-
-  // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expect
-  if (options.headers.expect === '100-continue') {
-    setImmediate(() => {
-      debug('continue')
-      req.emit('continue')
-    })
-  }
-
-  // support setting `timeout` using request `options`
-  // https://nodejs.org/docs/latest-v12.x/api/http.html#http_http_request_url_options_callback
-  if (options.timeout) {
-    socket.setTimeout(options.timeout)
-  }
-}
+module.exports = NockInterceptedClientRequest
