@@ -2,6 +2,7 @@
 
 const { inherits } = require('util')
 const http = require('http')
+const https = require('https')
 
 const debug = require('debug')('nock.request_overrider')
 const propagate = require('propagate')
@@ -11,6 +12,8 @@ const Socket = require('../socket')
 const normalizeNodeRequestArguments = require('../normalize-request-arguments')
 
 function createNockInterceptedClientRequest(onIntercept) {
+  const OriginalClientRequest = http.ClientRequest
+
   // @ts-expect-error - socket is incompatible with Node's Socket type
   class NockInterceptedClientRequest extends http.OutgoingMessage {
     constructor(...args) {
@@ -24,6 +27,7 @@ function createNockInterceptedClientRequest(onIntercept) {
       const state = {
         onIntercept,
         options,
+        onResponseCallback: callback,
         requestBodyBuffers: [],
         interceptStarted: false,
 
@@ -84,8 +88,32 @@ function createNockInterceptedClientRequest(onIntercept) {
       // which causes Nock to hang.
       process.nextTick(() => connectSocket(this, state))
 
-      if (callback) {
-        this.once('response', callback)
+      if (state.onResponseCallback) {
+        this.once('response', state.onResponseCallback)
+      }
+
+      /**
+       * Create an instance for the original `http.ClientRequest` and proxy
+       * all events from the real request to the mocked one. Then send the
+       * new request
+       */
+      this.sendRealRequest = function sendRealRequest() {
+        const newOptions = {
+          ...state.options,
+          _defaultAgent:
+            state.options.protocol === 'http:'
+              ? http.globalAgent
+              : https.globalAgent,
+        }
+
+        const newRequest = new OriginalClientRequest(
+          newOptions,
+          state.onResponseCallback
+        )
+
+        propagate(newRequest, this)
+
+        newRequest.end()
       }
     }
   }
@@ -262,7 +290,7 @@ function prepareForIntercept(request, state) {
   setImmediate(() => {
     if (isRequestDestroyed(request)) return
 
-    state.onIntercept(request)
+    state.onIntercept(options, request)
   })
 }
 

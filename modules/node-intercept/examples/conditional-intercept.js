@@ -5,13 +5,17 @@ const got = require('got')
 const intercept = require('../index.js')
 
 /**
- * Return a 200 response with a "Hello, world!" response body
- * for any request
+ * If request goes to example.com, respond with a mocked "Hello World" response.
+ * Otherwise let the request pass through
  *
  * @param {any} options
  * @param {http.ClientRequest} request
  */
 function onIntercept(options, request) {
+  if (options.hostname === 'example.com') {
+    return request.sendRealRequest()
+  }
+
   const response = new http.IncomingMessage(request.socket)
 
   // (1) set response header data
@@ -37,12 +41,11 @@ function onIntercept(options, request) {
 run()
 
 async function run() {
-  const reset = intercept(onIntercept)
+  intercept(onIntercept)
 
-  console.log('Intercepted:')
+  console.log(`await got('https://example.com').text()`)
   console.log(await got('https://example.com').text())
 
-  console.log('\n\nNot Intercepted:')
-  reset()
-  console.log(await got('https://example.com').text())
+  console.log(`await got('https://google.com').text()`)
+  console.log(await got('https://google.com').text())
 }

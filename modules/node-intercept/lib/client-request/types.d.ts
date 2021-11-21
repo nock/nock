@@ -1,6 +1,10 @@
 import http from 'http'
 
-export type OnInterceptCallback = (request: http.ClientRequest) => void
+export type OnInterceptCallback = (
+  options: NormalizedRequestOptions,
+  request: http.ClientRequest
+) => void
+export type OnResponseCallback = (request: http.IncomingMessage) => void
 
 export type NormalizedRequestOptions = {
   protocol: 'http:' | 'https:'
@@ -18,6 +22,7 @@ export type NormalizedRequestOptions = {
 export type State = {
   onIntercept: OnInterceptCallback
   options: NormalizedRequestOptions
+  onResponseCallback: OnResponseCallback
   requestBodyBuffers: Buffer[]
   interceptStarted: boolean
   readyToInterceptOnSocketEvent: boolean
