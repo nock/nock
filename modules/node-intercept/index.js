@@ -2,7 +2,7 @@ const http = require('http')
 const https = require('https')
 
 const overrideRequests = require('./lib/override-requests')
-const NockInterceptedClientRequest = require('./lib/client-request')
+const createNockInterceptedClientRequest = require('./lib/client-request')
 
 module.exports = setupNodeIntercept
 
@@ -12,7 +12,7 @@ module.exports = setupNodeIntercept
  * - https://github.com/nock/nock/issues/26
  * It would be good to add a comment that explains this more clearly.
  *
- * @param {Function} onIntercept
+ * @param {import("./lib/client-request/types").OnInterceptCallback} onIntercept
  * @returns {Function}
  */
 function setupNodeIntercept(onIntercept) {
@@ -24,7 +24,10 @@ function setupNodeIntercept(onIntercept) {
   const originalHttpsGet = https.get
 
   // do the overrides
+  const NockInterceptedClientRequest =
+    createNockInterceptedClientRequest(onIntercept)
   http.ClientRequest = NockInterceptedClientRequest
+
   overrideRequests(function (proto, overriddenRequest, args) {
     return new NockInterceptedClientRequest(...args)
   })

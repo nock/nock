@@ -1,5 +1,7 @@
 import http from 'http'
 
+export type OnInterceptCallback = (request: http.ClientRequest) => void
+
 export type NormalizedRequestOptions = {
   protocol: 'http:' | 'https:'
   hostname: string
@@ -14,8 +16,9 @@ export type NormalizedRequestOptions = {
 }
 
 export type State = {
+  onIntercept: OnInterceptCallback
   options: NormalizedRequestOptions
   requestBodyBuffers: Buffer[]
-  playbackStarted: boolean
-  readyToStartPlaybackOnSocketEvent: boolean
+  interceptStarted: boolean
+  readyToInterceptOnSocketEvent: boolean
 }
