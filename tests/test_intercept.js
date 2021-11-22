@@ -39,7 +39,7 @@ describe('Intercept', () => {
     )
   })
 
-  it('should intercept a basic GET request', async () => {
+  it.only('should intercept a basic GET request', async () => {
     const scope = nock('http://example.test').get('/').reply(201)
 
     const { statusCode } = await got('http://example.test/')

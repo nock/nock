@@ -113,7 +113,12 @@ function createNockInterceptedClientRequest(onIntercept) {
 
         propagate(newRequest, this)
 
+        // TODO: pass raw buffer of request body as received by mocked request
         newRequest.end()
+
+        // TODO: make sure that this.emit('finish') is not called when
+        // the real requests is sent out, and that it's called when
+        // the response is mocked
       }
     }
   }
@@ -268,8 +273,6 @@ function prepareForIntercept(request, state) {
     // to put the headers back into options.
     // https://github.com/nock/nock/pull/1484
     headers: request.getHeaders(),
-    // Fixes https://github.com/nock/nock/issues/976
-    protocol: `${state.options.proto}:`,
   }
 
   // set host header

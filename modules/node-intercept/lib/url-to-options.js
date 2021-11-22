@@ -24,6 +24,7 @@ function urlToOptions(url) {
     path: `${url.pathname}${url.search || ''}`,
     href: url.href,
   }
+
   if (url.port !== '') {
     options.port = Number(url.port)
   }
@@ -32,7 +33,7 @@ function urlToOptions(url) {
   }
 
   options.protocol = options.protocol || 'http'
-  options.port = options.port || (options.protocol === 'http' ? 80 : 443)
+  options.port = options.port || (options.protocol === 'http:' ? 80 : 443)
   if (options.host && !options.hostname) {
     options.hostname = options.host.split(':')[0]
   }
