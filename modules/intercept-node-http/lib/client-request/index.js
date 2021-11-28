@@ -67,7 +67,7 @@ function createNockInterceptedClientRequest(onIntercept) {
       // override public API methods
       this.write = (...args) => handleWrite(this, state, ...args)
       this.end = (...args) => handleEnd(this, state, ...args)
-      this.flushHeaders = () => handleFlushHeaders(state, this)
+      this.flushHeaders = () => handleFlushHeaders(this, state)
 
       // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expect
       if (options.headers.expect === '100-continue') {
@@ -111,6 +111,9 @@ function createNockInterceptedClientRequest(onIntercept) {
           state.onResponseCallback
         )
 
+        // do not call response callback twice
+        this.removeListener('response', state.onResponseCallback)
+
         propagate(newRequest, this)
 
         // TODO: pass raw buffer of request body as received by mocked request
@@ -119,6 +122,15 @@ function createNockInterceptedClientRequest(onIntercept) {
         // TODO: make sure that this.emit('finish') is not called when
         // the real requests is sent out, and that it's called when
         // the response is mocked
+      }
+
+      /**
+       * Expose method to retrieve request body as a buffer for matching purposes
+       *
+       * @returns {Buffer}
+       */
+      this.nockGetRequestBodyAsBuffer = function nockGetRequestBodyAsBuffer() {
+        return Buffer.concat(state.requestBodyBuffers)
       }
     }
   }
@@ -276,10 +288,11 @@ function prepareForIntercept(request, state) {
   }
 
   // set host header
-  let hostHeader = options.host
+  let hostHeader = options.host || options.hostname
   if (options.port === 80 || options.port === 443) {
     hostHeader = hostHeader.split(':')[0]
   }
+
   request.setHeader('host', hostHeader)
 
   // wait to emit the finish event until we know for sure that the request will be intercepted,

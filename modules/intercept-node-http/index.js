@@ -28,7 +28,7 @@ function setupNodeIntercept(onIntercept) {
     createNockInterceptedClientRequest(onIntercept)
   http.ClientRequest = NockInterceptedClientRequest
 
-  overrideRequests(function (proto, overriddenRequest, args) {
+  overrideRequests(function (...args) {
     return new NockInterceptedClientRequest(...args)
   })
 

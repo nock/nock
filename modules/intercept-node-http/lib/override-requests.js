@@ -1,6 +1,8 @@
 const http = require('http')
 const https = require('https')
 
+const normalizeNodeRequestArguments = require('./normalize-request-arguments')
+
 module.exports = overrideRequests
 
 /**
@@ -17,27 +19,26 @@ module.exports = overrideRequests
 function overrideRequests(newRequest) {
   ;['http', 'https'].forEach(function (moduleName) {
     const module = moduleName === 'http' ? http : https
-    const overriddenRequest = module.request
-    const overriddenGet = module.get
 
     // https://nodejs.org/api/http.html#http_http_request_url_options_callback
-    module.request = function (url, options, callback) {
-      return newRequest(moduleName, overriddenRequest.bind(module), [
-        url,
-        options,
-        callback,
-      ])
+    module.request = function (...args) {
+      const { options, callback } = normalizeNodeRequestArguments(...args)
+      return newRequest(withDefaultProtocol(moduleName, options), callback)
     }
 
     // https://nodejs.org/api/http.html#http_http_get_options_callback
-    module.get = function (url, options, callback) {
-      const req = newRequest(moduleName, overriddenGet.bind(module), [
-        url,
-        options,
-        callback,
-      ])
+    module.get = function (...args) {
+      const { options, callback } = normalizeNodeRequestArguments(...args)
+      const req = newRequest(withDefaultProtocol(moduleName, options), callback)
       req.end()
       return req
     }
   })
+}
+
+function withDefaultProtocol(moduleName, options) {
+  return {
+    protocol: moduleName + ':',
+    ...options,
+  }
 }
