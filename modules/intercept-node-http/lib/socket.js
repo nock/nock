@@ -7,7 +7,7 @@ class Socket extends EventEmitter {
     super()
 
     // Pretend this is a TLSSocket
-    if (options.proto === 'https') {
+    if (options.protocol === 'https:') {
       // https://github.com/nock/nock/issues/158
       this.authorized = true
       // https://github.com/nock/nock/issues/2147
