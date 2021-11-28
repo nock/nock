@@ -97,7 +97,7 @@ function createNockInterceptedClientRequest(onIntercept) {
        * all events from the real request to the mocked one. Then send the
        * new request
        */
-      this.sendRealRequest = function sendRealRequest() {
+      this.nockSendRealRequest = function nockSendRealRequest() {
         const newOptions = {
           ...state.options,
           _defaultAgent:

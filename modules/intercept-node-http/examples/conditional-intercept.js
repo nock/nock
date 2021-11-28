@@ -13,7 +13,7 @@ const intercept = require('../index.js')
  */
 function onIntercept(options, request) {
   if (options.hostname === 'example.com') {
-    return request.sendRealRequest()
+    return request.nockSendRealRequest()
   }
 
   const response = new http.IncomingMessage(request.socket)
