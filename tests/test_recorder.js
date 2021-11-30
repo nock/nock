@@ -53,6 +53,20 @@ describe('Recorder', () => {
     expect(outputs[0]).to.match(/\.post\('\/bar'\)/)
   })
 
+  it('records requests where response stream is not put into flowing mode', async () => {
+    const { origin } = await servers.startHttpServer()
+
+    nock.restore()
+    nock.recorder.clear()
+    nock.recorder.rec(true)
+
+    await http.get(`${origin}/foo`)
+
+    const outputs = nock.recorder.play()
+    expect(outputs).to.have.lengthOf(1)
+    expect(outputs[0]).to.match(/\.get\('\/foo'\)/)
+  })
+
   it('when request port is different, use the alternate port', async () => {
     nock.restore()
     nock.recorder.clear()
