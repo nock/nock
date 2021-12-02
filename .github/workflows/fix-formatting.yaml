@@ -1,4 +1,4 @@
-name: Update Prettier
+name: Fix formatting
 'on':
   push:
     branches:
@@ -18,8 +18,6 @@ jobs:
         with:
           node-version: 16
           cache: npm
-      - run: npm ci
-      - run: npm run format:fix
       - name: Install dependencies
         run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
       - name: Format
