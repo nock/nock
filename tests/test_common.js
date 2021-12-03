@@ -165,15 +165,17 @@ describe('`headersFieldNamesToLowerCase()`', () => {
     expect(input).to.deep.equal(inputClone) // assert the input is not mutated
   })
 
-  it('throws on conflicting keys', () => {
-    expect(() =>
-      common.headersFieldNamesToLowerCase({
-        HoSt: 'example.test',
-        HOST: 'example.test',
-      })
-    ).to.throw(
-      'Failed to convert header keys to lower case due to field name conflict: host'
-    )
+  it('handles duplicates of conflicting keys using last value provided', () => {
+    const results = common.headersFieldNamesToLowerCase({
+      hOsT: 'example.test',
+      HoSt: 'example.test',
+      HOST: 'final.example.test',
+    })
+    const expected = {
+      host: 'final.example.test',
+    }
+
+    expect(results).to.deep.equal(expected)
   })
 })
 
