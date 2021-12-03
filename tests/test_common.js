@@ -170,9 +170,11 @@ describe('`headersFieldNamesToLowerCase()`', () => {
       hOsT: 'example.test',
       HoSt: 'example.test',
       HOST: 'final.example.test',
+      hosts: 'final.example.test'
     })
     const expected = {
       host: 'final.example.test',
+      hosts: 'final.example.test'
     }
 
     expect(results).to.deep.equal(expected)
