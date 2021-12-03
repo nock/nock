@@ -1,4 +1,5 @@
 .cache
+.idea
 .nyc_output
 .vscode
 coverage

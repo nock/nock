@@ -1,0 +1,31 @@
+name: Fix formatting
+'on':
+  push:
+    branches:
+      - dependabot/npm_and_yarn/prettier-*
+      - dependabot/npm_and_yarn/eslint-*
+  workflow_dispatch: {}
+jobs:
+  fixFormatting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+          ref: ${{ github.head_ref }}
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16
+          cache: npm
+      - name: Install dependencies
+        run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
+      - name: Format
+        run: npm run format:fix
+      - name: Commit
+        run: >
+          git config user.email "github-actions@github.com"
+          git config user.name "github-actions"
+          git add .
+          git commit -m "style: format files with Prettier" | true # ignore error if there are no changes to commit
+          git push origin HEAD:${{ github.head_ref }}

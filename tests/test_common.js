@@ -14,6 +14,7 @@
 const http = require('http')
 const { expect } = require('chai')
 const sinon = require('sinon')
+const semver = require('semver')
 const nock = require('..')
 
 const common = require('../lib/common')
@@ -475,8 +476,12 @@ it('`percentEncode()` encodes extra reserved characters', () => {
 
 describe('`normalizeClientRequestArgs()`', () => {
   it('should throw for invalid URL', () => {
+    // See https://github.com/nodejs/node/pull/38614 release in node v16.2.0
+    const isNewErrorText = semver.gte(process.versions.node, '16.2.0')
+    const errorText = isNewErrorText ? 'Invalid URL' : 'example.test'
+
     // no schema
-    expect(() => http.get('example.test')).to.throw(TypeError, 'example.test')
+    expect(() => http.get('example.test')).to.throw(TypeError, errorText)
   })
 
   it('can include auth info', async () => {

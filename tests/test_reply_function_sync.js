@@ -319,6 +319,38 @@ describe('synchronous `reply()` function', () => {
       scope.done()
     })
 
+    it('handles status code, object body, and headers object', async () => {
+      const exampleBody = { foo: 'bar' }
+      const scope = nock('http://example.test')
+        .get('/')
+        .reply(() => [
+          202,
+          exampleBody,
+          { 'x-key': 'value', 'x-key-2': 'value 2' },
+        ])
+
+      const { statusCode, body, headers, rawHeaders } = await got(
+        'http://example.test/'
+      )
+
+      expect(statusCode).to.equal(202)
+      expect(body).to.equal(JSON.stringify(exampleBody))
+      expect(headers).to.deep.equal({
+        'content-type': 'application/json',
+        'x-key': 'value',
+        'x-key-2': 'value 2',
+      })
+      expect(rawHeaders).to.deep.equal([
+        'x-key',
+        'value',
+        'x-key-2',
+        'value 2',
+        'Content-Type',
+        'application/json',
+      ])
+      scope.done()
+    })
+
     it('when given a non-array, raises the expected error', async () => {
       nock('http://example.test')
         .get('/abc')

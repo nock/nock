@@ -16,6 +16,7 @@ const { URL } = require('url')
 const { expect } = require('chai')
 const sinon = require('sinon')
 const nock = require('..')
+const FormData = require('form-data')
 
 const got = require('./got_client')
 const servers = require('./servers')
@@ -88,7 +89,7 @@ describe('Request Overrider', () => {
     })
   })
 
-  it('write callback is not called if the provided chunk is an empty buffer', done => {
+  it('write callback is not called if the provided chunk is undefined', done => {
     const scope = nock('http://example.test').post('/').reply()
 
     const reqWriteCallback = sinon.spy()
@@ -112,8 +113,7 @@ describe('Request Overrider', () => {
       }
     )
 
-    const buf = Buffer.from('')
-    req.write(buf, null, reqWriteCallback)
+    req.write(undefined, null, reqWriteCallback)
     req.end()
   })
 
@@ -804,5 +804,26 @@ describe('Request Overrider', () => {
     expect(overriddenGet).not.to.have.been.called()
 
     req.abort()
+  })
+
+  // https://github.com/nock/nock/issues/2231
+  it('mocking a request which sends an empty buffer should finalize', async () => {
+    const prefixUrl = 'http://www.test.com'
+    const bufferEndpoint = 'upload/buffer/'
+
+    nock(prefixUrl).post(`/${bufferEndpoint}`).reply(200, 'BUFFER_SENT')
+
+    const formData = new FormData()
+
+    formData.append('fileData', Buffer.alloc(0), 'chunk')
+
+    const options = {
+      prefixUrl,
+      body: formData,
+    }
+
+    const { body: response } = await got.post(bufferEndpoint, options)
+
+    expect(response).to.equal('BUFFER_SENT')
   })
 })

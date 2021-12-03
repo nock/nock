@@ -1,10 +1,13 @@
 const http = require('http')
 const fs = require('fs')
+const path = require('path')
 
 const nock = require('../')
 
 const readFile = function () {
-  return fs.readFileSync(`${__dirname}/../tests/assets/reply_file_2.txt.gz`)
+  return fs.readFileSync(
+    path.resolve(__dirname, '../tests/assets/reply_file_2.txt.gz')
+  )
 }
 
 nock('http://binary.com').get('/binary').reply(200, readFile(), {

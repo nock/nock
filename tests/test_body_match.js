@@ -47,9 +47,7 @@ describe('`matchBody()`', () => {
   })
 
   it('match body is regex trying to match string (matches)', async () => {
-    const scope = nock('http://example.test')
-      .post('/', new RegExp('abc'))
-      .reply(201)
+    const scope = nock('http://example.test').post('/', /abc/).reply(201)
 
     const { statusCode } = await got.post('http://example.test/', {
       json: { nested: { value: 'abc' } },
@@ -60,12 +58,8 @@ describe('`matchBody()`', () => {
   })
 
   it('match body is regex trying to match string (does not match)', async () => {
-    const scope1 = nock('http://example.test')
-      .post('/', new RegExp('def'))
-      .reply(201)
-    const scope2 = nock('http://example.test')
-      .post('/', new RegExp('.'))
-      .reply(202)
+    const scope1 = nock('http://example.test').post('/', /def/).reply(201)
+    const scope2 = nock('http://example.test').post('/', /./).reply(202)
 
     const { statusCode } = await got.post('http://example.test/', {
       json: { nested: { value: 'abc' } },

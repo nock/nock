@@ -3,9 +3,7 @@
 const http = require('http')
 const https = require('https')
 const { expect } = require('chai')
-const mikealRequest = require('request')
 const sinon = require('sinon')
-const superagent = require('superagent')
 const assertRejects = require('assert-rejects')
 const url = require('url')
 const nock = require('..')
@@ -28,39 +26,52 @@ describe('Intercept', () => {
     )
   })
 
-  it("when the path doesn't include a leading slash it raises an error", () => {
+  it("should throw when the path doesn't include a leading slash and there is no base path", () => {
     expect(() => nock('http://example.test').get('no-leading-slash')).to.throw(
       "Non-wildcard URL path strings must begin with a slash (otherwise they won't match anything)"
     )
   })
 
+  // https://github.com/nock/nock/issues/1730
+  it('should throw when the path is empty and there is no base path', () => {
+    expect(() => nock('http://example.test').get('')).to.throw(
+      "Non-wildcard URL path strings must begin with a slash (otherwise they won't match anything) (got: )"
+    )
+  })
+
   it('should intercept a basic GET request', async () => {
-    const scope = nock('http://example.test')
-      .get('/')
-      .reply(200, 'Hello World!')
+    const scope = nock('http://example.test').get('/').reply(201)
 
-    const { statusCode, body } = await got('http://example.test/', {
-      responseType: 'buffer',
-    })
+    const { statusCode } = await got('http://example.test/')
 
-    expect(statusCode).to.equal(200)
-    expect(body).to.be.an.instanceOf(Buffer)
-    expect(body.toString('utf8')).to.equal('Hello World!')
+    expect(statusCode).to.equal(201)
     scope.done()
   })
 
-  it('get gets mocked with relative base path', async () => {
-    const scope = nock('http://example.test/abc')
-      .get('/def')
-      .reply(200, 'Hello World!')
+  it('should intercept a request with a base path', async () => {
+    const scope = nock('http://example.test/abc').get('/def').reply(201)
 
-    const { statusCode, body } = await got('http://example.test/abc/def', {
-      responseType: 'buffer',
-    })
+    const { statusCode } = await got('http://example.test/abc/def')
 
-    expect(statusCode).to.equal(200)
-    expect(body).to.be.an.instanceOf(Buffer)
-    expect(body.toString('utf8')).to.equal('Hello World!')
+    expect(statusCode).to.equal(201)
+    scope.done()
+  })
+
+  it('should intercept a request with a base path and no interceptor path', async () => {
+    const scope = nock('http://example.test/abc').get('').reply(201)
+
+    const { statusCode } = await got('http://example.test/abc')
+
+    expect(statusCode).to.equal(201)
+    scope.done()
+  })
+
+  it('should intercept a request with a base path and an interceptor path without a leading slash', async () => {
+    const scope = nock('http://example.test/abc').get('def').reply(201)
+
+    const { statusCode } = await got('http://example.test/abcdef')
+
+    expect(statusCode).to.equal(201)
     scope.done()
   })
 
@@ -587,47 +598,6 @@ describe('Intercept', () => {
     })
   })
 
-  it('superagent works', done => {
-    const responseText = 'Yay superagent!'
-    const headers = { 'Content-Type': 'text/plain' }
-    nock('http://example.test')
-      .get('/somepath')
-      .reply(200, responseText, headers)
-
-    superagent.get('http://example.test/somepath').end(function (err, res) {
-      expect(err).to.equal(null)
-      expect(res.text).to.equal(responseText)
-      done()
-    })
-  })
-
-  it('superagent works with query string', done => {
-    const responseText = 'Yay superagentzzz'
-    const headers = { 'Content-Type': 'text/plain' }
-    nock('http://example.test')
-      .get('/somepath?a=b')
-      .reply(200, responseText, headers)
-
-    superagent.get('http://example.test/somepath?a=b').end(function (err, res) {
-      expect(err).to.equal(null)
-      expect(res.text).to.equal(responseText)
-      done()
-    })
-  })
-
-  it('superagent posts', done => {
-    nock('http://example.test').post('/somepath?b=c').reply(204)
-
-    superagent
-      .post('http://example.test/somepath?b=c')
-      .send('some data')
-      .end(function (err, res) {
-        expect(err).to.equal(null)
-        expect(res.status).to.equal(204)
-        done()
-      })
-  })
-
   it('sending binary and receiving JSON should work', async () => {
     const scope = nock('http://example.test')
       .post('/')
@@ -642,25 +612,6 @@ describe('Intercept', () => {
     expect(body).to.be.a('string').and.have.lengthOf(12)
     expect(JSON.parse(body)).to.deep.equal({ foo: '61' })
     scope.done()
-  })
-
-  // TODO: What is the intention of this test? Should it be kept?
-  it('test request timeout option', done => {
-    nock('http://example.test')
-      .get('/path')
-      .reply(200, JSON.stringify({ foo: 'bar' }))
-
-    const options = {
-      url: 'http://example.test/path',
-      method: 'GET',
-      timeout: 2000,
-    }
-
-    mikealRequest(options, function (err, res, body) {
-      expect(err).to.equal(null)
-      expect(body).to.equal('{"foo":"bar"}')
-      done()
-    })
   })
 
   it('do not match when conditionally = false but should match after trying again when = true', async () => {
@@ -726,44 +677,43 @@ describe('Intercept', () => {
     scope.done()
   })
 
-  // TODO: Rewrite using got or http.
-  it('mocking succeeds even when host request header is not specified', done => {
-    nock('http://example.test').post('/resource').reply(200, { status: 'ok' })
+  it('succeeds even when host request header is not specified', done => {
+    const scope = nock('http://example.test').post('/resource').reply()
 
-    mikealRequest(
-      {
-        method: 'POST',
-        uri: 'http://example.test/resource',
-        headers: {
-          'X-App-TOKEN': 'apptoken',
-          'X-Auth-TOKEN': 'apptoken',
-        },
+    const opts = {
+      method: 'POST',
+      headers: {
+        'X-App-TOKEN': 'apptoken',
+        'X-Auth-TOKEN': 'apptoken',
       },
-      function (err, res) {
-        expect(err).to.equal(null)
-        expect(res.statusCode).to.equal(200)
+    }
+
+    const req = http.request('http://example.test/resource', opts, res => {
+      res.on('end', () => {
+        scope.done()
         done()
-      }
-    )
+      })
+      res.resume()
+    })
+
+    req.end()
   })
 
-  // TODO: Investigate the underlying issue.
   // https://github.com/nock/nock/issues/158
-  it('mikeal/request with strictSSL: true', done => {
-    nock('https://example.test').post('/what').reply(200, { status: 'ok' })
+  // mikeal/request with strictSSL: true
+  // https://github.com/request/request/blob/3c0cddc7c8eb60b470e9519da85896ed7ee0081e/request.js#L943-L950
+  it('should denote the response client is authorized for HTTPS requests', done => {
+    const scope = nock('https://example.test').get('/what').reply()
 
-    mikealRequest(
-      {
-        method: 'POST',
-        uri: 'https://example.test/what',
-        strictSSL: true,
-      },
-      function (err, res) {
-        expect(err).to.be.null()
-        expect(res.statusCode).to.deep.equal(200)
+    https.get('https://example.test/what', res => {
+      expect(res).to.have.nested.property('socket.authorized').that.is.true()
+
+      res.on('end', () => {
+        scope.done()
         done()
-      }
-    )
+      })
+      res.resume()
+    })
   })
 
   it('match domain using regexp', async () => {
@@ -1031,14 +981,6 @@ describe('Intercept', () => {
         })
       })
       .flushHeaders()
-  })
-
-  // https://github.com/nock/nock/issues/1730
-  it('URL path without leading slash throws expected error', done => {
-    expect(() => nock('http://example.test').get('')).to.throw(
-      "Non-wildcard URL path strings must begin with a slash (otherwise they won't match anything) (got: )"
-    )
-    done()
   })
 
   it('wildcard param URL should not throw error', done => {
