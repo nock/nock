@@ -296,7 +296,7 @@ function prepareForIntercept(request, state) {
   }
 
   // set host header
-  let hostHeader = options.host || options.hostname
+  let hostHeader = options.host || options.hostname || 'localhost'
   if (options.port === 80 || options.port === 443) {
     hostHeader = hostHeader.split(':')[0]
   }
