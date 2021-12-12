@@ -26,6 +26,7 @@ function createNockInterceptedClientRequest(onIntercept) {
       /** @type {import("./types").State} */
       const state = {
         onIntercept,
+        intercepted: true,
         options,
         onResponseCallback: callback,
         requestBodyBuffers: [],
@@ -98,6 +99,7 @@ function createNockInterceptedClientRequest(onIntercept) {
        * new request
        */
       this.nockSendRealRequest = function nockSendRealRequest() {
+        state.intercepted = false
         const newOptions = {
           ...state.options,
           _defaultAgent:
@@ -297,10 +299,6 @@ function prepareForIntercept(request, state) {
 
   request.setHeader('host', hostHeader)
 
-  // wait to emit the finish event until we know for sure that the request will be intercepted,
-  // Otherwise an unmocked request might emit finish twice.
-  request.emit('finish')
-
   // Calling `start` immediately could take the request all the way to the connection delay
   // during a single microtask execution. This setImmediate stalls the playback to ensure the
   // correct events are emitted first ('socket', 'finish') and any aborts in the in the queue or
@@ -309,6 +307,12 @@ function prepareForIntercept(request, state) {
     if (isRequestDestroyed(request)) return
 
     state.onIntercept(options, request)
+
+    if (state.intercepted) {
+      // wait to emit the finish event until we know for sure that the request will be intercepted,
+      // Otherwise an unmocked request might emit finish twice.
+      request.emit('finish')
+    }
   })
 }
 

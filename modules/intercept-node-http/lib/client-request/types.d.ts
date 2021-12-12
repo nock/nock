@@ -20,6 +20,7 @@ export type NormalizedRequestOptions = {
 }
 
 export type State = {
+  intercepted: boolean
   onIntercept: OnInterceptCallback
   options: NormalizedRequestOptions
   onResponseCallback: OnResponseCallback
