@@ -17,6 +17,12 @@ function createNockInterceptedClientRequest(onIntercept) {
   // @ts-expect-error - socket is incompatible with Node's Socket type
   class NockInterceptedClientRequest extends http.OutgoingMessage {
     constructor(...args) {
+      if (args.length === 0) {
+        throw new Error(
+          'Creating a ClientRequest with empty `options` is not supported in Nock'
+        )
+      }
+
       super()
 
       const { options, callback } = normalizeNodeRequestArguments(...args)
@@ -112,7 +118,9 @@ function createNockInterceptedClientRequest(onIntercept) {
         )
 
         // do not call response callback twice
-        this.removeListener('response', state.onResponseCallback)
+        if (state.onResponseCallback) {
+          this.removeListener('response', state.onResponseCallback)
+        }
 
         propagate(newRequest, this)
 
