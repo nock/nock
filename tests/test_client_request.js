@@ -108,11 +108,13 @@ describe('Direct use of `ClientRequest`', () => {
 
   it('should emit an expected error when no interceptors and net connect is disallowed', done => {
     nock.disableNetConnect()
-    new http.ClientRequest({ port: 12345, path: '/' }).on('error', err => {
-      expect(err.message).to.equal(
-        'Nock: Disallowed net connect for "localhost:12345/"'
-      )
-      done()
-    })
+    new http.ClientRequest({ port: 12345, path: '/' })
+      .on('error', err => {
+        expect(err.message).to.equal(
+          'Nock: Disallowed net connect for "localhost:12345/"'
+        )
+        done()
+      })
+      .on('close', done(new Error('Should not permit to connect')))
   })
 })
