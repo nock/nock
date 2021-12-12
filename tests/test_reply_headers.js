@@ -6,7 +6,6 @@
 const { IncomingMessage } = require('http')
 const { expect } = require('chai')
 const sinon = require('sinon')
-const fakeTimers = require('@sinonjs/fake-timers')
 const nock = require('..')
 const got = require('./got_client')
 
@@ -346,22 +345,10 @@ describe('`replyDate()`', () => {
   })
 
   describe('with mock timers', () => {
-    let clock
-    beforeEach(() => {
-      clock = fakeTimers.install()
-    })
-    afterEach(() => {
-      if (clock) {
-        clock.uninstall()
-        clock = undefined
-      }
-    })
-
     it('sends date header with response', async () => {
       const scope = nock('http://example.test').replyDate().get('/').reply()
 
       const req = got('http://example.test/')
-      clock.tick()
       const { headers } = await req
       const date = new Date()
       expect(headers).to.include({ date: date.toUTCString() })
