@@ -17,6 +17,12 @@ module.exports = normalizeNodeRequestArguments
  * https://github.com/nodejs/node/blob/908292cf1f551c614a733d858528ffb13fb3a524/lib/_http_client.js#L68
  */
 function normalizeNodeRequestArguments(input, options, cb) {
+  if (!input) {
+    throw new Error(
+      'Making a request with empty `options` is not supported in Nock'
+    )
+  }
+
   if (typeof input === 'string') {
     input = urlToOptions(new url.URL(input))
   } else if (input instanceof url.URL) {

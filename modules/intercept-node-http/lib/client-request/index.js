@@ -17,12 +17,6 @@ function createNockInterceptedClientRequest(onIntercept) {
   // @ts-expect-error - socket is incompatible with Node's Socket type
   class NockInterceptedClientRequest extends http.OutgoingMessage {
     constructor(...args) {
-      if (args.length === 0) {
-        throw new Error(
-          'Creating a ClientRequest with empty `options` is not supported in Nock'
-        )
-      }
-
       super()
 
       const { options, callback } = normalizeNodeRequestArguments(...args)
