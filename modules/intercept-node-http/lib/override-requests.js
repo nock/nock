@@ -21,13 +21,13 @@ function overrideRequests(newRequest) {
     const module = moduleName === 'http' ? http : https
 
     // https://nodejs.org/api/http.html#http_http_request_url_options_callback
-    module.request = function (...args) {
+    module.request = function nockInterceptedRequest(...args) {
       const { options, callback } = normalizeNodeRequestArguments(...args)
       return newRequest(withDefaultProtocol(moduleName, options), callback)
     }
 
     // https://nodejs.org/api/http.html#http_http_get_options_callback
-    module.get = function (...args) {
+    module.get = function nockInterceptedGet(...args) {
       const { options, callback } = normalizeNodeRequestArguments(...args)
       const req = newRequest(withDefaultProtocol(moduleName, options), callback)
       req.end()
