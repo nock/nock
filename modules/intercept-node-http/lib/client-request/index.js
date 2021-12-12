@@ -119,6 +119,9 @@ function createNockInterceptedClientRequest(onIntercept) {
         }
 
         propagate(newRequest, this)
+        // do not re-emit 'socket' event
+        this.removeAllListeners('socket')
+
         // do not throw error if `request.on("error", handler)` is called
         this.on('newListener', event => {
           if (event === 'error') {
