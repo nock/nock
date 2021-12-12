@@ -19,11 +19,12 @@ it('should expose TLSSocket attributes for HTTPS requests', done => {
 it('should not have TLSSocket attributes for HTTP requests', done => {
   nock('http://example.test').get('/').reply()
 
-  http.get('http://example.test').on('socket', socket => {
+  const req = http.get('http://example.test')
+  req.on('socket', socket => {
     expect(socket.authorized).to.equal(undefined)
     expect(socket.encrypted).to.equal(undefined)
-    done()
   })
+  req.on('finish', () => done())
 })
 
 describe('`Socket#setTimeout()`', () => {
