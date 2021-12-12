@@ -119,6 +119,14 @@ function createNockInterceptedClientRequest(onIntercept) {
         }
 
         propagate(newRequest, this)
+        // do not throw error if `request.on("error", handler)` is called
+        this.on('newListener', event => {
+          if (event === 'error') {
+            newRequest.on('error', () => {})
+          }
+        })
+
+        newRequest.on('error', () => {})
 
         // TODO: pass raw buffer of request body as received by mocked request
         newRequest.end()
