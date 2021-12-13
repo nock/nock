@@ -9,7 +9,7 @@ const assertRejects = require('assert-rejects')
 const got = require('./got_client')
 const servers = require('./servers')
 
-describe.skip('Nock lifecycle functions', () => {
+describe('Nock lifecycle functions', () => {
   describe('`activate()`', () => {
     it('double activation throws exception', () => {
       nock.restore()
@@ -105,7 +105,7 @@ describe.skip('Nock lifecycle functions', () => {
       })
     })
 
-    it('should be safe to call in the middle of a request', done => {
+    it.skip('should be safe to call in the middle of a request', done => {
       // This covers a race-condition where cleanAll() is called while a request
       // is in mid-flight. The request itself should continue to process normally.
       // Notably, `cleanAll` is being called before the Interceptor is marked as
@@ -191,7 +191,7 @@ describe.skip('Nock lifecycle functions', () => {
   })
 
   describe('`abortPendingRequests()`', () => {
-    it('prevents the request from completing', done => {
+    it.skip('prevents the request from completing', done => {
       const onRequest = sinon.spy()
 
       nock('http://example.test').get('/').delayConnection(100).reply(200, 'OK')
