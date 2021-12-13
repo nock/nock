@@ -3,6 +3,9 @@
 const { inherits } = require('util')
 const http = require('http')
 const https = require('https')
+// importing `setTimeout` from `timers` makes nock work with `@sinonjs/fake-timers`
+// see #1336
+const { setImmediate } = require('timers')
 
 const debug = require('debug')('nock.request_overrider')
 const propagate = require('propagate')
