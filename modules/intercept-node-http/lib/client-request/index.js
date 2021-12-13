@@ -111,26 +111,19 @@ function createNockInterceptedClientRequest(onIntercept) {
               : https.globalAgent,
         }
 
-        const newRequest = new OriginalClientRequest(
-          newOptions,
-          state.onResponseCallback
-        )
+        this.socket.removeAllListeners()
 
         // do not call response callback twice
         if (state.onResponseCallback) {
           this.removeListener('response', state.onResponseCallback)
         }
 
-        propagate(newRequest, this)
-        // do not re-emit 'socket' event
-        this.removeAllListeners('socket')
+        const newRequest = new OriginalClientRequest(
+          newOptions,
+          state.onResponseCallback
+        )
 
-        // do not throw error if `request.on("error", handler)` is called
-        this.on('newListener', event => {
-          if (event === 'error') {
-            newRequest.on('error', () => {})
-          }
-        })
+        propagate(newRequest, this)
 
         newRequest.on('error', () => {})
 
