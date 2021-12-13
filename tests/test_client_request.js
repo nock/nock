@@ -85,7 +85,7 @@ describe('Direct use of `ClientRequest`', () => {
 
   it('should throw an expected error when creating with empty options', () => {
     expect(() => new http.ClientRequest()).to.throw(
-      'Creating a ClientRequest with empty `options` is not supported in Nock'
+      'Making a request with empty `options` is not supported in Nock'
     )
   })
 
