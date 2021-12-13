@@ -6,7 +6,7 @@ const https = require('https')
 const { Readable } = require('stream')
 const nock = require('..')
 
-it.skip('should expose TLSSocket attributes for HTTPS requests', done => {
+it('should expose TLSSocket attributes for HTTPS requests', done => {
   nock('https://example.test').get('/').reply()
 
   https.get('https://example.test').on('socket', socket => {
@@ -16,7 +16,7 @@ it.skip('should expose TLSSocket attributes for HTTPS requests', done => {
   })
 })
 
-it.skip('should not have TLSSocket attributes for HTTP requests', done => {
+it('should not have TLSSocket attributes for HTTP requests', done => {
   nock('http://example.test').get('/').reply()
 
   const req = http.get('http://example.test')
