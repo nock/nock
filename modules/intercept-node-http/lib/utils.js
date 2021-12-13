@@ -18,12 +18,8 @@ function headersFieldNamesToLowerCase(headers) {
 
   const lowerCaseHeaders = {}
   Object.entries(headers).forEach(([fieldName, fieldValue]) => {
+    // if header is set multiple times (case insestitive), match the last key
     const key = fieldName.toLowerCase()
-    if (lowerCaseHeaders[key] !== undefined) {
-      throw Error(
-        `Failed to convert header keys to lower case due to field name conflict: ${key}`
-      )
-    }
     lowerCaseHeaders[key] = fieldValue
   })
 
