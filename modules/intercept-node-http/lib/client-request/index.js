@@ -28,7 +28,7 @@ function createNockInterceptedClientRequest(onIntercept) {
       /** @type {import("./types").State} */
       const state = {
         onIntercept,
-        intercepted: true,
+        intercepted: undefined,
         options,
         onResponseCallback: callback,
         requestBodyBuffers: [],
@@ -156,7 +156,7 @@ function connectSocket(request, state) {
   }
 
   propagate(['error', 'timeout'], request.socket, request)
-  request.socket.on('close', () => handleSocketClose(request))
+  request.socket.on('close', () => handleSocketClose(request, state))
 
   request.socket.connecting = false
   request.emit('socket', request.socket)
@@ -248,7 +248,7 @@ function handleFlushHeaders(request, state) {
   maybePrepareForIntercept(request, state)
 }
 
-function handleSocketClose(request) {
+function handleSocketClose(request, state) {
   debug('socket close')
 
   if (!request.res && !request.socket._hadError) {
@@ -281,6 +281,7 @@ function maybePrepareForIntercept(request, state) {
 function prepareForIntercept(request, state) {
   debug('ending')
 
+  state.intercepted = true
   state.interceptStarted = true
 
   const options = {
@@ -312,7 +313,7 @@ function prepareForIntercept(request, state) {
 
     state.onIntercept(options, request)
 
-    if (state.intercepted) {
+    if (state.intercepted !== false) {
       // wait to emit the finish event until we know for sure that the request will be intercepted,
       // Otherwise an unmocked request might emit finish twice.
       request.emit('finish')
