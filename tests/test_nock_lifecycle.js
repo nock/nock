@@ -191,7 +191,7 @@ describe('Nock lifecycle functions', () => {
   })
 
   describe('`abortPendingRequests()`', () => {
-    it.skip('prevents the request from completing', done => {
+    it('prevents the request from completing', done => {
       const onRequest = sinon.spy()
 
       nock('http://example.test').get('/').delayConnection(100).reply(200, 'OK')
