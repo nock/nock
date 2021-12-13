@@ -5,7 +5,7 @@ const nock = require('..')
 const got = require('./got_client')
 
 // https://github.com/nock/nock/issues/1334
-it.skip('should still return successfully when fake timer is enabled', async () => {
+it('should still return successfully when fake timer is enabled', async () => {
   const clock = fakeTimers.install()
   const scope = nock('http://example.test').get('/').reply()
 
