@@ -4,7 +4,7 @@ const { expect } = require('chai')
 const nock = require('..')
 const got = require('./got_client')
 
-describe.skip('`removeInterceptor()`', () => {
+describe('`removeInterceptor()`', () => {
   context('when invoked with an Interceptor instance', () => {
     it('remove interceptor removes given interceptor', async () => {
       const givenInterceptor = nock('http://example.test').get('/somepath')
@@ -124,7 +124,7 @@ describe.skip('`removeInterceptor()`', () => {
 
       expect(
         nock.removeInterceptor({
-          proto: 'https',
+          protocol: 'https:',
           hostname: 'example.test',
           path: '/somepath',
         })
