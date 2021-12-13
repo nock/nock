@@ -313,7 +313,7 @@ describe('`stringifyRequest()`', () => {
     const options = {
       method: 'GET',
       port: 3000,
-      proto: 'http',
+      protocol: 'http:',
       hostname: 'example.test',
       path: '/',
       headers: {},
@@ -334,7 +334,7 @@ describe('`stringifyRequest()`', () => {
     const options = {
       method: 'GET',
       port: 80,
-      proto: 'http',
+      protocol: 'http:',
       hostname: 'example.test',
       path: '/',
       headers: {},
@@ -354,7 +354,7 @@ describe('`stringifyRequest()`', () => {
     const options = {
       method: 'POST',
       port: 443,
-      proto: 'https',
+      protocol: 'https:',
       hostname: 'example.test',
       path: '/the/path',
       headers: {},
@@ -373,7 +373,7 @@ describe('`stringifyRequest()`', () => {
   it('should default optional options', () => {
     const options = {
       port: 80,
-      proto: 'http',
+      protocol: 'http:',
       hostname: 'example.test',
       headers: {},
     }
@@ -392,7 +392,7 @@ describe('`stringifyRequest()`', () => {
     const options = {
       method: 'GET',
       port: 80,
-      proto: 'http',
+      protocol: 'http:',
       hostname: 'example.test',
       path: '/',
       headers: { cookie: 'fiz=baz', 'set-cookie': ['hello', 'world'] },
@@ -412,7 +412,7 @@ describe('`stringifyRequest()`', () => {
     const options = {
       method: 'GET',
       port: 80,
-      proto: 'http',
+      protocol: 'http:',
       hostname: 'example.test',
       path: '/',
       headers: {},
