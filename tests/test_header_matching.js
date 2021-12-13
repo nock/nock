@@ -7,7 +7,7 @@ const sinon = require('sinon')
 const nock = require('..')
 const got = require('./got_client')
 
-describe('Header matching', () => {
+describe.skip('Header matching', () => {
   describe('`Scope.matchHeader()`', () => {
     it('should match headers with function: gets the expected argument', async () => {
       const matchHeaderStub = sinon.stub().returns(true)

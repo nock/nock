@@ -92,7 +92,7 @@ function nockBackWithFixtureLocalhost(mochaDone) {
   })
 }
 
-describe('Nock Back', () => {
+describe.skip('Nock Back', () => {
   beforeEach(() => {
     nockBack.fixtures = path.resolve(__dirname, 'fixtures')
   })

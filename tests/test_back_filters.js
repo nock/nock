@@ -19,7 +19,7 @@ const fixtureFullPath = path.resolve(fixturesDir, fixtureFilename)
 const getFixtureContent = () =>
   JSON.parse(fs.readFileSync(fixtureFullPath).toString())
 
-describe('nockBack filters', () => {
+describe.skip('nockBack filters', () => {
   beforeEach(() => {
     nockBack.fixtures = fixturesDir
     nockBack.setMode('record')

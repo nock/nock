@@ -8,7 +8,7 @@ const nock = require('..')
 const got = require('./got_client')
 const servers = require('./servers')
 
-describe('`disableNetConnect()`', () => {
+describe.skip('`disableNetConnect()`', () => {
   it('prevents connection to unmocked hosts', async () => {
     nock.disableNetConnect()
 
@@ -34,7 +34,7 @@ describe('`disableNetConnect()`', () => {
   })
 })
 
-describe('`enableNetConnect()`', () => {
+describe.skip('`enableNetConnect()`', () => {
   it('enables real HTTP request only for specified domain, via string', async () => {
     const onResponse = sinon.spy()
     const { origin } = await servers.startHttpServer((request, response) => {
