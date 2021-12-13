@@ -34,7 +34,7 @@ describe.skip('`disableNetConnect()`', () => {
   })
 })
 
-describe.skip('`enableNetConnect()`', () => {
+describe('`enableNetConnect()`', () => {
   it('enables real HTTP request only for specified domain, via string', async () => {
     const onResponse = sinon.spy()
     const { origin } = await servers.startHttpServer((request, response) => {
@@ -49,7 +49,7 @@ describe.skip('`enableNetConnect()`', () => {
     expect(onResponse).to.have.been.calledOnce()
   })
 
-  it('disallows request for other domains, via string', async () => {
+  it.skip('disallows request for other domains, via string', async () => {
     nock.enableNetConnect('localhost')
 
     await assertRejects(
@@ -72,7 +72,7 @@ describe.skip('`enableNetConnect()`', () => {
     expect(onResponse).to.have.been.calledOnce()
   })
 
-  it('disallows request for other domains, via regexp', async () => {
+  it.skip('disallows request for other domains, via regexp', async () => {
     nock.enableNetConnect(/ocalhos/)
 
     await assertRejects(
@@ -95,7 +95,7 @@ describe.skip('`enableNetConnect()`', () => {
     expect(onResponse).to.have.been.calledOnce()
   })
 
-  it('disallows request for other domains, via function', async () => {
+  it.skip('disallows request for other domains, via function', async () => {
     nock.enableNetConnect(host => host.includes('ocalhos'))
 
     await assertRejects(
@@ -104,7 +104,7 @@ describe.skip('`enableNetConnect()`', () => {
     )
   })
 
-  it('passes the domain to be tested, via function', async () => {
+  it.skip('passes the domain to be tested, via function', async () => {
     const matcher = sinon.stub().returns(false)
     nock.enableNetConnect(matcher)
 
