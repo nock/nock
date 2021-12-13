@@ -86,7 +86,7 @@ describe('`normalizeRequestOptions()`', () => {
       host: 'example.test:12345',
       hostname: 'example.test',
       port: 12345,
-      proto: 'http',
+      protocol: 'http:',
     }
 
     expect(result).to.deep.equal(expected)
@@ -101,7 +101,7 @@ describe('`normalizeRequestOptions()`', () => {
       host: 'example.test:80',
       hostname: 'example.test',
       port: 80,
-      proto: 'http',
+      protocol: 'http:',
     }
 
     expect(result).to.deep.equal(expected)
@@ -115,7 +115,7 @@ describe('`normalizeRequestOptions()`', () => {
       // Should this be included?
       // hostname: 'localhost'
       port: 80,
-      proto: 'http',
+      protocol: 'http:',
     }
 
     expect(result).to.deep.equal(expected)
