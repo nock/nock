@@ -126,8 +126,17 @@ function createNockInterceptedClientRequest(onIntercept) {
 
         newRequest.on('error', () => {})
 
-        // TODO: pass raw buffer of request body as received by mocked request
-        newRequest.end()
+        // write request body on next tick
+        // to enable recording
+        process.nextTick(() => {
+          for (const buffer of state.requestBodyBuffers) {
+            newRequest.write(buffer)
+            newRequest.emit('nock-data', buffer)
+          }
+
+          newRequest.end()
+          newRequest.emit('nock-end')
+        })
 
         // TODO: make sure that this.emit('finish') is not called when
         // the real requests is sent out, and that it's called when
