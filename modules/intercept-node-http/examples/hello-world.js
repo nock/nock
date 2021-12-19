@@ -8,8 +8,8 @@ const intercept = require('../index.js')
  * Return a 200 response with a "Hello, world!" response body
  * for any request
  *
- * @param {any} options
- * @param {http.ClientRequest} request
+ * @param {import("../lib/client-request/types").NormalizedRequestOptions} options
+ * @param {import("../lib/client-request/types").OverridenClientRequest} request
  */
 function onIntercept(options, request) {
   const response = new http.IncomingMessage(request.socket)

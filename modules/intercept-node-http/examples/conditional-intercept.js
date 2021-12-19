@@ -8,8 +8,8 @@ const intercept = require('../index.js')
  * If request goes to example.com, respond with a mocked "Hello World" response.
  * Otherwise let the request pass through
  *
- * @param {any} options
- * @param {http.ClientRequest} request
+ * @param {import("../lib/client-request/types").NormalizedRequestOptions} options
+ * @param {import("../lib/client-request/types").OverridenClientRequest} request
  */
 function onIntercept(options, request) {
   if (options.hostname === 'example.com') {

@@ -2,9 +2,13 @@ import http from 'http'
 
 export type OnInterceptCallback = (
   options: NormalizedRequestOptions,
-  request: http.ClientRequest
+  request: OverridenClientRequest
 ) => void
 export type OnResponseCallback = (request: http.IncomingMessage) => void
+
+export type OverridenClientRequest = http.ClientRequest & {
+  nockSendRealRequest: () => Promise<http.ClientRequest>
+}
 
 export type NormalizedRequestOptions = {
   protocol: 'http:' | 'https:'
