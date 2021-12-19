@@ -7,7 +7,8 @@ export type OnInterceptCallback = (
 export type OnResponseCallback = (request: http.IncomingMessage) => void
 
 export type OverridenClientRequest = http.ClientRequest & {
-  nockSendRealRequest: () => Promise<http.ClientRequest>
+  nockSendRealRequest: () => http.ClientRequest
+  nockGetRequestBodyChunks: () => Buffer[]
 }
 
 export type NormalizedRequestOptions = {
@@ -28,7 +29,7 @@ export type State = {
   onIntercept: OnInterceptCallback
   options: NormalizedRequestOptions
   onResponseCallback: OnResponseCallback
-  requestBodyBuffers: Buffer[]
+  requestBodyChunks: Buffer[]
   interceptStarted: boolean
   readyToInterceptOnSocketEvent: boolean
 }

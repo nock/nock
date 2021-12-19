@@ -31,7 +31,7 @@ function createNockInterceptedClientRequest(onIntercept) {
         intercepted: undefined,
         options,
         onResponseCallback: callback,
-        requestBodyBuffers: [],
+        requestBodyChunks: [],
         interceptStarted: false,
 
         // For parity with Node, it's important the socket event is emitted before we begin playback.
@@ -129,13 +129,11 @@ function createNockInterceptedClientRequest(onIntercept) {
         // write request body on next tick
         // to enable recording
         process.nextTick(() => {
-          for (const buffer of state.requestBodyBuffers) {
+          for (const buffer of state.requestBodyChunks) {
             newRequest.write(buffer)
-            newRequest.emit('nock-data', buffer)
           }
 
           newRequest.end()
-          newRequest.emit('nock-end')
         })
 
         // TODO: make sure that this.emit('finish') is not called when
@@ -148,10 +146,10 @@ function createNockInterceptedClientRequest(onIntercept) {
       /**
        * Expose method to retrieve request body as a buffer for matching purposes
        *
-       * @returns {Buffer}
+       * @returns {Buffer[]}
        */
-      this.nockGetRequestBodyAsBuffer = function nockGetRequestBodyAsBuffer() {
-        return Buffer.concat(state.requestBodyBuffers)
+      this.nockGetRequestBodyChunks = function nockGetRequestBodyChunks() {
+        return state.requestBodyChunks
       }
     }
   }
@@ -214,7 +212,7 @@ function handleWrite(request, state, buffer, encoding, callback) {
   if (!Buffer.isBuffer(buffer)) {
     buffer = Buffer.from(buffer, encoding)
   }
-  state.requestBodyBuffers.push(buffer)
+  state.requestBodyChunks.push(buffer)
 
   // can't use instanceof Function because some test runners
   // run tests in vm.runInNewContext where Function is not same
