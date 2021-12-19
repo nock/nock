@@ -778,7 +778,6 @@ describe('Request Overrider', () => {
     nock.activate()
 
     const { origin } = await servers.startHttpServer((request, response) => {
-      console.log('what the heck')
       response.writeHead(200)
       response.end()
     })

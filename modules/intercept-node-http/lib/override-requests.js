@@ -38,7 +38,7 @@ function overrideRequests(newRequest) {
 
 function withDefaultProtocol(moduleName, options) {
   return {
-    protocol: moduleName + ':',
+    protocol: `${moduleName}:`,
     ...options,
   }
 }
