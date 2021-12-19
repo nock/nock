@@ -132,6 +132,8 @@ function createNockInterceptedClientRequest(onIntercept) {
         // TODO: make sure that this.emit('finish') is not called when
         // the real requests is sent out, and that it's called when
         // the response is mocked
+
+        return newRequest
       }
 
       /**
