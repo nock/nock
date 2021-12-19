@@ -11,7 +11,7 @@ const nock = require('..')
 const got = require('./got_client')
 const servers = require('./servers')
 
-describe.skip('Recorder', () => {
+describe('Recorder', () => {
   let globalCount
   beforeEach(() => {
     globalCount = Object.keys(global).length
