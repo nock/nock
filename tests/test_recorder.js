@@ -69,7 +69,7 @@ describe('Recorder', () => {
     expect(recorded[0]).to.include(`nock('http://localhost:${port}',`)
   })
 
-  it.skip('recording turns off nock interception (backward compatibility behavior)', () => {
+  it('recording turns off nock interception (backward compatibility behavior)', () => {
     //  We ensure that there are no overrides.
     nock.restore()
     expect(nock.isActive()).to.be.false()
