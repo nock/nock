@@ -566,7 +566,7 @@ describe('Recorder', () => {
     })
   })
 
-  it.skip('records request headers correctly as an object', done => {
+  it('records request headers correctly as an object', done => {
     nock.restore()
     nock.recorder.clear()
     expect(nock.recorder.play()).to.be.empty()
