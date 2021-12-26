@@ -331,7 +331,7 @@ describe('Recorder', () => {
     })
   })
 
-  it.skip('checks that data is specified', () => {
+  it('checks that data is specified', () => {
     nock.restore()
     nock.recorder.clear()
     nock.recorder.rec(true)

@@ -206,6 +206,12 @@ function handleWrite(request, state, buffer, encoding, callback) {
   }
 
   if (!buffer) {
+    // throw helpful error when writing without a chunk
+    // this was previously inmplemented in nock's `lib/recorder.js`
+    if (arguments.length === 2) {
+      throw new Error('Data was undefined.')
+    }
+
     return true
   }
 
