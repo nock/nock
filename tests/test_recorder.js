@@ -381,7 +381,7 @@ describe('Recorder', () => {
     expect(recorded[0].body).to.be.an('object').and.deep.equal(payload)
   })
 
-  it.skip('records nonstandard ports', done => {
+  it('records nonstandard ports', done => {
     nock.restore()
     nock.recorder.clear()
     expect(nock.recorder.play()).to.be.empty()
