@@ -721,7 +721,7 @@ describe('Recorder', () => {
     nocks.forEach(nock => nock.done())
   })
 
-  it.skip('when encoding is set during recording, body is still recorded correctly', done => {
+  it('when encoding is set during recording, body is still recorded correctly', done => {
     const responseBody = '<html><body>example</body></html>'
 
     const requestListener = (request, response) => {
