@@ -517,7 +517,7 @@ describe('Recorder', () => {
     )
   })
 
-  it.skip('records https correctly', done => {
+  it('records https correctly', done => {
     const requestBody = '012345'
     const responseBody = '<html><body>example</body></html>'
 
