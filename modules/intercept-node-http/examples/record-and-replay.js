@@ -67,9 +67,9 @@ async function run() {
 
   const realResponse = await got('https://example.com/').text()
   console.log(`real response`)
-  console.log(realResponse.substr(0, 64) + '...')
+  console.log(`${realResponse.substr(0, 64)}...`)
 
   const mockedResponse = await got('https://example.com/').text()
   console.log(`mocked response`)
-  console.log(mockedResponse.substr(0, 64) + '...')
+  console.log(`${mockedResponse.substr(0, 64)}...`)
 }
