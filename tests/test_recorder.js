@@ -611,7 +611,7 @@ describe('Recorder', () => {
     })
   })
 
-  it.skip('records request headers correctly when not outputting objects', async () => {
+  it('records request headers correctly when not outputting objects', async () => {
     const gotRequest = sinon.spy()
 
     nock.restore()
@@ -772,7 +772,7 @@ describe('Recorder', () => {
     })
   })
 
-  it.skip("doesn't record request headers by default", done => {
+  it("doesn't record request headers by default", done => {
     nock.restore()
     nock.recorder.clear()
     expect(nock.recorder.play()).to.be.empty()
@@ -808,7 +808,7 @@ describe('Recorder', () => {
     })
   })
 
-  it.skip('will call a custom logging function', done => {
+  it('will call a custom logging function', done => {
     // This also tests that use_separator is on by default.
     nock.restore()
     nock.recorder.clear()
@@ -842,7 +842,7 @@ describe('Recorder', () => {
     })
   })
 
-  it.skip('use_separator:false is respected', done => {
+  it('use_separator:false is respected', done => {
     nock.restore()
     nock.recorder.clear()
     expect(nock.recorder.play()).to.be.empty()
@@ -880,7 +880,7 @@ describe('Recorder', () => {
     })
   })
 
-  it.skip('records request headers except user-agent if enable_reqheaders_recording is set to true', done => {
+  it('records request headers except user-agent if enable_reqheaders_recording is set to true', done => {
     nock.restore()
     nock.recorder.clear()
     expect(nock.recorder.play()).to.be.empty()
@@ -963,7 +963,7 @@ describe('Recorder', () => {
   })
 
   // https://github.com/nock/nock/issues/193
-  it.skip('works with clients listening for readable', done => {
+  it('works with clients listening for readable', done => {
     nock.restore()
     nock.recorder.clear()
     expect(nock.recorder.play()).to.be.empty()
@@ -1062,7 +1062,7 @@ describe('Recorder', () => {
       .and.include(`.query({"foo":["bar","baz"]})`)
   })
 
-  it.skip('removes query params from the path and puts them in query()', done => {
+  it('removes query params from the path and puts them in query()', done => {
     nock.restore()
     nock.recorder.clear()
     expect(nock.recorder.play()).to.be.empty()
