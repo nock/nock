@@ -1113,7 +1113,7 @@ describe('Recorder', () => {
       .and.include(`.get('/foo\\'bar\\'baz')`)
   })
 
-  it.skip('respects http.request() consumers', done => {
+  it('respects http.request() consumers', done => {
     const requestListener = (req, res) => {
       res.write('foo')
       setTimeout(() => {
@@ -1242,7 +1242,7 @@ describe('Recorder', () => {
   })
 
   // https://github.com/nock/nock/issues/2086
-  it.skip('should not resume the response stream', done => {
+  it('should not resume the response stream', done => {
     nock.recorder.rec(true)
 
     servers.startHttpServer().then(({ origin }) => {
