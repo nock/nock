@@ -242,7 +242,7 @@ describe('Nock Back', () => {
     })
   })
 
-  describe.skip('record mode', () => {
+  describe('record mode', () => {
     let fixture
     let fixtureLoc
 
@@ -351,7 +351,7 @@ describe('Nock Back', () => {
       })
     })
 
-    it("shouldn't allow outside calls", done => {
+    it.skip("shouldn't allow outside calls", done => {
       nockBack('wrong_uri.json', nockDone => {
         http
           .get('http://other.example.test', () => expect.fail())
@@ -365,7 +365,7 @@ describe('Nock Back', () => {
       })
     })
 
-    it('should load recorded tests', done => {
+    it.skip('should load recorded tests', done => {
       nockBack('good_request.json', function (nockDone) {
         expect(this.scopes).to.have.lengthOf.at.least(1)
         http.get('http://www.example.test/', () => {
@@ -482,7 +482,7 @@ describe('Nock Back', () => {
     })
   })
 
-  describe.skip('update mode', () => {
+  describe('update mode', () => {
     let fixture
     let fixtureLoc
     let fixturePath
