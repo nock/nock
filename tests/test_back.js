@@ -242,7 +242,7 @@ describe('Nock Back', () => {
     })
   })
 
-  describe('record mode', () => {
+  describe.skip('record mode', () => {
     let fixture
     let fixtureLoc
 
@@ -482,7 +482,7 @@ describe('Nock Back', () => {
     })
   })
 
-  describe('update mode', () => {
+  describe.skip('update mode', () => {
     let fixture
     let fixtureLoc
     let fixturePath
