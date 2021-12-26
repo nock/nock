@@ -3,6 +3,7 @@
 const emitter = require('./lib/global_emitter')
 const {
   activate,
+  restore,
   isActive,
   isDone,
   isOn,
@@ -41,7 +42,7 @@ const API = {
     clear: recorder.clear,
     play: recorder.outputs,
   },
-  restore: recorder.restore,
+  restore,
   back,
 }
 
