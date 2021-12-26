@@ -351,7 +351,7 @@ describe('Nock Back', () => {
       })
     })
 
-    it.skip("shouldn't allow outside calls", done => {
+    it("shouldn't allow outside calls", done => {
       nockBack('wrong_uri.json', nockDone => {
         http
           .get('http://other.example.test', () => expect.fail())
@@ -365,7 +365,7 @@ describe('Nock Back', () => {
       })
     })
 
-    it.skip('should load recorded tests', done => {
+    it('should load recorded tests', done => {
       nockBack('good_request.json', function (nockDone) {
         expect(this.scopes).to.have.lengthOf.at.least(1)
         http.get('http://www.example.test/', () => {
