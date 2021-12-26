@@ -454,38 +454,6 @@ it('`percentEncode()` encodes extra reserved characters', () => {
   expect(common.percentEncode('foo+(*)!')).to.equal('foo%2B%28%2A%29%21')
 })
 
-describe('`normalizeClientRequestArgs()`', () => {
-  it('should throw for invalid URL', () => {
-    // See https://github.com/nodejs/node/pull/38614 release in node v16.2.0
-    const isNewErrorText = semver.gte(process.versions.node, '16.2.0')
-    const errorText = isNewErrorText ? 'Invalid URL' : 'example.test'
-
-    // no schema
-    expect(() => http.get('example.test')).to.throw(TypeError, errorText)
-  })
-
-  it('can include auth info', async () => {
-    const scope = nock('http://example.test')
-      .get('/')
-      .basicAuth({ user: 'user', pass: 'pw' })
-      .reply()
-
-    http.get('http://user:pw@example.test')
-    scope.isDone()
-  })
-
-  it('should handle a single callback', async () => {
-    // TODO: Only passing a callback isn't currently supported by Nock,
-    // but should be in the future as Node allows it.
-    const cb = () => {}
-
-    const { options, callback } = common.normalizeClientRequestArgs(cb)
-
-    expect(options).to.deep.equal({})
-    expect(callback).to.equal(cb)
-  })
-})
-
 describe('`dataEqual()`', () => {
   it('treats explicit and implicit undefined object values as equal', () => {
     const result = common.dataEqual({ a: 'a', b: undefined }, { a: 'a' })
