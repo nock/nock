@@ -155,7 +155,7 @@ describe('`headersFieldNamesToLowerCase()`', () => {
       'Content-typE': 'plain/text',
     }
     const inputClone = { ...input }
-    const result = common.headersFieldNamesToLowerCase(input)
+    const result = common.headersFieldNamesToLowerCase(input, true)
     const expected = {
       host: 'example.test',
       'content-type': 'plain/text',
@@ -167,10 +167,13 @@ describe('`headersFieldNamesToLowerCase()`', () => {
 
   it('throws on conflicting keys', () => {
     expect(() =>
-      common.headersFieldNamesToLowerCase({
-        HoSt: 'example.test',
-        HOST: 'example.test',
-      })
+      common.headersFieldNamesToLowerCase(
+        {
+          HoSt: 'example.test',
+          HOST: 'example.test',
+        },
+        true
+      )
     ).to.throw(
       'Failed to convert header keys to lower case due to field name conflict: host'
     )

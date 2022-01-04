@@ -8,40 +8,6 @@ name: Continuous Integration
     branches:
       - main
 jobs:
-  fix-formatting:
-    if: >-
-      github.actor != 'github-actions[bot]' && github.event_name ==
-      'pull_request' && github.event.pull_request.head.repo.fork == false
-    name: Fix formatting
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-          persist-credentials: true
-          ref: ${{ github.head_ref }}
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: 16
-          cache: 'npm'
-      - name: Install dependencies
-        run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
-      - name: Format
-        run: npm run format:fix
-      - name: Commit
-        run: >
-          git config user.email "github-actions@github.com"
-
-          git config user.name "github-actions"
-
-          git add .
-
-          git commit -m "style: format files with Prettier" | true # ignore
-          error if there are no changes to commit
-
-          git push origin HEAD:${{ github.head_ref }}
   format:
     name: Format
     runs-on: ubuntu-latest

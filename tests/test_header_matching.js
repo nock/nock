@@ -425,6 +425,31 @@ describe('Header matching', () => {
       scope.done()
     })
 
+    it('should only match the last duplicate request header', done => {
+      const scope = nock('http://example.test', {
+        reqheaders: {
+          'x-auth-token': 'biz',
+        },
+      })
+        .get('/')
+        .reply()
+
+      // Can't use Got here because it would change these headers
+      const req = http.get('http://example.test', {
+        headers: {
+          'x-auth-token': 'foo',
+          'X-Auth-Token': 'bar',
+          'X-AUTH-TOKEN': 'biz',
+        },
+      })
+
+      req.on('response', res => {
+        expect(res.statusCode).to.equal(200)
+        scope.done()
+        done()
+      })
+    })
+
     // https://github.com/nock/nock/issues/966
     it('mocking succeeds when mocked and specified request headers have falsy values', async () => {
       const scope = nock('http://example.test', {
