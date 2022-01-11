@@ -141,6 +141,25 @@ describe('allowUnmocked option', () => {
     scope.done()
   })
 
+  it('allow unmocked passthrough with regex host & mismatched bodies', async () => {
+    const { origin } = await startHttpServer((request, response) => {
+      response.writeHead(200)
+      response.write('{"message":"server response"}')
+      response.end()
+    })
+
+    nock(/localhost/, { allowUnmocked: true })
+      .post('/post', { some: 'other data' })
+      .reply(404, '{"message":"server response"}')
+
+    const { body, statusCode } = await got.post(`${origin}/post`, {
+      json: { some: 'data' },
+      responseType: 'json',
+    })
+    expect(statusCode).to.equal(200)
+    expect(body).to.deep.equal({ message: 'server response' })
+  })
+
   // https://github.com/nock/nock/issues/1867
   it('match path using callback with allowUnmocked', async () => {
     const scope = nock('http://example.test', { allowUnmocked: true })
