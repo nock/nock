@@ -122,7 +122,7 @@ describe('`Scope#clean()`', () => {
     await got('http://example.test/')
     scope2.done()
   })
-});
+})
 
 describe('`filteringPath()`', function () {
   it('filter path with function', async function () {

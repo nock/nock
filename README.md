@@ -961,7 +961,9 @@ nock.isDone()
 Clean up all mocks for a given scope (could be useful for replacing a mock for one test case).
 
 ```js
-const scope = nock('http://google.com').get('/').reply(200, 'Hello from Google!')
+const scope = nock('http://google.com')
+  .get('/')
+  .reply(200, 'Hello from Google!')
 
 scope.clean()
 ```
