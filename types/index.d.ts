@@ -126,6 +126,9 @@ declare namespace nock {
 
     done(): void
     isDone(): boolean
+
+    clean(): void
+
     pendingMocks(): string[]
     activeMocks(): string[]
   }

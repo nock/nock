@@ -114,6 +114,16 @@ describe('`Scope#isDone()`', () => {
   })
 })
 
+describe('`Scope#clean()`', () => {
+  it('should be able to clean a scope', async () => {
+    const scope = nock('http://example.test').get('/').reply(400)
+    const scope2 = nock('http://example.test').get('/').reply(200)
+    scope.clean()
+    await got('http://example.test/')
+    scope2.done()
+  })
+});
+
 describe('`filteringPath()`', function () {
   it('filter path with function', async function () {
     const scope = nock('http://example.test')
