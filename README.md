@@ -956,6 +956,16 @@ It is also available in the global scope, which will determine if all expectatio
 nock.isDone()
 ```
 
+### .clean()
+
+Clean up all mocks for a given scope (could be useful for replacing a mock for one test case).
+
+```js
+const scope = nock('http://google.com').get('/').reply(200, 'Hello from Google!')
+
+scope.clean()
+```
+
 ### .cleanAll()
 
 You can cleanup all the prepared mocks (could be useful to cleanup some state after a failed test) like this:
