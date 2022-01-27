@@ -331,6 +331,34 @@ describe('`replyContentLength()`', () => {
     )
     scope.done()
   })
+
+  it('sends explicit content-length header with string response', async () => {
+    const response = '<html><body>...</body></html>'
+
+    const scope = nock('http://example.test')
+      .replyContentLength()
+      .get('/')
+      .reply(200, response)
+
+    const { headers } = await got('http://example.test/')
+
+    expect(headers['content-length']).to.equal(`${response.length}`)
+    scope.done()
+  })
+
+  it('sends explicit content-length header with buffer response', async () => {
+    const response = Buffer.from([1, 2, 3, 4, 5, 6]);
+
+    const scope = nock('http://example.test')
+      .replyContentLength()
+      .get('/')
+      .reply(200, response)
+
+    const { headers } = await got('http://example.test/')
+
+    expect(headers['content-length']).to.equal(`${response.byteLength}`)
+    scope.done()
+  })
 })
 
 describe('`replyDate()`', () => {
