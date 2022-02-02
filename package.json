@@ -14,7 +14,7 @@
     "url": "https://github.com/nock/nock.git"
   },
   "bugs": {
-    "url": "http://github.com/nock/nock/issues"
+    "url": "https://github.com/nock/nock/issues"
   },
   "engines": {
     "node": ">= 10.13"
@@ -28,11 +28,11 @@
     "propagate": "^2.0.0"
   },
   "devDependencies": {
+    "@definitelytyped/dtslint": "^0.0.103",
     "@sinonjs/fake-timers": "^9.0.0",
     "assert-rejects": "^1.0.0",
     "chai": "^4.1.2",
     "dirty-chai": "^2.0.1",
-    "dtslint": "^4.0.4",
     "eslint": "^8.8.0",
     "eslint-config-prettier": "^8.1.0",
     "eslint-config-standard": "^17.0.0-0",
