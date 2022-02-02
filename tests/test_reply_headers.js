@@ -7,8 +7,13 @@ const { IncomingMessage } = require('http')
 const { expect } = require('chai')
 const sinon = require('sinon')
 const fakeTimers = require('@sinonjs/fake-timers')
+const fs = require('fs')
+const path = require('path')
+
 const nock = require('..')
 const got = require('./got_client')
+
+const textFilePath = path.resolve(__dirname, './assets/reply_file_1.txt')
 
 describe('`reply()` headers', () => {
   describe('using parameter value', () => {
@@ -329,6 +334,46 @@ describe('`replyContentLength()`', () => {
     expect(headers['content-length']).to.equal(
       `${JSON.stringify(response).length}`
     )
+    scope.done()
+  })
+
+  it('sends explicit content-length header with string response', async () => {
+    const response = '<html><body>...</body></html>'
+
+    const scope = nock('http://example.test')
+      .replyContentLength()
+      .get('/')
+      .reply(200, response)
+
+    const { headers } = await got('http://example.test/')
+
+    expect(headers['content-length']).to.equal(`${response.length}`)
+    scope.done()
+  })
+
+  it('sends explicit content-length header with buffer response', async () => {
+    const response = Buffer.from([1, 2, 3, 4, 5, 6])
+
+    const scope = nock('http://example.test')
+      .replyContentLength()
+      .get('/')
+      .reply(200, response)
+
+    const { headers } = await got('http://example.test/')
+
+    expect(headers['content-length']).to.equal(`${response.byteLength}`)
+    scope.done()
+  })
+
+  it('should not send content-length when responding with a stream', async () => {
+    const scope = nock('http://example.test')
+      .replyContentLength()
+      .get('/')
+      .reply(200, () => fs.createReadStream(textFilePath))
+
+    const { headers } = await got('http://example.test/')
+
+    expect(headers['content-length']).to.be.undefined()
     scope.done()
   })
 })
