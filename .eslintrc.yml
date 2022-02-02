@@ -25,7 +25,7 @@ overrides:
 
 rules:
   # TODO These are included in standard and should be cleaned up and turned on.
-  node/no-deprecated-api: 'off' # we still make heavy use of url.parse
+  n/no-deprecated-api: 'off' # we still make heavy use of url.parse
 
   # Nock additions.
   strict: ['error', 'safe']
