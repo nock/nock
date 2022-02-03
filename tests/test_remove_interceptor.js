@@ -114,7 +114,7 @@ describe('`removeInterceptor()`', () => {
       ).to.be.false()
     })
 
-    it('can match a request with a proto', () => {
+    it('can match a request with a options.proto (deprecated)', () => {
       const scope = nock('https://example.test')
         .get('/somepath')
         .reply(200, 'hey')
@@ -125,6 +125,25 @@ describe('`removeInterceptor()`', () => {
       expect(
         nock.removeInterceptor({
           proto: 'https',
+          hostname: 'example.test',
+          path: '/somepath',
+        })
+      ).to.be.true()
+
+      expect(scope.pendingMocks()).to.deep.equal([])
+    })
+
+    it('can match a request with a options.protocol', () => {
+      const scope = nock('https://example.test')
+        .get('/somepath')
+        .reply(200, 'hey')
+      expect(scope.pendingMocks()).to.deep.equal([
+        'GET https://example.test:443/somepath',
+      ])
+
+      expect(
+        nock.removeInterceptor({
+          protocol: 'https:',
           hostname: 'example.test',
           path: '/somepath',
         })

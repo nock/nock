@@ -85,7 +85,7 @@ describe('Direct use of `ClientRequest`', () => {
 
   it('should throw an expected error when creating with empty options', () => {
     expect(() => new http.ClientRequest()).to.throw(
-      'Creating a ClientRequest with empty `options` is not supported in Nock'
+      'Making a request with empty `options` is not supported in Nock'
     )
   })
 
@@ -108,11 +108,15 @@ describe('Direct use of `ClientRequest`', () => {
 
   it('should emit an expected error when no interceptors and net connect is disallowed', done => {
     nock.disableNetConnect()
-    new http.ClientRequest({ port: 12345, path: '/' }).on('error', err => {
-      expect(err.message).to.equal(
-        'Nock: Disallowed net connect for "localhost:12345/"'
-      )
-      done()
-    })
+    const request = new http.ClientRequest({ port: 12345, path: '/' }).on(
+      'error',
+      err => {
+        expect(err.message).to.equal(
+          'Nock: Disallowed net connect for "localhost:12345/"'
+        )
+        done()
+      }
+    )
+    request.end()
   })
 })

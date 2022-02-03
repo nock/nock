@@ -1,14 +1,13 @@
-'use strict'
+// @ts-check
 
 const { EventEmitter } = require('events')
-const debug = require('debug')('nock.socket')
 
-module.exports = class Socket extends EventEmitter {
+class Socket extends EventEmitter {
   constructor(options) {
     super()
 
     // Pretend this is a TLSSocket
-    if (options.proto === 'https') {
+    if (options.protocol === 'https:') {
       // https://github.com/nock/nock/issues/158
       this.authorized = true
       // https://github.com/nock/nock/issues/2147
@@ -66,7 +65,6 @@ module.exports = class Socket extends EventEmitter {
    */
   applyDelay(delayMs) {
     if (this.timeout && delayMs > this.timeout) {
-      debug('socket timeout')
       this.emit('timeout')
     }
   }
@@ -89,7 +87,6 @@ module.exports = class Socket extends EventEmitter {
       return this
     }
 
-    debug('socket destroy')
     this.destroyed = true
     this.readable = this.writable = false
     this.readableEnded = this.writableFinished = true
@@ -105,3 +102,5 @@ module.exports = class Socket extends EventEmitter {
     return this
   }
 }
+
+module.exports = Socket

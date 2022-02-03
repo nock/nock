@@ -11,11 +11,8 @@
 // 100% test coverage, so when utility code falls out of test, we know it's time
 // to remove it.
 
-const http = require('http')
 const { expect } = require('chai')
 const sinon = require('sinon')
-const semver = require('semver')
-const nock = require('..')
 
 const common = require('../lib/common')
 const matchBody = require('../lib/match_body')
@@ -86,7 +83,7 @@ describe('`normalizeRequestOptions()`', () => {
       host: 'example.test:12345',
       hostname: 'example.test',
       port: 12345,
-      proto: 'http',
+      protocol: 'http:',
     }
 
     expect(result).to.deep.equal(expected)
@@ -101,7 +98,7 @@ describe('`normalizeRequestOptions()`', () => {
       host: 'example.test:80',
       hostname: 'example.test',
       port: 80,
-      proto: 'http',
+      protocol: 'http:',
     }
 
     expect(result).to.deep.equal(expected)
@@ -115,7 +112,7 @@ describe('`normalizeRequestOptions()`', () => {
       // Should this be included?
       // hostname: 'localhost'
       port: 80,
-      proto: 'http',
+      protocol: 'http:',
     }
 
     expect(result).to.deep.equal(expected)
@@ -288,32 +285,12 @@ describe('`matchStringOrRegexp()`', () => {
   })
 })
 
-describe('`overrideRequests()`', () => {
-  afterEach(() => {
-    common.restoreOverriddenRequests()
-  })
-
-  it('should throw if called a second time', () => {
-    nock.restore()
-    common.overrideRequests()
-    // Second call throws.
-    expect(() => common.overrideRequests()).to.throw(
-      "Module's request already overridden for http protocol."
-    )
-  })
-})
-
-it('`restoreOverriddenRequests()` can be called more than once', () => {
-  common.restoreOverriddenRequests()
-  common.restoreOverriddenRequests()
-})
-
 describe('`stringifyRequest()`', () => {
   it('should include non-default ports', () => {
     const options = {
       method: 'GET',
       port: 3000,
-      proto: 'http',
+      protocol: 'http:',
       hostname: 'example.test',
       path: '/',
       headers: {},
@@ -334,7 +311,7 @@ describe('`stringifyRequest()`', () => {
     const options = {
       method: 'GET',
       port: 80,
-      proto: 'http',
+      protocol: 'http:',
       hostname: 'example.test',
       path: '/',
       headers: {},
@@ -354,7 +331,7 @@ describe('`stringifyRequest()`', () => {
     const options = {
       method: 'POST',
       port: 443,
-      proto: 'https',
+      protocol: 'https:',
       hostname: 'example.test',
       path: '/the/path',
       headers: {},
@@ -373,7 +350,7 @@ describe('`stringifyRequest()`', () => {
   it('should default optional options', () => {
     const options = {
       port: 80,
-      proto: 'http',
+      protocol: 'http:',
       hostname: 'example.test',
       headers: {},
     }
@@ -392,7 +369,7 @@ describe('`stringifyRequest()`', () => {
     const options = {
       method: 'GET',
       port: 80,
-      proto: 'http',
+      protocol: 'http:',
       hostname: 'example.test',
       path: '/',
       headers: { cookie: 'fiz=baz', 'set-cookie': ['hello', 'world'] },
@@ -412,7 +389,7 @@ describe('`stringifyRequest()`', () => {
     const options = {
       method: 'GET',
       port: 80,
-      proto: 'http',
+      protocol: 'http:',
       hostname: 'example.test',
       path: '/',
       headers: {},
@@ -472,38 +449,6 @@ it('`headersArrayToObject()`', () => {
 
 it('`percentEncode()` encodes extra reserved characters', () => {
   expect(common.percentEncode('foo+(*)!')).to.equal('foo%2B%28%2A%29%21')
-})
-
-describe('`normalizeClientRequestArgs()`', () => {
-  it('should throw for invalid URL', () => {
-    // See https://github.com/nodejs/node/pull/38614 release in node v16.2.0
-    const isNewErrorText = semver.gte(process.versions.node, '16.2.0')
-    const errorText = isNewErrorText ? 'Invalid URL' : 'example.test'
-
-    // no schema
-    expect(() => http.get('example.test')).to.throw(TypeError, errorText)
-  })
-
-  it('can include auth info', async () => {
-    const scope = nock('http://example.test')
-      .get('/')
-      .basicAuth({ user: 'user', pass: 'pw' })
-      .reply()
-
-    http.get('http://user:pw@example.test')
-    scope.isDone()
-  })
-
-  it('should handle a single callback', async () => {
-    // TODO: Only passing a callback isn't currently supported by Nock,
-    // but should be in the future as Node allows it.
-    const cb = () => {}
-
-    const { options, callback } = common.normalizeClientRequestArgs(cb)
-
-    expect(options).to.deep.equal({})
-    expect(callback).to.equal(cb)
-  })
 })
 
 describe('`dataEqual()`', () => {

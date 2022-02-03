@@ -28,7 +28,6 @@ rules:
   n/no-deprecated-api: 'off' # we still make heavy use of url.parse
 
   # Nock additions.
-  strict: ['error', 'safe']
   no-console: 'error'
   no-loop-func: 'error'
   no-var: 'error'
