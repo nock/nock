@@ -826,4 +826,18 @@ describe('Request Overrider', () => {
 
     expect(response).to.equal('BUFFER_SENT')
   })
+
+  // https://github.com/nock/nock/issues/2298
+  it('should handle non-default agents', async () => {
+    nock('https://example.test').get('/').reply(200, 'OK')
+
+    const agent = {
+      foo: 'bar',
+    }
+
+    const { statusCode } = await got('https://example.test', {
+      agent: { https: agent },
+    })
+    expect(statusCode).to.equal(200)
+  })
 })
