@@ -17,7 +17,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: 16
           cache: 'npm'
@@ -34,7 +34,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: 16
           cache: 'npm'
@@ -51,7 +51,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: 16
           cache: 'npm'
@@ -69,7 +69,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
