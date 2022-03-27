@@ -164,6 +164,26 @@ describe('`matchBody()`', () => {
     scope.done()
   })
 
+  it('match body with form multipart with search params', async () => {
+    const form = new FormData()
+    form.append('field', 'value')
+
+    const scope = nock('http://example.test')
+      .post(
+        '/',
+        /value/gi
+      )
+      .reply(200, (uri) => ['OK', uri, 'match=>/value/gi'].join(' '))
+
+    const { statusCode, body } = await got.post('http://example.test', { body: form, searchParams: {a: 'b'} })
+
+    expect(statusCode).to.equal(200)
+    expect(body).to.equal('OK /?a=b match=>/value/gi')
+    
+    scope.done()
+  })
+
+
   it('array like urlencoded form posts are correctly parsed', async () => {
     const scope = nock('http://example.test')
       .post('/', {
