@@ -28,7 +28,7 @@
     "propagate": "^2.0.0"
   },
   "devDependencies": {
-    "@definitelytyped/dtslint": "^0.0.103",
+    "@definitelytyped/dtslint": "^0.0.111",
     "@sinonjs/fake-timers": "^9.0.0",
     "assert-rejects": "^1.0.0",
     "chai": "^4.1.2",
@@ -48,7 +48,7 @@
     "prettier": "2.5.1",
     "proxyquire": "^2.1.0",
     "rimraf": "^3.0.0",
-    "semantic-release": "^18.0.1",
+    "semantic-release": "^19.0.2",
     "sinon": "^13.0.1",
     "sinon-chai": "^3.7.0",
     "typescript": "^4.2.2"
