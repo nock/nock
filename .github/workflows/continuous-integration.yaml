@@ -7,6 +7,9 @@ name: Continuous Integration
   push:
     branches:
       - main
+permissions:
+  contents: read
+
 jobs:
   format:
     name: Format
