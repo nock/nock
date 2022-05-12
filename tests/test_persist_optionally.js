@@ -144,6 +144,25 @@ describe('`persist()`', () => {
     expect(scope.isDone()).to.be.true()
   })
 
+  it('persisted mocks go to the bottom of the stack after matching', async () => {
+    const scope = nock('http://example.test')
+      .persist()
+      .get('/')
+      .reply(200, 'Persisting all the way')
+
+    const specificTestScope = nock('http://example.test')
+      .get('/')
+      .reply(201, 'return different response once')
+
+    await got('http://example.test/')
+
+    expect(scope.isDone()).to.be.true()
+
+    await got('http://example.test/')
+
+    expect(specificTestScope.isDone()).to.be.true()
+  })
+
   it('persisted mocks appear in `pendingMocks()`', async () => {
     const scope = nock('http://example.test')
       .get('/abc')
