@@ -163,6 +163,19 @@ describe('Nock lifecycle functions', () => {
       await got('http://example.test/')
       expect(nock.activeMocks()).to.be.empty()
     })
+
+    it("activeMocks doesn't return duplicate mocks", () => {
+      nock('http://example.test')
+        .get('/').reply()
+        .get('/second').reply()
+        .get('/third').reply()
+
+      expect(nock.activeMocks()).to.deep.equal([
+        'GET http://example.test:80/',
+        'GET http://example.test:80/second',
+        'GET http://example.test:80/third',
+      ])
+    })
   })
 
   describe('resetting nock catastrophically while a request is in progress', () => {
