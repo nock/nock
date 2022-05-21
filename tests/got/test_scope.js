@@ -87,20 +87,6 @@ describe('`Scope#remove()`', () => {
     expect(scope.activeMocks()).to.deep.equal([])
   })
 
-  it('when a mock is persisted, does nothing', () => {
-    const scope = nock('http://example.test').persist().get('/').reply(200)
-    const key = 'GET http://example.test:80/'
-
-    // Confidence check.
-    expect(scope.activeMocks()).to.deep.equal([key])
-
-    // Act.
-    scope.remove(key, scope.interceptors[0])
-
-    // Assert.
-    expect(scope.activeMocks()).to.deep.equal([key])
-  })
-
   it('when the key is nonexistent, does nothing', () => {
     const scope = nock('http://example.test').get('/').reply(200)
     const key = 'GET http://example.test:80/'

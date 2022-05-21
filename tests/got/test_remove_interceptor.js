@@ -6,12 +6,29 @@ const got = require('./got_client')
 
 describe('`removeInterceptor()`', () => {
   context('when invoked with an Interceptor instance', () => {
-    it('remove interceptor removes given interceptor', async () => {
+    it('removes given interceptor', async () => {
       const newScope = nock('http://example.test')
         .get('/somepath')
         .reply(202, 'other-content')
       const givenInterceptor = nock('http://example.test').get('/somepath')
       givenInterceptor.reply(200, 'hey')
+
+      expect(nock.removeInterceptor(givenInterceptor)).to.be.true()
+
+      const { statusCode, body } = await got('http://example.test/somepath')
+
+      expect(statusCode).to.equal(202)
+      expect(body).to.equal('other-content')
+
+      newScope.done()
+    })
+
+    it('removes given interceptor even with `persist()`', async () => {
+      const newScope = nock('http://example.test')
+        .get('/somepath')
+        .reply(202, 'other-content')
+      const givenInterceptor = nock('http://example.test').get('/somepath')
+      givenInterceptor.reply(200, 'hey').persist()
 
       expect(nock.removeInterceptor(givenInterceptor)).to.be.true()
 
