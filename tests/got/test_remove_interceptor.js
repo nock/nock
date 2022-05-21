@@ -53,6 +53,34 @@ describe('`removeInterceptor()`', () => {
       expect(scope.pendingMocks()).to.deep.equal([])
     })
 
+    it('reflects the removal in `interceptors` of its scope', () => {
+      const givenInterceptor = nock('http://example.test').get('/somepath')
+      const scope = givenInterceptor.reply(200, 'hey')
+
+      expect(scope.interceptors).to.deep.equal([
+        givenInterceptor,
+      ])
+
+      expect(nock.removeInterceptor(givenInterceptor)).to.be.true()
+
+      expect(scope.interceptors).to.deep.equal([])
+    })
+
+    it('reflects the removal in `keyedInterceptors` of its scope', () => {
+      const givenInterceptor = nock('http://example.test').get('/somepath')
+      const scope = givenInterceptor.reply(200, 'hey')
+
+      expect(scope.keyedInterceptors).to.deep.equal({ 
+        'GET http://example.test:80/somepath': [
+          givenInterceptor,
+        ]
+      })
+
+      expect(nock.removeInterceptor(givenInterceptor)).to.be.true()
+
+      expect(scope.keyedInterceptors).to.deep.equal({})
+    })
+
     it('removes given interceptor for https', async () => {
       const givenInterceptor = nock('https://example.test').get('/somepath')
       const scope = givenInterceptor.reply(200, 'hey')
