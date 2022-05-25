@@ -10,6 +10,7 @@ const nock = require('..')
 
 const got = require('./got_client')
 const servers = require('./servers')
+const assertRejects = require("assert-rejects");
 
 describe('Recorder', () => {
   let globalCount
@@ -258,6 +259,81 @@ describe('Recorder', () => {
     const response2 = await got(origin)
     expect(response2.body).to.equal(exampleText)
     nocks.forEach(nock => nock.done())
+  })
+
+  it('records gunzipped objects correctly', async () => {
+    const exampleText = '<html><body>gunzipped</body></html>'
+
+    const { origin } = await servers.startHttpServer((request, response) => {
+      switch (parse(request.url).pathname) {
+        case '/comp':
+          response.writeHead(200, { 'content-encoding': 'gzip' })
+          response.write(zlib.gzipSync(Buffer.from(exampleText)))
+          break
+        case '/noncomp':
+          response.write(exampleText)
+          break
+      }
+      response.end()
+    })
+
+    nock.restore()
+    nock.recorder.clear()
+    expect(nock.recorder.play()).to.be.empty()
+
+    nock.recorder.rec({
+      dont_print: true,
+      output_objects: true,
+      gunzip: true,
+    })
+
+    const compRes = await got(`${origin}/comp`)
+    const nonCompRes = await got(`${origin}/noncomp`)
+
+    nock.restore()
+    const recorded = nock.recorder.play()
+    nock.recorder.clear()
+    nock.activate()
+
+    expect(recorded).to.have.lengthOf(2)
+    const [recComp, recNonComp] = recorded
+    expect(recComp.response).to.equal(exampleText)
+    expect(recNonComp.response).to.equal(exampleText)
+
+    expect(compRes.body).to.equal(exampleText)
+    expect(nonCompRes.body).to.equal(exampleText)
+  })
+
+  it('falls back to default behaviour on invalid gzip body', async () => {
+    const invalidBody = 'not valid gzip'
+    const { origin } = await servers.startHttpServer((request, response) => {
+      response.writeHead(200, { 'content-encoding': 'gzip' })
+      response.write(invalidBody)
+      response.end()
+    })
+
+    nock.restore()
+    nock.recorder.clear()
+    expect(nock.recorder.play()).to.be.empty()
+
+    nock.recorder.rec({
+      dont_print: true,
+      output_objects: true,
+      gunzip: true,
+    })
+
+    await assertRejects(
+      got(origin),
+      /incorrect header check/
+    )
+
+    nock.restore()
+    const recorded = nock.recorder.play()
+    nock.recorder.clear()
+    nock.activate()
+    const expectedResponseBody = [Buffer.from(invalidBody, 'utf8').toString('hex')]
+    expect(recorded).to.have.lengthOf(1)
+    expect(recorded[0].response).to.eql(expectedResponseBody)
   })
 
   it('records and replays correctly with filteringRequestBody', async () => {
