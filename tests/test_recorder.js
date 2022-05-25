@@ -2,7 +2,7 @@
 
 const http = require('http')
 const https = require('https')
-const { URLSearchParams } = require('url')
+const { URLSearchParams, parse } = require('url')
 const zlib = require('zlib')
 const sinon = require('sinon')
 const { expect } = require('chai')
@@ -224,7 +224,7 @@ describe('Recorder', () => {
     const exampleText = '<html><body>example</body></html>'
 
     const { origin } = await servers.startHttpServer((request, response) => {
-      switch (require('url').parse(request.url).pathname) {
+      switch (parse(request.url).pathname) {
         case '/':
           response.writeHead(302, { Location: '/abc' })
           break
@@ -684,7 +684,7 @@ describe('Recorder', () => {
     const exampleBody = '<html><body>example</body></html>'
 
     const { origin } = await servers.startHttpServer((request, response) => {
-      switch (require('url').parse(request.url).pathname) {
+      switch (parse(request.url).pathname) {
         case '/':
           response.writeHead(302, { Location: '/abc' })
           break
