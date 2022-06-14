@@ -151,6 +151,34 @@ describe('Request Overrider', () => {
     req.end()
   })
 
+  it("write doesn't throw if invoked w/o callback", done => {
+    const scope = nock('http://example.test').post('/').reply()
+
+    const reqWriteCallback = sinon.spy()
+
+    const req = http.request(
+      {
+        host: 'example.test',
+        method: 'POST',
+        path: '/',
+      },
+      res => {
+        expect(res.statusCode).to.equal(200)
+        res.on('end', () => {
+          expect(reqWriteCallback).to.not.have.been.called()
+          scope.done()
+          done()
+        })
+        // Streams start in 'paused' mode and must be started.
+        // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+        res.resume()
+      }
+    )
+
+    req.write(undefined)
+    req.end()
+  })
+
   it('end callback called', done => {
     const scope = nock('http://example.test')
       .filteringRequestBody(/mia/, 'nostra')
