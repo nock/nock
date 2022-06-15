@@ -89,6 +89,40 @@ describe('Request Overrider', () => {
     })
   })
 
+  it('write callback called when encoding is not supplied', done => {
+    const scope = nock('http://example.test')
+      .filteringRequestBody(/mia/, 'nostra')
+      .post('/', 'mamma nostra')
+      .reply()
+
+    const reqWriteCallback = sinon.spy()
+
+    const req = http.request(
+      {
+        host: 'example.test',
+        method: 'POST',
+        path: '/',
+        port: 80,
+      },
+      res => {
+        expect(reqWriteCallback).to.have.been.calledOnce()
+        expect(res.statusCode).to.equal(200)
+        res.on('end', () => {
+          scope.done()
+          done()
+        })
+        // Streams start in 'paused' mode and must be started.
+        // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+        res.resume()
+      }
+    )
+
+    req.write('mamma mia', () => {
+      reqWriteCallback()
+      req.end()
+    })
+  })
+
   it('write callback is not called if the provided chunk is undefined', done => {
     const scope = nock('http://example.test').post('/').reply()
 
@@ -114,6 +148,34 @@ describe('Request Overrider', () => {
     )
 
     req.write(undefined, null, reqWriteCallback)
+    req.end()
+  })
+
+  it("write doesn't throw if invoked w/o callback", done => {
+    const scope = nock('http://example.test').post('/').reply()
+
+    const reqWriteCallback = sinon.spy()
+
+    const req = http.request(
+      {
+        host: 'example.test',
+        method: 'POST',
+        path: '/',
+      },
+      res => {
+        expect(res.statusCode).to.equal(200)
+        res.on('end', () => {
+          expect(reqWriteCallback).to.not.have.been.called()
+          scope.done()
+          done()
+        })
+        // Streams start in 'paused' mode and must be started.
+        // See https://nodejs.org/api/stream.html#stream_class_stream_readable
+        res.resume()
+      }
+    )
+
+    req.write(undefined)
     req.end()
   })
 
