@@ -228,8 +228,8 @@ declare namespace nock {
   }
 
   interface Definition {
-    scope: string
-    path: string
+    scope: string | RegExp
+    path: string | RegExp
     port?: number | string
     method?: string
     status?: number
