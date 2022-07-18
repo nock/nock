@@ -856,13 +856,13 @@ const scope = nock('http://api.myservice.com')
   // Only this interceptor will match the header value `x-my-action` with `MyFirstAction`
   .matchHeader('x-my-action', 'MyFirstAction')
   .reply(200, {
-    data: 'FirstActionResponse'
+    data: 'FirstActionResponse',
   })
   .get('/')
   // Only this interceptor will match the header value `x-my-action` with `MySecondAction`
   .matchHeader('x-my-action', 'MySecondAction')
   .reply(200, {
-    data: 'SecondActionResponse'
+    data: 'SecondActionResponse',
   })
 ```
 
