@@ -58,7 +58,7 @@ it into your editor][integrate prettier].
 
 [integrate prettier]: https://prettier.io/docs/en/editors.html
 
-If you don't want to integrate with your editor, you can run `npm run prettier`
+If you don't want to integrate with your editor, you can run `npm run format:fix`
 instead.
 
 Semantic issues are checked with ESLint via `npm run lint`.

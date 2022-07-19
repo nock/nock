@@ -846,10 +846,23 @@ If you need to match requests only if certain request headers match, you can.
 
 ```js
 const scope = nock('http://api.myservice.com')
+  // Interceptors created after here will only match when the header `accept` equals `application/json`.
   .matchHeader('accept', 'application/json')
   .get('/')
   .reply(200, {
     data: 'hello world',
+  })
+  .get('/')
+  // Only this interceptor will match the header value `x-my-action` with `MyFirstAction`
+  .matchHeader('x-my-action', 'MyFirstAction')
+  .reply(200, {
+    data: 'FirstActionResponse',
+  })
+  .get('/')
+  // Only this interceptor will match the header value `x-my-action` with `MySecondAction`
+  .matchHeader('x-my-action', 'MySecondAction')
+  .reply(200, {
+    data: 'SecondActionResponse',
   })
 ```
 
