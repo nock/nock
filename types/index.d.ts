@@ -70,7 +70,7 @@ declare namespace nock {
     | RegExp
     | { (fieldValue: string): boolean }
 
-  type Body = string | Record<string, any> // a string or decoded JSON
+  type Body = string | number | boolean | Record<string, any> // a string, number, boolean or decoded JSON
   type ReplyBody = Body | Buffer | ReadStream
 
   type ReplyHeaderFunction = (
