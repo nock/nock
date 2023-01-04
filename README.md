@@ -159,10 +159,16 @@ If you don’t want interceptors to be removed as they are used, you can use the
 
 ### Specifying hostname
 
-The request hostname can be a string or a RegExp.
+The request hostname can be a string, URL, or a RegExp.
 
 ```js
 const scope = nock('http://www.example.com')
+  .get('/resource')
+  .reply(200, 'domain matched')
+```
+
+```js
+const scope = nock(new URL('http://www.example.com'))
   .get('/resource')
   .reply(200, 'domain matched')
 ```

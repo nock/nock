@@ -34,8 +34,7 @@ describe('`Scope#constructor`', () => {
     scope.done()
   })
 
-  // TODO: https://github.com/nock/nock/pull/1879
-  it.skip('accepts a WHATWG URL instance', async () => {
+  it('accepts a WHATWG URL instance', async () => {
     const scope = nock(new url.URL('http://example.test')).get('/').reply()
 
     const { statusCode } = await got('http://example.test')
@@ -43,10 +42,10 @@ describe('`Scope#constructor`', () => {
     scope.done()
   })
 
-  it('fails when provided a WHATWG URL instance', () => {
-    // This test just proves the lack of current support. When this feature is added,
-    // this test should be removed and the test above un-skipped.
-    expect(() => nock(new url.URL('http://example.test'))).to.throw()
+  it('throws on invalid or omitted protocol', async () => {
+    expect(() => nock('ws://example.test')).to.throw()
+    expect(() => nock('localhost/foo')).to.throw()
+    expect(() => nock('foo.com:1234')).to.throw()
   })
 })
 
