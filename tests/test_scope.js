@@ -50,8 +50,8 @@ describe('`Scope#constructor`', () => {
 
   it('throws on invalid URL format', async () => {
     expect(() => nock(['This is not a url'])).to.throw()
-    // The following contains all valid properties of WHATWG URL, but is not an 
-    // instance of URL. Maybe we should support object literals some day? A 
+    // The following contains all valid properties of WHATWG URL, but is not an
+    // instance of URL. Maybe we should support object literals some day? A
     // simple duck-type validator would suffice.
     expect(() =>
       nock({
