@@ -216,6 +216,7 @@ declare namespace nock {
   interface Recorder {
     rec(options?: boolean | RecorderOptions): void
     clear(): void
+    restore(): void
     play(): string[] | Definition[]
   }
 
