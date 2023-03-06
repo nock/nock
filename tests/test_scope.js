@@ -8,6 +8,7 @@ const url = require('url')
 const Interceptor = require('../lib/interceptor')
 const nock = require('..')
 const got = require('./got_client')
+const { define } = require("../lib/scope")
 
 it('scope exposes interceptors', () => {
   const scopes = nock.load(
@@ -133,6 +134,21 @@ describe('`Scope#isDone()`', () => {
     expect(scope.isDone()).to.be.true()
 
     scope.done()
+  })
+})
+
+describe('`define()`', function () {
+  it("accurately sets interceptor response when value is `false`", function () {
+    const [scope] = define([{
+      "scope": "http://www.example.test:80",
+      "method": "GET",
+      "path": "/",
+      "body": "",
+      "status": 200,
+      "response": false,
+    }])
+
+    expect(scope.interceptors[0].body).to.be.false()
   })
 })
 
