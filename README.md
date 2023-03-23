@@ -19,81 +19,83 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
 
 <!-- toc -->
 
-- [How does it work?](#how-does-it-work)
-- [Install](#install)
-  - [Node version support](#node-version-support)
-- [Usage](#usage)
-  - [READ THIS! - About interceptors](#read-this---about-interceptors)
-  - [Specifying hostname](#specifying-hostname)
-  - [Specifying path](#specifying-path)
-  - [Specifying request body](#specifying-request-body)
-  - [Specifying request query string](#specifying-request-query-string)
-  - [Specifying replies](#specifying-replies)
-    - [Access original request and headers](#access-original-request-and-headers)
-    - [Replying with errors](#replying-with-errors)
-  - [Specifying headers](#specifying-headers)
-    - [Header field names are case-insensitive](#header-field-names-are-case-insensitive)
-    - [Specifying Request Headers](#specifying-request-headers)
-    - [Specifying Reply Headers](#specifying-reply-headers)
-    - [Default Reply Headers](#default-reply-headers)
-    - [Including Content-Length Header Automatically](#including-content-length-header-automatically)
-    - [Including Date Header Automatically](#including-date-header-automatically)
-  - [HTTP Verbs](#http-verbs)
-  - [Support for HTTP and HTTPS](#support-for-http-and-https)
-  - [Non-standard ports](#non-standard-ports)
-  - [Repeat response n times](#repeat-response-n-times)
-  - [Delay the response](#delay-the-response)
-    - [Delay the connection](#delay-the-connection)
-      - [Technical Details](#technical-details)
-    - [Delay the response body](#delay-the-response-body)
-      - [Technical Details](#technical-details-1)
-  - [Chaining](#chaining)
-  - [Scope filtering](#scope-filtering)
-  - [Conditional scope filtering](#conditional-scope-filtering)
-  - [Path filtering](#path-filtering)
-  - [Request Body filtering](#request-body-filtering)
-  - [Request Headers Matching](#request-headers-matching)
-  - [Optional Requests](#optional-requests)
-  - [Allow **unmocked** requests on a mocked hostname](#allow-unmocked-requests-on-a-mocked-hostname)
-- [Expectations](#expectations)
-  - [.isDone()](#isdone)
-  - [.cleanAll()](#cleanall)
-  - [.abortPendingRequests()](#abortpendingrequests)
-  - [.persist()](#persist)
-  - [.pendingMocks()](#pendingmocks)
-  - [.activeMocks()](#activemocks)
-  - [.isActive()](#isactive)
-- [Restoring](#restoring)
-- [Activating](#activating)
-- [Turning Nock Off (experimental!)](#turning-nock-off-experimental)
-- [Enable/Disable real HTTP requests](#enabledisable-real-http-requests)
-  - [Disabling requests](#disabling-requests)
-  - [Enabling requests](#enabling-requests)
-  - [Resetting NetConnect](#resetting-netconnect)
-- [Recording](#recording)
-  - [`dont_print` option](#dont_print-option)
-  - [`output_objects` option](#output_objects-option)
-  - [`enable_reqheaders_recording` option](#enable_reqheaders_recording-option)
-  - [`logging` option](#logging-option)
-  - [`use_separator` option](#use_separator-option)
-  - [.removeInterceptor()](#removeinterceptor)
-- [Events](#events)
-  - [Global no match event](#global-no-match-event)
-- [Nock Back](#nock-back)
-  - [Setup](#setup)
-    - [Options](#options)
-  - [Usage](#usage-1)
-    - [Options](#options-1)
-      - [Example](#example)
-  - [Modes](#modes)
-- [Common issues](#common-issues)
-  - [Axios](#axios)
-  - [Memory issues with Jest](#memory-issues-with-jest)
-- [Debugging](#debugging)
-- [Contributing](#contributing)
-- [Contributors](#contributors)
-- [Sponsors](#sponsors)
-- [License](#license)
+- [Nock](#nock)
+  - [How does it work?](#how-does-it-work)
+  - [Install](#install)
+    - [Node version support](#node-version-support)
+  - [Usage](#usage)
+    - [READ THIS! - About interceptors](#read-this---about-interceptors)
+    - [Specifying hostname](#specifying-hostname)
+    - [Specifying path](#specifying-path)
+    - [Specifying request body](#specifying-request-body)
+    - [Specifying request query string](#specifying-request-query-string)
+    - [Specifying replies](#specifying-replies)
+      - [Access original request and headers](#access-original-request-and-headers)
+      - [Replying with errors](#replying-with-errors)
+    - [Specifying headers](#specifying-headers)
+      - [Header field names are case-insensitive](#header-field-names-are-case-insensitive)
+      - [Specifying Request Headers](#specifying-request-headers)
+      - [Specifying Reply Headers](#specifying-reply-headers)
+      - [Default Reply Headers](#default-reply-headers)
+      - [Including Content-Length Header Automatically](#including-content-length-header-automatically)
+      - [Including Date Header Automatically](#including-date-header-automatically)
+    - [HTTP Verbs](#http-verbs)
+    - [Support for HTTP and HTTPS](#support-for-http-and-https)
+    - [Non-standard ports](#non-standard-ports)
+    - [Repeat response n times](#repeat-response-n-times)
+    - [Delay the response](#delay-the-response)
+      - [Delay the connection](#delay-the-connection)
+        - [Technical Details](#technical-details)
+      - [Delay the response body](#delay-the-response-body)
+        - [Technical Details](#technical-details-1)
+    - [Chaining](#chaining)
+    - [Scope filtering](#scope-filtering)
+    - [Conditional scope filtering](#conditional-scope-filtering)
+    - [Path filtering](#path-filtering)
+    - [Request Body filtering](#request-body-filtering)
+    - [Request Headers Matching](#request-headers-matching)
+    - [Optional Requests](#optional-requests)
+    - [Allow **unmocked** requests on a mocked hostname](#allow-unmocked-requests-on-a-mocked-hostname)
+  - [Expectations](#expectations)
+    - [.isDone()](#isdone)
+    - [.cleanAll()](#cleanall)
+    - [.abortPendingRequests()](#abortpendingrequests)
+    - [.persist()](#persist)
+    - [.pendingMocks()](#pendingmocks)
+    - [.activeMocks()](#activemocks)
+    - [.isActive()](#isactive)
+  - [Restoring](#restoring)
+  - [Activating](#activating)
+  - [Turning Nock Off (experimental!)](#turning-nock-off-experimental)
+  - [Enable/Disable real HTTP requests](#enabledisable-real-http-requests)
+    - [Disabling requests](#disabling-requests)
+    - [Enabling requests](#enabling-requests)
+    - [Resetting NetConnect](#resetting-netconnect)
+  - [Recording](#recording)
+    - [`dont_print` option](#dont_print-option)
+    - [`allow_mocked` option](#allow_mocked-option)
+    - [`output_objects` option](#output_objects-option)
+    - [`enable_reqheaders_recording` option](#enable_reqheaders_recording-option)
+    - [`logging` option](#logging-option)
+    - [`use_separator` option](#use_separator-option)
+    - [.removeInterceptor()](#removeinterceptor)
+  - [Events](#events)
+    - [Global no match event](#global-no-match-event)
+  - [Nock Back](#nock-back)
+    - [Setup](#setup)
+      - [Options](#options)
+    - [Usage](#usage-1)
+      - [Options](#options-1)
+        - [Example](#example)
+    - [Modes](#modes)
+  - [Common issues](#common-issues)
+    - [Axios](#axios)
+    - [Memory issues with Jest](#memory-issues-with-jest)
+  - [Debugging](#debugging)
+  - [Contributing](#contributing)
+  - [Contributors](#contributors)
+  - [Sponsors](#sponsors)
+  - [License](#license)
 
 <!-- tocstop -->
 
@@ -1185,8 +1187,6 @@ Recording relies on intercepting real requests and responses and then persisting
 
 In order to stop recording you should call `nock.restore()` and recording will stop.
 
-**ATTENTION!:** when recording is enabled, nock does no validation, nor will any mocks be enabled. Please be sure to turn off recording before attempting to use any mocks in your tests.
-
 ### `dont_print` option
 
 If you just want to capture the generated code into a var as an array you can use:
@@ -1204,6 +1204,29 @@ The `nockCalls` var will contain an array of strings representing the generated 
 Copy and paste that code into your tests, customize at will, and you're done! You can call `nock.recorder.clear()` to remove already recorded calls from the array that `nock.recorder.play()` returns.
 
 (Remember that you should do this one test at a time).
+
+### `allow_mocked` option
+
+By default, when recording is enabled, nock does no validation, nor will any mocks be enabled. Please be sure to turn off recording before attempting to use any mocks in your tests.
+
+If you want to intercept and return recorded responses for some requests, you can use:
+
+```js
+nock.recorder.rec({
+  allow_mocked: true,
+  dont_print: true,
+})
+nock('http://example.com')
+  .get('/resource')
+  .reply(200, 'override')
+// Http request to 'http://example.com/resource'
+// Http request to 'http://example.com/resource2'
+const nockCalls = nock.recorder.play()
+```
+
+The `nockCalls` var will only record the non-mocked http requests (i.e. `/resource2`). Calls to matched mocked requests will return the mocked response and will not be recorded.
+
+This is useful when you want your tests to use specific responses for certain requests but to record the rest.
 
 ### `output_objects` option
 
