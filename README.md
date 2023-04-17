@@ -1539,9 +1539,8 @@ import test from 'ava' // You can use any test framework.
 // can't be intercepted by nock. So, configure axios to use the node adapter.
 //
 // References:
-// https://github.com/nock/nock/issues/699#issuecomment-272708264
-// https://github.com/axios/axios/issues/305
-axios.defaults.adapter = require('axios/lib/adapters/http')
+// https://github.com/axios/axios/pull/5277
+axios.defaults.adapter = 'http'
 
 test('can fetch test response', async t => {
   // Set up the mock request.
