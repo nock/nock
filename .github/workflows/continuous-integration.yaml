@@ -7,7 +7,6 @@ name: Continuous Integration
   push:
     branches:
       - main
-      - add-node-18-to-test-matrix
 jobs:
   format:
     name: Format
