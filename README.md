@@ -1558,6 +1558,16 @@ test('can fetch test response', async t => {
 })
 ```
 
+For Nock + Axios + Jest to work, you'll have to also adapt your jest.config.js, like so:
+
+```
+moduleNameMapper: {
+    // Force CommonJS build for http adapter to be available.
+    // via https://github.com/axios/axios/issues/5101#issuecomment-1276572468
+    '^axios$': require.resolve('axios'),
+```
+
+
 [axios]: https://github.com/axios/axios
 
 ### Memory issues with Jest
