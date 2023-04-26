@@ -59,7 +59,7 @@
     "lint": "run-p lint:js lint:ts",
     "lint:js": "eslint --cache --cache-location './.cache/eslint' '**/*.js'",
     "lint:js:fix": "eslint --cache --cache-location './.cache/eslint' --fix '**/*.js'",
-    "lint:ts": "dtslint types",
+    "lint:ts": "dtslint --expectOnly types",
     "test": "nyc --reporter=lcov --reporter=text mocha tests",
     "test:coverage": "open coverage/lcov-report/index.html"
   },

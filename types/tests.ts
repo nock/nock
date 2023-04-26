@@ -43,9 +43,12 @@ inst = scope.post(str, [num, str, regex])
 inst = scope.post(str, [num, num, num] as const)
 inst = scope.post(str, regex)
 inst = scope.post(str, buffer)
-inst = scope.post(str, true) // $ExpectError
-inst = scope.post(str, null) // $ExpectError
-inst = scope.post(str, num) // $ExpectError
+// @ts-expect-error
+inst = scope.post(str, true)
+// @ts-expect-error
+inst = scope.post(str, null)
+// @ts-expect-error
+inst = scope.post(str, num)
 
 inst = scope.put(str)
 inst = scope.put(str, str)
@@ -69,9 +72,12 @@ inst = inst.query(true)
 inst = inst.query(obj)
 inst = inst.query(objWithUndefinedValue)
 inst = inst.query({ foo: regex })
-inst = inst.query(strings) // $ExpectError
-inst = inst.query(buffer) // $ExpectError
-inst = inst.query(regex) // $ExpectError
+// @ts-expect-error
+inst = inst.query(strings)
+// @ts-expect-error
+inst = inst.query(buffer)
+// @ts-expect-error
+inst = inst.query(regex)
 
 inst = scope.intercept(str, str)
 inst = scope.intercept(str, str, str)
