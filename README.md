@@ -1540,6 +1540,9 @@ import test from 'ava' // You can use any test framework.
 //
 // References:
 // https://github.com/axios/axios/pull/5277
+// https://github.com/nock/nock/issues/699#issuecomment-272708264
+// https://github.com/axios/axios/issues/305
+
 axios.defaults.adapter = 'http'
 
 test('can fetch test response', async t => {
@@ -1561,12 +1564,14 @@ test('can fetch test response', async t => {
 For Nock + Axios + Jest to work, you'll have to also adapt your jest.config.js, like so:
 
 ```js
-moduleNameMapper: {
+const config = {
+  moduleNameMapper: {
     // Force CommonJS build for http adapter to be available.
     // via https://github.com/axios/axios/issues/5101#issuecomment-1276572468
     '^axios$': require.resolve('axios'),
+  },
+}
 ```
-
 
 [axios]: https://github.com/axios/axios
 
