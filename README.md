@@ -1541,7 +1541,7 @@ import test from 'ava' // You can use any test framework.
 // References:
 // https://github.com/nock/nock/issues/699#issuecomment-272708264
 // https://github.com/axios/axios/issues/305
-axios.defaults.adapter = require('axios/lib/adapters/http')
+axios.defaults.adapter = 'http'
 
 test('can fetch test response', async t => {
   // Set up the mock request.
