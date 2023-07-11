@@ -9,6 +9,9 @@
 [npmjs]: https://www.npmjs.com/package/nock
 [build]: https://travis-ci.org/nock/nock
 
+> **Warning**  
+> nock is currently not compatible with Node's experimental native `fetch` implementation. See [#2397](https://github.com/nock/nock/issues/2397)
+
 HTTP server mocking and expectations library for Node.js
 
 Nock can be used to test modules that perform HTTP requests in isolation.
