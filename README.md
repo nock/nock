@@ -1005,7 +1005,7 @@ const scope = nock('http://example.com')
   .reply(200, 'Persisting all the way')
 ```
 
-Note that while a persisted scope will always intercept the requests, it is considered "done" after the first interception, and they are pushed to the bottom of the stack after consumption.
+Note that while a persisted scope will always intercept the requests, it is considered "done" after the first interception.
 
 If you want to stop persisting an individual persisted mock you can call `persist(false)`:
 
