@@ -1318,6 +1318,22 @@ nock.recorder.rec({
 })
 ```
 
+### `gunzip` option
+
+By default, nock won't decompress gzipped response bodies (you will see the body as an array of hex strings instead). 
+However, when recording/replaying it can be useful to work with the decompressed versions. 
+
+To have nock decompress the response bodies before it outputs the request, set `gunzip` to `true`.
+
+```js
+nock.recorder.rec({
+  gunzip: true,
+})
+```
+
+Note: This option requires the `content-encoding` header on the response to be `gzip` to have an effect (trigger decompression).
+No other `content-encoding` values are supported to enable decompression at this time (e.g. `deflate` is not supported).
+
 ### .removeInterceptor()
 
 This allows removing a specific interceptor. This can be either an interceptor instance or options for a url. It's useful when there's a list of common interceptors shared between tests, where an individual test requires one of the shared interceptors to behave differently.
