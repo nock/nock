@@ -360,6 +360,16 @@ describe('Intercept', () => {
     scope.done()
   })
 
+  it('can use fetch', async () => {
+    const scope = nock('https://example.test').get('/').reply(200, 'Hello World!')
+
+    const response = await fetch('https://example.test/')
+
+    expect(response.status).to.equal(200)
+    expect(await response.text()).to.equal('Hello World!')
+    scope.done()
+  })
+
   it('emits error when listeners are added after `req.end()` call', done => {
     nock('http://example.test').get('/').reply()
 
