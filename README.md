@@ -160,6 +160,8 @@ This means that you can intercept 2 or more calls to the same URL and return dif
 It also means that you must setup one interceptor for each request you are going to have, otherwise nock will throw an error because that URL was not present in the interceptor list.
 If you don’t want interceptors to be removed as they are used, you can use the [.persist()](#persist) method.
 
+> You can always disable an interceptor by setting `Interceptor.enabled` to false
+
 ### Specifying hostname
 
 The request hostname can be a string, URL, or a RegExp.
@@ -1086,7 +1088,7 @@ Only for cases where nock has been deactivated using [nock.restore()](#restoring
 nock.activate()
 ```
 
-**note**: To check if nock HTTP interceptor is active or inactive, use [nock.isActive()](#isactive).
+**note**: To check if nock HTTP interceptor is active or inactive, use [nock.isActive()](#isactive). This will not check for the property `.enabled`
 
 ## Turning Nock Off (experimental!)
 
@@ -1322,6 +1324,8 @@ nock.recorder.rec({
 
 This allows removing a specific interceptor. This can be either an interceptor instance or options for a url. It's useful when there's a list of common interceptors shared between tests, where an individual test requires one of the shared interceptors to behave differently.
 
+> If you expect to use the interceptor later, you can set the `Interceptor.enabled` property to `false` to temporarily disable the interceptor
+
 Examples:
 
 ```js
@@ -1355,6 +1359,11 @@ nock.removeInterceptor(interceptor)
 const interceptor = nock('http://example.org').get('somePath')
 interceptor.reply(200, 'OK')
 nock.removeInterceptor(interceptor)
+```
+
+```js
+const interceptor = nock('http://example.org').get('somePath')
+interceptor.enabled = false
 ```
 
 ## Events
