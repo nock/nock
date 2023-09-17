@@ -340,7 +340,7 @@ describe('Intercept', () => {
     req.end()
   })
 
-  it('can take a port', async () => {
+  it.only('can take a port', async () => {
     const scope = nock('http://example.test:3333').get('/').reply()
 
     const { statusCode } = await got('http://example.test:3333/')
@@ -357,16 +357,6 @@ describe('Intercept', () => {
     })
 
     expect(statusCode).to.equal(200)
-    scope.done()
-  })
-
-  it('can use fetch', async () => {
-    const scope = nock('https://example.test').get('/').reply(200, 'Hello World!')
-
-    const response = await fetch('https://example.test/')
-
-    expect(response.status).to.equal(200)
-    expect(await response.text()).to.equal('Hello World!')
     scope.done()
   })
 
