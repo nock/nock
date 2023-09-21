@@ -340,7 +340,7 @@ describe('Intercept', () => {
     req.end()
   })
 
-  it.only('can take a port', async () => {
+  it('can take a port', async () => {
     const scope = nock('http://example.test:3333').get('/').reply()
 
     const { statusCode } = await got('http://example.test:3333/')
@@ -357,6 +357,15 @@ describe('Intercept', () => {
     })
 
     expect(statusCode).to.equal(200)
+    scope.done()
+  })
+
+  it('can use fetch', async () => {
+    const scope = nock('https://example.test').get('/').reply()
+
+    const { status } = await fetch('https://example.test/')
+
+    expect(status).to.equal(200)
     scope.done()
   })
 
@@ -482,6 +491,7 @@ describe('Intercept', () => {
   })
 
   // TODO: Move this test to test_header_matching.
+  // TODO: https://github.com/mswjs/interceptors/pull/440
   it('username and password works', done => {
     const scope = nock('http://example.test')
       .get('/')
@@ -502,6 +512,7 @@ describe('Intercept', () => {
       .end()
   })
 
+  // TODO: https://github.com/mswjs/interceptors/pull/440
   it('Matches with a username and password in the URL', async () => {
     const scope = nock('http://example.test')
       .get('/abc')
@@ -702,6 +713,7 @@ describe('Intercept', () => {
   // https://github.com/nock/nock/issues/158
   // mikeal/request with strictSSL: true
   // https://github.com/request/request/blob/3c0cddc7c8eb60b470e9519da85896ed7ee0081e/request.js#L943-L950
+  // TODO: msw doesn't expose the socket to the interceptor handler
   it('should denote the response client is authorized for HTTPS requests', done => {
     const scope = nock('https://example.test').get('/what').reply()
 
@@ -961,6 +973,7 @@ describe('Intercept', () => {
       .end()
   })
 
+  // TODO: msw support for flushHeaders: https://github.com/mswjs/interceptors/issues/439
   it('data is sent with flushHeaders', done => {
     const scope1 = nock('https://example.test')
       .get('/')
@@ -1014,6 +1027,7 @@ describe('Intercept', () => {
     })
   })
 
+  // TODO: wait for this PR: https://github.com/mswjs/interceptors/pull/441
   it('three argument form of http.request: URL, options, and callback', done => {
     const responseText = 'this is data'
     const scope = nock('http://example.test')
