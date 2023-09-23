@@ -23,12 +23,16 @@ describe('`ClientRequest.abort()`', () => {
     req.write('foo')
 
     setTimeout(() => {
-      expect(emitSpy).to.have.been.calledOnceWithExactly('abort')
+      // NOTE FOR PR, REMOVE BEFORE MERGE: the real node client emit both close and abort events
+      expect(emitSpy).to.have.been.calledTwice
+      expect(emitSpy.firstCall).to.have.been.calledWith('close')
+      expect(emitSpy.secondCall).to.have.been.calledWith('abort')
       expect(scope.isDone()).to.be.false()
       done()
     }, 10)
   })
 
+  // TODO: https://github.com/mswjs/interceptors/issues/444
   it('Emits the expected event sequence when `end` is called on an aborted request', done => {
     const scope = nock('http://example.test').get('/').reply()
 
@@ -38,7 +42,9 @@ describe('`ClientRequest.abort()`', () => {
     req.end()
 
     setTimeout(() => {
-      expect(emitSpy).to.have.been.calledOnceWithExactly('abort')
+      expect(emitSpy).to.have.been.calledTwice
+      expect(emitSpy.firstCall).to.have.been.calledWith('close')
+      expect(emitSpy.secondCall).to.have.been.calledWith('abort')
       expect(scope.isDone()).to.be.false()
       done()
     }, 10)
@@ -53,12 +59,15 @@ describe('`ClientRequest.abort()`', () => {
     req.flushHeaders()
 
     setTimeout(() => {
-      expect(emitSpy).to.have.been.calledOnceWithExactly('abort')
+      expect(emitSpy).to.have.been.calledTwice
+      expect(emitSpy.firstCall).to.have.been.calledWith('close')
+      expect(emitSpy.secondCall).to.have.been.calledWith('abort')
       expect(scope.isDone()).to.be.false()
       done()
     }, 10)
   })
 
+  // TODO: https://github.com/mswjs/interceptors/issues/444
   it('Emits the expected event sequence when aborted immediately after `end`', done => {
     const scope = nock('http://example.test').get('/').reply()
 
@@ -68,12 +77,15 @@ describe('`ClientRequest.abort()`', () => {
     req.abort()
 
     setTimeout(() => {
-      expect(emitSpy).to.have.been.calledOnceWithExactly('abort')
+      expect(emitSpy).to.have.been.calledTwice
+      expect(emitSpy.firstCall).to.have.been.calledWith('close')
+      expect(emitSpy.secondCall).to.have.been.calledWith('abort')
       expect(scope.isDone()).to.be.false()
       done()
     }, 10)
   })
 
+  // TODO: https://github.com/mswjs/interceptors/issues/444
   it('Emits the expected event sequence when aborted inside a `socket` event listener', done => {
     const scope = nock('http://example.test').get('/').reply()
 
@@ -97,6 +109,7 @@ describe('`ClientRequest.abort()`', () => {
     }, 10)
   })
 
+  // TODO: https://github.com/mswjs/interceptors/issues/444
   it('Emits the expected event sequence when aborted multiple times', done => {
     const scope = nock('http://example.test').get('/').reply()
 

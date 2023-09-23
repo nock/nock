@@ -491,7 +491,6 @@ describe('Intercept', () => {
   })
 
   // TODO: Move this test to test_header_matching.
-  // TODO: https://github.com/mswjs/interceptors/pull/440
   it('username and password works', done => {
     const scope = nock('http://example.test')
       .get('/')
@@ -512,7 +511,6 @@ describe('Intercept', () => {
       .end()
   })
 
-  // TODO: https://github.com/mswjs/interceptors/pull/440
   it('Matches with a username and password in the URL', async () => {
     const scope = nock('http://example.test')
       .get('/abc')
