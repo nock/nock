@@ -381,6 +381,7 @@ describe('Recorder', () => {
     expect(recorded[0].body).to.be.an('object').and.deep.equal(payload)
   })
 
+  // TODO: https://github.com/mswjs/interceptors/issues/445
   it('records nonstandard ports', done => {
     nock.restore()
     nock.recorder.clear()
