@@ -40,6 +40,7 @@ describe('basic auth with username only', () => {
     done()
   })
 
+  // TODO: https://github.com/mswjs/interceptors/pull/447
   it('succeeds when it matches', async () => {
     const response = await got('http://example.test/test', {
       username: 'foo',

@@ -196,6 +196,7 @@ describe('`define()`', () => {
     req.end()
   })
 
+  // TODO: https://github.com/nock/nock/pull/2517#issuecomment-1736145159
   it('uses reqheaders', done => {
     const auth = 'foo:bar'
     const authHeader = `Basic ${Buffer.from('foo:bar').toString('base64')}`

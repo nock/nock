@@ -247,14 +247,14 @@ declare namespace nock {
     fixtures: string
     setMode(mode: BackMode): void
 
-    (fixtureName: string, nockedFn: (nockDone: () => void) => void): void
+    (fixtureName: string, nockedFn: (nockDone: () => Promise<void>) => void): void
     (
       fixtureName: string,
       options: BackOptions,
-      nockedFn: (nockDone: () => void) => void
+      nockedFn: (nockDone: () => Promise<void>) => void
     ): void
     (fixtureName: string, options?: BackOptions): Promise<{
-      nockDone: () => void
+      nockDone: () => Promise<void>
       context: BackContext
     }>
   }
