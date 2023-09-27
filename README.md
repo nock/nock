@@ -1199,7 +1199,7 @@ nock.recorder.rec({
   dont_print: true,
 })
 // ... some HTTP calls
-const nockCalls = nock.recorder.play()
+const nockCalls = await nock.recorder.play()
 ```
 
 The `nockCalls` var will contain an array of strings representing the generated code you need.
@@ -1217,7 +1217,7 @@ nock.recorder.rec({
   output_objects: true,
 })
 // ... some HTTP calls
-const nockCallObjects = nock.recorder.play()
+const nockCallObjects = await nock.recorder.play()
 ```
 
 The returned call objects have the following properties:
