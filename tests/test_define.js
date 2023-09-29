@@ -196,7 +196,6 @@ describe('`define()`', () => {
     req.end()
   })
 
-  // TODO: https://github.com/nock/nock/pull/2517#issuecomment-1736145159
   it('uses reqheaders', done => {
     const auth = 'foo:bar'
     const authHeader = `Basic ${Buffer.from('foo:bar').toString('base64')}`
@@ -230,7 +229,7 @@ describe('`define()`', () => {
         expect(res.statusCode).to.equal(200)
 
         res.once('end', () => {
-          expect(res.req.getHeaders(), reqheaders)
+          expect(req.getHeaders(), reqheaders)
           done()
         })
         // Streams start in 'paused' mode and must be started.

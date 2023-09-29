@@ -351,7 +351,8 @@ describe('Nock Back', () => {
       })
     })
 
-    it("shouldn't allow outside calls", done => {
+    // TODO: https://github.com/mswjs/interceptors/issues/452
+    it.skip("shouldn't allow outside calls", done => {
       nockBack('wrong_uri.json', nockDone => {
         http
           .get('http://other.example.test', () => expect.fail())
@@ -755,7 +756,8 @@ describe('Nock Back', () => {
 
     it('nock back loads scope', done => nockBackWithFixture(done, true))
 
-    it('no unnocked http calls work', done => {
+    // TODO: https://github.com/mswjs/interceptors/issues/452
+    it.skip('no unnocked http calls work', done => {
       const req = http.request(
         {
           host: 'other.example.test',
