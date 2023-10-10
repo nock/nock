@@ -19,7 +19,7 @@ describe('`define()`', () => {
           //  "reply" has been deprecated
           reply: '500',
         },
-      ])
+      ]),
     ).to.be.ok()
 
     await assertRejects(
@@ -27,7 +27,7 @@ describe('`define()`', () => {
       ({ response: { statusCode } }) => {
         expect(statusCode).to.equal(500)
         return true
-      }
+      },
     )
   })
 
@@ -40,7 +40,7 @@ describe('`define()`', () => {
           path: '/',
           reply: 'frodo',
         },
-      ])
+      ]),
     ).to.throw('`reply`, when present, must be a numeric string')
   })
 
@@ -56,7 +56,7 @@ describe('`define()`', () => {
           body,
           response: '�',
         },
-      ])
+      ]),
     ).to.have.lengthOf(1)
 
     const { statusCode } = await got.post('http://example.test/', { body })
@@ -77,7 +77,7 @@ describe('`define()`', () => {
           body,
           response: '�',
         },
-      ])
+      ]),
     ).to.be.ok()
 
     const { statusCode } = await got.post('http://example.test:1451/', { body })
@@ -96,9 +96,9 @@ describe('`define()`', () => {
           body: 'Hello, world!',
           response: '�',
         },
-      ])
+      ]),
     ).to.throw(
-      'Mismatched port numbers in scope and port properties of nock definition.'
+      'Mismatched port numbers in scope and port properties of nock definition.',
     )
   })
 
@@ -111,7 +111,7 @@ describe('`define()`', () => {
           body: 'Hello, world!',
           response: 'yo',
         },
-      ])
+      ]),
     ).to.throw('Method is required')
   })
 
@@ -129,7 +129,7 @@ describe('`define()`', () => {
           status: 200,
           response: exampleResponseBody,
         },
-      ])
+      ]),
     ).to.be.ok()
 
     const { statusCode, body } = await got.post('http://example.test/', {
@@ -160,7 +160,7 @@ describe('`define()`', () => {
           status: 200,
           response: exampleResponse,
         },
-      ])
+      ]),
     ).to.be.ok()
 
     const req = http.request(
@@ -183,7 +183,7 @@ describe('`define()`', () => {
           expect(response.toString('hex')).to.equal(exampleResponse)
           done()
         })
-      }
+      },
     )
 
     req.on('error', () => {
@@ -213,7 +213,7 @@ describe('`define()`', () => {
           status: 200,
           reqheaders,
         },
-      ])
+      ]),
     ).to.be.ok()
 
     // Make a request which should match the mock that was configured above.
@@ -235,7 +235,7 @@ describe('`define()`', () => {
         // Streams start in 'paused' mode and must be started.
         // See https://nodejs.org/api/stream.html#stream_class_stream_readable
         res.resume()
-      }
+      },
     )
     req.end()
   })
@@ -259,7 +259,7 @@ describe('`define()`', () => {
             'x-foo': 'bar',
           },
         },
-      ])
+      ]),
     ).to.be.ok()
 
     const req = http.request(
@@ -280,7 +280,7 @@ describe('`define()`', () => {
         // Streams start in 'paused' mode and must be started.
         // See https://nodejs.org/api/stream.html#stream_class_stream_readable
         res.resume()
-      }
+      },
     )
     req.end()
   })

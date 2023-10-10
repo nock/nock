@@ -1142,7 +1142,7 @@ nock.enableNetConnect(/(amazon|github)\.com/)
 
 // Or a Function
 nock.enableNetConnect(
-  host => host.includes('amazon.com') || host.includes('github.com')
+  host => host.includes('amazon.com') || host.includes('github.com'),
 )
 
 http.get('http://www.amazon.com/')
@@ -1248,7 +1248,7 @@ nocks.forEach(function (nock) {
         /(timestamp):([0-9]+)/g,
         function (match, key, value) {
           return key + ':' + recordedTimestamp
-        }
+        },
       )
     } else {
       return body
@@ -1467,7 +1467,7 @@ function prepareScope(scope) {
       const recordedTimestamp = recordedBodyResult[1]
       return body.replace(
         /(timestamp):([0-9]+)/g,
-        (match, key, value) => `${key}:${recordedTimestamp}`
+        (match, key, value) => `${key}:${recordedTimestamp}`,
       )
     } else {
       return body

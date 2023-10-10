@@ -11,7 +11,7 @@ const got = require('./got_client')
 
 it('scope exposes interceptors', () => {
   const scopes = nock.load(
-    path.join(__dirname, 'fixtures', 'good_request.json')
+    path.join(__dirname, 'fixtures', 'good_request.json'),
   )
 
   expect(scopes).to.be.an.instanceOf(Array)
@@ -67,7 +67,7 @@ describe('`Scope#constructor`', () => {
         search: '',
         searchParams: {},
         hash: '',
-      })
+      }),
     ).to.throw()
   })
 })
@@ -168,7 +168,7 @@ describe('`filteringPath()`', function () {
   it('filteringPath with invalid argument throws expected', () => {
     expect(() => nock('http://example.test').filteringPath('abc123')).to.throw(
       Error,
-      'Invalid arguments: filtering path should be a function or a regular expression'
+      'Invalid arguments: filtering path should be a function or a regular expression',
     )
   })
 })
@@ -211,10 +211,10 @@ describe('filteringRequestBody()', () => {
 
   it('filteringRequestBody with invalid argument throws expected', () => {
     expect(() =>
-      nock('http://example.test').filteringRequestBody('abc123')
+      nock('http://example.test').filteringRequestBody('abc123'),
     ).to.throw(
       Error,
-      'Invalid arguments: filtering request body should be a function or a regular expression'
+      'Invalid arguments: filtering request body should be a function or a regular expression',
     )
   })
 })

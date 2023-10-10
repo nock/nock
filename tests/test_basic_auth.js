@@ -26,7 +26,7 @@ describe('basic auth with username and password', () => {
   it('fails when it doesnt match', async () => {
     await assertRejects(
       got('http://example.test/test'),
-      /Nock: No match for request/
+      /Nock: No match for request/,
     )
   })
 })
@@ -52,7 +52,7 @@ describe('basic auth with username only', () => {
   it('fails when it doesnt match', async () => {
     await assertRejects(
       got('http://example.test/test'),
-      /Nock: No match for request/
+      /Nock: No match for request/,
     )
   })
 })
