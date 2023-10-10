@@ -28,7 +28,7 @@ describe('Body Match', () => {
       const result = matchBody(
         {},
         'something //here is something more \n',
-        'something //here is something more \n\r'
+        'something //here is something more \n\r',
       )
       expect(result).to.equal(true)
     })
@@ -45,7 +45,7 @@ describe('Body Match', () => {
       const result = matchBody(
         { headers: { 'Content-Type': ['multipart/form-data;'] } },
         {},
-        'test'
+        'test',
       )
       expect(result).to.equal(false)
     })
@@ -54,7 +54,7 @@ describe('Body Match', () => {
       const result = matchBody(
         { headers: { 'Content-Type': 'multipart/form-data;' } },
         'something //here is something more \nHello',
-        'something //here is something more \nHello'
+        'something //here is something more \nHello',
       )
       expect(result).to.equal(true)
     })
@@ -63,7 +63,7 @@ describe('Body Match', () => {
       const result = matchBody(
         { headers: { 'Content-Type': ['multipart/form-data;'] } },
         'something //here is something more \nHello',
-        'something //here is something more \nHello'
+        'something //here is something more \nHello',
       )
       expect(result).to.equal(true)
     })
@@ -125,24 +125,24 @@ describe('`normalizeRequestOptions()`', () => {
 describe('`isUtf8Representable()`', () => {
   it("should return false for buffers that aren't utf8 representable", () => {
     expect(common.isUtf8Representable(Buffer.from('8001', 'hex'))).to.equal(
-      false
+      false,
     )
   })
 
   it('should returns true for buffers containing strings', () => {
     expect(common.isUtf8Representable(Buffer.from('8001', 'utf8'))).to.equal(
-      true
+      true,
     )
   })
 })
 
 it('`isJSONContent()`', () => {
   expect(common.isJSONContent({ 'content-type': 'application/json' })).to.equal(
-    true
+    true,
   )
 
   expect(
-    common.isJSONContent({ 'content-type': 'application/json; charset=utf-8' })
+    common.isJSONContent({ 'content-type': 'application/json; charset=utf-8' }),
   ).to.equal(true)
 
   expect(common.isJSONContent({ 'content-type': 'text/plain' })).to.equal(false)
@@ -172,10 +172,10 @@ describe('`headersFieldNamesToLowerCase()`', () => {
           HoSt: 'example.test',
           HOST: 'example.test',
         },
-        true
-      )
+        true,
+      ),
     ).to.throw(
-      'Failed to convert header keys to lower case due to field name conflict: host'
+      'Failed to convert header keys to lower case due to field name conflict: host',
     )
   })
 })
@@ -240,13 +240,13 @@ describe('`deleteHeadersField()`', () => {
 
   it('should throw for invalid headers', () => {
     expect(() => common.deleteHeadersField('foo', 'Content-Type')).to.throw(
-      'headers must be an object'
+      'headers must be an object',
     )
   })
 
   it('should throw for invalid field name', () => {
     expect(() => common.deleteHeadersField({}, /cookie/)).to.throw(
-      'field name must be a string'
+      'field name must be a string',
     )
   })
 })
@@ -298,7 +298,7 @@ describe('`overrideRequests()`', () => {
     common.overrideRequests()
     // Second call throws.
     expect(() => common.overrideRequests()).to.throw(
-      "Module's request already overridden for http protocol."
+      "Module's request already overridden for http protocol.",
     )
   })
 })
@@ -466,7 +466,7 @@ it('`headersArrayToObject()`', () => {
   })
 
   expect(() => common.headersArrayToObject(123)).to.throw(
-    'Expected a header array'
+    'Expected a header array',
   )
 })
 
@@ -518,7 +518,7 @@ describe('`dataEqual()`', () => {
   it('treats JSON path notated and nested objects as equal', () => {
     const result = common.dataEqual(
       { 'foo[bar][0]': 'baz' },
-      { foo: { bar: ['baz'] } }
+      { foo: { bar: ['baz'] } },
     )
     expect(result).to.equal(true)
   })

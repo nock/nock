@@ -47,7 +47,7 @@ async function startHttpsServer(requestListener = defaultRequestListener) {
       key: fs.readFileSync(path.resolve(__dirname, './localhost.key')),
       cert: fs.readFileSync(path.resolve(__dirname, './localhost.crt')),
     },
-    requestListener
+    requestListener,
   )
   await new Promise(resolve => server.listen(resolve))
   servers.push(server)

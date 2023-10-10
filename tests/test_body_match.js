@@ -154,7 +154,7 @@ describe('`matchBody()`', () => {
     const scope = nock('http://example.test')
       .post(
         '/',
-        `--${boundary}\r\nContent-Disposition: form-data; name="field"\r\n\r\nvalue\r\n--${boundary}--\r\n`
+        `--${boundary}\r\nContent-Disposition: form-data; name="field"\r\n\r\nvalue\r\n--${boundary}--\r\n`,
       )
       .reply(200)
 

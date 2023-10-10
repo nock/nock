@@ -16,7 +16,7 @@ describe('asynchronous `reply()` function', () => {
       const scope = nock('http://example.test')
         .get('/')
         .reply(200, (path, requestBody, callback) =>
-          callback(null, 'Hello World!')
+          callback(null, 'Hello World!'),
         )
 
       const { body } = await got('http://example.test/', {
@@ -41,7 +41,7 @@ describe('asynchronous `reply()` function', () => {
                 responseBody,
                 { 'X-Custom-Header': 'abcdef' },
               ]),
-            1
+            1,
           )
         })
 
@@ -87,7 +87,7 @@ describe('asynchronous `reply()` function', () => {
       nock('http://example.test')
         .get('/')
         .reply(500, (path, requestBody, callback) =>
-          callback(new Error('Database failed'))
+          callback(new Error('Database failed')),
         )
 
       await assertRejects(got('http://example.test'), /Database failed/)

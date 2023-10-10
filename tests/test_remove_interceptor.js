@@ -89,7 +89,7 @@ describe('`removeInterceptor()`', () => {
         nock.removeInterceptor({
           hostname: 'example.test',
           path: '/somepath',
-        })
+        }),
       ).to.be.true()
 
       const newScope = nock('http://example.test')
@@ -109,7 +109,7 @@ describe('`removeInterceptor()`', () => {
         nock.removeInterceptor({
           hostname: 'example.org',
           path: '/somepath',
-        })
+        }),
       ).to.be.false()
     })
 
@@ -126,7 +126,7 @@ describe('`removeInterceptor()`', () => {
           proto: 'https',
           hostname: 'example.test',
           path: '/somepath',
-        })
+        }),
       ).to.be.true()
 
       expect(scope.pendingMocks()).to.deep.equal([])
@@ -145,7 +145,7 @@ describe('`removeInterceptor()`', () => {
           method: 'post',
           hostname: 'example.test',
           path: '/somepath',
-        })
+        }),
       ).to.be.true()
 
       expect(scope.pendingMocks()).to.deep.equal([])
@@ -160,7 +160,7 @@ describe('`removeInterceptor()`', () => {
       expect(
         nock.removeInterceptor({
           hostname: 'example.test',
-        })
+        }),
       ).to.be.true()
 
       expect(scope.pendingMocks()).to.deep.equal([])
@@ -185,7 +185,7 @@ describe('`removeInterceptor()`', () => {
         nock.removeInterceptor({
           hostname: 'example.test',
           path: '/anotherpath',
-        })
+        }),
       ).to.be.true()
 
       expect(scope1.pendingMocks()).to.deep.equal([

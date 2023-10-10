@@ -39,7 +39,7 @@ describe('Request Overrider', () => {
           expect(res).to.be.an.instanceof(http.IncomingMessage)
           scope.done()
           done()
-        }
+        },
       )
       .end()
   })
@@ -80,7 +80,7 @@ describe('Request Overrider', () => {
         // Streams start in 'paused' mode and must be started.
         // See https://nodejs.org/api/stream.html#stream_class_stream_readable
         res.resume()
-      }
+      },
     )
 
     req.write('mamma mia', null, () => {
@@ -114,7 +114,7 @@ describe('Request Overrider', () => {
         // Streams start in 'paused' mode and must be started.
         // See https://nodejs.org/api/stream.html#stream_class_stream_readable
         res.resume()
-      }
+      },
     )
 
     req.write('mamma mia', () => {
@@ -144,7 +144,7 @@ describe('Request Overrider', () => {
         // Streams start in 'paused' mode and must be started.
         // See https://nodejs.org/api/stream.html#stream_class_stream_readable
         res.resume()
-      }
+      },
     )
 
     req.write(undefined, null, reqWriteCallback)
@@ -172,7 +172,7 @@ describe('Request Overrider', () => {
         // Streams start in 'paused' mode and must be started.
         // See https://nodejs.org/api/stream.html#stream_class_stream_readable
         res.resume()
-      }
+      },
     )
 
     req.write(undefined)
@@ -204,7 +204,7 @@ describe('Request Overrider', () => {
         // Streams start in 'paused' mode and must be started.
         // See https://nodejs.org/api/stream.html#stream_class_stream_readable
         res.resume()
-      }
+      },
     )
 
     req.end('mamma mia', null, reqEndCallback)
@@ -233,7 +233,7 @@ describe('Request Overrider', () => {
         // Streams start in 'paused' mode and must be started.
         // See https://nodejs.org/api/stream.html#stream_class_stream_readable
         res.resume()
-      }
+      },
     )
 
     req.end(reqEndCallback)
@@ -257,7 +257,7 @@ describe('Request Overrider', () => {
           done()
         })
         res.resume()
-      }
+      },
     )
 
     // hex(foobar) == 666F6F626172
@@ -279,7 +279,7 @@ describe('Request Overrider', () => {
           done()
         })
         res.resume()
-      }
+      },
     )
 
     // hex(foobar) == 666F6F626172
@@ -304,7 +304,7 @@ describe('Request Overrider', () => {
           done()
         })
         res.resume()
-      }
+      },
     )
 
     req.end('foobar', reqEndCallback)
@@ -326,7 +326,7 @@ describe('Request Overrider', () => {
           done()
         })
         res.resume()
-      }
+      },
     )
 
     req.end()
@@ -374,7 +374,7 @@ describe('Request Overrider', () => {
         // Streams start in 'paused' mode and must be started.
         // See https://nodejs.org/api/stream.html#stream_class_stream_readable
         res.resume()
-      }
+      },
     )
 
     req.on('finish', onFinish)
@@ -490,7 +490,7 @@ describe('Request Overrider', () => {
         scope.done()
         expect(req.path).to.equal('/the/path/to/infinity')
         done()
-      }
+      },
     )
     req.end()
   })
@@ -545,7 +545,7 @@ describe('Request Overrider', () => {
         // Streams start in 'paused' mode and must be started.
         // See https://nodejs.org/api/stream.html#stream_class_stream_readable
         res.resume()
-      }
+      },
     )
 
     req.setNoDelay(true)
@@ -723,7 +723,7 @@ describe('Request Overrider', () => {
   it('should throw expected error when creating request with missing options', done => {
     expect(() => http.request()).to.throw(
       Error,
-      'Making a request with empty `options` is not supported in Nock'
+      'Making a request with empty `options` is not supported in Nock',
     )
     done()
   })
@@ -772,7 +772,7 @@ describe('Request Overrider', () => {
         // Streams start in 'paused' mode and must be started.
         // See https://nodejs.org/api/stream.html#stream_class_stream_readable
         res.resume()
-      }
+      },
     )
     req.end()
   })

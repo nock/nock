@@ -285,7 +285,7 @@ nock('http://example.test')
     new URLSearchParams([
       ['foo', 'one'],
       ['foo', 'two'],
-    ])
+    ]),
   )
   .reply()
 

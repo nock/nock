@@ -27,7 +27,7 @@ describe('Logging using the `debug` package', () => {
 
     // the log when an interceptor is chosen
     expect(logFn).to.have.been.calledWith(
-      sinon.match('matched base path (1 interceptor)')
+      sinon.match('matched base path (1 interceptor)'),
     )
 
     // the log of the Interceptor match
@@ -38,18 +38,18 @@ describe('Logging using the `debug` package', () => {
       // request URL.
       sinon.match('"href":"http://example.test/deep/link"'),
       // This is the JSON-stringified body.
-      `"${exampleBody}"`
+      `"${exampleBody}"`,
     )
 
     expect(logFn).to.have.been.calledWith(sinon.match('query matching skipped'))
 
     expect(logFn).to.have.been.calledWith(
       sinon.match(
-        'matching http://example.test:80/deep/link to POST http://example.test:80/deep/link: true'
-      )
+        'matching http://example.test:80/deep/link to POST http://example.test:80/deep/link: true',
+      ),
     )
     expect(logFn).to.have.been.calledWith(
-      sinon.match('interceptor identified, starting mocking')
+      sinon.match('interceptor identified, starting mocking'),
     )
   })
 })
