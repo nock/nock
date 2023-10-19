@@ -551,13 +551,13 @@ describe('`isPlainObject()`', () => {
 
   it('custom Object', () => {
     function Foo() {
-      this.a = 1;
+      this.a = 1
     }
     expect(isPlainObject(new Foo()), false)
   })
 
   it('Array', () => {
-    expect(isPlainObject([1,2,3]), false)
+    expect(isPlainObject([1, 2, 3]), false)
   })
 
   it('Date', () => {
@@ -577,7 +577,7 @@ describe('`isPlainObject()`', () => {
   })
 
   it('null-Object /1', () => {
-    expect(isPlainObject({ __proto__: null}), true)
+    expect(isPlainObject({ __proto__: null }), true)
   })
 
   it('null-Object /2', () => {
@@ -597,41 +597,46 @@ describe('`expand()`', () => {
   })
 
   it('throws on constructor', () => {
-    expect(expand({constructor: 4})).equal(undefined)
+    expect(expand({ constructor: 4 })).equal(undefined)
   })
 
   it('pure key values', () => {
-    expect(expand({'a': 4})).deep.equal({'a': 4})
+    expect(expand({ a: 4 })).deep.equal({ a: 4 })
   })
 
   it('nested object', () => {
-    expect(expand({'a.b': 4})).deep.equal({'a': {'b': 4}})
+    expect(expand({ 'a.b': 4 })).deep.equal({ a: { b: 4 } })
   })
 
   it('nested object', () => {
-    expect(expand({'a.b': 4, 'a.c': 5})).deep.equal({'a': {'b': 4, 'c': 5}})
+    expect(expand({ 'a.b': 4, 'a.c': 5 })).deep.equal({ a: { b: 4, c: 5 } })
   })
 
   it('nested object', () => {
-    expect(expand({'a.b': 4, 'b.a': 5})).deep.equal({'a': {'b': 4}, 'b': {'a': 5}})
+    expect(expand({ 'a.b': 4, 'b.a': 5 })).deep.equal({
+      a: { b: 4 },
+      b: { a: 5 },
+    })
   })
 
   it('nested array', () => {
-    expect(expand({'a.0': 4, 'a.1': 5})).deep.equal({'a': [4, 5]})
+    expect(expand({ 'a.0': 4, 'a.1': 5 })).deep.equal({ a: [4, 5] })
   })
 
   it('array-like', () => {
-    expect(expand({'a[0]': 4, 'a[1]': 5})).deep.equal({'a': [4, 5]})
+    expect(expand({ 'a[0]': 4, 'a[1]': 5 })).deep.equal({ a: [4, 5] })
   })
 
   it('example', () => {
-    expect(expand({ 'foo[bar][0]': 'baz' })).deep.equal({ foo: { bar: [ 'baz' ] } })
+    expect(expand({ 'foo[bar][0]': 'baz' })).deep.equal({
+      foo: { bar: ['baz'] },
+    })
   })
 
   it('does not mutate original', () => {
-    const original = { 'foo[bar][0]': 'baz' };
+    const original = { 'foo[bar][0]': 'baz' }
     const result = expand(original)
-    expect(result).deep.equal({ foo: { bar: [ 'baz' ] } })
+    expect(result).deep.equal({ foo: { bar: ['baz'] } })
     expect(original).deep.equal({ 'foo[bar][0]': 'baz' })
     expect(original).not.equal(result)
   })
