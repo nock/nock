@@ -24,7 +24,6 @@
   "dependencies": {
     "debug": "^4.1.0",
     "json-stringify-safe": "^5.0.1",
-    "lodash": "^4.17.21",
     "propagate": "^2.0.0"
   },
   "devDependencies": {
