@@ -136,8 +136,21 @@
         "code",
         "test"
       ]
+    },
+    {
+      "login": "Uzlopak",
+      "name": "Aras Abbasi",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5059100?v=4",
+      "profile": "https://github.com/Uzlopak",
+      "contributions": [
+        "code",
+        "test",
+        "maintenance"
+      ]
     }
   ],
   "contributorsPerLine": 7,
-  "skipCi": true
+  "skipCi": true,
+  "commitType": "docs",
+  "commitConvention": "angular"
 }
