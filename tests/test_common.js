@@ -476,7 +476,9 @@ it('`percentEncode()` encodes extra reserved characters', () => {
 describe('`normalizeClientRequestArgs()`', () => {
   it('should throw for invalid URL', () => {
     // See https://github.com/nodejs/node/pull/38614 release in node v16.2.0
-    const [major, minor, patch] = process.versions.node.split('.').map(parseInt)
+    const [major, minor, patch] = process.versions.node
+      .split('.')
+      .map(num => parseInt(num, 10))
     const useNewErrorText =
       major > 16 ||
       (major === 16 && minor > 2) ||
