@@ -25,7 +25,6 @@
     "@mswjs/interceptors": "^0.25.6",
     "debug": "^4.1.0",
     "json-stringify-safe": "^5.0.1",
-    "lodash": "^4.17.21",
     "propagate": "^2.0.0"
   },
   "devDependencies": {
@@ -49,7 +48,7 @@
     "prettier": "3.0.3",
     "proxyquire": "^2.1.0",
     "rimraf": "^3.0.0",
-    "semantic-release": "^21.0.2",
+    "semantic-release": "^22.0.5",
     "sinon": "^15.0.1",
     "sinon-chai": "^3.7.0",
     "typescript": "^5.0.4"

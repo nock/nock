@@ -34,7 +34,7 @@ function checkDuration(start, durationMillis) {
   // TODO: find a better way to test delays while ensuring the delays aren't too long.
   expect(milliseconds).to.be.at.least(
     durationMillis - 5,
-    'delay minimum not satisfied'
+    'delay minimum not satisfied',
   )
   // .and.at.most(durationMillis + bufferMillis, 'delay upper bound exceeded')
 }
@@ -77,7 +77,7 @@ describe('`delay()`', () => {
 
   it('should throw on invalid arguments', () => {
     expect(() => interceptor.delay('one million seconds')).to.throw(
-      'Unexpected input'
+      'Unexpected input',
     )
   })
 
@@ -205,7 +205,7 @@ describe('`delayConnection()`', () => {
 
     await assertRejects(
       got('http://example.test', { timeout: 10 }),
-      err => err.code === 'ETIMEDOUT'
+      err => err.code === 'ETIMEDOUT',
     )
 
     scope.done()
@@ -295,7 +295,7 @@ describe('`delayConnection()`', () => {
 
     const { body, statusCode } = await resolvesInAtLeast(
       got('http://example.test'),
-      200
+      200,
     )
 
     expect(statusCode).to.equal(200)
@@ -311,7 +311,7 @@ describe('`delayConnection()`', () => {
 
     await resolvesInAtLeast(
       assertRejects(got('http://example.test'), /this is an error message/),
-      100
+      100,
     )
   })
 
@@ -382,7 +382,7 @@ describe('`delayConnection()`', () => {
       { agent, timeout: 5000 },
       res => {
         res.once('end', onEnd)
-      }
+      },
     )
 
     req.on('timeout', function () {

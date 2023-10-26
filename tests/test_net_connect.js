@@ -17,7 +17,7 @@ describe('`disableNetConnect()`', () => {
 
     await assertRejects(
       got('https://other.example.test/'),
-      /Nock: Disallowed net connect for "other.example.test:443\/"/
+      /Nock: Disallowed net connect for "other.example.test:443\/"/,
     )
   })
 
@@ -57,7 +57,7 @@ describe('`enableNetConnect()`', () => {
 
     await assertRejects(
       got('https://example.test/'),
-      /Nock: Disallowed net connect for "example.test:443\/"/
+      /Nock: Disallowed net connect for "example.test:443\/"/,
     )
   })
 
@@ -81,7 +81,7 @@ describe('`enableNetConnect()`', () => {
 
     await assertRejects(
       got('https://example.test/'),
-      /Nock: Disallowed net connect for "example.test:443\/"/
+      /Nock: Disallowed net connect for "example.test:443\/"/,
     )
   })
 
@@ -105,7 +105,7 @@ describe('`enableNetConnect()`', () => {
 
     await assertRejects(
       got('https://example.test/'),
-      /Nock: Disallowed net connect for "example.test:443\/"/
+      /Nock: Disallowed net connect for "example.test:443\/"/,
     )
   })
 

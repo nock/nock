@@ -6,7 +6,7 @@ const nock = require('../')
 
 const readFile = function () {
   return fs.readFileSync(
-    path.resolve(__dirname, '../tests/assets/reply_file_2.txt.gz')
+    path.resolve(__dirname, '../tests/assets/reply_file_2.txt.gz'),
   )
 }
 
@@ -29,7 +29,7 @@ http.get('http://binary.com/binary', function (res) {
     console.log(
       Buffer.compare(readFile(), buffer) === 0
         ? 'Received the file.'
-        : 'Received something else.'
+        : 'Received something else.',
     )
   })
 })

@@ -103,7 +103,7 @@ describe('`reply()` body', () => {
     }
 
     expect(() =>
-      nock('http://localhost').get('/').reply(200, unencodableObject)
+      nock('http://localhost').get('/').reply(200, unencodableObject),
     ).to.throw(Error, 'Error encoding response body into JSON')
   })
 
@@ -134,11 +134,11 @@ describe('`reply()` status code', () => {
 
     expect(() => scope.reply('200')).to.throw(
       Error,
-      'Invalid string value for status code'
+      'Invalid string value for status code',
     )
     expect(() => scope.reply(false)).to.throw(
       Error,
-      'Invalid boolean value for status code'
+      'Invalid boolean value for status code',
     )
   })
 })

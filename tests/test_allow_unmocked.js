@@ -119,7 +119,7 @@ describe('allowUnmocked option', () => {
       .reply(200, 'Match regex')
 
     const { body, statusCode } = await got(
-      'http://example.test/resources/regex'
+      'http://example.test/resources/regex',
     )
     expect(statusCode).to.equal(200)
     expect(body).to.equal('Match regex')
@@ -134,7 +134,7 @@ describe('allowUnmocked option', () => {
       .reply(200, 'Match regex')
 
     const { body, statusCode } = await got(
-      'http://localhost:3000/no/regex/here'
+      'http://localhost:3000/no/regex/here',
     )
     expect(statusCode).to.equal(200)
     expect(body).to.equal('Match regex')
@@ -191,7 +191,7 @@ describe('allowUnmocked option', () => {
     expect((await got(origin)).body).to.equal('live')
     expect((await got(`${origin}/alphalicious`)).body).to.equal('this is alpha')
     expect((await got(`${origin}/bravo-company`)).body).to.equal(
-      'bravo, bravo!'
+      'bravo, bravo!',
     )
 
     scope1.done()
@@ -244,7 +244,7 @@ describe('allowUnmocked option', () => {
   // https://github.com/nock/nock/issues/1832
   it('should only emit "finish" once even if an unmocked request is created after playback as started', async () => {
     const { origin, port } = await startHttpServer((request, response) =>
-      response.end()
+      response.end(),
     )
 
     const scope = nock(origin, { allowUnmocked: true }).post('/', 'foo').reply()

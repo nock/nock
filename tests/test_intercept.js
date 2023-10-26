@@ -22,20 +22,20 @@ const acceptableGlobalKeys = new Set([
 describe('Intercept', () => {
   it('invalid or missing method parameter throws an exception', () => {
     expect(() => nock('https://example.test').intercept('/somepath')).to.throw(
-      'The "method" parameter is required for an intercept call.'
+      'The "method" parameter is required for an intercept call.',
     )
   })
 
   it("should throw when the path doesn't include a leading slash and there is no base path", () => {
     expect(() => nock('http://example.test').get('no-leading-slash')).to.throw(
-      "Non-wildcard URL path strings must begin with a slash (otherwise they won't match anything)"
+      "Non-wildcard URL path strings must begin with a slash (otherwise they won't match anything)",
     )
   })
 
   // https://github.com/nock/nock/issues/1730
   it('should throw when the path is empty and there is no base path', () => {
     expect(() => nock('http://example.test').get('')).to.throw(
-      "Non-wildcard URL path strings must begin with a slash (otherwise they won't match anything) (got: )"
+      "Non-wildcard URL path strings must begin with a slash (otherwise they won't match anything) (got: )",
     )
   })
 
@@ -126,7 +126,7 @@ describe('Intercept', () => {
           scope.done()
           done()
         })
-      }
+      },
     )
 
     req.end()
@@ -317,7 +317,7 @@ describe('Intercept', () => {
         // Streams start in 'paused' mode and must be started.
         // See https://nodejs.org/api/stream.html#stream_class_stream_readable
         res.resume()
-      }
+      },
     )
 
     req.end()
@@ -335,7 +335,7 @@ describe('Intercept', () => {
       () => {
         scope.done()
         done()
-      }
+      },
     )
     req.end()
   })
@@ -379,7 +379,7 @@ describe('Intercept', () => {
       },
       res => {
         expect.fail(new Error('should not come here!'))
-      }
+      },
     )
 
     req.end()
@@ -393,8 +393,8 @@ describe('Intercept', () => {
             headers: {},
           },
           null,
-          2
-        )}`
+          2,
+        )}`,
       )
       done()
     })
@@ -410,7 +410,7 @@ describe('Intercept', () => {
       },
       res => {
         expect.fail(new Error('should not come here!'))
-      }
+      },
     )
     req.on('error', err => {
       expect(err.message.trim()).to.equal(
@@ -421,8 +421,8 @@ describe('Intercept', () => {
             headers: {},
           },
           null,
-          2
-        )}`
+          2,
+        )}`,
       )
       done()
     })
@@ -441,7 +441,7 @@ describe('Intercept', () => {
       },
       res => {
         expect.fail(new Error('should not come here!'))
-      }
+      },
     )
 
     req.on('error', err => {
@@ -453,8 +453,8 @@ describe('Intercept', () => {
             headers: {},
           },
           null,
-          2
-        )}`
+          2,
+        )}`,
       )
       done()
     })
@@ -507,7 +507,7 @@ describe('Intercept', () => {
         res => {
           scope.done()
           done()
-        }
+        },
       )
       .end()
   })
@@ -522,7 +522,7 @@ describe('Intercept', () => {
       })
 
     const { statusCode } = await got(
-      'http://username:password@example.test/abc'
+      'http://username:password@example.test/abc',
     )
     expect(statusCode).to.equal(200)
 
@@ -542,7 +542,7 @@ describe('Intercept', () => {
         res => {
           scope.done()
           done()
-        }
+        },
       )
       .end()
   })
@@ -560,7 +560,7 @@ describe('Intercept', () => {
         res => {
           scope.done()
           done()
-        }
+        },
       )
       .end()
   })
@@ -581,7 +581,7 @@ describe('Intercept', () => {
         res => {
           scope.done()
           done()
-        }
+        },
       )
       .end('{"some_data":"something"}')
   })
@@ -633,7 +633,7 @@ describe('Intercept', () => {
 
     await assertRejects(
       got('http://example.test/'),
-      /Nock: No match for request/
+      /Nock: No match for request/,
     )
     expect(scope.isDone()).to.be.false()
 
@@ -853,7 +853,7 @@ describe('Intercept', () => {
       .reply(200, 'Match regex')
 
     const { statusCode, body } = await got(
-      'http://example.test/resources/regex'
+      'http://example.test/resources/regex',
     )
     expect(statusCode).to.equal(200)
     expect(body).to.equal('Match regex')
@@ -891,7 +891,7 @@ describe('Intercept', () => {
       .reply(200, 'Match PUT')
 
     const postResponse = await got.post(
-      'http://example.test/match/uri/function'
+      'http://example.test/match/uri/function',
     )
     expect(postResponse).to.include({ statusCode: 200, body: `Match POST` })
 
@@ -900,7 +900,7 @@ describe('Intercept', () => {
 
     await assertRejects(
       got.head('http://example.test/do/not/match'),
-      /Nock: No match for request/
+      /Nock: No match for request/,
     )
   })
 
@@ -913,7 +913,7 @@ describe('Intercept', () => {
 
     await assertRejects(
       got('http://example.test/hey'),
-      /Nock: No match for request/
+      /Nock: No match for request/,
     )
   })
 
@@ -938,7 +938,7 @@ describe('Intercept', () => {
             scope.done()
             done()
           })
-        }
+        },
       )
       .end('WHAA')
   })
@@ -1002,14 +1002,14 @@ describe('Intercept', () => {
 
   it('with filteringScope, URL path without leading slash does not throw error', done => {
     expect(() =>
-      nock('http://example.test', { filteringScope: () => {} }).get('')
+      nock('http://example.test', { filteringScope: () => {} }).get(''),
     ).not.to.throw()
     done()
   })
 
   it('no new keys were added to the global namespace', done => {
     const leaks = Object.keys(global).filter(
-      key => !acceptableGlobalKeys.has(key)
+      key => !acceptableGlobalKeys.has(key),
     )
     expect(leaks).to.deep.equal([])
     done()
@@ -1107,7 +1107,7 @@ describe('Intercept', () => {
             expect(res.statusCode).to.equal(200)
             scope.done()
             server.close(done)
-          }
+          },
         )
 
         req.on('error', error => {

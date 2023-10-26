@@ -56,7 +56,7 @@ describe('IPv6', () => {
             scope.done()
             done()
           })
-        }
+        },
       )
       .end()
   })

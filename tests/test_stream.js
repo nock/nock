@@ -144,7 +144,7 @@ it('response pipe', done => {
       })
 
       res.pipe(dest)
-    }
+    },
   )
 })
 
@@ -194,7 +194,7 @@ it('response pipe without implicit end', done => {
       })
 
       res.pipe(dest, { end: false })
-    }
+    },
   )
 })
 
@@ -222,7 +222,7 @@ it('response is streams2 compatible', done => {
           expect(body).to.equal(responseText)
           done()
         })
-      }
+      },
     )
     .end()
 })
@@ -288,7 +288,7 @@ it('response readable pull stream works as expected', done => {
           done()
         }
       })
-    }
+    },
   )
 
   req.end()
@@ -318,6 +318,6 @@ it.skip('error events on reply streams proxy to the response', done => {
       replyBody.end(() => {
         replyBody.emit('error', 'oh no!')
       })
-    }
+    },
   )
 })

@@ -41,7 +41,7 @@ describe('Header matching', () => {
         got('http://example.test/', {
           headers: { 'X-My-Headers': 456 },
         }),
-        /Nock: No match for request/
+        /Nock: No match for request/,
       )
     })
 
@@ -57,7 +57,7 @@ describe('Header matching', () => {
         got('http://example.test/', {
           headers: { '-My-Headers': 456 },
         }),
-        /Nock: No match for request/
+        /Nock: No match for request/,
       )
 
       expect(scope.isDone()).to.be.false()
@@ -219,7 +219,7 @@ describe('Header matching', () => {
         got('http://example.test/', {
           headers: { 'X-My-Headers': 456 },
         }),
-        /Nock: No match for request/
+        /Nock: No match for request/,
       )
     })
 
@@ -233,7 +233,7 @@ describe('Header matching', () => {
         got('http://example.test/', {
           headers: { '-My-Headers': 456 },
         }),
-        /Nock: No match for request/
+        /Nock: No match for request/,
       )
 
       expect(scope.isDone()).to.be.false()
@@ -243,7 +243,7 @@ describe('Header matching', () => {
       const username = 'testuser'
       const password = 'testpassword'
       const authString = Buffer.from(`${username}:${password}`).toString(
-        'base64'
+        'base64',
       )
       const expectedAuthHeader = `Basic ${authString}`
 
@@ -278,7 +278,7 @@ describe('Header matching', () => {
         got.post('http://example.test/', {
           headers: { 'X-App-Token': 'apptoken' },
         }),
-        /Nock: No match for request/
+        /Nock: No match for request/,
       )
     })
 
@@ -310,7 +310,7 @@ describe('Header matching', () => {
         got.post('http://example.test/', {
           headers: { 'X-My-Super-Power': 'mullet growing' },
         }),
-        /Nock: No match/
+        /Nock: No match/,
       )
 
       expect(scope.isDone()).to.be.false()
@@ -339,7 +339,7 @@ describe('Header matching', () => {
       }
 
       expect(() => nock('http://example.test', options).get('/')).to.throw(
-        'Headers must be provided as an object'
+        'Headers must be provided as an object',
       )
     })
 
@@ -373,7 +373,7 @@ describe('Header matching', () => {
         got.post('http://example.test/', {
           headers: { 'X-My-Super-Power': 'mullet growing' },
         }),
-        /Nock: No match/
+        /Nock: No match/,
       )
 
       expect(scope.isDone()).to.be.false()
@@ -514,7 +514,7 @@ describe('Header matching', () => {
         got('http://example.test/', {
           headers: { Cookie: 'cookie', Donut: 'donut' },
         }),
-        /Nock: No match for request/
+        /Nock: No match for request/,
       )
 
       expect(scope.isDone()).to.be.false()
@@ -575,7 +575,7 @@ describe('Header matching', () => {
         got('http://example.test/', {
           headers: { Host: 'some.other.domain.test' },
         }),
-        /Nock: No match for request/
+        /Nock: No match for request/,
       )
     })
   })

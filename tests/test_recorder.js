@@ -98,7 +98,7 @@ describe('Recorder', () => {
         gotRequest()
         response.writeHead(200)
         response.end()
-      }
+      },
     )
 
     nock.recorder.rec(true)
@@ -115,8 +115,8 @@ describe('Recorder', () => {
     // TODO: Use chai-string?
     expect(
       recorded[0].startsWith(
-        `\nnock('http://localhost:${port}', {"encodedQueryParams":true})\n  .post('/')`
-      )
+        `\nnock('http://localhost:${port}', {"encodedQueryParams":true})\n  .post('/')`,
+      ),
     ).to.be.true()
   })
 
@@ -177,8 +177,8 @@ describe('Recorder', () => {
       loggingFn
         .getCall(0)
         .args[0].startsWith(
-          '\n<<<<<<-- cut here -->>>>>>\n{\n  "scope": "http://localhost:'
-        )
+          '\n<<<<<<-- cut here -->>>>>>\n{\n  "scope": "http://localhost:',
+        ),
     ).to.be.true()
   })
 
@@ -420,7 +420,7 @@ describe('Recorder', () => {
             })
             done()
           })
-        }
+        },
       )
 
       req.end(requestBody)
@@ -450,7 +450,7 @@ describe('Recorder', () => {
             done()
           })
           res.resume()
-        }
+        },
       )
 
       req.end(onEnd)
@@ -494,7 +494,7 @@ describe('Recorder', () => {
             done()
           })
           res.resume()
-        }
+        },
       )
 
       req.end('foobar', onEnd)
@@ -508,7 +508,7 @@ describe('Recorder', () => {
     nock.recorder.rec()
     expect(() => nock.recorder.rec()).to.throw(
       Error,
-      'Nock recording already in progress'
+      'Nock recording already in progress',
     )
   })
 
@@ -554,7 +554,7 @@ describe('Recorder', () => {
               })
               done()
             })
-          }
+          },
         )
         .end(requestBody)
     })
@@ -592,13 +592,13 @@ describe('Recorder', () => {
                   reqheaders: {
                     host: `localhost:${port}`,
                     authorization: `Basic ${Buffer.from('foo:bar').toString(
-                      'base64'
+                      'base64',
                     )}`,
                   },
                 })
               done()
             })
-          }
+          },
         )
         .end()
     })
@@ -747,7 +747,7 @@ describe('Recorder', () => {
 
             // Confidence check: we're getting hex.
             expect(hexChunks.join('')).to.equal(
-              Buffer.from(responseBody, 'utf8').toString('hex')
+              Buffer.from(responseBody, 'utf8').toString('hex'),
             )
 
             // Assert: we're recording utf-8.
@@ -756,7 +756,7 @@ describe('Recorder', () => {
 
             done()
           })
-        }
+        },
       )
       req.end()
     })
@@ -791,7 +791,7 @@ describe('Recorder', () => {
               expect(recorded[0].reqheaders).to.be.undefined()
               done()
             })
-          }
+          },
         )
         .end()
     })
@@ -825,7 +825,7 @@ describe('Recorder', () => {
               expect(loggingFn.getCall(0).args[0]).to.be.a('string')
               done()
             })
-          }
+          },
         )
         .end()
     })
@@ -863,7 +863,7 @@ describe('Recorder', () => {
               expect(loggingFn.getCall(0).args[0]).to.be.an('object')
               done()
             })
-          }
+          },
         )
         .end()
     })
@@ -900,7 +900,7 @@ describe('Recorder', () => {
               expect(recorded[0].reqheaders['user-agent']).to.be.undefined()
               done()
             })
-          }
+          },
         )
         .end()
     })
@@ -1000,7 +1000,7 @@ describe('Recorder', () => {
               })
               done()
             })
-          }
+          },
         )
         .end(requestBody)
     })
@@ -1072,7 +1072,7 @@ describe('Recorder', () => {
                 .and.include(`.query({"param1":"1","param2":"2"})`)
               done()
             })
-          }
+          },
         )
         .end('ABCDEF')
     })
@@ -1133,7 +1133,7 @@ describe('Recorder', () => {
               })
           })
         },
-        50
+        50,
       )
 
       req.end()
@@ -1183,7 +1183,7 @@ describe('Recorder', () => {
 
         response.on('end', async () => {
           expect(Buffer.concat(data).toString('hex')).to.equal(
-            transparentGifHex
+            transparentGifHex,
           )
 
           const recordedFixtures = await nock.recorder.play()
@@ -1206,7 +1206,7 @@ describe('Recorder', () => {
 
               response.on('end', () => {
                 expect(Buffer.concat(data).toString('hex')).to.equal(
-                  transparentGifHex
+                  transparentGifHex,
                 )
                 done()
               })

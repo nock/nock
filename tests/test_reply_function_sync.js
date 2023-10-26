@@ -116,7 +116,7 @@ describe('synchronous `reply()` function', () => {
             expect(statusCode).to.equal(404)
             expect(body).to.equal(exampleResponseBody)
             return true
-          }
+          },
         )
         scope.done()
       })
@@ -144,7 +144,7 @@ describe('synchronous `reply()` function', () => {
               expect(statusCode).to.equal(404)
               expect(body).to.equal('')
               return true
-            }
+            },
           )
 
           expect(replyFnCalled).to.have.been.called()
@@ -264,7 +264,7 @@ describe('synchronous `reply()` function', () => {
           expect(statusCode).to.equal(401)
           expect(body).to.equal(exampleResponse)
           return true
-        }
+        },
       )
       scope.done()
     })
@@ -306,7 +306,7 @@ describe('synchronous `reply()` function', () => {
         ])
 
       const { statusCode, body, headers, rawHeaders } = await got(
-        'http://example.test/'
+        'http://example.test/',
       )
 
       expect(statusCode).to.equal(202)
@@ -331,7 +331,7 @@ describe('synchronous `reply()` function', () => {
         ])
 
       const { statusCode, body, headers, rawHeaders } = await got(
-        'http://example.test/'
+        'http://example.test/',
       )
 
       expect(statusCode).to.equal(202)
@@ -404,7 +404,7 @@ describe('synchronous `reply()` function', () => {
       const interceptor = nock('http://example.test').get('/')
 
       expect(() =>
-        interceptor.reply(() => [200], { 'x-my-header': 'some-value' })
+        interceptor.reply(() => [200], { 'x-my-header': 'some-value' }),
       ).to.throw(Error, 'Invalid arguments')
     })
   })

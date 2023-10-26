@@ -77,7 +77,7 @@ describe('`replyWithFile()`', () => {
       expect(() =>
         new Scope('http://example.test')
           .get('/')
-          .replyWithFile(200, textFilePath)
+          .replyWithFile(200, textFilePath),
       ).to.throw(Error, 'No fs')
     })
   })

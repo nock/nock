@@ -39,7 +39,7 @@ function testNock(done) {
           expect(data).to.be.an.instanceOf(Buffer)
           expect(data.toString()).to.equal('Hello World!')
         })
-      }
+      },
     )
     .end()
 }
@@ -83,7 +83,7 @@ function nockBackWithFixtureLocalhost(mochaDone) {
           this.assertScopesFinished()
           await nockDone()
           mochaDone()
-        }
+        },
       )
 
       request.on('error', () => expect.fail())
@@ -117,7 +117,7 @@ describe('Nock Back', () => {
 
   it('should throw an exception when a hook is not a function', () => {
     expect(() =>
-      nockBack('good_request.json', { before: 'not-a-function-innit' })
+      nockBack('good_request.json', { before: 'not-a-function-innit' }),
     ).to.throw('processing hooks must be a function')
   })
 
@@ -127,7 +127,7 @@ describe('Nock Back', () => {
         expect(nockDone).to.be.a('function')
         expect(context).to.be.an('object')
         done()
-      }
+      },
     )
   })
 
@@ -140,7 +140,7 @@ describe('Nock Back', () => {
     const fixturePath = path.join(nockBack.fixtures, fixtureName)
     nockBack(fixtureName, async function (nockDone) {
       expect(() => this.assertScopesFinished()).to.throw(
-        `["GET http://www.example.test:80/"] was not used, consider removing ${fixturePath} to rerecord fixture`
+        `["GET http://www.example.test:80/"] was not used, consider removing ${fixturePath} to rerecord fixture`,
       )
       await nockDone()
       done()
@@ -164,7 +164,7 @@ describe('Nock Back', () => {
 
     it(
       "shouldn't do anything when fixtures are present",
-      nockBackWithFixtureLocalhost
+      nockBackWithFixtureLocalhost,
     )
   })
 
@@ -186,7 +186,7 @@ describe('Nock Back', () => {
           response => {
             expect(response.statusCode).to.equal(217)
             done()
-          }
+          },
         )
 
         request.on('error', () => expect.fail())
@@ -224,7 +224,7 @@ describe('Nock Back', () => {
                 expect(fs.existsSync(fixtureLoc)).to.be.false()
                 done()
               })
-            }
+            },
           )
 
           request.on('error', () => expect.fail())
@@ -275,7 +275,7 @@ describe('Nock Back', () => {
               expect(response.statusCode).to.equal(217)
               expect(fs.existsSync(fixtureLoc)).to.be.true()
               done()
-            }
+            },
           )
 
           request.on('error', () => expect.fail())
@@ -299,7 +299,7 @@ describe('Nock Back', () => {
                 await nockDone()
 
                 const fixtureContent = JSON.parse(
-                  fs.readFileSync(fixtureLoc).toString('utf8')
+                  fs.readFileSync(fixtureLoc).toString('utf8'),
                 )
                 expect(fixtureContent).to.have.length(1)
 
@@ -314,7 +314,7 @@ describe('Nock Back', () => {
               })
 
               response.resume()
-            }
+            },
           )
 
           request.on('error', err => expect.fail(err.message))
@@ -342,7 +342,7 @@ describe('Nock Back', () => {
               expect(response.statusCode).to.equal(217)
               expect(fs.existsSync(fixtureLoc)).to.be.true()
               done()
-            }
+            },
           )
 
           request.on('error', () => expect.fail())
@@ -358,7 +358,7 @@ describe('Nock Back', () => {
           .get('http://other.example.test', () => expect.fail())
           .on('error', async err => {
             expect(err.message).to.equal(
-              'Nock: Disallowed net connect for "other.example.test:80/"'
+              'Nock: Disallowed net connect for "other.example.test:80/"',
             )
             await nockDone()
             done()
@@ -399,7 +399,7 @@ describe('Nock Back', () => {
               expect(fs.existsSync(fixtureLoc)).to.be.true()
               expect(this.scopes).to.be.empty()
               done()
-            }
+            },
           )
           request.on('error', () => expect.fail())
           request.end()
@@ -426,10 +426,10 @@ describe('Nock Back', () => {
               expect(response.statusCode).to.equal(217)
               expect(fs.existsSync(fixtureLoc)).to.be.true()
               expect(fs.readFileSync(fixtureLoc, 'utf8')).to.equal(
-                'string-response'
+                'string-response',
               )
               done()
-            }
+            },
           )
           request.on('error', () => expect.fail())
           request.end()
@@ -455,7 +455,7 @@ describe('Nock Back', () => {
                   await nockDone()
 
                   const fixtureContent = JSON.parse(
-                    fs.readFileSync(fixtureLoc).toString('utf8')
+                    fs.readFileSync(fixtureLoc).toString('utf8'),
                   )
 
                   expect(fixtureContent).to.have.length(1)
@@ -464,13 +464,13 @@ describe('Nock Back', () => {
                   done()
                 })
                 response.resume()
-              }
+              },
             )
 
             request.on('error', () => expect.fail())
             request.end()
           })
-        }
+        },
       )
     })
 
@@ -497,7 +497,7 @@ describe('Nock Back', () => {
       nockBack.setMode('update')
       fs.copyFileSync(
         path.resolve(fixturePath, 'wrong_uri.json'),
-        path.resolve(fixturePath, 'temp_wrong_uri.json')
+        path.resolve(fixturePath, 'temp_wrong_uri.json'),
       )
     })
 
@@ -522,7 +522,7 @@ describe('Nock Back', () => {
               expect(response.statusCode).to.equal(217)
               expect(fs.existsSync(fixtureLoc)).to.be.true()
               done()
-            }
+            },
           )
 
           request.on('error', () => expect.fail())
@@ -546,7 +546,7 @@ describe('Nock Back', () => {
                 await nockDone()
 
                 const fixtureContent = JSON.parse(
-                  fs.readFileSync(fixtureLoc).toString('utf8')
+                  fs.readFileSync(fixtureLoc).toString('utf8'),
                 )
                 expect(fixtureContent).to.have.length(1)
 
@@ -561,7 +561,7 @@ describe('Nock Back', () => {
               })
 
               response.resume()
-            }
+            },
           )
 
           request.on('error', err => expect.fail(err.message))
@@ -589,7 +589,7 @@ describe('Nock Back', () => {
               expect(response.statusCode).to.equal(217)
               expect(fs.existsSync(fixtureLoc)).to.be.true()
               done()
-            }
+            },
           )
 
           request.on('error', () => expect.fail())
@@ -611,10 +611,10 @@ describe('Nock Back', () => {
               await nockDone()
               expect(response.statusCode).to.equal(217)
               expect(
-                fs.existsSync(`${fixturePath}/temp_wrong_uri.json`)
+                fs.existsSync(`${fixturePath}/temp_wrong_uri.json`),
               ).to.be.true()
               done()
-            }
+            },
           )
 
           request.on('error', () => expect.fail())
@@ -626,7 +626,7 @@ describe('Nock Back', () => {
     it("shouldn't load recorded tests", done => {
       fs.copyFileSync(
         path.resolve(fixturePath, 'good_request.json'),
-        path.resolve(fixturePath, 'temp_good_request.json')
+        path.resolve(fixturePath, 'temp_good_request.json'),
       )
       nockBack('temp_good_request.json', function (nockDone) {
         expect(this.scopes).to.have.lengthOf.at.least(0)
@@ -663,7 +663,7 @@ describe('Nock Back', () => {
               expect(fs.existsSync(fixtureLoc)).to.be.true()
               expect(this.scopes).to.be.empty()
               done()
-            }
+            },
           )
           request.on('error', () => expect.fail())
           request.end()
@@ -690,10 +690,10 @@ describe('Nock Back', () => {
               expect(response.statusCode).to.equal(217)
               expect(fs.existsSync(fixtureLoc)).to.be.true()
               expect(fs.readFileSync(fixtureLoc, 'utf8')).to.equal(
-                'string-response'
+                'string-response',
               )
               done()
-            }
+            },
           )
           request.on('error', () => expect.fail())
           request.end()
@@ -719,7 +719,7 @@ describe('Nock Back', () => {
                   await nockDone()
 
                   const fixtureContent = JSON.parse(
-                    fs.readFileSync(fixtureLoc).toString('utf8')
+                    fs.readFileSync(fixtureLoc).toString('utf8'),
                   )
 
                   expect(fixtureContent).to.have.length(1)
@@ -728,13 +728,13 @@ describe('Nock Back', () => {
                   done()
                 })
                 response.resume()
-              }
+              },
             )
 
             request.on('error', () => expect.fail())
             request.end()
           })
-        }
+        },
       )
     })
 
@@ -763,12 +763,12 @@ describe('Nock Back', () => {
           host: 'other.example.test',
           path: '/',
         },
-        () => expect.fail('Should not come here!')
+        () => expect.fail('Should not come here!'),
       )
 
       req.on('error', err => {
         expect(err.message.trim()).to.equal(
-          'Nock: Disallowed net connect for "other.example.test:80/"'
+          'Nock: Disallowed net connect for "other.example.test:80/"',
         )
         done()
       })

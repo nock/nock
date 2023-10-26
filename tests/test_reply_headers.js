@@ -47,10 +47,10 @@ describe('`reply()` headers', () => {
       const scope = nock('http://example.test').get('/')
 
       expect(() =>
-        scope.reply(200, 'Hello World!', ['one', 'two', 'three'])
+        scope.reply(200, 'Hello World!', ['one', 'two', 'three']),
       ).to.throw(
         Error,
-        'Raw headers must be provided as an array with an even number of items. [fieldName, value, ...]'
+        'Raw headers must be provided as an array with an even number of items. [fieldName, value, ...]',
       )
     })
 
@@ -135,12 +135,12 @@ describe('`reply()` headers', () => {
 
       expect(() => scope.reply(200, 'Hello World!', 'foo: bar')).to.throw(
         Error,
-        'Headers must be provided as an array of raw values, a Map, or a plain Object. foo: bar'
+        'Headers must be provided as an array of raw values, a Map, or a plain Object. foo: bar',
       )
 
       expect(() => scope.reply(200, 'Hello World!', false)).to.throw(
         Error,
-        'Headers must be provided as an array of raw values, a Map, or a plain Object. false'
+        'Headers must be provided as an array of raw values, a Map, or a plain Object. false',
       )
     })
   })
@@ -318,7 +318,7 @@ describe('`reply()` headers', () => {
       expect(counter).to.equal(1)
 
       const { headers: headers2, rawHeaders: rawHeaders2 } = await got(
-        'http://example.test/'
+        'http://example.test/',
       )
       expect(headers2).to.deep.equal({ 'x-my-headers': '2' })
       expect(rawHeaders2).to.deep.equal(['X-My-Headers', '2'])
@@ -342,7 +342,7 @@ describe('`replyContentLength()`', () => {
     const { headers } = await got('http://example.test/')
 
     expect(headers['content-length']).to.equal(
-      `${JSON.stringify(response).length}`
+      `${JSON.stringify(response).length}`,
     )
     scope.done()
   })

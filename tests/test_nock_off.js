@@ -23,7 +23,7 @@ describe('NOCK_OFF env var', () => {
       (request, response) => {
         response.writeHead(200)
         response.end(responseBody)
-      }
+      },
     )
 
     const scope = nock(origin, { allowUnmocked: true })
