@@ -1261,4 +1261,46 @@ describe('Recorder', () => {
       req.end()
     })
   })
+
+  it('allows mocks', async () => {
+    const exampleText = '<html><body>example</body></html>'
+    const exampleTextOverride = '<html><body>example override</body></html>'
+
+    const { origin } = await servers.startHttpServer((request, response) => {
+      switch (require('url').parse(request.url).pathname) {
+        case '/abc':
+          response.write(exampleText)
+          break
+        case '/xyz':
+          response.write(exampleText)
+          break
+      }
+      response.end()
+    })
+
+    nock.restore()
+    nock.recorder.clear()
+    expect(nock.recorder.play()).to.be.empty()
+
+    nock.recorder.rec({
+      allow_mocked: true,
+      dont_print: true,
+      output_objects: true,
+    })
+
+    // Override /xyz to return a different response.
+    nock(origin).get('/xyz').reply(200, exampleTextOverride)
+    expect(nock.activeMocks()).to.have.lengthOf(1)
+
+    const response1 = await got(`${origin}/abc`)
+    expect(response1.body).to.equal(exampleText)
+
+    const response2 = await got(`${origin}/xyz`)
+    expect(response2.body).to.equal(exampleTextOverride)
+
+    // Expect only the non-overridden request to be recorded.
+    const recorded = nock.recorder.play()
+    expect(recorded).to.have.lengthOf(1)
+    expect(recorded[0].path).to.equal('/abc');
+  })
 })

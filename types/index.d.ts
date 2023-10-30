@@ -223,6 +223,7 @@ declare namespace nock {
   }
 
   interface RecorderOptions {
+    allow_mocked?: boolean
     dont_print?: boolean
     output_objects?: boolean
     enable_reqheaders_recording?: boolean
