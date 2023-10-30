@@ -9,6 +9,9 @@
 [npmjs]: https://www.npmjs.com/package/nock
 [build]: https://travis-ci.org/nock/nock
 
+> **Warning**  
+> nock is currently not compatible with Node's experimental native `fetch` implementation. See [#2397](https://github.com/nock/nock/issues/2397)
+
 HTTP server mocking and expectations library for Node.js
 
 Nock can be used to test modules that perform HTTP requests in isolation.
@@ -159,10 +162,16 @@ If you don’t want interceptors to be removed as they are used, you can use the
 
 ### Specifying hostname
 
-The request hostname can be a string or a RegExp.
+The request hostname can be a string, URL, or a RegExp.
 
 ```js
 const scope = nock('http://www.example.com')
+  .get('/resource')
+  .reply(200, 'domain matched')
+```
+
+```js
+const scope = nock(new URL('http://www.example.com'))
   .get('/resource')
   .reply(200, 'domain matched')
 ```
@@ -846,10 +855,23 @@ If you need to match requests only if certain request headers match, you can.
 
 ```js
 const scope = nock('http://api.myservice.com')
+  // Interceptors created after here will only match when the header `accept` equals `application/json`.
   .matchHeader('accept', 'application/json')
   .get('/')
   .reply(200, {
     data: 'hello world',
+  })
+  .get('/')
+  // Only this interceptor will match the header value `x-my-action` with `MyFirstAction`
+  .matchHeader('x-my-action', 'MyFirstAction')
+  .reply(200, {
+    data: 'FirstActionResponse',
+  })
+  .get('/')
+  // Only this interceptor will match the header value `x-my-action` with `MySecondAction`
+  .matchHeader('x-my-action', 'MySecondAction')
+  .reply(200, {
+    data: 'SecondActionResponse',
   })
 ```
 
@@ -1120,7 +1142,7 @@ nock.enableNetConnect(/(amazon|github)\.com/)
 
 // Or a Function
 nock.enableNetConnect(
-  host => host.includes('amazon.com') || host.includes('github.com')
+  host => host.includes('amazon.com') || host.includes('github.com'),
 )
 
 http.get('http://www.amazon.com/')
@@ -1206,7 +1228,7 @@ The returned call objects have the following properties:
 - `body` - the body of the call, if any
 - `status` - the HTTP status of the reply (e.g. `200`)
 - `response` - the body of the reply which can be a JSON, string, hex string representing binary buffers or an array of such hex strings (when handling `content-encoded` in reply header)
-- `headers` - the headers of the reply
+- `rawHeaders` - the headers of the reply which are formatted as a flat array containing header name and header value pairs (e.g. `['accept', 'application/json', 'set-cookie', 'my-cookie=value']`)
 - `reqheader` - the headers of the request
 
 If you save this as a JSON file, you can load them directly through `nock.load(path)`. Then you can post-process them before using them in the tests. For example, to add request body filtering (shown here fixing timestamps to match the ones captured during recording):
@@ -1226,7 +1248,7 @@ nocks.forEach(function (nock) {
         /(timestamp):([0-9]+)/g,
         function (match, key, value) {
           return key + ':' + recordedTimestamp
-        }
+        },
       )
     } else {
       return body
@@ -1445,7 +1467,7 @@ function prepareScope(scope) {
       const recordedTimestamp = recordedBodyResult[1]
       return body.replace(
         /(timestamp):([0-9]+)/g,
-        (match, key, value) => `${key}:${recordedTimestamp}`
+        (match, key, value) => `${key}:${recordedTimestamp}`,
       )
     } else {
       return body
@@ -1520,9 +1542,9 @@ import test from 'ava' // You can use any test framework.
 // can't be intercepted by nock. So, configure axios to use the node adapter.
 //
 // References:
-// https://github.com/nock/nock/issues/699#issuecomment-272708264
-// https://github.com/axios/axios/issues/305
-axios.defaults.adapter = require('axios/lib/adapters/http')
+// https://github.com/axios/axios/pull/5277
+
+axios.defaults.adapter = 'http'
 
 test('can fetch test response', async t => {
   // Set up the mock request.
@@ -1538,6 +1560,18 @@ test('can fetch test response', async t => {
   // Assert that the expected request was made.
   scope.done()
 })
+```
+
+For Nock + Axios + Jest to work, you'll have to also adapt your jest.config.js, like so:
+
+```js
+const config = {
+  moduleNameMapper: {
+    // Force CommonJS build for http adapter to be available.
+    // via https://github.com/axios/axios/issues/5101#issuecomment-1276572468
+    '^axios$': require.resolve('axios'),
+  },
+}
 ```
 
 [axios]: https://github.com/axios/axios
@@ -1590,23 +1624,26 @@ Thanks goes to these wonderful people ([emoji key](https://github.com/all-contri
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
 <table>
-  <tr>
-    <td align="center"><a href="http://pgte.me"><img src="https://avatars1.githubusercontent.com/u/47910?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Pedro Teixeira</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=pgte" title="Code">💻</a> <a href="#maintenance-pgte" title="Maintenance">🚧</a></td>
-    <td align="center"><a href="https://github.com/n30n0v"><img src="https://avatars3.githubusercontent.com/u/10771967?v=4?s=100" width="100px;" alt=""/><br /><sub><b>n30n0v</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=n30n0v" title="Code">💻</a></td>
-    <td align="center"><a href="https://burntfen.com"><img src="https://avatars3.githubusercontent.com/u/910753?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Richard Littauer</b></sub></a><br /><a href="#maintenance-RichardLitt" title="Maintenance">🚧</a> <a href="https://github.com/nock/nock/commits?author=RichardLitt" title="Code">💻</a> <a href="#blog-RichardLitt" title="Blogposts">📝</a></td>
-    <td align="center"><a href="http://ianwsperber.com"><img src="https://avatars1.githubusercontent.com/u/3731165?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ian Walker-Sperber</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=ianwsperber" title="Code">💻</a></td>
-    <td align="center"><a href="http://ilovacha.com"><img src="https://avatars2.githubusercontent.com/u/1505203?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ivan Erceg</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=ierceg" title="Code">💻</a> <a href="#maintenance-ierceg" title="Maintenance">🚧</a></td>
-    <td align="center"><a href="https://twitter.com/paulmelnikow"><img src="https://avatars2.githubusercontent.com/u/1487036?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Paul Melnikow</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=paulmelnikow" title="Code">💻</a> <a href="#maintenance-paulmelnikow" title="Maintenance">🚧</a></td>
-    <td align="center"><a href="https://twitter.com/gr2m"><img src="https://avatars3.githubusercontent.com/u/39992?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Gregor Martynus</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=gr2m" title="Code">💻</a> <a href="#maintenance-gr2m" title="Maintenance">🚧</a> <a href="#business-gr2m" title="Business development">💼</a> <a href="#financial-gr2m" title="Financial">💵</a> <a href="#blog-gr2m" title="Blogposts">📝</a></td>
-  </tr>
-  <tr>
-    <td align="center"><a href="https://gitlab.com/hutson"><img src="https://avatars1.githubusercontent.com/u/6701030?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Hutson Betts</b></sub></a><br /><a href="#financial-hutson" title="Financial">💵</a></td>
-    <td align="center"><a href="http://lilja.io"><img src="https://avatars2.githubusercontent.com/u/6105119?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jonas Lilja</b></sub></a><br /><a href="#financial-jlilja" title="Financial">💵</a> <a href="https://github.com/nock/nock/commits?author=jlilja" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/benrki"><img src="https://avatars0.githubusercontent.com/u/4446950?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Benjamin Ki</b></sub></a><br /><a href="#financial-benrki" title="Financial">💵</a></td>
-    <td align="center"><a href="http://chadf.ca"><img src="https://avatars2.githubusercontent.com/u/3250463?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Chad Fawcett</b></sub></a><br /><a href="#financial-chadfawcett" title="Financial">💵</a></td>
-    <td align="center"><a href="http://www.laurencemyers.com.au"><img src="https://avatars.githubusercontent.com/u/6336048?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Laurence Dougal Myers</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=laurence-myers" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/Beretta1979"><img src="https://avatars.githubusercontent.com/u/10073962?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Sébastien Van Bruaene</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=Beretta1979" title="Code">💻</a> <a href="https://github.com/nock/nock/commits?author=Beretta1979" title="Tests">⚠️</a></td>
-  </tr>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="http://pgte.me"><img src="https://avatars1.githubusercontent.com/u/47910?v=4?s=100" width="100px;" alt="Pedro Teixeira"/><br /><sub><b>Pedro Teixeira</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=pgte" title="Code">💻</a> <a href="#maintenance-pgte" title="Maintenance">🚧</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/n30n0v"><img src="https://avatars3.githubusercontent.com/u/10771967?v=4?s=100" width="100px;" alt="n30n0v"/><br /><sub><b>n30n0v</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=n30n0v" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://burntfen.com"><img src="https://avatars3.githubusercontent.com/u/910753?v=4?s=100" width="100px;" alt="Richard Littauer"/><br /><sub><b>Richard Littauer</b></sub></a><br /><a href="#maintenance-RichardLitt" title="Maintenance">🚧</a> <a href="https://github.com/nock/nock/commits?author=RichardLitt" title="Code">💻</a> <a href="#blog-RichardLitt" title="Blogposts">📝</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://ianwsperber.com"><img src="https://avatars1.githubusercontent.com/u/3731165?v=4?s=100" width="100px;" alt="Ian Walker-Sperber"/><br /><sub><b>Ian Walker-Sperber</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=ianwsperber" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://ilovacha.com"><img src="https://avatars2.githubusercontent.com/u/1505203?v=4?s=100" width="100px;" alt="Ivan Erceg"/><br /><sub><b>Ivan Erceg</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=ierceg" title="Code">💻</a> <a href="#maintenance-ierceg" title="Maintenance">🚧</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://twitter.com/paulmelnikow"><img src="https://avatars2.githubusercontent.com/u/1487036?v=4?s=100" width="100px;" alt="Paul Melnikow"/><br /><sub><b>Paul Melnikow</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=paulmelnikow" title="Code">💻</a> <a href="#maintenance-paulmelnikow" title="Maintenance">🚧</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://twitter.com/gr2m"><img src="https://avatars3.githubusercontent.com/u/39992?v=4?s=100" width="100px;" alt="Gregor Martynus"/><br /><sub><b>Gregor Martynus</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=gr2m" title="Code">💻</a> <a href="#maintenance-gr2m" title="Maintenance">🚧</a> <a href="#business-gr2m" title="Business development">💼</a> <a href="#financial-gr2m" title="Financial">💵</a> <a href="#blog-gr2m" title="Blogposts">📝</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://gitlab.com/hutson"><img src="https://avatars1.githubusercontent.com/u/6701030?v=4?s=100" width="100px;" alt="Hutson Betts"/><br /><sub><b>Hutson Betts</b></sub></a><br /><a href="#financial-hutson" title="Financial">💵</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://lilja.io"><img src="https://avatars2.githubusercontent.com/u/6105119?v=4?s=100" width="100px;" alt="Jonas Lilja"/><br /><sub><b>Jonas Lilja</b></sub></a><br /><a href="#financial-jlilja" title="Financial">💵</a> <a href="https://github.com/nock/nock/commits?author=jlilja" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/benrki"><img src="https://avatars0.githubusercontent.com/u/4446950?v=4?s=100" width="100px;" alt="Benjamin Ki"/><br /><sub><b>Benjamin Ki</b></sub></a><br /><a href="#financial-benrki" title="Financial">💵</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://chadf.ca"><img src="https://avatars2.githubusercontent.com/u/3250463?v=4?s=100" width="100px;" alt="Chad Fawcett"/><br /><sub><b>Chad Fawcett</b></sub></a><br /><a href="#financial-chadfawcett" title="Financial">💵</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://www.laurencemyers.com.au"><img src="https://avatars.githubusercontent.com/u/6336048?v=4?s=100" width="100px;" alt="Laurence Dougal Myers"/><br /><sub><b>Laurence Dougal Myers</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=laurence-myers" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Beretta1979"><img src="https://avatars.githubusercontent.com/u/10073962?v=4?s=100" width="100px;" alt="Sébastien Van Bruaene"/><br /><sub><b>Sébastien Van Bruaene</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=Beretta1979" title="Code">💻</a> <a href="https://github.com/nock/nock/commits?author=Beretta1979" title="Tests">⚠️</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Uzlopak"><img src="https://avatars.githubusercontent.com/u/5059100?v=4?s=100" width="100px;" alt="Aras Abbasi"/><br /><sub><b>Aras Abbasi</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=Uzlopak" title="Code">💻</a> <a href="https://github.com/nock/nock/commits?author=Uzlopak" title="Tests">⚠️</a> <a href="#maintenance-Uzlopak" title="Maintenance">🚧</a></td>
+    </tr>
+  </tbody>
 </table>
 
 <!-- markdownlint-restore -->

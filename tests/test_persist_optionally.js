@@ -36,7 +36,7 @@ describe('`optionally()`', () => {
 
     expect(() => interceptor.optionally('foo')).to.throw(
       Error,
-      'Invalid arguments: argument should be a boolean'
+      'Invalid arguments: argument should be a boolean',
     )
   })
 
@@ -203,14 +203,14 @@ describe('`persist()`', () => {
 
     await assertRejects(
       got('http://example.test/'),
-      /Nock: No match for request/
+      /Nock: No match for request/,
     )
   })
 
   it('when called with an invalid argument, throws the expected error', () => {
     expect(() => nock('http://example.test').persist('string')).to.throw(
       Error,
-      'Invalid arguments: argument should be a boolean'
+      'Invalid arguments: argument should be a boolean',
     )
   })
 })

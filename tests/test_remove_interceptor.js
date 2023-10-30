@@ -7,14 +7,13 @@ const got = require('./got_client')
 describe('`removeInterceptor()`', () => {
   context('when invoked with an Interceptor instance', () => {
     it('remove interceptor removes given interceptor', async () => {
+      const newScope = nock('http://example.test')
+        .get('/somepath')
+        .reply(202, 'other-content')
       const givenInterceptor = nock('http://example.test').get('/somepath')
       givenInterceptor.reply(200, 'hey')
 
       expect(nock.removeInterceptor(givenInterceptor)).to.be.true()
-
-      const newScope = nock('http://example.test')
-        .get('/somepath')
-        .reply(202, 'other-content')
 
       const { statusCode, body } = await got('http://example.test/somepath')
 
@@ -90,7 +89,7 @@ describe('`removeInterceptor()`', () => {
         nock.removeInterceptor({
           hostname: 'example.test',
           path: '/somepath',
-        })
+        }),
       ).to.be.true()
 
       const newScope = nock('http://example.test')
@@ -110,7 +109,7 @@ describe('`removeInterceptor()`', () => {
         nock.removeInterceptor({
           hostname: 'example.org',
           path: '/somepath',
-        })
+        }),
       ).to.be.false()
     })
 
@@ -127,7 +126,7 @@ describe('`removeInterceptor()`', () => {
           proto: 'https',
           hostname: 'example.test',
           path: '/somepath',
-        })
+        }),
       ).to.be.true()
 
       expect(scope.pendingMocks()).to.deep.equal([])
@@ -146,7 +145,7 @@ describe('`removeInterceptor()`', () => {
           method: 'post',
           hostname: 'example.test',
           path: '/somepath',
-        })
+        }),
       ).to.be.true()
 
       expect(scope.pendingMocks()).to.deep.equal([])
@@ -161,7 +160,7 @@ describe('`removeInterceptor()`', () => {
       expect(
         nock.removeInterceptor({
           hostname: 'example.test',
-        })
+        }),
       ).to.be.true()
 
       expect(scope.pendingMocks()).to.deep.equal([])
@@ -186,7 +185,7 @@ describe('`removeInterceptor()`', () => {
         nock.removeInterceptor({
           hostname: 'example.test',
           path: '/anotherpath',
-        })
+        }),
       ).to.be.true()
 
       expect(scope1.pendingMocks()).to.deep.equal([

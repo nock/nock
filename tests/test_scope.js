@@ -11,7 +11,7 @@ const got = require('./got_client')
 
 it('scope exposes interceptors', () => {
   const scopes = nock.load(
-    path.join(__dirname, 'fixtures', 'good_request.json')
+    path.join(__dirname, 'fixtures', 'good_request.json'),
   )
 
   expect(scopes).to.be.an.instanceOf(Array)
@@ -34,8 +34,7 @@ describe('`Scope#constructor`', () => {
     scope.done()
   })
 
-  // TODO: https://github.com/nock/nock/pull/1879
-  it.skip('accepts a WHATWG URL instance', async () => {
+  it('accepts a WHATWG URL instance', async () => {
     const scope = nock(new url.URL('http://example.test')).get('/').reply()
 
     const { statusCode } = await got('http://example.test')
@@ -43,10 +42,33 @@ describe('`Scope#constructor`', () => {
     scope.done()
   })
 
-  it('fails when provided a WHATWG URL instance', () => {
-    // This test just proves the lack of current support. When this feature is added,
-    // this test should be removed and the test above un-skipped.
-    expect(() => nock(new url.URL('http://example.test'))).to.throw()
+  it('throws on invalid or omitted protocol', async () => {
+    expect(() => nock('ws://example.test')).to.throw()
+    expect(() => nock('localhost/foo')).to.throw()
+    expect(() => nock('foo.com:1234')).to.throw()
+  })
+
+  it('throws on invalid URL format', async () => {
+    expect(() => nock(['This is not a url'])).to.throw()
+    // The following contains all valid properties of WHATWG URL, but is not an
+    // instance of URL. Maybe we should support object literals some day? A
+    // simple duck-type validator would suffice.
+    expect(() =>
+      nock({
+        href: 'http://google.com/foo',
+        origin: 'http://google.com',
+        protocol: 'http:',
+        username: '',
+        password: '',
+        host: 'google.com',
+        hostname: 'google.com',
+        port: 80,
+        pathname: '/foo',
+        search: '',
+        searchParams: {},
+        hash: '',
+      }),
+    ).to.throw()
   })
 })
 
@@ -146,7 +168,7 @@ describe('`filteringPath()`', function () {
   it('filteringPath with invalid argument throws expected', () => {
     expect(() => nock('http://example.test').filteringPath('abc123')).to.throw(
       Error,
-      'Invalid arguments: filtering path should be a function or a regular expression'
+      'Invalid arguments: filtering path should be a function or a regular expression',
     )
   })
 })
@@ -189,10 +211,10 @@ describe('filteringRequestBody()', () => {
 
   it('filteringRequestBody with invalid argument throws expected', () => {
     expect(() =>
-      nock('http://example.test').filteringRequestBody('abc123')
+      nock('http://example.test').filteringRequestBody('abc123'),
     ).to.throw(
       Error,
-      'Invalid arguments: filtering request body should be a function or a regular expression'
+      'Invalid arguments: filtering request body should be a function or a regular expression',
     )
   })
 })
