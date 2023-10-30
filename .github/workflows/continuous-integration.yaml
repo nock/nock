@@ -7,6 +7,9 @@ name: Continuous Integration
   push:
     branches:
       - main
+permissions:
+  contents: read
+
 jobs:
   format:
     name: Format
@@ -19,7 +22,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: lts/*
+          node-version: 16
           cache: 'npm'
       - name: Install dependencies
         run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
@@ -36,7 +39,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: lts/*
           cache: 'npm'
       - name: Install dependencies
         run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
@@ -53,7 +56,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: lts/*
           cache: 'npm'
       - name: Install dependencies
         run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
