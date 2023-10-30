@@ -1452,6 +1452,9 @@ As an optional second parameter you can pass the following options
 - `after`: a postprocessing function, gets called after nock.define
 - `afterRecord`: a postprocessing function, gets called after recording. Is passed the array of scopes recorded and should return the intact array, a modified version of the array, or if custom formatting is desired, a stringified version of the array to save to the fixture
 - `recorder`: custom options to pass to the recorder
+- `filter`: an option filtering object
+- `filter.id`: an id on which a filtering will be applied
+- `filter.goup`: a group name on which a filtering will be applied
 
 ##### Example
 
