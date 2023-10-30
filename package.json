@@ -24,11 +24,10 @@
   "dependencies": {
     "debug": "^4.1.0",
     "json-stringify-safe": "^5.0.1",
-    "lodash": "^4.17.21",
     "propagate": "^2.0.0"
   },
   "devDependencies": {
-    "@definitelytyped/dtslint": "^0.0.163",
+    "@definitelytyped/dtslint": "^0.0.183",
     "@sinonjs/fake-timers": "^10.0.0",
     "assert-rejects": "^1.0.0",
     "chai": "^4.1.2",
@@ -48,7 +47,7 @@
     "prettier": "3.0.3",
     "proxyquire": "^2.1.0",
     "rimraf": "^3.0.0",
-    "semantic-release": "^21.0.2",
+    "semantic-release": "^22.0.5",
     "sinon": "^15.0.1",
     "sinon-chai": "^3.7.0",
     "typescript": "^5.0.4"
