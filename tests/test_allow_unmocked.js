@@ -208,11 +208,11 @@ describe('allowUnmocked option', () => {
     scope.done()
   })
 
-  it('match domain and path using regexp with query params and allowUnmocked', async () => {
+  it('match domain and path using regexp and allowUnmocked, with query params', async () => {
     const imgResponse = 'Matched Images Page'
 
     const scope = nock(/example/, { allowUnmocked: true })
-      .get(/imghp\?hl=en/)
+      .get(/^\/imghp$/)
       .reply(200, imgResponse)
 
     const { body, statusCode } = await got('http://example.test/imghp?hl=en')

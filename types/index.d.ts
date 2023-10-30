@@ -35,7 +35,7 @@ declare namespace nock {
   let recorder: Recorder
 
   type InterceptFunction = (
-    uri: string | RegExp | { (uri: string): boolean },
+    pathname: string | RegExp | { (uri: string): boolean },
     requestBody?: RequestBodyMatcher,
     interceptorOptions?: Options,
   ) => Interceptor

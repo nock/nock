@@ -818,7 +818,7 @@ describe('Intercept', () => {
     scope2.done()
   })
 
-  it('match domain using intercept callback', async () => {
+  it('match path using intercept callback', async () => {
     const validUrl = ['/cats', '/dogs']
 
     nock('http://example.test')
@@ -1108,5 +1108,49 @@ describe('Intercept', () => {
         expect.fail(error)
         done()
       })
+  })
+
+  describe('ignoring query params', () => {
+    it('ignores the query string if `query()` is not called and request includes query params', async () => {
+      const scope = nock('http://example.test').get('/foo').reply()
+
+      const { statusCode } = await got('http://example.test/foo?bar=baz')
+
+      expect(statusCode).to.equal(200)
+      scope.done()
+    })
+
+    it('ignores the query string when matching path using intercept callback', async () => {
+      const scope = nock('http://example.test')
+        .get(pathname => pathname === '/foo')
+        .reply()
+
+      const { statusCode } = await got('http://example.test/foo?bar=baz')
+
+      expect(statusCode).to.equal(200)
+      scope.done()
+    })
+
+    it('ignores the query string if regexp is used for the pathname', async () => {
+      const scope = nock('http://example.test')
+        .get(/^\/foo$/)
+        .reply()
+
+      const { statusCode } = await got('http://example.test/foo?bar=baz')
+
+      expect(statusCode).to.equal(200)
+      scope.done()
+    })
+
+    it('ignores the query string if regexp is used for the domain and pathname', async () => {
+      const scope = nock(/example/)
+        .get(/^\/foo$/)
+        .reply()
+
+      const { statusCode } = await got('http://example.test/foo?bar=baz')
+
+      expect(statusCode).to.equal(200)
+      scope.done()
+    })
   })
 })

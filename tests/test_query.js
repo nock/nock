@@ -70,6 +70,18 @@ describe('`query()`', () => {
       scope.done()
     })
 
+    it('matches query values if regexp is used on the pathname', async () => {
+      const scope = nock('http://example.test')
+        .get(/^\/foo$/)
+        .query({ bar: 'baz' })
+        .reply()
+
+      const { statusCode } = await got('http://example.test/foo?bar=baz')
+
+      expect(statusCode).to.equal(200)
+      scope.done()
+    })
+
     it("doesn't match query values of requests without query string", async () => {
       const scope1 = nock('http://example.test')
         .get('/')
