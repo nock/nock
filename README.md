@@ -1355,6 +1355,22 @@ nock.removeInterceptor(interceptor)
 const interceptor = nock('http://example.org').get('somePath')
 interceptor.reply(200, 'OK')
 nock.removeInterceptor(interceptor)
+
+### .removeInterceptorByPredictor(predictor)
+
+The purpose is the same as removeInterceptor but here you can use predictor(a function) to determinate which interceptor instance to be removed, it gives way more expansibility to removal logics.
+
+Examples:
+
+```js
+const removed = nock.removeInterceptorByPredictor(
+  ({ interceptor, basePath }) => {
+    return (interceptor.path === 'abc' && basePath = 'http://localhost')
+  }
+)
+
+// here you can check if interceptor is acutally removed.
+console.log(removed && removed[0].path) // should be 'abc' in console.
 ```
 
 ## Events

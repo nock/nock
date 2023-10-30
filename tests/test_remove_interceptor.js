@@ -4,6 +4,48 @@ const { expect } = require('chai')
 const nock = require('..')
 const got = require('./got_client')
 
+require('./setup')
+
+describe('removeInterceptorByPredictor', () => {
+  context('when invoked with an Interceptor instance', () => {
+    it('should remove interceptor matched by given predictor', async () => {
+      const givenInterceptor = nock('http://example.test').get('/somepath')
+      givenInterceptor.reply(200, 'hey')
+
+      const predictor = ({ interceptor }) => interceptor.path === '/somepath'
+
+      const [removed] = nock.removeInterceptorByPredictor(predictor)
+
+      expect(removed.path).to.be.equals('/somepath')
+
+      nock('http://example.test').get('/somepath').reply(202, 'other-content')
+
+      const { statusCode, body } = await got('http://example.test/somepath')
+
+      expect(statusCode).to.equal(202)
+      expect(body).to.equal('other-content')
+    })
+
+    it('should not remove interceptor if given predictor matches nothing', async () => {
+      const givenInterceptor = nock('http://example.test').get('/somepath')
+      givenInterceptor.reply(200, 'hey')
+
+      const predictor = () => false
+
+      const removed = nock.removeInterceptorByPredictor(predictor)
+
+      expect(removed).to.be.undefined()
+
+      nock('http://example.test').get('/somepath').reply(202, 'other-content')
+
+      const { statusCode, body } = await got('http://example.test/somepath')
+
+      expect(statusCode).to.equal(200)
+      expect(body).to.equal('hey')
+    })
+  })
+})
+
 describe('`removeInterceptor()`', () => {
   context('when invoked with an Interceptor instance', () => {
     it('remove interceptor removes given interceptor', async () => {
