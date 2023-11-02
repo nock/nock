@@ -118,7 +118,9 @@ declare namespace nock {
     filteringPath(regex: RegExp, replace: string): this
     filteringPath(fn: (path: string) => string): this
     filteringRequestBody(regex: RegExp, replace: string): this
-    filteringRequestBody(fn: (body: string) => string): this
+    filteringRequestBody(
+      fn: (body: string, recordedBody: string) => string,
+    ): this
 
     persist(flag?: boolean): this
     replyContentLength(): this
