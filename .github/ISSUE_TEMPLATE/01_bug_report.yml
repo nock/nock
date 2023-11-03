@@ -9,7 +9,7 @@ body:
     attributes:
       label: Please avoid duplicates
       options:
-        - label: I checked [all open bugs](https://github.com/nock/nock.js/issues?q=is%3Aissue+is%3Aopen+label%3Abug) and none of them matched my problem.
+        - label: I checked [all open bugs](https://github.com/nock/nock/issues?q=is%3Aissue+is%3Aopen+label%3Abug) and none of them matched my problem.
           required: true
   - type: input
     id: testcase
