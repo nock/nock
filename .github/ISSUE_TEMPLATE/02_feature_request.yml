@@ -9,7 +9,7 @@ body:
     attributes:
       label: Please avoid duplicates
       options:
-        - label: I checked [all open feature requests](https://github.com/nock/nock.js/issues?q=is%3Aissue+is%3Aopen+label%3Afeature) and none of them matched my request.
+        - label: I checked [all open feature requests](https://github.com/nock/nock/issues?q=is%3Aissue+is%3Aopen+label%3Afeature) and none of them matched my request.
           required: true
   - type: textarea
     id: context
