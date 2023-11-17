@@ -686,7 +686,7 @@ To repeat this response for as long as nock is active, use [.persist()](#persist
 
 ### Delay the response
 
-Nock can simulate response latency to allow you to test timeouts, race conditions, an other timing related scenarios.  
+Nock can simulate response latency to allow you to test timeouts, race conditions, an other timing related scenarios.
 You are able to specify the number of milliseconds that your reply should be delayed.
 
 ```js
@@ -696,8 +696,8 @@ nock('http://my.server.com')
   .reply(200, '<html></html>')
 ```
 
-`delay(1000)` is an alias for `delayConnection(1000).delayBody(0)`  
-`delay({ head: 1000, body: 2000 })` is an alias for `delayConnection(1000).delayBody(2000)`  
+`delay(1000)` is an alias for `delayConnection(1000).delayBody(0)`
+`delay({ head: 1000, body: 2000 })` is an alias for `delayConnection(1000).delayBody(2000)`
 Both of which are covered in detail below.
 
 #### Delay the connection
@@ -715,7 +715,7 @@ nock('http://my.server.com')
 req = http.request('http://my.server.com', { timeout: 1000 })
 ```
 
-Nock emits timeout events almost immediately by comparing the requested connection delay to the timeout parameter passed to `http.request()` or `http.ClientRequest#setTimeout()`.  
+Nock emits timeout events almost immediately by comparing the requested connection delay to the timeout parameter passed to `http.request()` or `http.ClientRequest#setTimeout()`.
 This allows you to test timeouts without using fake timers or slowing down your tests.
 If the client chooses to _not_ take an action (e.g. abort the request), the request and response will continue on as normal, after real clock time has passed.
 
@@ -725,12 +725,12 @@ Following the `'finish'` event being emitted by `ClientRequest`, Nock will wait 
 At this point, any connection delay value is compared against any request timeout setting and a [`'timeout'`](https://nodejs.org/api/http.html#http_event_timeout) is emitted when appropriate from the socket and the request objects.
 A Node timeout timer is then registered with any connection delay value to delay real time before checking again if the request has been aborted and the [`'response'`](http://nodejs.org/api/http.html#http_event_response) is emitted by the request.
 
-A similar method, `.socketDelay()` was removed in version 13. It was thought that having two methods so subtlety similar was confusing.  
+A similar method, `.socketDelay()` was removed in version 13. It was thought that having two methods so subtlety similar was confusing.
 The discussion can be found at https://github.com/nock/nock/pull/1974.
 
 #### Delay the response body
 
-You are able to specify the number of milliseconds that the response body should be delayed.  
+You are able to specify the number of milliseconds that the response body should be delayed.
 This is the time between the headers being received and the body starting to be received.
 
 ```js
@@ -1514,6 +1514,18 @@ To set the mode call `nockBack.setMode(mode)` or run the tests with the `NOCK_BA
 
 - lockdown: use recorded nocks, disables all http calls even when not nocked, doesn't record
 
+### Hiding Secrets from NockBack
+
+Nockback will happily record secrets that appear in URL parameters or HTTP request bodies. To prevent this you can use simple substitution to dynamically replace these values whenever the fixture is written or read from disk. To do this, use the `substitutions` options on Nock.
+
+```js
+context { nockDone } = nockBack('exampleFixture.json', { substitutions: { A_SECRET: "the-value-of-your-secret" }})
+```
+
+In the recorded cassette where ever `the-value-of-your-secret` would appear `{{ A_SECRET }}` will appear instead.
+
+This feature should only be used for strings that are unlikely to occur naturally - as this works with simple string substitution.
+
 ### Verifying recorded fixtures
 
 Although you can certainly open the recorded JSON fixtures to manually verify requests recorded by nockBack - it's sometimes useful to put those expectations in your tests.
@@ -1634,7 +1646,7 @@ const config = {
 
 ### Memory issues with Jest
 
-Memory issues can be avoided by calling [`nock.restore()`](#restoring) after each test suite.  
+Memory issues can be avoided by calling [`nock.restore()`](#restoring) after each test suite.
 One of the core principles of [Jest](https://jestjs.io/) is that it runs tests in isolation.
 It does this by manipulating the modules cache of Node in a way that conflicts with how Nock monkey patches the builtin `http` and `https` modules.
 [Related issue with more details](https://github.com/nock/nock/issues/1817).

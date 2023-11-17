@@ -287,6 +287,7 @@ declare namespace nock {
   }
 
   interface BackOptions {
+    substitutions?: { [key: string]: string }
     before?: (def: Definition) => void
     after?: (scope: Scope) => void
     afterRecord?: (defs: Definition[]) => Definition[]
