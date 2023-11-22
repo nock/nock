@@ -115,6 +115,26 @@ describe('Nock Back', () => {
     })
   })
 
+  it('should allow template substitutions in recorded fixtures', done => {
+    const mySecretApiKey = 'blah-blah'
+
+    nockBack(
+      'test-template-substitution-fixture.json',
+      {
+        substitutions: { SECRET: mySecretApiKey },
+        after: scope => {
+          expect(scope.interceptors[0].uri).to.eql('/?secret=blah-blah')
+        },
+      },
+      function (nockDone) {
+        http.get('http://example.test/?secret=blah-blah', () => {
+          nockDone()
+          done()
+        })
+      },
+    )
+  })
+
   it('should throw an exception when a hook is not a function', () => {
     expect(() =>
       nockBack('good_request.json', { before: 'not-a-function-innit' }),
@@ -271,7 +291,6 @@ describe('Nock Back', () => {
             },
             response => {
               nockDone()
-
               expect(response.statusCode).to.equal(217)
               expect(fs.existsSync(fixtureLoc)).to.be.true()
               done()
@@ -282,6 +301,44 @@ describe('Nock Back', () => {
           request.end()
         })
       })
+    })
+
+    it('should record template keys into fixtures rather than secrets', done => {
+      expect(fs.existsSync(fixtureLoc)).to.be.false()
+
+      const mySecretApiKey = 'sooper-secret'
+
+      nockBack(
+        fixture,
+        {
+          substitutions: { SECRET: mySecretApiKey },
+        },
+        function (nockDone) {
+          startHttpServer(requestListener).then(server => {
+            const request = http.request(
+              {
+                host: 'localhost',
+                path: '/?secret=sooper-secret',
+                port: server.address().port,
+              },
+              response => {
+                response.once('end', () => {
+                  nockDone()
+                  const fixtureContent = fs.readFileSync(fixtureLoc, 'utf8')
+                  expect(response.statusCode).to.equal(217)
+                  expect(fixtureContent).to.contain('{{ SECRET }}')
+                  done()
+                })
+
+                response.resume()
+              },
+            )
+
+            request.on('error', () => expect.fail())
+            request.end()
+          })
+        },
+      )
     })
 
     it('should record the expected data', done => {
@@ -528,6 +585,42 @@ describe('Nock Back', () => {
           request.end()
         })
       })
+    })
+
+    it('should record template keys into fixtures rather than secrets', done => {
+      const mySecretApiKey = 'sooper-secret'
+
+      nockBack(
+        fixture,
+        {
+          substitutions: { SECRET: mySecretApiKey },
+        },
+        function (nockDone) {
+          startHttpServer(requestListener).then(server => {
+            const request = http.request(
+              {
+                host: 'localhost',
+                path: '/?secret=sooper-secret',
+                port: server.address().port,
+              },
+              response => {
+                response.once('end', () => {
+                  nockDone()
+                  const fixtureContent = fs.readFileSync(fixtureLoc, 'utf8')
+                  expect(response.statusCode).to.equal(217)
+                  expect(fixtureContent).to.contain('{{ SECRET }}')
+                  done()
+                })
+
+                response.resume()
+              },
+            )
+
+            request.on('error', () => expect.fail())
+            request.end()
+          })
+        },
+      )
     })
 
     it('should record the expected data', done => {

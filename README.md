@@ -1497,6 +1497,18 @@ To set the mode call `nockBack.setMode(mode)` or run the tests with the `NOCK_BA
 
 - lockdown: use recorded nocks, disables all http calls even when not nocked, doesn't record
 
+### Hiding Secrets from NockBack
+
+Nockback will happily record secrets that appear in URL parameters or HTTP request bodies. To prevent this you can use simple substitution to dynamically replace these values whenever the fixture is written or read from disk. To do this, use the `substitutions` options on Nock.
+
+```js
+context { nockDone } = nockBack('exampleFixture.json', { substitutions: { A_SECRET: "the-value-of-your-secret" }})
+```
+
+In the recorded cassette where ever `the-value-of-your-secret` would appear `{{ A_SECRET }}` will appear instead.
+
+This feature should only be used for strings that are unlikely to occur naturally - as this works with simple string substitution.
+
 ## Common issues
 
 **"No match for response" when using got with error responses**
