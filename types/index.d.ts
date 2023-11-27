@@ -267,10 +267,23 @@ declare namespace nock {
     }>
   }
 
+  interface InterceptorSurface {
+    method: string
+    uri: string
+    basePath: string
+    path: string
+    queries?: string
+    counter: number
+    body: string
+    statusCode: number
+    optional: boolean
+  }
+
   interface BackContext {
     isLoaded: boolean
     scopes: Scope[]
     assertScopesFinished(): void
+    query: InterceptorSurface[]
   }
 
   interface BackOptions {
