@@ -1066,6 +1066,17 @@ if (!nock.isActive()) {
 }
 ```
 
+### .clone()
+
+You can clone a scope by calling `.clone()` on it:
+
+```js
+const scope = nock('http://example.test')
+
+const getScope = scope.get('/').reply(200)
+const postScope = scope.clone().post('/').reply(200)
+```
+
 ## Restoring
 
 You can restore the HTTP interceptor to the normal unmocked behaviour by calling:
