@@ -1497,6 +1497,45 @@ To set the mode call `nockBack.setMode(mode)` or run the tests with the `NOCK_BA
 
 - lockdown: use recorded nocks, disables all http calls even when not nocked, doesn't record
 
+### Verifying recorded fixtures
+
+Although you can certainly open the recorded JSON fixtures to manually verify requests recorded by nockBack - it's sometimes useful to put those expectations in your tests.
+
+The `context.query` function can be used to return all of the interceptors that were recored in a given fixture.
+
+By itself, this functions as a negative expectation - you can verify that certain calls do NOT happen in the fixture. Since `assertScopesFinished` can verify there are no _extra_ calls in a fixture - pairing the two methods allows you to verify the exact set of HTTP interactions recorded in the fixture. This is especially useful when re-recording for instance, a service that synchronizes via several HTTP calls to an external API.
+
+**NB**: The list of fixtures is only available when reading. It will only be populated for nocks that are played back from fixtures.
+
+#### Example
+
+```js
+it('#synchronize - synchronize with the external API', async localState => {
+  const { nockDone, context } = await back('http-interaction.json')
+
+  const syncronizer = new Synchronizer(localState)
+
+  sycnronizer.syncronize()
+
+  nockDone()
+
+  context.assertScopesFinished()
+
+  expect(context.query()).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        method: 'POST',
+        path: '/create/thing',
+      }),
+      expect.objectContaining({
+        method: 'POST',
+        path: 'create/thing',
+      }),
+    ]),
+  )
+})
+```
+
 ## Common issues
 
 **"No match for response" when using got with error responses**

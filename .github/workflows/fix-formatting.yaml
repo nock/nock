@@ -5,8 +5,13 @@ name: Fix formatting
       - dependabot/npm_and_yarn/prettier-*
       - dependabot/npm_and_yarn/eslint-*
   workflow_dispatch: {}
+permissions:
+  contents: read
+
 jobs:
   fixFormatting:
+    permissions:
+      contents: write # for Git to git push
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -14,7 +19,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: true
           ref: ${{ github.head_ref }}
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 16
           cache: npm
