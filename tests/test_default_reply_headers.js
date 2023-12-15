@@ -5,8 +5,7 @@ const nock = require('..')
 const got = require('./got_client')
 
 describe('`defaultReplyHeaders()`', () => {
-  // TODO: https://github.com/mswjs/interceptors/issues/448
-  it.skip('when no headers are specified on the request, default reply headers work', async () => {
+  it('when no headers are specified on the request, default reply headers work', async () => {
     nock('http://example.test')
       .defaultReplyHeaders({
         'X-Powered-By': 'Meeee',
@@ -26,20 +25,18 @@ describe('`defaultReplyHeaders()`', () => {
       'X-Powered-By',
       'Meeee',
       'X-Another-Header',
-      ['foo', 'bar'],
+      'foo, bar',
     ])
   })
 
-  // TODO: https://github.com/mswjs/interceptors/issues/448
-  it.skip('default reply headers can be provided as a raw array', async () => {
+  it('default reply headers can be provided as a raw array', async () => {
     const defaultHeaders = [
       'X-Powered-By',
       'Meeee',
       'X-Another-Header',
-      ['foo', 'bar'],
     ]
     nock('http://example.test')
-      .defaultReplyHeaders(defaultHeaders)
+      .defaultReplyHeaders([...defaultHeaders, ['foo', 'bar']])
       .get('/')
       .reply(200, '')
 
@@ -50,11 +47,10 @@ describe('`defaultReplyHeaders()`', () => {
       'x-another-header': 'foo, bar',
     })
 
-    expect(rawHeaders).to.deep.equal(defaultHeaders)
+    expect(rawHeaders).to.deep.equal([...defaultHeaders, 'foo, bar'])
   })
 
-  // TODO: https://github.com/mswjs/interceptors/issues/448
-  it.skip('default reply headers can be provided as a Map', async () => {
+  it('default reply headers can be provided as a Map', async () => {
     const defaultHeaders = new Map([
       ['X-Powered-By', 'Meeee'],
       ['X-Another-Header', ['foo', 'bar']],
@@ -75,7 +71,7 @@ describe('`defaultReplyHeaders()`', () => {
       'X-Powered-By',
       'Meeee',
       'X-Another-Header',
-      ['foo', 'bar'],
+      'foo, bar',
     ])
   })
 
@@ -135,8 +131,7 @@ describe('`defaultReplyHeaders()`', () => {
     expect(body).to.equal('<html></html>')
   })
 
-  // TODO: https://github.com/mswjs/interceptors/issues/448
-  it.skip('direct reply headers override defaults when casing differs', async () => {
+  it('direct reply headers override defaults when casing differs', async () => {
     const scope = nock('http://example.test')
       .defaultReplyHeaders({
         'X-Default-Only': 'default',
@@ -167,8 +162,7 @@ describe('`defaultReplyHeaders()`', () => {
     scope.done()
   })
 
-  // TODO: https://github.com/mswjs/interceptors/issues/448
-  it.skip('dynamic reply headers override defaults when casing differs', async () => {
+  it('dynamic reply headers override defaults when casing differs', async () => {
     const scope = nock('http://example.test')
       .defaultReplyHeaders({
         'X-Default-Only': 'default',

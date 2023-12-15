@@ -429,7 +429,7 @@ describe('Intercept', () => {
     req.end()
   })
 
-  // TODO: https://github.com/mswjs/interceptors/issues/452
+  // TODO: https://github.com/mswjs/interceptors/issues/474
   it.skip('emits error if https route is missing, non-standard port', done => {
     nock('https://example.test:123').get('/').reply(200, 'Hello World!')
 

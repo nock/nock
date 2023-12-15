@@ -319,8 +319,7 @@ describe('synchronous `reply()` function', () => {
       scope.done()
     })
 
-    // TODO: https://github.com/mswjs/interceptors/issues/448
-    it.skip('handles status code, object body, and headers object', async () => {
+    it('handles status code, object body, and headers object', async () => {
       const exampleBody = { foo: 'bar' }
       const scope = nock('http://example.test')
         .get('/')
