@@ -91,8 +91,7 @@ describe('`reply()` headers', () => {
       scope.done()
     })
 
-    // TODO: https://github.com/mswjs/interceptors/pull/487
-    it.skip('as object', async () => {
+    it('as object', async () => {
       const scope = nock('http://example.test')
         .get('/')
         .reply(200, 'Hello World!', { 'X-My-Headers': 'My Header value' })
@@ -104,8 +103,7 @@ describe('`reply()` headers', () => {
       scope.done()
     })
 
-    // TODO: https://github.com/mswjs/interceptors/pull/487
-    it.skip('as Map', async () => {
+    it('as Map', async () => {
       const replyHeaders = new Map([
         ['X-My-Header', 'My Header value'],
         ['X-Other-Header', 'My Other Value'],
@@ -145,8 +143,7 @@ describe('`reply()` headers', () => {
   })
 
   describe('using synchronous reply function', () => {
-    // TODO: https://github.com/mswjs/interceptors/pull/487
-    it.skip('as array', async () => {
+    it('as array', async () => {
       const scope = nock('http://example.test')
         .get('/')
         .reply(() => [
@@ -175,8 +172,7 @@ describe('`reply()` headers', () => {
       scope.done()
     })
 
-    // TODO: https://github.com/mswjs/interceptors/pull/487
-    it.skip('as object', async () => {
+    it('as object', async () => {
       const scope = nock('http://example.test')
         .get('/')
         .reply(() => [
@@ -192,8 +188,7 @@ describe('`reply()` headers', () => {
       scope.done()
     })
 
-    // TODO: https://github.com/mswjs/interceptors/pull/487
-    it.skip('as Map', async () => {
+    it('as Map', async () => {
       const replyHeaders = new Map([
         ['X-My-Header', 'My Header value'],
         ['X-Other-Header', 'My Other Value'],
@@ -219,8 +214,7 @@ describe('`reply()` headers', () => {
   })
 
   describe('using functions', () => {
-    // TODO: https://github.com/mswjs/interceptors/pull/487
-    it.skip('sends the result back in the response', async () => {
+    it('sends the result back in the response', async () => {
       const scope = nock('http://example.test')
         .get('/')
         .reply(200, 'boo!', {
@@ -300,8 +294,7 @@ describe('`reply()` headers', () => {
       scope.done()
     })
 
-    // TODO: https://github.com/mswjs/interceptors/pull/487
-    it.skip('is re-evaluated for a subsequent request', async () => {
+    it('is re-evaluated for a subsequent request', async () => {
       let counter = 0
       const scope = nock('http://example.test')
         .get('/')
