@@ -677,7 +677,7 @@ describe('Request Overrider', () => {
     nock('http://example.test').get('/').reply(200, 'hey')
 
     const req = http.get('http://example.test')
-    req.on('error', () => {}) // listen for error so it doesn't bubble
+    req.on('error', () => { }) // listen for error so it doesn't bubble
     req.once('socket', socket => {
       socket.destroy()
       done()
@@ -688,7 +688,7 @@ describe('Request Overrider', () => {
     nock('http://example.test').get('/').reply(200, 'hey')
 
     const req = http.get('http://example.test')
-    req.on('error', () => {}) // listen for error so it doesn't bubble
+    req.on('error', () => { }) // listen for error so it doesn't bubble
     req.once('socket', socket => {
       const closeSpy = sinon.spy()
       socket.on('close', closeSpy)
@@ -721,7 +721,7 @@ describe('Request Overrider', () => {
 
     const req = http.get('http://example.test')
     // Ignore errors.
-    req.once('error', () => {})
+    req.once('error', () => { })
     req.once('socket', socket => {
       req.abort()
       expect(socket.destroyed).to.be.true()
@@ -729,13 +729,21 @@ describe('Request Overrider', () => {
     })
   })
 
-  // TODO: https://github.com/mswjs/interceptors/issues/461
-  it.skip('should throw expected error when creating request with missing options', done => {
-    expect(() => http.request()).to.throw(
-      Error,
-      'Making a request with empty `options` is not supported in Nock',
-    )
-    done()
+  it('should request with no arguments', done => {
+    const scope = nock('http://localhost').get('/').reply(200, {})
+
+    const req = http.request()
+    req.end()
+
+    req.on('response', () => {
+      scope.done()
+      done()
+    })
+
+    expect(req.method).to.equal('GET')
+    expect(req.path).to.equal('/')
+    expect(req.host).to.equal('localhost')
+    expect(req.protocol).to.equal('http:')
   })
 
   // https://github.com/nock/nock/issues/1558
