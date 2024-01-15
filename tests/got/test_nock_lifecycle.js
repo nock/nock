@@ -202,7 +202,8 @@ describe('Nock lifecycle functions', () => {
         expect(onRequest).not.to.have.been.called()
         done()
       }, 200)
-      process.nextTick(nock.abortPendingRequests)
+      // NOTE FOR PR, DELETE BEFORE MERGE: with msw in the middle, we get to this line sooner. so we need to wait for the next loop
+      setImmediate(nock.abortPendingRequests)
     })
   })
 })

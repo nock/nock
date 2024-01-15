@@ -40,7 +40,7 @@ describe('nockBack filters', () => {
 
     const back1 = await nockBack(fixtureFilename, nockBackOptions)
     const response1 = await got(`${server.origin}/?timestamp=1111`)
-    back1.nockDone()
+    await back1.nockDone()
 
     const fixtureContent = getFixtureContent()
     expect(fixtureContent).to.have.lengthOf(1)
@@ -78,7 +78,7 @@ describe('nockBack filters', () => {
     const response1 = await got.post(server.origin, {
       form: { token: 'aaa-bbb-ccc' },
     })
-    back1.nockDone()
+    await back1.nockDone()
 
     const fixtureContent = getFixtureContent()
     expect(fixtureContent).to.have.lengthOf(1)

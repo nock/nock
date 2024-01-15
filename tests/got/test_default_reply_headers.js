@@ -25,7 +25,7 @@ describe('`defaultReplyHeaders()`', () => {
       'X-Powered-By',
       'Meeee',
       'X-Another-Header',
-      ['foo', 'bar'],
+      'foo, bar',
     ])
   })
 
@@ -34,10 +34,9 @@ describe('`defaultReplyHeaders()`', () => {
       'X-Powered-By',
       'Meeee',
       'X-Another-Header',
-      ['foo', 'bar'],
     ]
     nock('http://example.test')
-      .defaultReplyHeaders(defaultHeaders)
+      .defaultReplyHeaders([...defaultHeaders, ['foo', 'bar']])
       .get('/')
       .reply(200, '')
 
@@ -48,7 +47,7 @@ describe('`defaultReplyHeaders()`', () => {
       'x-another-header': 'foo, bar',
     })
 
-    expect(rawHeaders).to.deep.equal(defaultHeaders)
+    expect(rawHeaders).to.deep.equal([...defaultHeaders, 'foo, bar'])
   })
 
   it('default reply headers can be provided as a Map', async () => {
@@ -72,7 +71,7 @@ describe('`defaultReplyHeaders()`', () => {
       'X-Powered-By',
       'Meeee',
       'X-Another-Header',
-      ['foo', 'bar'],
+      'foo, bar',
     ])
   })
 

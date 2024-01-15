@@ -28,7 +28,8 @@ describe('IPv6', () => {
     })
   })
 
-  it('IPV6 hostname in http.request get gets mocked', done => {
+  // TODO: https://github.com/mswjs/interceptors/issues/451
+  it.skip('IPV6 hostname in http.request get gets mocked', done => {
     const responseBody = 'Hello World!'
     const scope = nock('http://[2607:f0d0:1002:51::5]:8080')
       .get('/')

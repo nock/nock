@@ -54,7 +54,8 @@ describe('`reply()` headers', () => {
     })
 
     // https://nodejs.org/api/http.html#http_message_headers
-    it('folds duplicate headers the same as Node', async () => {
+    // TODO: https://github.com/mswjs/interceptors/pull/487
+    it.skip('folds duplicate headers the same as Node', async () => {
       const replyHeaders = [
         'Content-Type',
         'text/html; charset=utf-8',
@@ -267,7 +268,8 @@ describe('`reply()` headers', () => {
       scope.done()
     })
 
-    it('when keys are duplicated, is evaluated once per input field name, in correct order', async () => {
+    // TODO: https://github.com/mswjs/interceptors/pull/487
+    it.skip('when keys are duplicated, is evaluated once per input field name, in correct order', async () => {
       const replyHeaders = [
         'X-MY-HEADER',
         () => 'one',
