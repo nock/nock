@@ -147,6 +147,16 @@
         "test",
         "maintenance"
       ]
+    },
+    {
+      "login": "rsaryev",
+      "name": "Saryev Rustam",
+      "avatar_url": "https://avatars.githubusercontent.com/u/70219513?v=4",
+      "profile": "https://github.com/rsaryev",
+      "contributions": [
+        "code",
+        "test"
+      ]
     }
   ],
   "contributorsPerLine": 7,

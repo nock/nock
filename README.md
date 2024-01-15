@@ -66,6 +66,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
   - [.pendingMocks()](#pendingmocks)
   - [.activeMocks()](#activemocks)
   - [.isActive()](#isactive)
+  - [.clone()](#clone)
 - [Restoring](#restoring)
 - [Activating](#activating)
 - [Turning Nock Off (experimental!)](#turning-nock-off-experimental)
@@ -89,6 +90,8 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
     - [Options](#options-1)
       - [Example](#example)
   - [Modes](#modes)
+  - [Verifying recorded fixtures](#verifying-recorded-fixtures)
+    - [Example](#example-1)
 - [Common issues](#common-issues)
   - [Axios](#axios)
   - [Memory issues with Jest](#memory-issues-with-jest)
@@ -1692,6 +1695,9 @@ Thanks goes to these wonderful people ([emoji key](https://github.com/all-contri
       <td align="center" valign="top" width="14.28%"><a href="http://www.laurencemyers.com.au"><img src="https://avatars.githubusercontent.com/u/6336048?v=4?s=100" width="100px;" alt="Laurence Dougal Myers"/><br /><sub><b>Laurence Dougal Myers</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=laurence-myers" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Beretta1979"><img src="https://avatars.githubusercontent.com/u/10073962?v=4?s=100" width="100px;" alt="Sébastien Van Bruaene"/><br /><sub><b>Sébastien Van Bruaene</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=Beretta1979" title="Code">💻</a> <a href="https://github.com/nock/nock/commits?author=Beretta1979" title="Tests">⚠️</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Uzlopak"><img src="https://avatars.githubusercontent.com/u/5059100?v=4?s=100" width="100px;" alt="Aras Abbasi"/><br /><sub><b>Aras Abbasi</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=Uzlopak" title="Code">💻</a> <a href="https://github.com/nock/nock/commits?author=Uzlopak" title="Tests">⚠️</a> <a href="#maintenance-Uzlopak" title="Maintenance">🚧</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/rsaryev"><img src="https://avatars.githubusercontent.com/u/70219513?v=4?s=100" width="100px;" alt="Saryev Rustam"/><br /><sub><b>Saryev Rustam</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=rsaryev" title="Code">💻</a> <a href="https://github.com/nock/nock/commits?author=rsaryev" title="Tests">⚠️</a></td>
     </tr>
   </tbody>
 </table>
