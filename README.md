@@ -9,6 +9,9 @@
 [npmjs]: https://www.npmjs.com/package/nock
 [build]: https://travis-ci.org/nock/nock
 
+> **Warning**  
+> nock is currently not compatible with Node's experimental native `fetch` implementation. See [#2397](https://github.com/nock/nock/issues/2397)
+
 HTTP server mocking and expectations library for Node.js
 
 Nock can be used to test modules that perform HTTP requests in isolation.
@@ -63,6 +66,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
   - [.pendingMocks()](#pendingmocks)
   - [.activeMocks()](#activemocks)
   - [.isActive()](#isactive)
+  - [.clone()](#clone)
 - [Restoring](#restoring)
 - [Activating](#activating)
 - [Turning Nock Off (experimental!)](#turning-nock-off-experimental)
@@ -86,6 +90,8 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
     - [Options](#options-1)
       - [Example](#example)
   - [Modes](#modes)
+  - [Verifying recorded fixtures](#verifying-recorded-fixtures)
+    - [Example](#example-1)
 - [Common issues](#common-issues)
   - [Axios](#axios)
   - [Memory issues with Jest](#memory-issues-with-jest)
@@ -1063,6 +1069,17 @@ if (!nock.isActive()) {
 }
 ```
 
+### .clone()
+
+You can clone a scope by calling `.clone()` on it:
+
+```js
+const scope = nock('http://example.test')
+
+const getScope = scope.get('/').reply(200)
+const postScope = scope.clone().post('/').reply(200)
+```
+
 ## Restoring
 
 You can restore the HTTP interceptor to the normal unmocked behaviour by calling:
@@ -1139,7 +1156,7 @@ nock.enableNetConnect(/(amazon|github)\.com/)
 
 // Or a Function
 nock.enableNetConnect(
-  host => host.includes('amazon.com') || host.includes('github.com')
+  host => host.includes('amazon.com') || host.includes('github.com'),
 )
 
 http.get('http://www.amazon.com/')
@@ -1225,7 +1242,7 @@ The returned call objects have the following properties:
 - `body` - the body of the call, if any
 - `status` - the HTTP status of the reply (e.g. `200`)
 - `response` - the body of the reply which can be a JSON, string, hex string representing binary buffers or an array of such hex strings (when handling `content-encoded` in reply header)
-- `headers` - the headers of the reply
+- `rawHeaders` - the headers of the reply which are formatted as a flat array containing header name and header value pairs (e.g. `['accept', 'application/json', 'set-cookie', 'my-cookie=value']`)
 - `reqheader` - the headers of the request
 
 If you save this as a JSON file, you can load them directly through `nock.load(path)`. Then you can post-process them before using them in the tests. For example, to add request body filtering (shown here fixing timestamps to match the ones captured during recording):
@@ -1245,7 +1262,7 @@ nocks.forEach(function (nock) {
         /(timestamp):([0-9]+)/g,
         function (match, key, value) {
           return key + ':' + recordedTimestamp
-        }
+        },
       )
     } else {
       return body
@@ -1464,7 +1481,7 @@ function prepareScope(scope) {
       const recordedTimestamp = recordedBodyResult[1]
       return body.replace(
         /(timestamp):([0-9]+)/g,
-        (match, key, value) => `${key}:${recordedTimestamp}`
+        (match, key, value) => `${key}:${recordedTimestamp}`,
       )
     } else {
       return body
@@ -1493,6 +1510,45 @@ To set the mode call `nockBack.setMode(mode)` or run the tests with the `NOCK_BA
 - update: remove recorded nocks, record nocks
 
 - lockdown: use recorded nocks, disables all http calls even when not nocked, doesn't record
+
+### Verifying recorded fixtures
+
+Although you can certainly open the recorded JSON fixtures to manually verify requests recorded by nockBack - it's sometimes useful to put those expectations in your tests.
+
+The `context.query` function can be used to return all of the interceptors that were recored in a given fixture.
+
+By itself, this functions as a negative expectation - you can verify that certain calls do NOT happen in the fixture. Since `assertScopesFinished` can verify there are no _extra_ calls in a fixture - pairing the two methods allows you to verify the exact set of HTTP interactions recorded in the fixture. This is especially useful when re-recording for instance, a service that synchronizes via several HTTP calls to an external API.
+
+**NB**: The list of fixtures is only available when reading. It will only be populated for nocks that are played back from fixtures.
+
+#### Example
+
+```js
+it('#synchronize - synchronize with the external API', async localState => {
+  const { nockDone, context } = await back('http-interaction.json')
+
+  const syncronizer = new Synchronizer(localState)
+
+  sycnronizer.syncronize()
+
+  nockDone()
+
+  context.assertScopesFinished()
+
+  expect(context.query()).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        method: 'POST',
+        path: '/create/thing',
+      }),
+      expect.objectContaining({
+        method: 'POST',
+        path: 'create/thing',
+      }),
+    ]),
+  )
+})
+```
 
 ## Common issues
 
@@ -1621,23 +1677,29 @@ Thanks goes to these wonderful people ([emoji key](https://github.com/all-contri
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
 <table>
-  <tr>
-    <td align="center"><a href="http://pgte.me"><img src="https://avatars1.githubusercontent.com/u/47910?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Pedro Teixeira</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=pgte" title="Code">💻</a> <a href="#maintenance-pgte" title="Maintenance">🚧</a></td>
-    <td align="center"><a href="https://github.com/n30n0v"><img src="https://avatars3.githubusercontent.com/u/10771967?v=4?s=100" width="100px;" alt=""/><br /><sub><b>n30n0v</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=n30n0v" title="Code">💻</a></td>
-    <td align="center"><a href="https://burntfen.com"><img src="https://avatars3.githubusercontent.com/u/910753?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Richard Littauer</b></sub></a><br /><a href="#maintenance-RichardLitt" title="Maintenance">🚧</a> <a href="https://github.com/nock/nock/commits?author=RichardLitt" title="Code">💻</a> <a href="#blog-RichardLitt" title="Blogposts">📝</a></td>
-    <td align="center"><a href="http://ianwsperber.com"><img src="https://avatars1.githubusercontent.com/u/3731165?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ian Walker-Sperber</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=ianwsperber" title="Code">💻</a></td>
-    <td align="center"><a href="http://ilovacha.com"><img src="https://avatars2.githubusercontent.com/u/1505203?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ivan Erceg</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=ierceg" title="Code">💻</a> <a href="#maintenance-ierceg" title="Maintenance">🚧</a></td>
-    <td align="center"><a href="https://twitter.com/paulmelnikow"><img src="https://avatars2.githubusercontent.com/u/1487036?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Paul Melnikow</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=paulmelnikow" title="Code">💻</a> <a href="#maintenance-paulmelnikow" title="Maintenance">🚧</a></td>
-    <td align="center"><a href="https://twitter.com/gr2m"><img src="https://avatars3.githubusercontent.com/u/39992?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Gregor Martynus</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=gr2m" title="Code">💻</a> <a href="#maintenance-gr2m" title="Maintenance">🚧</a> <a href="#business-gr2m" title="Business development">💼</a> <a href="#financial-gr2m" title="Financial">💵</a> <a href="#blog-gr2m" title="Blogposts">📝</a></td>
-  </tr>
-  <tr>
-    <td align="center"><a href="https://gitlab.com/hutson"><img src="https://avatars1.githubusercontent.com/u/6701030?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Hutson Betts</b></sub></a><br /><a href="#financial-hutson" title="Financial">💵</a></td>
-    <td align="center"><a href="http://lilja.io"><img src="https://avatars2.githubusercontent.com/u/6105119?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jonas Lilja</b></sub></a><br /><a href="#financial-jlilja" title="Financial">💵</a> <a href="https://github.com/nock/nock/commits?author=jlilja" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/benrki"><img src="https://avatars0.githubusercontent.com/u/4446950?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Benjamin Ki</b></sub></a><br /><a href="#financial-benrki" title="Financial">💵</a></td>
-    <td align="center"><a href="http://chadf.ca"><img src="https://avatars2.githubusercontent.com/u/3250463?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Chad Fawcett</b></sub></a><br /><a href="#financial-chadfawcett" title="Financial">💵</a></td>
-    <td align="center"><a href="http://www.laurencemyers.com.au"><img src="https://avatars.githubusercontent.com/u/6336048?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Laurence Dougal Myers</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=laurence-myers" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/Beretta1979"><img src="https://avatars.githubusercontent.com/u/10073962?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Sébastien Van Bruaene</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=Beretta1979" title="Code">💻</a> <a href="https://github.com/nock/nock/commits?author=Beretta1979" title="Tests">⚠️</a></td>
-  </tr>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="http://pgte.me"><img src="https://avatars1.githubusercontent.com/u/47910?v=4?s=100" width="100px;" alt="Pedro Teixeira"/><br /><sub><b>Pedro Teixeira</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=pgte" title="Code">💻</a> <a href="#maintenance-pgte" title="Maintenance">🚧</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/n30n0v"><img src="https://avatars3.githubusercontent.com/u/10771967?v=4?s=100" width="100px;" alt="n30n0v"/><br /><sub><b>n30n0v</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=n30n0v" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://burntfen.com"><img src="https://avatars3.githubusercontent.com/u/910753?v=4?s=100" width="100px;" alt="Richard Littauer"/><br /><sub><b>Richard Littauer</b></sub></a><br /><a href="#maintenance-RichardLitt" title="Maintenance">🚧</a> <a href="https://github.com/nock/nock/commits?author=RichardLitt" title="Code">💻</a> <a href="#blog-RichardLitt" title="Blogposts">📝</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://ianwsperber.com"><img src="https://avatars1.githubusercontent.com/u/3731165?v=4?s=100" width="100px;" alt="Ian Walker-Sperber"/><br /><sub><b>Ian Walker-Sperber</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=ianwsperber" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://ilovacha.com"><img src="https://avatars2.githubusercontent.com/u/1505203?v=4?s=100" width="100px;" alt="Ivan Erceg"/><br /><sub><b>Ivan Erceg</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=ierceg" title="Code">💻</a> <a href="#maintenance-ierceg" title="Maintenance">🚧</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://twitter.com/paulmelnikow"><img src="https://avatars2.githubusercontent.com/u/1487036?v=4?s=100" width="100px;" alt="Paul Melnikow"/><br /><sub><b>Paul Melnikow</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=paulmelnikow" title="Code">💻</a> <a href="#maintenance-paulmelnikow" title="Maintenance">🚧</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://twitter.com/gr2m"><img src="https://avatars3.githubusercontent.com/u/39992?v=4?s=100" width="100px;" alt="Gregor Martynus"/><br /><sub><b>Gregor Martynus</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=gr2m" title="Code">💻</a> <a href="#maintenance-gr2m" title="Maintenance">🚧</a> <a href="#business-gr2m" title="Business development">💼</a> <a href="#financial-gr2m" title="Financial">💵</a> <a href="#blog-gr2m" title="Blogposts">📝</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://gitlab.com/hutson"><img src="https://avatars1.githubusercontent.com/u/6701030?v=4?s=100" width="100px;" alt="Hutson Betts"/><br /><sub><b>Hutson Betts</b></sub></a><br /><a href="#financial-hutson" title="Financial">💵</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://lilja.io"><img src="https://avatars2.githubusercontent.com/u/6105119?v=4?s=100" width="100px;" alt="Jonas Lilja"/><br /><sub><b>Jonas Lilja</b></sub></a><br /><a href="#financial-jlilja" title="Financial">💵</a> <a href="https://github.com/nock/nock/commits?author=jlilja" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/benrki"><img src="https://avatars0.githubusercontent.com/u/4446950?v=4?s=100" width="100px;" alt="Benjamin Ki"/><br /><sub><b>Benjamin Ki</b></sub></a><br /><a href="#financial-benrki" title="Financial">💵</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://chadf.ca"><img src="https://avatars2.githubusercontent.com/u/3250463?v=4?s=100" width="100px;" alt="Chad Fawcett"/><br /><sub><b>Chad Fawcett</b></sub></a><br /><a href="#financial-chadfawcett" title="Financial">💵</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://www.laurencemyers.com.au"><img src="https://avatars.githubusercontent.com/u/6336048?v=4?s=100" width="100px;" alt="Laurence Dougal Myers"/><br /><sub><b>Laurence Dougal Myers</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=laurence-myers" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Beretta1979"><img src="https://avatars.githubusercontent.com/u/10073962?v=4?s=100" width="100px;" alt="Sébastien Van Bruaene"/><br /><sub><b>Sébastien Van Bruaene</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=Beretta1979" title="Code">💻</a> <a href="https://github.com/nock/nock/commits?author=Beretta1979" title="Tests">⚠️</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Uzlopak"><img src="https://avatars.githubusercontent.com/u/5059100?v=4?s=100" width="100px;" alt="Aras Abbasi"/><br /><sub><b>Aras Abbasi</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=Uzlopak" title="Code">💻</a> <a href="https://github.com/nock/nock/commits?author=Uzlopak" title="Tests">⚠️</a> <a href="#maintenance-Uzlopak" title="Maintenance">🚧</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/rsaryev"><img src="https://avatars.githubusercontent.com/u/70219513?v=4?s=100" width="100px;" alt="Saryev Rustam"/><br /><sub><b>Saryev Rustam</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=rsaryev" title="Code">💻</a> <a href="https://github.com/nock/nock/commits?author=rsaryev" title="Tests">⚠️</a></td>
+    </tr>
+  </tbody>
 </table>
 
 <!-- markdownlint-restore -->

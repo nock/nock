@@ -136,8 +136,31 @@
         "code",
         "test"
       ]
+    },
+    {
+      "login": "Uzlopak",
+      "name": "Aras Abbasi",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5059100?v=4",
+      "profile": "https://github.com/Uzlopak",
+      "contributions": [
+        "code",
+        "test",
+        "maintenance"
+      ]
+    },
+    {
+      "login": "rsaryev",
+      "name": "Saryev Rustam",
+      "avatar_url": "https://avatars.githubusercontent.com/u/70219513?v=4",
+      "profile": "https://github.com/rsaryev",
+      "contributions": [
+        "code",
+        "test"
+      ]
     }
   ],
   "contributorsPerLine": 7,
-  "skipCi": true
+  "skipCi": true,
+  "commitType": "docs",
+  "commitConvention": "angular"
 }

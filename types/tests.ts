@@ -160,10 +160,9 @@ nock('http://example.test').get('/users/1').reply(200, {
 })
 
 // Using URL as input
-// Not supported yet
-// scope = nock(new URL('https://example.test/'))
-//   .get('/resource')
-//   .reply(200, 'url matched')
+scope = nock(new URL('https://example.test/'))
+  .get('/resource')
+  .reply(200, 'url matched')
 
 // specifying URL from url.parse output
 scope = nock(url.parse('https://example.test/'))
@@ -286,7 +285,7 @@ nock('http://example.test')
     new URLSearchParams([
       ['foo', 'one'],
       ['foo', 'two'],
-    ])
+    ]),
   )
   .reply()
 

@@ -28,6 +28,6 @@
 1.  [`enableNetConnect()`](https://github.com/nock/nock#enabling-requests) now accepts a function.
     ```js
     nock.enableNetConnect(
-      host => host.includes('amazon.com') || host.includes('github.com')
+      host => host.includes('amazon.com') || host.includes('github.com'),
     )
     ```

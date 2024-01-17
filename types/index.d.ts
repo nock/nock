@@ -8,8 +8,8 @@ import { Url, URLSearchParams } from 'url'
 export = nock
 
 declare function nock(
-  basePath: string | RegExp | Url,
-  options?: nock.Options
+  basePath: string | RegExp | Url | URL,
+  options?: nock.Options,
 ): nock.Scope
 
 declare namespace nock {
@@ -22,7 +22,7 @@ declare namespace nock {
   function removeInterceptor(interceptor: Interceptor | ReqOptions): boolean
   function disableNetConnect(): void
   function enableNetConnect(
-    matcher?: string | RegExp | ((host: string) => boolean)
+    matcher?: string | RegExp | ((host: string) => boolean),
   ): void
   function load(path: string): Scope[]
   function loadDefs(path: string): Definition[]
@@ -37,7 +37,7 @@ declare namespace nock {
   type InterceptFunction = (
     uri: string | RegExp | { (uri: string): boolean },
     requestBody?: RequestBodyMatcher,
-    interceptorOptions?: Options
+    interceptorOptions?: Options,
   ) => Interceptor
 
   // Essentially valid, decoded JSON with the addition of possible RegExp. TS doesn't currently have
@@ -76,7 +76,7 @@ declare namespace nock {
   type ReplyHeaderFunction = (
     req: ClientRequest,
     res: IncomingMessage,
-    body: string | Buffer
+    body: string | Buffer,
   ) => string | string[]
   type ReplyHeaderValue = string | string[] | ReplyHeaderFunction
   type ReplyHeaders =
@@ -110,7 +110,7 @@ declare namespace nock {
       uri: string | RegExp | { (uri: string): boolean },
       method: string,
       requestBody?: RequestBodyMatcher,
-      options?: Options
+      options?: Options,
     ) => Interceptor
 
     defaultReplyHeaders(headers: ReplyHeaders): this
@@ -118,7 +118,9 @@ declare namespace nock {
     filteringPath(regex: RegExp, replace: string): this
     filteringPath(fn: (path: string) => string): this
     filteringRequestBody(regex: RegExp, replace: string): this
-    filteringRequestBody(fn: (body: string) => string): this
+    filteringRequestBody(
+      fn: (body: string, recordedBody: string) => string,
+    ): this
 
     persist(flag?: boolean): this
     replyContentLength(): this
@@ -137,7 +139,7 @@ declare namespace nock {
         | string
         | DataMatcherMap
         | URLSearchParams
-        | { (parsedObj: ParsedUrlQuery): boolean }
+        | { (parsedObj: ParsedUrlQuery): boolean },
     ): this
 
     // tslint (as of 5.16) is under the impression that the callback types can be unified,
@@ -151,16 +153,16 @@ declare namespace nock {
         body: Body,
         callback: (
           err: NodeJS.ErrnoException | null,
-          result: ReplyFnResult
-        ) => void
-      ) => void
+          result: ReplyFnResult,
+        ) => void,
+      ) => void,
     ): Scope
     reply(
       replyFn: (
         this: ReplyFnContext,
         uri: string,
-        body: Body
-      ) => ReplyFnResult | Promise<ReplyFnResult>
+        body: Body,
+      ) => ReplyFnResult | Promise<ReplyFnResult>,
     ): Scope
     reply(
       statusCode: StatusCode,
@@ -168,18 +170,21 @@ declare namespace nock {
         this: ReplyFnContext,
         uri: string,
         body: Body,
-        callback: (err: NodeJS.ErrnoException | null, result: ReplyBody) => void
+        callback: (
+          err: NodeJS.ErrnoException | null,
+          result: ReplyBody,
+        ) => void,
       ) => void,
-      headers?: ReplyHeaders
+      headers?: ReplyHeaders,
     ): Scope
     reply(
       statusCode: StatusCode,
       replyBodyFn: (
         this: ReplyFnContext,
         uri: string,
-        body: Body
+        body: Body,
       ) => ReplyBody | Promise<ReplyBody>,
-      headers?: ReplyHeaders
+      headers?: ReplyHeaders,
     ): Scope
     reply(responseCode?: StatusCode, body?: Body, headers?: ReplyHeaders): Scope
     /* tslint:enable:unified-signatures */
@@ -188,7 +193,7 @@ declare namespace nock {
     replyWithFile(
       statusCode: StatusCode,
       fileName: string,
-      headers?: ReplyHeaders
+      headers?: ReplyHeaders,
     ): Scope
 
     matchHeader(name: string, value: RequestHeaderMatcher): this
@@ -251,18 +256,34 @@ declare namespace nock {
     (
       fixtureName: string,
       options: BackOptions,
-      nockedFn: (nockDone: () => void) => void
+      nockedFn: (nockDone: () => void) => void,
     ): void
-    (fixtureName: string, options?: BackOptions): Promise<{
+    (
+      fixtureName: string,
+      options?: BackOptions,
+    ): Promise<{
       nockDone: () => void
       context: BackContext
     }>
+  }
+
+  interface InterceptorSurface {
+    method: string
+    uri: string
+    basePath: string
+    path: string
+    queries?: string
+    counter: number
+    body: string
+    statusCode: number
+    optional: boolean
   }
 
   interface BackContext {
     isLoaded: boolean
     scopes: Scope[]
     assertScopesFinished(): void
+    query: InterceptorSurface[]
   }
 
   interface BackOptions {
