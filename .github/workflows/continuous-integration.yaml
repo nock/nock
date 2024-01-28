@@ -80,6 +80,9 @@ jobs:
         run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
       - name: Test
         run: npm run test
+      - name: Test jest
+        run: npm run test:jest
+        if: matrix.node-version >= 14
     strategy:
       fail-fast: false
       matrix:
