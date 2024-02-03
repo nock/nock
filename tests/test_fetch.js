@@ -77,5 +77,19 @@ if (global.fetch) {
       const { status } = await fetch(origin)
       expect(status).to.equal(200)
     })
+
+    it('should work with empty response', async () => {
+      nock('http://example.test').get('/').reply(204)
+
+      const { status } = await fetch('http://example.test')
+      expect(status).to.equal(204)
+    })
+
+    it('should work https', async () => {
+      nock('https://example.test').get('/').reply()
+
+      const { status } = await fetch('https://example.test')
+      expect(status).to.equal(200)
+    })
   })
 }
