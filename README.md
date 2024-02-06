@@ -9,8 +9,13 @@
 [npmjs]: https://www.npmjs.com/package/nock
 [build]: https://travis-ci.org/nock/nock
 
-> **Warning**  
-> nock is currently not compatible with Node's experimental native `fetch` implementation. See [#2397](https://github.com/nock/nock/issues/2397)
+> **Notice**
+>
+> We have introduced experimental support for fetch. Please share your feedback with us. You can install it by:
+>
+> ```
+> npm install --save-dev nock@beta
+> ```
 
 HTTP server mocking and expectations library for Node.js
 
