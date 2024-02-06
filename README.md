@@ -10,8 +10,9 @@
 [build]: https://travis-ci.org/nock/nock
 
 > **Notice**
-> 
+>
 > We have introduced experimental support for fetch. Please share your feedback with us. You can install it by:
+>
 > ```
 > npm install --save-dev nock@beta
 > ```
