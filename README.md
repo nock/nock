@@ -1703,6 +1703,7 @@ Thanks goes to these wonderful people ([emoji key](https://github.com/all-contri
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/rsaryev"><img src="https://avatars.githubusercontent.com/u/70219513?v=4?s=100" width="100px;" alt="Saryev Rustam"/><br /><sub><b>Saryev Rustam</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=rsaryev" title="Code">💻</a> <a href="https://github.com/nock/nock/commits?author=rsaryev" title="Tests">⚠️</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/mikicho"><img src="https://avatars.githubusercontent.com/u/11459632?v=4?s=100" width="100px;" alt="Michael Solomon"/><br /><sub><b>Michael Solomon</b></sub></a><br /><a href="#maintenance-mikicho" title="Maintenance">🚧</a> <a href="https://github.com/nock/nock/commits?author=mikicho" title="Code">💻</a> <a href="https://github.com/nock/nock/commits?author=mikicho" title="Documentation">📖</a></td>
     </tr>
   </tbody>
 </table>
