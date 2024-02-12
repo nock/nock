@@ -18,6 +18,7 @@ const nock = require('..')
 
 const common = require('../lib/common')
 const matchBody = require('../lib/match_body')
+const url = require("url");
 
 // match_body has its own test file that tests the functionality from the API POV.
 // Since it's not in common.js does it make more sense for these six unit tests to move into that file?
@@ -504,6 +505,37 @@ describe('`normalizeClientRequestArgs()`', () => {
     expect(options).to.deep.equal({})
     expect(callback).to.equal(cb)
   })
+
+  it('should handle custom URL classes', async () => {
+    // ClickHouse Client JS uses their custom URL class.
+    class URL {
+      constructor(stringURL) {
+        const urlObj = new url.URL(stringURL);
+        this.protocol = urlObj.protocol;
+        this.hostname = urlObj.hostname;
+        this.hash = urlObj.hash;
+        this.search = urlObj.search;
+        this.pathname = urlObj.pathname;
+        this.href = urlObj.href;
+        this.port = urlObj.port;
+      }
+    }
+
+    const urlObject = new URL('https://freeyourmusic.com/query1=223');
+    expect(urlObject instanceof url.URL).to.equal(false);
+
+    const { options } = common.normalizeClientRequestArgs(urlObject)
+
+    expect(options).to.deep.equal({
+      "hash": "",
+      "hostname": "freeyourmusic.com",
+      "href": "https://freeyourmusic.com/query1=223",
+      "path": "/query1=223",
+      "pathname": "/query1=223",
+      "protocol": "https:",
+      "search": "",
+    })
+  })
 })
 
 describe('`dataEqual()`', () => {
@@ -625,6 +657,18 @@ describe('`expand()`', () => {
 
   it('array-like', () => {
     expect(expand({ 'a[0]': 4, 'a[1]': 5 })).deep.equal({ a: [4, 5] })
+  })
+
+  it('array-like meshed with string', () => {
+    // Handles cases with URL with query params that overlap array-like with normal values.
+    // For example, used by Apple Music API: "include=record-labels,artists&include[music-videos]=artists"
+    // https://github.com/nock/nock/issues/2541
+    expect(expand({ 'a': 'info', 'a[include]': 'extra' })).deep.equal({
+      "a": {
+        "__string_value": "info",
+        "include": "extra"
+      }
+    })
   })
 
   it('example', () => {
