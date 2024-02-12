@@ -659,7 +659,7 @@ describe('`expand()`', () => {
     expect(expand({ 'a[0]': 4, 'a[1]': 5 })).deep.equal({ a: [4, 5] })
   })
 
-  it('array-like meshed with string', () => {
+  it('array-like mixed with string value', () => {
     // Handles cases with URL with query params that overlap array-like with normal values.
     // For example, used by Apple Music API: "include=record-labels,artists&include[music-videos]=artists"
     // https://github.com/nock/nock/issues/2541
