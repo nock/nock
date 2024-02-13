@@ -6,7 +6,10 @@ name: Continuous Integration
       - synchronize
   push:
     branches:
+      - '*.x'
       - main
+      - beta
+      - next
 permissions:
   contents: read
 
