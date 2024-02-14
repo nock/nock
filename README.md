@@ -9,8 +9,13 @@
 [npmjs]: https://www.npmjs.com/package/nock
 [build]: https://travis-ci.org/nock/nock
 
-> **Warning**  
-> nock is currently not compatible with Node's experimental native `fetch` implementation. See [#2397](https://github.com/nock/nock/issues/2397)
+> **Notice**
+>
+> We have introduced experimental support for fetch. Please share your feedback with us. You can install it by:
+>
+> ```
+> npm install --save-dev nock@beta
+> ```
 
 HTTP server mocking and expectations library for Node.js
 
@@ -1698,6 +1703,7 @@ Thanks goes to these wonderful people ([emoji key](https://github.com/all-contri
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/rsaryev"><img src="https://avatars.githubusercontent.com/u/70219513?v=4?s=100" width="100px;" alt="Saryev Rustam"/><br /><sub><b>Saryev Rustam</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=rsaryev" title="Code">💻</a> <a href="https://github.com/nock/nock/commits?author=rsaryev" title="Tests">⚠️</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/mikicho"><img src="https://avatars.githubusercontent.com/u/11459632?v=4?s=100" width="100px;" alt="Michael Solomon"/><br /><sub><b>Michael Solomon</b></sub></a><br /><a href="#maintenance-mikicho" title="Maintenance">🚧</a> <a href="https://github.com/nock/nock/commits?author=mikicho" title="Code">💻</a> <a href="https://github.com/nock/nock/commits?author=mikicho" title="Documentation">📖</a></td>
     </tr>
   </tbody>
 </table>
