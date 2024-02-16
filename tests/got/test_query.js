@@ -26,7 +26,9 @@ describe('`query()`', () => {
         .query('foo%5Bbar%5D%3Dhello%20world%21')
         .reply()
 
-      const { statusCode } = await got('http://example.test/?foo%5Bbar%5D%3Dhello%20world%21')
+      const { statusCode } = await got(
+        'http://example.test/?foo%5Bbar%5D%3Dhello%20world%21',
+      )
 
       expect(statusCode).to.equal(200)
       scope.done()
