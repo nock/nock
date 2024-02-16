@@ -19,6 +19,20 @@ describe('query params in path', () => {
 })
 
 describe('`query()`', () => {
+  describe('when called with a string', () => {
+    it('matches a url encoded query string of the same name=value', async () => {
+      const scope = nock('http://example.test')
+        .get('/')
+        .query('foo%5Bbar%5D%3Dhello%20world%21')
+        .reply()
+
+      const { statusCode } = await got('http://example.test/?foo%5Bbar%5D%3Dhello%20world%21')
+
+      expect(statusCode).to.equal(200)
+      scope.done()
+    })
+  })
+
   describe('when called with an object', () => {
     it('matches a query string of the same name=value', async () => {
       const scope = nock('http://example.test')
@@ -256,8 +270,8 @@ describe('`query()`', () => {
       const interceptor = nock('http://example.test').get('/')
 
       expect(() => {
-        interceptor.query('foo=bar')
-      }).to.throw(Error, 'Argument Error: foo=bar')
+        interceptor.query(1)
+      }).to.throw(Error, 'Argument Error: 1')
     })
   })
 
