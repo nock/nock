@@ -102,4 +102,16 @@ describe('`replyWithFile()`', () => {
       ).to.throw(Error, 'No fs')
     })
   })
+
+  it('does not create ReadStream eagerly', async () => {
+    sinon.spy(fs)
+
+    nock('http://example.test')
+      .get('/')
+      .replyWithFile(200, binaryFilePath, {
+        'content-encoding': 'gzip',
+      })
+
+    expect(fs.createReadStream.callCount).to.equal(0)
+  })
 })
