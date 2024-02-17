@@ -64,6 +64,29 @@ describe('`replyWithFile()`', () => {
     scope.done()
   })
 
+  it('reply with file with persist', async () => {
+    sinon.spy(fs)
+
+    const scope = nock('http://example.test')
+      .persist()
+      .get('/')
+      .replyWithFile(200, binaryFilePath, {
+        'content-encoding': 'gzip',
+      })
+
+    const response1 = await got('http://example.test/')
+    expect(response1.statusCode).to.equal(200)
+    expect(response1.body).to.have.lengthOf(20)
+
+    const response2 = await got('http://example.test/')
+    expect(response2.statusCode).to.equal(200)
+    expect(response2.body).to.have.lengthOf(20)
+
+    expect(fs.createReadStream.callCount).to.equal(2)
+
+    scope.done()
+  })
+
   describe('with no fs', () => {
     const { Scope } = proxyquire('../../lib/scope', {
       './interceptor': proxyquire('../../lib/interceptor', {
