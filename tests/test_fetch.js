@@ -90,4 +90,12 @@ describe('Native Fetch', () => {
     const { status } = await fetch('https://example.test')
     expect(status).to.equal(200)
   })
+
+  it('should set the statusText according to the response code', async () => {
+    nock('https://example.test').get('/').reply(404)
+
+    const { status, statusText } = await fetch('https://example.test')
+    expect(status).to.equal(404)
+    expect(statusText).to.equal('Not Found')
+  })
 })
