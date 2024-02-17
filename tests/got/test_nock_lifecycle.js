@@ -166,9 +166,12 @@ describe('Nock lifecycle functions', () => {
 
     it("activeMocks doesn't return duplicate mocks", () => {
       nock('http://example.test')
-        .get('/').reply()
-        .get('/second').reply()
-        .get('/third').reply()
+        .get('/')
+        .reply()
+        .get('/second')
+        .reply()
+        .get('/third')
+        .reply()
 
       expect(nock.activeMocks()).to.deep.equal([
         'GET http://example.test:80/',
