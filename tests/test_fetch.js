@@ -1,5 +1,6 @@
 'use strict'
 
+const zlib = require('zlib')
 const { expect } = require('chai')
 const nock = require('..')
 const assertRejects = require('assert-rejects')
@@ -97,5 +98,34 @@ describe('Native Fetch', () => {
     const { status, statusText } = await fetch('https://example.test')
     expect(status).to.equal(404)
     expect(statusText).to.equal('Not Found')
+  })
+
+  it('should return mocked response', async () => {
+    const message = 'Lorem ipsum dolor sit amet'
+    const scope = nock('http://example.test').get('/foo').reply(200, message)
+
+    const response = await fetch('http://example.test/foo')
+
+    expect(response.status).to.equal(200)
+    expect(await response.text()).to.equal(message)
+    scope.done()
+  })
+
+  it('should accept gzipped content', async () => {
+    const message = 'Lorem ipsum dolor sit amet'
+    const compressed = zlib.gzipSync(message)
+
+    const scope = nock('http://example.test')
+      .get('/foo')
+      .reply(200, compressed, {
+        'X-Transfer-Length': String(compressed.length),
+        'Content-Length': undefined,
+        'Content-Encoding': 'gzip',
+      })
+    const response = await fetch('http://example.test/foo')
+
+    expect(response.status).to.equal(200)
+    expect(await response.text()).to.equal(message)
+    scope.done()
   })
 })
