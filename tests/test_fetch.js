@@ -183,5 +183,21 @@ describe('Native Fetch', () => {
       expect(await response.text()).to.equal(message)
       scope.done()
     })
+
+    it('should pass through the result if a not supported encoding was used', async () => {
+      const message = 'Lorem ipsum dolor sit amet'
+      const compressed = Buffer.from(message)
+      const scope = nock('http://example.test')
+        .get('/foo')
+        .reply(200, compressed, {
+          'X-Transfer-Length': String(compressed.length),
+          'Content-Length': undefined,
+          'Content-Encoding': 'invalid',
+        })
+      const response = await fetch('http://example.test/foo')
+      expect(response.status).to.equal(200)
+      expect(await response.text()).to.equal(message)
+      scope.done()
+    })
   })
 })
