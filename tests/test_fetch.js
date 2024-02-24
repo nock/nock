@@ -111,21 +111,77 @@ describe('Native Fetch', () => {
     scope.done()
   })
 
-  it('should accept gzipped content', async () => {
-    const message = 'Lorem ipsum dolor sit amet'
-    const compressed = zlib.gzipSync(message)
+  describe('content-encoding', () => {
+    it('should accept gzipped content', async () => {
+      const message = 'Lorem ipsum dolor sit amet'
+      const compressed = zlib.gzipSync(message)
 
-    const scope = nock('http://example.test')
-      .get('/foo')
-      .reply(200, compressed, {
-        'X-Transfer-Length': String(compressed.length),
-        'Content-Length': undefined,
-        'Content-Encoding': 'gzip',
-      })
-    const response = await fetch('http://example.test/foo')
+      const scope = nock('http://example.test')
+        .get('/foo')
+        .reply(200, compressed, {
+          'X-Transfer-Length': String(compressed.length),
+          'Content-Length': undefined,
+          'Content-Encoding': 'gzip',
+        })
+      const response = await fetch('http://example.test/foo')
 
-    expect(response.status).to.equal(200)
-    expect(await response.text()).to.equal(message)
-    scope.done()
+      expect(response.status).to.equal(200)
+      expect(await response.text()).to.equal(message)
+      scope.done()
+    })
+
+    it('should accept deflated content', async () => {
+      const message = 'Lorem ipsum dolor sit amet'
+      const compressed = zlib.deflateSync(message)
+
+      const scope = nock('http://example.test')
+        .get('/foo')
+        .reply(200, compressed, {
+          'X-Transfer-Length': String(compressed.length),
+          'Content-Length': undefined,
+          'Content-Encoding': 'deflate',
+        })
+      const response = await fetch('http://example.test/foo')
+
+      expect(response.status).to.equal(200)
+      expect(await response.text()).to.equal(message)
+      scope.done()
+    })
+
+    it('should accept brotli content', async () => {
+      const message = 'Lorem ipsum dolor sit amet'
+      const compressed = zlib.brotliCompressSync(message)
+
+      const scope = nock('http://example.test')
+        .get('/foo')
+        .reply(200, compressed, {
+          'X-Transfer-Length': String(compressed.length),
+          'Content-Length': undefined,
+          'Content-Encoding': 'br',
+        })
+      const response = await fetch('http://example.test/foo')
+
+      expect(response.status).to.equal(200)
+      expect(await response.text()).to.equal(message)
+      scope.done()
+    })
+
+    it('should accept gzip and broti content', async () => {
+      const message = 'Lorem ipsum dolor sit amet'
+      const compressed = zlib.brotliCompressSync(zlib.gzipSync(message))
+
+      const scope = nock('http://example.test')
+        .get('/foo')
+        .reply(200, compressed, {
+          'X-Transfer-Length': String(compressed.length),
+          'Content-Length': undefined,
+          'Content-Encoding': 'gzip, br',
+        })
+      const response = await fetch('http://example.test/foo')
+
+      expect(response.status).to.equal(200)
+      expect(await response.text()).to.equal(message)
+      scope.done()
+    })
   })
 })
