@@ -212,6 +212,7 @@ describe('Native Fetch', () => {
       const response = await fetch('http://example.test/foo')
       await response.text().catch(e => {
         expect(e.message).to.contain('unexpected end of file')
+        scope.done()
       })
     })
   })
