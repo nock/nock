@@ -199,5 +199,20 @@ describe('Native Fetch', () => {
       expect(await response.text()).to.equal(message)
       scope.done()
     })
+
+    it('should throw error if wrong encoding is used', async () => {
+      const message = 'Lorem ipsum dolor sit amet'
+      const scope = nock('http://example.test')
+        .get('/foo')
+        .reply(200, message, {
+          'X-Transfer-Length': String(message.length),
+          'Content-Length': undefined,
+          'Content-Encoding': 'br',
+        })
+      const response = await fetch('http://example.test/foo')
+      await response.text().catch(e => {
+        expect(e.message).to.contain('unexpected end of file')
+      })
+    })
   })
 })
