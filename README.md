@@ -9,8 +9,13 @@
 [npmjs]: https://www.npmjs.com/package/nock
 [build]: https://travis-ci.org/nock/nock
 
-> **Warning**  
-> nock is currently not compatible with Node's experimental native `fetch` implementation. See [#2397](https://github.com/nock/nock/issues/2397)
+> **Notice**
+>
+> We have introduced experimental support for fetch. Please share your feedback with us. You can install it by:
+>
+> ```
+> npm install --save-dev nock@beta
+> ```
 
 HTTP server mocking and expectations library for Node.js
 
@@ -66,6 +71,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
   - [.pendingMocks()](#pendingmocks)
   - [.activeMocks()](#activemocks)
   - [.isActive()](#isactive)
+  - [.clone()](#clone)
 - [Restoring](#restoring)
 - [Activating](#activating)
 - [Turning Nock Off (experimental!)](#turning-nock-off-experimental)
@@ -89,6 +95,8 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
     - [Options](#options-1)
       - [Example](#example)
   - [Modes](#modes)
+  - [Verifying recorded fixtures](#verifying-recorded-fixtures)
+    - [Example](#example-1)
 - [Common issues](#common-issues)
   - [Axios](#axios)
   - [Memory issues with Jest](#memory-issues-with-jest)
@@ -1066,6 +1074,17 @@ if (!nock.isActive()) {
 }
 ```
 
+### .clone()
+
+You can clone a scope by calling `.clone()` on it:
+
+```js
+const scope = nock('http://example.test')
+
+const getScope = scope.get('/').reply(200)
+const postScope = scope.clone().post('/').reply(200)
+```
+
 ## Restoring
 
 You can restore the HTTP interceptor to the normal unmocked behaviour by calling:
@@ -1497,6 +1516,45 @@ To set the mode call `nockBack.setMode(mode)` or run the tests with the `NOCK_BA
 
 - lockdown: use recorded nocks, disables all http calls even when not nocked, doesn't record
 
+### Verifying recorded fixtures
+
+Although you can certainly open the recorded JSON fixtures to manually verify requests recorded by nockBack - it's sometimes useful to put those expectations in your tests.
+
+The `context.query` function can be used to return all of the interceptors that were recored in a given fixture.
+
+By itself, this functions as a negative expectation - you can verify that certain calls do NOT happen in the fixture. Since `assertScopesFinished` can verify there are no _extra_ calls in a fixture - pairing the two methods allows you to verify the exact set of HTTP interactions recorded in the fixture. This is especially useful when re-recording for instance, a service that synchronizes via several HTTP calls to an external API.
+
+**NB**: The list of fixtures is only available when reading. It will only be populated for nocks that are played back from fixtures.
+
+#### Example
+
+```js
+it('#synchronize - synchronize with the external API', async localState => {
+  const { nockDone, context } = await back('http-interaction.json')
+
+  const syncronizer = new Synchronizer(localState)
+
+  sycnronizer.syncronize()
+
+  nockDone()
+
+  context.assertScopesFinished()
+
+  expect(context.query()).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        method: 'POST',
+        path: '/create/thing',
+      }),
+      expect.objectContaining({
+        method: 'POST',
+        path: 'create/thing',
+      }),
+    ]),
+  )
+})
+```
+
 ## Common issues
 
 **"No match for response" when using got with error responses**
@@ -1585,10 +1643,10 @@ It does this by manipulating the modules cache of Node in a way that conflicts w
 
 ## Debugging
 
-Nock uses [`debug`](https://github.com/visionmedia/debug), so just run with environmental variable `DEBUG` set to `nock.*`.
+Nock uses node internals [`debuglog`](https://nodejs.org/api/util.html#utildebuglogsection-callbackg), so just run with environmental variable `NODE_DEBUG` set to `nock:*`.
 
 ```console
-user@local$ DEBUG=nock.* node my_test.js
+user@local$ NODE_DEBUG=nock:* node my_test.js
 ```
 
 Each step in the matching process is logged this way and can be useful when determining why a request was not intercepted by Nock.
@@ -1602,11 +1660,11 @@ await got('http://example.com/?foo=bar&baz=foz')
 ```
 
 ```console
-user@local$ DEBUG=nock.scope:example.com node my_test.js
+user@local$ DEBUG=nock:scope:example.com node my_test.js
 ...
-nock.scope:example.com Interceptor queries: {"foo":"bar"} +1ms
-nock.scope:example.com     Request queries: {"foo":"bar","baz":"foz"} +0ms
-nock.scope:example.com query matching failed +0ms
+NOCK:SCOPE:EXAMPLE.COM 103514: Interceptor queries: {"foo":"bar"}
+NOCK:SCOPE:EXAMPLE.COM 103514:     Request queries: {"foo":"bar","baz":"foz"}
+NOCK:SCOPE:EXAMPLE.COM 103514: query matching failed
 ```
 
 ## Contributing
@@ -1642,6 +1700,10 @@ Thanks goes to these wonderful people ([emoji key](https://github.com/all-contri
       <td align="center" valign="top" width="14.28%"><a href="http://www.laurencemyers.com.au"><img src="https://avatars.githubusercontent.com/u/6336048?v=4?s=100" width="100px;" alt="Laurence Dougal Myers"/><br /><sub><b>Laurence Dougal Myers</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=laurence-myers" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Beretta1979"><img src="https://avatars.githubusercontent.com/u/10073962?v=4?s=100" width="100px;" alt="Sébastien Van Bruaene"/><br /><sub><b>Sébastien Van Bruaene</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=Beretta1979" title="Code">💻</a> <a href="https://github.com/nock/nock/commits?author=Beretta1979" title="Tests">⚠️</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Uzlopak"><img src="https://avatars.githubusercontent.com/u/5059100?v=4?s=100" width="100px;" alt="Aras Abbasi"/><br /><sub><b>Aras Abbasi</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=Uzlopak" title="Code">💻</a> <a href="https://github.com/nock/nock/commits?author=Uzlopak" title="Tests">⚠️</a> <a href="#maintenance-Uzlopak" title="Maintenance">🚧</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/rsaryev"><img src="https://avatars.githubusercontent.com/u/70219513?v=4?s=100" width="100px;" alt="Saryev Rustam"/><br /><sub><b>Saryev Rustam</b></sub></a><br /><a href="https://github.com/nock/nock/commits?author=rsaryev" title="Code">💻</a> <a href="https://github.com/nock/nock/commits?author=rsaryev" title="Tests">⚠️</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/mikicho"><img src="https://avatars.githubusercontent.com/u/11459632?v=4?s=100" width="100px;" alt="Michael Solomon"/><br /><sub><b>Michael Solomon</b></sub></a><br /><a href="#maintenance-mikicho" title="Maintenance">🚧</a> <a href="https://github.com/nock/nock/commits?author=mikicho" title="Code">💻</a> <a href="https://github.com/nock/nock/commits?author=mikicho" title="Documentation">📖</a></td>
     </tr>
   </tbody>
 </table>

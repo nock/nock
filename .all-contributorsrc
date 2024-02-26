@@ -147,6 +147,27 @@
         "test",
         "maintenance"
       ]
+    },
+    {
+      "login": "rsaryev",
+      "name": "Saryev Rustam",
+      "avatar_url": "https://avatars.githubusercontent.com/u/70219513?v=4",
+      "profile": "https://github.com/rsaryev",
+      "contributions": [
+        "code",
+        "test"
+      ]
+    },
+    {
+      "login": "mikicho",
+      "name": "Michael Solomon",
+      "avatar_url": "https://avatars.githubusercontent.com/u/11459632?v=4",
+      "profile": "https://github.com/mikicho",
+      "contributions": [
+        "maintenance",
+        "code",
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

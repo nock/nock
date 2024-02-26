@@ -147,6 +147,24 @@ describe('Nock Back', () => {
     })
   })
 
+  it('`query` returns all of the interceptors recorded to the cassette', done => {
+    nockBack('good_request.json').then(({ nockDone, context }) => {
+      const interceptor = context.query()
+      nockDone()
+      expect(interceptor.length).to.equal(1)
+      expect(interceptor[0].method).to.equal('GET')
+      expect(interceptor[0].uri).to.equal('/')
+      expect(interceptor[0].basePath).to.equal('http://www.example.test:80')
+      expect(interceptor[0].path).to.equal('/')
+      expect(interceptor[0].queries).to.be.null()
+      expect(interceptor[0].counter).to.equal(1)
+      expect(interceptor[0]).to.have.property('body')
+      expect(interceptor[0].statusCode).to.equal(200)
+      expect(interceptor[0].optional).to.equal(false)
+      done()
+    })
+  })
+
   describe('wild mode', () => {
     beforeEach(() => {
       nockBack.setMode('wild')

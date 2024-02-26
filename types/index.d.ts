@@ -118,7 +118,9 @@ declare namespace nock {
     filteringPath(regex: RegExp, replace: string): this
     filteringPath(fn: (path: string) => string): this
     filteringRequestBody(regex: RegExp, replace: string): this
-    filteringRequestBody(fn: (body: string) => string): this
+    filteringRequestBody(
+      fn: (body: string, recordedBody: string) => string,
+    ): this
 
     persist(flag?: boolean): this
     replyContentLength(): this
@@ -265,10 +267,23 @@ declare namespace nock {
     }>
   }
 
+  interface InterceptorSurface {
+    method: string
+    uri: string
+    basePath: string
+    path: string
+    queries?: string
+    counter: number
+    body: string
+    statusCode: number
+    optional: boolean
+  }
+
   interface BackContext {
     isLoaded: boolean
     scopes: Scope[]
     assertScopesFinished(): void
+    query: InterceptorSurface[]
   }
 
   interface BackOptions {
