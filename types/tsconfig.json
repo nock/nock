@@ -6,6 +6,6 @@
     "noEmit": true,
     "esModuleInterop": true,
     "baseUrl": ".",
-    "paths": { "nock": ["."] }
-  }
+    "paths": { "nock": ["."] },
+  },
 }
