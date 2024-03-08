@@ -111,6 +111,19 @@ describe('Native Fetch', () => {
     scope.done()
   })
 
+  it('should throw when signal is already aborted', async () => {
+    nock('http://example.test').get('/').reply(200)
+
+    const signal = AbortSignal.abort('reason')
+    try {
+      await fetch('http://example.test', { signal })
+      expect.fail()
+    } catch (e) {
+      expect(signal.aborted).to.true()
+      expect(e).to.equal('reason')
+    }
+  })
+
   describe('content-encoding', () => {
     it('should accept gzipped content', async () => {
       const message = 'Lorem ipsum dolor sit amet'
