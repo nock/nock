@@ -216,4 +216,49 @@ describe('Native Fetch', () => {
       })
     })
   })
+
+  describe('delay', () => {
+    it('should cause a timeout error when larger than AbortSignal.timeout', async () => {
+      nock('http://example.test').get('/').delay(100).reply(200)
+
+      try {
+        await fetch('http://example.test', { signal: AbortSignal.timeout(50) })
+        expect.fail()
+      } catch (e) {
+        expect(e.name).to.equal('TimeoutError')
+      }
+    })
+
+    it('should delay the response body', async () => {
+      nock('http://example.test').get('/').delayBody(50).reply(200)
+
+      const start = Date.now()
+
+      const response = await fetch('http://example.test', {
+        signal: AbortSignal.timeout(100),
+      })
+
+      expect(response.status).to.equal(200)
+      // wait for body stream to complete
+      await response.text()
+      expect(Date.now() - start).to.be.at.least(
+        50,
+        'delay minimum not satisfied',
+      )
+    })
+
+    it('should throw TimeoutError', async () => {
+      nock('http://example.test').get('/').delayBody(100).reply(200)
+
+      const response = await fetch('http://example.test', {
+        signal: AbortSignal.timeout(50),
+      })
+      try {
+        await response.text()
+        expect.fail()
+      } catch (e) {
+        expect(e.name).to.equal('TimeoutError')
+      }
+    })
+  })
 })
