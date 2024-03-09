@@ -242,6 +242,22 @@ describe('Native Fetch', () => {
       }
     })
 
+    it('should delay the connection', async () => {
+      nock('http://example.test').get('/').delayBody(50).reply(200)
+
+      const start = Date.now()
+
+      const response = await fetch('http://example.test')
+
+      expect(response.status).to.equal(200)
+      // wait for body stream to complete
+      await response.text()
+      expect(Date.now() - start).to.be.at.least(
+        50,
+        'delay minimum not satisfied',
+      )
+    })
+
     it('should delay the response body', async () => {
       nock('http://example.test').get('/').delayBody(50).reply(200)
 
