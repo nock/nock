@@ -10,6 +10,7 @@ Breaking changes:
 1. recorder.play and nockDone are async
 3. Small - Fix headers matcher gets non-string values (this test: `should match headers with function: gets the expected argument`)
 2. Fix - socket ref/unref return this
+4. increased Nock compatibility with Node
 
 
 Topics to discuss:
@@ -18,7 +19,6 @@ Topics to discuss:
 4. Are we OK that we emit "internal-response" to the end user as well?
 5. Test timeout without actually wait
 6. should denote the response client is authorized for HTTPS requests
-7. res.req is unofficial, why do we have test for it? "has a req property on the response". why they can't jut use req that returns from the http.get/request
 8. getPeerCertificate does not return string: https://nodejs.org/api/tls.html#tlssocketgetpeercertificatedetailed
    test: "socket has getPeerCertificate() method which returns a random base64 string"
 9. why the behavior is different than Node's? test: "Request with `Expect: 100-continue` triggers continue event"

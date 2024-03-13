@@ -108,8 +108,8 @@ describe('`delayBody()`', () => {
   it('should delay the clock between the `response` event and the first `data` event', done => {
     nock('http://example.test').get('/').delayBody(200).reply(201, 'OK')
 
+    const start = process.hrtime()
     http.get('http://example.test', res => {
-      const start = process.hrtime()
       res.once('data', () => {
         checkDuration(start, 200)
         done()
@@ -197,7 +197,7 @@ describe('`delayBody()`', () => {
 
 describe('`delayConnection()`', () => {
   // TODO: https://github.com/mswjs/interceptors/issues/456
-  it.skip('should cause a timeout error when larger than options.timeout', async () => {
+  it('should cause a timeout error when larger than options.timeout', async () => {
     const scope = nock('http://example.test')
       .get('/')
       .delayConnection(1000)
