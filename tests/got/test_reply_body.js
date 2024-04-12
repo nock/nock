@@ -115,6 +115,23 @@ describe('`reply()` body', () => {
     expect(body).to.be.a('string').and.equal('')
     scope.done()
   })
+
+  it('does not modify the object used for response', async () => {
+    const patchBody = { number: 1234 }
+    const form = new FormData()
+    form.append('number', 1234)
+
+    const scope = nock('http://example.test')
+      .patch('/', patchBody)
+      .reply(200, patchBody)
+
+    await got.patch('http://example.test/', {
+      form,
+    })
+
+    expect(patchBody.number).to.be.a('number').and.equal(1234)
+    scope.done()
+  })
 })
 
 describe('`reply()` status code', () => {

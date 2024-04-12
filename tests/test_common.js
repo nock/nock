@@ -71,6 +71,18 @@ describe('Body Match', () => {
       const result = matchBody({}, { number: 1 }, '{"number": "1"}')
       expect(result).to.equal(false)
     })
+
+    it('should not modify the original spec object', () => {
+      const spec = { number: 1 }
+      matchBody(
+        {
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        },
+        spec,
+        '',
+      )
+      expect(spec).to.deep.equal({ number: 1 })
+    })
   })
 })
 
