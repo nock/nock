@@ -33,7 +33,7 @@ describe('`ClientRequest.abort()`', () => {
   })
 
   // TODO: https://github.com/mswjs/interceptors/issues/444
-  it.skip('Emits the expected event sequence when `end` is called on an aborted request', done => {
+  it('Emits the expected event sequence when `end` is called on an aborted request', done => {
     const scope = nock('http://example.test').get('/').reply()
 
     const req = http.request('http://example.test')
@@ -68,7 +68,7 @@ describe('`ClientRequest.abort()`', () => {
   })
 
   // TODO: https://github.com/mswjs/interceptors/issues/444
-  it.skip('Emits the expected event sequence when aborted immediately after `end`', done => {
+  it('Emits the expected event sequence when aborted immediately after `end`', done => {
     const scope = nock('http://example.test').get('/').reply()
 
     const req = http.request('http://example.test')
@@ -86,7 +86,7 @@ describe('`ClientRequest.abort()`', () => {
   })
 
   // TODO: https://github.com/mswjs/interceptors/issues/444
-  it.skip('Emits the expected event sequence when aborted inside a `socket` event listener', done => {
+  it('Emits the expected event sequence when aborted inside a `socket` event listener', done => {
     const scope = nock('http://example.test').get('/').reply()
 
     const req = http.request('http://example.test')
@@ -110,7 +110,7 @@ describe('`ClientRequest.abort()`', () => {
   })
 
   // TODO: https://github.com/mswjs/interceptors/issues/444
-  it.skip('Emits the expected event sequence when aborted multiple times', done => {
+  it('Emits the expected event sequence when aborted multiple times', done => {
     const scope = nock('http://example.test').get('/').reply()
 
     const req = http.request('http://example.test')
@@ -156,6 +156,7 @@ describe('`ClientRequest.abort()`', () => {
       const events = emitSpy.args.map(i => i[0])
       expect(events).to.deep.equal([
         'socket',
+        'prefinish',
         'finish',
         'abort',
         'error',
@@ -163,10 +164,10 @@ describe('`ClientRequest.abort()`', () => {
       ])
       scope.done()
       done()
-    }, 10)
+    }, 20)
   })
 
-  // TODO: https://github.com/mswjs/interceptors/issues/444
+  // TODO: https://github.com/mswjs/interceptors/pull/542#issuecomment-2028881290
   it.skip('Emits the expected event sequence when aborted after a delay from the `finish` event', done => {
     // use the delay functionality to create a window where the abort is called during the artificial connection wait.
     const scope = nock('http://example.test').get('/').delay(100).reply()
@@ -189,6 +190,7 @@ describe('`ClientRequest.abort()`', () => {
       const events = emitSpy.args.map(i => i[0])
       expect(events).to.deep.equal([
         'socket',
+        'prefinish',
         'finish',
         'abort',
         'error',
@@ -215,6 +217,7 @@ describe('`ClientRequest.abort()`', () => {
       const events = emitSpy.args.map(i => i[0])
       expect(events).to.deep.equal([
         'socket',
+        'prefinish',
         'finish',
         'response',
         'abort',
@@ -222,6 +225,6 @@ describe('`ClientRequest.abort()`', () => {
       ])
       scope.done()
       done()
-    }, 10)
+    }, 20)
   })
 })

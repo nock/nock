@@ -55,8 +55,7 @@ describe('Request Overrider', () => {
     })
   })
 
-  // TODO: https://github.com/mswjs/interceptors/pull/515#issuecomment-1995549971
-  it.skip('write callback called', done => {
+  it('write callback called', done => {
     const scope = nock('http://example.test')
       .filteringRequestBody(/mia/, 'nostra')
       .post('/', 'mamma nostra')
@@ -91,7 +90,7 @@ describe('Request Overrider', () => {
   })
 
   // TODO: https://github.com/mswjs/interceptors/pull/515#issuecomment-1995549971
-  it.skip('write callback called when encoding is not supplied', done => {
+  it('write callback called when encoding is not supplied', done => {
     const scope = nock('http://example.test')
       .filteringRequestBody(/mia/, 'nostra')
       .post('/', 'mamma nostra')
@@ -183,7 +182,7 @@ describe('Request Overrider', () => {
   })
 
   // TODO: https://github.com/mswjs/interceptors/issues/459
-  it.skip('end callback called', done => {
+  it('end callback called', done => {
     const scope = nock('http://example.test')
       .filteringRequestBody(/mia/, 'nostra')
       .post('/', 'mamma nostra')
@@ -216,7 +215,7 @@ describe('Request Overrider', () => {
 
   // https://github.com/nock/nock/issues/1509
   // TODO: https://github.com/mswjs/interceptors/issues/459
-  it.skip('end callback called when end has callback, but no buffer', done => {
+  it('end callback called when end has callback, but no buffer', done => {
     const scope = nock('http://example.test').post('/').reply()
 
     const reqEndCallback = sinon.spy()
@@ -245,7 +244,7 @@ describe('Request Overrider', () => {
   })
 
   // TODO: https://github.com/mswjs/interceptors/issues/459
-  it.skip('request.end called with all three arguments', done => {
+  it('request.end called with all three arguments', done => {
     const scope = nock('http://example.test').post('/', 'foobar').reply()
 
     const reqEndCallback = sinon.spy()
@@ -293,7 +292,7 @@ describe('Request Overrider', () => {
   })
 
   // TODO: https://github.com/mswjs/interceptors/issues/459
-  it.skip('request.end called with only data and a callback', done => {
+  it('request.end called with only data and a callback', done => {
     const scope = nock('http://example.test').post('/', 'foobar').reply()
 
     const reqEndCallback = sinon.spy()
@@ -342,7 +341,7 @@ describe('Request Overrider', () => {
   })
 
   // TODO: https://github.com/mswjs/interceptors/issues/460
-  it.skip('should emit an error if `write` is called after `end`', done => {
+  it('should emit an error if `write` is called after `end`', done => {
     nock('http://example.test').get('/').reply()
 
     const req = http.request('http://example.test')
@@ -359,7 +358,7 @@ describe('Request Overrider', () => {
 
   // http://github.com/nock/nock/issues/139
   // TODO: https://github.com/mswjs/interceptors/pull/515#issuecomment-1995549971
-  it.skip('should emit "finish" on the request before emitting "end" on the response', done => {
+  it('should emit "finish" on the request before emitting "end" on the response', done => {
     const scope = nock('http://example.test').post('/').reply()
 
     const onFinish = sinon.spy()
@@ -391,7 +390,7 @@ describe('Request Overrider', () => {
   })
 
   // TODO: https://github.com/mswjs/interceptors/issues/458 - this might solve it. let's wait for this fix
-  it.skip('should update the writable attributes before emitting the "finish" event', done => {
+  it('should update the writable attributes before emitting the "finish" event', done => {
     nock('http://example.test').post('/').reply()
 
     const req = http.request({
@@ -878,7 +877,7 @@ describe('Request Overrider', () => {
 
   // https://github.com/nock/nock/issues/2231
   // TODO: why?
-  it.skip('mocking a request which sends an empty buffer should finalize', async () => {
+  it('mocking a request which sends an empty buffer should finalize', async () => {
     const prefixUrl = 'http://www.test.com'
     const bufferEndpoint = 'upload/buffer/'
 

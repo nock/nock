@@ -6,8 +6,7 @@ const nock = require('../..')
 const got = require('./got_client')
 
 describe('Content Encoding', () => {
-  // TODO: https://github.com/mswjs/interceptors/issues/446
-  it.skip('should accept gzipped content', async () => {
+  it('should accept gzipped content', async () => {
     const message = 'Lorem ipsum dolor sit amet'
     const compressed = zlib.gzipSync(message)
 
@@ -15,7 +14,6 @@ describe('Content Encoding', () => {
       .get('/foo')
       .reply(200, compressed, {
         'X-Transfer-Length': String(compressed.length),
-        'Content-Length': undefined,
         'Content-Encoding': 'gzip',
       })
     const { body, statusCode } = await got('http://example.test/foo')
@@ -25,8 +23,7 @@ describe('Content Encoding', () => {
     scope.done()
   })
 
-  // TODO: https://github.com/mswjs/interceptors/issues/446
-  it.skip('Delaying the body works with content encoded responses', async () => {
+  it('Delaying the body works with content encoded responses', async () => {
     const message = 'Lorem ipsum dolor sit amet'
     const compressed = zlib.gzipSync(message)
 

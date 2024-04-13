@@ -27,8 +27,7 @@ describe('`replyWithFile()`', () => {
     scope.done()
   })
 
-  // TODO: https://github.com/mswjs/interceptors/issues/446
-  it.skip('reply with file with headers', async () => {
+  it('reply with file with headers', async () => {
     const scope = nock('http://example.test')
       .get('/')
       .replyWithFile(200, binaryFilePath, {
@@ -42,8 +41,7 @@ describe('`replyWithFile()`', () => {
     scope.done()
   })
 
-  // TODO: https://github.com/mswjs/interceptors/issues/446
-  it.skip('reply with file with repeated', async () => {
+  it('reply with file with repeated', async () => {
     sinon.spy(fs)
 
     const scope = nock('http://example.test')

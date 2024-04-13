@@ -38,24 +38,23 @@ describe('`reply()` body', () => {
   // While `false` and `null` are falsy, they are valid JSON value so they
   // should be returned as strings that `JSON.parse()` would convert back to
   // native values.
-  // NEED DISCUSSION: 204, 205, 304 can not have body
-  it.skip('stringifies a boolean (including `false`)', async () => {
-    const scope = nock('http://example.test').get('/').reply(204, false)
+  it('stringifies a boolean (including `false`)', async () => {
+    const scope = nock('http://example.test').get('/').reply(200, false)
 
     const { statusCode, body } = await got('http://example.test/')
 
-    expect(statusCode).to.equal(204)
+    expect(statusCode).to.equal(200)
     // `'false'` is json-stringified `false`.
     expect(body).to.be.a('string').and.equal('false')
     scope.done()
   })
 
-  it.skip('stringifies null', async () => {
-    const scope = nock('http://example.test').get('/').reply(204, null)
+  it('stringifies null', async () => {
+    const scope = nock('http://example.test').get('/').reply(200, null)
 
     const { statusCode, body } = await got('http://example.test/')
 
-    expect(statusCode).to.equal(204)
+    expect(statusCode).to.equal(200)
     // `'null'` is json-stringified `null`.
     expect(body).to.be.a('string').and.equal('null')
     scope.done()

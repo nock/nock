@@ -774,7 +774,7 @@ describe('Nock Back', () => {
     it('nock back loads scope', done => nockBackWithFixture(done, true))
 
     // TODO: https://github.com/mswjs/interceptors/issues/474
-    it.skip('no unnocked http calls work', done => {
+    it('no unnocked http calls work', done => {
       const req = http.request(
         {
           host: 'other.example.test',

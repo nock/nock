@@ -6,7 +6,7 @@ const nock = require('..')
 
 describe('`res.destroy()`', () => {
   // TODO: https://github.com/mswjs/interceptors/issues/457
-  it.skip('should emit error event if called with error', done => {
+  it('should emit error event if called with error', done => {
     nock('http://example.test').get('/').reply(404)
 
     const respErr = new Error('Response error')

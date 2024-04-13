@@ -11,6 +11,7 @@ Breaking changes:
 3. Small - Fix headers matcher gets non-string values (this test: `should match headers with function: gets the expected argument`)
 2. Fix - socket ref/unref return this
 4. increased Nock compatibility with Node
+5. We no longer support in undefined content-length (this test: `Content Encoding should accept gzipped content`)
 
 
 Topics to discuss:

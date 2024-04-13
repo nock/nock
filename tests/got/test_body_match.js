@@ -146,7 +146,7 @@ describe('`matchBody()`', () => {
     await assertRejects(request, /Nock: No match for request/)
   })
 
-  // TODO: seems like we need to replace form-data and/or update got, prefer to do this later.
+  // TODO: probably due to transfer-encoding chunked.
   it.skip('match body with form multipart', async () => {
     const form = new FormData()
     const boundary = form.getBoundary()

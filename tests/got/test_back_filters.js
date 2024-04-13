@@ -29,6 +29,7 @@ describe('nockBack filters', () => {
     rimraf.sync(fixtureFullPath)
   })
 
+  // Root cause: MSW socket based doesn't support transfer-encoding chunked: https://github.com/mswjs/interceptors/pull/515#issuecomment-2005159683
   it.skip('should pass filteringPath options', async () => {
     const server = await startHttpServer()
     const nockBackOptions = {
@@ -57,6 +58,7 @@ describe('nockBack filters', () => {
     expect(fixtureContentReloaded[0].path).to.equal('/?timestamp=1111')
   })
 
+  // Root cause: MSW socket based doesn't support transfer-encoding chunked: https://github.com/mswjs/interceptors/pull/515#issuecomment-2005159683
   it.skip('should pass filteringRequestBody options', async () => {
     const server = await startHttpServer()
     const nockBackOptions = {
