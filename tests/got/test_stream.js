@@ -231,40 +231,7 @@ it('response is streams2 compatible', done => {
     .end()
 })
 
-// TODO BEFORE MERGE: I think we need to update this test.
-it.skip('when a stream is used for the response body, it will not be read until after the response event', done => {
-  let responseEvent = false
-  const responseText = 'Hello World\n'
-
-  class SimpleStream extends stream.Readable {
-    _read() {
-      expect(responseEvent).to.be.true()
-      this.push(responseText)
-      this.push(null)
-    }
-  }
-
-  nock('http://localhost')
-    .get('/')
-    .reply(201, () => new SimpleStream())
-
-  http.get('http://localhost/', res => {
-    responseEvent = true
-    res.setEncoding('utf8')
-
-    let body = ''
-    expect(res.statusCode).to.equal(201)
-
-    res.on('data', function (chunk) {
-      body += chunk
-    })
-
-    res.once('end', function () {
-      expect(body).to.equal(responseText)
-      done()
-    })
-  })
-})
+// TODO BEFORE MERGE: Removed. This is not compatible with Node.js
 
 // https://github.com/nock/nock/issues/193
 it('response readable pull stream works as expected', done => {
@@ -299,7 +266,6 @@ it('response readable pull stream works as expected', done => {
   req.end()
 })
 
-// TODO: We don't propagate errors in createResponse
 it.skip('error events on reply streams proxy to the response', done => {
   // This test could probably be written to use got, however, that lib has a lot
   // of built in error handling and this test would get convoluted.

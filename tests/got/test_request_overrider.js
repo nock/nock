@@ -124,35 +124,6 @@ describe('Request Overrider', () => {
     })
   })
 
-  // we should remove this test as undefined chunk is not supported by Node.
-  it.skip('write callback is not called if the provided chunk is undefined', done => {
-    const scope = nock('http://example.test').post('/').reply()
-
-    const reqWriteCallback = sinon.spy()
-
-    const req = http.request(
-      {
-        host: 'example.test',
-        method: 'POST',
-        path: '/',
-      },
-      res => {
-        expect(res.statusCode).to.equal(200)
-        res.on('end', () => {
-          expect(reqWriteCallback).to.not.have.been.called()
-          scope.done()
-          done()
-        })
-        // Streams start in 'paused' mode and must be started.
-        // See https://nodejs.org/api/stream.html#stream_class_stream_readable
-        res.resume()
-      },
-    )
-
-    req.write(undefined, null, reqWriteCallback)
-    req.end()
-  })
-
   it("write doesn't throw if invoked w/o callback", done => {
     const scope = nock('http://example.test').post('/').reply()
 
@@ -606,8 +577,7 @@ describe('Request Overrider', () => {
     })
   })
 
-  // TODO: https://github.com/mswjs/interceptors/pull/515#issuecomment-1995549971
-  it.skip('socket has address() method', done => {
+  it('socket has address() method', done => {
     nock('http://example.test').get('/').reply()
 
     const req = http.get('http://example.test')
@@ -623,18 +593,19 @@ describe('Request Overrider', () => {
     })
   })
 
-  // TODO: https://github.com/mswjs/interceptors/pull/515#issuecomment-1995549971
-  it.skip('socket has address() method, https/IPv6', done => {
+  it('socket has address() method, https/IPv6', done => {
     nock('https://example.test').get('/').reply()
 
     const req = https.get('https://example.test', { family: 6 })
     req.once('socket', socket => {
-      expect(socket.address()).to.deep.equal({
-        port: 443,
-        family: 'IPv6',
-        address: '::1',
+      socket.once('connect', () => {
+        expect(socket.address()).to.deep.equal({
+          port: 443,
+          family: 'IPv6',
+          address: '::1',
+        })
+        done()
       })
-      done()
     })
   })
 
@@ -783,7 +754,6 @@ describe('Request Overrider', () => {
     req.end()
   })
 
-  // TODO: why the behavior is different than Node's?
   it.skip('Request with `Expect: 100-continue` triggers continue event', done => {
     // This is a replacement for a wide-bracket regression test that was added
     // for https://github.com/nock/nock/issues/256.

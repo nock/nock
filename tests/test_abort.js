@@ -137,7 +137,7 @@ describe('`ClientRequest.abort()`', () => {
   // all tests below assert the Scope is done.
 
   // TODO: https://github.com/mswjs/interceptors/issues/444
-  it.skip('Emits the expected event sequence when aborted inside a `finish` event listener', done => {
+  it('Emits the expected event sequence when aborted inside a `finish` event listener', done => {
     const scope = nock('http://example.test').get('/').reply()
 
     const req = http.request('http://example.test')
@@ -202,7 +202,7 @@ describe('`ClientRequest.abort()`', () => {
   })
 
   // TODO: https://github.com/mswjs/interceptors/issues/444
-  it.skip('Emits the expected event sequence when aborted inside a `response` event listener', done => {
+  it('Emits the expected event sequence when aborted inside a `response` event listener', done => {
     const scope = nock('http://example.test').get('/').reply()
 
     const req = http.request('http://example.test')

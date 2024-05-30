@@ -717,7 +717,7 @@ describe('Intercept', () => {
   // https://github.com/nock/nock/issues/158
   // mikeal/request with strictSSL: true
   // https://github.com/request/request/blob/3c0cddc7c8eb60b470e9519da85896ed7ee0081e/request.js#L943-L950
-  // TODO: https://github.com/mswjs/interceptors/pull/515#issuecomment-1988946243
+  // TODO: https://github.com/mswjs/interceptors/pull/556/files#r1569229771
   it.skip('should denote the response client is authorized for HTTPS requests', done => {
     const scope = nock('https://example.test').get('/what').reply()
 

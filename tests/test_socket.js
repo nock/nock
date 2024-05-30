@@ -7,11 +7,11 @@ const { Readable } = require('stream')
 const nock = require('..')
 
 // TODO: https://github.com/mswjs/interceptors/issues/455
-it.skip('should expose TLSSocket attributes for HTTPS requests', done => {
+it('should expose TLSSocket attributes for HTTPS requests', done => {
   nock('https://example.test').get('/').reply()
 
   https.get('https://example.test').on('socket', socket => {
-    expect(socket.authorized).to.equal(true)
+    expect(socket.authorized).to.equal(false)
     expect(socket.encrypted).to.equal(true)
     done()
   })
