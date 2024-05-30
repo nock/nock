@@ -111,6 +111,16 @@ describe('Native Fetch', () => {
     scope.done()
   })
 
+  it('should support body cancellation', async () => {
+    const scope = nock('http://test')
+      .post('/')
+      .reply(200);
+
+    const response = await fetch('http://test', { method: 'POST' })
+    await response.body.cancel()
+    scope.done()
+  });
+
   describe('content-encoding', () => {
     it('should accept gzipped content', async () => {
       const message = 'Lorem ipsum dolor sit amet'
