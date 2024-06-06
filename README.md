@@ -970,6 +970,19 @@ setTimeout(() => {
 }, 5000)
 ```
 
+You may also retrieve the request objects and run your own assertions on them. For example using jests assertions:
+
+```js
+const interceptor = nock('http://google.com').get('/').remember()
+interceptor.reply(200, 'Hello from Google!')
+
+// do some stuff
+
+expect(interceptor.requests[0].getHeaders().accept).toContain('application/json')
+
+interceptor.clearRequestHistory()
+```
+
 ### .isDone()
 
 You can call `isDone()` on a single expectation to determine if the expectation was met:
