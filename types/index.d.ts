@@ -133,6 +133,8 @@ declare namespace nock {
   }
 
   interface Interceptor {
+    requests: ClientRequest[]
+
     query(
       matcher:
         | boolean
