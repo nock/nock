@@ -80,7 +80,7 @@ jobs:
           - macos-latest
           - ubuntu-latest
           - windows-latest
-        exclude: 
+        exclude:
           - node-version: 10
             os: macos-latest
           - node-version: 12
