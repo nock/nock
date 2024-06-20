@@ -6,12 +6,29 @@ const got = require('./got_client')
 
 describe('`removeInterceptor()`', () => {
   context('when invoked with an Interceptor instance', () => {
-    it('remove interceptor removes given interceptor', async () => {
+    it('removes given interceptor', async () => {
       const newScope = nock('http://example.test')
         .get('/somepath')
         .reply(202, 'other-content')
       const givenInterceptor = nock('http://example.test').get('/somepath')
       givenInterceptor.reply(200, 'hey')
+
+      expect(nock.removeInterceptor(givenInterceptor)).to.be.true()
+
+      const { statusCode, body } = await got('http://example.test/somepath')
+
+      expect(statusCode).to.equal(202)
+      expect(body).to.equal('other-content')
+
+      newScope.done()
+    })
+
+    it('removes given interceptor even with `persist()`', async () => {
+      const newScope = nock('http://example.test')
+        .get('/somepath')
+        .reply(202, 'other-content')
+      const givenInterceptor = nock('http://example.test').get('/somepath')
+      givenInterceptor.reply(200, 'hey').persist()
 
       expect(nock.removeInterceptor(givenInterceptor)).to.be.true()
 
@@ -34,6 +51,34 @@ describe('`removeInterceptor()`', () => {
       expect(nock.removeInterceptor(givenInterceptor)).to.be.true()
 
       expect(scope.pendingMocks()).to.deep.equal([])
+    })
+
+    it('reflects the removal in `interceptors` of its scope', () => {
+      const givenInterceptor = nock('http://example.test').get('/somepath')
+      const scope = givenInterceptor.reply(200, 'hey')
+
+      expect(scope.interceptors).to.deep.equal([
+        givenInterceptor,
+      ])
+
+      expect(nock.removeInterceptor(givenInterceptor)).to.be.true()
+
+      expect(scope.interceptors).to.deep.equal([])
+    })
+
+    it('reflects the removal in `keyedInterceptors` of its scope', () => {
+      const givenInterceptor = nock('http://example.test').get('/somepath')
+      const scope = givenInterceptor.reply(200, 'hey')
+
+      expect(scope.keyedInterceptors).to.deep.equal({ 
+        'GET http://example.test:80/somepath': [
+          givenInterceptor,
+        ]
+      })
+
+      expect(nock.removeInterceptor(givenInterceptor)).to.be.true()
+
+      expect(scope.keyedInterceptors).to.deep.equal({})
     })
 
     it('removes given interceptor for https', async () => {
