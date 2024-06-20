@@ -80,7 +80,13 @@ jobs:
           - macos-latest
           - ubuntu-latest
           - windows-latest
-
+        exclude: 
+          - node-version: 10
+            os: macos-latest
+          - node-version: 12
+            os: macos-latest
+          - node-version: 14
+            os: macos-latest
     runs-on: ${{ matrix.os }}
     timeout-minutes: 5
 
