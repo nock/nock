@@ -41,7 +41,7 @@ describe('nockBack filters', () => {
 
     const back1 = await nockBack(fixtureFilename, nockBackOptions)
     const response1 = await got(`${server.origin}/?timestamp=1111`)
-    await back1.nockDone()
+    back1.nockDone()
 
     const fixtureContent = getFixtureContent()
     expect(fixtureContent).to.have.lengthOf(1)
@@ -49,7 +49,7 @@ describe('nockBack filters', () => {
 
     const back2 = await nockBack(fixtureFilename, nockBackOptions)
     const response2 = await got(`${server.origin}/?timestamp=2222`)
-    await back2.nockDone()
+    back2.nockDone()
 
     expect(response2.body).to.deep.equal(response1.body)
 
@@ -80,7 +80,7 @@ describe('nockBack filters', () => {
     const response1 = await got.post(server.origin, {
       form: { token: 'aaa-bbb-ccc' },
     })
-    await back1.nockDone()
+    back1.nockDone()
 
     const fixtureContent = getFixtureContent()
     expect(fixtureContent).to.have.lengthOf(1)

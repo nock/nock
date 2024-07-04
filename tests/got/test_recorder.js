@@ -49,7 +49,7 @@ describe('Recorder', () => {
     await req1Promise
 
     // validate only the request from the second session is in the outputs
-    const outputs = await nock.recorder.play()
+    const outputs = nock.recorder.play()
     expect(outputs).to.have.lengthOf(1)
     expect(outputs[0]).to.match(/\.post\('\/bar'\)/)
   })
@@ -65,7 +65,7 @@ describe('Recorder', () => {
 
     await got.post(origin)
 
-    const recorded = await nock.recorder.play()
+    const recorded = nock.recorder.play()
     expect(recorded).to.have.lengthOf(1)
     expect(recorded[0]).to.include(`nock('http://localhost:${port}',`)
   })
@@ -110,7 +110,7 @@ describe('Recorder', () => {
 
     nock.restore()
 
-    const recorded = await nock.recorder.play()
+    const recorded = nock.recorder.play()
     expect(recorded).to.have.lengthOf(1)
     expect(recorded[0]).to.be.a('string')
     // TODO: Use chai-string?
@@ -143,7 +143,7 @@ describe('Recorder', () => {
 
     expect(gotRequest).to.have.been.calledOnce()
     nock.restore()
-    const recorded = await nock.recorder.play()
+    const recorded = nock.recorder.play()
     expect(recorded).to.have.lengthOf(1)
     expect(recorded[0]).to.include({
       scope: origin,
@@ -153,7 +153,7 @@ describe('Recorder', () => {
   })
 
   // TODO: need to await for the response interceptor to end
-  it.skip('logs recorded objects', async () => {
+  it('logs recorded objects', async () => {
     const gotRequest = sinon.spy()
     const loggingFn = sinon.spy()
 
@@ -203,7 +203,7 @@ describe('Recorder', () => {
     })
 
     nock.restore()
-    const recorded = await nock.recorder.play()
+    const recorded = nock.recorder.play()
     nock.recorder.clear()
     nock.activate()
 
@@ -250,7 +250,7 @@ describe('Recorder', () => {
     expect(response1.body).to.equal(exampleText)
 
     nock.restore()
-    const recorded = await nock.recorder.play()
+    const recorded = nock.recorder.play()
     nock.recorder.clear()
     nock.activate()
 
@@ -283,7 +283,7 @@ describe('Recorder', () => {
     expect(response1.headers).to.be.ok()
 
     nock.restore()
-    const recorded = await nock.recorder.play()
+    const recorded = nock.recorder.play()
     nock.recorder.clear()
     nock.activate()
 
@@ -361,7 +361,7 @@ describe('Recorder', () => {
 
     await got.post(origin, { body: JSON.stringify(payload) })
 
-    const recorded = await nock.recorder.play()
+    const recorded = nock.recorder.play()
     expect(recorded).to.have.lengthOf(1)
     expect(recorded[0]).to.include('.post(\'/\', {"a":1,"b":true})')
   })
@@ -377,7 +377,7 @@ describe('Recorder', () => {
 
     await got.post(origin, { body: JSON.stringify(payload) })
 
-    const recorded = await nock.recorder.play()
+    const recorded = nock.recorder.play()
     expect(recorded).to.have.lengthOf(1)
     expect(recorded[0]).to.be.an('object')
     expect(recorded[0].body).to.be.an('object').and.deep.equal(payload)
@@ -413,7 +413,7 @@ describe('Recorder', () => {
           res.resume()
           res.once('end', async () => {
             nock.restore()
-            const recorded = await nock.recorder.play()
+            const recorded = nock.recorder.play()
             expect(recorded).to.have.lengthOf(1)
             expect(recorded[0]).to.be.an('object').and.include({
               scope: origin,
@@ -547,7 +547,7 @@ describe('Recorder', () => {
             res.resume()
             res.once('end', async () => {
               nock.restore()
-              const recorded = await nock.recorder.play()
+              const recorded = nock.recorder.play()
               expect(recorded).to.have.lengthOf(1)
               expect(recorded[0]).to.be.an('object').and.to.include({
                 scope: origin,
@@ -588,7 +588,7 @@ describe('Recorder', () => {
             res.resume()
             res.once('end', async () => {
               nock.restore()
-              const recorded = await nock.recorder.play()
+              const recorded = nock.recorder.play()
               expect(recorded).to.have.lengthOf(1)
               expect(recorded[0])
                 .to.be.an('object')
@@ -631,7 +631,7 @@ describe('Recorder', () => {
 
     nock.restore()
 
-    const recorded = await nock.recorder.play()
+    const recorded = nock.recorder.play()
     expect(recorded).to.have.lengthOf(1)
     expect(recorded[0])
       .to.be.a('string')
@@ -663,7 +663,7 @@ describe('Recorder', () => {
     expect(response1.headers).to.include({ 'content-encoding': 'gzip' })
 
     nock.restore()
-    const recorded = await nock.recorder.play()
+    const recorded = nock.recorder.play()
     nock.recorder.clear()
     nock.activate()
 
@@ -705,7 +705,7 @@ describe('Recorder', () => {
     expect(response1.body).to.equal(exampleBody)
 
     nock.restore()
-    const recorded = await nock.recorder.play()
+    const recorded = nock.recorder.play()
     nock.recorder.clear()
     nock.activate()
 
@@ -747,7 +747,7 @@ describe('Recorder', () => {
 
           res.on('end', async () => {
             nock.restore()
-            const recorded = await nock.recorder.play()
+            const recorded = nock.recorder.play()
             nock.recorder.clear()
             nock.activate()
 
@@ -791,7 +791,7 @@ describe('Recorder', () => {
             res.resume()
             res.once('end', async () => {
               nock.restore()
-              const recorded = await nock.recorder.play()
+              const recorded = nock.recorder.play()
               expect(recorded).to.have.lengthOf(1)
               expect(recorded[0]).to.be.an('object')
               expect(recorded[0].reqheaders).to.be.undefined()
@@ -826,7 +826,7 @@ describe('Recorder', () => {
             res.once('end', async () => {
               nock.restore()
 
-              await nock.recorder.play()
+              nock.recorder.play()
               expect(loggingFn).to.have.been.calledOnce()
               expect(loggingFn.getCall(0).args[0]).to.be.a('string')
               done()
@@ -862,7 +862,7 @@ describe('Recorder', () => {
             res.resume()
             res.once('end', async () => {
               nock.restore()
-              await nock.recorder.play()
+              nock.recorder.play()
               expect(loggingFn).to.have.been.calledOnce()
               // This is still an object, because the "cut here" strings have not
               // been appended.
@@ -899,7 +899,7 @@ describe('Recorder', () => {
             res.resume()
             res.once('end', async () => {
               nock.restore()
-              const recorded = await nock.recorder.play()
+              const recorded = nock.recorder.play()
               expect(recorded).to.have.lengthOf(1)
               expect(recorded[0]).to.be.an('object')
               expect(recorded[0].reqheaders).to.be.an('object')
@@ -928,7 +928,7 @@ describe('Recorder', () => {
     })
 
     nock.restore()
-    const recorded = await nock.recorder.play()
+    const recorded = nock.recorder.play()
     expect(recorded).to.have.lengthOf(1)
     expect(recorded[0]).to.include({ path: '/?q=test+search' })
   })
@@ -949,7 +949,7 @@ describe('Recorder', () => {
     })
 
     nock.restore()
-    const recorded = await nock.recorder.play()
+    const recorded = nock.recorder.play()
     expect(recorded).to.have.lengthOf(1)
     expect(recorded[0]).to.include('test%20search%2B%2B')
   })
@@ -995,7 +995,7 @@ describe('Recorder', () => {
               expect(readableCount).to.equal(1)
               expect(chunkCount).to.equal(1)
 
-              const recorded = await nock.recorder.play()
+              const recorded = nock.recorder.play()
               expect(recorded).to.have.lengthOf(1)
               expect(recorded[0]).to.be.an('object').and.include({
                 scope: origin,
@@ -1024,7 +1024,7 @@ describe('Recorder', () => {
       searchParams: { param1: 1, param2: 2 },
     })
 
-    const recorded = await nock.recorder.play()
+    const recorded = nock.recorder.play()
     expect(recorded).to.have.lengthOf(1)
     expect(recorded[0])
       .to.be.a('string')
@@ -1046,7 +1046,7 @@ describe('Recorder', () => {
       ]),
     })
 
-    const recorded = await nock.recorder.play()
+    const recorded = nock.recorder.play()
     expect(recorded).to.have.lengthOf(1)
     expect(recorded[0])
       .to.be.a('string')
@@ -1070,7 +1070,7 @@ describe('Recorder', () => {
           res => {
             res.resume()
             res.once('end', async () => {
-              const recorded = await nock.recorder.play()
+              const recorded = nock.recorder.play()
               expect(recorded).to.have.lengthOf(1)
               expect(recorded[0])
                 .to.be.a('string')
@@ -1095,7 +1095,7 @@ describe('Recorder', () => {
 
     await got(`${origin}/foo'bar'baz`)
 
-    const recorded = await nock.recorder.play()
+    const recorded = nock.recorder.play()
     expect(recorded).to.have.lengthOf(1)
     expect(recorded[0])
       .to.be.a('string')
@@ -1192,7 +1192,7 @@ describe('Recorder', () => {
             transparentGifHex,
           )
 
-          const recordedFixtures = await nock.recorder.play()
+          const recordedFixtures = nock.recorder.play()
 
           server.close(error => {
             server = undefined

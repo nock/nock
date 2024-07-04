@@ -221,7 +221,7 @@ declare namespace nock {
   interface Recorder {
     rec(options?: boolean | RecorderOptions): void
     clear(): void
-    play(): Promise<string[] | Definition[]>
+    play(): string[] | Definition[]
   }
 
   interface RecorderOptions {
@@ -252,7 +252,7 @@ declare namespace nock {
     fixtures: string
     setMode(mode: BackMode): void
 
-    (fixtureName: string, nockedFn: (nockDone: () => Promise<void>) => void): void
+    (fixtureName: string, nockedFn: (nockDone: () => void) => void): void
     (
       fixtureName: string,
       options: BackOptions,

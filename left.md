@@ -1,5 +1,5 @@
 - should be safe to call in the middle of a request
-- socket emits connect and secureConnect
+- socket emits connect and secureConnect - edge case (https://github.com/mswjs/interceptors/pull/515#issuecomment-2067702330)
 - Request with `Expect: 100-continue` triggers continue event (https://github.com/mswjs/interceptors/pull/515#issuecomment-2067760131)
 
 ## Transfer Encoding:

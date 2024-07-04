@@ -5,9 +5,8 @@ These are automatically created by [semantic-release](https://github.com/semanti
 
 Migration guides are available for major versions in the [migration guides directory](https://github.com/nock/nock/tree/main/migration_guides).
 
-Remove this before merge:
+// TODO: Remove this before merge:
 Breaking changes:
-1. recorder.play and nockDone are async
 3. Small - Fix headers matcher gets non-string values (this test: `should match headers with function: gets the expected argument`)
 2. Fix - socket ref/unref return this
 4. increased Nock compatibility with Node
