@@ -217,4 +217,27 @@ describe('filteringRequestBody()', () => {
       'Invalid arguments: filtering request body should be a function or a regular expression',
     )
   })
+
+  describe('`Scope#clone()`', async () => {
+    it('creates a new Scope with the same basePath and scope options', () => {
+      const scope = nock('http://example.test', { encodedQueryParams: true })
+      const clonedScope = scope.clone()
+
+      expect(clonedScope.basePath).to.equal(scope.basePath)
+      expect(clonedScope.scopeOptions).to.deep.equal(scope.scopeOptions)
+    })
+
+    it('creates a new Scope that works independently', async () => {
+      const scope = nock('http://example.test')
+
+      const getScope = scope.get('/').reply(200)
+      const postScope = scope.clone().post('/').reply(200)
+
+      await got('http://example.test/')
+      expect(getScope.isDone()).to.be.true()
+
+      await got.post('http://example.test/')
+      expect(postScope.isDone()).to.be.true()
+    })
+  })
 })
