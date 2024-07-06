@@ -666,7 +666,6 @@ describe('Request Overrider', () => {
 
     const req = https.get('https://example.test')
     req.once('socket', socket => {
-      console.log(socket);
       const first = socket.getPeerCertificate()
       const second = socket.getPeerCertificate()
       expect(first).to.be.a('string')
