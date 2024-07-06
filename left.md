@@ -2,11 +2,6 @@
 - socket emits connect and secureConnect - edge case (https://github.com/mswjs/interceptors/pull/515#issuecomment-2067702330)
 - Request with `Expect: 100-continue` triggers continue event (https://github.com/mswjs/interceptors/pull/515#issuecomment-2067760131)
 
-## Transfer Encoding:
-- should pass filteringPath options
-- should pass filteringRequestBody options
-- match body with form multipart
-
 ## preemtive timeout
 - emits a timeout - with setTimeout
 - emits a timeout - with options.timeout
@@ -20,11 +15,6 @@
 
 ## Recorder
 - does not record requests from previous sessions
-- logs recorded objects
-- records and replays objects correctly
-- records and replays correctly with filteringRequestBody
-- records and replays gzipped nocks correctly
-- records and replays the response body
 
 ## Nock open question/problems
 - match hostname as regex and string in tandem

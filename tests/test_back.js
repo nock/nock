@@ -500,8 +500,7 @@ describe('Nock Back', () => {
     })
   })
 
-  // TODO: should solve this. the problem is that we don't wait the recording to finish
-  describe.skip('update mode', () => {
+  describe('update mode', () => {
     let fixture
     let fixtureLoc
     let fixturePath

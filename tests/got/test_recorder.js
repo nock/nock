@@ -222,8 +222,7 @@ describe('Recorder', () => {
     // expect(recorded[0]).to.include({ body: JSON.stringify(exampleBody) })
   })
 
-  // TODO: maybe upgrade got will solve the problem. aborted because res.complete is false.
-  it.skip('records and replays objects correctly', async () => {
+  it('records and replays objects correctly', async () => {
     const exampleText = '<html><body>example</body></html>'
 
     const { origin } = await servers.startHttpServer((request, response) => {
@@ -262,8 +261,7 @@ describe('Recorder', () => {
     nocks.forEach(nock => nock.done())
   })
 
-  // TODO: maybe upgrade got will solve the problem. aborted because res.complete is false.
-  it.skip('records and replays correctly with filteringRequestBody', async () => {
+  it('records and replays correctly with filteringRequestBody', async () => {
     const responseBody = '<html><body>example</body></html>'
     const { origin } = await servers.startHttpServer((request, response) => {
       response.write(responseBody)
@@ -638,8 +636,7 @@ describe('Recorder', () => {
       .and.include('  .matchHeader("x-foo", "bar")')
   })
 
-  // TODO: maybe upgrade got will solve the problem. aborted because res.complete is false.
-  it.skip('records and replays gzipped nocks correctly', async () => {
+  it('records and replays gzipped nocks correctly', async () => {
     const exampleText = '<html><body>example</body></html>'
 
     const { origin } = await servers.startHttpServer((request, response) => {
@@ -677,8 +674,7 @@ describe('Recorder', () => {
     nocks.forEach(nock => nock.done())
   })
 
-  // TODO: maybe upgrade got will solve the problem. aborted because res.complete is false.
-  it.skip('records and replays the response body', async () => {
+  it('records and replays the response body', async () => {
     const exampleBody = '<html><body>example</body></html>'
 
     const { origin } = await servers.startHttpServer((request, response) => {
