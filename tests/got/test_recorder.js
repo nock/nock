@@ -152,7 +152,6 @@ describe('Recorder', () => {
     })
   })
 
-  // TODO: need to await for the response interceptor to end
   it('logs recorded objects', async () => {
     const gotRequest = sinon.spy()
     const loggingFn = sinon.spy()
@@ -330,7 +329,6 @@ describe('Recorder', () => {
     })
   })
 
-  // TODO: https://github.com/mswjs/interceptors/issues/458
   it('checks that data is specified', () => {
     nock.restore()
     nock.recorder.clear()
@@ -951,7 +949,6 @@ describe('Recorder', () => {
   })
 
   // https://github.com/nock/nock/issues/193
-  // TODO: blocked by https://github.com/mswjs/interceptors/issues/443
   it('works with clients listening for readable', done => {
     nock.restore()
     nock.recorder.clear()

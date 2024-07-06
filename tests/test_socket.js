@@ -6,7 +6,6 @@ const https = require('https')
 const { Readable } = require('stream')
 const nock = require('..')
 
-// TODO: https://github.com/mswjs/interceptors/issues/455
 it('should expose TLSSocket attributes for HTTPS requests', done => {
   nock('https://example.test').get('/').reply()
 
@@ -28,7 +27,6 @@ it('should not have TLSSocket attributes for HTTP requests', done => {
 })
 
 describe('`Socket#setTimeout()`', () => {
-  // TODO: https://github.com/mswjs/interceptors/issues/455
   it('adds callback as a one-time listener for parity with a real socket', done => {
     nock('http://example.test').get('/').delayConnection(100).reply()
 
@@ -41,7 +39,6 @@ describe('`Socket#setTimeout()`', () => {
     })
   })
 
-  // TODO: https://github.com/mswjs/interceptors/issues/455
   it('can be called without a callback', done => {
     nock('http://example.test').get('/').delayConnection(100).reply()
 

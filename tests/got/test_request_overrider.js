@@ -89,7 +89,6 @@ describe('Request Overrider', () => {
     })
   })
 
-  // TODO: https://github.com/mswjs/interceptors/pull/515#issuecomment-1995549971
   it('write callback called when encoding is not supplied', done => {
     const scope = nock('http://example.test')
       .filteringRequestBody(/mia/, 'nostra')
@@ -152,7 +151,6 @@ describe('Request Overrider', () => {
     req.end()
   })
 
-  // TODO: https://github.com/mswjs/interceptors/issues/459
   it('end callback called', done => {
     const scope = nock('http://example.test')
       .filteringRequestBody(/mia/, 'nostra')
@@ -185,7 +183,6 @@ describe('Request Overrider', () => {
   })
 
   // https://github.com/nock/nock/issues/1509
-  // TODO: https://github.com/mswjs/interceptors/issues/459
   it('end callback called when end has callback, but no buffer', done => {
     const scope = nock('http://example.test').post('/').reply()
 
@@ -214,7 +211,6 @@ describe('Request Overrider', () => {
     req.end(reqEndCallback)
   })
 
-  // TODO: https://github.com/mswjs/interceptors/issues/459
   it('request.end called with all three arguments', done => {
     const scope = nock('http://example.test').post('/', 'foobar').reply()
 
@@ -262,7 +258,6 @@ describe('Request Overrider', () => {
     req.end('666F6F626172', 'hex')
   })
 
-  // TODO: https://github.com/mswjs/interceptors/issues/459
   it('request.end called with only data and a callback', done => {
     const scope = nock('http://example.test').post('/', 'foobar').reply()
 
@@ -311,7 +306,6 @@ describe('Request Overrider', () => {
     req.end()
   })
 
-  // TODO: https://github.com/mswjs/interceptors/issues/460
   it('should emit an error if `write` is called after `end`', done => {
     nock('http://example.test').get('/').reply()
 
@@ -328,7 +322,6 @@ describe('Request Overrider', () => {
   })
 
   // http://github.com/nock/nock/issues/139
-  // TODO: https://github.com/mswjs/interceptors/pull/515#issuecomment-1995549971
   it('should emit "finish" on the request before emitting "end" on the response', done => {
     const scope = nock('http://example.test').post('/').reply()
 
@@ -360,7 +353,6 @@ describe('Request Overrider', () => {
     req.end('mamma mia')
   })
 
-  // TODO: https://github.com/mswjs/interceptors/issues/458 - this might solve it. let's wait for this fix
   it('should update the writable attributes before emitting the "finish" event', done => {
     nock('http://example.test').post('/').reply()
 
@@ -530,7 +522,6 @@ describe('Request Overrider', () => {
     })
   })
 
-  // TODO: https://github.com/mswjs/interceptors/issues/443 may solve this
   it('socket is shared and aliased correctly', done => {
     nock('http://example.test').get('/').reply()
 
@@ -844,8 +835,6 @@ describe('Request Overrider', () => {
     req.abort()
   })
 
-  // https://github.com/nock/nock/issues/2231
-  // TODO: why?
   it('mocking a request which sends an empty buffer should finalize', async () => {
     const prefixUrl = 'http://www.test.com'
     const bufferEndpoint = 'upload/buffer/'

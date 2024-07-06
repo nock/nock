@@ -430,7 +430,6 @@ describe('Intercept', () => {
     req.end()
   })
 
-  // TODO: https://github.com/mswjs/interceptors/issues/474
   it('emits error if https route is missing, non-standard port', done => {
     nock('https://example.test:123').get('/').reply(200, 'Hello World!')
 
@@ -977,7 +976,6 @@ describe('Intercept', () => {
       .end()
   })
 
-  // TODO: msw support for flushHeaders: https://github.com/mswjs/interceptors/issues/439
   it('data is sent with flushHeaders', done => {
     const scope1 = nock('https://example.test')
       .get('/')
@@ -1031,7 +1029,6 @@ describe('Intercept', () => {
     })
   })
 
-  // TODO: wait for this PR: https://github.com/mswjs/interceptors/pull/441
   it('three argument form of http.request: URL, options, and callback', done => {
     const responseText = 'this is data'
     const scope = nock('http://example.test')

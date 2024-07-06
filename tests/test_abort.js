@@ -32,7 +32,6 @@ describe('`ClientRequest.abort()`', () => {
     }, 10)
   })
 
-  // TODO: https://github.com/mswjs/interceptors/issues/444
   it('Emits the expected event sequence when `end` is called on an aborted request', done => {
     const scope = nock('http://example.test').get('/').reply()
 
@@ -67,7 +66,6 @@ describe('`ClientRequest.abort()`', () => {
     }, 10)
   })
 
-  // TODO: https://github.com/mswjs/interceptors/issues/444
   it('Emits the expected event sequence when aborted immediately after `end`', done => {
     const scope = nock('http://example.test').get('/').reply()
 
@@ -85,7 +83,6 @@ describe('`ClientRequest.abort()`', () => {
     }, 10)
   })
 
-  // TODO: https://github.com/mswjs/interceptors/issues/444
   it('Emits the expected event sequence when aborted inside a `socket` event listener', done => {
     const scope = nock('http://example.test').get('/').reply()
 
@@ -109,7 +106,6 @@ describe('`ClientRequest.abort()`', () => {
     }, 10)
   })
 
-  // TODO: https://github.com/mswjs/interceptors/issues/444
   it('Emits the expected event sequence when aborted multiple times', done => {
     const scope = nock('http://example.test').get('/').reply()
 
@@ -136,7 +132,6 @@ describe('`ClientRequest.abort()`', () => {
   // The Interceptor is considered consumed just prior to the `finish` event on the request,
   // all tests below assert the Scope is done.
 
-  // TODO: https://github.com/mswjs/interceptors/issues/444
   it('Emits the expected event sequence when aborted inside a `finish` event listener', done => {
     const scope = nock('http://example.test').get('/').reply()
 
@@ -201,7 +196,6 @@ describe('`ClientRequest.abort()`', () => {
     }, 200)
   })
 
-  // TODO: https://github.com/mswjs/interceptors/issues/444
   it('Emits the expected event sequence when aborted inside a `response` event listener', done => {
     const scope = nock('http://example.test').get('/').reply()
 

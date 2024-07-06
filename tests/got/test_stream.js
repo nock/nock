@@ -70,7 +70,6 @@ it('pause response after data', done => {
 })
 
 // https://github.com/nock/nock/issues/1493
-// TODO: https://github.com/mswjs/interceptors/issues/443
 it("response has 'complete' property and it's true after end", done => {
   const response = new stream.PassThrough()
   const scope = nock('http://example.test')

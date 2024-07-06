@@ -6,26 +6,20 @@ These are automatically created by [semantic-release](https://github.com/semanti
 Migration guides are available for major versions in the [migration guides directory](https://github.com/nock/nock/tree/main/migration_guides).
 
 // TODO: Remove this before merge:
-Breaking changes:
-3. Small - Fix headers matcher gets non-string values (this test: `should match headers with function: gets the expected argument`)
+
+# Breaking changes:
+We increased our compatibility with Node.js:
+
+1. Fix headers matcher gets non-string values
 2. Fix - socket ref/unref return this
-4. increased Nock compatibility with Node
-5. We no longer support in undefined content-length (this test: `Content Encoding should accept gzipped content`)
-
-
-Topics to discuss:
-2. GET requests no longer may have body. we can discuss this with msw/interceptors maintainer.
+3. We no longer support undefined content-length
+1. GET requests no longer may have body. 
 3. 204, 205, 304 responses can not have body.
-4. Are we OK that we emit "internal-response" to the end user as well?
-5. Test timeout without actually wait
-6. should denote the response client is authorized for HTTPS requests
-8. getPeerCertificate does not return string: https://nodejs.org/api/tls.html#tlssocketgetpeercertificatedetailed
-   test: "socket has getPeerCertificate() method which returns a random base64 string"
-9. why the behavior is different than Node's? test: "Request with `Expect: 100-continue` triggers continue event"
-10. Do we need to call the original request on passthrough? 
-    test: "when http.get and http.request have been overridden before nock overrides them, http.get calls through to the expected method"
-11. why?
-    test: "mocking a request which sends an empty buffer should finalize"
+
+# Topics to discuss
+1. Test timeout without actually wait
+2. does not record requests from previous sessions
+3. In this PR I tried (very poorly :sweat_smile:) to keep the changes to minimum. My next step is to remove all parts that we no longer need, as now the interception logic sits in mswjs/interceptors.
 
 For me:
 Why tests stuck if expect fails in req callback?

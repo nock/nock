@@ -9,7 +9,6 @@ const got = require('./got_client')
 const servers = require('../servers')
 
 describe('`disableNetConnect()`', () => {
-  // TODO: https://github.com/mswjs/interceptors/issues/474
   it('prevents connection to unmocked hosts', async () => {
     nock.disableNetConnect()
 
@@ -21,7 +20,6 @@ describe('`disableNetConnect()`', () => {
     )
   })
 
-  // TODO: https://github.com/mswjs/interceptors/issues/474
   it('prevents connections when no hosts are mocked', async () => {
     nock.disableNetConnect()
 
@@ -51,7 +49,6 @@ describe('`enableNetConnect()`', () => {
     expect(onResponse).to.have.been.calledOnce()
   })
 
-  // TODO: https://github.com/mswjs/interceptors/issues/474
   it('disallows request for other domains, via string', async () => {
     nock.enableNetConnect('localhost')
 
@@ -75,7 +72,6 @@ describe('`enableNetConnect()`', () => {
     expect(onResponse).to.have.been.calledOnce()
   })
 
-  // TODO: https://github.com/mswjs/interceptors/issues/474
   it('disallows request for other domains, via regexp', async () => {
     nock.enableNetConnect(/ocalhos/)
 
@@ -99,7 +95,6 @@ describe('`enableNetConnect()`', () => {
     expect(onResponse).to.have.been.calledOnce()
   })
 
-  // TODO: https://github.com/mswjs/interceptors/issues/474
   it('disallows request for other domains, via function', async () => {
     nock.enableNetConnect(host => host.includes('ocalhos'))
 
@@ -109,7 +104,6 @@ describe('`enableNetConnect()`', () => {
     )
   })
 
-  // TODO: https://github.com/mswjs/interceptors/issues/474
   it('passes the domain to be tested, via function', async () => {
     const matcher = sinon.stub().returns(false)
     nock.enableNetConnect(matcher)

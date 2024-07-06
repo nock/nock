@@ -196,7 +196,6 @@ describe('`delayBody()`', () => {
 })
 
 describe('`delayConnection()`', () => {
-  // TODO: https://github.com/mswjs/interceptors/issues/456
   it('should cause a timeout error when larger than options.timeout', async () => {
     const scope = nock('http://example.test')
       .get('/')

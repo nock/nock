@@ -5,7 +5,6 @@ const http = require('http')
 const nock = require('..')
 
 describe('`res.destroy()`', () => {
-  // TODO: https://github.com/mswjs/interceptors/issues/457
   it('should emit error event if called with error', done => {
     nock('http://example.test').get('/').reply(404)
 
