@@ -8,9 +8,13 @@ Migration guides are available for major versions in the [migration guides direc
 // TODO: Remove this before merge:
 
 # Breaking changes:
-We increased our compatibility with Node.js:
 
-1. headers matcher gets non-string values.
+1. No longer support preemptive timeout for delay connection. Please use fake timers instead.
+
+We increased our compatibility with Node.js:
+1. Request (http.get/request) interception resolution is no longer sync. 
+2. socket.authorized now returns false. This is the case most of the time. 
+2. headers matcher gets non-string values.
 2. socket ref/unref return this.
 3. response rawHeaders no longer return arrays. 
 3. We no longer support undefined content-length
@@ -18,9 +22,19 @@ We increased our compatibility with Node.js:
 3. 204, 205, 304 responses can not have body.
 
 # Topics to discuss
-1. Test timeout without actually wait
-2. does not record requests from previous sessions
-3. In this PR I tried (very poorly :sweat_smile:) to keep the changes to minimum. My next step is to remove all parts that we no longer need, as now the interception logic sits in mswjs/interceptors.
+1. In this PR I tried (very poorly :sweat_smile:) to keep the changes to minimum. My next step is to remove all parts that we no longer need, as now the interception logic sits in mswjs/interceptors.
+1. test: does not record requests from previous sessions
+4. test: get correct filtering with scope and request headers filtering - why is this considered as correct behavior?
+5. test: should be safe to call in the middle of a request
+   We can (should?) send cleanAll to next loop with setImmediate
+6. test: socket emits connect and secureConnect - edge case (https://github.com/mswjs/interceptors/pull/515#issuecomment-2067702330)
+7. test: error events on reply streams proxy to the response - what's the use case for this?
+
+# Need to be done
+1. Support fetch decompress (https://github.com/mswjs/interceptors/pull/604)
+3. test: Request with `Expect: 100-continue` triggers continue event (https://github.com/mswjs/interceptors/pull/599)
+What does this mean to emit error after response end? 
+5. test: socket has getPeerCertificate() method which returns a random base64 string
 
 For me:
 Why tests stuck if expect fails in req callback?

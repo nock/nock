@@ -218,10 +218,12 @@ describe('Native Fetch', () => {
           'Content-Encoding': 'br',
         })
       const response = await fetch('http://example.test/foo')
-      await response.text().catch(e => {
-        expect(e.message).to.contain('unexpected end of file')
-        scope.done()
-      })
+      await response.text()
+        .then(() => { throw new Error('Should have thrown') })
+        .catch(e => {
+          expect(e.message).to.contain('unexpected end of file')
+          scope.done()
+        })
     })
   })
 })

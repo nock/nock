@@ -713,15 +713,11 @@ describe('Intercept', () => {
     req.end()
   })
 
-  // https://github.com/nock/nock/issues/158
-  // mikeal/request with strictSSL: true
-  // https://github.com/request/request/blob/3c0cddc7c8eb60b470e9519da85896ed7ee0081e/request.js#L943-L950
-  // TODO: https://github.com/mswjs/interceptors/pull/556/files#r1569229771
-  it.skip('should denote the response client is authorized for HTTPS requests', done => {
+  it('should denote the response client is authorized for HTTPS requests', done => {
     const scope = nock('https://example.test').get('/what').reply()
 
     https.get('https://example.test/what', res => {
-      expect(res).to.have.nested.property('socket.authorized').that.is.true()
+      expect(res).to.have.nested.property('socket.authorized').that.is.false()
 
       res.on('end', () => {
         scope.done()
