@@ -33,7 +33,6 @@ We increased our compatibility with Node.js:
 # Need to be done
 1. Support fetch decompress (https://github.com/mswjs/interceptors/pull/604)
 3. test: Request with `Expect: 100-continue` triggers continue event (https://github.com/mswjs/interceptors/pull/599)
-What does this mean to emit error after response end? 
 5. test: socket has getPeerCertificate() method which returns a random base64 string
 
 For me:
