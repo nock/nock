@@ -24,7 +24,6 @@ describe('Recorder', () => {
     expect(leaks).to.be.empty()
   })
 
-  // TODO: need to await for the response interceptor to end?
   it.skip('does not record requests from previous sessions', async () => {
     const { origin } = await servers.startHttpServer()
 

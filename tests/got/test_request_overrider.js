@@ -651,7 +651,6 @@ describe('Request Overrider', () => {
     })
   })
 
-  // TODO: getPeerCertificate does not return string: https://nodejs.org/api/tls.html#tlssocketgetpeercertificatedetailed
   it.skip('socket has getPeerCertificate() method which returns a random base64 string', done => {
     nock('https://example.test').get('/').reply()
 

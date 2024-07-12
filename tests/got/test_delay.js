@@ -314,7 +314,6 @@ describe('`delayConnection()`', () => {
     )
   })
 
-  // TODO: MSW support fake-timeout
   it.skip('emits a timeout - with setTimeout', done => {
     nock('http://example.test').get('/').delayConnection(10000).reply(200, 'OK')
 
@@ -332,7 +331,6 @@ describe('`delayConnection()`', () => {
     req.end()
   })
 
-  // TODO: MSW support fake-timeout
   it.skip('emits a timeout - with options.timeout', done => {
     nock('http://example.test').get('/').delayConnection(10000).reply(200, 'OK')
 
@@ -350,7 +348,6 @@ describe('`delayConnection()`', () => {
     req.end()
   })
 
-  // TODO: MSW support fake-timeout
   it.skip('emits a timeout - with Agent.timeout', done => {
     nock('http://example.test').get('/').delayConnection(10000).reply(200, 'OK')
 
@@ -369,7 +366,6 @@ describe('`delayConnection()`', () => {
     req.end()
   })
 
-  // TODO: MSW support fake-timeout
   it.skip('emits a timeout - options.timeout takes precedence over Agent.timeout', done => {
     nock('http://example.test').get('/').delayConnection(10000).reply(200, 'OK')
 
