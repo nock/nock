@@ -10,8 +10,9 @@ Migration guides are available for major versions in the [migration guides direc
 # Breaking changes:
 We increased our compatibility with Node.js:
 
-1. Fix headers matcher gets non-string values
-2. Fix - socket ref/unref return this
+1. headers matcher gets non-string values.
+2. socket ref/unref return this.
+3. response rawHeaders no longer return arrays. 
 3. We no longer support undefined content-length
 1. GET requests no longer may have body. 
 3. 204, 205, 304 responses can not have body.

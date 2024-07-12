@@ -230,8 +230,6 @@ it('response is streams2 compatible', done => {
     .end()
 })
 
-// TODO BEFORE MERGE: Removed. This is not compatible with Node.js
-
 // https://github.com/nock/nock/issues/193
 it('response readable pull stream works as expected', done => {
   nock('http://example.test')
@@ -265,6 +263,7 @@ it('response readable pull stream works as expected', done => {
   req.end()
 })
 
+// TODO: what's the use case for this test?
 it.skip('error events on reply streams proxy to the response', done => {
   // This test could probably be written to use got, however, that lib has a lot
   // of built in error handling and this test would get convoluted.

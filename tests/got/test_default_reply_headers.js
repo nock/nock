@@ -25,7 +25,9 @@ describe('`defaultReplyHeaders()`', () => {
       'X-Powered-By',
       'Meeee',
       'X-Another-Header',
-      'foo, bar',
+      'foo',
+      'X-Another-Header',
+      'bar',
     ])
   })
 
@@ -47,7 +49,7 @@ describe('`defaultReplyHeaders()`', () => {
       'x-another-header': 'foo, bar',
     })
 
-    expect(rawHeaders).to.deep.equal([...defaultHeaders, 'foo, bar'])
+    expect(rawHeaders).to.deep.equal([...defaultHeaders, 'foo', 'X-Another-Header', 'bar'])
   })
 
   it('default reply headers can be provided as a Map', async () => {
@@ -71,7 +73,9 @@ describe('`defaultReplyHeaders()`', () => {
       'X-Powered-By',
       'Meeee',
       'X-Another-Header',
-      'foo, bar',
+      'foo',
+      'X-Another-Header',
+      'bar',
     ])
   })
 

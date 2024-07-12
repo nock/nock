@@ -38,3 +38,4 @@ What does this mean to emit error after response end?
 
 - should be safe to call in the middle of a request
 - socket emits connect and secureConnect - edge case (https://github.com/mswjs/interceptors/pull/515#issuecomment-2067702330)
+- error events on reply streams proxy to the response

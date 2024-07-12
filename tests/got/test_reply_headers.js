@@ -53,9 +53,7 @@ describe('`reply()` headers', () => {
       )
     })
 
-    // https://nodejs.org/api/http.html#http_message_headers
-    // TODO: https://github.com/mswjs/interceptors/pull/487
-    it.skip('folds duplicate headers the same as Node', async () => {
+    it('folds duplicate headers the same as Node', async () => {
       const replyHeaders = [
         'Content-Type',
         'text/html; charset=utf-8',
@@ -86,7 +84,29 @@ describe('`reply()` headers', () => {
         cookie: 'cookie1=foo; cookie2=bar; cookie3=baz',
         'x-custom': 'custom1, custom2, custom3',
       })
-      expect(rawHeaders).to.deep.equal(replyHeaders)
+
+      expect(rawHeaders).to.deep.equal([
+        'Content-Type',
+        'text/html; charset=utf-8',
+        'set-cookie',
+        'set-cookie1=foo',
+        'set-cookie',
+        'set-cookie2=bar',
+        'set-cookie',
+        'set-cookie3=baz',
+        'CONTENT-TYPE',
+        'text/xml',
+        'cookie',
+        'cookie1=foo; cookie2=bar',
+        'cookie',
+        'cookie3=baz',
+        'x-custom',
+        'custom1',
+        'X-Custom',
+        'custom2',
+        'X-Custom',
+        'custom3',
+      ])
 
       scope.done()
     })
@@ -268,8 +288,7 @@ describe('`reply()` headers', () => {
       scope.done()
     })
 
-    // TODO: https://github.com/mswjs/interceptors/pull/487
-    it.skip('when keys are duplicated, is evaluated once per input field name, in correct order', async () => {
+    it('when keys are duplicated, is evaluated once per input field name, in correct order', async () => {
       const replyHeaders = [
         'X-MY-HEADER',
         () => 'one',
