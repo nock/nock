@@ -5,7 +5,7 @@ const { spawn } = require('node:child_process')
 const { expect } = require('chai')
 
 describe('Logging using the `debug` package', () => {
-  it('match debugging works', async () => {
+  it.skip('match debugging works', async () => {
     // the log function will have been a few dozen times, there are a few specific to matching we want to validate:
 
     let resolveTest

@@ -39,22 +39,22 @@ describe('`reply()` body', () => {
   // should be returned as strings that `JSON.parse()` would convert back to
   // native values.
   it('stringifies a boolean (including `false`)', async () => {
-    const scope = nock('http://example.test').get('/').reply(204, false)
+    const scope = nock('http://example.test').get('/').reply(200, false)
 
     const { statusCode, body } = await got('http://example.test/')
 
-    expect(statusCode).to.equal(204)
+    expect(statusCode).to.equal(200)
     // `'false'` is json-stringified `false`.
     expect(body).to.be.a('string').and.equal('false')
     scope.done()
   })
 
   it('stringifies null', async () => {
-    const scope = nock('http://example.test').get('/').reply(204, null)
+    const scope = nock('http://example.test').get('/').reply(200, null)
 
     const { statusCode, body } = await got('http://example.test/')
 
-    expect(statusCode).to.equal(204)
+    expect(statusCode).to.equal(200)
     // `'null'` is json-stringified `null`.
     expect(body).to.be.a('string').and.equal('null')
     scope.done()

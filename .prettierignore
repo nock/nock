@@ -1,5 +1,6 @@
 package.json
 package-lock.json
+tsconfig.json
 /.nyc_output
 /coverage
 /tests/browserify-public/browserify-bundle.js

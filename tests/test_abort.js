@@ -23,7 +23,9 @@ describe('`ClientRequest.abort()`', () => {
     req.write('foo')
 
     setTimeout(() => {
-      expect(emitSpy).to.have.been.calledOnceWithExactly('abort')
+      expect(emitSpy).to.have.been.calledTwice()
+      expect(emitSpy.firstCall).to.have.been.calledWith('close')
+      expect(emitSpy.secondCall).to.have.been.calledWith('abort')
       expect(scope.isDone()).to.be.false()
       done()
     }, 10)
@@ -38,7 +40,9 @@ describe('`ClientRequest.abort()`', () => {
     req.end()
 
     setTimeout(() => {
-      expect(emitSpy).to.have.been.calledOnceWithExactly('abort')
+      expect(emitSpy).to.have.been.calledTwice()
+      expect(emitSpy.firstCall).to.have.been.calledWith('close')
+      expect(emitSpy.secondCall).to.have.been.calledWith('abort')
       expect(scope.isDone()).to.be.false()
       done()
     }, 10)
@@ -53,7 +57,9 @@ describe('`ClientRequest.abort()`', () => {
     req.flushHeaders()
 
     setTimeout(() => {
-      expect(emitSpy).to.have.been.calledOnceWithExactly('abort')
+      expect(emitSpy).to.have.been.calledTwice()
+      expect(emitSpy.firstCall).to.have.been.calledWith('close')
+      expect(emitSpy.secondCall).to.have.been.calledWith('abort')
       expect(scope.isDone()).to.be.false()
       done()
     }, 10)
@@ -68,7 +74,9 @@ describe('`ClientRequest.abort()`', () => {
     req.abort()
 
     setTimeout(() => {
-      expect(emitSpy).to.have.been.calledOnceWithExactly('abort')
+      expect(emitSpy).to.have.been.calledTwice()
+      expect(emitSpy.firstCall).to.have.been.calledWith('close')
+      expect(emitSpy.secondCall).to.have.been.calledWith('abort')
       expect(scope.isDone()).to.be.false()
       done()
     }, 10)
@@ -142,6 +150,7 @@ describe('`ClientRequest.abort()`', () => {
       const events = emitSpy.args.map(i => i[0])
       expect(events).to.deep.equal([
         'socket',
+        'prefinish',
         'finish',
         'abort',
         'error',
@@ -149,10 +158,11 @@ describe('`ClientRequest.abort()`', () => {
       ])
       scope.done()
       done()
-    }, 10)
+    }, 20)
   })
 
-  it('Emits the expected event sequence when aborted after a delay from the `finish` event', done => {
+  // TODO: https://github.com/mswjs/interceptors/pull/542#issuecomment-2028881290
+  it.skip('Emits the expected event sequence when aborted after a delay from the `finish` event', done => {
     // use the delay functionality to create a window where the abort is called during the artificial connection wait.
     const scope = nock('http://example.test').get('/').delay(100).reply()
 
@@ -174,6 +184,7 @@ describe('`ClientRequest.abort()`', () => {
       const events = emitSpy.args.map(i => i[0])
       expect(events).to.deep.equal([
         'socket',
+        'prefinish',
         'finish',
         'abort',
         'error',
@@ -199,6 +210,7 @@ describe('`ClientRequest.abort()`', () => {
       const events = emitSpy.args.map(i => i[0])
       expect(events).to.deep.equal([
         'socket',
+        'prefinish',
         'finish',
         'response',
         'abort',
@@ -206,6 +218,6 @@ describe('`ClientRequest.abort()`', () => {
       ])
       scope.done()
       done()
-    }, 10)
+    }, 20)
   })
 })

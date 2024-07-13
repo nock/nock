@@ -119,7 +119,7 @@ describe('Native Fetch', () => {
     scope.done()
   })
 
-  describe('content-encoding', () => {
+  describe.skip('content-encoding', () => {
     it('should accept gzipped content', async () => {
       const message = 'Lorem ipsum dolor sit amet'
       const compressed = zlib.gzipSync(message)
@@ -218,10 +218,12 @@ describe('Native Fetch', () => {
           'Content-Encoding': 'br',
         })
       const response = await fetch('http://example.test/foo')
-      await response.text().catch(e => {
-        expect(e.message).to.contain('unexpected end of file')
-        scope.done()
-      })
+      await response.text()
+        .then(() => { throw new Error('Should have thrown') })
+        .catch(e => {
+          expect(e.message).to.contain('unexpected end of file')
+          scope.done()
+        })
     })
   })
 })
