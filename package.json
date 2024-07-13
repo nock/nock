@@ -22,7 +22,7 @@
   "main": "./index.js",
   "types": "types",
   "dependencies": {
-    "@mswjs/interceptors": "file:../../typescript/mswjs-interceptors",
+    "@mswjs/interceptors": "^0.33.1",
     "debug": "^4.1.0",
     "json-stringify-safe": "^5.0.1",
     "propagate": "^2.0.0"
