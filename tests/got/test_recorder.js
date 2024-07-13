@@ -88,10 +88,7 @@ describe('Recorder', () => {
 
     nock.restore()
     nock.recorder.clear()
-    // NOTE FOR PR, REMOVE BEFORE MERGE: Because "play" is async now, 
-    // it causes a lot of trouble with the "done" function which require a big refactor to all tests in this file 
-    // Because the value of this expect is low, I decided to remove it
-    // We can add it back later. 
+    expect(nock.recorder.play()).to.be.empty()
 
     const { origin, port } = await servers.startHttpServer(
       (request, response) => {
@@ -125,6 +122,7 @@ describe('Recorder', () => {
 
     nock.restore()
     nock.recorder.clear()
+    expect(nock.recorder.play()).to.be.empty()
 
     const { origin } = await servers.startHttpServer((request, response) => {
       gotRequest()
@@ -157,6 +155,7 @@ describe('Recorder', () => {
 
     nock.restore()
     nock.recorder.clear()
+    expect(nock.recorder.play()).to.be.empty()
 
     const { origin } = await servers.startHttpServer((request, response) => {
       gotRequest()
@@ -185,6 +184,7 @@ describe('Recorder', () => {
   it('records objects and correctly stores JSON object in body', async () => {
     nock.restore()
     nock.recorder.clear()
+    expect(nock.recorder.play()).to.be.empty()
 
     const { origin } = await servers.startHttpServer()
 
@@ -237,6 +237,7 @@ describe('Recorder', () => {
 
     nock.restore()
     nock.recorder.clear()
+    expect(nock.recorder.play()).to.be.empty()
 
     nock.recorder.rec({
       dont_print: true,
@@ -268,6 +269,7 @@ describe('Recorder', () => {
 
     nock.restore()
     nock.recorder.clear()
+    expect(nock.recorder.play()).to.be.empty()
 
     nock.recorder.rec({
       dont_print: true,
@@ -305,6 +307,7 @@ describe('Recorder', () => {
 
     nock.restore()
     nock.recorder.clear()
+    expect(nock.recorder.play()).to.be.empty()
 
     servers.startHttpServer().then(({ port }) => {
       nock.recorder.rec(true)
@@ -381,6 +384,7 @@ describe('Recorder', () => {
   it('records nonstandard ports', done => {
     nock.restore()
     nock.recorder.clear()
+    expect(nock.recorder.play()).to.be.empty()
 
     const requestBody = 'ABCDEF'
     const responseBody = '012345'
@@ -431,6 +435,7 @@ describe('Recorder', () => {
 
     nock.restore()
     nock.recorder.clear()
+    expect(nock.recorder.play()).to.be.empty()
 
     servers.startHttpServer().then(({ port }) => {
       nock.recorder.rec({ dont_print: true })
@@ -503,6 +508,7 @@ describe('Recorder', () => {
   it('`rec()` throws when reinvoked with already recorder requests', () => {
     nock.restore()
     nock.recorder.clear()
+    expect(nock.recorder.play()).to.be.empty()
 
     nock.recorder.rec()
     expect(() => nock.recorder.rec()).to.throw(
@@ -522,6 +528,7 @@ describe('Recorder', () => {
 
     nock.restore()
     nock.recorder.clear()
+    expect(nock.recorder.play()).to.be.empty()
 
     nock.recorder.rec({
       dont_print: true,
@@ -562,6 +569,7 @@ describe('Recorder', () => {
   it('records request headers correctly as an object', done => {
     nock.restore()
     nock.recorder.clear()
+    expect(nock.recorder.play()).to.be.empty()
 
     servers.startHttpServer().then(({ port }) => {
       nock.recorder.rec({
@@ -609,6 +617,7 @@ describe('Recorder', () => {
 
     nock.restore()
     nock.recorder.clear()
+    expect(nock.recorder.play()).to.be.empty()
 
     const { origin } = await servers.startHttpServer((request, response) => {
       gotRequest()
@@ -646,6 +655,7 @@ describe('Recorder', () => {
 
     nock.restore()
     nock.recorder.clear()
+    expect(nock.recorder.play()).to.be.empty()
 
     nock.recorder.rec({
       dont_print: true,
@@ -688,6 +698,7 @@ describe('Recorder', () => {
 
     nock.restore()
     nock.recorder.clear()
+    expect(nock.recorder.play()).to.be.empty()
 
     nock.recorder.rec({
       dont_print: true,
@@ -721,6 +732,7 @@ describe('Recorder', () => {
 
     nock.restore()
     nock.recorder.clear()
+    expect(nock.recorder.play()).to.be.empty()
 
     servers.startHttpServer(requestListener).then(({ port }) => {
       nock.recorder.rec({
@@ -764,6 +776,7 @@ describe('Recorder', () => {
   it("doesn't record request headers by default", done => {
     nock.restore()
     nock.recorder.clear()
+    expect(nock.recorder.play()).to.be.empty()
 
     servers.startHttpServer().then(({ port }) => {
       nock.recorder.rec({
@@ -800,6 +813,7 @@ describe('Recorder', () => {
     // This also tests that use_separator is on by default.
     nock.restore()
     nock.recorder.clear()
+    expect(nock.recorder.play()).to.be.empty()
 
     servers.startHttpServer().then(({ port }) => {
       const loggingFn = sinon.spy()
@@ -833,6 +847,7 @@ describe('Recorder', () => {
   it('use_separator:false is respected', done => {
     nock.restore()
     nock.recorder.clear()
+    expect(nock.recorder.play()).to.be.empty()
 
     servers.startHttpServer().then(({ port }) => {
       const loggingFn = sinon.spy()
@@ -871,6 +886,7 @@ describe('Recorder', () => {
   it('records request headers except user-agent if enable_reqheaders_recording is set to true', done => {
     nock.restore()
     nock.recorder.clear()
+    expect(nock.recorder.play()).to.be.empty()
 
     servers.startHttpServer().then(({ port }) => {
       nock.recorder.rec({
@@ -910,6 +926,7 @@ describe('Recorder', () => {
 
     nock.restore()
     nock.recorder.clear()
+    expect(nock.recorder.play()).to.be.empty()
 
     nock.recorder.rec({
       dont_print: true,
@@ -931,6 +948,7 @@ describe('Recorder', () => {
 
     nock.restore()
     nock.recorder.clear()
+    expect(nock.recorder.play()).to.be.empty()
 
     nock.recorder.rec({
       dont_print: true,
@@ -951,6 +969,7 @@ describe('Recorder', () => {
   it('works with clients listening for readable', done => {
     nock.restore()
     nock.recorder.clear()
+    expect(nock.recorder.play()).to.be.empty()
 
     const requestBody = 'ABCDEF'
     const responseBody = '012345'
@@ -1009,6 +1028,7 @@ describe('Recorder', () => {
 
     nock.restore()
     nock.recorder.clear()
+    expect(nock.recorder.play()).to.be.empty()
 
     nock.recorder.rec(true)
 
@@ -1028,6 +1048,7 @@ describe('Recorder', () => {
 
     nock.restore()
     nock.recorder.clear()
+    expect(nock.recorder.play()).to.be.empty()
 
     nock.recorder.rec(true)
 
@@ -1048,6 +1069,7 @@ describe('Recorder', () => {
   it('removes query params from the path and puts them in query()', done => {
     nock.restore()
     nock.recorder.clear()
+    expect(nock.recorder.play()).to.be.empty()
 
     servers.startHttpServer().then(({ port }) => {
       nock.recorder.rec(true)
@@ -1082,6 +1104,7 @@ describe('Recorder', () => {
 
     nock.restore()
     nock.recorder.clear()
+    expect(nock.recorder.play()).to.be.empty()
 
     nock.recorder.rec(true)
 
@@ -1141,6 +1164,7 @@ describe('Recorder', () => {
   it('records and replays binary response correctly', done => {
     nock.restore()
     nock.recorder.clear()
+    expect(nock.recorder.play()).to.be.empty()
 
     nock.recorder.rec({
       output_objects: true,

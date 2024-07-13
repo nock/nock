@@ -54,7 +54,6 @@ describe('allowUnmocked option', () => {
 
     const scope = nock(origin, { allowUnmocked: true })
       .get('/abc')
-      // NOTE FOR PR, REMOVE BEFORE MERGE: 304 can't have body
       .reply(307, 'served from our mock')
       .get('/wont/get/here')
       .reply(307, 'served from our mock')

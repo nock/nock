@@ -23,8 +23,7 @@ describe('`ClientRequest.abort()`', () => {
     req.write('foo')
 
     setTimeout(() => {
-      // NOTE FOR PR, REMOVE BEFORE MERGE: the real node client emit both close and abort events
-      expect(emitSpy).to.have.been.calledTwice
+      expect(emitSpy).to.have.been.calledTwice()
       expect(emitSpy.firstCall).to.have.been.calledWith('close')
       expect(emitSpy.secondCall).to.have.been.calledWith('abort')
       expect(scope.isDone()).to.be.false()
@@ -41,7 +40,7 @@ describe('`ClientRequest.abort()`', () => {
     req.end()
 
     setTimeout(() => {
-      expect(emitSpy).to.have.been.calledTwice
+      expect(emitSpy).to.have.been.calledTwice()
       expect(emitSpy.firstCall).to.have.been.calledWith('close')
       expect(emitSpy.secondCall).to.have.been.calledWith('abort')
       expect(scope.isDone()).to.be.false()
@@ -58,7 +57,7 @@ describe('`ClientRequest.abort()`', () => {
     req.flushHeaders()
 
     setTimeout(() => {
-      expect(emitSpy).to.have.been.calledTwice
+      expect(emitSpy).to.have.been.calledTwice()
       expect(emitSpy.firstCall).to.have.been.calledWith('close')
       expect(emitSpy.secondCall).to.have.been.calledWith('abort')
       expect(scope.isDone()).to.be.false()
@@ -75,7 +74,7 @@ describe('`ClientRequest.abort()`', () => {
     req.abort()
 
     setTimeout(() => {
-      expect(emitSpy).to.have.been.calledTwice
+      expect(emitSpy).to.have.been.calledTwice()
       expect(emitSpy.firstCall).to.have.been.calledWith('close')
       expect(emitSpy.secondCall).to.have.been.calledWith('abort')
       expect(scope.isDone()).to.be.false()
