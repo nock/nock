@@ -1,13 +1,11 @@
 # Nock
 
 [![npm](https://img.shields.io/npm/v/nock.svg)][npmjs]
-[![Build Status](https://travis-ci.org/nock/nock.svg)][build]
 ![Coverage Status](http://img.shields.io/badge/coverage-100%25-brightgreen.svg)
 [![Backers on Open Collective](https://opencollective.com/nock/backers/badge.svg)](#backers)
 [![Sponsors on Open Collective](https://opencollective.com/nock/sponsors/badge.svg)](#sponsors)
 
 [npmjs]: https://www.npmjs.com/package/nock
-[build]: https://travis-ci.org/nock/nock
 
 > **Notice**
 >
@@ -1643,10 +1641,10 @@ It does this by manipulating the modules cache of Node in a way that conflicts w
 
 ## Debugging
 
-Nock uses [`debug`](https://github.com/visionmedia/debug), so just run with environmental variable `DEBUG` set to `nock.*`.
+Nock uses node internals [`debuglog`](https://nodejs.org/api/util.html#utildebuglogsection-callbackg), so just run with environmental variable `NODE_DEBUG` set to `nock:*`.
 
 ```console
-user@local$ DEBUG=nock.* node my_test.js
+user@local$ NODE_DEBUG=nock:* node my_test.js
 ```
 
 Each step in the matching process is logged this way and can be useful when determining why a request was not intercepted by Nock.
@@ -1660,11 +1658,11 @@ await got('http://example.com/?foo=bar&baz=foz')
 ```
 
 ```console
-user@local$ DEBUG=nock.scope:example.com node my_test.js
+user@local$ DEBUG=nock:scope:example.com node my_test.js
 ...
-nock.scope:example.com Interceptor queries: {"foo":"bar"} +1ms
-nock.scope:example.com     Request queries: {"foo":"bar","baz":"foz"} +0ms
-nock.scope:example.com query matching failed +0ms
+NOCK:SCOPE:EXAMPLE.COM 103514: Interceptor queries: {"foo":"bar"}
+NOCK:SCOPE:EXAMPLE.COM 103514:     Request queries: {"foo":"bar","baz":"foz"}
+NOCK:SCOPE:EXAMPLE.COM 103514: query matching failed
 ```
 
 ## Contributing

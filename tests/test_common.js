@@ -71,6 +71,18 @@ describe('Body Match', () => {
       const result = matchBody({}, { number: 1 }, '{"number": "1"}')
       expect(result).to.equal(false)
     })
+
+    it('should not modify the original spec object', () => {
+      const spec = { number: 1 }
+      matchBody(
+        {
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        },
+        spec,
+        '',
+      )
+      expect(spec).to.deep.equal({ number: 1 })
+    })
   })
 })
 
@@ -285,26 +297,6 @@ describe('`matchStringOrRegexp()`', () => {
     const result = common.matchStringOrRegexp('to match', /not/)
     expect(result).to.equal(false)
   })
-})
-
-describe('`overrideRequests()`', () => {
-  afterEach(() => {
-    common.restoreOverriddenRequests()
-  })
-
-  it('should throw if called a second time', () => {
-    nock.restore()
-    common.overrideRequests()
-    // Second call throws.
-    expect(() => common.overrideRequests()).to.throw(
-      "Module's request already overridden for http protocol.",
-    )
-  })
-})
-
-it('`restoreOverriddenRequests()` can be called more than once', () => {
-  common.restoreOverriddenRequests()
-  common.restoreOverriddenRequests()
 })
 
 describe('`stringifyRequest()`', () => {

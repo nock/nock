@@ -2,7 +2,7 @@ env:
   node: true
 
 parserOptions:
-  ecmaVersion: 9
+  ecmaVersion: 2020
   # Override eslint-config-standard, which incorrectly sets this to "module",
   # though that setting is only for ES6 modules, not CommonJS modules.
   sourceType: 'script'

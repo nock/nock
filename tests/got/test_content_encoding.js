@@ -14,7 +14,6 @@ describe('Content Encoding', () => {
       .get('/foo')
       .reply(200, compressed, {
         'X-Transfer-Length': String(compressed.length),
-        'Content-Length': undefined,
         'Content-Encoding': 'gzip',
       })
     const { body, statusCode } = await got('http://example.test/foo')
