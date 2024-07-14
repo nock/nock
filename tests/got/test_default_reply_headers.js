@@ -32,11 +32,7 @@ describe('`defaultReplyHeaders()`', () => {
   })
 
   it('default reply headers can be provided as a raw array', async () => {
-    const defaultHeaders = [
-      'X-Powered-By',
-      'Meeee',
-      'X-Another-Header',
-    ]
+    const defaultHeaders = ['X-Powered-By', 'Meeee', 'X-Another-Header']
     nock('http://example.test')
       .defaultReplyHeaders([...defaultHeaders, ['foo', 'bar']])
       .get('/')
@@ -49,7 +45,12 @@ describe('`defaultReplyHeaders()`', () => {
       'x-another-header': 'foo, bar',
     })
 
-    expect(rawHeaders).to.deep.equal([...defaultHeaders, 'foo', 'X-Another-Header', 'bar'])
+    expect(rawHeaders).to.deep.equal([
+      ...defaultHeaders,
+      'foo',
+      'X-Another-Header',
+      'bar',
+    ])
   })
 
   it('default reply headers can be provided as a Map', async () => {
