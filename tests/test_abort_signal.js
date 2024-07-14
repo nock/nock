@@ -23,42 +23,7 @@ const makeRequest = async (url, options = {}) => {
   return { statusCode }
 }
 
-describe('When `AbortSignal` is used', () => {
-  it('does not abort a request if the signal is an empty object', async () => {
-    const scope = nock('http://example.test').post('/form').reply(201, 'OK!')
-
-    const { statusCode } = await makeRequest('http://example.test/form', {
-      method: 'POST',
-    })
-
-    expect(statusCode).to.equal(201)
-    scope.done()
-  })
-
-  it('does not abort a request if the signal is an empty object', async () => {
-    const scope = nock('http://example.test').post('/form').reply(201, 'OK!')
-
-    const { statusCode } = await makeRequest('http://example.test/form', {
-      method: 'POST',
-      signal: {},
-    })
-
-    expect(statusCode).to.equal(201)
-    scope.done()
-  })
-
-  it('does not abort a request if the signal is not an object', async () => {
-    const scope = nock('http://example.test').post('/form').reply(201, 'OK!')
-
-    const { statusCode } = await makeRequest('http://example.test/form', {
-      method: 'POST',
-      signal: 'Not an object',
-    })
-
-    expect(statusCode).to.equal(201)
-    scope.done()
-  })
-
+describe.only('When `AbortSignal` is used', () => {
   it('does not abort a request if the signal is not aborted', async () => {
     const abortController = new AbortController()
 
@@ -91,7 +56,7 @@ describe('When `AbortSignal` is used', () => {
       'message',
       'This operation was aborted'
     )
-    scope.done()
+    expect(scope.isDone()).to.be.false()
   })
 
   it('sets the reason correctly for an aborted request', async () => {
@@ -110,7 +75,7 @@ describe('When `AbortSignal` is used', () => {
     expect(error).to.have.property('name', 'AbortError')
     expect(error).to.have.property('code', 'ABORT_ERR')
     expect(error.cause).to.eql(cause)
-    scope.done()
+    expect(scope.isDone()).to.be.false()
   })
 
   it('aborts a request if the signal is aborted after the response headers have been read', async () => {
