@@ -54,7 +54,7 @@ describe('When `AbortSignal` is used', () => {
     expect(error).to.have.property('code', 'ABORT_ERR')
     expect(error.cause).to.have.property(
       'message',
-      'This operation was aborted'
+      'This operation was aborted',
     )
     expect(scope.isDone()).to.be.false()
   })
@@ -80,7 +80,7 @@ describe('When `AbortSignal` is used', () => {
 
   it('aborts a request if the signal is aborted after the response headers have been read', async () => {
     const abortController = new AbortController()
-    const scope = nock('http://example.test').post('/form').reply(201, 'OK!');
+    const scope = nock('http://example.test').post('/form').reply(201, 'OK!')
 
     const makeRequest = () =>
       new Promise((resolve, reject) => {
@@ -99,7 +99,7 @@ describe('When `AbortSignal` is used', () => {
               .on('end', () =>
                 resolve({
                   statusCode: res.statusCode,
-                })
+                }),
               )
           })
           .on('error', error => {
@@ -114,7 +114,7 @@ describe('When `AbortSignal` is used', () => {
     expect(error).to.have.property('code', 'ABORT_ERR')
     expect(error.cause).to.have.property(
       'message',
-      'This operation was aborted'
+      'This operation was aborted',
     )
     scope.done()
   })
