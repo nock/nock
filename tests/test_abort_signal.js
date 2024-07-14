@@ -23,7 +23,7 @@ const makeRequest = async (url, options = {}) => {
   return { statusCode }
 }
 
-describe.only('When `AbortSignal` is used', () => {
+describe('When `AbortSignal` is used', () => {
   it('does not abort a request if the signal is not aborted', async () => {
     const abortController = new AbortController()
 
