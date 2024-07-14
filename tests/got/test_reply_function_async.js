@@ -59,7 +59,7 @@ describe('asynchronous `reply()` function', () => {
         .reply(201, function (path, reqBody, cb) {
           expect(this.req.path).to.equal('/yo')
           expect(this.req.headers).to.deep.equal({
-            'connection': 'close',
+            connection: 'close',
             'accept-encoding': 'gzip, deflate, br',
             host: 'example.test',
             'x-my-header': 'some-value',
