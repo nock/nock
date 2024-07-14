@@ -636,7 +636,7 @@ describe('Request Overrider', () => {
     nock('http://example.test').get('/').reply(200, 'hey')
 
     const req = http.get('http://example.test')
-    req.on('error', () => { }) // listen for error so it doesn't bubble
+    req.on('error', () => {}) // listen for error so it doesn't bubble
     req.once('socket', socket => {
       socket.destroy()
       done()
@@ -647,7 +647,7 @@ describe('Request Overrider', () => {
     nock('http://example.test').get('/').reply(200, 'hey')
 
     const req = http.get('http://example.test')
-    req.on('error', () => { }) // listen for error so it doesn't bubble
+    req.on('error', () => {}) // listen for error so it doesn't bubble
     req.once('socket', socket => {
       const closeSpy = sinon.spy()
       socket.on('close', closeSpy)
@@ -679,7 +679,7 @@ describe('Request Overrider', () => {
 
     const req = http.get('http://example.test')
     // Ignore errors.
-    req.once('error', () => { })
+    req.once('error', () => {})
     req.once('socket', socket => {
       req.abort()
       expect(socket.destroyed).to.be.true()

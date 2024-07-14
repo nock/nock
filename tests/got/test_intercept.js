@@ -450,7 +450,7 @@ describe('Intercept', () => {
           {
             method: 'GET',
             url: 'https://example.test:123/dsadsads',
-            headers: { 
+            headers: {
               connection: 'close',
               host: 'example.test:123',
             },

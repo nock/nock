@@ -344,7 +344,10 @@ describe('Recorder', () => {
       body: undefined,
     })
 
-    expect(() => req.write()).to.throw(Error, 'The "chunk" argument must be of type string or an instance of Buffer or Uint8Array. Received undefined')
+    expect(() => req.write()).to.throw(
+      Error,
+      'The "chunk" argument must be of type string or an instance of Buffer or Uint8Array. Received undefined',
+    )
     req.abort()
   })
 
