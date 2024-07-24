@@ -48,6 +48,37 @@ describe('Intercept', () => {
     scope.done()
   })
 
+  it('get, lowercase', done => {
+    const onData = sinon.spy()
+
+    const scope = nock('http://example.test').get('/form').reply(200, 'OK!')
+
+    // Since this is testing a lowercase `method`, it's using the `http` module.
+    const req = http.request(
+      {
+        host: 'example.test',
+        method: 'get',
+        path: '/form',
+        port: 80,
+      },
+      res => {
+        expect(res.statusCode).to.equal(200)
+        res.on('data', data => {
+          onData()
+          expect(data).to.be.an.instanceOf(Buffer)
+          expect(data.toString()).to.equal('OK!')
+        })
+        res.on('end', () => {
+          expect(onData).to.have.been.calledOnce()
+          scope.done()
+          done()
+        })
+      },
+    )
+
+    req.end()
+  })
+
   it('should intercept a request with a base path', async () => {
     const scope = nock('http://example.test/abc').get('/def').reply(201)
 
