@@ -120,17 +120,19 @@ describe('Native Fetch', () => {
   })
 
   // https://github.com/nock/nock/issues/2768
-  it("should not mess the Headers object", async () => {
-    nock("https://api.test.com", { reqheaders: { "Content-Type": "application/json" } })
-      .get("/data")
+  it('should not mess the Headers object', async () => {
+    nock('https://api.test.com', {
+      reqheaders: { 'Content-Type': 'application/json' },
+    })
+      .get('/data')
       .times(2)
-      .reply(200);
+      .reply(200)
 
-    const headers = new Headers({ "Content-Type": "application/json" });
+    const headers = new Headers({ 'Content-Type': 'application/json' })
 
-    await fetch("https://api.test.com/data", { headers });
-    await fetch("https://api.test.com/data", { headers });
-  });
+    await fetch('https://api.test.com/data', { headers })
+    await fetch('https://api.test.com/data', { headers })
+  })
 
   describe.skip('content-encoding', () => {
     it('should accept gzipped content', async () => {
