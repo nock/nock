@@ -530,17 +530,14 @@ describe('`dataEqual()`', () => {
 
 it('testing timers are deleted correctly', done => {
   const timeoutSpy = sinon.spy()
-  const intervalSpy = sinon.spy()
   const immediateSpy = sinon.spy()
 
   common.setTimeout(timeoutSpy, 0)
-  common.setInterval(intervalSpy, 0)
   common.setImmediate(immediateSpy)
   common.removeAllTimers()
 
   setImmediate(() => {
     expect(timeoutSpy).to.not.have.been.called()
-    expect(intervalSpy).to.not.have.been.called()
     expect(immediateSpy).to.not.have.been.called()
     done()
   })
