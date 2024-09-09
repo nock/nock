@@ -244,4 +244,199 @@ describe('Native Fetch', () => {
         })
     })
   })
+
+  describe('redirect', () => {
+    let origin
+
+    beforeEach(async () => {
+      const server = await startHttpServer((request, response) => {
+        if (request.url === '/redirected') {
+          response.writeHead(200).end('redirected')
+        } else {
+          response.writeHead(302, { Location: '/redirected' }).end()
+        }
+      })
+
+      origin = server.origin
+    })
+
+    it('should follow a bypassed redirect response', async () => {
+      const response = await fetch(origin)
+      expect(response.status).to.eq(200)
+      expect(await response.text()).to.eq('redirected')
+    })
+
+    it('should follows a mocked redirect to the original server', async () => {
+      nock(origin, { allowUnmocked: true })
+        .get('/')
+        .reply(302, '', { Location: `${origin}/redirected` })
+
+      const response = await fetch(origin)
+      expect(response.status).to.eq(200)
+      expect(await response.text()).to.eq('redirected')
+    })
+
+    it.skip('should follows a mocked relative redirect to the original server', async () => {
+      nock(origin, { allowUnmocked: true })
+        .get('/')
+        .reply(302, '', { Location: `/redirected` })
+
+      const response = await fetch(origin)
+      expect(response.status).to.eq(200)
+      expect(await response.text()).to.eq('redirected')
+    })
+
+    it('should follows a mocked redirect to a mocked response', async () => {
+      nock(origin)
+        .get('/')
+        .reply(302, '', { Location: `${origin}/redirected` })
+      nock(origin).get('/redirected').reply(200, 'mocked')
+
+      const response = await fetch(origin)
+      expect(response.status).to.eq(200)
+      expect(await response.text()).to.eq('mocked')
+    })
+
+    it('should returns the redirect response as-is for a request with "manual" redirect mode', async () => {
+      nock(origin)
+        .get('/')
+        .reply(302, '', { Location: `${origin}/redirected` })
+
+      const response = await fetch(origin, { redirect: 'manual' })
+      expect(response.status).to.eq(302)
+      expect(response.headers.get('location')).to.eq(`${origin}/redirected`)
+    })
+
+    it('should throws a network error on a redirect for a request with "error" redirect mode', async () => {
+      nock(origin)
+        .get('/')
+        .reply(302, '', { Location: `${origin}/redirected` })
+
+      await assertRejects(
+        fetch(origin, { redirect: 'error' }),
+        /Failed to fetch/,
+      )
+    })
+
+    it('should throws a network error on a non-303 redirect with a body', async () => {
+      nock(origin)
+        .post('/')
+        .reply(302, '', { Location: `${origin}/redirected` })
+
+      await assertRejects(
+        fetch(origin, { method: 'POST', body: 'Hello' }),
+        /Failed to fetch/,
+      )
+    })
+
+    it('should throws a network error on redirects to a non-HTTP scheme', async () => {
+      nock(origin).get('/').reply(302, '', { Location: `wss://localhost` })
+
+      await assertRejects(fetch(origin), /Failed to fetch/)
+    })
+
+    it('should throws on a redirect with credentials for a "cors" request', async () => {
+      nock(origin)
+        .get('/')
+        .reply(302, '', { Location: `http://user:password@localhost` })
+
+      await assertRejects(fetch(origin, { mode: 'cors' }), /Failed to fetch/)
+    })
+
+    it('should coerces a 301/302 redirect for a POST request to a GET request', async () => {
+      let body, headers
+      nock(origin)
+        .post('/')
+        .reply(302, '', { Location: `${origin}/redirected` })
+      nock(origin)
+        .get('/redirected')
+        .reply(200, function (uri, requestBody) {
+          body = requestBody
+          headers = this.req.headers
+        })
+
+      const response = await fetch(origin, {
+        method: 'POST',
+        headers: {
+          'content-language': 'en-US',
+          'content-location': 'http://localhost/redirected',
+          'content-type': 'application/json',
+          'content-length': '0',
+          'x-other-header': 'value',
+        },
+      })
+
+      expect(response.status).to.eq(200)
+      // Must remove body-related request headers.
+      expect(headers).to.deep.eq({
+        'x-other-header': 'value',
+        host: new URL(origin).host,
+      })
+      // Non-GET/HEAD request body of a 303 redirect must be null.
+      expect(body).to.be.empty()
+    })
+
+    it('should coerces a 303 redirect to a non-HEAD/GET request to a GET request', async () => {
+      let body, headers
+      nock(origin)
+        .post('/')
+        .reply(303, '', { Location: `${origin}/redirected` })
+      nock(origin)
+        .get('/redirected')
+        .reply(200, function (uri, requestBody) {
+          body = requestBody
+          headers = this.req.headers
+        })
+
+      const response = await fetch(origin, {
+        method: 'POST',
+        headers: {
+          'content-language': 'en-US',
+          'content-location': 'http://localhost/redirected',
+          'content-type': 'application/json',
+          'content-length': '0',
+          'x-other-header': 'value',
+        },
+      })
+
+      expect(response.status).to.eq(200)
+      // Must remove body-related request headers.
+      expect(headers).to.deep.eq({
+        'x-other-header': 'value',
+        host: new URL(origin).host,
+      })
+      // Non-GET/HEAD request body of a 303 redirect must be null.
+      expect(body).to.be.empty()
+    })
+
+    it('should deletes sensitive request headers for a cross-origin redirect', async () => {
+      let body, headers
+      nock(origin)
+        .get('/')
+        .reply(303, '', { Location: `https://anotherhost.com/redirected` })
+      nock('https://anotherhost.com')
+        .get('/redirected')
+        .reply(200, function (uri, requestBody) {
+          body = requestBody
+          headers = this.req.headers
+        })
+
+      const response = await fetch(origin, {
+        headers: {
+          authorization: 'Bearer TOKEN',
+          'proxy-authorization': 'Bearer PROXY_TOKEN',
+          cookie: 'a=1',
+          host: 'localhost',
+          'x-other-header': 'value',
+        },
+      })
+
+      expect(response.status).to.eq(200)
+      expect(headers).to.deep.eq({
+        'x-other-header': 'value',
+        host: 'anotherhost.com',
+      })
+      expect(body).to.be.empty()
+    })
+  })
 })
