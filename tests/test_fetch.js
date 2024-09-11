@@ -276,7 +276,7 @@ describe('Native Fetch', () => {
       expect(await response.text()).to.eq('redirected')
     })
 
-    it.skip('should follows a mocked relative redirect to the original server', async () => {
+    it('should follows a mocked relative redirect to the original server', async () => {
       nock(origin, { allowUnmocked: true })
         .get('/')
         .reply(302, '', { Location: `/redirected` })
