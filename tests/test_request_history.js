@@ -74,6 +74,20 @@ describe('Request history', () => {
     expect(interceptor.requests).to.have.lengthOf(20);
   })
 
+  it('remembers a request', async () => {
+    const interceptor = nock('http://example.test')
+        .get('/foo')
+        .remember()
+
+    interceptor.reply(202, '1')
+    await sendRequest('example.test', '/foo')
+    expect(interceptor.requests).to.have.lengthOf(1);
+
+    interceptor.reply(202, '1')
+    await sendRequest('example.test', '/foo')
+    expect(interceptor.requests).to.have.lengthOf(2);
+  })
+
   it('remembers no requests', async () => {
     const interceptor = nock('http://example.test')
         .persist()
