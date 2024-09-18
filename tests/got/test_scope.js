@@ -87,32 +87,39 @@ describe('`Scope#remove()`', () => {
     expect(scope.activeMocks()).to.deep.equal([])
   })
 
-  it('when a mock is persisted, does nothing', () => {
-    const scope = nock('http://example.test').persist().get('/').reply(200)
+  it('removes the interceptor from its collections', () => {
+    const scope = nock('http://example.test').get('/').reply(200)
     const key = 'GET http://example.test:80/'
+    const interceptor = scope.interceptors[0]
 
     // Confidence check.
     expect(scope.activeMocks()).to.deep.equal([key])
+    expect(scope.keyedInterceptors).to.deep.equal({ [key]: [interceptor] })
 
     // Act.
     scope.remove(key, scope.interceptors[0])
 
     // Assert.
-    expect(scope.activeMocks()).to.deep.equal([key])
+    expect(scope.interceptors).to.deep.equal([])
+    expect(scope.keyedInterceptors).to.deep.equal({})
   })
 
   it('when the key is nonexistent, does nothing', () => {
     const scope = nock('http://example.test').get('/').reply(200)
     const key = 'GET http://example.test:80/'
+    const interceptor = scope.interceptors[0]
 
     // Confidence check.
     expect(scope.activeMocks()).to.deep.equal([key])
+    expect(scope.keyedInterceptors).to.deep.equal({ [key]: [interceptor] })
 
     // Act.
-    scope.remove('GET http://bogus.test:80/', scope.interceptors[0])
+    scope.remove('GET http://bogus.test:80/', interceptor)
 
     // Assert.
     expect(scope.activeMocks()).to.deep.equal([key])
+    expect(scope.interceptors).to.deep.equal([interceptor])
+    expect(scope.keyedInterceptors).to.deep.equal({ [key]: [interceptor] })
   })
 })
 
