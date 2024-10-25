@@ -149,7 +149,7 @@ describe('Native Fetch', () => {
     await fetch('https://api.test.com/data', { headers })
   })
 
-  describe.skip('content-encoding', () => {
+  describe('content-encoding', () => {
     it('should accept gzipped content', async () => {
       const message = 'Lorem ipsum dolor sit amet'
       const compressed = zlib.gzipSync(message)
@@ -222,6 +222,24 @@ describe('Native Fetch', () => {
       scope.done()
     })
 
+    it('should accept gzip and deflate content', async () => {
+      const message = 'Lorem ipsum dolor sit amet'
+      const compressed = zlib.deflateSync(zlib.gzipSync(message))
+
+      const scope = nock('http://example.test')
+        .get('/foo')
+        .reply(200, compressed, {
+          'X-Transfer-Length': String(compressed.length),
+          'Content-Length': undefined,
+          'Content-Encoding': 'gzip, deflate',
+        })
+      const response = await fetch('http://example.test/foo')
+
+      expect(response.status).to.equal(200)
+      expect(await response.text()).to.equal(message)
+      scope.done()
+    })
+
     it('should pass through the result if a not supported encoding was used', async () => {
       const message = 'Lorem ipsum dolor sit amet'
       const compressed = Buffer.from(message)
@@ -240,9 +258,11 @@ describe('Native Fetch', () => {
 
     it('should throw error if wrong encoding is used', async () => {
       const message = 'Lorem ipsum dolor sit amet'
+      const compressed = zlib.gzipSync(message)
+      
       const scope = nock('http://example.test')
         .get('/foo')
-        .reply(200, message, {
+        .reply(200, compressed, {
           'X-Transfer-Length': String(message.length),
           'Content-Length': undefined,
           'Content-Encoding': 'br',
@@ -254,7 +274,29 @@ describe('Native Fetch', () => {
           throw new Error('Should have thrown')
         })
         .catch(e => {
-          expect(e.message).to.contain('unexpected end of file')
+          expect(e.message).to.contain('Decompression failed')
+          scope.done()
+        })
+    })
+
+    it.skip('should throw error if encoding is used with uncompressed body', async () => {
+      const message = 'Lorem ipsum dolor sit amet'
+      
+      const scope = nock('http://example.test')
+        .get('/foo')
+        .reply(200, Buffer.from(message), {
+          'X-Transfer-Length': String(message.length),
+          'Content-Length': undefined,
+          'Content-Encoding': 'br',
+        })
+      const response = await fetch('http://example.test/foo')
+      await response
+        .text()
+        .then(() => {
+          throw new Error('Should have thrown')
+        })
+        .catch(e => {
+          expect(e.message).to.contain('Decompression failed')
           scope.done()
         })
     })
