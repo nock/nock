@@ -259,7 +259,7 @@ describe('Native Fetch', () => {
     it('should throw error if wrong encoding is used', async () => {
       const message = 'Lorem ipsum dolor sit amet'
       const compressed = zlib.gzipSync(message)
-      
+
       const scope = nock('http://example.test')
         .get('/foo')
         .reply(200, compressed, {
@@ -281,7 +281,7 @@ describe('Native Fetch', () => {
 
     it.skip('should throw error if encoding is used with uncompressed body', async () => {
       const message = 'Lorem ipsum dolor sit amet'
-      
+
       const scope = nock('http://example.test')
         .get('/foo')
         .reply(200, Buffer.from(message), {
