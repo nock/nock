@@ -27,7 +27,7 @@
     "propagate": "^2.0.0"
   },
   "devDependencies": {
-    "@definitelytyped/dtslint": "^0.0.163",
+    "@definitelytyped/dtslint": "^0.2.25",
     "@sinonjs/fake-timers": "^11.2.2",
     "assert-rejects": "^1.0.0",
     "chai": "^4.1.2",
