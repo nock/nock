@@ -49,7 +49,7 @@
     "proxyquire": "^2.1.0",
     "rimraf": "^3.0.0",
     "semantic-release": "^24.1.0",
-    "sinon": "^15.0.1",
+    "sinon": "^19.0.2",
     "sinon-chai": "^3.7.0",
     "typescript": "^5.0.4"
   },
