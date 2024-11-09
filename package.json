@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "@definitelytyped/dtslint": "^0.0.163",
-    "@sinonjs/fake-timers": "^11.2.2",
+    "@sinonjs/fake-timers": "^13.0.5",
     "assert-rejects": "^1.0.0",
     "chai": "^4.1.2",
     "dirty-chai": "^2.0.1",
