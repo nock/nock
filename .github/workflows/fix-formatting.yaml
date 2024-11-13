@@ -8,6 +8,9 @@ name: Fix formatting
 permissions:
   contents: read
 
+env:
+  HEAD_REF: ${{ github.head_ref }}
+
 jobs:
   fixFormatting:
     permissions:
@@ -33,4 +36,4 @@ jobs:
           git config user.name "github-actions"
           git add .
           git commit -m "style: format files with Prettier" | true # ignore error if there are no changes to commit
-          git push origin HEAD:${{ github.head_ref }}
+          git push origin HEAD:$HEAD_REF
