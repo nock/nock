@@ -122,8 +122,13 @@ describe('Native Fetch', () => {
   it('should abort a request with a timeout signal', async () => {
     const scope = nock('http://test.com').get('/').delayBody(100).reply(200)
 
-    const response = await fetch('http://test.com', { signal: AbortSignal.timeout(50)});
-    await assertRejects(response.text(), 'TimeoutError: The operation was aborted due to timeout')
+    const response = await fetch('http://test.com', {
+      signal: AbortSignal.timeout(50),
+    })
+    await assertRejects(
+      response.text(),
+      'TimeoutError: The operation was aborted due to timeout',
+    )
     scope.done()
   })
 
