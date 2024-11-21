@@ -119,6 +119,19 @@ describe('Native Fetch', () => {
     scope.done()
   })
 
+  it('should abort a request with a timeout signal', async () => {
+    const scope = nock('http://test.com').get('/').delayBody(100).reply(200)
+
+    const response = await fetch('http://test.com', {
+      signal: AbortSignal.timeout(50),
+    })
+    await assertRejects(
+      response.text(),
+      'TimeoutError: The operation was aborted due to timeout',
+    )
+    scope.done()
+  })
+
   // https://github.com/nock/nock/issues/2768
   it('should not mess the Headers object', async () => {
     nock('https://api.test.com', {
