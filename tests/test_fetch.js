@@ -509,4 +509,84 @@ describe('Native Fetch', () => {
       expect(body).to.be.empty()
     })
   })
+
+  describe('recording', () => {
+    it('records and replays gzipped nocks correctly', async () => {
+      const exampleText = '<html><body>example</body></html>'
+
+      const { origin } = await startHttpServer((request, response) => {
+        // TODO: flip the order of the encoding, this is a bug in fetch
+        // const body = zlib.brotliCompressSync(zlib.gzipSync(exampleText))
+        const body = zlib.gzipSync(zlib.brotliCompressSync(exampleText))
+
+        response.writeHead(200, { 'content-encoding': 'gzip, br' })
+        response.end(body)
+      })
+
+      nock.restore()
+      nock.recorder.clear()
+      expect(nock.recorder.play()).to.be.empty()
+
+      nock.recorder.rec({
+        dont_print: true,
+        output_objects: true,
+      })
+
+      const response1 = await fetch(origin)
+      expect(await response1.text()).to.equal(exampleText)
+      expect(response1.headers.get('content-encoding')).to.equal('gzip, br')
+
+      nock.restore()
+      const recorded = nock.recorder.play()
+      nock.recorder.clear()
+      nock.activate()
+
+      expect(recorded).to.have.lengthOf(1)
+      const nocks = nock.define(recorded)
+
+      const response2 = await fetch(origin)
+      expect(await response2.text()).to.equal(exampleText)
+      expect(response1.headers.get('content-encoding')).to.equal('gzip, br')
+
+      nocks.forEach(nock => nock.done())
+    })
+
+    it('records and replays deflated nocks correctly', async () => {
+      const exampleText = '<html><body>example</body></html>'
+
+      const { origin } = await startHttpServer((request, response) => {
+        const body = zlib.deflateSync(exampleText)
+
+        response.writeHead(200, { 'content-encoding': 'deflate' })
+        response.end(body)
+      })
+
+      nock.restore()
+      nock.recorder.clear()
+      expect(nock.recorder.play()).to.be.empty()
+
+      nock.recorder.rec({
+        dont_print: true,
+        output_objects: true,
+      })
+
+      const response1 = await fetch(origin)
+      expect(await response1.text()).to.equal(exampleText)
+      expect(response1.headers.get('content-encoding')).to.equal('deflate')
+
+      nock.restore()
+      const recorded = nock.recorder.play()
+      nock.recorder.clear()
+      nock.activate()
+
+      expect(recorded).to.have.lengthOf(1)
+      const nocks = nock.define(recorded)
+
+      const response2 = await fetch(origin)
+      expect(await response2.text()).to.equal(exampleText)
+      expect(response1.headers.get('content-encoding')).to.equal('deflate')
+
+      nocks.forEach(nock => nock.done())
+    })
+  })
 })
