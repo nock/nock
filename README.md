@@ -98,6 +98,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
   - [Verifying recorded fixtures](#verifying-recorded-fixtures)
     - [Example](#example-1)
 - [Common issues](#common-issues)
+  - [Requests made by ES Modules are not intercepted](#requests-made-by-es-modules-are-not-intercepted)
   - [Axios](#axios)
   - [Memory issues with Jest](#memory-issues-with-jest)
 - [Debugging](#debugging)
@@ -1585,6 +1586,14 @@ This is how it's handled in Nock itself (see [#1523][]).
 
 [got]: https://github.com/sindresorhus/got
 [#1523]: https://github.com/nock/nock/issues/1523
+
+### Requests made by ES Modules are not intercepted
+
+When an ES module imports `request` with a namespaced import like `import * as
+http from "node:http"`, and the module is imported before `nock`, requests made
+by this module are not intercepted. You can fix this by telling Node to preload
+`nock` using the `--import=nock` [CLI option](https://nodejs.org/api/cli.html#--importmodule)
+or setting the `NODE_OPTIONS=--import=nock` environment variable.
 
 ### Axios
 
