@@ -536,8 +536,7 @@ describe('Request Overrider', () => {
     })
   })
 
-  // https://github.com/mswjs/interceptors/pull/515#issuecomment-1995549971
-  it.skip('socket emits connect and secureConnect', done => {
+  it('socket emits connect and secureConnect', done => {
     nock('https://example.test').post('/').reply(200, 'hey')
 
     const req = https.request({
@@ -552,7 +551,6 @@ describe('Request Overrider', () => {
     req.on('socket', socket => {
       socket.once('connect', () => {
         onConnect()
-        req.end()
       })
       socket.once('secureConnect', onSecureConnect)
     })
@@ -566,6 +564,7 @@ describe('Request Overrider', () => {
         done()
       })
     })
+    req.end()
   })
 
   it('socket has address() method', done => {

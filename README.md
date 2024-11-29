@@ -692,46 +692,17 @@ You are able to specify the number of milliseconds that your reply should be del
 ```js
 nock('http://my.server.com')
   .get('/')
-  .delay(2000) // 2 seconds delay will be applied to the response header.
+  .delay(2000) // 2 seconds delay will be applied to the response body.
   .reply(200, '<html></html>')
 ```
-
-`delay(1000)` is an alias for `delayConnection(1000).delayBody(0)`  
-`delay({ head: 1000, body: 2000 })` is an alias for `delayConnection(1000).delayBody(2000)`  
-Both of which are covered in detail below.
 
 #### Delay the connection
 
-You are able to specify the number of milliseconds that your connection should be idle before it starts to receive the response.
-
-To simulate a socket timeout, provide a larger value than the timeout setting on the request.
-
-```js
-nock('http://my.server.com')
-  .get('/')
-  .delayConnection(2000) // 2 seconds
-  .reply(200, '<html></html>')
-
-req = http.request('http://my.server.com', { timeout: 1000 })
-```
-
-Nock emits timeout events almost immediately by comparing the requested connection delay to the timeout parameter passed to `http.request()` or `http.ClientRequest#setTimeout()`.  
-This allows you to test timeouts without using fake timers or slowing down your tests.
-If the client chooses to _not_ take an action (e.g. abort the request), the request and response will continue on as normal, after real clock time has passed.
-
-##### Technical Details
-
-Following the `'finish'` event being emitted by `ClientRequest`, Nock will wait for the next event loop iteration before checking if the request has been aborted.
-At this point, any connection delay value is compared against any request timeout setting and a [`'timeout'`](https://nodejs.org/api/http.html#http_event_timeout) is emitted when appropriate from the socket and the request objects.
-A Node timeout timer is then registered with any connection delay value to delay real time before checking again if the request has been aborted and the [`'response'`](http://nodejs.org/api/http.html#http_event_response) is emitted by the request.
-
-A similar method, `.socketDelay()` was removed in version 13. It was thought that having two methods so subtlety similar was confusing.  
-The discussion can be found at https://github.com/nock/nock/pull/1974.
+The `delayConnection` method’s behavior of emitting quick timeout events when the connection delay exceeds the request timeout is now deprecated. Please use the `delay` function instead.
 
 #### Delay the response body
 
-You are able to specify the number of milliseconds that the response body should be delayed.  
-This is the time between the headers being received and the body starting to be received.
+The `delayBody` is now deprecated. Please use the `delay` function instead.
 
 ```js
 nock('http://my.server.com')

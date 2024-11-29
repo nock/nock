@@ -30,6 +30,7 @@ describe('`replyWithError()`', () => {
     req.end()
   })
 
+  // TODO: https://github.com/mswjs/interceptors/issues/625
   it.skip('allows json response', done => {
     const scope = nock('http://example.test')
       .post('/echo')
