@@ -289,7 +289,7 @@ declare namespace nock {
   interface BackOptions {
     before?: (def: Definition) => void
     after?: (scope: Scope) => void
-    afterRecord?: (defs: Definition[]) => Definition[]
+    afterRecord?: (defs: Definition[]) => Definition[] | string
     recorder?: RecorderOptions
   }
 }
