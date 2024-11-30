@@ -256,13 +256,13 @@ declare namespace nock {
     (
       fixtureName: string,
       options: BackOptions,
-      nockedFn: (nockDone: () => Promise<void>) => void,
+      nockedFn: (nockDone: () => void) => void,
     ): void
     (
       fixtureName: string,
       options?: BackOptions,
     ): Promise<{
-      nockDone: () => Promise<void>
+      nockDone: () => void
       context: BackContext
     }>
   }

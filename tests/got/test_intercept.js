@@ -228,7 +228,6 @@ describe('Intercept', () => {
   })
 
   it('should intercept a basic HEAD request', async () => {
-    // TODO BEFORE MERGE: should we remove the response body as HEAD requests doesn't allow to have body
     const scope = nock('http://example.test').head('/').reply(201)
 
     const { statusCode } = await got.head('http://example.test/')
@@ -389,15 +388,6 @@ describe('Intercept', () => {
     })
 
     expect(statusCode).to.equal(200)
-    scope.done()
-  })
-
-  it('can use fetch', async () => {
-    const scope = nock('https://example.test').get('/').reply()
-
-    const { status } = await fetch('https://example.test/')
-
-    expect(status).to.equal(200)
     scope.done()
   })
 
