@@ -413,7 +413,7 @@ describe('Recorder', () => {
         },
         res => {
           res.resume()
-          res.once('end', async () => {
+          res.once('end', () => {
             nock.restore()
             const recorded = nock.recorder.play()
             expect(recorded).to.have.lengthOf(1)
@@ -550,7 +550,7 @@ describe('Recorder', () => {
           },
           res => {
             res.resume()
-            res.once('end', async () => {
+            res.once('end', () => {
               nock.restore()
               const recorded = nock.recorder.play()
               expect(recorded).to.have.lengthOf(1)
@@ -592,7 +592,7 @@ describe('Recorder', () => {
           },
           res => {
             res.resume()
-            res.once('end', async () => {
+            res.once('end', () => {
               nock.restore()
               const recorded = nock.recorder.play()
               expect(recorded).to.have.lengthOf(1)
@@ -798,7 +798,7 @@ describe('Recorder', () => {
           },
           res => {
             res.resume()
-            res.once('end', async () => {
+            res.once('end', () => {
               nock.restore()
               const recorded = nock.recorder.play()
               expect(recorded).to.have.lengthOf(1)
@@ -833,7 +833,7 @@ describe('Recorder', () => {
           },
           res => {
             res.resume()
-            res.once('end', async () => {
+            res.once('end', () => {
               nock.restore()
 
               nock.recorder.play()
@@ -871,7 +871,7 @@ describe('Recorder', () => {
           },
           res => {
             res.resume()
-            res.once('end', async () => {
+            res.once('end', () => {
               nock.restore()
               nock.recorder.play()
               expect(loggingFn).to.have.been.calledOnce()
@@ -909,7 +909,7 @@ describe('Recorder', () => {
           },
           res => {
             res.resume()
-            res.once('end', async () => {
+            res.once('end', () => {
               nock.restore()
               const recorded = nock.recorder.play()
               expect(recorded).to.have.lengthOf(1)
@@ -1005,7 +1005,7 @@ describe('Recorder', () => {
               }
             })
 
-            res.once('end', async () => {
+            res.once('end', () => {
               expect(readableCount).to.equal(1)
               expect(chunkCount).to.equal(1)
 
@@ -1086,7 +1086,7 @@ describe('Recorder', () => {
           },
           res => {
             res.resume()
-            res.once('end', async () => {
+            res.once('end', () => {
               const recorded = nock.recorder.play()
               expect(recorded).to.have.lengthOf(1)
               expect(recorded[0])
