@@ -7,14 +7,6 @@
 
 [npmjs]: https://www.npmjs.com/package/nock
 
-> **Notice**
->
-> We have introduced experimental support for fetch. Please share your feedback with us. You can install it by:
->
-> ```
-> npm install --save-dev nock@beta
-> ```
-
 HTTP server mocking and expectations library for Node.js
 
 Nock can be used to test modules that perform HTTP requests in isolation.

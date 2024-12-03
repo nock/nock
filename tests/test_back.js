@@ -78,7 +78,7 @@ function nockBackWithFixtureLocalhost(mochaDone) {
           path: '/',
           port: server.address().port,
         },
-        async response => {
+        response => {
           expect(response.statusCode).to.equal(217)
           this.assertScopesFinished()
           nockDone()
@@ -354,7 +354,7 @@ describe('Nock Back', () => {
               path: '/',
               port: server.address().port,
             },
-            async response => {
+            response => {
               nockDone()
 
               expect(response.statusCode).to.equal(217)
@@ -409,7 +409,7 @@ describe('Nock Back', () => {
               path: '/',
               port: server.address().port,
             },
-            async response => {
+            response => {
               nockDone()
 
               expect(response.statusCode).to.equal(217)
@@ -437,7 +437,7 @@ describe('Nock Back', () => {
               path: '/',
               port: server.address().port,
             },
-            async response => {
+            response => {
               nockDone()
 
               expect(response.statusCode).to.equal(217)
@@ -600,7 +600,7 @@ describe('Nock Back', () => {
               path: '/',
               port: server.address().port,
             },
-            async response => {
+            response => {
               nockDone()
 
               expect(response.statusCode).to.equal(217)
@@ -624,7 +624,7 @@ describe('Nock Back', () => {
               path: '/',
               port: server.address().port,
             },
-            async response => {
+            response => {
               nockDone()
               expect(response.statusCode).to.equal(217)
               expect(
@@ -673,7 +673,7 @@ describe('Nock Back', () => {
               path: '/',
               port: server.address().port,
             },
-            async response => {
+            response => {
               nockDone()
 
               expect(response.statusCode).to.equal(217)
@@ -701,7 +701,7 @@ describe('Nock Back', () => {
               path: '/',
               port: server.address().port,
             },
-            async response => {
+            response => {
               nockDone()
 
               expect(response.statusCode).to.equal(217)

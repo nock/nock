@@ -25,7 +25,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
       - name: Install dependencies
         run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
@@ -75,7 +75,7 @@ jobs:
         node-version:
           - 18
           - 20
-          - 21
+          - 22
         os:
           - macos-latest
           - ubuntu-latest
