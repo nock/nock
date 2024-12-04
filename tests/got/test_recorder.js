@@ -24,6 +24,8 @@ describe('Recorder', () => {
     expect(leaks).to.be.empty()
   })
 
+  // The problem is that after the migration to "@mswjs/interceptors" the request is no longer synchronous, which is Node compatible behavior.
+  // so in the test we initiate a new recording session because we record the first request.
   it.skip('does not record requests from previous sessions', async () => {
     const { origin } = await servers.startHttpServer()
 

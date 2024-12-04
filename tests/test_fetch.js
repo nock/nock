@@ -292,6 +292,7 @@ describe('Native Fetch', () => {
         })
     })
 
+    // May be a bug in Node.js which swallows the error. Need to investigate it further
     it.skip('should throw error if encoding is used with uncompressed body', async () => {
       const message = 'Lorem ipsum dolor sit amet'
 
