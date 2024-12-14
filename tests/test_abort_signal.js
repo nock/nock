@@ -123,7 +123,7 @@ describe('When `AbortSignal` is used', () => {
     const signal = AbortSignal.timeout(10)
     const scope = nock('http://example.test')
       .post('/form')
-      .delayConnection(10)
+      .delay(10)
       .reply(201, 'OK!')
 
     const error = await makeRequest('http://example.test/form', {

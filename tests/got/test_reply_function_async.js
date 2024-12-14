@@ -57,8 +57,8 @@ describe('asynchronous `reply()` function', () => {
       const scope = nock('http://example.test')
         .get('/yo')
         .reply(201, function (path, reqBody, cb) {
-          expect(this.req.path).to.equal('/yo')
-          expect(this.req.headers).to.deep.equal({
+          expect(new URL(this.req.url).pathname).to.equal('/yo')
+          expect(Object.fromEntries(this.req.headers.entries())).to.deep.equal({
             connection: 'close',
             'accept-encoding': 'gzip, deflate, br',
             host: 'example.test',

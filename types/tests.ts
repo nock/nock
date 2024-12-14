@@ -115,7 +115,6 @@ scope = scope.matchHeader(str, regex)
 scope = scope.matchHeader(str, (val: string) => true)
 
 inst = inst.delay(num)
-inst = inst.delayConnection(num)
 
 scope = scope.filteringPath(regex, str)
 scope = scope.filteringPath((path: string) => {
@@ -133,9 +132,6 @@ scope = scope.replyDate()
 scope = scope.replyDate(new Date())
 
 inst = inst.delay(2000)
-inst = inst.delay({ head: 1000, body: 1000 })
-inst = inst.delayBody(2000)
-inst = inst.delayConnection(2000)
 
 scope.done() // $ExpectType void
 scope.isDone() // $ExpectType boolean
@@ -742,7 +738,7 @@ nock.removeInterceptor(interceptor)
 
 // Events
 /// Global no match event
-nock.emitter.on('no match', (req: any) => {})
+nock.emitter.on('no match', (req: Request) => {})
 
 // Nock Back
 /// Setup

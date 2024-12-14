@@ -68,7 +68,7 @@ describe('interception in parallel', () => {
       .persist()
       .get('/')
       .reply(function () {
-        fooHeadersStub(this.req.headers.foo)
+        fooHeadersStub(this.req.headers.get('foo'))
         return [200]
       })
 

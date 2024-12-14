@@ -412,7 +412,7 @@ describe('Intercept', () => {
           {
             method: 'GET',
             url: 'http://example.test/wrong-path',
-            headers: { connection: 'close' },
+            headers: { connection: 'close', host: 'example.test' },
           },
           null,
           2,
@@ -440,7 +440,7 @@ describe('Intercept', () => {
           {
             method: 'GET',
             url: 'https://example.test/abcdef892932',
-            headers: { connection: 'close' },
+            headers: { connection: 'close', host: 'example.test' },
           },
           null,
           2,
