@@ -1,4 +1,4 @@
-// TypeScript Version: 3.5
+// TypeScript Version: 5.0
 
 import { ReadStream } from 'fs'
 import { ClientRequest, IncomingMessage, RequestOptions } from 'http'

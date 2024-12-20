@@ -5,4 +5,3 @@
 coverage
 node_modules
 npm-debug.log
-tests/browserify-public/browserify-bundle.js

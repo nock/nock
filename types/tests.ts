@@ -485,21 +485,7 @@ nock('http://example.test').get('/').optionally().reply(200, 'Ok')
 // Delay the response body
 nock('http://example.test')
   .get('/')
-  .delayBody(2000) // 2 seconds
-  .reply(200, '<html></html>')
-
-// Delay the response
-nock('http://example.test')
-  .get('/')
   .delay(2000) // 2 seconds delay will be applied to the response header.
-  .reply(200, '<html></html>')
-
-nock('http://example.test')
-  .get('/')
-  .delay({
-    head: 2000, // header will be delayed for 2 seconds, i.e. the whole response will be delayed for 2 seconds.
-    body: 3000, // body will be delayed for another 3 seconds after header is sent out.
-  })
   .reply(200, '<html></html>')
 
 // Chaining

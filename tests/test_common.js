@@ -11,10 +11,8 @@
 // 100% test coverage, so when utility code falls out of test, we know it's time
 // to remove it.
 
-const http = require('http')
 const { expect } = require('chai')
 const sinon = require('sinon')
-const nock = require('..')
 
 const common = require('../lib/common')
 const matchBody = require('../lib/match_body')
