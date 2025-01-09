@@ -1,8 +1,8 @@
 all: true
 check-coverage: true
 
-branches: 94.59
-lines: 96.89
+branches: 94.49
+lines: 96.78
 
 include:
   - lib

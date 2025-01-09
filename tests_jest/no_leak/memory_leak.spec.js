@@ -1,6 +1,6 @@
 'use strict'
 
-const nock = require('..')
+const nock = require('../..')
 const { test } = require('@jest/globals')
 
 // jest --detectLeaks flag will fail on a leak, so we do not need any 'expect' in this test
