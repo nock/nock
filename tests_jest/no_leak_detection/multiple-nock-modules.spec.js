@@ -14,7 +14,7 @@ if the bug is present the second request will fail to intercept a client request
 
 > NetConnectNotAllowedError: Nock: Disallowed net connect for "example.com:80/foo"
  */
-async function importNockAndDoClientRequest (resBody) {
+async function importNockAndDoClientRequest(resBody) {
   _jest.resetModules()
   const nock = require('../..')
   nock.disableNetConnect()
@@ -26,7 +26,7 @@ async function importNockAndDoClientRequest (resBody) {
   expect(data).toBe(resBody)
   expect(status).toBe(200)
   scope.done()
-  return nock;
+  return nock
 }
 
 test(`check msw client request interceptors can re-apply across modules`, async () => {
