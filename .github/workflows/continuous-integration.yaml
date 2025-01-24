@@ -6,7 +6,10 @@ name: Continuous Integration
       - synchronize
   push:
     branches:
+      - '*.x'
       - main
+      - beta
+      - next
 permissions:
   contents: read
 
@@ -22,7 +25,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: lts/*
           cache: 'npm'
       - name: Install dependencies
         run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
@@ -70,23 +73,13 @@ jobs:
       fail-fast: false
       matrix:
         node-version:
-          - 10
-          - 12
-          - 14
-          - 16
           - 18
           - 20
+          - 22
         os:
           - macos-latest
           - ubuntu-latest
           - windows-latest
-        exclude:
-          - node-version: 10
-            os: macos-latest
-          - node-version: 12
-            os: macos-latest
-          - node-version: 14
-            os: macos-latest
     runs-on: ${{ matrix.os }}
     timeout-minutes: 5
 
@@ -106,7 +99,6 @@ jobs:
         run: npm run test
       - name: Test jest
         run: npm run test:jest
-        if: matrix.node-version >= 14
 
   # separate job to set as required in branch protection,
   # as the build names above change each time Node versions change

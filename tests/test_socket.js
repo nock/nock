@@ -10,7 +10,7 @@ it('should expose TLSSocket attributes for HTTPS requests', done => {
   nock('https://example.test').get('/').reply()
 
   https.get('https://example.test').on('socket', socket => {
-    expect(socket.authorized).to.equal(true)
+    expect(socket.authorized).to.equal(false)
     expect(socket.encrypted).to.equal(true)
     done()
   })

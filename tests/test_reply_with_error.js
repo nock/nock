@@ -30,7 +30,8 @@ describe('`replyWithError()`', () => {
     req.end()
   })
 
-  it('allows json response', done => {
+  // TODO: https://github.com/mswjs/interceptors/issues/625
+  it.skip('allows json response', done => {
     const scope = nock('http://example.test')
       .post('/echo')
       .replyWithError({ message: 'Service not found', code: 'test' })

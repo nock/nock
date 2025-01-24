@@ -39,22 +39,22 @@ describe('`reply()` body', () => {
   // should be returned as strings that `JSON.parse()` would convert back to
   // native values.
   it('stringifies a boolean (including `false`)', async () => {
-    const scope = nock('http://example.test').get('/').reply(204, false)
+    const scope = nock('http://example.test').get('/').reply(200, false)
 
     const { statusCode, body } = await got('http://example.test/')
 
-    expect(statusCode).to.equal(204)
+    expect(statusCode).to.equal(200)
     // `'false'` is json-stringified `false`.
     expect(body).to.be.a('string').and.equal('false')
     scope.done()
   })
 
   it('stringifies null', async () => {
-    const scope = nock('http://example.test').get('/').reply(204, null)
+    const scope = nock('http://example.test').get('/').reply(200, null)
 
     const { statusCode, body } = await got('http://example.test/')
 
-    expect(statusCode).to.equal(204)
+    expect(statusCode).to.equal(200)
     // `'null'` is json-stringified `null`.
     expect(body).to.be.a('string').and.equal('null')
     scope.done()
@@ -113,6 +113,23 @@ describe('`reply()` body', () => {
 
     expect(statusCode).to.equal(204)
     expect(body).to.be.a('string').and.equal('')
+    scope.done()
+  })
+
+  it('does not modify the object used for response', async () => {
+    const patchBody = { number: 1234 }
+    const form = new FormData()
+    form.append('number', 1234)
+
+    const scope = nock('http://example.test')
+      .patch('/', patchBody)
+      .reply(200, patchBody)
+
+    await got.patch('http://example.test/', {
+      form,
+    })
+
+    expect(patchBody.number).to.be.a('number').and.equal(1234)
     scope.done()
   })
 })

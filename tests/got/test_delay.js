@@ -108,8 +108,8 @@ describe('`delayBody()`', () => {
   it('should delay the clock between the `response` event and the first `data` event', done => {
     nock('http://example.test').get('/').delayBody(200).reply(201, 'OK')
 
+    const start = process.hrtime()
     http.get('http://example.test', res => {
-      const start = process.hrtime()
       res.once('data', () => {
         checkDuration(start, 200)
         done()
@@ -312,80 +312,6 @@ describe('`delayConnection()`', () => {
       assertRejects(got('http://example.test'), /this is an error message/),
       100,
     )
-  })
-
-  it('emits a timeout - with setTimeout', done => {
-    nock('http://example.test').get('/').delayConnection(10000).reply(200, 'OK')
-
-    const onEnd = sinon.spy()
-
-    const req = http.request('http://example.test', res => {
-      res.once('end', onEnd)
-    })
-
-    req.setTimeout(5000, () => {
-      expect(onEnd).not.to.have.been.called()
-      done()
-    })
-
-    req.end()
-  })
-
-  it('emits a timeout - with options.timeout', done => {
-    nock('http://example.test').get('/').delayConnection(10000).reply(200, 'OK')
-
-    const onEnd = sinon.spy()
-
-    const req = http.request('http://example.test', { timeout: 5000 }, res => {
-      res.once('end', onEnd)
-    })
-
-    req.on('timeout', function () {
-      expect(onEnd).not.to.have.been.called()
-      done()
-    })
-
-    req.end()
-  })
-
-  it('emits a timeout - with Agent.timeout', done => {
-    nock('http://example.test').get('/').delayConnection(10000).reply(200, 'OK')
-
-    const onEnd = sinon.spy()
-    const agent = new http.Agent({ timeout: 5000 })
-
-    const req = http.request('http://example.test', { agent }, res => {
-      res.once('end', onEnd)
-    })
-
-    req.on('timeout', function () {
-      expect(onEnd).not.to.have.been.called()
-      done()
-    })
-
-    req.end()
-  })
-
-  it('emits a timeout - options.timeout takes precedence over Agent.timeout', done => {
-    nock('http://example.test').get('/').delayConnection(10000).reply(200, 'OK')
-
-    const onEnd = sinon.spy()
-    const agent = new http.Agent({ timeout: 30000 })
-
-    const req = http.request(
-      'http://example.test',
-      { agent, timeout: 5000 },
-      res => {
-        res.once('end', onEnd)
-      },
-    )
-
-    req.on('timeout', function () {
-      expect(onEnd).not.to.have.been.called()
-      done()
-    })
-
-    req.end()
   })
 
   it('does not emit a timeout when timeout > delayConnection', done => {

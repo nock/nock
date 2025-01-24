@@ -49,7 +49,7 @@ function nockBackWithFixture(mochaDone, scopesLoaded) {
 
   nockBack('good_request.json', function (nockDone) {
     expect(this.scopes).to.have.length(scopesLength)
-    http.get('http://www.example.test/', () => {
+    http.get('http://www.example.test/', async () => {
       this.assertScopesFinished()
       nockDone()
       mochaDone()
@@ -138,7 +138,7 @@ describe('Nock Back', () => {
   it('`assertScopesFinished` throws exception when Back still has pending scopes', done => {
     const fixtureName = 'good_request.json'
     const fixturePath = path.join(nockBack.fixtures, fixtureName)
-    nockBack(fixtureName, function (nockDone) {
+    nockBack(fixtureName, async function (nockDone) {
       expect(() => this.assertScopesFinished()).to.throw(
         `["GET http://www.example.test:80/"] was not used, consider removing ${fixturePath} to rerecord fixture`,
       )
@@ -313,7 +313,7 @@ describe('Nock Back', () => {
               method: 'GET',
             },
             response => {
-              response.once('end', () => {
+              response.once('end', async () => {
                 nockDone()
 
                 const fixtureContent = JSON.parse(
@@ -373,7 +373,7 @@ describe('Nock Back', () => {
       nockBack('wrong_uri.json', nockDone => {
         http
           .get('http://other.example.test', () => expect.fail())
-          .on('error', err => {
+          .on('error', async err => {
             expect(err.message).to.equal(
               'Nock: Disallowed net connect for "other.example.test:80/"',
             )
@@ -386,7 +386,7 @@ describe('Nock Back', () => {
     it('should load recorded tests', done => {
       nockBack('good_request.json', function (nockDone) {
         expect(this.scopes).to.have.lengthOf.at.least(1)
-        http.get('http://www.example.test/', () => {
+        http.get('http://www.example.test/', async () => {
           this.assertScopesFinished()
           nockDone()
           done()
@@ -468,7 +468,7 @@ describe('Nock Back', () => {
                 method: 'GET',
               },
               response => {
-                response.once('end', () => {
+                response.once('end', async () => {
                   nockDone()
 
                   const fixtureContent = JSON.parse(
@@ -559,7 +559,7 @@ describe('Nock Back', () => {
               method: 'GET',
             },
             response => {
-              response.once('end', () => {
+              response.once('end', async () => {
                 nockDone()
 
                 const fixtureContent = JSON.parse(
@@ -651,7 +651,7 @@ describe('Nock Back', () => {
           .get('http://www.example.test/', () => {
             expect.fail()
           })
-          .on('error', () => {
+          .on('error', async () => {
             nockDone()
             done()
           })
@@ -732,7 +732,7 @@ describe('Nock Back', () => {
                 method: 'GET',
               },
               response => {
-                response.once('end', () => {
+                response.once('end', async () => {
                   nockDone()
 
                   const fixtureContent = JSON.parse(

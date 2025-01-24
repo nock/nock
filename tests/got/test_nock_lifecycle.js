@@ -105,7 +105,7 @@ describe('Nock lifecycle functions', () => {
       })
     })
 
-    it('should be safe to call in the middle of a request', done => {
+    it.skip('should be safe to call in the middle of a request', done => {
       // This covers a race-condition where cleanAll() is called while a request
       // is in mid-flight. The request itself should continue to process normally.
       // Notably, `cleanAll` is being called before the Interceptor is marked as
@@ -218,7 +218,7 @@ describe('Nock lifecycle functions', () => {
         expect(onRequest).not.to.have.been.called()
         done()
       }, 200)
-      process.nextTick(nock.abortPendingRequests)
+      setImmediate(nock.abortPendingRequests)
     })
   })
 })

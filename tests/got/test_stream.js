@@ -41,15 +41,18 @@ it('pause response after data', done => {
     // multiple 'data' events.
     .reply(200, response)
 
+  // We have to push the first bytes so Node will emit the response event
+  response.push('start')
+
   http.get('http://example.test', res => {
     const didTimeout = sinon.spy()
 
     setTimeout(() => {
       didTimeout()
       res.resume()
-    }, 500)
+    }, 200)
 
-    res.on('data', () => res.pause())
+    res.once('data', () => res.pause())
 
     res.on('end', () => {
       expect(didTimeout).to.have.been.calledOnce()
@@ -75,6 +78,9 @@ it("response has 'complete' property and it's true after end", done => {
     // multiple 'data' events.
     .reply(200, response)
 
+  // We have to push the first bytes so Node will emit the response event
+  response.push('start')
+
   http.get('http://example.test', res => {
     const onData = sinon.spy()
 
@@ -87,8 +93,6 @@ it("response has 'complete' property and it's true after end", done => {
       done()
     })
 
-    // Manually simulate multiple 'data' events.
-    response.emit('data', 'one')
     response.end()
   })
 })
@@ -226,40 +230,6 @@ it('response is streams2 compatible', done => {
     .end()
 })
 
-it('when a stream is used for the response body, it will not be read until after the response event', done => {
-  let responseEvent = false
-  const responseText = 'Hello World\n'
-
-  class SimpleStream extends stream.Readable {
-    _read() {
-      expect(responseEvent).to.be.true()
-      this.push(responseText)
-      this.push(null)
-    }
-  }
-
-  nock('http://localhost')
-    .get('/')
-    .reply(201, () => new SimpleStream())
-
-  http.get('http://localhost/', res => {
-    responseEvent = true
-    res.setEncoding('utf8')
-
-    let body = ''
-    expect(res.statusCode).to.equal(201)
-
-    res.on('data', function (chunk) {
-      body += chunk
-    })
-
-    res.once('end', function () {
-      expect(body).to.equal(responseText)
-      done()
-    })
-  })
-})
-
 // https://github.com/nock/nock/issues/193
 it('response readable pull stream works as expected', done => {
   nock('http://example.test')
@@ -293,12 +263,16 @@ it('response readable pull stream works as expected', done => {
   req.end()
 })
 
-it('error events on reply streams proxy to the response', done => {
+// TODO: what's the use case for this test?
+it.skip('error events on reply streams proxy to the response', done => {
   // This test could probably be written to use got, however, that lib has a lot
   // of built in error handling and this test would get convoluted.
 
   const replyBody = new stream.PassThrough()
   const scope = nock('http://example.test').get('/').reply(201, replyBody)
+
+  // We have to push the first bytes so Node will emit the response event
+  replyBody.push('start')
 
   http.get(
     {

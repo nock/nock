@@ -53,7 +53,6 @@ describe('`reply()` headers', () => {
       )
     })
 
-    // https://nodejs.org/api/http.html#http_message_headers
     it('folds duplicate headers the same as Node', async () => {
       const replyHeaders = [
         'Content-Type',
@@ -85,7 +84,29 @@ describe('`reply()` headers', () => {
         cookie: 'cookie1=foo; cookie2=bar; cookie3=baz',
         'x-custom': 'custom1, custom2, custom3',
       })
-      expect(rawHeaders).to.deep.equal(replyHeaders)
+
+      expect(rawHeaders).to.deep.equal([
+        'Content-Type',
+        'text/html; charset=utf-8',
+        'set-cookie',
+        'set-cookie1=foo',
+        'set-cookie',
+        'set-cookie2=bar',
+        'set-cookie',
+        'set-cookie3=baz',
+        'CONTENT-TYPE',
+        'text/xml',
+        'cookie',
+        'cookie1=foo; cookie2=bar',
+        'cookie',
+        'cookie3=baz',
+        'x-custom',
+        'custom1',
+        'X-Custom',
+        'custom2',
+        'X-Custom',
+        'custom3',
+      ])
 
       scope.done()
     })
