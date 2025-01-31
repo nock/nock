@@ -516,9 +516,7 @@ describe('Native Fetch', () => {
       const exampleText = '<html><body>example</body></html>'
 
       const { origin } = await startHttpServer((request, response) => {
-        // TODO: flip the order of the encoding, this is a bug in fetch
-        // const body = zlib.brotliCompressSync(zlib.gzipSync(exampleText))
-        const body = zlib.gzipSync(zlib.brotliCompressSync(exampleText))
+        const body = zlib.brotliCompressSync(zlib.gzipSync(exampleText))
 
         response.writeHead(200, { 'content-encoding': 'gzip, br' })
         response.end(body)
