@@ -512,7 +512,8 @@ describe('Native Fetch', () => {
   })
 
   describe('recording', () => {
-    it('records and replays gzipped nocks correctly', async () => {
+    // Skip this test until the fix will be backported to all LTS versions.
+    it.skip('records and replays gzipped nocks correctly', async () => {
       const exampleText = '<html><body>example</body></html>'
 
       const { origin } = await startHttpServer((request, response) => {
