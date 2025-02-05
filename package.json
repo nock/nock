@@ -38,7 +38,7 @@
     "eslint-plugin-import": "^2.16.0",
     "eslint-plugin-mocha": "^10.0.3",
     "eslint-plugin-node": "^11.0.0",
-    "eslint-plugin-promise": "^6.0.0",
+    "eslint-plugin-promise": "^7.2.1",
     "form-data": "^4.0.0",
     "got": "^11.3.0",
     "jest": "^29.7.0",
