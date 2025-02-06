@@ -126,20 +126,15 @@ describe('Recorder', () => {
     nock.recorder.clear()
     expect(nock.recorder.play()).to.be.empty()
 
-    const { origin } = await servers.startHttpServer(
-      (request, response) => {
-        gotRequest()
-        response.writeHead(200)
-        response.end()
-      },
-    )
+    const { origin } = await servers.startHttpServer((request, response) => {
+      gotRequest()
+      response.writeHead(200)
+      response.end()
+    })
 
     nock.recorder.rec(true)
 
-    await Promise.all([
-      got.post(origin),
-      got.post(origin),
-    ])
+    await Promise.all([got.post(origin), got.post(origin)])
 
     expect(gotRequest).to.have.been.calledTwice()
 
