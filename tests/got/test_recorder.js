@@ -119,6 +119,36 @@ describe('Recorder', () => {
     ).to.be.true()
   })
 
+  it('records parallel requests', async () => {
+    const gotRequest = sinon.spy()
+
+    nock.restore()
+    nock.recorder.clear()
+    expect(nock.recorder.play()).to.be.empty()
+
+    const { origin, port } = await servers.startHttpServer(
+      (request, response) => {
+        gotRequest()
+        response.writeHead(200)
+        response.end()
+      },
+    )
+
+    nock.recorder.rec(true)
+
+    await Promise.all([
+      got.post(origin),
+      got.post(origin),
+    ])
+
+    expect(gotRequest).to.have.been.calledTwice()
+
+    nock.restore()
+
+    const recorded = nock.recorder.play()
+    expect(recorded).to.have.lengthOf(2)
+  })
+
   it('records objects', async () => {
     const gotRequest = sinon.spy()
 
