@@ -126,7 +126,7 @@ describe('Recorder', () => {
     nock.recorder.clear()
     expect(nock.recorder.play()).to.be.empty()
 
-    const { origin, port } = await servers.startHttpServer(
+    const { origin } = await servers.startHttpServer(
       (request, response) => {
         gotRequest()
         response.writeHead(200)
