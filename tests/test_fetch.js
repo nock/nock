@@ -622,7 +622,7 @@ describe('Native Fetch', () => {
 
       it('should record fetch POST request', async () => {
         expect(fs.existsSync(fixtureLoc)).to.be.false()
-        
+
         const { nockDone } = await nock.back(fixture)
         const { origin } = await startHttpServer((request, response) => {
           response.write('live')
@@ -647,7 +647,7 @@ describe('Native Fetch', () => {
           path: '/',
           status: 200,
         })
-      });
+      })
     })
   })
 })
