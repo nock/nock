@@ -604,14 +604,12 @@ describe('Native Fetch', () => {
     describe('update mode', () => {
       let fixture
       let fixtureLoc
-      let fixturePath
 
       beforeEach(() => {
         // random fixture file so tests don't interfere with each other
         const token = crypto.randomBytes(4).toString('hex')
         fixture = `temp_${token}.json`
         fixtureLoc = path.resolve(__dirname, 'fixtures', fixture)
-        fixturePath = path.resolve(__dirname, 'fixtures')
         nock.back.setMode('update')
       })
 
