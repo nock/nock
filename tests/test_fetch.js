@@ -166,6 +166,14 @@ describe('Native Fetch', () => {
     await fetch('https://api.test.com/data', { headers })
   })
 
+  it('should return a url for cloned response URL ', async () => {
+    const scope = nock('http://example.test').get('/').reply()
+
+    const response = await fetch(new URL('http://example.test/'))
+    expect(response.clone().url).to.equal('http://example.test/')
+    scope.done()
+  });
+
   describe('content-encoding', () => {
     it('should accept gzipped content', async () => {
       const message = 'Lorem ipsum dolor sit amet'
