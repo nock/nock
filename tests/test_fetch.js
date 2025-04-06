@@ -172,7 +172,7 @@ describe('Native Fetch', () => {
     const response = await fetch(new URL('http://example.test/'))
     expect(response.clone().url).to.equal('http://example.test/')
     scope.done()
-  });
+  })
 
   describe('content-encoding', () => {
     it('should accept gzipped content', async () => {
