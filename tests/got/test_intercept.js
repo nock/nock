@@ -79,6 +79,21 @@ describe('Intercept', () => {
     req.end()
   })
 
+  it('should intercept a GET request with body', async () => {
+    const scope = nock('http://example.test')
+      .get('/')
+      .reply(200, (uri, body) => body)
+
+    const { body } = await got('http://example.test/', {
+      method: 'GET',
+      allowGetBody: true,
+      body: 'Hello World!',
+    })
+
+    expect(body).to.equal('Hello World!')
+    scope.done()
+  })
+
   it('should intercept a request with a base path', async () => {
     const scope = nock('http://example.test/abc').get('/def').reply(201)
 
