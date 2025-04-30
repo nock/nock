@@ -17,12 +17,12 @@
     "url": "https://github.com/nock/nock/issues"
   },
   "engines": {
-    "node": ">= 18"
+    "node": ">=18.20.0 <20 || >=20.12.1"
   },
   "main": "./index.js",
   "types": "types",
   "dependencies": {
-    "@mswjs/interceptors": "^0.37.3",
+    "@mswjs/interceptors": "^0.38.6",
     "json-stringify-safe": "^5.0.1",
     "propagate": "^2.0.0"
   },

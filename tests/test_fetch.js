@@ -1,10 +1,14 @@
 'use strict'
 
+const fs = require('fs')
+const path = require('path')
+const crypto = require('crypto')
 const zlib = require('zlib')
 const { expect } = require('chai')
 const nock = require('..')
 const assertRejects = require('assert-rejects')
 const { startHttpServer } = require('./servers')
+const rimraf = require('rimraf')
 
 describe('Native Fetch', () => {
   it('input is string', async () => {
@@ -119,8 +123,8 @@ describe('Native Fetch', () => {
     scope.done()
   })
 
-  it.skip('should abort a request with a timeout signal', async () => {
-    const scope = nock('http://test.com').get('/').delay(100).reply(200)
+  it('should abort a request with a timeout signal', async () => {
+    const scope = nock('http://test.com').get('/').delayBody(100).reply(200)
 
     const response = await fetch('http://test.com', {
       signal: AbortSignal.timeout(50),
@@ -160,6 +164,14 @@ describe('Native Fetch', () => {
 
     await fetch('https://api.test.com/data', { headers })
     await fetch('https://api.test.com/data', { headers })
+  })
+
+  it('should return a url for cloned response URL ', async () => {
+    const scope = nock('http://example.test').get('/').reply()
+
+    const response = await fetch(new URL('http://example.test/'))
+    expect(response.clone().url).to.equal('http://example.test/')
+    scope.done()
   })
 
   describe('content-encoding', () => {
@@ -504,7 +516,8 @@ describe('Native Fetch', () => {
   })
 
   describe('recording', () => {
-    it('records and replays gzipped nocks correctly', async () => {
+    // Skip this test until the fix will be backported to all LTS versions.
+    it.skip('records and replays gzipped nocks correctly', async () => {
       const exampleText = '<html><body>example</body></html>'
 
       const { origin } = await startHttpServer((request, response) => {
@@ -580,6 +593,59 @@ describe('Native Fetch', () => {
       expect(response1.headers.get('content-encoding')).to.equal('deflate')
 
       nocks.forEach(nock => nock.done())
+    })
+  })
+
+  describe('Nock Back', () => {
+    beforeEach(() => {
+      nock.back.fixtures = path.resolve(__dirname, 'fixtures')
+    })
+
+    describe('update mode', () => {
+      let fixture
+      let fixtureLoc
+
+      beforeEach(() => {
+        // random fixture file so tests don't interfere with each other
+        const token = crypto.randomBytes(4).toString('hex')
+        fixture = `temp_${token}.json`
+        fixtureLoc = path.resolve(__dirname, 'fixtures', fixture)
+        nock.back.setMode('update')
+      })
+
+      after(() => {
+        rimraf.sync(path.resolve(__dirname, 'fixtures', 'temp_*.json'))
+        nock.back.setMode('dryrun')
+      })
+
+      it('should record fetch POST request', async () => {
+        expect(fs.existsSync(fixtureLoc)).to.be.false()
+
+        const { nockDone } = await nock.back(fixture)
+        const { origin } = await startHttpServer((request, response) => {
+          response.write('live')
+          response.end()
+        })
+
+        const { status } = await fetch(origin, {
+          method: 'POST',
+          body: 'Hello, world!',
+        })
+
+        nockDone()
+        expect(status).to.equal(200)
+        const fixtureContent = JSON.parse(
+          fs.readFileSync(fixtureLoc).toString('utf8'),
+        )
+        expect(fixtureContent).to.have.length(1)
+
+        const [firstFixture] = fixtureContent
+        expect(firstFixture).to.include({
+          method: 'POST',
+          path: '/',
+          status: 200,
+        })
+      })
     })
   })
 })
