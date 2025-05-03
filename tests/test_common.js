@@ -40,7 +40,9 @@ describe('Body Match', () => {
 
     it('should not throw, when headers come node-fetch style as array', () => {
       const result = matchBody(
-        new Request('http://example.test', { headers: { 'Content-Type': ['multipart/form-data;'] } }),
+        new Request('http://example.test', {
+          headers: { 'Content-Type': ['multipart/form-data;'] },
+        }),
         {},
         'test',
       )
@@ -49,7 +51,9 @@ describe('Body Match', () => {
 
     it("should not ignore new line characters from strings when Content-Type contains 'multipart'", () => {
       const result = matchBody(
-        new Request('http://example.test', { headers: { 'Content-Type': 'multipart/form-data;' } }),
+        new Request('http://example.test', {
+          headers: { 'Content-Type': 'multipart/form-data;' },
+        }),
         'something //here is something more \nHello',
         'something //here is something more \nHello',
       )
@@ -58,7 +62,9 @@ describe('Body Match', () => {
 
     it("should not ignore new line characters from strings when Content-Type contains 'multipart' (arrays come node-fetch style as array)", () => {
       const result = matchBody(
-        new Request('http://example.test', { headers: { 'Content-Type': ['multipart/form-data;'] } }),
+        new Request('http://example.test', {
+          headers: { 'Content-Type': ['multipart/form-data;'] },
+        }),
         'something //here is something more \nHello',
         'something //here is something more \nHello',
       )
@@ -66,7 +72,11 @@ describe('Body Match', () => {
     })
 
     it('should use strict equality for deep comparisons', () => {
-      const result = matchBody(new Request('http://example.test'), { number: 1 }, '{"number": "1"}')
+      const result = matchBody(
+        new Request('http://example.test'),
+        { number: 1 },
+        '{"number": "1"}',
+      )
       expect(result).to.equal(false)
     })
 
@@ -146,15 +156,19 @@ describe('`isUtf8Representable()`', () => {
 })
 
 it('`isJSONContent()`', () => {
-  expect(common.isJSONContent(new Headers({ 'content-type': 'application/json' }))).to.equal(
-    true,
-  )
-
   expect(
-    common.isJSONContent(new Headers({ 'content-type': 'application/json; charset=utf-8' })),
+    common.isJSONContent(new Headers({ 'content-type': 'application/json' })),
   ).to.equal(true)
 
-  expect(common.isJSONContent(new Headers({ 'content-type': 'text/plain' }))).to.equal(false)
+  expect(
+    common.isJSONContent(
+      new Headers({ 'content-type': 'application/json; charset=utf-8' }),
+    ),
+  ).to.equal(true)
+
+  expect(
+    common.isJSONContent(new Headers({ 'content-type': 'text/plain' })),
+  ).to.equal(false)
 })
 
 describe('`headersFieldNamesToLowerCase()`', () => {
@@ -299,7 +313,10 @@ describe('`matchStringOrRegexp()`', () => {
 
 describe('`stringifyRequest()`', () => {
   it('should include non-default ports', () => {
-    const result = common.stringifyRequest(new Request('http://example.test:3000'), 'foo')
+    const result = common.stringifyRequest(
+      new Request('http://example.test:3000'),
+      'foo',
+    )
 
     // We have to parse the object instead of comparing the raw string because the order of keys are not guaranteed.
     expect(JSON.parse(result)).to.deep.equal({
@@ -311,7 +328,10 @@ describe('`stringifyRequest()`', () => {
   })
 
   it('should not include default http port', () => {
-    const result = common.stringifyRequest(new Request('http://example.test:80'), 'foo')
+    const result = common.stringifyRequest(
+      new Request('http://example.test:80'),
+      'foo',
+    )
 
     expect(JSON.parse(result)).to.deep.equal({
       method: 'GET',
@@ -322,7 +342,10 @@ describe('`stringifyRequest()`', () => {
   })
 
   it('should not include default https port', () => {
-    const result = common.stringifyRequest(new Request('https://example.test/the/path', { method: 'POST' }), 'foo')
+    const result = common.stringifyRequest(
+      new Request('https://example.test/the/path', { method: 'POST' }),
+      'foo',
+    )
 
     expect(JSON.parse(result)).to.deep.equal({
       method: 'POST',
@@ -333,7 +356,10 @@ describe('`stringifyRequest()`', () => {
   })
 
   it('should default optional options', () => {
-    const result = common.stringifyRequest(new Request('http://example.test'), 'foo')
+    const result = common.stringifyRequest(
+      new Request('http://example.test'),
+      'foo',
+    )
 
     expect(JSON.parse(result)).to.deep.equal({
       method: 'GET',
@@ -344,7 +370,12 @@ describe('`stringifyRequest()`', () => {
   })
 
   it('should pass headers through', () => {
-    const result = common.stringifyRequest(new Request('http://example.test', { headers: { cookie: 'fiz=baz', 'set-cookie': ['hello', 'world'] }}), 'foo')
+    const result = common.stringifyRequest(
+      new Request('http://example.test', {
+        headers: { cookie: 'fiz=baz', 'set-cookie': ['hello', 'world'] },
+      }),
+      'foo',
+    )
 
     expect(JSON.parse(result)).to.deep.equal({
       method: 'GET',
@@ -355,7 +386,10 @@ describe('`stringifyRequest()`', () => {
   })
 
   it('should always treat the body as a string', () => {
-    const result = common.stringifyRequest(new Request('http://example.test'), '{"hello":"world"}')
+    const result = common.stringifyRequest(
+      new Request('http://example.test'),
+      '{"hello":"world"}',
+    )
 
     expect(JSON.parse(result)).to.deep.equal({
       method: 'GET',

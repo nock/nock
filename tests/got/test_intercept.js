@@ -185,7 +185,9 @@ describe('Intercept', () => {
 
     const scope = nock('http://example.test')
       .post('/echo', /key=v.?l/g)
-      .reply(200, async request => ['OK', new URL(request.url).pathname, await request.text()].join(' '))
+      .reply(200, async request =>
+        ['OK', new URL(request.url).pathname, await request.text()].join(' '),
+      )
 
     const { body } = await got.post('http://example.test/echo', { body: input })
 
@@ -196,7 +198,9 @@ describe('Intercept', () => {
   it('post with function as spec', async () => {
     const scope = nock('http://example.test')
       .post('/echo', body => body === 'key=val')
-      .reply(200, async request => ['OK', new URL(request.url).pathname, await request.text()].join(' '))
+      .reply(200, async request =>
+        ['OK', new URL(request.url).pathname, await request.text()].join(' '),
+      )
 
     const { body } = await got.post('http://example.test/echo', {
       body: 'key=val',
@@ -211,7 +215,9 @@ describe('Intercept', () => {
 
     const scope = nock('http://example.test')
       .post('/echo', input)
-      .reply(200, async request => ['OK', new URL(request.url).pathname, await request.text()].join(' '))
+      .reply(200, async request =>
+        ['OK', new URL(request.url).pathname, await request.text()].join(' '),
+      )
 
     const { body } = await got.post('http://example.test/echo', { body: input })
 
@@ -234,7 +240,9 @@ describe('Intercept', () => {
       .filteringPath(/.*/, '*')
       .filteringRequestBody(/.*/, '*')
       .post('*', '*')
-      .reply(200, async request => ['OK', new URL(request.url).pathname, await request.text()].join(' '))
+      .reply(200, async request =>
+        ['OK', new URL(request.url).pathname, await request.text()].join(' '),
+      )
 
     const { body } = await got.post('http://example.test/original/path', {
       body: 'original=body',

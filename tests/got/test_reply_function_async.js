@@ -15,9 +15,7 @@ describe('asynchronous `reply()` function', () => {
     it('reply can take a callback', async () => {
       const scope = nock('http://example.test')
         .get('/')
-        .reply(200, (request, callback) =>
-          callback(null, 'Hello World!'),
-        )
+        .reply(200, (request, callback) => callback(null, 'Hello World!'))
 
       const { body } = await got('http://example.test/', {
         responseType: 'buffer',

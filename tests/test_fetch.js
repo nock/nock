@@ -468,7 +468,7 @@ describe('Native Fetch', () => {
         .reply(303, '', { Location: `${origin}/redirected` })
       nock(origin)
         .get('/redirected')
-        .reply(200, async request =>  {
+        .reply(200, async request => {
           body = await request.text()
           headers = Object.fromEntries(request.headers.entries())
         })
@@ -498,7 +498,7 @@ describe('Native Fetch', () => {
         .reply(303, '', { Location: `https://anotherhost.com/redirected` })
       nock('https://anotherhost.com')
         .get('/redirected')
-        .reply(200, async request =>  {
+        .reply(200, async request => {
           body = await request.text()
           headers = Object.fromEntries(request.headers.entries())
         })

@@ -38,9 +38,7 @@ it('should accept and decode gzip encoded application/json, when headers come fr
     my: 'contents',
   }
 
-  const scope = nock('http://example.test')
-    .post('/', message)
-    .reply(200)
+  const scope = nock('http://example.test').post('/', message).reply(200)
 
   const req = http.request({
     hostname: 'example.test',

@@ -5,4 +5,3 @@
 The goal of this release is to create more predictable, modern and consistent API
 
 ### Breaking changes
-
