@@ -194,7 +194,7 @@ describe('Nock lifecycle functions', () => {
       const responseBody = 'hi'
       const scope = nock('http://example.test')
         .get('/somepath')
-        .reply(200, (uri, requestBody) => {
+        .reply(200, () => {
           somethingBad()
           return responseBody
         })

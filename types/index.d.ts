@@ -149,8 +149,7 @@ declare namespace nock {
     reply(
       replyFnWithCallback: (
         this: ReplyFnContext,
-        uri: string,
-        body: Body,
+        request: Request,
         callback: (
           err: NodeJS.ErrnoException | null,
           result: ReplyFnResult,
@@ -160,16 +159,14 @@ declare namespace nock {
     reply(
       replyFn: (
         this: ReplyFnContext,
-        uri: string,
-        body: Body,
+        request: Request,
       ) => ReplyFnResult | Promise<ReplyFnResult>,
     ): Scope
     reply(
       statusCode: StatusCode,
       replyBodyFnWithCallback: (
         this: ReplyFnContext,
-        uri: string,
-        body: Body,
+        request: Request,
         callback: (
           err: NodeJS.ErrnoException | null,
           result: ReplyBody,
@@ -181,8 +178,7 @@ declare namespace nock {
       statusCode: StatusCode,
       replyBodyFn: (
         this: ReplyFnContext,
-        uri: string,
-        body: Body,
+        request: Request,
       ) => ReplyBody | Promise<ReplyBody>,
       headers?: ReplyHeaders,
     ): Scope
@@ -206,13 +202,6 @@ declare namespace nock {
     optionally(flag?: boolean): this
 
     delay(opts: number): this
-    /** @deprecated use delay(number) instead */
-    delay(opts: { head?: number; body?: number }): this
-    delay(opts: number | { head?: number; body?: number }): this
-    /** @deprecated use delay function instead */
-    delayBody(timeMs: number): this
-    /** @deprecated use delay function instead */
-    delayConnection(timeMs: number): this
   }
 
   interface Options {

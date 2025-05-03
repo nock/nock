@@ -18,6 +18,8 @@ Breaking changes:
 4. `this.req` no longer available, use `request` argument instead.
 5. What's the point of `filteringPath` function?:q
 <!-- 6. return `host` response header as node does. -->
+6. Body matcher function only get the body
+7. reply function only get the request
 
 
 Ideas:
