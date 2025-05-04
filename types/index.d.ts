@@ -91,12 +91,6 @@ declare namespace nock {
     | readonly [StatusCode, ReplyBody]
     | readonly [StatusCode, ReplyBody, ReplyHeaders]
 
-  interface ReplyFnContext extends Interceptor {
-    req: ClientRequest & {
-      headers: Record<string, string>
-    }
-  }
-
   interface Scope extends NodeJS.EventEmitter {
     get: InterceptFunction
     post: InterceptFunction
@@ -149,7 +143,6 @@ declare namespace nock {
     /* tslint:disable:unified-signatures */
     reply(
       replyFnWithCallback: (
-        this: ReplyFnContext,
         request: Request,
         callback: (
           err: NodeJS.ErrnoException | null,
@@ -159,14 +152,12 @@ declare namespace nock {
     ): Scope
     reply(
       replyFn: (
-        this: ReplyFnContext,
         request: Request,
       ) => ReplyFnResult | Promise<ReplyFnResult>,
     ): Scope
     reply(
       statusCode: StatusCode,
       replyBodyFnWithCallback: (
-        this: ReplyFnContext,
         request: Request,
         callback: (
           err: NodeJS.ErrnoException | null,
@@ -178,7 +169,6 @@ declare namespace nock {
     reply(
       statusCode: StatusCode,
       replyBodyFn: (
-        this: ReplyFnContext,
         request: Request,
       ) => ReplyBody | Promise<ReplyBody>,
       headers?: ReplyHeaders,
