@@ -3,6 +3,7 @@
 import { ReadStream } from 'fs'
 import { ClientRequest, IncomingMessage, RequestOptions } from 'http'
 import { ParsedUrlQuery } from 'querystring'
+import { Readable } from 'stream'
 import { Url, URLSearchParams } from 'url'
 
 export = nock
@@ -203,6 +204,15 @@ declare namespace nock {
 
     delay(opts: number): this
   }
+
+  /**
+   * Retrieves the decompressed body of a GET request.
+   * This function handles the edge case of GET requests with a body.
+   *
+   * @param request - The Request object.
+   * @returns A Promise resolving to the decompressed body.
+   */
+  function getDecompressedGetBody(request: Request): Promise<Readable>
 
   interface Options {
     allowUnmocked?: boolean
