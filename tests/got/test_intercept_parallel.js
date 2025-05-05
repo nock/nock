@@ -1,7 +1,6 @@
 'use strict'
 
 const { expect } = require('chai')
-const sinon = require('sinon')
 const nock = require('../..')
 const got = require('./got_client')
 

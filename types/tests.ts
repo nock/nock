@@ -93,12 +93,12 @@ scope = inst.reply(num, str)
 
 scope = inst.reply(num, str, obj)
 scope = inst.reply(num, obj, obj)
-scope = inst.reply(num, (uri: string, body: string) => str)
-scope = inst.reply(num, async (uri: string, body: string) => str)
-scope = inst.reply(num, (uri: string, body: string) => str, obj)
-scope = inst.reply((uri: string, body) => [num, str] as const)
-scope = inst.reply(async (uri: string, body) => [num] as const)
-scope = inst.reply((uri: string, body) => [num, str, obj])
+scope = inst.reply(num, (request: Request) => str)
+scope = inst.reply(num, async (request: Request) => str)
+scope = inst.reply(num, (request: Request) => str, obj)
+scope = inst.reply((request) => [num, str] as const)
+scope = inst.reply(async (request) => [num] as const)
+scope = inst.reply((request) => [num, str, obj])
 scope = inst.replyWithFile(num, str)
 
 inst = inst.times(4)
@@ -311,22 +311,22 @@ scope = nock('http://example.test')
 scope = nock('http://example.test')
   .filteringRequestBody(/.*/, '*')
   .post('/echo', '*')
-  .reply(201, (uri: string, requestBody) => {
-    return requestBody
+  .reply(201, async (request) => {
+    return await request.text()
   })
 
 scope = nock('http://example.test')
   .filteringRequestBody(/.*/, '*')
   .post('/echo', '*')
-  .reply((uri, requestBody, cb) => {
+  .reply((request, cb) => {
     fs.readFile('cat-poems.txt', cb as any) // Error-first callback
   })
 
 scope = nock('http://example.test')
   .filteringRequestBody(/.*/, '*')
   .post('/echo', '*')
-  .reply((uri, requestBody) => {
-    str = uri
+  .reply((request) => {
+    str = request.url
     return [
       201,
       'THIS IS THE REPLY BODY',
@@ -337,7 +337,7 @@ scope = nock('http://example.test')
 scope = nock('http://example.test')
   .filteringRequestBody(/.*/, '*')
   .post('/echo', '*')
-  .reply((uri, requestBody, cb) => {
+  .reply((request, cb) => {
     setTimeout(() => {
       cb(null, [201, 'THIS IS THE REPLY BODY'])
     }, 1e3)
@@ -345,17 +345,17 @@ scope = nock('http://example.test')
 
 scope = nock('http://example.test')
   .get('/cat-poems')
-  .reply(200, (uri: string, requestBody) => {
+  .reply(200, () => {
     return fs.createReadStream('cat-poems.txt')
   })
 
 /// Access original request and headers
 scope = nock('http://example.test')
   .get('/cat-poems')
-  .reply(function (uri, requestBody) {
-    str = this.req.path
-    console.log('path:', this.req.path)
-    console.log('headers:', this.req.headers)
+  .reply(function (request) {
+    str = request.url
+    console.log('path:', new URL(request.url).pathname)
+    console.log('headers:', Object.fromEntries(request.headers.entries()))
     // ...
   })
 
