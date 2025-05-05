@@ -4,9 +4,6 @@
 
 The goal of this release is to create more predictable, modern and consistent API.
 
-### Breaking changes
-
-
 ## Breaking Changes
 
 1. **`no match` event now sends a `Request` object**  
@@ -44,31 +41,48 @@ The goal of this release is to create more predictable, modern and consistent AP
    })
    ```
 
-7. **`request` and `replied` events now send a `Request` object**  
-    Events now emits the `Request` object instead of attaching the request to the `interceptor`. This ensures a consistent API and avoids reliance on internal properties.
+3. **`reply` header functions now only receive the `Request` instance**  
+   The `reply` header functions no longer receive the `request`, `response`, and (response) `body` parameters. Instead, they now only receive the `Request` instance.
 
-    ```js
-    // Before
-    nock.emitter.on('replied', (req, interceptor) => {
-      console.log(req.path, interceptor.statusCode)
+   ```js
+   // Before
+   .reply(200, 'Hello World!', {
+      'Content-Length': (req, res, body) => body.length,
+      ETag: () => `${Date.now()}`,
     })
 
-    // After
-    nock.emitter.on('replied', (request: Request, interceptor) => {
-      console.log(request.url, interceptor.statusCode)
+   // After
+   .reply(200, 'Hello World!', {
+      'Body-Content-Length': async (request) => (await request.text()).length,
+      ETag: () => `${Date.now()}`,
     })
-    ```
+   ```
 
-8. **New `getDecompressedGetBody` Function**  
+4. **`request` and `replied` events now send a `Request` object**  
+   Events now emits the `Request` object instead of attaching the request to the `interceptor`. This ensures a consistent API and avoids reliance on internal properties.
+
+   ```js
+   // Before
+   nock.emitter.on('replied', (req, interceptor) => {
+     console.log(req.path, interceptor.statusCode)
+   })
+
+   // After
+   nock.emitter.on('replied', (request: Request, interceptor) => {
+     console.log(request.url, interceptor.statusCode)
+   })
+   ```
+
+5. **New `getDecompressedGetBody` Function**  
    A new utility function, `getDecompressedGetBody`, has been introduced to handle the edge case of `GET` requests with a body. This function allows you to retrieve the decompressed body of a `GET` request, which is not natively supported by the `Request` object.
 
    ```js
    const scope = nock('http://example.test')
-    .get('/')
-    .reply(200, request => text(getDecompressedGetBody(request)))
+     .get('/')
+     .reply(200, request => text(getDecompressedGetBody(request)))
    ```
 
-3. **Removed `delayBody` and `delayConnection` methods**  
+6. **Removed `delayBody` and `delayConnection` methods**  
    These methods have been consolidated into a single `delay` method that accepts a single argument and behave as `delayBody`.
 
    ```js
@@ -81,7 +95,7 @@ The goal of this release is to create more predictable, modern and consistent AP
    .delay(200) // actual waits 200ms
    ```
 
-4. **Body matcher functions now only receive the body**  
+7. **Body matcher functions now only receive the body**  
    The body matcher functions no longer receive the `Request` object.
 
    ```js
@@ -92,7 +106,7 @@ The goal of this release is to create more predictable, modern and consistent AP
    .post('/', (body) => body.includes('test'))
    ```
 
-5. **Removed `this.req` in reply functions**  
+8. **Removed `this.req` in reply functions**  
    The `this.req` property is no longer available. Use the `Request` object passed to the `replyFunction`.
 
    ```js
@@ -109,18 +123,19 @@ The goal of this release is to create more predictable, modern and consistent AP
    })
    ```
 
-6. **Updated `Host` header behavior**  
+9. **Updated `Host` header behavior**  
    We no longer ignore the `Host` header if it is not explicitly defined in the request and match it like any other header.
 
    ```js
    const scope = nock('http://example.test', {
      reqheaders: { host: 'some.other.domain.test' },
    })
-    .get('/')
-    .reply()
+     .get('/')
+     .reply()
 
-    const { statusCode } = await got('http://example.test/') // Nock no match
+   const { statusCode } = await got('http://example.test/') // Nock no match
    ```
+
 ---
 
 For more details, refer to the [release notes](https://github.com/nock/nock/releases/tag/v15.0.0).

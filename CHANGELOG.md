@@ -25,6 +25,6 @@ TODO:
 2. // TODO: request.headers.forEach skip a header, need to investigate it.
 3. remove old lint rules and set `node:` rule:q
    5: test: receives the correct arguments
-5. test: should delay the clock between the `response` event and the first `data` event
-6. test: should abort a request with a timeout signal
-7. Think about a better name for `getDecompressedGetBody`
+4. test: should delay the clock between the `response` event and the first `data` event
+5. test: should abort a request with a timeout signal
+6. Think about a better name for `getDecompressedGetBody`

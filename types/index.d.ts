@@ -1,7 +1,7 @@
 // TypeScript Version: 5.0
 
 import { ReadStream } from 'fs'
-import { ClientRequest, IncomingMessage, RequestOptions } from 'http'
+import { RequestOptions } from 'http'
 import { ParsedUrlQuery } from 'querystring'
 import { Readable } from 'stream'
 import { Url, URLSearchParams } from 'url'
@@ -74,11 +74,7 @@ declare namespace nock {
   type Body = string | Record<string, any> // a string or decoded JSON
   type ReplyBody = Body | Buffer | ReadStream
 
-  type ReplyHeaderFunction = (
-    req: ClientRequest,
-    res: IncomingMessage,
-    body: string | Buffer,
-  ) => string | string[]
+  type ReplyHeaderFunction = (req: Request) => Promise<string | string[]>
   type ReplyHeaderValue = string | string[] | ReplyHeaderFunction
   type ReplyHeaders =
     | Record<string, ReplyHeaderValue>
@@ -151,9 +147,7 @@ declare namespace nock {
       ) => void,
     ): Scope
     reply(
-      replyFn: (
-        request: Request,
-      ) => ReplyFnResult | Promise<ReplyFnResult>,
+      replyFn: (request: Request) => ReplyFnResult | Promise<ReplyFnResult>,
     ): Scope
     reply(
       statusCode: StatusCode,
@@ -168,9 +162,7 @@ declare namespace nock {
     ): Scope
     reply(
       statusCode: StatusCode,
-      replyBodyFn: (
-        request: Request,
-      ) => ReplyBody | Promise<ReplyBody>,
+      replyBodyFn: (request: Request) => ReplyBody | Promise<ReplyBody>,
       headers?: ReplyHeaders,
     ): Scope
     reply(responseCode?: StatusCode, body?: Body, headers?: ReplyHeaders): Scope

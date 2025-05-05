@@ -96,9 +96,9 @@ scope = inst.reply(num, obj, obj)
 scope = inst.reply(num, (request: Request) => str)
 scope = inst.reply(num, async (request: Request) => str)
 scope = inst.reply(num, (request: Request) => str, obj)
-scope = inst.reply((request) => [num, str] as const)
-scope = inst.reply(async (request) => [num] as const)
-scope = inst.reply((request) => [num, str, obj])
+scope = inst.reply(request => [num, str] as const)
+scope = inst.reply(async request => [num] as const)
+scope = inst.reply(request => [num, str, obj])
 scope = inst.replyWithFile(num, str)
 
 inst = inst.times(4)
@@ -311,7 +311,7 @@ scope = nock('http://example.test')
 scope = nock('http://example.test')
   .filteringRequestBody(/.*/, '*')
   .post('/echo', '*')
-  .reply(201, async (request) => {
+  .reply(201, async request => {
     return await request.text()
   })
 
@@ -325,7 +325,7 @@ scope = nock('http://example.test')
 scope = nock('http://example.test')
   .filteringRequestBody(/.*/, '*')
   .post('/echo', '*')
-  .reply((request) => {
+  .reply(request => {
     str = request.url
     return [
       201,
@@ -429,8 +429,8 @@ scope = nock('http://example.test')
 scope = nock('http://example.test')
   .get('/')
   .reply(200, 'Hello World!', {
-    'X-My-Headers': (req, res, body) => {
-      return body.toString()
+    'X-My-Headers': request => {
+      return request.text()
     },
   })
 
@@ -445,8 +445,8 @@ scope = nock('http://example.test')
 
 scope = nock('http://example.test')
   .defaultReplyHeaders({
-    'Content-Length': (req, res, body) => {
-      return body.length.toString()
+    'Content-Length': async request => {
+      return (await request.text()).length.toString()
     },
   })
   .get('/')
