@@ -1309,7 +1309,7 @@ nock.removeInterceptor({
   hostname: 'localhost',
   path: '/mockedResource',
   // method defaults to `GET`
-  // proto defaullts to `http`
+  // proto defaults to `http`
 })
 ```
 
