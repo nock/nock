@@ -8,6 +8,8 @@ const assertRejects = require('assert-rejects')
 const url = require('url')
 const nock = require('../..')
 const got = require('./got_client')
+const { text } = require('stream/consumers')
+const { getDecompressedGetBody } = require('../../lib/utils/node')
 
 const acceptableGlobalKeys = new Set([
   ...Object.keys(global),
@@ -82,7 +84,7 @@ describe('Intercept', () => {
   it('should intercept a GET request with body', async () => {
     const scope = nock('http://example.test')
       .get('/')
-      .reply(200, (uri, body) => body)
+      .reply(200, request => text(getDecompressedGetBody(request)))
 
     const { body } = await got('http://example.test/', {
       method: 'GET',
@@ -183,7 +185,9 @@ describe('Intercept', () => {
 
     const scope = nock('http://example.test')
       .post('/echo', /key=v.?l/g)
-      .reply(200, (uri, body) => ['OK', uri, body].join(' '))
+      .reply(200, async request =>
+        ['OK', new URL(request.url).pathname, await request.text()].join(' '),
+      )
 
     const { body } = await got.post('http://example.test/echo', { body: input })
 
@@ -194,7 +198,9 @@ describe('Intercept', () => {
   it('post with function as spec', async () => {
     const scope = nock('http://example.test')
       .post('/echo', body => body === 'key=val')
-      .reply(200, (uri, body) => ['OK', uri, body].join(' '))
+      .reply(200, async request =>
+        ['OK', new URL(request.url).pathname, await request.text()].join(' '),
+      )
 
     const { body } = await got.post('http://example.test/echo', {
       body: 'key=val',
@@ -209,7 +215,9 @@ describe('Intercept', () => {
 
     const scope = nock('http://example.test')
       .post('/echo', input)
-      .reply(200, (uri, body) => ['OK', uri, body].join(' '))
+      .reply(200, async request =>
+        ['OK', new URL(request.url).pathname, await request.text()].join(' '),
+      )
 
     const { body } = await got.post('http://example.test/echo', { body: input })
 
@@ -232,7 +240,9 @@ describe('Intercept', () => {
       .filteringPath(/.*/, '*')
       .filteringRequestBody(/.*/, '*')
       .post('*', '*')
-      .reply(200, (uri, body) => ['OK', uri, body].join(' '))
+      .reply(200, async request =>
+        ['OK', new URL(request.url).pathname, await request.text()].join(' '),
+      )
 
     const { body } = await got.post('http://example.test/original/path', {
       body: 'original=body',
@@ -427,7 +437,7 @@ describe('Intercept', () => {
           {
             method: 'GET',
             url: 'http://example.test/wrong-path',
-            headers: { connection: 'close' },
+            headers: { connection: 'close', host: 'example.test' },
           },
           null,
           2,
@@ -455,7 +465,7 @@ describe('Intercept', () => {
           {
             method: 'GET',
             url: 'https://example.test/abcdef892932',
-            headers: { connection: 'close' },
+            headers: { connection: 'close', host: 'example.test' },
           },
           null,
           2,

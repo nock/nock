@@ -15,9 +15,7 @@ describe('asynchronous `reply()` function', () => {
     it('reply can take a callback', async () => {
       const scope = nock('http://example.test')
         .get('/')
-        .reply(200, (path, requestBody, callback) =>
-          callback(null, 'Hello World!'),
-        )
+        .reply(200, (request, callback) => callback(null, 'Hello World!'))
 
       const { body } = await got('http://example.test/', {
         responseType: 'buffer',
@@ -33,7 +31,7 @@ describe('asynchronous `reply()` function', () => {
 
       const scope = nock('http://example.test')
         .get('/')
-        .reply((path, requestBody, callback) => {
+        .reply((request, callback) => {
           setTimeout(
             () =>
               callback(null, [
@@ -56,9 +54,9 @@ describe('asynchronous `reply()` function', () => {
     it('should get request headers', async () => {
       const scope = nock('http://example.test')
         .get('/yo')
-        .reply(201, function (path, reqBody, cb) {
-          expect(this.req.path).to.equal('/yo')
-          expect(this.req.headers).to.deep.equal({
+        .reply(201, function (request, cb) {
+          expect(new URL(request.url).pathname).to.equal('/yo')
+          expect(Object.fromEntries(request.headers.entries())).to.deep.equal({
             connection: 'close',
             'accept-encoding': 'gzip, deflate, br',
             host: 'example.test',
@@ -68,7 +66,7 @@ describe('asynchronous `reply()` function', () => {
           })
           setTimeout(function () {
             cb(null, 'foobar')
-          }, 1e3)
+          }, 100)
         })
 
       const { statusCode, body } = await got('http://example.test/yo', {
@@ -87,7 +85,7 @@ describe('asynchronous `reply()` function', () => {
     it('reply should throw on error on the callback', async () => {
       nock('http://example.test')
         .get('/')
-        .reply(500, (path, requestBody, callback) =>
+        .reply(500, (request, callback) =>
           callback(new Error('Database failed')),
         )
 
@@ -97,7 +95,7 @@ describe('asynchronous `reply()` function', () => {
     it('an error passed to the callback propagates when [err, fullResponseArray] is expected', async () => {
       nock('http://example.test')
         .get('/')
-        .reply((path, requestBody, callback) => {
+        .reply((request, callback) => {
           callback(Error('boom'))
         })
 
@@ -109,7 +107,7 @@ describe('asynchronous `reply()` function', () => {
 
       const scope = nock('http://example.test')
         .get('/')
-        .reply(201, (path, requestBody, callback) => {
+        .reply(201, (request, callback) => {
           replyFnCalled()
           callback(null, 'one')
           callback(null, 'two')
@@ -130,9 +128,9 @@ describe('asynchronous `reply()` function', () => {
     it('reply can take a status code with an 2-arg async function, and passes it the correct arguments', async () => {
       const scope = nock('http://example.com')
         .post('/foo')
-        .reply(201, async (path, requestBody) => {
-          expect(path).to.equal('/foo')
-          expect(requestBody).to.equal('request-body')
+        .reply(201, async request => {
+          expect(new URL(request.url).pathname).to.equal('/foo')
+          expect(await request.text()).to.equal('request-body')
           return 'response-body'
         })
 

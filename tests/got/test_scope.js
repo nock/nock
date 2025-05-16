@@ -20,7 +20,7 @@ it('scope exposes interceptors', () => {
   scopes.forEach(scope => {
     scope.interceptors.forEach(interceptor => {
       expect(interceptor).to.be.an.instanceOf(Interceptor)
-      interceptor.delayConnection(100)
+      interceptor.delay(100)
     })
   })
 })

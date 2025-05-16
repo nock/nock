@@ -1,8 +1,9 @@
-// TypeScript Version: 3.5
+// TypeScript Version: 5.0
 
 import { ReadStream } from 'fs'
-import { ClientRequest, IncomingMessage, RequestOptions } from 'http'
+import { RequestOptions } from 'http'
 import { ParsedUrlQuery } from 'querystring'
+import { Readable } from 'stream'
 import { Url, URLSearchParams } from 'url'
 
 export = nock
@@ -73,11 +74,7 @@ declare namespace nock {
   type Body = string | Record<string, any> // a string or decoded JSON
   type ReplyBody = Body | Buffer | ReadStream
 
-  type ReplyHeaderFunction = (
-    req: ClientRequest,
-    res: IncomingMessage,
-    body: string | Buffer,
-  ) => string | string[]
+  type ReplyHeaderFunction = (req: Request) => Promise<string | string[]>
   type ReplyHeaderValue = string | string[] | ReplyHeaderFunction
   type ReplyHeaders =
     | Record<string, ReplyHeaderValue>
@@ -89,12 +86,6 @@ declare namespace nock {
     | readonly [StatusCode]
     | readonly [StatusCode, ReplyBody]
     | readonly [StatusCode, ReplyBody, ReplyHeaders]
-
-  interface ReplyFnContext extends Interceptor {
-    req: ClientRequest & {
-      headers: Record<string, string>
-    }
-  }
 
   interface Scope extends NodeJS.EventEmitter {
     get: InterceptFunction
@@ -148,9 +139,7 @@ declare namespace nock {
     /* tslint:disable:unified-signatures */
     reply(
       replyFnWithCallback: (
-        this: ReplyFnContext,
-        uri: string,
-        body: Body,
+        request: Request,
         callback: (
           err: NodeJS.ErrnoException | null,
           result: ReplyFnResult,
@@ -158,18 +147,12 @@ declare namespace nock {
       ) => void,
     ): Scope
     reply(
-      replyFn: (
-        this: ReplyFnContext,
-        uri: string,
-        body: Body,
-      ) => ReplyFnResult | Promise<ReplyFnResult>,
+      replyFn: (request: Request) => ReplyFnResult | Promise<ReplyFnResult>,
     ): Scope
     reply(
       statusCode: StatusCode,
       replyBodyFnWithCallback: (
-        this: ReplyFnContext,
-        uri: string,
-        body: Body,
+        request: Request,
         callback: (
           err: NodeJS.ErrnoException | null,
           result: ReplyBody,
@@ -179,11 +162,7 @@ declare namespace nock {
     ): Scope
     reply(
       statusCode: StatusCode,
-      replyBodyFn: (
-        this: ReplyFnContext,
-        uri: string,
-        body: Body,
-      ) => ReplyBody | Promise<ReplyBody>,
+      replyBodyFn: (request: Request) => ReplyBody | Promise<ReplyBody>,
       headers?: ReplyHeaders,
     ): Scope
     reply(responseCode?: StatusCode, body?: Body, headers?: ReplyHeaders): Scope
@@ -206,14 +185,16 @@ declare namespace nock {
     optionally(flag?: boolean): this
 
     delay(opts: number): this
-    /** @deprecated use delay(number) instead */
-    delay(opts: { head?: number; body?: number }): this
-    delay(opts: number | { head?: number; body?: number }): this
-    /** @deprecated use delay function instead */
-    delayBody(timeMs: number): this
-    /** @deprecated use delay function instead */
-    delayConnection(timeMs: number): this
   }
+
+  /**
+   * Retrieves the decompressed body of a GET request.
+   * This function handles the edge case of GET requests with a body.
+   *
+   * @param request - The Request object.
+   * @returns A Promise resolving to the decompressed body.
+   */
+  function getDecompressedGetBody(request: Request): Promise<Readable>
 
   interface Options {
     allowUnmocked?: boolean

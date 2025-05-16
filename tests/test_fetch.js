@@ -124,13 +124,18 @@ describe('Native Fetch', () => {
   })
 
   it('should abort a request with a timeout signal', async () => {
-    const scope = nock('http://test.com').get('/').delayBody(100).reply(200)
+    const scope = nock('http://test.com')
+      .get('/')
+      .reply(200, async () => {
+        await new Promise(resolve => setTimeout(resolve, 100))
+        return true
+      })
 
-    const response = await fetch('http://test.com', {
+    const response = fetch('http://test.com', {
       signal: AbortSignal.timeout(50),
     })
     await assertRejects(
-      response.text(),
+      response,
       'TimeoutError: The operation was aborted due to timeout',
     )
     scope.done()
@@ -433,9 +438,9 @@ describe('Native Fetch', () => {
         .reply(302, '', { Location: `${origin}/redirected` })
       nock(origin)
         .get('/redirected')
-        .reply(200, function (uri, requestBody) {
-          body = requestBody
-          headers = this.req.headers
+        .reply(200, async request => {
+          body = await request.text()
+          headers = Object.fromEntries(request.headers.entries())
         })
 
       const response = await fetch(origin, {
@@ -451,10 +456,7 @@ describe('Native Fetch', () => {
 
       expect(response.status).to.eq(200)
       // Must remove body-related request headers.
-      expect(headers).to.deep.eq({
-        'x-other-header': 'value',
-        host: new URL(origin).host,
-      })
+      expect(headers).to.deep.eq({ 'x-other-header': 'value' })
       // Non-GET/HEAD request body of a 303 redirect must be null.
       expect(body).to.be.empty()
     })
@@ -466,9 +468,9 @@ describe('Native Fetch', () => {
         .reply(303, '', { Location: `${origin}/redirected` })
       nock(origin)
         .get('/redirected')
-        .reply(200, function (uri, requestBody) {
-          body = requestBody
-          headers = this.req.headers
+        .reply(200, async request => {
+          body = await request.text()
+          headers = Object.fromEntries(request.headers.entries())
         })
 
       const response = await fetch(origin, {
@@ -484,10 +486,7 @@ describe('Native Fetch', () => {
 
       expect(response.status).to.eq(200)
       // Must remove body-related request headers.
-      expect(headers).to.deep.eq({
-        'x-other-header': 'value',
-        host: new URL(origin).host,
-      })
+      expect(headers).to.deep.eq({ 'x-other-header': 'value' })
       // Non-GET/HEAD request body of a 303 redirect must be null.
       expect(body).to.be.empty()
     })
@@ -499,9 +498,9 @@ describe('Native Fetch', () => {
         .reply(303, '', { Location: `https://anotherhost.com/redirected` })
       nock('https://anotherhost.com')
         .get('/redirected')
-        .reply(200, function (uri, requestBody) {
-          body = requestBody
-          headers = this.req.headers
+        .reply(200, async request => {
+          body = await request.text()
+          headers = Object.fromEntries(request.headers.entries())
         })
 
       const response = await fetch(origin, {
@@ -515,23 +514,17 @@ describe('Native Fetch', () => {
       })
 
       expect(response.status).to.eq(200)
-      expect(headers).to.deep.eq({
-        'x-other-header': 'value',
-        host: 'anotherhost.com',
-      })
+      expect(headers).to.deep.eq({ 'x-other-header': 'value' })
       expect(body).to.be.empty()
     })
   })
 
   describe('recording', () => {
-    // Skip this test until the fix will be backported to all LTS versions.
-    it.skip('records and replays gzipped nocks correctly', async () => {
+    it('records and replays gzipped nocks correctly', async () => {
       const exampleText = '<html><body>example</body></html>'
 
       const { origin } = await startHttpServer((request, response) => {
-        // TODO: flip the order of the encoding, this is a bug in fetch
-        // const body = zlib.brotliCompressSync(zlib.gzipSync(exampleText))
-        const body = zlib.gzipSync(zlib.brotliCompressSync(exampleText))
+        const body = zlib.brotliCompressSync(zlib.gzipSync(exampleText))
 
         response.writeHead(200, { 'content-encoding': 'gzip, br' })
         response.end(body)
