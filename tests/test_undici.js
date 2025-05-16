@@ -14,13 +14,13 @@ describe('Undici', () => {
     const response = await undici.request('http://example.test/test', {
       query: { a: 1 },
     })
-    
+
     expect(response).to.deep.include({
       statusCode: 200,
       headers: { test: 'header' },
-    })   
+    })
     expect(await response.body.text()).to.equal('OK')
-  });
+  })
 
   it('query options overrides URL query', async () => {
     const scope = nock('http://example.test')
@@ -31,9 +31,9 @@ describe('Undici', () => {
     await undici.request('http://example.test/test?a=2', {
       query: { a: 1 },
     })
-    
+
     scope.done()
-  });
+  })
 
   it('GET request with query in path', async () => {
     const scope = nock('http://example.test')
@@ -44,21 +44,24 @@ describe('Undici', () => {
     await undici.request('http://example.test/test?a=1')
 
     scope.done()
-  });
+  })
 
   it('POST request', async () => {
     let requestBody
     nock('http://example.test')
-      .post('/test', body => (requestBody = body, true))
+      .post('/test', body => {
+        requestBody = body
+        return true
+      })
       .reply(200)
     const response = await undici.request('http://example.test/test', {
       method: 'POST',
       body: 'test',
     })
-    
-    expect(response.statusCode).to.be.eq(200) 
+
+    expect(response.statusCode).to.be.eq(200)
     expect(requestBody).to.be.eq('test')
-  });
+  })
 
   it('forward request if no mock', async () => {
     const { origin } = await startHttpServer((request, response) => {
