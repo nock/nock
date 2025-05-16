@@ -1308,6 +1308,8 @@ Examples:
 nock.removeInterceptor({
   hostname: 'localhost',
   path: '/mockedResource',
+  // method defaults to `GET`
+  // proto defaults to `http`
 })
 ```
 
