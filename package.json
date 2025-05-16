@@ -51,7 +51,8 @@
     "semantic-release": "^24.1.0",
     "sinon": "^17.0.1",
     "sinon-chai": "^3.7.0",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+    "undici": "^7.9.0"
   },
   "scripts": {
     "format:fix": "prettier --write '**/*.{js,json,md,ts,yml,yaml}'",
