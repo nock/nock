@@ -36,7 +36,7 @@ it('emits request and request body', async () => {
 
   scope.on('request', function (req, interceptor, body) {
     onRequest()
-    expect(req.path).to.equal('/please')
+    expect(new URL(req.url).pathname).to.equal('/please')
     expect(interceptor.interceptionCounter).to.equal(1)
     expect(body).to.deep.equal(data)
     expect(onReplied).to.not.have.been.called()
@@ -44,7 +44,7 @@ it('emits request and request body', async () => {
 
   scope.on('replied', function (req, interceptor) {
     onReplied()
-    expect(req.path).to.equal('/please')
+    expect(new URL(req.url).pathname).to.equal('/please')
     expect(interceptor.interceptionCounter).to.equal(1)
   })
 
@@ -92,7 +92,7 @@ it('emits no match when no match and mocked', done => {
   nock('http://example.test').get('/').reply(418)
 
   nock.emitter.on('no match', req => {
-    expect(req.path).to.equal('/definitelymaybe')
+    expect(new URL(req.url).pathname).to.equal('/definitelymaybe')
     done()
   })
 
@@ -103,7 +103,7 @@ it('emits no match when netConnect is disabled', done => {
   nock.disableNetConnect()
 
   nock.emitter.on('no match', req => {
-    expect(req.hostname).to.equal('example.test')
+    expect(new URL(req.url).hostname).to.equal('example.test')
     done()
   })
 

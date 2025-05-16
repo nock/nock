@@ -194,7 +194,7 @@ describe('Nock lifecycle functions', () => {
       const responseBody = 'hi'
       const scope = nock('http://example.test')
         .get('/somepath')
-        .reply(200, (uri, requestBody) => {
+        .reply(200, () => {
           somethingBad()
           return responseBody
         })
@@ -210,7 +210,7 @@ describe('Nock lifecycle functions', () => {
     it('prevents the request from completing', done => {
       const onRequest = sinon.spy()
 
-      nock('http://example.test').get('/').delayConnection(100).reply(200, 'OK')
+      nock('http://example.test').get('/').delay(100).reply(200, 'OK')
 
       http.get('http://example.test', onRequest)
 

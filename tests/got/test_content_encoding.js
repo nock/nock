@@ -29,9 +29,7 @@ describe('Content Encoding', () => {
 
     const scope = nock('http://example.test')
       .get('/')
-      .delay({
-        body: 100,
-      })
+      .delay(100)
       .reply(200, compressed, {
         'Content-Encoding': 'gzip',
       })

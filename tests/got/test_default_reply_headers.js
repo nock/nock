@@ -104,17 +104,19 @@ describe('`defaultReplyHeaders()`', () => {
 
     nock('http://example.test')
       .defaultReplyHeaders({
-        'Content-Length': (req, res, body) => body.length,
+        'Request-Id': request => request.headers.get('request-id'),
         Date: () => date,
         Foo: () => 'foo',
       })
       .get('/')
       .reply(200, message, { foo: 'bar' })
 
-    const { headers } = await got('http://example.test')
+    const { headers } = await got('http://example.test', {
+      headers: { 'request-id': 'abc' },
+    })
 
     expect(headers).to.deep.equal({
-      'content-length': message.length.toString(),
+      'request-id': 'abc',
       date,
       foo: 'bar',
     })
