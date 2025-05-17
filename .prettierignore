@@ -3,3 +3,4 @@ package-lock.json
 tsconfig.json
 /.nyc_output
 /coverage
+migration_guides

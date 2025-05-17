@@ -213,7 +213,9 @@ describe('Nock Back', () => {
 
     it('normal nocks work', testNock)
 
-    it('uses recorded fixtures', done => { nockBackWithFixture(done, true) })
+    it('uses recorded fixtures', done => {
+      nockBackWithFixture(done, true)
+    })
 
     it("goes to internet, doesn't record new fixtures", done => {
       const onData = sinon.spy()
@@ -746,7 +748,9 @@ describe('Nock Back', () => {
 
     it('normal nocks work', testNock)
 
-    it('nock back loads scope', done => { nockBackWithFixture(done, true) })
+    it('nock back loads scope', done => {
+      nockBackWithFixture(done, true)
+    })
 
     it('no unnocked http calls work', done => {
       const req = http.request(
