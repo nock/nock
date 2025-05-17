@@ -160,11 +160,6 @@ scope = nock(new URL('https://example.test/'))
   .get('/resource')
   .reply(200, 'url matched')
 
-// specifying URL from url.parse output
-scope = nock(url.parse('https://example.test/'))
-  .get('/resource')
-  .reply(200, 'url matched')
-
 // Specifying hostname
 scope = nock('http://example.test')
   .get('/resource')

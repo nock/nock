@@ -12,10 +12,10 @@
 //   openssl x509 -req -in localhost.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out localhost.crt -days 3650
 //   rm ca.srl localhost.csr
 //
-const http = require('http')
-const https = require('https')
-const path = require('path')
-const fs = require('fs')
+const http = require('node:http')
+const https = require('node:https')
+const path = require('node:path')
+const fs = require('node:fs')
 
 const servers = []
 

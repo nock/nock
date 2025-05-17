@@ -12,7 +12,7 @@ const nock = require('../')
 
 nock('http://someotherservice.com').get('/').reply(200, 'whaaa')
 
-const http = require('http')
+const http = require('node:http')
 const req = http.get('http://www.google.com/', function (res) {
   console.log('request result: res.statusCode = %j', res.statusCode)
   events.forEach(log(res, 'res'))

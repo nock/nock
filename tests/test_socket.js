@@ -1,9 +1,9 @@
 'use strict'
 
 const { expect } = require('chai')
-const http = require('http')
-const https = require('https')
-const { Readable } = require('stream')
+const http = require('node:http')
+const https = require('node:https')
+const { Readable } = require('node:stream')
 const nock = require('..')
 
 it('should expose TLSSocket attributes for HTTPS requests', done => {

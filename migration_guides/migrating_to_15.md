@@ -136,6 +136,18 @@ The goal of this release is to create more predictable, modern and consistent AP
    const { statusCode } = await got('http://example.test/') // Nock no match
    ```
 
+10. **Scope constructor no longer supports legacy URL format**  
+   The `Scope` constructor no longer supports the legacy URL format. Use the modern URL format instead.
+
+   ```js
+   // Before
+   const scope = nock(url.parse('http://example.test'))
+
+   // After
+   const scope = nock('http://example.test')
+   const scope = nock(new URL('http://example.test'))
+   ```
+
 ---
 
 For more details, refer to the [release notes](https://github.com/nock/nock/releases/tag/v15.0.0).

@@ -1,7 +1,7 @@
 'use strict'
 
 const { expect } = require('chai')
-const zlib = require('zlib')
+const zlib = require('node:zlib')
 const nock = require('../..')
 const got = require('./got_client')
 

@@ -1,7 +1,7 @@
 'use strict'
 
 const { expect } = require('chai')
-const http = require('http')
+const http = require('node:http')
 const sinon = require('sinon')
 const nock = require('../..')
 

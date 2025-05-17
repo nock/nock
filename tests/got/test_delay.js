@@ -4,7 +4,7 @@ const fs = require('node:fs')
 const path = require('node:path')
 const http = require('node:http')
 const { expect } = require('chai')
-const stream = require('stream')
+const stream = require('node:stream')
 const nock = require('../..')
 const got = require('./got_client')
 

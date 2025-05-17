@@ -2,7 +2,7 @@
 
 const { expect } = require('chai')
 const sinon = require('sinon')
-const url = require('url')
+const url = require('node:url')
 const nock = require('../..')
 const got = require('./got_client')
 const assertRejects = require('assert-rejects')

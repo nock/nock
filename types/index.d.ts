@@ -9,7 +9,7 @@ import { Url, URLSearchParams } from 'url'
 export = nock
 
 declare function nock(
-  basePath: string | RegExp | Url | URL,
+  basePath: string | RegExp | URL,
   options?: nock.Options,
 ): nock.Scope
 
