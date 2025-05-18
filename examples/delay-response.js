@@ -1,4 +1,4 @@
-const http = require('http')
+const http = require('node:http')
 const nock = require('../')
 const log = require('./_log')
 const events = ['socket', 'response', 'end', 'data']

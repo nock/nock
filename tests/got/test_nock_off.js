@@ -1,7 +1,7 @@
 'use strict'
 
 const { expect } = require('chai')
-const http = require('http')
+const http = require('node:http')
 const nock = require('../..')
 
 const got = require('./got_client')
@@ -9,10 +9,12 @@ const httpsServer = require('../servers')
 
 describe('NOCK_OFF env var', () => {
   let original
+
   beforeEach(() => {
     original = process.env.NOCK_OFF
     process.env.NOCK_OFF = 'true'
   })
+
   afterEach(() => {
     process.env.NOCK_OFF = original
   })

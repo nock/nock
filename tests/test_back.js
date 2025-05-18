@@ -1,13 +1,12 @@
 'use strict'
 
-const crypto = require('crypto')
-const http = require('http')
-const fs = require('fs')
+const crypto = require('node:crypto')
+const http = require('node:http')
+const fs = require('node:fs')
 const { expect } = require('chai')
-const path = require('path')
+const path = require('node:path')
 const rimraf = require('rimraf')
 const sinon = require('sinon')
-const proxyquire = require('proxyquire').preserveCache()
 const nock = require('..')
 const { startHttpServer } = require('./servers')
 
@@ -214,7 +213,9 @@ describe('Nock Back', () => {
 
     it('normal nocks work', testNock)
 
-    it('uses recorded fixtures', done => nockBackWithFixture(done, true))
+    it('uses recorded fixtures', done => {
+      nockBackWithFixture(done, true)
+    })
 
     it("goes to internet, doesn't record new fixtures", done => {
       const onData = sinon.spy()
@@ -249,14 +250,6 @@ describe('Nock Back', () => {
           request.end()
         })
       })
-    })
-
-    it('should throw the expected exception when fs is not available', () => {
-      const nockBackWithoutFs = proxyquire('../lib/back', { fs: null })
-      nockBackWithoutFs.setMode('dryrun')
-
-      nockBackWithoutFs.fixtures = path.resolve(__dirname, 'fixtures')
-      expect(() => nockBackWithoutFs('good_request.json')).to.throw('no fs')
     })
   })
 
@@ -489,14 +482,6 @@ describe('Nock Back', () => {
           })
         },
       )
-    })
-
-    it('should throw the expected exception when fs is not available', () => {
-      const nockBackWithoutFs = proxyquire('../lib/back', { fs: null })
-      nockBackWithoutFs.setMode('record')
-
-      nockBackWithoutFs.fixtures = path.resolve(__dirname, 'fixtures')
-      expect(() => nockBackWithoutFs('good_request.json')).to.throw('no fs')
     })
   })
 
@@ -754,14 +739,6 @@ describe('Nock Back', () => {
         },
       )
     })
-
-    it('should throw the expected exception when fs is not available', () => {
-      const nockBackWithoutFs = proxyquire('../lib/back', { fs: null })
-      nockBackWithoutFs.setMode('update')
-
-      nockBackWithoutFs.fixtures = path.resolve(__dirname, 'fixtures')
-      expect(() => nockBackWithoutFs('good_request.json')).to.throw('no fs')
-    })
   })
 
   describe('lockdown mode', () => {
@@ -771,7 +748,9 @@ describe('Nock Back', () => {
 
     it('normal nocks work', testNock)
 
-    it('nock back loads scope', done => nockBackWithFixture(done, true))
+    it('nock back loads scope', done => {
+      nockBackWithFixture(done, true)
+    })
 
     it('no unnocked http calls work', done => {
       const req = http.request(

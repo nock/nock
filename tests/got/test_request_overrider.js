@@ -10,9 +10,9 @@
 // assertions about how the mock client responds. Here the code under test is
 // the part of Nock that must interface with all http clients.
 
-const http = require('http')
-const https = require('https')
-const { URL } = require('url')
+const http = require('node:http')
+const https = require('node:https')
+const { URL } = require('node:url')
 const { expect } = require('chai')
 const sinon = require('sinon')
 const nock = require('../..')
@@ -457,7 +457,7 @@ describe('Request Overrider', () => {
         method: 'GET',
         path: '/the/path/to/infinity',
       },
-      res => {
+      () => {
         scope.done()
         expect(req.path).to.equal('/the/path/to/infinity')
         done()
@@ -716,7 +716,7 @@ describe('Request Overrider', () => {
 
     expect(req.method).to.equal('GET')
 
-    req.on('response', res => {
+    req.on('response', () => {
       expect(req.method).to.equal('GET')
       scope.done()
       done()

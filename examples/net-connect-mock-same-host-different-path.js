@@ -12,7 +12,7 @@ const nock = require('../')
 
 nock('http://example.com').get('/path').reply(200, 'whaaa')
 
-const http = require('http')
+const http = require('node:http')
 const req = http.get('http://example.com/other-path')
 
 req.once('error', function (err) {

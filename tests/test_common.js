@@ -450,10 +450,12 @@ describe('`dataEqual()`', () => {
     const result = common.dataEqual({ a: 'a', b: undefined }, { a: 'a' })
     expect(result).to.equal(true)
   })
+
   it('does not conflate object and array keys', () => {
     const result = common.dataEqual(['a', 'b'], { 0: 'a', 1: 'b' })
     expect(result).to.equal(false)
   })
+
   it('treats JSON path notated and nested objects as equal', () => {
     const result = common.dataEqual(
       { 'foo[bar][0]': 'baz' },
@@ -461,6 +463,7 @@ describe('`dataEqual()`', () => {
     )
     expect(result).to.equal(true)
   })
+
   it('does not equate arrays of different length', () => {
     const result = common.dataEqual(['a'], ['a', 'b'])
     expect(result).to.equal(false)

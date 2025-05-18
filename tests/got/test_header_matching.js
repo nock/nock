@@ -1,6 +1,6 @@
 'use strict'
 
-const http = require('http')
+const http = require('node:http')
 const assertRejects = require('assert-rejects')
 const { expect } = require('chai')
 const sinon = require('sinon')

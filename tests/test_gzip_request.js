@@ -1,8 +1,8 @@
 'use strict'
 
 const { expect } = require('chai')
-const http = require('http')
-const zlib = require('zlib')
+const http = require('node:http')
+const zlib = require('node:zlib')
 const nock = require('..')
 
 it('should accept and decode gzip encoded application/json', done => {

@@ -1,9 +1,9 @@
 'use strict'
 
-const fs = require('fs')
-const path = require('path')
-const crypto = require('crypto')
-const zlib = require('zlib')
+const fs = require('node:fs')
+const path = require('node:path')
+const crypto = require('node:crypto')
+const zlib = require('node:zlib')
 const { expect } = require('chai')
 const nock = require('..')
 const assertRejects = require('assert-rejects')

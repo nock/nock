@@ -3,8 +3,8 @@
 // `persist()` and `optionally()` are closely related. Their tests are both
 // contained in this file.
 
-const http = require('http')
-const path = require('path')
+const http = require('node:http')
+const path = require('node:path')
 const assertRejects = require('assert-rejects')
 const { expect } = require('chai')
 const nock = require('../..')
@@ -100,7 +100,7 @@ describe('`optionally()`', () => {
     expect(nock.activeMocks()).to.deep.equal([
       'GET http://example.test:80/optional',
     ])
-    http.get({ host: 'example.test', path: '/optional' }, res => {
+    http.get({ host: 'example.test', path: '/optional' }, () => {
       expect(nock.activeMocks()).to.be.empty()
       done()
     })

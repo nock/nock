@@ -2,7 +2,7 @@
 
 // Tests for `.replyWithError()`.
 
-const http = require('http')
+const http = require('node:http')
 const { expect } = require('chai')
 const nock = require('..')
 

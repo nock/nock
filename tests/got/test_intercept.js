@@ -1,14 +1,14 @@
 'use strict'
 
-const http = require('http')
-const https = require('https')
+const http = require('node:http')
+const https = require('node:https')
 const { expect } = require('chai')
 const sinon = require('sinon')
 const assertRejects = require('assert-rejects')
-const url = require('url')
+const url = require('node:url')
 const nock = require('../..')
 const got = require('./got_client')
-const { text } = require('stream/consumers')
+const { text } = require('node:stream/consumers')
 const { getDecompressedGetBody } = require('../../lib/utils/node')
 
 const acceptableGlobalKeys = new Set([
@@ -424,7 +424,7 @@ describe('Intercept', () => {
         host: 'example.test',
         path: '/wrong-path',
       },
-      res => {
+      () => {
         expect.fail(new Error('should not come here!'))
       },
     )
@@ -455,7 +455,7 @@ describe('Intercept', () => {
         host: 'example.test',
         path: '/abcdef892932',
       },
-      res => {
+      () => {
         expect.fail(new Error('should not come here!'))
       },
     )
@@ -485,7 +485,7 @@ describe('Intercept', () => {
         port: 123,
         path: '/dsadsads',
       },
-      res => {
+      () => {
         expect.fail(new Error('should not come here!'))
       },
     )
@@ -553,7 +553,7 @@ describe('Intercept', () => {
           auth: 'username:password',
           path: '/',
         },
-        res => {
+        () => {
           scope.done()
           done()
         },
@@ -588,7 +588,7 @@ describe('Intercept', () => {
           port: 8081,
           path: '/',
         },
-        res => {
+        () => {
           scope.done()
           done()
         },
@@ -596,7 +596,7 @@ describe('Intercept', () => {
       .end()
   })
 
-  it('explicitly specifiying port 80 works', done => {
+  it('explicitly specifying port 80 works', done => {
     const scope = nock('http://example.test:80').get('/').reply()
 
     http
@@ -606,7 +606,7 @@ describe('Intercept', () => {
           port: 80,
           path: '/',
         },
-        res => {
+        () => {
           scope.done()
           done()
         },
@@ -627,7 +627,7 @@ describe('Intercept', () => {
           method: 'POST',
           path: '/claim',
         },
-        res => {
+        () => {
           scope.done()
           done()
         },
@@ -838,7 +838,7 @@ describe('Intercept', () => {
 
   it('interceptors should work in any order with filteringScope', async () => {
     nock('http://some.test', {
-      filteringScope: scope => true,
+      filteringScope: () => true,
     })
       .get('/path1?query=1')
       .reply(200, 'response for path1/query1')

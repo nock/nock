@@ -1,9 +1,9 @@
 'use strict'
 
-const http = require('http')
-const https = require('https')
-const { URLSearchParams } = require('url')
-const zlib = require('zlib')
+const http = require('node:http')
+const https = require('node:https')
+const { URLSearchParams } = require('node:url')
+const zlib = require('node:zlib')
 const sinon = require('sinon')
 const { expect } = require('chai')
 const nock = require('../..')
@@ -13,9 +13,11 @@ const servers = require('../servers')
 
 describe('Recorder', () => {
   let globalCount
+
   beforeEach(() => {
     globalCount = Object.keys(global).length
   })
+
   afterEach(() => {
     let leaks = Object.keys(global).splice(globalCount, Number.MAX_VALUE)
     if (leaks.length === 1 && leaks[0] === '_key') {
@@ -251,7 +253,7 @@ describe('Recorder', () => {
     const exampleText = '<html><body>example</body></html>'
 
     const { origin } = await servers.startHttpServer((request, response) => {
-      switch (require('url').parse(request.url).pathname) {
+      switch (request.url) {
         case '/':
           response.writeHead(302, { Location: '/abc' })
           break
@@ -715,7 +717,7 @@ describe('Recorder', () => {
     const exampleBody = '<html><body>example</body></html>'
 
     const { origin } = await servers.startHttpServer((request, response) => {
-      switch (require('url').parse(request.url).pathname) {
+      switch (request.url) {
         case '/':
           response.writeHead(302, { Location: '/abc' })
           break

@@ -3,12 +3,12 @@
 // Tests for header objects passed to `.reply()`, including header objects
 // containing lambdas.
 
-const { IncomingMessage } = require('http')
+const { IncomingMessage } = require('node:http')
 const { expect } = require('chai')
 const sinon = require('sinon')
 const fakeTimers = require('@sinonjs/fake-timers')
-const fs = require('fs')
-const path = require('path')
+const fs = require('node:fs')
+const path = require('node:path')
 
 const nock = require('../..')
 const got = require('./got_client')
@@ -413,9 +413,11 @@ describe('`replyDate()`', () => {
 
   describe('with mock timers', () => {
     let clock
+
     beforeEach(() => {
       clock = fakeTimers.install()
     })
+
     afterEach(() => {
       if (clock) {
         clock.uninstall()

@@ -1,7 +1,7 @@
 'use strict'
 
 const { expect } = require('chai')
-const http = require('http')
+const http = require('node:http')
 const nock = require('..')
 
 // These tests use `AbortSignal` to abort HTTP requests
