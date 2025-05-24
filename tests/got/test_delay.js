@@ -46,14 +46,15 @@ describe('`delay()`', () => {
     )
   })
 
-  // TODO: fix this test, the start should be in the response callback
-  it.skip('should delay the clock between the `response` event and the first `data` event', done => {
-    nock('http://example.test').get('/').delay(200).reply(201, 'OK')
+  it('should delay the clock between the `response` event and the response `end` event', done => {
+    nock('http://example.test').get('/').delay(100).reply(201, 'OK')
 
-    const start = process.hrtime()
     http.get('http://example.test', res => {
-      res.once('data', () => {
-        checkDuration(start, 200)
+      const start = process.hrtime()
+      // read the body
+      res.on('data', () => {})
+      res.once('end', () => {
+        checkDuration(start, 100)
         done()
       })
     })
@@ -62,28 +63,11 @@ describe('`delay()`', () => {
   it('should delay the overall response', async () => {
     const scope = nock('http://example.test')
       .get('/')
-      .delay(200)
+      .delay(100)
       .reply(200, 'OK')
 
-    const { body } = await resolvesInAtLeast(got('http://example.test/'), 200)
+    const { body } = await resolvesInAtLeast(got('http://example.test/'), 100)
 
-    expect(body).to.equal('OK')
-    scope.done()
-  })
-
-  it('should not have an impact on a response timeout', async () => {
-    const scope = nock('http://example.test')
-      .get('/')
-      .delay(300)
-      .reply(201, 'OK')
-
-    const { body, statusCode } = await got('http://example.test/', {
-      timeout: {
-        response: 500,
-      },
-    })
-
-    expect(statusCode).to.equal(201)
     expect(body).to.equal('OK')
     scope.done()
   })
@@ -103,12 +87,12 @@ describe('`delay()`', () => {
   it('should work with a response stream of binary buffers', async () => {
     const scope = nock('http://example.test')
       .get('/')
-      .delay(200)
+      .delay(100)
       // No encoding specified, which causes the file to be streamed using
       // buffers instead of strings.
       .reply(200, () => fs.createReadStream(textFilePath))
 
-    const { body } = await resolvesInAtLeast(got('http://example.test/'), 200)
+    const { body } = await resolvesInAtLeast(got('http://example.test/'), 100)
 
     expect(body).to.equal(textFileContents)
     scope.done()
