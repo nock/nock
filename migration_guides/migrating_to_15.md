@@ -15,7 +15,7 @@ The goal of this release is to create more predictable, modern and consistent AP
      console.log(req.path, options, body)
    })
    nock.emitter.on('no match', (req) => {
-     console.log(req.path, options, body)
+     console.log(req.path)
    })
 
    // After
@@ -30,7 +30,7 @@ The goal of this release is to create more predictable, modern and consistent AP
    ```js
    // Before
    .reply((uri, body) => {
-     console.log(this.req.path)
+     console.log(body)
      return 'response'
    })
 
