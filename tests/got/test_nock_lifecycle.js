@@ -208,14 +208,16 @@ describe('Nock lifecycle functions', () => {
 
   describe('`abortPendingRequests()`', () => {
     it('prevents the request from completing', done => {
-      const onRequest = sinon.spy()
+      const onResponseEnd = sinon.spy()
 
       nock('http://example.test').get('/').delay(100).reply(200, 'OK')
 
-      http.get('http://example.test', onRequest)
+      http.get('http://example.test', res => {
+        res.on('end', onResponseEnd)
+      })
 
       setTimeout(() => {
-        expect(onRequest).not.to.have.been.called()
+        expect(onResponseEnd).not.to.have.been.called()
         done()
       }, 200)
       setImmediate(nock.abortPendingRequests)
