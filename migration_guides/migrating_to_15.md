@@ -92,6 +92,7 @@ The goal of this release is to create more predictable, modern and consistent AP
 
 6. **Removed `delayBody` and `delayConnection` methods**  
    These methods have been consolidated into a single `delay` method that accepts a single argument and behave as `delayBody`.
+   To better reflect real-world scenarios, the delay is now applied at the end of the response rather than at the beginning.
 
    ```js
    // Before
