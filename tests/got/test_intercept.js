@@ -4,7 +4,6 @@ const http = require('node:http')
 const https = require('node:https')
 const { expect } = require('chai')
 const sinon = require('sinon')
-const assertRejects = require('assert-rejects')
 const url = require('node:url')
 const nock = require('../..')
 const got = require('./got_client')
@@ -617,9 +616,10 @@ describe('Intercept', () => {
       .get('/')
       .reply(200)
 
-    const { statusCode: errorStatus, body } = await got('http://example.test/', {
-      responseType: 'json'
-    }).catch(err => err.response)
+    const { statusCode: errorStatus, body } = await got(
+      'http://example.test/',
+      { responseType: 'json' },
+    ).catch(err => err.response)
     expect(errorStatus).to.equal(501)
     expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
     expect(scope.isDone()).to.be.false()
@@ -882,10 +882,13 @@ describe('Intercept', () => {
     const getResponse = await got('http://example.test/match/uri/function')
     expect(getResponse).to.include({ statusCode: 200, body: `Match GET` })
 
-    const { statusCode: errorStatus } = await got('http://example.test/do/not/match', {
-      method: 'HEAD',
-      responseType: 'json'
-    }).catch(err => err.response)
+    const { statusCode: errorStatus } = await got(
+      'http://example.test/do/not/match',
+      {
+        method: 'HEAD',
+        responseType: 'json',
+      },
+    ).catch(err => err.response)
     expect(errorStatus).to.equal(501)
   })
 
@@ -896,9 +899,10 @@ describe('Intercept', () => {
     expect(statusCode).to.equal(200)
     expect(body).to.equal('First match')
 
-    const { statusCode: errorStatus, body: anotherBody } = await got('http://example.test/hey', {
-      responseType: 'json'
-    }).catch(err => err.response)
+    const { statusCode: errorStatus, body: anotherBody } = await got(
+      'http://example.test/hey',
+      { responseType: 'json' },
+    ).catch(err => err.response)
     expect(errorStatus).to.equal(501)
     expect(anotherBody.code).to.equal('ERR_NOCK_NO_MATCH')
   })

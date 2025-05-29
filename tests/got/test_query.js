@@ -151,9 +151,10 @@ describe('`query()`', () => {
         .query({ foo: 'hello%20world' })
         .reply()
 
-      const { statusCode: errorStatus, body } = await got('http://example.test/?foo=hello%20world', {
-        responseType: 'json'
-      }).catch(err => err.response)
+      const { statusCode: errorStatus, body } = await got(
+        'http://example.test/?foo=hello%20world',
+        { responseType: 'json' },
+      ).catch(err => err.response)
       expect(errorStatus).to.equal(501)
       expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
 
@@ -190,7 +191,7 @@ describe('`query()`', () => {
       nock('http://example.test').get('/').query({ foo: 'bar' }).reply()
 
       const { statusCode, body } = await got('http://example.test/?foo=baz', {
-        responseType: 'json'
+        responseType: 'json',
       }).catch(err => err.response)
       expect(statusCode).to.equal(501)
       expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
@@ -199,9 +200,10 @@ describe('`query()`', () => {
     it('will not match when a query string is present that was not registered', async () => {
       nock('http://example.test').get('/').query({ foo: 'bar' }).reply()
 
-      const { statusCode, body } = await got('http://example.test/?foo=bar&baz=foz', {
-        responseType: 'json'
-      }).catch(err => err.response)
+      const { statusCode, body } = await got(
+        'http://example.test/?foo=bar&baz=foz',
+        { responseType: 'json' },
+      ).catch(err => err.response)
       expect(statusCode).to.equal(501)
       expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
     })
@@ -212,7 +214,7 @@ describe('`query()`', () => {
       nock('http://example.test').get('/').query({ foo: 'bar' }).reply()
 
       const { statusCode, body } = await got('http://example.test/?foobar', {
-        responseType: 'json'
+        responseType: 'json',
       }).catch(err => err.response)
       expect(statusCode).to.equal(501)
       expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
@@ -229,9 +231,10 @@ describe('`query()`', () => {
         })
         .reply()
 
-      const { statusCode, body } = await got('http://example.test/?num=1str=fou', {
-        responseType: 'json'
-      }).catch(err => err.response)
+      const { statusCode, body } = await got(
+        'http://example.test/?num=1str=fou',
+        { responseType: 'json' },
+      ).catch(err => err.response)
       expect(statusCode).to.equal(501)
       expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
     })
@@ -239,9 +242,10 @@ describe('`query()`', () => {
     it('query matching should not consider request arrays equal to comma-separated expectations', async () => {
       nock('http://example.test').get('/').query({ foo: 'bar,baz' }).reply()
 
-      const { statusCode, body } = await got('http://example.test?foo[]=bar&foo[]=baz', {
-        responseType: 'json'
-      }).catch(err => err.response)
+      const { statusCode, body } = await got(
+        'http://example.test?foo[]=bar&foo[]=baz',
+        { responseType: 'json' },
+      ).catch(err => err.response)
       expect(statusCode).to.equal(501)
       expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
     })
@@ -252,9 +256,10 @@ describe('`query()`', () => {
         .query({ foo: ['bar', 'baz'] })
         .reply()
 
-      const { statusCode, body } = await got('http://example.test?foo=bar%2Cbaz', {
-        responseType: 'json'
-      }).catch(err => err.response)
+      const { statusCode, body } = await got(
+        'http://example.test?foo=bar%2Cbaz',
+        { responseType: 'json' },
+      ).catch(err => err.response)
       expect(statusCode).to.equal(501)
       expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
     })
@@ -337,9 +342,10 @@ describe('`query()`', () => {
         .query(() => false)
         .reply()
 
-      const { statusCode, body } = await got('http://example.test/?i=should&pass=?', {
-        responseType: 'json'
-      }).catch(err => err.response)
+      const { statusCode, body } = await got(
+        'http://example.test/?i=should&pass=?',
+        { responseType: 'json' },
+      ).catch(err => err.response)
       expect(statusCode).to.equal(501)
       expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
     })

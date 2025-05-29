@@ -201,7 +201,7 @@ describe('`persist()`', () => {
     expect(scope.isDone()).to.be.true()
 
     const { statusCode, body } = await got('http://example.test/', {
-      responseType: 'json'
+      responseType: 'json',
     }).catch(err => err.response)
     expect(statusCode).to.equal(501)
     expect(body.code).to.equal('ERR_NOCK_NO_MATCH')

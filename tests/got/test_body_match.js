@@ -131,10 +131,12 @@ describe('`matchBody()`', () => {
   it("doesn't match body with mismatching keys", async () => {
     nock('http://example.test').post('/', { a: 'a' }).reply(200)
 
-    const { statusCode, body } = await got.post('http://example.test', {
-      json: { a: 'a', b: 'b' },
-      responseType: 'json'
-    }).catch(err => err.response)
+    const { statusCode, body } = await got
+      .post('http://example.test', {
+        json: { a: 'a', b: 'b' },
+        responseType: 'json',
+      })
+      .catch(err => err.response)
     expect(statusCode).to.equal(501)
     expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
   })
@@ -143,10 +145,12 @@ describe('`matchBody()`', () => {
   it("doesn't match body with same number of keys but different keys", async () => {
     nock('http://example.test').post('/', { a: {} }).reply()
 
-    const { statusCode, body } = await got.post('http://example.test', { 
-      json: { b: 123 },
-      responseType: 'json'
-    }).catch(err => err.response)
+    const { statusCode, body } = await got
+      .post('http://example.test', {
+        json: { b: 123 },
+        responseType: 'json',
+      })
+      .catch(err => err.response)
     expect(statusCode).to.equal(501)
     expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
   })
@@ -257,10 +261,12 @@ describe('`matchBody()`', () => {
   it("doesn't match utf-8 buffer body with mismatching utf-8 buffer", async () => {
     nock('http://example.test').post('/', Buffer.from('goodbye')).reply(200)
 
-    const { statusCode, body } = await got.post('http://example.test', {
-      body: Buffer.from('hello'),
-      responseType: 'json'
-    }).catch(err => err.response)
+    const { statusCode, body } = await got
+      .post('http://example.test', {
+        body: Buffer.from('hello'),
+        responseType: 'json',
+      })
+      .catch(err => err.response)
     expect(statusCode).to.equal(501)
     expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
   })
@@ -283,10 +289,12 @@ describe('`matchBody()`', () => {
       .post('/', Buffer.from([0xff, 0xff, 0xfa]))
       .reply(200)
 
-    const { statusCode, body } = await got.post('http://example.test', {
-      body: Buffer.from([0xff, 0xff, 0xff]),
-      responseType: 'json'
-    }).catch(err => err.response)
+    const { statusCode, body } = await got
+      .post('http://example.test', {
+        body: Buffer.from([0xff, 0xff, 0xff]),
+        responseType: 'json',
+      })
+      .catch(err => err.response)
     expect(statusCode).to.equal(501)
     expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
   })
@@ -296,10 +304,12 @@ describe('`matchBody()`', () => {
       .post('/', Buffer.from([0xff, 0xff, 0xff]))
       .reply(200)
 
-    const { statusCode, body } = await got.post('http://example.test', {
-      body: Buffer.from('hello'),
-      responseType: 'json'
-    }).catch(err => err.response)
+    const { statusCode, body } = await got
+      .post('http://example.test', {
+        body: Buffer.from('hello'),
+        responseType: 'json',
+      })
+      .catch(err => err.response)
     expect(statusCode).to.equal(501)
     expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
   })
@@ -307,10 +317,12 @@ describe('`matchBody()`', () => {
   it("doesn't match utf-8 buffer body with mismatching binary buffer", async () => {
     nock('http://example.test').post('/', Buffer.from('hello')).reply(200)
 
-    const { statusCode, body } = await got.post('http://example.test', {
-      body: Buffer.from([0xff, 0xff, 0xff]),
-      responseType: 'json'
-    }).catch(err => err.response)
+    const { statusCode, body } = await got
+      .post('http://example.test', {
+        body: Buffer.from([0xff, 0xff, 0xff]),
+        responseType: 'json',
+      })
+      .catch(err => err.response)
     expect(statusCode).to.equal(501)
     expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
   })

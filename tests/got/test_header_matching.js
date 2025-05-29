@@ -38,7 +38,7 @@ describe('Header matching', () => {
 
       const { statusCode, body } = await got('http://example.test/', {
         headers: { 'X-My-Headers': 456 },
-        responseType: 'json'
+        responseType: 'json',
       }).catch(err => err.response)
       expect(statusCode).to.equal(501)
       expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
@@ -54,7 +54,7 @@ describe('Header matching', () => {
 
       const { statusCode, body } = await got('http://example.test/', {
         headers: { '-My-Headers': 456 },
-        responseType: 'json'
+        responseType: 'json',
       }).catch(err => err.response)
       expect(statusCode).to.equal(501)
       expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
@@ -216,7 +216,7 @@ describe('Header matching', () => {
 
       const { statusCode, body } = await got('http://example.test/', {
         headers: { 'X-My-Headers': 456 },
-        responseType: 'json'
+        responseType: 'json',
       }).catch(err => err.response)
       expect(statusCode).to.equal(501)
       expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
@@ -230,7 +230,7 @@ describe('Header matching', () => {
 
       const { statusCode, body } = await got('http://example.test/', {
         headers: { '-My-Headers': 456 },
-        responseType: 'json'
+        responseType: 'json',
       }).catch(err => err.response)
       expect(statusCode).to.equal(501)
       expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
@@ -273,10 +273,12 @@ describe('Header matching', () => {
         .post('/')
         .reply(200, { status: 'ok' })
 
-      const { statusCode, body } = await got.post('http://example.test/', {
-        headers: { 'X-App-Token': 'apptoken' },
-        responseType: 'json'
-      }).catch(err => err.response)
+      const { statusCode, body } = await got
+        .post('http://example.test/', {
+          headers: { 'X-App-Token': 'apptoken' },
+          responseType: 'json',
+        })
+        .catch(err => err.response)
       expect(statusCode).to.equal(501)
       expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
     })
@@ -305,10 +307,12 @@ describe('Header matching', () => {
         .post('/')
         .reply()
 
-      const { statusCode, body } = await got.post('http://example.test/', {
-        headers: { 'X-My-Super-Power': 'mullet growing' },
-        responseType: 'json'
-      }).catch(err => err.response)
+      const { statusCode, body } = await got
+        .post('http://example.test/', {
+          headers: { 'X-My-Super-Power': 'mullet growing' },
+          responseType: 'json',
+        })
+        .catch(err => err.response)
       expect(statusCode).to.equal(501)
       expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
 
@@ -368,10 +372,12 @@ describe('Header matching', () => {
         .post('/')
         .reply()
 
-      const { statusCode, body } = await got.post('http://example.test/', {
-        headers: { 'X-My-Super-Power': 'mullet growing' },
-        responseType: 'json'
-      }).catch(err => err.response)
+      const { statusCode, body } = await got
+        .post('http://example.test/', {
+          headers: { 'X-My-Super-Power': 'mullet growing' },
+          responseType: 'json',
+        })
+        .catch(err => err.response)
       expect(statusCode).to.equal(501)
       expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
 
@@ -511,7 +517,7 @@ describe('Header matching', () => {
 
       const { statusCode, body } = await got('http://example.test/', {
         headers: { Cookie: 'cookie', Donut: 'donut' },
-        responseType: 'json'
+        responseType: 'json',
       }).catch(err => err.response)
       expect(statusCode).to.equal(501)
       expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
@@ -573,7 +579,7 @@ describe('Header matching', () => {
 
       const { statusCode, body } = await got('http://example.test/', {
         headers: { Host: 'some.other.domain.test' },
-        responseType: 'json'
+        responseType: 'json',
       }).catch(err => err.response)
       expect(statusCode).to.equal(501)
       expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
