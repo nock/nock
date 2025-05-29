@@ -9,11 +9,11 @@ const got = require('./got_client')
 
 describe('interception in parallel', () => {
   const origin = 'https://example.test'
-  const makeRequest = opts =>
-    got(origin, opts)
+  const makeRequest = () =>
+    got(origin, { responseType: 'json' })
       .then(res => res.statusCode)
       .catch(reason => {
-        if (reason.code === 'ERR_NOCK_NO_MATCH') return 418
+        if (reason.response.body.code === 'ERR_NOCK_NO_MATCH') return 501
         throw reason
       })
 
@@ -29,7 +29,7 @@ describe('interception in parallel', () => {
       makeRequest(),
     ])
 
-    expect(results.sort()).to.deep.equal([200, 201, 418])
+    expect(results.sort()).to.deep.equal([200, 201, 501])
     scope.done()
   })
 
@@ -42,7 +42,7 @@ describe('interception in parallel', () => {
       makeRequest(),
     ])
 
-    expect(results.sort()).to.deep.equal([200, 200, 418])
+    expect(results.sort()).to.deep.equal([200, 200, 501])
     scope.done()
   })
 
@@ -56,7 +56,7 @@ describe('interception in parallel', () => {
       makeRequest(),
     ])
 
-    expect(results.sort()).to.deep.equal([200, 201, 418])
+    expect(results.sort()).to.deep.equal([200, 201, 501])
     expect(nock.isDone()).to.equal(true)
   })
 })

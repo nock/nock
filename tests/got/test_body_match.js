@@ -1,6 +1,5 @@
 'use strict'
 
-const assertRejects = require('assert-rejects')
 const { expect } = require('chai')
 const FormData = require('form-data')
 const nock = require('../..')
@@ -132,18 +131,24 @@ describe('`matchBody()`', () => {
   it("doesn't match body with mismatching keys", async () => {
     nock('http://example.test').post('/', { a: 'a' }).reply(200)
 
-    const request = got.post('http://example.test', {
+    const { statusCode, body } = await got.post('http://example.test', {
       json: { a: 'a', b: 'b' },
-    })
-    await assertRejects(request, /Nock: No match for request/)
+      responseType: 'json'
+    }).catch(err => err.response)
+    expect(statusCode).to.equal(501)
+    expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
   })
 
   // https://github.com/nock/nock/issues/1713
   it("doesn't match body with same number of keys but different keys", async () => {
     nock('http://example.test').post('/', { a: {} }).reply()
 
-    const request = got.post('http://example.test', { json: { b: 123 } })
-    await assertRejects(request, /Nock: No match for request/)
+    const { statusCode, body } = await got.post('http://example.test', { 
+      json: { b: 123 },
+      responseType: 'json'
+    }).catch(err => err.response)
+    expect(statusCode).to.equal(501)
+    expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
   })
 
   it('match body with form multipart', async () => {
@@ -252,11 +257,12 @@ describe('`matchBody()`', () => {
   it("doesn't match utf-8 buffer body with mismatching utf-8 buffer", async () => {
     nock('http://example.test').post('/', Buffer.from('goodbye')).reply(200)
 
-    const request = got.post('http://example.test', {
+    const { statusCode, body } = await got.post('http://example.test', {
       body: Buffer.from('hello'),
-    })
-
-    await assertRejects(request, /Nock: No match for request/)
+      responseType: 'json'
+    }).catch(err => err.response)
+    expect(statusCode).to.equal(501)
+    expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
   })
 
   it('match binary buffer body with binary buffer', async () => {
@@ -277,11 +283,12 @@ describe('`matchBody()`', () => {
       .post('/', Buffer.from([0xff, 0xff, 0xfa]))
       .reply(200)
 
-    const request = got.post('http://example.test', {
+    const { statusCode, body } = await got.post('http://example.test', {
       body: Buffer.from([0xff, 0xff, 0xff]),
-    })
-
-    await assertRejects(request, /Nock: No match for request/)
+      responseType: 'json'
+    }).catch(err => err.response)
+    expect(statusCode).to.equal(501)
+    expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
   })
 
   it("doesn't match binary buffer body with mismatching utf-8 buffer", async () => {
@@ -289,20 +296,22 @@ describe('`matchBody()`', () => {
       .post('/', Buffer.from([0xff, 0xff, 0xff]))
       .reply(200)
 
-    const request = got.post('http://example.test', {
+    const { statusCode, body } = await got.post('http://example.test', {
       body: Buffer.from('hello'),
-    })
-
-    await assertRejects(request, /Nock: No match for request/)
+      responseType: 'json'
+    }).catch(err => err.response)
+    expect(statusCode).to.equal(501)
+    expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
   })
 
   it("doesn't match utf-8 buffer body with mismatching binary buffer", async () => {
     nock('http://example.test').post('/', Buffer.from('hello')).reply(200)
 
-    const request = got.post('http://example.test', {
+    const { statusCode, body } = await got.post('http://example.test', {
       body: Buffer.from([0xff, 0xff, 0xff]),
-    })
-
-    await assertRejects(request, /Nock: No match for request/)
+      responseType: 'json'
+    }).catch(err => err.response)
+    expect(statusCode).to.equal(501)
+    expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
   })
 })
