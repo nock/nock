@@ -24,7 +24,15 @@ The goal of this release is to create more predictable, modern and consistent AP
    })
    ```
 
-2. **`reply` now receives a `Request` object**  
+2. **Unmatched requests now return Response objects with 501 status instead of throwing errors**  
+   Previously, nock would throw an error when no matching mock was found. Now it returns a Response object with status code 501 and a JSON body containing the code "ERR_NOCK_NO_MATCH". This makes error handling more consistent across different HTTP client libraries.
+
+   ```js
+   const { statusCode } = await got('http://example.test/not-mocked').catch(err => err.response)
+   console.log(statusCode) // 501
+   ```
+
+3. **`reply` now receives a `Request` object**  
    The `interceptor` no longer contains the `req` property. Use the `Request` object passed to the `reply`.
 
    ```js

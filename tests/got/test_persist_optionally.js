@@ -5,7 +5,6 @@
 
 const http = require('node:http')
 const path = require('node:path')
-const assertRejects = require('assert-rejects')
 const { expect } = require('chai')
 const nock = require('../..')
 const got = require('./got_client')
@@ -201,10 +200,11 @@ describe('`persist()`', () => {
     expect(nock.activeMocks()).to.be.empty()
     expect(scope.isDone()).to.be.true()
 
-    await assertRejects(
-      got('http://example.test/'),
-      /Nock: No match for request/,
-    )
+    const { statusCode, body } = await got('http://example.test/', {
+      responseType: 'json',
+    }).catch(err => err.response)
+    expect(statusCode).to.equal(501)
+    expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
   })
 
   it('when called with an invalid argument, throws the expected error', () => {

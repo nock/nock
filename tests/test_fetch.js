@@ -66,10 +66,9 @@ describe('Native Fetch', () => {
   it('no match', async () => {
     nock('http://example.test').get('/').reply()
 
-    await assertRejects(
-      fetch('http://example.test/wrong-path'),
-      /Nock: No match for request/,
-    )
+    const response = await fetch('http://example.test/wrong-path')
+    expect(response.status).to.equal(501)
+    expect((await response.json()).code).to.equal('ERR_NOCK_NO_MATCH')
   })
 
   it('forward request if no mock', async () => {

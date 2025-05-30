@@ -4,7 +4,6 @@ const http = require('node:http')
 const https = require('node:https')
 const { expect } = require('chai')
 const sinon = require('sinon')
-const assertRejects = require('assert-rejects')
 const url = require('node:url')
 const nock = require('../..')
 const got = require('./got_client')
@@ -416,98 +415,35 @@ describe('Intercept', () => {
     scope.done()
   })
 
-  it('emits error when listeners are added after `req.end()` call', done => {
-    nock('http://example.test').get('/').reply()
-
-    const req = http.request(
-      {
-        host: 'example.test',
-        path: '/wrong-path',
-      },
-      () => {
-        expect.fail(new Error('should not come here!'))
-      },
-    )
-
-    req.end()
-
-    req.on('error', err => {
-      expect(err.message.trim()).to.equal(
-        `Nock: No match for request ${JSON.stringify(
-          {
-            method: 'GET',
-            url: 'http://example.test/wrong-path',
-            headers: { connection: 'close', host: 'example.test' },
-          },
-          null,
-          2,
-        )}`,
-      )
-      done()
-    })
-  })
-
-  it('emits error if https route is missing', done => {
+  it('return 501 if https route is missing', done => {
     nock('https://example.test').get('/').reply(200, 'Hello World!')
 
-    const req = https.request(
+    https.get(
       {
         host: 'example.test',
         path: '/abcdef892932',
       },
-      () => {
-        expect.fail(new Error('should not come here!'))
+      res => {
+        expect(res.statusCode).to.equal(501)
+        done()
       },
     )
-    req.on('error', err => {
-      expect(err.message.trim()).to.equal(
-        `Nock: No match for request ${JSON.stringify(
-          {
-            method: 'GET',
-            url: 'https://example.test/abcdef892932',
-            headers: { connection: 'close', host: 'example.test' },
-          },
-          null,
-          2,
-        )}`,
-      )
-      done()
-    })
-    req.end()
   })
 
-  it('emits error if https route is missing, non-standard port', done => {
+  it('return 501 if https route is missing, non-standard port', done => {
     nock('https://example.test:123').get('/').reply(200, 'Hello World!')
 
-    const req = https.request(
+    https.get(
       {
         host: 'example.test',
         port: 123,
         path: '/dsadsads',
       },
-      () => {
-        expect.fail(new Error('should not come here!'))
+      res => {
+        expect(res.statusCode).to.equal(501)
+        done()
       },
     )
-
-    req.on('error', err => {
-      expect(err.message.trim()).to.equal(
-        `Nock: No match for request ${JSON.stringify(
-          {
-            method: 'GET',
-            url: 'https://example.test:123/dsadsads',
-            headers: {
-              connection: 'close',
-              host: 'example.test:123',
-            },
-          },
-          null,
-          2,
-        )}`,
-      )
-      done()
-    })
-    req.end()
   })
 
   it('scopes are independent', async () => {
@@ -680,10 +616,12 @@ describe('Intercept', () => {
       .get('/')
       .reply(200)
 
-    await assertRejects(
-      got('http://example.test/'),
-      /Nock: No match for request/,
-    )
+    const { statusCode: errorStatus, body } = await got(
+      'http://example.test/',
+      { responseType: 'json' },
+    ).catch(err => err.response)
+    expect(errorStatus).to.equal(501)
+    expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
     expect(scope.isDone()).to.be.false()
 
     enabled = true
@@ -944,10 +882,14 @@ describe('Intercept', () => {
     const getResponse = await got('http://example.test/match/uri/function')
     expect(getResponse).to.include({ statusCode: 200, body: `Match GET` })
 
-    await assertRejects(
-      got.head('http://example.test/do/not/match'),
-      /Nock: No match for request/,
-    )
+    const { statusCode: errorStatus } = await got(
+      'http://example.test/do/not/match',
+      {
+        method: 'HEAD',
+        responseType: 'json',
+      },
+    ).catch(err => err.response)
+    expect(errorStatus).to.equal(501)
   })
 
   it('you must setup an interceptor for each request', async () => {
@@ -957,10 +899,12 @@ describe('Intercept', () => {
     expect(statusCode).to.equal(200)
     expect(body).to.equal('First match')
 
-    await assertRejects(
-      got('http://example.test/hey'),
-      /Nock: No match for request/,
-    )
+    const { statusCode: errorStatus, body: anotherBody } = await got(
+      'http://example.test/hey',
+      { responseType: 'json' },
+    ).catch(err => err.response)
+    expect(errorStatus).to.equal(501)
+    expect(anotherBody.code).to.equal('ERR_NOCK_NO_MATCH')
   })
 
   // TODO: What is the intention of this test?

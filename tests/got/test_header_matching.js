@@ -1,7 +1,6 @@
 'use strict'
 
 const http = require('node:http')
-const assertRejects = require('assert-rejects')
 const { expect } = require('chai')
 const sinon = require('sinon')
 const nock = require('../..')
@@ -37,12 +36,12 @@ describe('Header matching', () => {
         .get('/')
         .reply(200, 'Hello World!')
 
-      await assertRejects(
-        got('http://example.test/', {
-          headers: { 'X-My-Headers': 456 },
-        }),
-        /Nock: No match for request/,
-      )
+      const { statusCode, body } = await got('http://example.test/', {
+        headers: { 'X-My-Headers': 456 },
+        responseType: 'json',
+      }).catch(err => err.response)
+      expect(statusCode).to.equal(501)
+      expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
     })
 
     it('should not consume mock request when match is declined by function', async () => {
@@ -53,12 +52,12 @@ describe('Header matching', () => {
         .get('/')
         .reply(200, 'Hello World!')
 
-      await assertRejects(
-        got('http://example.test/', {
-          headers: { '-My-Headers': 456 },
-        }),
-        /Nock: No match for request/,
-      )
+      const { statusCode, body } = await got('http://example.test/', {
+        headers: { '-My-Headers': 456 },
+        responseType: 'json',
+      }).catch(err => err.response)
+      expect(statusCode).to.equal(501)
+      expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
 
       expect(scope.isDone()).to.be.false()
     })
@@ -215,12 +214,12 @@ describe('Header matching', () => {
         .matchHeader('x-my-headers', () => false)
         .reply(200, 'Hello World!')
 
-      await assertRejects(
-        got('http://example.test/', {
-          headers: { 'X-My-Headers': 456 },
-        }),
-        /Nock: No match for request/,
-      )
+      const { statusCode, body } = await got('http://example.test/', {
+        headers: { 'X-My-Headers': 456 },
+        responseType: 'json',
+      }).catch(err => err.response)
+      expect(statusCode).to.equal(501)
+      expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
     })
 
     it('should not consume mock request when match is declined by function', async () => {
@@ -229,12 +228,12 @@ describe('Header matching', () => {
         .matchHeader('x-my-headers', () => false)
         .reply(200, 'Hello World!')
 
-      await assertRejects(
-        got('http://example.test/', {
-          headers: { '-My-Headers': 456 },
-        }),
-        /Nock: No match for request/,
-      )
+      const { statusCode, body } = await got('http://example.test/', {
+        headers: { '-My-Headers': 456 },
+        responseType: 'json',
+      }).catch(err => err.response)
+      expect(statusCode).to.equal(501)
+      expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
 
       expect(scope.isDone()).to.be.false()
     })
@@ -274,12 +273,14 @@ describe('Header matching', () => {
         .post('/')
         .reply(200, { status: 'ok' })
 
-      await assertRejects(
-        got.post('http://example.test/', {
+      const { statusCode, body } = await got
+        .post('http://example.test/', {
           headers: { 'X-App-Token': 'apptoken' },
-        }),
-        /Nock: No match for request/,
-      )
+          responseType: 'json',
+        })
+        .catch(err => err.response)
+      expect(statusCode).to.equal(501)
+      expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
     })
 
     it('should match when request header matches regular expression', async () => {
@@ -306,12 +307,14 @@ describe('Header matching', () => {
         .post('/')
         .reply()
 
-      await assertRejects(
-        got.post('http://example.test/', {
+      const { statusCode, body } = await got
+        .post('http://example.test/', {
           headers: { 'X-My-Super-Power': 'mullet growing' },
-        }),
-        /Nock: No match/,
-      )
+          responseType: 'json',
+        })
+        .catch(err => err.response)
+      expect(statusCode).to.equal(501)
+      expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
 
       expect(scope.isDone()).to.be.false()
     })
@@ -369,12 +372,14 @@ describe('Header matching', () => {
         .post('/')
         .reply()
 
-      await assertRejects(
-        got.post('http://example.test/', {
+      const { statusCode, body } = await got
+        .post('http://example.test/', {
           headers: { 'X-My-Super-Power': 'mullet growing' },
-        }),
-        /Nock: No match/,
-      )
+          responseType: 'json',
+        })
+        .catch(err => err.response)
+      expect(statusCode).to.equal(501)
+      expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
 
       expect(scope.isDone()).to.be.false()
     })
@@ -510,12 +515,12 @@ describe('Header matching', () => {
         .get('/')
         .reply()
 
-      await assertRejects(
-        got('http://example.test/', {
-          headers: { Cookie: 'cookie', Donut: 'donut' },
-        }),
-        /Nock: No match for request/,
-      )
+      const { statusCode, body } = await got('http://example.test/', {
+        headers: { Cookie: 'cookie', Donut: 'donut' },
+        responseType: 'json',
+      }).catch(err => err.response)
+      expect(statusCode).to.equal(501)
+      expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
 
       expect(scope.isDone()).to.be.false()
     })
@@ -572,12 +577,12 @@ describe('Header matching', () => {
         .get('/')
         .reply()
 
-      await assertRejects(
-        got('http://example.test/', {
-          headers: { Host: 'some.other.domain.test' },
-        }),
-        /Nock: No match for request/,
-      )
+      const { statusCode, body } = await got('http://example.test/', {
+        headers: { Host: 'some.other.domain.test' },
+        responseType: 'json',
+      }).catch(err => err.response)
+      expect(statusCode).to.equal(501)
+      expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
     })
   })
 })
