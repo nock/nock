@@ -22,7 +22,7 @@
   "main": "./index.js",
   "types": "types",
   "dependencies": {
-    "@mswjs/interceptors": "^0.38.6",
+    "@mswjs/interceptors": "^0.38.7",
     "json-stringify-safe": "^5.0.1"
   },
   "devDependencies": {
