@@ -54,13 +54,13 @@ describe('allowUnmocked option', () => {
 
     const scope = nock(origin, { allowUnmocked: true })
       .get('/abc')
-      .reply(304, 'served from our mock')
+      .reply(307, 'served from our mock')
       .get('/wont/get/here')
-      .reply(304, 'served from our mock')
+      .reply(307, 'served from our mock')
     const client = got.extend({ prefixUrl: origin, throwHttpErrors: false })
 
     const response1 = await client('abc')
-    expect(response1.statusCode).to.equal(304)
+    expect(response1.statusCode).to.equal(307)
     expect(response1.body).to.equal('served from our mock')
     expect(scope.isDone()).to.equal(false)
 

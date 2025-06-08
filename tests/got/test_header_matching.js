@@ -23,9 +23,7 @@ describe('Header matching', () => {
         headers: { 'X-My-Headers': 456 },
       })
 
-      // TODO: It's surprising that this function receives a number instead of
-      // a string. Probably this behavior should be changed.
-      expect(matchHeaderStub).to.have.been.calledOnceWithExactly(456)
+      expect(matchHeaderStub).to.have.been.calledOnceWithExactly('456')
       expect(statusCode).to.equal(200)
       expect(body).to.equal('Hello World!')
       scope.done()
@@ -190,9 +188,7 @@ describe('Header matching', () => {
         headers: { 'X-My-Headers': 456 },
       })
 
-      // TODO: It's surprising that this function receives a number instead of
-      // a string. Probably this behavior should be changed.
-      expect(matchHeaderStub).to.have.been.calledOnceWithExactly(456)
+      expect(matchHeaderStub).to.have.been.calledOnceWithExactly('456')
       expect(statusCode).to.equal(200)
       expect(body).to.equal('Hello World!')
       scope.done()
