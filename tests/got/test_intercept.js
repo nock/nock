@@ -924,7 +924,7 @@ describe('Intercept', () => {
           headers: {},
         },
         res => {
-          res.on('data', () => { })
+          res.on('data', () => {})
           res.once('end', () => {
             scope.done()
             done()
@@ -954,7 +954,7 @@ describe('Intercept', () => {
     https
       .request({ hostname: 'example.test' }, res => {
         expect(res.statusCode).to.equal(200)
-        res.on('data', () => { })
+        res.on('data', () => {})
         res.on('end', () => {
           scope1.done()
           done()
@@ -992,7 +992,7 @@ describe('Intercept', () => {
 
   it('with filteringScope, URL path without leading slash does not throw error', done => {
     expect(() =>
-      nock('http://example.test', { filteringScope: () => { } }).get(''),
+      nock('http://example.test', { filteringScope: () => {} }).get(''),
     ).not.to.throw()
     done()
   })
@@ -1112,7 +1112,6 @@ describe('Intercept', () => {
       })
   })
 
-
   // We don't support yet in mocked 100-continue requests, so currently we just make sure it pass through.
   it('Request with `Expect: 100-continue` pass through', async () => {
     const { origin } = await startHttpServer((request, response) => {
@@ -1131,12 +1130,14 @@ describe('Intercept', () => {
       req.end(exampleRequestBody)
     })
 
-    const { resolve, promise } = Promise.withResolvers()
-    req.on('response', res => {
-      expect(res.statusCode).to.equal(200)
-      resolve()
+    await new Promise(resolve => {
+      req.on('response', res => {
+        expect(res.statusCode).to.equal(200)
+        res.on('data', data => {
+          expect(data.toString()).to.equal(exampleRequestBody)
+        })
+        res.on('end', resolve)
+      })
     })
-
-    await promise
   })
 })
