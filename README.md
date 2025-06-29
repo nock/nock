@@ -1618,9 +1618,9 @@ It does this by manipulating the modules cache of Node in a way that conflicts w
 
 ### Jest
 
-To use Nock in conjunction with Jest fake timers, make sure you're using the "async" functions when advancing the timers,
-such as `jest.advanceTimersByTimeAsync()` or `jest.runAllTimersAsync()`.
-Otherwise, the timers will not be advanced correctly and you'll experience a timeout in your tests.
+To use `nock` in conjunction with `jest` fake timers, make sure you're using the "async" functions when advancing the
+timers, such as `jest.advanceTimersByTimeAsync()` or `jest.runAllTimersAsync()`. Otherwise, the timers will not be
+advanced correctly and you'll experience a timeout in your tests.
 
 ```js
 test('should mock a request with fake timers', async () => {
@@ -1632,7 +1632,7 @@ test('should mock a request with fake timers', async () => {
     .reply(200, 'response')
 
   // Simulate a request
-  const promise = got('https://example.com/path')
+  const request = got('https://example.com/path')
 
   // Fast-forward time
   await jest.advanceTimersByTimeAsync(1000)
@@ -1641,7 +1641,7 @@ test('should mock a request with fake timers', async () => {
   await jest.runAllTimersAsync()
 
   // Wait for the request to complete
-  const response = await promise
+  const response = await request
 
   expect(response.body).toBe('response')
   jest.useRealTimers() // Restore real timers after the test
@@ -1649,7 +1649,7 @@ test('should mock a request with fake timers', async () => {
 })
 ```
 
-In case you don't need testing delays, you can instruct jest to advance the timers automatically using the
+In case you don't need testing delays, you can instruct `jest` to advance the timers automatically using the
 `advanceTimers` option
 
 ```js
@@ -1658,7 +1658,7 @@ jest.useFakeTimers({ advanceTimers: true })
 
 ### Sinon
 
-In a similar way to Jest, if you are using Sinon fake timers, you should use the `clock.tickAsync()` or
+In a similar way to `jest`, if you are using `sinon` fake timers, you should use the `clock.tickAsync()` or
 `clock.runAllAsync()` methods to advance the timers correctly.
 
 ```js
@@ -1670,7 +1670,7 @@ it('should us sinon timers', async () => {
     .reply(200, 'response')
 
   // Simulate a request
-  const promise = got('https://example.com/path')
+  const request = got('https://example.com/path')
 
   // Fast-forward time
   await clock.tickAsync(1000)
@@ -1679,7 +1679,7 @@ it('should us sinon timers', async () => {
   await clock.runAllAsync()
 
   // Wait for the request to complete
-  const response = await promise
+  const response = await request
 
   expect(response.body).toBe('response')
   clock.restore()
@@ -1687,11 +1687,11 @@ it('should us sinon timers', async () => {
 })
 ```
 
-Same applies for sinon, if you don't need testing delays, you can instruct sinon to advance the timers automatically
-using the `shouldAdvanceTimers` option
+Same applies for `sinon`, if you don't need testing delays, you can instruct `sinon` to advance the timers automatically
+using the `shouldAdvanceTimer` option
 
 ```js
-clock = sinon.useFakeTimers({ shouldAdvanceTimers: true })
+clock = sinon.useFakeTimers({ shouldAdvanceTimer: true })
 ```
 
 ## Debugging
