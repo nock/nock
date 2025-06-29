@@ -10,7 +10,7 @@ describe('test fake timers (jest)', () => {
     let scope
 
     beforeEach(() => {
-      jest.useFakeTimers();
+      jest.useFakeTimers()
 
       scope = nock(url)
         .get('/api/v1/resource')
@@ -31,6 +31,7 @@ describe('test fake timers (jest)', () => {
     afterEach(() => {
       jest.useRealTimers()
       nock.cleanAll()
+      nock.restore()
     })
 
     it('should use fake timers', async () => {

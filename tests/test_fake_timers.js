@@ -33,19 +33,20 @@ describe('test fake timers (sinon)', () => {
     afterEach(() => {
       clock.restore()
       nock.cleanAll()
+      nock.restore()
     })
 
     it('should use fake timers', async () => {
       const fetch = createRetryFetch({ retries: 3, delay: 100 })
 
-      const p = fetch(new URL('/api/v1/resource', url))
+      const promise = fetch(new URL('/api/v1/resource', url))
 
       await clock.tickAsync(100) // first request
       await clock.tickAsync(100) // first retry
       await clock.tickAsync(100) // second retry
       await clock.tickAsync(100) // third retry
 
-      const response = await p.then(response => response.json())
+      const response = await promise.then(response => response.json())
 
       expect(response).to.be.deep.equal({ message: 'Success' })
 

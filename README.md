@@ -1623,10 +1623,9 @@ such as `jest.advanceTimersByTime()` or `jest.runAllTimers()`.
 Otherwise, the timers will not be advanced correctly and you'll experience a timeout in your tests.
 
 ```js
-
 test('should mock a request with fake timers', async () => {
   jest.useFakeTimers()
-  
+
   const scope = nock('https://example.com')
     .get('/path')
     .delay(1000)
@@ -1636,10 +1635,10 @@ test('should mock a request with fake timers', async () => {
   const promise = got('https://example.com/path')
 
   // Fast-forward time
-  jest.advanceTimersByTimeAsync(1000)
-  
+  await jest.advanceTimersByTimeAsync(1000)
+
   // Or advance all timers
-  jest.runAllTimersAsync()
+  await jest.runAllTimersAsync()
 
   // Wait for the request to complete
   const response = await promise
@@ -1680,7 +1679,6 @@ it('should us sinon timers', async () => {
   scope.done()
 })
 ```
-
 
 ## Debugging
 

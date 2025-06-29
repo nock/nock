@@ -11,9 +11,9 @@ it('should still return successfully when fake timer is enabled', async () => {
 
   const promise = got('http://example.test')
 
-  await clock.runAllAsync(); // Run all fake timers to ensure all scheduled tasks are executed
+  await clock.runAllAsync() // Run all fake timers to ensure all scheduled tasks are executed
 
-  await promise;
+  await promise
 
   clock.uninstall()
   scope.done()
