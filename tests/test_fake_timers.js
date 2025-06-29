@@ -10,7 +10,7 @@ describe('test fake timers (sinon)', () => {
   let scope
   let clock
 
-  describe('sinon', () => {
+  describe('using timers to test delays', () => {
     beforeEach(() => {
       clock = sinon.useFakeTimers()
 
