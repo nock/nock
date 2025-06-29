@@ -91,6 +91,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
   - [Requests made by ES Modules are not intercepted](#requests-made-by-es-modules-are-not-intercepted)
   - [Axios](#axios)
   - [Memory issues with Jest](#memory-issues-with-jest)
+  - [Fake timers](#fake-timers)
 - [Debugging](#debugging)
 - [Contributing](#contributing)
 - [Contributors](#contributors)
@@ -1612,6 +1613,74 @@ Memory issues can be avoided by calling [`nock.restore()`](#restoring) after eac
 One of the core principles of [Jest](https://jestjs.io/) is that it runs tests in isolation.
 It does this by manipulating the modules cache of Node in a way that conflicts with how Nock monkey patches the builtin `http` and `https` modules.
 [Related issue with more details](https://github.com/nock/nock/issues/1817).
+
+### Fake timers
+
+### Jest
+
+To use Nock in conjunction with Jest fake timers, make sure you're using the "async" functions when advacing the timers,
+such as `jest.advanceTimersByTime()` or `jest.runAllTimers()`.
+Otherwise, the timers will not be advanced correctly and you'll experience a timeout in your tests.
+
+```js
+
+test('should mock a request with fake timers', async () => {
+  jest.useFakeTimers()
+  
+  const scope = nock('https://example.com')
+    .get('/path')
+    .delay(1000)
+    .reply(200, 'response')
+
+  // Simulate a request
+  const promise = got('https://example.com/path')
+
+  // Fast-forward time
+  jest.advanceTimersByTimeAsync(1000)
+  
+  // Or advance all timers
+  jest.runAllTimersAsync()
+
+  // Wait for the request to complete
+  const response = await promise
+
+  expect(response.body).toBe('response')
+  jest.useRealTimers() // Restore real timers after the test
+  scope.done()
+})
+```
+
+### Sinon
+
+In a similar way to Jest, if you are using Sinon fake timers, you should use the `clock.tickAsync()` or
+`clock.runAllAsync()` methods to advance the timers correctly.
+
+```js
+it('should us sinon timers', async () => {
+  clock = sinon.useFakeTimers()
+  const scope = nock('https://example.com')
+    .get('/path')
+    .delay(1000)
+    .reply(200, 'response')
+
+  // Simulate a request
+  const promise = got('https://example.com/path')
+
+  // Fast-forward time
+  await clock.tickAsync(1000)
+
+  // Or run all timers
+  await clock.runAllAsync()
+
+  // Wait for the request to complete
+  const response = await promise
+
+  expect(response.body).toBe('response')
+  clock.restore()
+  scope.done()
+})
+```
+
 
 ## Debugging
 
