@@ -1688,10 +1688,10 @@ it('should us sinon timers', async () => {
 ```
 
 Same applies for `sinon`, if you don't need testing delays, you can instruct `sinon` to advance the timers automatically
-using the `shouldAdvanceTimer` option
+using the `shouldAdvanceTime` option
 
 ```js
-clock = sinon.useFakeTimers({ shouldAdvanceTimer: true })
+clock = sinon.useFakeTimers({ shouldAdvanceTime: true })
 ```
 
 ## Debugging
