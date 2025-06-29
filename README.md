@@ -1618,8 +1618,8 @@ It does this by manipulating the modules cache of Node in a way that conflicts w
 
 ### Jest
 
-To use Nock in conjunction with Jest fake timers, make sure you're using the "async" functions when advacing the timers,
-such as `jest.advanceTimersByTime()` or `jest.runAllTimers()`.
+To use Nock in conjunction with Jest fake timers, make sure you're using the "async" functions when advancing the timers,
+such as `jest.advanceTimersByTimeAsync()` or `jest.runAllTimersAsync()`.
 Otherwise, the timers will not be advanced correctly and you'll experience a timeout in your tests.
 
 ```js
@@ -1647,6 +1647,13 @@ test('should mock a request with fake timers', async () => {
   jest.useRealTimers() // Restore real timers after the test
   scope.done()
 })
+```
+
+In case you don't need testing delays, you can instruct jest to advance the timers automatically using the
+`advanceTimers` option
+
+```js
+jest.useFakeTimers({ advanceTimers: true })
 ```
 
 ### Sinon
@@ -1678,6 +1685,13 @@ it('should us sinon timers', async () => {
   clock.restore()
   scope.done()
 })
+```
+
+Same applies for sinon, if you don't need testing delays, you can instruct sinon to advance the timers automatically
+using the `shouldAdvanceTimers` option
+
+```js
+clock = sinon.useFakeTimers({ shouldAdvanceTimers: true })
 ```
 
 ## Debugging

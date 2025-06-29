@@ -7,10 +7,10 @@ const nock = require('..')
 describe('test fake timers (sinon)', () => {
   const url = 'https://api.example.com'
 
-  describe('sinon', () => {
-    let scope
-    let clock
+  let scope
+  let clock
 
+  describe('sinon', () => {
     beforeEach(() => {
       clock = sinon.useFakeTimers()
 
@@ -36,17 +36,47 @@ describe('test fake timers (sinon)', () => {
       nock.restore()
     })
 
-    it('should use fake timers', async () => {
+    it('correctly trigger the timers', async () => {
       const fetch = createRetryFetch({ retries: 3, delay: 100 })
 
-      const promise = fetch(new URL('/api/v1/resource', url))
+      const request = fetch(new URL('/api/v1/resource', url))
 
       await clock.tickAsync(100) // first request
       await clock.tickAsync(100) // first retry
       await clock.tickAsync(100) // second retry
       await clock.tickAsync(100) // third retry
 
-      const response = await promise.then(response => response.json())
+      const response = await request.then(response => response.json())
+
+      expect(response).to.be.deep.equal({ message: 'Success' })
+
+      scope.done()
+    })
+  })
+
+  describe('advance timers workaround', () => {
+    beforeEach(() => {
+      clock = sinon.useFakeTimers({ shouldAdvanceTime: true })
+
+      scope = nock(url)
+        .get('/api/v1/resource')
+        .reply(
+          200,
+          { message: 'Success' },
+          { 'content-type': 'application/json' },
+        )
+    })
+
+    afterEach(() => {
+      clock.restore()
+      nock.cleanAll()
+      nock.restore()
+    })
+
+    it('should use fake timers', async () => {
+      const request = fetch(new URL('/api/v1/resource', url))
+
+      const response = await request.then(response => response.json())
 
       expect(response).to.be.deep.equal({ message: 'Success' })
 

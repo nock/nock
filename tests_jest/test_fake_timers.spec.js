@@ -6,7 +6,7 @@ const nock = require('..')
 describe('test fake timers (jest)', () => {
   const url = 'https://api.example.com'
 
-  describe('jest', () => {
+  describe('using timers to test delays', () => {
     let scope
 
     beforeEach(() => {
@@ -34,7 +34,7 @@ describe('test fake timers (jest)', () => {
       nock.restore()
     })
 
-    it('should use fake timers', async () => {
+    it('correctly trigger the timers', async () => {
       const fetch = createRetryFetch({ retries: 3, delay: 100 })
 
       const request = fetch(new URL('/api/v1/resource', url))
@@ -43,6 +43,38 @@ describe('test fake timers (jest)', () => {
       await jest.runAllTimersAsync() // first retry
       await jest.runAllTimersAsync() // second retry
       await jest.runAllTimersAsync() // third retry
+
+      const response = await request.then(response => response.json())
+
+      expect(response).to.be.deep.equal({ message: 'Success' })
+
+      scope.done()
+    })
+  })
+
+  describe('advance timers workaround', () => {
+    let scope
+
+    beforeEach(() => {
+      jest.useFakeTimers({ advanceTimers: true })
+
+      scope = nock(url)
+        .get('/api/v1/resource')
+        .reply(
+          200,
+          { message: 'Success' },
+          { 'content-type': 'application/json' },
+        )
+    })
+
+    afterEach(() => {
+      jest.useRealTimers()
+      nock.cleanAll()
+      nock.restore()
+    })
+
+    it('should use fake timers', async () => {
+      const request = fetch(new URL('/api/v1/resource', url))
 
       const response = await request.then(response => response.json())
 
