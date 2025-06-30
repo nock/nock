@@ -1,10 +1,15 @@
 'use strict'
 
+const { describe, it, beforeEach, afterEach, afterAll } = require('@jest/globals')
 const { expect } = require('chai')
 const nock = require('..')
 
 describe('test fake timers (jest)', () => {
   const url = 'https://api.example.com'
+
+  afterAll(() => {
+    nock.restore();
+  })
 
   describe('using timers to test delays', () => {
     let scope
@@ -29,9 +34,8 @@ describe('test fake timers (jest)', () => {
     })
 
     afterEach(() => {
-      jest.useRealTimers()
       nock.cleanAll()
-      nock.restore()
+      jest.useRealTimers()
     })
 
     it('correctly trigger the timers', async () => {
@@ -44,7 +48,8 @@ describe('test fake timers (jest)', () => {
       await jest.runAllTimersAsync() // second retry
       await jest.runAllTimersAsync() // third retry
 
-      const response = await request.then(response => response.json())
+      const response = await request.then(async response => response.json());
+
 
       expect(response).to.be.deep.equal({ message: 'Success' })
 
@@ -68,9 +73,8 @@ describe('test fake timers (jest)', () => {
     })
 
     afterEach(() => {
-      jest.useRealTimers()
       nock.cleanAll()
-      nock.restore()
+      jest.useRealTimers()
     })
 
     it('should use fake timers', async () => {
