@@ -22,6 +22,10 @@ overrides:
       mocha: true
     rules:
       mocha/no-exclusive-tests: 'error'
+  - files:
+      - 'tests_jest/**/*.js'
+    globals:
+      jest: true
 
 rules:
   # TODO These are included in standard and should be cleaned up and turned on.
