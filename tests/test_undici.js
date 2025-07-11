@@ -63,6 +63,32 @@ describe('Undici', () => {
     expect(requestBody).to.be.eq('test')
   })
 
+  it('POST using fetch', async () => {
+    let requestBody
+    nock('http://example.test')
+      .post('/test', body => {
+        requestBody = body
+        return true
+      })
+      .reply(200)
+    const response = await undici.fetch('http://example.test/test', {
+      method: 'POST',
+      body: 'test',
+    })
+
+    expect(response.status).to.be.eq(200)
+    expect(requestBody).to.be.eq('test')
+  })
+
+  it('GET using fetch', async () => {
+    nock('http://example.test').get('/test').reply(200)
+    const response = await undici.fetch('http://example.test/test', {
+      method: 'GET',
+    })
+
+    expect(response.status).to.be.eq(200)
+  })
+
   it('forward request if no mock', async () => {
     const { origin } = await startHttpServer((request, response) => {
       response.write('live')
