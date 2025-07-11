@@ -82,9 +82,7 @@ describe('Undici', () => {
 
   it('GET using fetch', async () => {
     nock('http://example.test')
-      .get('/test', () => {
-        return true
-      })
+      .get('/test')
       .reply(200)
     const response = await undici.fetch('http://example.test/test', {
       method: 'GET',
