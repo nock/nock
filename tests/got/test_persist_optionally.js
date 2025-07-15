@@ -203,7 +203,7 @@ describe('`persist()`', () => {
 
     await assertRejects(
       got('http://example.test/'),
-      /Nock: No match for request/,
+      /RequestError: getaddrinfo ENOTFOUND example.test/,
     )
   })
 
