@@ -5,8 +5,9 @@ const { tmpdir } = require('node:os')
 const nock = require('..')
 const { expect } = require('chai')
 const fs = require('node:fs')
+const path = require('node:path')
 
-const socketPath = `${tmpdir()}/socket.sock`
+const socketPath = path.join(tmpdir(), 'socket.sock')
 let server
 
 before(async () => {
