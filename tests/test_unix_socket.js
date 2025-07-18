@@ -12,7 +12,7 @@ const socketPath = path.join(tmpdir(), 'socket.sock')
 let server
 
 if (os.platform() === 'win32') {
-  console.log('Skipping Unix socket tests on Windows')
+  // Skipping Unix socket tests on Windows
   return
 }
 
