@@ -6,9 +6,15 @@ const nock = require('..')
 const { expect } = require('chai')
 const fs = require('node:fs')
 const path = require('node:path')
+const os = require('node:os')
 
 const socketPath = path.join(tmpdir(), 'socket.sock')
 let server
+
+if (os.platform() === 'win32') {
+  console.log('Skipping Unix socket tests on Windows')
+  return
+}
 
 describe('Unix socket', () => {
   before(async () => {
