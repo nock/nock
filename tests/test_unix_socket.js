@@ -10,35 +10,35 @@ const path = require('node:path')
 const socketPath = path.join(tmpdir(), 'socket.sock')
 let server
 
-before(async () => {
-  server = http.createServer((req, res) => {
-    res.end('hello world')
-  })
-
-  await new Promise((resolve, reject) => {
-    server.listen(socketPath, err => {
-      if (err) reject(err)
-      else resolve()
-    })
-  })
-})
-
-after(async () => {
-  await new Promise((resolve, reject) => {
-    server.close(err => {
-      if (err) reject(err)
-      else resolve()
-    })
-  })
-
-  try {
-    fs.unlinkSync(socketPath)
-  } catch (err) {
-    if (err.code !== 'ENOENT') throw err
-  }
-})
-
 describe('Unix socket', () => {
+  before(async () => {
+    server = http.createServer((req, res) => {
+      res.end('hello world')
+    })
+
+    await new Promise((resolve, reject) => {
+      server.listen(socketPath, err => {
+        if (err) reject(err)
+        else resolve()
+      })
+    })
+  })
+
+  after(async () => {
+    await new Promise((resolve, reject) => {
+      server.close(err => {
+        if (err) reject(err)
+        else resolve()
+      })
+    })
+
+    try {
+      fs.unlinkSync(socketPath)
+    } catch (err) {
+      if (err.code !== 'ENOENT') throw err
+    }
+  })
+
   it('dispatches a GET request to a Unix socket', async () => {
     const response = await new Promise((resolve, reject) => {
       const request = http.get(
