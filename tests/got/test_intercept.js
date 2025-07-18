@@ -1174,9 +1174,7 @@ describe('Intercept', () => {
      */
     const headersPairs = Object.fromEntries(
       Array.from({ length: 60 })
-        .map((_, index) => {
-          return [`x-header-${index}`, index.toString()]
-        })
+        .map((_, index) => [`x-header-${index}`, index.toString()])
         .sort(),
     )
 
