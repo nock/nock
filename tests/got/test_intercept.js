@@ -949,7 +949,7 @@ describe('Intercept', () => {
 
     await assertRejects(
       got('http://example.test/hey'),
-      /Nock: No match for request/,
+      /RequestError: getaddrinfo ENOTFOUND example.test/,
     )
   })
 
