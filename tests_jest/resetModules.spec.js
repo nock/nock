@@ -1,4 +1,4 @@
-/* globals jest */ 
+/* globals jest */
 'use strict'
 
 const nock = require('../')
