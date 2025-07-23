@@ -1116,8 +1116,8 @@ describe('Intercept', () => {
 
     nock('http://localhost')
       .get('/irrelevant')
-      .reply(function () {
-        reqHeaders = this.req.headers
+      .reply(request => {
+        reqHeaders = Object.fromEntries(request.headers.entries())
         return [200]
       })
 
