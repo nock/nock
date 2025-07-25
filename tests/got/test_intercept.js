@@ -1110,4 +1110,41 @@ describe('Intercept', () => {
         done()
       })
   })
+
+  it('supports requests with more than default maximum header fields count', done => {
+    let reqHeaders
+
+    nock('http://localhost')
+      .get('/irrelevant')
+      .reply(request => {
+        reqHeaders = Object.fromEntries(request.headers.entries())
+        return [200]
+      })
+
+    /**
+     * By default, Node.js HTTP parser defines 32 as the maximum header fields count.
+     * Each request also has "connection" and "host" headers added automatically.
+     * @see https://github.com/nodejs/node/blob/229cc3be28eab3153c16bc55bc67d1e81c4a7067/src/node_http_parser.cc#L83-L84
+     */
+    const headersPairs = Object.fromEntries(
+      Array.from({ length: 60 })
+        .map((_, index) => [`x-header-${index}`, index.toString()])
+        .sort(),
+    )
+
+    http.get(
+      'http://localhost/irrelevant',
+      {
+        headers: headersPairs,
+      },
+      () => {
+        expect(reqHeaders).to.deep.equal({
+          connection: 'close',
+          host: 'localhost',
+          ...headersPairs,
+        })
+        done()
+      },
+    )
+  })
 })
