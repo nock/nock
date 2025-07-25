@@ -9,6 +9,7 @@ const nock = require('../..')
 const got = require('./got_client')
 const { text } = require('node:stream/consumers')
 const { getDecompressedGetBody } = require('../../lib/utils/node')
+const { startHttpServer } = require('../servers')
 
 const acceptableGlobalKeys = new Set([
   ...Object.keys(global),
@@ -1109,6 +1110,35 @@ describe('Intercept', () => {
         expect.fail(error)
         done()
       })
+  })
+
+  // We don't support yet in mocked 100-continue requests, so currently we just make sure it pass through.
+  it('Request with `Expect: 100-continue` pass through', async () => {
+    const { origin } = await startHttpServer((request, response) => {
+      request.pipe(response)
+    })
+    const exampleRequestBody = 'this is the full request body'
+    const continueListener = sinon.spy()
+
+    const req = http.request(origin, {
+      method: 'POST',
+      headers: { Expect: '100-continue' },
+    })
+
+    req.on('continue', () => {
+      continueListener()
+      req.end(exampleRequestBody)
+    })
+
+    await new Promise(resolve => {
+      req.on('response', res => {
+        expect(res.statusCode).to.equal(200)
+        res.on('data', data => {
+          expect(data.toString()).to.equal(exampleRequestBody)
+        })
+        res.on('end', resolve)
+      })
+    })
   })
 
   it('supports requests with more than default maximum header fields count', done => {
