@@ -102,18 +102,20 @@ $ npm test
 
 ### Running only a single test
 
-When you're writing a test for a specific purpose, it may be useful to only run that test. In order to do this, you can pass a `only` option as the second argument to the [`tap`](https://www.node-tap.org/) testrunner. For instance in `tests/example.js`, like so:
+When you're writing a test for a specific purpose, it may be useful to only run that test. To do so, add `.only` on that test function, like so:
 
 ```js
-test('description', { only: true }, t => {
+test.only('description', t => {
   // ...
 })
 ```
 
-And then:
+Then when that test file is run, only that test will trigger.
+
+If you only want to run a single test file, specify the file name into the test runner:
 
 ```sh
-$ tap --only tests/example_file.js
+$ npx mocha tests/example_file.js
 ```
 
 ## Release Process
