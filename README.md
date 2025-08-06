@@ -462,13 +462,14 @@ nock('http://www.google.com')
   .replyWithError('something awful happened')
 ```
 
-JSON error responses are allowed too:
+Error objects are allowed too:
 
 ```js
-nock('http://www.google.com').get('/cat-poems').replyWithError({
-  message: 'something awful happened',
-  code: 'AWFUL_ERROR',
-})
+nock('http://www.google.com')
+  .get('/cat-poems')
+  .replyWithError(
+    Object.assign(new Error('Connection refused'), { code: 'ECONNREFUSED' }),
+  )
 ```
 
 > Note: This will emit an `error` event on the `request` object, not the reply.
