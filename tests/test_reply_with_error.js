@@ -31,10 +31,14 @@ describe('`replyWithError()`', () => {
   })
 
   // TODO: https://github.com/mswjs/interceptors/issues/625
-  it.skip('allows json response', done => {
+  it.skip('allows an Error response', done => {
     const scope = nock('http://example.test')
       .post('/echo')
-      .replyWithError({ message: 'Service not found', code: 'test' })
+      .replyWithError(
+        Object.assign(new Error('Connection refused'), {
+          code: 'ECONNREFUSED',
+        }),
+      )
 
     const req = http.request({
       host: 'example.test',
@@ -45,8 +49,8 @@ describe('`replyWithError()`', () => {
 
     req.on('error', e => {
       expect(e).to.deep.equal({
-        message: 'Service not found',
-        code: 'test',
+        message: 'Connection refused',
+        code: 'ECONNREFUSED',
       })
       scope.done()
       done()

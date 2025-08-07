@@ -370,7 +370,9 @@ nock('http://example.test')
 
 nock('http://example.test')
   .get('/cat-poems')
-  .replyWithError({ message: 'something awful happened', code: 'AWFUL_ERROR' })
+  .replyWithError(
+    Object.assign(new Error('Connection refused'), { code: 'ECONNREFUSED' }),
+  )
 
 nock('http://example.test')
   .get('/cat-poems')
