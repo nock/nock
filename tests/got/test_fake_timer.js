@@ -9,11 +9,7 @@ it('should still return successfully when fake timer is enabled', async () => {
   const clock = fakeTimers.install()
   const scope = nock('http://example.test').get('/').reply()
 
-  const promise = got('http://example.test')
-
-  await clock.runAllAsync() // Run all fake timers to ensure all scheduled tasks are executed
-
-  await promise
+  await got('http://example.test')
 
   clock.uninstall()
   scope.done()
