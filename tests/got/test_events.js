@@ -98,7 +98,9 @@ describe('no match event', () => {
         expect(new URL(req.url).pathname).to.equal('/definitelymaybe')
         expect(mismatches).to.have.lengthOf(1)
         expect(mismatches[0].interceptor).to.equal(interceptor)
-        expect(mismatches[0].reasons).to.deep.equal(['Path mismatch: expected /, got /definitelymaybe'])
+        expect(mismatches[0].reasons).to.deep.equal([
+          'Path mismatch: expected /, got /definitelymaybe',
+        ])
         done()
       })
 
@@ -106,14 +108,16 @@ describe('no match event', () => {
     })
 
     it('emits no match because of path function mismatch', done => {
-      const pathFunction = (path) => path.includes('expected')
+      const pathFunction = path => path.includes('expected')
       const interceptor = nock('http://example.test').get(pathFunction)
       interceptor.reply(200)
 
       nock.emitter.on('no match', (req, mismatches) => {
         expect(mismatches).to.have.lengthOf(1)
         expect(mismatches[0].interceptor).to.equal(interceptor)
-        expect(mismatches[0].reasons).to.deep.equal(['Path function mismatch: expected function to return true for /something'])
+        expect(mismatches[0].reasons).to.deep.equal([
+          'Path function mismatch: expected function to return true for /something',
+        ])
         done()
       })
 
@@ -127,34 +131,37 @@ describe('no match event', () => {
       nock.emitter.on('no match', (req, mismatches) => {
         expect(mismatches).to.have.lengthOf(1)
         expect(mismatches[0].interceptor).to.equal(interceptor)
-        expect(mismatches[0].reasons).to.deep.equal(['Method mismatch: expected GET, got POST'])
+        expect(mismatches[0].reasons).to.deep.equal([
+          'Method mismatch: expected GET, got POST',
+        ])
         done()
       })
 
       const postReq = http.request({
         hostname: 'example.test',
         path: '/',
-        method: 'POST'
+        method: 'POST',
       })
       postReq.end()
     })
 
     it('emits no match because of body mismatch', done => {
-      const interceptor = nock('http://example.test')
-        .post('/', 'expected body')
+      const interceptor = nock('http://example.test').post('/', 'expected body')
       interceptor.reply(200)
 
       nock.emitter.on('no match', (req, mismatches) => {
         expect(mismatches).to.have.lengthOf(1)
         expect(mismatches[0].interceptor).to.equal(interceptor)
-        expect(mismatches[0].reasons).to.deep.equal(['Body mismatch: expected "expected body", got actual body'])
+        expect(mismatches[0].reasons).to.deep.equal([
+          'Body mismatch: expected "expected body", got actual body',
+        ])
         done()
       })
 
       const postReq = http.request({
         hostname: 'example.test',
         path: '/',
-        method: 'POST'
+        method: 'POST',
       })
       postReq.on('error', ignore)
       postReq.write('actual body')
@@ -189,7 +196,7 @@ describe('no match event', () => {
         expect(mismatches[0].interceptor).to.equal(interceptor)
         expect(mismatches[0].reasons).to.deep.equal([
           'Header mismatch: expected x-scope to match test-scope, got null',
-          'Header mismatch: expected x-interceptor to match test-interceptor, got null'
+          'Header mismatch: expected x-interceptor to match test-interceptor, got null',
         ])
         done()
       })
@@ -200,8 +207,8 @@ describe('no match event', () => {
     it('emits no match because of request headers mismatch', done => {
       const scope = nock('http://example.test', {
         reqheaders: {
-          'x-required': 'value'
-        }
+          'x-required': 'value',
+        },
       })
       const interceptor = scope.get('/')
       interceptor.reply(200)
@@ -209,7 +216,9 @@ describe('no match event', () => {
       nock.emitter.on('no match', (req, mismatches) => {
         expect(mismatches).to.have.lengthOf(1)
         expect(mismatches[0].interceptor).to.equal(interceptor)
-        expect(mismatches[0].reasons).to.deep.equal(["Request headers don't match"])
+        expect(mismatches[0].reasons).to.deep.equal([
+          "Request headers don't match",
+        ])
         done()
       })
 
@@ -218,7 +227,7 @@ describe('no match event', () => {
 
     it('emits no match because of bad headers', done => {
       const scope = nock('http://example.test', {
-        badheaders: ['x-forbidden']
+        badheaders: ['x-forbidden'],
       })
       const interceptor = scope.get('/')
       interceptor.reply(200)
@@ -226,7 +235,9 @@ describe('no match event', () => {
       nock.emitter.on('no match', (req, mismatches) => {
         expect(mismatches).to.have.lengthOf(1)
         expect(mismatches[0].interceptor).to.equal(interceptor)
-        expect(mismatches[0].reasons).to.deep.equal(['Request contains bad headers: x-forbidden'])
+        expect(mismatches[0].reasons).to.deep.equal([
+          'Request contains bad headers: x-forbidden',
+        ])
         done()
       })
 
@@ -235,8 +246,8 @@ describe('no match event', () => {
         path: '/',
         method: 'GET',
         headers: {
-          'x-forbidden': 'should not be here'
-        }
+          'x-forbidden': 'should not be here',
+        },
       })
       req.on('error', ignore)
       req.end()
@@ -244,7 +255,7 @@ describe('no match event', () => {
 
     it('emits no match because conditionally() failed', done => {
       const scope = nock('http://example.test', {
-        conditionally: () => false
+        conditionally: () => false,
       })
       const interceptor = scope.get('/')
       interceptor.reply(200)
@@ -252,13 +263,15 @@ describe('no match event', () => {
       nock.emitter.on('no match', (req, mismatches) => {
         expect(mismatches).to.have.lengthOf(1)
         expect(mismatches[0].interceptor).to.equal(interceptor)
-        expect(mismatches[0].reasons).to.deep.equal(['conditionally() did not validate'])
+        expect(mismatches[0].reasons).to.deep.equal([
+          'conditionally() did not validate',
+        ])
         done()
       })
 
       http.get('http://example.test/').once('error', ignore)
     })
-  });
+  })
 
   it('emits no match when netConnect is disabled', done => {
     nock.disableNetConnect()
@@ -270,4 +283,4 @@ describe('no match event', () => {
 
     http.get('http://example.test').once('error', ignore)
   })
-});
+})

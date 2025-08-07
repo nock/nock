@@ -1354,10 +1354,14 @@ You can also listen for no match events like this:
 ```js
 nock.emitter.on('no match', (req, interceptorResults) => {
   console.log('Request did not match any interceptors:', req.url)
-  
+
   if (interceptorResults && interceptorResults.length > 0) {
     interceptorResults.forEach(({ interceptor, reasons }) => {
-      console.log('Interceptor:', interceptor.method, interceptor.basePath + interceptor.path)
+      console.log(
+        'Interceptor:',
+        interceptor.method,
+        interceptor.basePath + interceptor.path,
+      )
       console.log('Reasons:', reasons)
     })
   }
@@ -1365,14 +1369,17 @@ nock.emitter.on('no match', (req, interceptorResults) => {
 ```
 
 The callback receives two parameters:
+
 - `req` - The request object that didn't match
 - `interceptorResults` - An array of objects containing detailed information about each interceptor that was tested
 
 Each interceptor result object contains:
+
 - `interceptor` - The interceptor that was tested against the request
 - `reasons` - An array of strings describing why the request didn't match this interceptor
 
 Common mismatch reasons include:
+
 - **Method mismatch**: `"Method mismatch: expected GET, got POST"`
 - **Path mismatch**: `"Path mismatch: expected /api/users, got /api/posts"`
 - **Header mismatch**: `"Header mismatch: expected authorization to match Bearer token, got null"`
