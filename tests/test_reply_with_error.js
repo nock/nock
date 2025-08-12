@@ -7,7 +7,7 @@ const { expect } = require('chai')
 const nock = require('..')
 
 describe('`replyWithError()`', () => {
-  it('returns an error through the request', done => {
+  it('returns a string as an error response through the request', done => {
     const scope = nock('http://example.test')
       .post('/echo')
       .replyWithError('Service not found')
@@ -30,8 +30,7 @@ describe('`replyWithError()`', () => {
     req.end()
   })
 
-  // TODO: https://github.com/mswjs/interceptors/issues/625
-  it.skip('allows an Error response', done => {
+  it('returns an Error object as an error response through the request', done => {
     const scope = nock('http://example.test')
       .post('/echo')
       .replyWithError(
@@ -48,10 +47,9 @@ describe('`replyWithError()`', () => {
     })
 
     req.on('error', e => {
-      expect(e).to.deep.equal({
-        message: 'Connection refused',
-        code: 'ECONNREFUSED',
-      })
+      expect(e).to.be.an.instanceof(Error)
+      expect(e).to.have.property('message', 'Connection refused')
+      expect(e).to.have.property('code', 'ECONNREFUSED')
       scope.done()
       done()
     })
