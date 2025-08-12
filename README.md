@@ -467,7 +467,7 @@ Error objects are allowed too:
 nock('http://www.google.com')
   .get('/cat-poems')
   .replyWithError(
-    Object.assign(new Error('Connection refused'), { code: 'ECONNREFUSED' })
+    Object.assign(new Error('Connection refused'), { code: 'ECONNREFUSED' }),
   )
 ```
 
