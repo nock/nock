@@ -1371,12 +1371,11 @@ nock.emitter.on('no match', (req, interceptorResults) => {
 The callback receives two parameters:
 
 - `req` - The request object that didn't match
-- `interceptorResults` - An array of objects containing detailed information about each interceptor that was tested
-
-Each interceptor result object contains:
-
-- `interceptor` - The interceptor that was tested against the request
-- `reasons` - An array of strings describing why the request didn't match this interceptor
+- `interceptorResults` - An array of objects containing detailed information about each interceptor that was tested.
+  Each object contains:
+  - `interceptor` - The interceptor that was tested against the request
+  - `reasons` - An array of strings describing why the request didn't match this interceptor
+    > ⚠️ **Experimental**: The structure and format of the detailed mismatch information may change in future versions as we gather user feedback and refine the API. The feature itself is stable and ready for use and we're seeking community input on the API design before marking it stable.
 
 Common mismatch reasons include:
 
