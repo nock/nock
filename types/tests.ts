@@ -721,6 +721,30 @@ nock.removeInterceptor(interceptor)
 /// Global no match event
 nock.emitter.on('no match', (req: Request) => {})
 
+nock.emitter.on(
+  'no match',
+  (req: Request, interceptorResults?: nock.InterceptorMatchResult[]) => {
+    if (interceptorResults) {
+      interceptorResults.forEach(result => {
+        const interceptor: nock.Interceptor = result.interceptor
+        const reasons: string[] = result.reasons
+      })
+    }
+  },
+)
+
+nock.emitter.once(
+  'no match',
+  (req: Request, interceptorResults?: nock.InterceptorMatchResult[]) => {
+    // Type checking for optional second parameter
+  },
+)
+
+// Type checking: interceptorResults should be optional
+nock.emitter.on('no match', (req: Request) => {
+  // This should still work (backward compatibility)
+})
+
 // Nock Back
 /// Setup
 nock.back.fixtures = '/path/to/fixtures/'

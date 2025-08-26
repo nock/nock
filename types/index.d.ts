@@ -32,7 +32,7 @@ declare namespace nock {
   function abortPendingRequests(): void
 
   let back: Back
-  let emitter: NodeJS.EventEmitter
+  let emitter: NockEmitter
   let recorder: Recorder
 
   type InterceptFunction = (
@@ -86,6 +86,42 @@ declare namespace nock {
     | readonly [StatusCode]
     | readonly [StatusCode, ReplyBody]
     | readonly [StatusCode, ReplyBody, ReplyHeaders]
+
+  /**
+   * Detailed mismatch information for the 'no match' event
+   * @experimental This interface may change in future versions based on community feedback.
+   */
+  interface InterceptorMatchResult {
+    interceptor: Interceptor
+    reasons: string[]
+  }
+
+  /**
+   * Enhanced global emitter with typed 'no match' event
+   */
+  interface NockEmitter extends NodeJS.EventEmitter {
+    on(event: 'no match', listener: (req: Request) => void): this
+    on(
+      event: 'no match',
+      listener: (
+        req: Request,
+        interceptorResults?: InterceptorMatchResult[],
+      ) => void,
+    ): this
+    once(event: 'no match', listener: (req: Request) => void): this
+    once(
+      event: 'no match',
+      listener: (
+        req: Request,
+        interceptorResults?: InterceptorMatchResult[],
+      ) => void,
+    ): this
+    emit(
+      event: 'no match',
+      req: Request,
+      interceptorResults?: InterceptorMatchResult[],
+    ): boolean
+  }
 
   interface Scope extends NodeJS.EventEmitter {
     get: InterceptFunction
