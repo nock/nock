@@ -87,7 +87,7 @@ describe('synchronous `reply()` function', () => {
 
       const scope = nock('http://example.test')
         .get('/')
-        .reply(200, (uri, body) => {
+        .reply(200, () => {
           onReply()
           return ''
         })
@@ -130,10 +130,10 @@ describe('synchronous `reply()` function', () => {
 
           const scope = nock('http://example.test')
             .post('/endpoint', exampleRequestBody)
-            .reply(404, (uri, requestBody) => {
+            .reply(404, async request => {
               replyFnCalled()
-              expect(uri).to.equal('/endpoint')
-              expect(requestBody).to.equal(exampleRequestBody)
+              expect(new URL(request.url).pathname).to.equal('/endpoint')
+              expect(await request.text()).to.equal(exampleRequestBody)
             })
 
           await assertRejects(
@@ -159,9 +159,9 @@ describe('synchronous `reply()` function', () => {
 
           const scope = nock('http://example.test')
             .post('/')
-            .reply(201, (uri, requestBody) => {
+            .reply(201, async request => {
               replyFnCalled()
-              expect(requestBody)
+              expect(await request.json())
                 .to.be.an('object')
                 .and.to.deep.equal(JSON.parse(exampleRequestBody))
             })
@@ -182,9 +182,9 @@ describe('synchronous `reply()` function', () => {
 
           const scope = nock('http://example.test')
             .post('/')
-            .reply(201, (uri, requestBody) => {
+            .reply(201, async request => {
               replyFnCalled()
-              expect(requestBody)
+              expect(await request.json())
                 .to.be.an('object')
                 .and.to.to.deep.equal(JSON.parse(exampleRequestBody))
             })
@@ -206,9 +206,9 @@ describe('synchronous `reply()` function', () => {
 
           const scope = nock('http://example.test')
             .post('/')
-            .reply(201, (uri, requestBody) => {
+            .reply(201, async request => {
               replyFnCalled()
-              expect(requestBody)
+              expect(await request.text())
                 .to.be.a('string')
                 .and.to.equal(exampleRequestBody)
             })

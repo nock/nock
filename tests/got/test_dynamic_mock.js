@@ -50,10 +50,10 @@ describe('dynamic `reply()` function', () => {
   it('should provide the status code and body by passing them to the asynchronous callback', async () => {
     const scope = nock('http://example.test')
       .get('/')
-      .reply(function (path, reqBody, cb) {
+      .reply(function (request, cb) {
         setTimeout(function () {
           cb(null, [201, 'GHI'])
-        }, 1e3)
+        }, 100)
       })
 
     const { statusCode, body } = await got('http://example.test')

@@ -1,7 +1,7 @@
 'use strict'
 
 const { expect } = require('chai')
-const http = require('http')
+const http = require('node:http')
 const nock = require('..')
 
 // These tests use `AbortSignal` to abort HTTP requests
@@ -123,7 +123,7 @@ describe('When `AbortSignal` is used', () => {
     const signal = AbortSignal.timeout(10)
     const scope = nock('http://example.test')
       .post('/form')
-      .delayConnection(10)
+      .delay(10)
       .reply(201, 'OK!')
 
     const error = await makeRequest('http://example.test/form', {

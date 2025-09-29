@@ -14,7 +14,7 @@ nock.disableNetConnect()
 
 nock('http://someotherservice.com').get('/').reply(200, 'whaaa')
 
-const http = require('http')
+const http = require('node:http')
 const req = http.get('http://www.google.com/')
 
 req.once('error', function (err) {

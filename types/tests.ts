@@ -93,12 +93,12 @@ scope = inst.reply(num, str)
 
 scope = inst.reply(num, str, obj)
 scope = inst.reply(num, obj, obj)
-scope = inst.reply(num, (uri: string, body: string) => str)
-scope = inst.reply(num, async (uri: string, body: string) => str)
-scope = inst.reply(num, (uri: string, body: string) => str, obj)
-scope = inst.reply((uri: string, body) => [num, str] as const)
-scope = inst.reply(async (uri: string, body) => [num] as const)
-scope = inst.reply((uri: string, body) => [num, str, obj])
+scope = inst.reply(num, (request: Request) => str)
+scope = inst.reply(num, async (request: Request) => str)
+scope = inst.reply(num, (request: Request) => str, obj)
+scope = inst.reply(request => [num, str] as const)
+scope = inst.reply(async request => [num] as const)
+scope = inst.reply(request => [num, str, obj])
 scope = inst.replyWithFile(num, str)
 
 inst = inst.times(4)
@@ -115,7 +115,6 @@ scope = scope.matchHeader(str, regex)
 scope = scope.matchHeader(str, (val: string) => true)
 
 inst = inst.delay(num)
-inst = inst.delayConnection(num)
 
 scope = scope.filteringPath(regex, str)
 scope = scope.filteringPath((path: string) => {
@@ -133,9 +132,6 @@ scope = scope.replyDate()
 scope = scope.replyDate(new Date())
 
 inst = inst.delay(2000)
-inst = inst.delay({ head: 1000, body: 1000 })
-inst = inst.delayBody(2000)
-inst = inst.delayConnection(2000)
 
 scope.done() // $ExpectType void
 scope.isDone() // $ExpectType boolean
@@ -161,11 +157,6 @@ nock('http://example.test').get('/users/1').reply(200, {
 
 // Using URL as input
 scope = nock(new URL('https://example.test/'))
-  .get('/resource')
-  .reply(200, 'url matched')
-
-// specifying URL from url.parse output
-scope = nock(url.parse('https://example.test/'))
   .get('/resource')
   .reply(200, 'url matched')
 
@@ -315,22 +306,22 @@ scope = nock('http://example.test')
 scope = nock('http://example.test')
   .filteringRequestBody(/.*/, '*')
   .post('/echo', '*')
-  .reply(201, (uri: string, requestBody) => {
-    return requestBody
+  .reply(201, async request => {
+    return await request.text()
   })
 
 scope = nock('http://example.test')
   .filteringRequestBody(/.*/, '*')
   .post('/echo', '*')
-  .reply((uri, requestBody, cb) => {
+  .reply((request, cb) => {
     fs.readFile('cat-poems.txt', cb as any) // Error-first callback
   })
 
 scope = nock('http://example.test')
   .filteringRequestBody(/.*/, '*')
   .post('/echo', '*')
-  .reply((uri, requestBody) => {
-    str = uri
+  .reply(request => {
+    str = request.url
     return [
       201,
       'THIS IS THE REPLY BODY',
@@ -341,7 +332,7 @@ scope = nock('http://example.test')
 scope = nock('http://example.test')
   .filteringRequestBody(/.*/, '*')
   .post('/echo', '*')
-  .reply((uri, requestBody, cb) => {
+  .reply((request, cb) => {
     setTimeout(() => {
       cb(null, [201, 'THIS IS THE REPLY BODY'])
     }, 1e3)
@@ -349,17 +340,17 @@ scope = nock('http://example.test')
 
 scope = nock('http://example.test')
   .get('/cat-poems')
-  .reply(200, (uri: string, requestBody) => {
+  .reply(200, () => {
     return fs.createReadStream('cat-poems.txt')
   })
 
 /// Access original request and headers
 scope = nock('http://example.test')
   .get('/cat-poems')
-  .reply(function (uri, requestBody) {
-    str = this.req.path
-    console.log('path:', this.req.path)
-    console.log('headers:', this.req.headers)
+  .reply(function (request) {
+    str = request.url
+    console.log('path:', new URL(request.url).pathname)
+    console.log('headers:', Object.fromEntries(request.headers.entries()))
     // ...
   })
 
@@ -435,8 +426,8 @@ scope = nock('http://example.test')
 scope = nock('http://example.test')
   .get('/')
   .reply(200, 'Hello World!', {
-    'X-My-Headers': (req, res, body) => {
-      return body.toString()
+    'X-My-Headers': request => {
+      return request.text()
     },
   })
 
@@ -451,8 +442,8 @@ scope = nock('http://example.test')
 
 scope = nock('http://example.test')
   .defaultReplyHeaders({
-    'Content-Length': (req, res, body) => {
-      return body.length.toString()
+    'Content-Length': async request => {
+      return (await request.text()).length.toString()
     },
   })
   .get('/')
@@ -491,21 +482,7 @@ nock('http://example.test').get('/').optionally().reply(200, 'Ok')
 // Delay the response body
 nock('http://example.test')
   .get('/')
-  .delayBody(2000) // 2 seconds
-  .reply(200, '<html></html>')
-
-// Delay the response
-nock('http://example.test')
-  .get('/')
   .delay(2000) // 2 seconds delay will be applied to the response header.
-  .reply(200, '<html></html>')
-
-nock('http://example.test')
-  .get('/')
-  .delay({
-    head: 2000, // header will be delayed for 2 seconds, i.e. the whole response will be delayed for 2 seconds.
-    body: 3000, // body will be delayed for another 3 seconds after header is sent out.
-  })
   .reply(200, '<html></html>')
 
 // Chaining
@@ -744,7 +721,31 @@ nock.removeInterceptor(interceptor)
 
 // Events
 /// Global no match event
-nock.emitter.on('no match', (req: any) => {})
+nock.emitter.on('no match', (req: Request) => {})
+
+nock.emitter.on(
+  'no match',
+  (req: Request, interceptorResults?: nock.InterceptorMatchResult[]) => {
+    if (interceptorResults) {
+      interceptorResults.forEach(result => {
+        const interceptor: nock.Interceptor = result.interceptor
+        const reasons: string[] = result.reasons
+      })
+    }
+  },
+)
+
+nock.emitter.once(
+  'no match',
+  (req: Request, interceptorResults?: nock.InterceptorMatchResult[]) => {
+    // Type checking for optional second parameter
+  },
+)
+
+// Type checking: interceptorResults should be optional
+nock.emitter.on('no match', (req: Request) => {
+  // This should still work (backward compatibility)
+})
 
 // Nock Back
 /// Setup

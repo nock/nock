@@ -1311,7 +1311,7 @@ nock.removeInterceptor({
   hostname: 'localhost',
   path: '/mockedResource',
   // method defaults to `GET`
-  // proto defaullts to `http`
+  // proto defaults to `http`
 })
 ```
 
@@ -1353,8 +1353,38 @@ A scope emits the following events:
 You can also listen for no match events like this:
 
 ```js
-nock.emitter.on('no match', req => {})
+nock.emitter.on('no match', (req, interceptorResults) => {
+  console.log('Request did not match any interceptors:', req.url)
+
+  if (interceptorResults && interceptorResults.length > 0) {
+    interceptorResults.forEach(({ interceptor, reasons }) => {
+      console.log(
+        'Interceptor:',
+        interceptor.method,
+        interceptor.basePath + interceptor.path,
+      )
+      console.log('Reasons:', reasons)
+    })
+  }
+})
 ```
+
+The callback receives two parameters:
+
+- `req` - The request object that didn't match
+- `interceptorResults` - An array of objects containing detailed information about each interceptor that was tested.
+  Each object contains:
+  - `interceptor` - The interceptor that was tested against the request
+  - `reasons` - An array of strings describing why the request didn't match this interceptor
+    > ⚠️ **Experimental**: The structure and format of the detailed mismatch information may change in future versions as we gather user feedback and refine the API. The feature itself is stable and ready for use and we're seeking community input on the API design before marking it stable.
+
+Common mismatch reasons include:
+
+- **Method mismatch**: `"Method mismatch: expected GET, got POST"`
+- **Path mismatch**: `"Path mismatch: expected /api/users, got /api/posts"`
+- **Header mismatch**: `"Header mismatch: expected authorization to match Bearer token, got null"`
+- **Body mismatch**: `"Body mismatch: expected "expected body", got actual body"`
+- **Query mismatch**: `"query matching failed"`
 
 ## Nock Back
 
