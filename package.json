@@ -22,9 +22,8 @@
   "main": "./index.js",
   "types": "types",
   "dependencies": {
-    "@mswjs/interceptors": "^0.39.5",
-    "json-stringify-safe": "^5.0.1",
-    "propagate": "^2.0.0"
+    "@mswjs/interceptors": "^0.40.0",
+    "json-stringify-safe": "^5.0.1"
   },
   "devDependencies": {
     "@definitelytyped/dtslint": "^0.0.163",
