@@ -1515,7 +1515,7 @@ To set the mode call `nockBack.setMode(mode)` or run the tests with the `NOCK_BA
 
 Although you can certainly open the recorded JSON fixtures to manually verify requests recorded by nockBack - it's sometimes useful to put those expectations in your tests.
 
-The `context.query` function can be used to return all of the interceptors that were recored in a given fixture.
+The `context.query` property can be used to access all of the interceptors that were recored in a given fixture.
 
 By itself, this functions as a negative expectation - you can verify that certain calls do NOT happen in the fixture. Since `assertScopesFinished` can verify there are no _extra_ calls in a fixture - pairing the two methods allows you to verify the exact set of HTTP interactions recorded in the fixture. This is especially useful when re-recording for instance, a service that synchronizes via several HTTP calls to an external API.
 
@@ -1535,7 +1535,7 @@ it('#synchronize - synchronize with the external API', async localState => {
 
   context.assertScopesFinished()
 
-  expect(context.query()).toEqual(
+  expect(context.query).toEqual(
     expect.arrayContaining([
       expect.objectContaining({
         method: 'POST',
