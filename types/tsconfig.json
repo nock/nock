@@ -5,6 +5,6 @@
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
-    "paths": { "nock": ["./."] }
+    "paths": { "nock": ["."] }
   }
 }
