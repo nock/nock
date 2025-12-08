@@ -133,6 +133,8 @@ declare namespace nock {
   }
 
   interface Interceptor {
+    requests: ClientRequest[]
+
     query(
       matcher:
         | boolean
@@ -213,6 +215,11 @@ declare namespace nock {
     delayBody(timeMs: number): this
     /** @deprecated use delay function instead */
     delayConnection(timeMs: number): this
+
+    remember(): this
+    remember(maxRememberedRequests: number | null): this
+
+    clearRequestHistory(): void
   }
 
   interface Options {
