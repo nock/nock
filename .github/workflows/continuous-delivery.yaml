@@ -8,7 +8,7 @@ name: Continuous Delivery
       - next
 
 permissions:
-  id-token: write  # Required for npm OIDC
+  id-token: write # Required for npm OIDC
   contents: read
 
 jobs:
