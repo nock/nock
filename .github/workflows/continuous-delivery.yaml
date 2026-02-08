@@ -9,6 +9,7 @@ name: Continuous Delivery
 
 permissions:
   id-token: write # Required for npm OIDC
+  contents: write
 
 jobs:
   build:
