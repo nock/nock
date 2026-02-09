@@ -48,7 +48,7 @@
     "prettier": "3.6.2",
     "proxyquire": "^2.1.0",
     "rimraf": "^3.0.0",
-    "semantic-release": "^24.1.0",
+    "semantic-release": "^25.0.3",
     "sinon": "^17.0.1",
     "sinon-chai": "^3.7.0",
     "typescript": "^5.0.4"
