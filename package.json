@@ -22,7 +22,7 @@
   "main": "./index.js",
   "types": "types",
   "dependencies": {
-    "@mswjs/interceptors": "^0.40.0",
+    "@mswjs/interceptors": "^0.41.2",
     "json-stringify-safe": "^5.0.1"
   },
   "devDependencies": {
@@ -47,7 +47,7 @@
     "nyc": "^15.0.0",
     "prettier": "3.6.2",
     "rimraf": "^3.0.0",
-    "semantic-release": "^24.1.0",
+    "semantic-release": "^25.0.3",
     "sinon": "^17.0.1",
     "sinon-chai": "^3.7.0",
     "typescript": "^5.0.4",
