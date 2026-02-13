@@ -53,6 +53,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
   - [Request Headers Matching](#request-headers-matching)
   - [Optional Requests](#optional-requests)
   - [Allow **unmocked** requests on a mocked hostname](#allow-unmocked-requests-on-a-mocked-hostname)
+  - [Passthrough requests](#passthrough-requests)
 - [Expectations](#expectations)
   - [.isDone()](#isdone)
   - [.cleanAll()](#cleanall)
@@ -910,6 +911,44 @@ const scope = nock('http://my.existing.service.com', { allowUnmocked: true })
 ```
 
 > Note: When applying `{allowUnmocked: true}`, if the request is made to the real server, no interceptor is removed.
+
+### Passthrough requests
+
+For more granular control over which requests should hit the real server, you can use `passthrough()`. While `allowUnmocked` lets through any request that doesn't match an interceptor, `passthrough()` lets you specify exactly which requests go through the HTTP stack.
+
+```js
+const scope = nock('http://my.existing.service.com')
+  .get('/mock')
+  .reply(200, { users: ['fake'] })
+  .post('/live')
+  .passthrough()
+
+// GET /mock => goes through nock
+// POST /live => actually makes request to the server
+```
+
+You can use `passthrough()` with query strings, header matching, and other interceptor features:
+
+```js
+nock('http://my.existing.service.com')
+  .get('/api/data')
+  .query({ live: 'true' })
+  .matchHeader('authorization', /^Bearer /)
+  .passthrough()
+```
+
+Like other interceptors, passthrough interceptors are consumed when matched. They work with modifiers like `times()`, `persist()`, and `optionally()`:
+
+```js
+// Passthrough the first 3 requests, then fail
+nock('http://example.com').get('/').times(3).passthrough()
+
+// Passthrough indefinitely
+nock('http://example.com').persist().get('/').passthrough()
+
+// Don't fail scope.done() if this is never called
+nock('http://example.com').get('/maybe').optionally().passthrough()
+```
 
 ## Expectations
 
