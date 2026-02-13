@@ -60,10 +60,7 @@ describe('`passthrough()`', () => {
       response.end()
     })
 
-    const scope = nock(origin)
-      .get('/api')
-      .query({ live: 'true' })
-      .passthrough()
+    const scope = nock(origin).get('/api').query({ live: 'true' }).passthrough()
 
     const { body } = await got(`${origin}/api?live=true`)
     expect(body).to.equal('real data')
@@ -204,18 +201,14 @@ describe('`passthrough()`', () => {
     nock('http://example.test').get('/path').passthrough()
 
     expect(nock.pendingMocks()).to.have.lengthOf(1)
-    expect(nock.pendingMocks()[0]).to.equal(
-      'GET http://example.test:80/path',
-    )
+    expect(nock.pendingMocks()[0]).to.equal('GET http://example.test:80/path')
   })
 
   it('passthrough interceptors appear in `activeMocks()`', () => {
     nock('http://example.test').get('/path').passthrough()
 
     expect(nock.activeMocks()).to.have.lengthOf(1)
-    expect(nock.activeMocks()[0]).to.equal(
-      'GET http://example.test:80/path',
-    )
+    expect(nock.activeMocks()[0]).to.equal('GET http://example.test:80/path')
   })
 
   it('optional passthrough does not appear in `pendingMocks()`', () => {
@@ -245,9 +238,7 @@ describe('`passthrough()`', () => {
       response.end('live')
     })
 
-    nock(origin, { allowUnmocked: true })
-      .get('/passthrough')
-      .passthrough()
+    nock(origin, { allowUnmocked: true }).get('/passthrough').passthrough()
 
     // An unmocked route should pass through to the real server
     // because allowUnmocked is set at the scope level and must
