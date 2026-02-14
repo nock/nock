@@ -1,7 +1,7 @@
 'use strict'
 
 const { expect } = require('chai')
-const zlib = require('zlib')
+const zlib = require('node:zlib')
 const nock = require('../..')
 const got = require('./got_client')
 
@@ -29,9 +29,7 @@ describe('Content Encoding', () => {
 
     const scope = nock('http://example.test')
       .get('/')
-      .delay({
-        body: 100,
-      })
+      .delay(100)
       .reply(200, compressed, {
         'Content-Encoding': 'gzip',
       })

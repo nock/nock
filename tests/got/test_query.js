@@ -2,10 +2,9 @@
 
 const { expect } = require('chai')
 const sinon = require('sinon')
-const url = require('url')
+const url = require('node:url')
 const nock = require('../..')
 const got = require('./got_client')
-const assertRejects = require('assert-rejects')
 
 describe('query params in path', () => {
   it('matches that query string', async () => {
@@ -152,10 +151,12 @@ describe('`query()`', () => {
         .query({ foo: 'hello%20world' })
         .reply()
 
-      await assertRejects(
-        got('http://example.test/?foo=hello%20world'),
-        /Nock: No match for request/,
-      )
+      const { statusCode: errorStatus, body } = await got(
+        'http://example.test/?foo=hello%20world',
+        { responseType: 'json' },
+      ).catch(err => err.response)
+      expect(errorStatus).to.equal(501)
+      expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
 
       const { statusCode } = await got(
         'http://example.test/?foo=hello%2520world',
@@ -189,19 +190,22 @@ describe('`query()`', () => {
     it('will not match when a query string does not match name=value', async () => {
       nock('http://example.test').get('/').query({ foo: 'bar' }).reply()
 
-      await assertRejects(
-        got('http://example.test/?foo=baz'),
-        /Nock: No match for request/,
-      )
+      const { statusCode, body } = await got('http://example.test/?foo=baz', {
+        responseType: 'json',
+      }).catch(err => err.response)
+      expect(statusCode).to.equal(501)
+      expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
     })
 
     it('will not match when a query string is present that was not registered', async () => {
       nock('http://example.test').get('/').query({ foo: 'bar' }).reply()
 
-      await assertRejects(
-        got('http://example.test/?foo=bar&baz=foz'),
-        /Nock: No match for request/,
-      )
+      const { statusCode, body } = await got(
+        'http://example.test/?foo=bar&baz=foz',
+        { responseType: 'json' },
+      ).catch(err => err.response)
+      expect(statusCode).to.equal(501)
+      expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
     })
 
     it('will not match when a query string is malformed', async () => {
@@ -209,10 +213,11 @@ describe('`query()`', () => {
       // matching. Should this test be removed?
       nock('http://example.test').get('/').query({ foo: 'bar' }).reply()
 
-      await assertRejects(
-        got('http://example.test/?foobar'),
-        /Nock: No match for request/,
-      )
+      const { statusCode, body } = await got('http://example.test/?foobar', {
+        responseType: 'json',
+      }).catch(err => err.response)
+      expect(statusCode).to.equal(501)
+      expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
     })
 
     it('will not match when a query string has fewer correct values than expected', async () => {
@@ -226,19 +231,23 @@ describe('`query()`', () => {
         })
         .reply()
 
-      await assertRejects(
-        got('http://example.test/?num=1str=fou'),
-        /Nock: No match for request/,
-      )
+      const { statusCode, body } = await got(
+        'http://example.test/?num=1str=fou',
+        { responseType: 'json' },
+      ).catch(err => err.response)
+      expect(statusCode).to.equal(501)
+      expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
     })
 
     it('query matching should not consider request arrays equal to comma-separated expectations', async () => {
       nock('http://example.test').get('/').query({ foo: 'bar,baz' }).reply()
 
-      await assertRejects(
-        got('http://example.test?foo[]=bar&foo[]=baz'),
-        /Nock: No match for request/,
-      )
+      const { statusCode, body } = await got(
+        'http://example.test?foo[]=bar&foo[]=baz',
+        { responseType: 'json' },
+      ).catch(err => err.response)
+      expect(statusCode).to.equal(501)
+      expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
     })
 
     it('query matching should not consider comma-separated requests equal to array expectations', async () => {
@@ -247,10 +256,12 @@ describe('`query()`', () => {
         .query({ foo: ['bar', 'baz'] })
         .reply()
 
-      await assertRejects(
-        got('http://example.test?foo=bar%2Cbaz'),
-        /Nock: No match for request/,
-      )
+      const { statusCode, body } = await got(
+        'http://example.test?foo=bar%2Cbaz',
+        { responseType: 'json' },
+      ).catch(err => err.response)
+      expect(statusCode).to.equal(501)
+      expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
     })
   })
 
@@ -331,10 +342,12 @@ describe('`query()`', () => {
         .query(() => false)
         .reply()
 
-      await assertRejects(
-        got('http://example.test/?i=should&pass=?'),
-        /Nock: No match for request/,
-      )
+      const { statusCode, body } = await got(
+        'http://example.test/?i=should&pass=?',
+        { responseType: 'json' },
+      ).catch(err => err.response)
+      expect(statusCode).to.equal(501)
+      expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
     })
   })
 })

@@ -1,10 +1,10 @@
 'use strict'
 
-const events = require('events')
-const http = require('http')
-const path = require('path')
-const stream = require('stream')
-const util = require('util')
+const events = require('node:events')
+const http = require('node:http')
+const path = require('node:path')
+const stream = require('node:stream')
+const util = require('node:util')
 const { expect } = require('chai')
 const sinon = require('sinon')
 const nock = require('../..')

@@ -1,10 +1,8 @@
 'use strict'
 
-const path = require('path')
+const path = require('node:path')
 const { expect } = require('chai')
 const sinon = require('sinon')
-const proxyquire = require('proxyquire').preserveCache()
-const url = require('url')
 const Interceptor = require('../../lib/interceptor')
 const nock = require('../..')
 const got = require('./got_client')
@@ -20,22 +18,14 @@ it('scope exposes interceptors', () => {
   scopes.forEach(scope => {
     scope.interceptors.forEach(interceptor => {
       expect(interceptor).to.be.an.instanceOf(Interceptor)
-      interceptor.delayConnection(100)
+      interceptor.delay(100)
     })
   })
 })
 
 describe('`Scope#constructor`', () => {
-  it('accepts the output of url.parse', async () => {
-    const scope = nock(url.parse('http://example.test')).get('/').reply()
-
-    const { statusCode } = await got('http://example.test')
-    expect(statusCode).to.equal(200)
-    scope.done()
-  })
-
   it('accepts a WHATWG URL instance', async () => {
-    const scope = nock(new url.URL('http://example.test')).get('/').reply()
+    const scope = nock(new URL('http://example.test')).get('/').reply()
 
     const { statusCode } = await got('http://example.test')
     expect(statusCode).to.equal(200)
@@ -50,25 +40,6 @@ describe('`Scope#constructor`', () => {
 
   it('throws on invalid URL format', async () => {
     expect(() => nock(['This is not a url'])).to.throw()
-    // The following contains all valid properties of WHATWG URL, but is not an
-    // instance of URL. Maybe we should support object literals some day? A
-    // simple duck-type validator would suffice.
-    expect(() =>
-      nock({
-        href: 'http://google.com/foo',
-        origin: 'http://google.com',
-        protocol: 'http:',
-        username: '',
-        password: '',
-        host: 'google.com',
-        hostname: 'google.com',
-        port: 80,
-        pathname: '/foo',
-        search: '',
-        searchParams: {},
-        hash: '',
-      }),
-    ).to.throw()
   })
 })
 
@@ -114,12 +85,6 @@ describe('`Scope#remove()`', () => {
     // Assert.
     expect(scope.activeMocks()).to.deep.equal([key])
   })
-})
-
-it('loadDefs throws expected when fs is not available', () => {
-  const { loadDefs } = proxyquire('../../lib/scope', { fs: null })
-
-  expect(() => loadDefs()).to.throw(Error, 'No fs')
 })
 
 describe('`Scope#isDone()`', () => {
@@ -218,7 +183,7 @@ describe('filteringRequestBody()', () => {
     )
   })
 
-  describe('`Scope#clone()`', async () => {
+  describe('`Scope#clone()`', () => {
     it('creates a new Scope with the same basePath and scope options', () => {
       const scope = nock('http://example.test', { encodedQueryParams: true })
       const clonedScope = scope.clone()

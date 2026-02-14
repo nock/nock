@@ -1,13 +1,15 @@
 'use strict'
 
-const http = require('http')
-const https = require('https')
+const http = require('node:http')
+const https = require('node:https')
 const { expect } = require('chai')
 const sinon = require('sinon')
-const assertRejects = require('assert-rejects')
-const url = require('url')
+const url = require('node:url')
 const nock = require('../..')
 const got = require('./got_client')
+const { text } = require('node:stream/consumers')
+const { getDecompressedGetBody } = require('../../lib/utils/node')
+const { startHttpServer } = require('../servers')
 
 const acceptableGlobalKeys = new Set([
   ...Object.keys(global),
@@ -82,7 +84,7 @@ describe('Intercept', () => {
   it('should intercept a GET request with body', async () => {
     const scope = nock('http://example.test')
       .get('/')
-      .reply(200, (uri, body) => body)
+      .reply(200, request => text(getDecompressedGetBody(request)))
 
     const { body } = await got('http://example.test/', {
       method: 'GET',
@@ -183,7 +185,9 @@ describe('Intercept', () => {
 
     const scope = nock('http://example.test')
       .post('/echo', /key=v.?l/g)
-      .reply(200, (uri, body) => ['OK', uri, body].join(' '))
+      .reply(200, async request =>
+        ['OK', new URL(request.url).pathname, await request.text()].join(' '),
+      )
 
     const { body } = await got.post('http://example.test/echo', { body: input })
 
@@ -194,7 +198,9 @@ describe('Intercept', () => {
   it('post with function as spec', async () => {
     const scope = nock('http://example.test')
       .post('/echo', body => body === 'key=val')
-      .reply(200, (uri, body) => ['OK', uri, body].join(' '))
+      .reply(200, async request =>
+        ['OK', new URL(request.url).pathname, await request.text()].join(' '),
+      )
 
     const { body } = await got.post('http://example.test/echo', {
       body: 'key=val',
@@ -209,7 +215,9 @@ describe('Intercept', () => {
 
     const scope = nock('http://example.test')
       .post('/echo', input)
-      .reply(200, (uri, body) => ['OK', uri, body].join(' '))
+      .reply(200, async request =>
+        ['OK', new URL(request.url).pathname, await request.text()].join(' '),
+      )
 
     const { body } = await got.post('http://example.test/echo', { body: input })
 
@@ -232,7 +240,9 @@ describe('Intercept', () => {
       .filteringPath(/.*/, '*')
       .filteringRequestBody(/.*/, '*')
       .post('*', '*')
-      .reply(200, (uri, body) => ['OK', uri, body].join(' '))
+      .reply(200, async request =>
+        ['OK', new URL(request.url).pathname, await request.text()].join(' '),
+      )
 
     const { body } = await got.post('http://example.test/original/path', {
       body: 'original=body',
@@ -406,98 +416,35 @@ describe('Intercept', () => {
     scope.done()
   })
 
-  it('emits error when listeners are added after `req.end()` call', done => {
-    nock('http://example.test').get('/').reply()
-
-    const req = http.request(
-      {
-        host: 'example.test',
-        path: '/wrong-path',
-      },
-      res => {
-        expect.fail(new Error('should not come here!'))
-      },
-    )
-
-    req.end()
-
-    req.on('error', err => {
-      expect(err.message.trim()).to.equal(
-        `Nock: No match for request ${JSON.stringify(
-          {
-            method: 'GET',
-            url: 'http://example.test/wrong-path',
-            headers: { connection: 'close' },
-          },
-          null,
-          2,
-        )}`,
-      )
-      done()
-    })
-  })
-
-  it('emits error if https route is missing', done => {
+  it('return 501 if https route is missing', done => {
     nock('https://example.test').get('/').reply(200, 'Hello World!')
 
-    const req = https.request(
+    https.get(
       {
         host: 'example.test',
         path: '/abcdef892932',
       },
       res => {
-        expect.fail(new Error('should not come here!'))
+        expect(res.statusCode).to.equal(501)
+        done()
       },
     )
-    req.on('error', err => {
-      expect(err.message.trim()).to.equal(
-        `Nock: No match for request ${JSON.stringify(
-          {
-            method: 'GET',
-            url: 'https://example.test/abcdef892932',
-            headers: { connection: 'close' },
-          },
-          null,
-          2,
-        )}`,
-      )
-      done()
-    })
-    req.end()
   })
 
-  it('emits error if https route is missing, non-standard port', done => {
+  it('return 501 if https route is missing, non-standard port', done => {
     nock('https://example.test:123').get('/').reply(200, 'Hello World!')
 
-    const req = https.request(
+    https.get(
       {
         host: 'example.test',
         port: 123,
         path: '/dsadsads',
       },
       res => {
-        expect.fail(new Error('should not come here!'))
+        expect(res.statusCode).to.equal(501)
+        done()
       },
     )
-
-    req.on('error', err => {
-      expect(err.message.trim()).to.equal(
-        `Nock: No match for request ${JSON.stringify(
-          {
-            method: 'GET',
-            url: 'https://example.test:123/dsadsads',
-            headers: {
-              connection: 'close',
-              host: 'example.test:123',
-            },
-          },
-          null,
-          2,
-        )}`,
-      )
-      done()
-    })
-    req.end()
   })
 
   it('scopes are independent', async () => {
@@ -543,7 +490,7 @@ describe('Intercept', () => {
           auth: 'username:password',
           path: '/',
         },
-        res => {
+        () => {
           scope.done()
           done()
         },
@@ -578,7 +525,7 @@ describe('Intercept', () => {
           port: 8081,
           path: '/',
         },
-        res => {
+        () => {
           scope.done()
           done()
         },
@@ -586,7 +533,7 @@ describe('Intercept', () => {
       .end()
   })
 
-  it('explicitly specifiying port 80 works', done => {
+  it('explicitly specifying port 80 works', done => {
     const scope = nock('http://example.test:80').get('/').reply()
 
     http
@@ -596,7 +543,7 @@ describe('Intercept', () => {
           port: 80,
           path: '/',
         },
-        res => {
+        () => {
           scope.done()
           done()
         },
@@ -617,7 +564,7 @@ describe('Intercept', () => {
           method: 'POST',
           path: '/claim',
         },
-        res => {
+        () => {
           scope.done()
           done()
         },
@@ -670,10 +617,12 @@ describe('Intercept', () => {
       .get('/')
       .reply(200)
 
-    await assertRejects(
-      got('http://example.test/'),
-      /Nock: No match for request/,
-    )
+    const { statusCode: errorStatus, body } = await got(
+      'http://example.test/',
+      { responseType: 'json' },
+    ).catch(err => err.response)
+    expect(errorStatus).to.equal(501)
+    expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
     expect(scope.isDone()).to.be.false()
 
     enabled = true
@@ -828,7 +777,7 @@ describe('Intercept', () => {
 
   it('interceptors should work in any order with filteringScope', async () => {
     nock('http://some.test', {
-      filteringScope: scope => true,
+      filteringScope: () => true,
     })
       .get('/path1?query=1')
       .reply(200, 'response for path1/query1')
@@ -934,10 +883,14 @@ describe('Intercept', () => {
     const getResponse = await got('http://example.test/match/uri/function')
     expect(getResponse).to.include({ statusCode: 200, body: `Match GET` })
 
-    await assertRejects(
-      got.head('http://example.test/do/not/match'),
-      /Nock: No match for request/,
-    )
+    const { statusCode: errorStatus } = await got(
+      'http://example.test/do/not/match',
+      {
+        method: 'HEAD',
+        responseType: 'json',
+      },
+    ).catch(err => err.response)
+    expect(errorStatus).to.equal(501)
   })
 
   it('you must setup an interceptor for each request', async () => {
@@ -947,10 +900,12 @@ describe('Intercept', () => {
     expect(statusCode).to.equal(200)
     expect(body).to.equal('First match')
 
-    await assertRejects(
-      got('http://example.test/hey'),
-      /Nock: No match for request/,
-    )
+    const { statusCode: errorStatus, body: anotherBody } = await got(
+      'http://example.test/hey',
+      { responseType: 'json' },
+    ).catch(err => err.response)
+    expect(errorStatus).to.equal(501)
+    expect(anotherBody.code).to.equal('ERR_NOCK_NO_MATCH')
   })
 
   // TODO: What is the intention of this test?
@@ -1157,13 +1112,42 @@ describe('Intercept', () => {
       })
   })
 
+  // We don't support yet in mocked 100-continue requests, so currently we just make sure it pass through.
+  it('Request with `Expect: 100-continue` pass through', async () => {
+    const { origin } = await startHttpServer((request, response) => {
+      request.pipe(response)
+    })
+    const exampleRequestBody = 'this is the full request body'
+    const continueListener = sinon.spy()
+
+    const req = http.request(origin, {
+      method: 'POST',
+      headers: { Expect: '100-continue' },
+    })
+
+    req.on('continue', () => {
+      continueListener()
+      req.end(exampleRequestBody)
+    })
+
+    await new Promise(resolve => {
+      req.on('response', res => {
+        expect(res.statusCode).to.equal(200)
+        res.on('data', data => {
+          expect(data.toString()).to.equal(exampleRequestBody)
+        })
+        res.on('end', resolve)
+      })
+    })
+  })
+
   it('supports requests with more than default maximum header fields count', done => {
     let reqHeaders
 
     nock('http://localhost')
       .get('/irrelevant')
-      .reply(function () {
-        reqHeaders = this.req.headers
+      .reply(request => {
+        reqHeaders = Object.fromEntries(request.headers.entries())
         return [200]
       })
 

@@ -2,11 +2,10 @@
 
 // Tests for `.replyWithFile()`.
 
-const fs = require('fs')
-const path = require('path')
+const fs = require('node:fs')
+const path = require('node:path')
 const sinon = require('sinon')
 const { expect } = require('chai')
-const proxyquire = require('proxyquire').preserveCache()
 const nock = require('../..')
 const got = require('./got_client')
 
@@ -85,22 +84,6 @@ describe('`replyWithFile()`', () => {
     expect(fs.createReadStream.callCount).to.equal(2)
 
     scope.done()
-  })
-
-  describe('with no fs', () => {
-    const { Scope } = proxyquire('../../lib/scope', {
-      './interceptor': proxyquire('../../lib/interceptor', {
-        fs: null,
-      }),
-    })
-
-    it('throws the expected error', () => {
-      expect(() =>
-        new Scope('http://example.test')
-          .get('/')
-          .replyWithFile(200, textFilePath),
-      ).to.throw(Error, 'No fs')
-    })
   })
 
   it('does not create ReadStream eagerly', async () => {

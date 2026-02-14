@@ -3,7 +3,6 @@
 const { expect } = require('chai')
 const nock = require('../..')
 const got = require('./got_client')
-const assertRejects = require('assert-rejects')
 
 describe('repeating', () => {
   it('`once()`', async () => {
@@ -15,10 +14,12 @@ describe('repeating', () => {
     const { statusCode } = await got('http://example.test/')
     expect(statusCode).to.equal(200)
 
-    await assertRejects(
-      got('http://example.test/'),
-      /Nock: No match for request/,
-    )
+    const { statusCode: errorStatus, body } = await got(
+      'http://example.test/',
+      { responseType: 'json' },
+    ).catch(err => err.response)
+    expect(errorStatus).to.equal(501)
+    expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
 
     scope.done()
   })
@@ -35,10 +36,11 @@ describe('repeating', () => {
       expect(statusCode).to.equal(200)
     }
 
-    await assertRejects(
-      got('http://example.test/'),
-      /Nock: No match for request/,
-    )
+    const { statusCode, body } = await got('http://example.test/', {
+      responseType: 'json',
+    }).catch(err => err.response)
+    expect(statusCode).to.equal(501)
+    expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
 
     scope.done()
   })
@@ -55,10 +57,11 @@ describe('repeating', () => {
       expect(statusCode).to.equal(200)
     }
 
-    await assertRejects(
-      got('http://example.test/'),
-      /Nock: No match for request/,
-    )
+    const { statusCode, body } = await got('http://example.test/', {
+      responseType: 'json',
+    }).catch(err => err.response)
+    expect(statusCode).to.equal(501)
+    expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
 
     scope.done()
   })
@@ -76,10 +79,12 @@ describe('repeating', () => {
         expect(statusCode).to.equal(200)
       }
 
-      await assertRejects(
-        got('http://example.test/'),
-        /Nock: No match for request/,
-      )
+      const { statusCode: errorStatus, body } = await got(
+        'http://example.test/',
+        { responseType: 'json' },
+      ).catch(err => err.response)
+      expect(errorStatus).to.equal(501)
+      expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
 
       scope.done()
     })
@@ -93,10 +98,12 @@ describe('repeating', () => {
       const { statusCode } = await got('http://example.test/')
       expect(statusCode).to.equal(200)
 
-      await assertRejects(
-        got('http://example.test/'),
-        /Nock: No match for request/,
-      )
+      const { statusCode: errorStatus, body } = await got(
+        'http://example.test/',
+        { responseType: 'json' },
+      ).catch(err => err.response)
+      expect(errorStatus).to.equal(501)
+      expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
 
       scope.done()
     })

@@ -1,6 +1,6 @@
 'use strict'
 
-const http = require('http')
+const http = require('node:http')
 const { expect } = require('chai')
 const nock = require('../..')
 const sinon = require('sinon')
@@ -194,7 +194,7 @@ describe('Nock lifecycle functions', () => {
       const responseBody = 'hi'
       const scope = nock('http://example.test')
         .get('/somepath')
-        .reply(200, (uri, requestBody) => {
+        .reply(200, () => {
           somethingBad()
           return responseBody
         })
@@ -208,14 +208,16 @@ describe('Nock lifecycle functions', () => {
 
   describe('`abortPendingRequests()`', () => {
     it('prevents the request from completing', done => {
-      const onRequest = sinon.spy()
+      const onResponseEnd = sinon.spy()
 
-      nock('http://example.test').get('/').delayConnection(100).reply(200, 'OK')
+      nock('http://example.test').get('/').delay(100).reply(200, 'OK')
 
-      http.get('http://example.test', onRequest)
+      http.get('http://example.test', res => {
+        res.on('end', onResponseEnd)
+      })
 
       setTimeout(() => {
-        expect(onRequest).not.to.have.been.called()
+        expect(onResponseEnd).not.to.have.been.called()
         done()
       }, 200)
       setImmediate(nock.abortPendingRequests)

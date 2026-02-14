@@ -1,7 +1,6 @@
 'use strict'
 
 const { expect } = require('chai')
-const sinon = require('sinon')
 const nock = require('../..')
 const got = require('./got_client')
 
@@ -10,11 +9,11 @@ const got = require('./got_client')
 
 describe('interception in parallel', () => {
   const origin = 'https://example.test'
-  const makeRequest = opts =>
-    got(origin, opts)
+  const makeRequest = () =>
+    got(origin, { responseType: 'json' })
       .then(res => res.statusCode)
       .catch(reason => {
-        if (reason.code === 'ERR_NOCK_NO_MATCH') return 418
+        if (reason.response.body.code === 'ERR_NOCK_NO_MATCH') return 501
         throw reason
       })
 
@@ -30,7 +29,7 @@ describe('interception in parallel', () => {
       makeRequest(),
     ])
 
-    expect(results.sort()).to.deep.equal([200, 201, 418])
+    expect(results.sort()).to.deep.equal([200, 201, 501])
     scope.done()
   })
 
@@ -43,7 +42,7 @@ describe('interception in parallel', () => {
       makeRequest(),
     ])
 
-    expect(results.sort()).to.deep.equal([200, 200, 418])
+    expect(results.sort()).to.deep.equal([200, 200, 501])
     scope.done()
   })
 
@@ -57,29 +56,7 @@ describe('interception in parallel', () => {
       makeRequest(),
     ])
 
-    expect(results.sort()).to.deep.equal([200, 201, 418])
-    expect(nock.isDone()).to.equal(true)
-  })
-
-  it('provides the correct request instance on the Interceptor inside reply callbacks', async () => {
-    const fooHeadersStub = sinon.stub()
-
-    nock(origin)
-      .persist()
-      .get('/')
-      .reply(function () {
-        fooHeadersStub(this.req.headers.foo)
-        return [200]
-      })
-
-    await Promise.all([
-      makeRequest({ headers: { foo: 'A' } }),
-      makeRequest({ headers: { foo: 'B' } }),
-    ])
-
-    expect(fooHeadersStub).to.have.calledTwice()
-    expect(fooHeadersStub).to.have.been.calledWithExactly('A')
-    expect(fooHeadersStub).to.have.been.calledWithExactly('B')
+    expect(results.sort()).to.deep.equal([200, 201, 501])
     expect(nock.isDone()).to.equal(true)
   })
 })
