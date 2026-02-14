@@ -74,7 +74,10 @@ declare namespace nock {
   type Body = string | Record<string, any> // a string or decoded JSON
   type ReplyBody = Body | Buffer | ReadStream
 
-  type ReplyHeaderFunction = (req: Request) => Promise<string | string[]>
+  type ReplyHeaderFunction = (
+    req: Request,
+    body?: string | Buffer,
+  ) => string | string[] | Promise<string | string[]>
   type ReplyHeaderValue = string | string[] | ReplyHeaderFunction
   type ReplyHeaders =
     | Record<string, ReplyHeaderValue>
@@ -230,7 +233,7 @@ declare namespace nock {
    * @param request - The Request object.
    * @returns A Promise resolving to the decompressed body.
    */
-  function getDecompressedGetBody(request: Request): Promise<Readable>
+  function getGetRequestBody(request: Request): Promise<Readable>
 
   interface Options {
     allowUnmocked?: boolean

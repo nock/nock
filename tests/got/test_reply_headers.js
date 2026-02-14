@@ -248,17 +248,15 @@ describe('`reply()` headers', () => {
       scope.done()
     })
 
-    // TODO: does it make sense to send the response to the function?
-    it.skip('receives the correct arguments', async () => {
+    it('receives the correct arguments', async () => {
       const myHeaderFnCalled = sinon.spy()
 
       const scope = nock('http://example.test')
         .post('/')
         .reply(200, 'boo!', {
-          'X-My-Headers': (req, res, body) => {
+          'X-My-Headers': (req, body) => {
             myHeaderFnCalled()
             expect(req).to.be.an.instanceof(Request)
-            expect(res).to.be.an.instanceof(IncomingMessage)
             expect(body).to.equal('boo!')
             return 'gotcha'
           },
