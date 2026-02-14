@@ -1,7 +1,6 @@
 'use strict'
 
 const { expect } = require('chai')
-const assertRejects = require('assert-rejects')
 const nock = require('../..')
 const got = require('./got_client')
 const { startHttpServer } = require('../servers')
@@ -25,10 +24,11 @@ describe('`passthrough()`', () => {
   it('non-matching request is not passed through', async () => {
     nock('http://example.test').get('/specific').passthrough()
 
-    await assertRejects(
-      got('http://example.test/other'),
-      /Response code 501/,
-    )
+    const { statusCode, body } = await got('http://example.test/other', {
+      responseType: 'json',
+    }).catch(err => err.response)
+    expect(statusCode).to.equal(501)
+    expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
   })
 
   it('mixed mocked and passthrough on the same scope', async () => {
@@ -73,10 +73,12 @@ describe('`passthrough()`', () => {
       .query({ live: 'true' })
       .passthrough()
 
-    await assertRejects(
-      got('http://example.test/api?live=false'),
-      /Response code 501/,
-    )
+    const { statusCode, body } = await got(
+      'http://example.test/api?live=false',
+      { responseType: 'json' },
+    ).catch(err => err.response)
+    expect(statusCode).to.equal(501)
+    expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
   })
 
   it('passthrough with header matching', async () => {
@@ -104,12 +106,12 @@ describe('`passthrough()`', () => {
       .matchHeader('authorization', /^Bearer /)
       .passthrough()
 
-    await assertRejects(
-      got('http://example.test', {
-        headers: { authorization: 'Basic abc123' },
-      }),
-      /Response code 501/,
-    )
+    const { statusCode, body } = await got('http://example.test', {
+      headers: { authorization: 'Basic abc123' },
+      responseType: 'json',
+    }).catch(err => err.response)
+    expect(statusCode).to.equal(501)
+    expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
   })
 
   it('passthrough with body matching', async () => {
@@ -137,10 +139,14 @@ describe('`passthrough()`', () => {
   it('passthrough does not match with wrong body', async () => {
     nock('http://example.test').post('/submit', 'hello').passthrough()
 
-    await assertRejects(
-      got.post('http://example.test/submit', { body: 'goodbye' }),
-      /Response code 501/,
-    )
+    const { statusCode, body } = await got
+      .post('http://example.test/submit', {
+        body: 'goodbye',
+        responseType: 'json',
+      })
+      .catch(err => err.response)
+    expect(statusCode).to.equal(501)
+    expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
   })
 
   it('passthrough respects `times()`', async () => {
@@ -155,7 +161,11 @@ describe('`passthrough()`', () => {
     await got(origin)
     await got(origin)
 
-    await assertRejects(got(origin), /Response code 501/)
+    const { statusCode, body } = await got(origin, {
+      responseType: 'json',
+    }).catch(err => err.response)
+    expect(statusCode).to.equal(501)
+    expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
   })
 
   it('passthrough with `persist()`', async () => {
