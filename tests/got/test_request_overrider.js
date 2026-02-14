@@ -660,19 +660,6 @@ describe('Request Overrider', () => {
     })
   })
 
-  it.skip('socket has getPeerCertificate() method which returns a random base64 string', done => {
-    nock('https://example.test').get('/').reply()
-
-    const req = https.get('https://example.test')
-    req.once('socket', socket => {
-      const first = socket.getPeerCertificate()
-      const second = socket.getPeerCertificate()
-      expect(first).to.be.a('string')
-      expect(second).to.be.a('string').and.not.equal(first)
-      done()
-    })
-  })
-
   it('abort destroys socket', done => {
     nock('http://example.test').get('/').reply(200, 'hey')
 
