@@ -3,7 +3,6 @@
 // Tests for header objects passed to `.reply()`, including header objects
 // containing lambdas.
 
-const { IncomingMessage } = require('node:http')
 const { expect } = require('chai')
 const sinon = require('sinon')
 const fakeTimers = require('@sinonjs/fake-timers')
