@@ -6,6 +6,13 @@ name: Continuous Delivery
       - main
       - beta
       - next
+
+permissions:
+  id-token: write # Required for npm OIDC
+  contents: write
+  issues: write
+  pull-requests: write
+
 jobs:
   build:
     name: Release

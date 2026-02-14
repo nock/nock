@@ -51,6 +51,8 @@ jobs:
   lint-typescript:
     name: Lint TypeScript declaration files
     runs-on: ubuntu-latest
+    # skip this for now because we are using outdated dtslint which doesn't support newer TypeScript features.
+    if: ${{ false }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
