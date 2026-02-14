@@ -205,6 +205,7 @@ declare namespace nock {
     /* tslint:enable:unified-signatures */
 
     replyWithError(errorMessage: string | object): Scope
+    passthrough(): Scope
     replyWithFile(
       statusCode: StatusCode,
       fileName: string,
