@@ -27,7 +27,7 @@ describe('`passthrough()`', () => {
 
     await assertRejects(
       got('http://example.test/other'),
-      /Nock: No match for request/,
+      /Response code 501/,
     )
   })
 
@@ -75,7 +75,7 @@ describe('`passthrough()`', () => {
 
     await assertRejects(
       got('http://example.test/api?live=false'),
-      /Nock: No match for request/,
+      /Response code 501/,
     )
   })
 
@@ -108,7 +108,7 @@ describe('`passthrough()`', () => {
       got('http://example.test', {
         headers: { authorization: 'Basic abc123' },
       }),
-      /Nock: No match for request/,
+      /Response code 501/,
     )
   })
 
@@ -139,7 +139,7 @@ describe('`passthrough()`', () => {
 
     await assertRejects(
       got.post('http://example.test/submit', { body: 'goodbye' }),
-      /Nock: No match for request/,
+      /Response code 501/,
     )
   })
 
@@ -155,7 +155,7 @@ describe('`passthrough()`', () => {
     await got(origin)
     await got(origin)
 
-    await assertRejects(got(origin), /Nock: No match for request/)
+    await assertRejects(got(origin), /Response code 501/)
   })
 
   it('passthrough with `persist()`', async () => {
