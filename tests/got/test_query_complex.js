@@ -111,6 +111,22 @@ describe('`query()` complex encoding', () => {
     scope.done()
   })
 
+  it('query with unindexed array', async () => {
+    const encodedQuery = 'list[]=123&list[]=456&list[]=789'
+
+    const expectedQuery = {
+      list: [123, 456, 789],
+    }
+
+    const scope = nock('http://example.test')
+      .get('/test')
+      .query(expectedQuery)
+      .reply()
+    await got(`http://example.test/test?${encodedQuery}`)
+
+    scope.done()
+  })
+
   it('query with array and regexp', async () => {
     // In Node 10.x this can be updated:
     // const exampleQuery = new URLSearchParams([
