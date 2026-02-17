@@ -424,12 +424,6 @@ scope = nock('http://example.test').get('/').reply(200, 'Hello World!', {
 
 scope = nock('http://example.test')
   .get('/')
-  .reply(200, 'Hello World!', {
-    'X-My-Headers': ['My Header value 1', 'My Header value 2'],
-  })
-
-scope = nock('http://example.test')
-  .get('/')
   .reply(200, 'Hello World!', new Map([['X-Header-One', 'foo']]))
 
 scope = nock('http://example.test')

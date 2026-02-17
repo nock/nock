@@ -77,12 +77,12 @@ declare namespace nock {
     req: ClientRequest,
     res: IncomingMessage,
     body: string | Buffer,
-  ) => string | string[]
-  type ReplyHeaderValue = string | string[] | ReplyHeaderFunction
+  ) => string
+  type ReplyHeaderValue = string | ReplyHeaderFunction
   type ReplyHeaders =
     | Record<string, ReplyHeaderValue>
     | Map<string, ReplyHeaderValue>
-    | ReplyHeaderValue[]
+    | string[]
 
   type StatusCode = number
   type ReplyFnResult =
