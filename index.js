@@ -17,7 +17,7 @@ const {
 } = require('./lib/intercept')
 const recorder = require('./lib/recorder')
 const { Scope, load, loadDefs, define } = require('./lib/scope')
-const { getDecompressedGetBody } = require('./lib/utils/node')
+const { getGetRequestBody } = require('./lib/utils/node')
 
 module.exports = (basePath, options) => new Scope(basePath, options)
 
@@ -43,7 +43,7 @@ Object.assign(module.exports, {
   },
   restore: recorder.restore,
   back,
-  getDecompressedGetBody,
+  getGetRequestBody,
 })
 
 // We always activate Nock on import, overriding the globals.

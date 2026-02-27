@@ -8,7 +8,7 @@ const url = require('node:url')
 const nock = require('../..')
 const got = require('./got_client')
 const { text } = require('node:stream/consumers')
-const { getDecompressedGetBody } = require('../../lib/utils/node')
+const { getGetRequestBody } = require('../../lib/utils/node')
 const { startHttpServer } = require('../servers')
 
 const acceptableGlobalKeys = new Set([
@@ -84,7 +84,7 @@ describe('Intercept', () => {
   it('should intercept a GET request with body', async () => {
     const scope = nock('http://example.test')
       .get('/')
-      .reply(200, request => text(getDecompressedGetBody(request)))
+      .reply(200, request => text(getGetRequestBody(request)))
 
     const { body } = await got('http://example.test/', {
       method: 'GET',
