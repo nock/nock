@@ -770,5 +770,43 @@ describe('Nock Back', () => {
 
       req.end()
     })
+
+    it('fixes content-length header when JSON is reserialized', done => {
+      nockBack('content_length_test.json', function (nockDone) {
+        expect(this.scopes).to.have.length(1)
+
+        const req = http.get('http://example.test/api/data', res => {
+          let body = ''
+          res.on('data', chunk => {
+            body += chunk.toString()
+          })
+
+          res.on('end', () => {
+            const contentLength = parseInt(res.headers['content-length'], 10)
+            const actualLength = Buffer.byteLength(body, 'utf8')
+
+            // The content-length should match the actual body size
+            expect(contentLength).to.equal(actualLength)
+
+            // Verify the body is valid JSON
+            const parsed = JSON.parse(body)
+            expect(parsed).to.deep.equal({
+              name: 'John Doe',
+              age: 30,
+              city: 'New York',
+            })
+
+            this.assertScopesFinished()
+            nockDone()
+            done()
+          })
+        })
+
+        req.on('error', err => {
+          nockDone()
+          done(err)
+        })
+      })
+    })
   })
 })

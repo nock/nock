@@ -40,7 +40,6 @@
    ```
 
 1. `ClientRequest.abort()` has been updated to align with Node's native behavior.
-
    - Nock use to always emit a 'socket hang up' error. Now it only emits the error if `abort` is called between the 'socket' and 'response' events.
    - The emitted 'abort' event now happens on `nextTick`.
    - The socket is now only destroyed if the 'socket' event has fired, and now emits a 'close' event on `nextTick` that propagates though the request object.

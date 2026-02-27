@@ -49,21 +49,21 @@ The goal of this release is to create more predictable, modern and consistent AP
    })
    ```
 
-3. **`reply` header functions now only receive the `Request` instance**  
-   The `reply` header functions no longer receive the `request`, `response`, and (response) `body` parameters. Instead, they now only receive the `Request` instance.
+3. **`reply` header functions no longer receive the `Response` object**  
+  The `reply` header functions now receive the `Request` instance and the response `body`, but no longer receive the `Response` object.
 
    ```js
    // Before
    .reply(200, 'Hello World!', {
-      'Content-Length': (req, res, body) => body.length,
-      ETag: () => `${Date.now()}`,
-    })
+     'Content-Length': (req, res, body) => body.length,
+     ETag: () => `${Date.now()}`,
+   })
 
    // After
    .reply(200, 'Hello World!', {
-      'Body-Content-Length': async (request) => (await request.text()).length,
-      ETag: () => `${Date.now()}`,
-    })
+     'Content-Length': (request, body) => body.length,
+     ETag: () => `${Date.now()}`,
+   })
    ```
 
 4. **`request` and `replied` events now send a `Request` object**  
@@ -81,13 +81,13 @@ The goal of this release is to create more predictable, modern and consistent AP
    })
    ```
 
-5. **New `getDecompressedGetBody` Function**  
-   A new utility function, `getDecompressedGetBody`, has been introduced to handle the edge case of `GET` requests with a body. This function allows you to retrieve the decompressed body of a `GET` request, which is not natively supported by the `Request` object.
+5. **New `getGetRequestBody` Function**  
+  A new utility function, `getGetRequestBody`, has been introduced to handle the edge case of `GET` requests with a body. This function allows you to retrieve the decompressed body of a `GET` request, which is not natively supported by the `Request` object.
 
    ```js
    const scope = nock('http://example.test')
      .get('/')
-     .reply(200, request => text(getDecompressedGetBody(request)))
+     .reply(200, request => text(getGetRequestBody(request)))
    ```
 
 6. **Removed `delayBody` and `delayConnection` methods**  

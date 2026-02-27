@@ -6,17 +6,24 @@ name: Continuous Delivery
       - main
       - beta
       - next
+
+permissions:
+  id-token: write # Required for npm OIDC
+  contents: write
+  issues: write
+  pull-requests: write
+
 jobs:
   build:
     name: Release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 'lts/*'
           cache: 'npm'
