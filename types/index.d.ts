@@ -246,7 +246,12 @@ declare namespace nock {
     body?: RequestBodyMatcher
     reqheaders?: Record<string, RequestHeaderMatcher>
     response?: ReplyBody
-    headers?: ReplyHeaders
+    /**
+     * Response headers as recorded (object form). Values are strings; multi-value
+     * headers (e.g. set-cookie) may be string[] when definitions are loaded from
+     * fixtures or hand-written. This is what define() uses.
+     */
+    rawHeaders?: Record<string, string | string[]>
     options?: Options
   }
 
