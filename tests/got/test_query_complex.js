@@ -111,6 +111,15 @@ describe('`query()` complex encoding', () => {
     scope.done()
   })
 
+  it('does not throw on unbalanced dot-notation query params', async () => {
+    const scope = nock('http://example.test')
+      .get('/path')
+      .query({ parent: 'value', 'parent.1': 'first' })
+      .reply(200)
+    await got('http://example.test/path?parent=value&parent.1=first')
+    scope.done()
+  })
+
   it('query with array and regexp', async () => {
     // In Node 10.x this can be updated:
     // const exampleQuery = new URLSearchParams([
