@@ -629,4 +629,8 @@ describe('`expand()`', () => {
     expect(original).deep.equal({ 'foo[bar][0]': 'baz' })
     expect(original).not.equal(result)
   })
+
+  it('returns undefined when a key conflicts with an already-set primitive value', () => {
+    expect(expand({ parent: 'value', 'parent.1': 'first' })).equal(undefined)
+  })
 })
