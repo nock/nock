@@ -157,6 +157,22 @@ The goal of this release is to create more predictable, modern and consistent AP
    const scope = nock(new URL('http://example.test'))
    ```
 
+## ESM
+
+Nock is now a pure ES module. If your project uses CommonJS, you can still use `require()` with the Node.js's built-in `require(esm)` support (stable since v22.12):
+
+```js
+// ESM
+import nock from 'nock'
+
+// CommonJS (Node.js >= 22.12)
+const nock = require('nock')
+```
+
+## TypeScript
+
+Nock is now written in TypeScript. Type declarations are auto-generated and shipped with the package. Public types remain unchanged except for minor fixes.
+
 ---
 
 For more details, refer to the [release notes](https://github.com/nock/nock/releases/tag/v15.0.0).
