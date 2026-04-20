@@ -1,9 +1,7 @@
-'use strict'
-
-const { expect } = require('chai')
-const nock = require('../..')
-const got = require('./got_client')
-const { startHttpServer } = require('../servers')
+import { expect } from 'chai'
+import nock from '../../index.ts'
+import got from './got_client.js'
+import { startHttpServer } from '../servers/index.js'
 
 describe('`passthrough()`', () => {
   it('forwards request to the real server', async () => {

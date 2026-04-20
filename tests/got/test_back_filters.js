@@ -1,18 +1,16 @@
-'use strict'
+import { expect } from 'chai'
+import fs from 'node:fs'
+import path from 'node:path'
+import rimraf from 'rimraf'
 
-const { expect } = require('chai')
-const fs = require('node:fs')
-const path = require('node:path')
-const rimraf = require('rimraf')
+import got from './got_client.js'
+import { startHttpServer } from '../servers/index.js'
 
-const got = require('./got_client')
-const { startHttpServer } = require('../servers')
-
-const nock = require('../..')
+import nock from '../../index.ts'
 
 const nockBack = nock.back
 const originalMode = nockBack.currentMode
-const fixturesDir = path.resolve(__dirname, 'fixtures')
+const fixturesDir = path.resolve(import.meta.dirname, 'fixtures')
 const fixtureFilename = 'recording_filters_test.json'
 const fixtureFullPath = path.resolve(fixturesDir, fixtureFilename)
 

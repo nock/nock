@@ -1,12 +1,10 @@
-'use strict'
+import { expect } from 'chai'
+import http from 'node:http'
+import path from 'node:path'
+import sinon from 'sinon'
 
-const { expect } = require('chai')
-const http = require('node:http')
-const path = require('node:path')
-const sinon = require('sinon')
-
-const nock = require('../..')
-const got = require('./got_client')
+import nock from '../../index.ts'
+import got from './got_client.js'
 
 function ignore() {}
 
@@ -62,7 +60,7 @@ it('emits request and request body', async () => {
 })
 
 it('emits request and replied events when response body is a stream', async () => {
-  const textFilePath = path.resolve(__dirname, '../assets/reply_file_1.txt')
+  const textFilePath = path.resolve(import.meta.dirname, '../assets/reply_file_1.txt')
   const scope = nock('http://example.test')
     .get('/')
     .replyWithFile(200, textFilePath)

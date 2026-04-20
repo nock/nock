@@ -1,32 +1,18 @@
-'use strict'
+import type { Interceptor } from './interceptor.ts'
+import type { Scope } from './scope.ts'
+import * as common from './common.ts'
+import { intercept as debug } from './debug.ts'
+import * as builtinMock from './interceptors/builtin.ts'
+import { createRequire } from 'node:module'
 
-const common = require('./common')
-const { intercept: debug } = require('./debug')
-const builtinMock = require('./interceptors/builtin')
-let undiciMock // Lazy-loaded, optional peer dependency
+const _require = createRequire(import.meta.url)
+let undiciMock: { activate: () => void, deactivate: () => void } | undefined
 
-let allInterceptors = {}
-let allowNetConnect
-let isActive = false
+let allInterceptors: Record<string, any> = {}
+let allowNetConnect: RegExp | {test: (url: string) => boolean} | undefined
+let _isActive = false
 
-/**
- * Enabled real request.
- * @public
- * @param {String|RegExp} matcher=RegExp.new('.*') Expression to match
- * @example
- * // Enables all real requests
- * nock.enableNetConnect();
- * @example
- * // Enables real requests for url that matches google
- * nock.enableNetConnect('google');
- * @example
- * // Enables real requests for url that matches google and amazon
- * nock.enableNetConnect(/(google|amazon)/);
- * @example
- * // Enables real requests for url that includes google
- * nock.enableNetConnect(host => host.includes('google'));
- */
-function enableNetConnect(matcher) {
+function enableNetConnect(matcher?: string | RegExp | ((host: string) => boolean)) {
   if (typeof matcher === 'string') {
     allowNetConnect = new RegExp(matcher)
   } else if (matcher instanceof RegExp) {
@@ -38,18 +24,12 @@ function enableNetConnect(matcher) {
   }
 }
 
-function isEnabledForNetConnect(url) {
-  const enabled = allowNetConnect && allowNetConnect.test(url)
+function isEnabledForNetConnect(url: string) {
+  const enabled = !!(allowNetConnect && allowNetConnect.test(url))
   debug('Net connect', enabled ? '' : 'not', 'enabled for', url)
   return enabled
 }
 
-/**
- * Disable all real requests.
- * @public
- * @example
- * nock.disableNetConnect();
- */
 function disableNetConnect() {
   allowNetConnect = undefined
 }
@@ -62,7 +42,7 @@ function isOff() {
   return process.env.NOCK_OFF === 'true'
 }
 
-function addInterceptor(key, interceptor, scope, scopeOptions, host) {
+function addInterceptor(key: string, interceptor: Interceptor, scope: Scope, scopeOptions: Record<string, any>, host: string) {
   if (!(key in allInterceptors)) {
     allInterceptors[key] = { key, interceptors: [] }
   }
@@ -80,39 +60,33 @@ function addInterceptor(key, interceptor, scope, scopeOptions, host) {
   allInterceptors[key].interceptors.push(interceptor)
 }
 
-function remove(interceptor) {
-  if (interceptor.__nock_scope.shouldPersist() || --interceptor.counter > 0) {
+function remove(interceptor: Interceptor) {
+  if (interceptor.__nock_scope?.shouldPersist() || --interceptor.counter > 0) {
     return
   }
 
-  const { basePath } = interceptor
+  const basePath = interceptor.basePath as string
   const interceptors =
     (allInterceptors[basePath] && allInterceptors[basePath].interceptors) || []
 
   // TODO: There is a clearer way to write that we want to delete the first
   // matching instance. I'm also not sure why we couldn't delete _all_
   // matching instances.
-  interceptors.some(function (thisInterceptor, i) {
+  interceptors.some(function (thisInterceptor: Interceptor, i: number) {
     return thisInterceptor === interceptor ? interceptors.splice(i, 1) : false
   })
 }
 
 function removeAll() {
   Object.keys(allInterceptors).forEach(function (key) {
-    allInterceptors[key].interceptors.forEach(function (interceptor) {
+    allInterceptors[key].interceptors.forEach(function (interceptor: Interceptor) {
       interceptor.scope.keyedInterceptors = {}
     })
   })
   allInterceptors = {}
 }
 
-/**
- * Return all the Interceptors whose Scopes match against the base path of the provided options.
- *
- * @param {URL} url
- * @returns {Interceptor[]}
- */
-function interceptorsFor(url) {
+function interceptorsFor(url: URL) {
   debug('interceptors for %j', url.host)
 
   const port = url.port || (url.protocol === 'https:' ? 443 : 80)
@@ -135,7 +109,7 @@ function interceptorsFor(url) {
 
         // Keep the filtered scope (its key) to signal the rest of the module
         // that this wasn't an exact but filtered match.
-        interceptors.forEach(ic => {
+        interceptors.forEach((ic: Interceptor) => {
           ic.__nock_filteredScope = ic.__nock_scopeKey
         })
         return interceptors
@@ -167,21 +141,21 @@ function interceptorsFor(url) {
   return undefined
 }
 
-function removeInterceptor(options) {
-  // Lazily import to avoid circular imports.
-  const Interceptor = require('./interceptor')
+import { Interceptor as InterceptorClass } from './interceptor.ts'
 
+function removeInterceptor(options: Interceptor | {proto?: string, host?: string, method?: string, path?: string}) {
   let baseUrl, key, method, proto
-  if (options instanceof Interceptor) {
-    baseUrl = options.basePath
-    key = options._key
+  if (options instanceof InterceptorClass) {
+    baseUrl = (options as Interceptor).basePath as string
+    key = (options as Interceptor)._key
   } else {
-    proto = options.proto ? options.proto : 'http'
+    const opts = options as {proto?: string, host?: string, method?: string, path?: string}
+    proto = opts.proto ? opts.proto : 'http'
 
-    common.normalizeRequestOptions(options)
-    baseUrl = `${proto}://${options.host}`
-    method = (options.method && options.method.toUpperCase()) || 'GET'
-    key = `${method} ${baseUrl}${options.path || '/'}`
+    common.normalizeRequestOptions(opts)
+    baseUrl = `${proto}://${opts.host}`
+    method = (opts.method && opts.method.toUpperCase()) || 'GET'
+    key = `${method} ${baseUrl}${opts.path || '/'}`
   }
 
   if (
@@ -191,7 +165,7 @@ function removeInterceptor(options) {
     for (let i = 0; i < allInterceptors[baseUrl].interceptors.length; i++) {
       const interceptor = allInterceptors[baseUrl].interceptors[i]
       if (
-        options instanceof Interceptor
+        options instanceof InterceptorClass
           ? interceptor === options
           : interceptor._key === key
       ) {
@@ -209,10 +183,10 @@ function removeInterceptor(options) {
 
 function interceptorScopes() {
   const nestedInterceptors = Object.values(allInterceptors).map(
-    i => i.interceptors,
+    (i: any) => i.interceptors,
   )
-  const scopes = new Set([].concat(...nestedInterceptors).map(i => i.scope))
-  return [...scopes]
+  const scopes = new Set(([] as Interceptor[]).concat(...nestedInterceptors).map((i: Interceptor) => i.scope))
+  return [...scopes] as Scope[]
 }
 
 function isDone() {
@@ -220,23 +194,22 @@ function isDone() {
 }
 
 function pendingMocks() {
-  return [].concat(...interceptorScopes().map(scope => scope.pendingMocks()))
+  return ([] as string[]).concat(...interceptorScopes().map(scope => scope.pendingMocks()))
 }
 
 function activeMocks() {
-  return [].concat(...interceptorScopes().map(scope => scope.activeMocks()))
+  return ([] as string[]).concat(...interceptorScopes().map(scope => scope.activeMocks()))
 }
 
 function activate() {
-  if (!isActive) {
+  if (!_isActive) {
     builtinMock.activate()
 
-    // Lazy load undiciMock only when activate is called
     if (!undiciMock) {
       try {
-        undiciMock = require('./interceptors/undici')
-      } catch (err) {
-        if (err.code !== 'MODULE_NOT_FOUND') {
+        undiciMock = _require('./interceptors/undici.ts')
+      } catch (err: any) {
+        if (err.code !== 'MODULE_NOT_FOUND' && err.code !== 'ERR_MODULE_NOT_FOUND') {
           throw err
         }
         debug(
@@ -246,35 +219,38 @@ function activate() {
     }
 
     undiciMock?.activate()
-    isActive = true
+    _isActive = true
   } else {
     throw new Error('Nock already active')
   }
 }
 
 function deactivate() {
-  if (isActive) {
+  if (_isActive) {
     builtinMock.deactivate()
     undiciMock?.deactivate()
-    isActive = false
+    _isActive = false
   }
 }
 
-module.exports = {
+const isActiveFn = () => _isActive
+const abortPendingRequests = common.removeAllTimers
+
+export {
   addInterceptor,
   remove,
   removeAll,
   removeInterceptor,
   isOn,
   activate,
-  isActive: () => isActive,
+  isActiveFn as isActive,
   isDone,
   pendingMocks,
   activeMocks,
   enableNetConnect,
   disableNetConnect,
-  restoreOverriddenClientRequest: deactivate,
-  abortPendingRequests: common.removeAllTimers,
+  deactivate as restoreOverriddenClientRequest,
+  abortPendingRequests,
   interceptorsFor,
   isEnabledForNetConnect,
 }

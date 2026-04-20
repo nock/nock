@@ -1,10 +1,8 @@
-'use strict'
-
-const nock = require('..')
-const chai = require('chai')
-const dirtyChai = require('dirty-chai')
-const sinon = require('sinon')
-const sinonChai = require('sinon-chai')
+import nock from '../index.ts'
+import chai from 'chai'
+import dirtyChai from 'dirty-chai'
+import sinon from 'sinon'
+import sinonChai from 'sinon-chai'
 
 chai.use(dirtyChai)
 chai.use(sinonChai)

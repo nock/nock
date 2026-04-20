@@ -1,14 +1,12 @@
-'use strict'
-
 // Tests for invoking `.reply()` with a function which invokes the error-first
 // callback with the response body or an array containing the status code and
 // optional response body and headers.
 
-const { expect } = require('chai')
-const assertRejects = require('assert-rejects')
-const sinon = require('sinon')
-const nock = require('../..')
-const got = require('./got_client')
+import { expect } from 'chai'
+import assertRejects from 'assert-rejects'
+import sinon from 'sinon'
+import nock from '../../index.ts'
+import got from './got_client.js'
 
 describe('asynchronous `reply()` function', () => {
   describe('using callback', () => {

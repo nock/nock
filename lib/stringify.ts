@@ -1,5 +1,7 @@
-'use strict'
 /**
+ * @module stringify
+ * @private
+ * Safe JSON.stringify that handles circular references.
  * @see https://github.com/moll/json-stringify-safe/blob/02cfafd45f06d076ac4bf0dd28be6738a07a72f9/stringify.js
  * @license
  * The ISC License
@@ -19,31 +21,17 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-/**
- * @param {*} obj
- * @returns {string}
- */
-function stringify(obj) {
+function stringify(obj: any) {
   return JSON.stringify(obj, safeReplacer())
 }
 
-/**
- * @param {Array<*>} stack
- * @param {Array<string>} keys
- * @param {*} value
- * @returns {string}
- */
-function cycleReplacer(stack, keys, value) {
+function cycleReplacer(stack: any[], keys: string[], value: any) {
   if (stack[0] === value) return '[Circular ~]'
   return `[Circular ~.${keys.slice(0, stack.indexOf(value)).join('.')}]`
 }
 
-/**
- * @param {Array<*>} [stack]
- * @param {Array<string>} [keys]
- * @returns {(key: string, value: *) => *} */
-function safeReplacer(stack = [], keys = []) {
-  return function (key, value) {
+function safeReplacer(stack: any[] = [], keys: string[] = []) {
+  return function (this: any, key: string, value: any) {
     if (stack.length > 0) {
       const thisPos = stack.indexOf(this)
       ~thisPos ? stack.splice(thisPos + 1) : stack.push(this)
@@ -59,4 +47,4 @@ function safeReplacer(stack = [], keys = []) {
   }
 }
 
-module.exports = stringify
+export default stringify

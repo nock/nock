@@ -1,5 +1,3 @@
-'use strict'
-
 // With OpenSSL installed, you can set up your CA and certificates with
 // the following commands, valid for 10 years:
 //
@@ -12,10 +10,10 @@
 //   openssl x509 -req -in localhost.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out localhost.crt -days 3650
 //   rm ca.srl localhost.csr
 //
-const http = require('node:http')
-const https = require('node:https')
-const path = require('node:path')
-const fs = require('node:fs')
+import http from 'node:http'
+import https from 'node:https'
+import path from 'node:path'
+import fs from 'node:fs'
 
 const servers = []
 
@@ -44,8 +42,8 @@ async function startHttpServer(requestListener = defaultRequestListener) {
 async function startHttpsServer(requestListener = defaultRequestListener) {
   const server = https.createServer(
     {
-      key: fs.readFileSync(path.resolve(__dirname, './localhost.key')),
-      cert: fs.readFileSync(path.resolve(__dirname, './localhost.crt')),
+      key: fs.readFileSync(path.resolve(import.meta.dirname, './localhost.key')),
+      cert: fs.readFileSync(path.resolve(import.meta.dirname, './localhost.crt')),
     },
     requestListener,
   )
@@ -56,8 +54,8 @@ async function startHttpsServer(requestListener = defaultRequestListener) {
   return server
 }
 
-module.exports = {
-  ca: fs.readFileSync(path.resolve(__dirname, './ca.crt')),
+export const ca = fs.readFileSync(path.resolve(import.meta.dirname, './ca.crt'))
+export {
   startHttpServer,
   startHttpsServer,
 }

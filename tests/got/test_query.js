@@ -1,10 +1,8 @@
-'use strict'
-
-const { expect } = require('chai')
-const sinon = require('sinon')
-const url = require('node:url')
-const nock = require('../..')
-const got = require('./got_client')
+import { expect } from 'chai'
+import sinon from 'sinon'
+import url from 'node:url'
+import nock from '../../index.ts'
+import got from './got_client.js'
 
 describe('query params in path', () => {
   it('matches that query string', async () => {

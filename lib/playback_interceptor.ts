@@ -1,13 +1,12 @@
-'use strict'
+import type { Interceptor } from './interceptor.ts'
+import { STATUS_CODES } from 'node:http'
+import stream from 'node:stream'
+import util from 'node:util'
+import { playback_interceptor as debug } from './debug.ts'
+import * as common from './common.ts'
+import { FetchResponse } from '@mswjs/interceptors'
 
-const { STATUS_CODES } = require('node:http')
-const stream = require('node:stream')
-const util = require('node:util')
-const { playback_interceptor: debug } = require('./debug')
-const common = require('./common')
-const { FetchResponse } = require('@mswjs/interceptors')
-
-function parseFullReplyResult(fullReplyResult) {
+function parseFullReplyResult(fullReplyResult: any[]) {
   debug('full response from callback result: %j', fullReplyResult)
 
   if (!Array.isArray(fullReplyResult)) {
@@ -32,23 +31,18 @@ function parseFullReplyResult(fullReplyResult) {
   return [status, body, rawHeaders]
 }
 
-/**
- * Determine which of the default headers should be added to the response.
- *
- * Don't include any defaults whose case-insensitive keys are already on the response.
- */
-function selectDefaultHeaders(existingHeaders, defaultHeaders) {
+function selectDefaultHeaders(existingHeaders: any[], defaultHeaders: any[]) {
   if (!defaultHeaders.length) {
     return [] // return early if we don't need to bother
   }
 
   const definedHeaders = new Set()
-  const result = []
+  const result: [string, any][] = []
 
-  common.forEachHeader(existingHeaders, (_, fieldName) => {
+  common.forEachHeader(existingHeaders, (_: any, fieldName: string) => {
     definedHeaders.add(fieldName.toLowerCase())
   })
-  common.forEachHeader(defaultHeaders, (value, fieldName) => {
+  common.forEachHeader(defaultHeaders, (value: any, fieldName: string) => {
     if (!definedHeaders.has(fieldName.toLowerCase())) {
       result.push([fieldName, value])
     }
@@ -59,7 +53,9 @@ function selectDefaultHeaders(existingHeaders, defaultHeaders) {
 
 // Presents a list of Buffers as a Readable
 class ReadableBuffers extends stream.Readable {
-  constructor(buffers) {
+  declare buffers: Buffer[]
+
+  constructor(buffers: Buffer[]) {
     super()
 
     this.buffers = buffers
@@ -75,7 +71,7 @@ class ReadableBuffers extends stream.Readable {
   }
 }
 
-function convertBodyToStream(body) {
+function convertBodyToStream(body: any) {
   if (common.isStream(body)) {
     return body
   }
@@ -95,20 +91,16 @@ function convertBodyToStream(body) {
   return new ReadableBuffers([Buffer.from(body)])
 }
 
-/**
- * Play back an interceptor using the given request and mock response.
- *
- * @param {Object} param0
- * @param {Request} param0.decompressedRequest
- * @param {string} param0.requestBodyString
- * @param {boolean} param0.requestBodyIsUtf8Representable
- * @param {import('./interceptor').Interceptor} param0.interceptor
- */
 async function playbackInterceptor({
   decompressedRequest,
   interceptor,
   requestBodyString,
   requestBodyIsUtf8Representable,
+}: {
+  decompressedRequest: Request
+  requestBodyString: string
+  requestBodyIsUtf8Representable: boolean
+  interceptor: Interceptor
 }) {
   const { logger } = interceptor.scope
   interceptor.scope.emit(
@@ -139,14 +131,14 @@ async function playbackInterceptor({
     let fn = interceptor.replyFunction
     if (fn.length === 2) {
       // Handle the case of an async reply function, the third parameter being the callback.
-      fn = util.promisify(fn)
+      fn = util.promisify(fn) as any
     }
 
     // At this point `fn` is either a synchronous function or a promise-returning function;
     // wrapping in `Promise.resolve` makes it into a promise either way.
-    return Promise.resolve(fn.call(interceptor, decompressedRequest))
+    return Promise.resolve((fn as any).call(interceptor, decompressedRequest))
       .then(continueWithResponseBody)
-      .catch(err => {
+      .catch((err: any) => {
         throw err
       })
   }
@@ -154,35 +146,33 @@ async function playbackInterceptor({
   else if (interceptor.fullReplyFunction) {
     let fn = interceptor.fullReplyFunction
     if (fn.length === 2) {
-      fn = util.promisify(fn)
+      fn = util.promisify(fn) as any
     }
 
-    return Promise.resolve(fn.call(interceptor, decompressedRequest))
+    return Promise.resolve((fn as any).call(interceptor, decompressedRequest))
       .then(continueWithFullResponse)
-      .catch(err => {
+      .catch((err: any) => {
         throw err
       })
   }
 
   if (
-    common.isContentEncoded(interceptor.headers) &&
+    common.isContentEncoded(interceptor.headers || {}) &&
     !common.isStream(interceptor.body)
   ) {
     //  If the content is encoded we know that the response body *must* be an array
     //  of response buffers which should be mocked one by one.
-    //  (otherwise decompressions after the first one fails as unzip expects to receive
-    //  buffer by buffer and not one single merged buffer)
     const bufferData = Array.isArray(interceptor.body)
       ? interceptor.body
       : [interceptor.body]
-    const responseBuffers = bufferData.map(data => Buffer.from(data, 'hex'))
+    const responseBuffers = bufferData.map((data: string) => Buffer.from(data, 'hex'))
     const responseBody = new ReadableBuffers(responseBuffers)
     return continueWithResponseBody(responseBody)
   }
 
   // If we get to this point, the body is either a string or an object that
   // will eventually be JSON stringified.
-  let responseBody = interceptor.body
+  let responseBody: any = interceptor.body
 
   // If the request was not UTF8-representable then we assume that the
   // response won't be either. In that case we send the response as a Buffer
@@ -194,28 +184,26 @@ async function playbackInterceptor({
     // Creating buffers does not necessarily throw errors; check for difference in size.
     if (
       !responseBody ||
-      (interceptor.body.length > 0 && responseBody.length === 0)
+      ((interceptor.body as string).length > 0 && responseBody.length === 0)
     ) {
       // We fallback on constructing buffer from utf8 representation of the body.
-      responseBody = Buffer.from(interceptor.body, 'utf8')
+      responseBody = Buffer.from(interceptor.body as string, 'utf8')
     }
   }
 
   return continueWithResponseBody(responseBody)
 
-  function continueWithFullResponse(fullReplyResult) {
+  function continueWithFullResponse(fullReplyResult: [number, any, any[]]) {
     const [status, responseBody, rawHeaders] =
       parseFullReplyResult(fullReplyResult)
     return continueWithResponseBody(responseBody, status, rawHeaders)
   }
 
-  async function prepareResponseHeaders(body, responseHeaders) {
+  async function prepareResponseHeaders(body: any, responseHeaders: any[]) {
     const defaultHeaders = [...interceptor.scope._defaultReplyHeaders]
-    const rawHeaders = []
+    const rawHeaders: [string, any][] = []
 
     // Include a JSON content type when JSON.stringify is called on the body.
-    // This is a convenience added by Nock that has no analog in Node. It's added to the
-    // defaults, so it will be ignored if the caller explicitly provided the header already.
     const isJSON =
       body !== undefined &&
       typeof body !== 'string' &&
@@ -226,15 +214,15 @@ async function playbackInterceptor({
       defaultHeaders.push('Content-Type', 'application/json')
     }
     common.forEachHeader(
-      [...interceptor.rawHeaders, ...responseHeaders],
-      (value, fieldName) => {
+      [...(interceptor.rawHeaders || []), ...responseHeaders],
+      (value: any, fieldName: string) => {
         rawHeaders.push([fieldName, value])
       },
     )
 
     rawHeaders.push(
       ...selectDefaultHeaders(
-        [...interceptor.rawHeaders, ...responseHeaders],
+        [...(interceptor.rawHeaders || []), ...responseHeaders],
         defaultHeaders,
       ),
     )
@@ -252,9 +240,9 @@ async function playbackInterceptor({
   }
 
   async function continueWithResponseBody(
-    rawBody,
-    fullResponseStatus,
-    fullResponseRawHeaders = [],
+    rawBody: any,
+    fullResponseStatus?: number,
+    fullResponseRawHeaders: any[] = [],
   ) {
     const headers = await prepareResponseHeaders(
       rawBody,
@@ -268,7 +256,7 @@ async function playbackInterceptor({
     const readable = new stream.Readable({
       read() {},
     })
-    bodyAsStream.on('data', function (chunk) {
+    bodyAsStream.on('data', function (chunk: Buffer) {
       readable.push(chunk)
     })
     bodyAsStream.on('end', function () {
@@ -277,18 +265,18 @@ async function playbackInterceptor({
         interceptor.scope.emit('replied', decompressedRequest, interceptor)
       }, interceptor.delayBodyInMs)
     })
-    bodyAsStream.on('error', function (err) {
+    bodyAsStream.on('error', function (err: Error) {
       readable.emit('error', err)
     })
 
     const status = interceptor.statusCode || fullResponseStatus
-    const hasBody = FetchResponse.isResponseWithBody(status)
+    const hasBody = FetchResponse.isResponseWithBody(status as number)
     return new Response(hasBody ? readable : null, {
-      status,
-      statusText: STATUS_CODES[status],
+      status: status as number,
+      statusText: STATUS_CODES[status as number],
       headers,
     })
   }
 }
 
-module.exports = { playbackInterceptor }
+export { playbackInterceptor }

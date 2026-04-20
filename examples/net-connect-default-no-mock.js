@@ -4,11 +4,11 @@ No mock.
 Result: Nock allows request to proceed.
 */
 
-const log = require('./_log')
+import log from './_log.js'
 
 const events = ['socket', 'response', 'end', 'data', 'error']
 
-const http = require('node:http')
+import http from 'node:http'
 console.log('making request...')
 const req = http.get('http://www.google.com/', function (res) {
   console.log('request result: res.statusCode = %j', res.statusCode)

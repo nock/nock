@@ -4,15 +4,15 @@ Mock the same hostname:port, different path.
 Result: Nock does not allow request to proceed.
 */
 
-const log = require('./_log')
+import log from './_log.js'
 
 const events = ['socket', 'response', 'end', 'data', 'error']
 
-const nock = require('../')
+import nock from '../index.ts'
 
 nock('http://example.com').get('/path').reply(200, 'whaaa')
 
-const http = require('node:http')
+import http from 'node:http'
 const req = http.get('http://example.com/other-path')
 
 req.once('error', function (err) {

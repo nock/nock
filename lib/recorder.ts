@@ -1,39 +1,44 @@
-'use strict'
+import type { Definition } from './scope.ts'
 
-const { recorder: debug } = require('./debug')
-const querystring = require('node:querystring')
-const { inspect } = require('node:util')
+export interface RecorderOptions {
+  dont_print?: boolean
+  output_objects?: boolean
+  enable_reqheaders_recording?: boolean
+  logging?: (content: string) => void
+  use_separator?: boolean
+}
 
-const common = require('./common')
-const { restoreOverriddenClientRequest } = require('./intercept')
-const { gzipSync, brotliCompressSync, deflateSync } = require('node:zlib')
-const nodeInterceptors = require('@mswjs/interceptors/presets/node')
+import { recorder as debug } from './debug.ts'
+import querystring from 'node:querystring'
+import { inspect } from 'node:util'
+
+import * as common from './common.ts'
+import { restoreOverriddenClientRequest } from './intercept.ts'
+import { gzipSync, brotliCompressSync, deflateSync } from 'node:zlib'
+import nodeInterceptors from '@mswjs/interceptors/presets/node'
 const SEPARATOR = '\n<<<<<<-- cut here -->>>>>>\n'
 let recordingInProgress = false
-let outputs = []
+let _outputs: Array<string | Definition> = []
 
 // TODO: don't reuse the nodeInterceptors, create new ones.
 const clientRequestInterceptor = nodeInterceptors[0]
 const fetchRequestInterceptor = nodeInterceptors[2]
 
-/**
- * @param {URL} url
- */
-function getScope(url) {
+function getScope(url: URL) {
   return common.normalizeOrigin(url)
 }
 
-function getMethod(request) {
+function getMethod(request: Request) {
   return request.method || 'GET'
 }
 
-function getBodyFromChunks(chunks, headers) {
+function getBodyFromChunks(chunks: Buffer[], headers?: Record<string, any>) {
   // If we have headers and there is content-encoding it means that the body
   // shouldn't be merged but instead persisted as an array of hex strings so
   // that the response chunks can be mocked one by one.
   if (headers && common.isContentEncoded(headers)) {
     return {
-      body: chunks.map(chunk => chunk.toString('hex')),
+      body: chunks.map((chunk: Buffer) => chunk.toString('hex')),
     }
   }
 
@@ -65,11 +70,7 @@ function getBodyFromChunks(chunks, headers) {
   }
 }
 
-/**
- * @param {Request} request
- * @param {Response} response
- */
-async function generateRequestAndResponseObject(request, response) {
+async function generateRequestAndResponseObject(request: Request, response: Response) {
   const { body, isUtf8Representable } = getBodyFromChunks(
     [Buffer.from(await response.arrayBuffer())],
     Object.fromEntries(response.headers.entries()),
@@ -92,22 +93,17 @@ async function generateRequestAndResponseObject(request, response) {
   }
 }
 
-/**
- * @param {Request} request
- * @param {Response} response
- */
-async function generateRequestAndResponse(request, response) {
+async function generateRequestAndResponse(request: Request, response: Response) {
   const url = new URL(request.url)
   const requestBody = getBodyFromChunks([
     Buffer.from(await request.arrayBuffer()),
   ]).body
   const responseBody = getBodyFromChunks(
     [Buffer.from(await response.arrayBuffer())],
-    response.headers,
+    response.headers as any,
   ).body
 
-  // Always encode the query parameters when recording.
-  const encodedQueryObj = {}
+  const encodedQueryObj: Record<string, any> = {}
 
   for (const [key, value] of Object.entries(
     querystring.parse(url.searchParams.toString()),
@@ -120,7 +116,7 @@ async function generateRequestAndResponse(request, response) {
     encodedQueryObj[formattedPair[0]] = formattedPair[1]
   }
 
-  const lines = []
+  const lines: string[] = []
 
   // We want a leading newline.
   lines.push('')
@@ -149,7 +145,7 @@ async function generateRequestAndResponse(request, response) {
     lines.push(`  .query(${JSON.stringify(encodedQueryObj)})`)
   }
 
-  const statusCode = response.status.toString()
+  const statusCode = String(response.status)
   const stringifiedResponseBody = JSON.stringify(responseBody)
   const headers = inspect(Object.fromEntries(response.headers.entries()))
   lines.push(`  .reply(${statusCode}, ${stringifiedResponseBody}, ${headers});`)
@@ -172,7 +168,7 @@ const defaultRecordOptions = {
   use_separator: true,
 }
 
-function record(recOptions) {
+function record(recOptions: boolean | RecorderOptions) {
   //  Trying to start recording with recording already in progress implies an error
   //  in the recording configuration (double recording makes no sense and used to lead
   //  to duplicates in output)
@@ -204,7 +200,7 @@ function record(recOptions) {
     use_separator: useSeparator,
   } = recOptions
 
-  debug(thisRecordingId, 'restoring overridden requests before new overrides')
+  debug(String(thisRecordingId), 'restoring overridden requests before new overrides')
   //  To preserve backward compatibility (starting recording wasn't throwing if nock was already active)
   //  we restore any requests that may have been overridden by other parts of nock (e.g. intercept)
   //  NOTE: This is hacky as hell but it keeps the backward compatibility *and* allows correct
@@ -218,29 +214,29 @@ function record(recOptions) {
   fetchRequestInterceptor.apply()
   clientRequestInterceptor.on(
     'response',
-    async function ({ request, response }) {
+    async function ({ request, response }: any) {
       await recordResponse(request, response)
     },
   )
   fetchRequestInterceptor.on(
     'response',
-    async function ({ request, response }) {
+    async function ({ request, response }: any) {
       // fetch decompresses the body automatically, so we need to recompress it
       const codings =
         response.headers
           .get('content-encoding')
           ?.toLowerCase()
           .split(',')
-          .map(c => c.trim()) || []
+          .map((c: string) => c.trim()) || []
 
-      let body = await response.arrayBuffer()
+      let body: ArrayBuffer = await response.arrayBuffer()
       for (const coding of codings) {
         if (coding === 'gzip') {
-          body = gzipSync(body)
+          body = gzipSync(body) as any
         } else if (coding === 'deflate') {
-          body = deflateSync(body)
+          body = deflateSync(body) as any
         } else if (coding === 'br') {
-          body = brotliCompressSync(body)
+          body = brotliCompressSync(body) as any
         }
       }
 
@@ -248,15 +244,11 @@ function record(recOptions) {
     },
   )
 
-  /**
-   * @param {Request} mswRequest
-   * @param {Response} mswResponse
-   */
-  async function recordResponse(mswRequest, mswResponse) {
+  async function recordResponse(mswRequest: Request, mswResponse: Response) {
     const request = mswRequest.clone()
     const response = mswResponse.clone()
     debug(
-      thisRecordingId,
+      String(thisRecordingId),
       request.url.split(':', 1)[0],
       'intercepted request ended',
     )
@@ -277,7 +269,7 @@ function record(recOptions) {
     const generateFn = outputObjects
       ? generateRequestAndResponseObject
       : generateRequestAndResponse
-    let out = await generateFn(request, response)
+    let out: any = await generateFn(request, response)
 
     debug('out:', out)
 
@@ -294,16 +286,16 @@ function record(recOptions) {
       return
     }
 
-    outputs.push(out)
+    _outputs.push(out)
 
     if (!dontPrint) {
       if (useSeparator) {
         if (typeof out !== 'string') {
           out = JSON.stringify(out, null, 2)
         }
-        logging(SEPARATOR + out + SEPARATOR)
+        ;(logging as Function)(SEPARATOR + out + SEPARATOR)
       } else {
-        logging(out)
+        ;(logging as Function)(out)
       }
     }
 
@@ -314,7 +306,7 @@ function record(recOptions) {
 // Restore *all* the overridden http/https modules' properties.
 function restore() {
   debug(
-    currentRecordingId,
+    String(currentRecordingId),
     'restoring all the overridden http/https properties',
   )
 
@@ -325,12 +317,16 @@ function restore() {
 }
 
 function clear() {
-  outputs = []
+  _outputs = []
 }
 
-module.exports = {
+function outputs(): string[] | Definition[] {
+  return _outputs as string[] | Definition[]
+}
+
+export {
   record,
-  outputs: () => outputs,
+  outputs,
   restore,
   clear,
 }

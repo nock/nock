@@ -1,15 +1,13 @@
-'use strict'
-
-const http = require('node:http')
-const https = require('node:https')
-const { expect } = require('chai')
-const sinon = require('sinon')
-const url = require('node:url')
-const nock = require('../..')
-const got = require('./got_client')
-const { text } = require('node:stream/consumers')
-const { getGetRequestBody } = require('../../lib/utils/node')
-const { startHttpServer } = require('../servers')
+import http from 'node:http'
+import https from 'node:https'
+import { expect } from 'chai'
+import sinon from 'sinon'
+import url from 'node:url'
+import nock from '../../index.ts'
+import got from './got_client.js'
+import { text } from 'node:stream/consumers'
+import { getGetRequestBody } from '../../lib/utils/node/index.ts'
+import { startHttpServer } from '../servers/index.js'
 
 const acceptableGlobalKeys = new Set([
   ...Object.keys(global),

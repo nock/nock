@@ -1,20 +1,18 @@
-'use strict'
-
-const http = require('node:http')
-const { tmpdir } = require('node:os')
-const nock = require('..')
-const { expect } = require('chai')
-const fs = require('node:fs')
-const path = require('node:path')
-const os = require('node:os')
+import http from 'node:http'
+import { tmpdir } from 'node:os'
+import nock from '../index.ts'
+import { expect } from 'chai'
+import fs from 'node:fs'
+import path from 'node:path'
+import os from 'node:os'
 
 const socketPath = path.join(tmpdir(), 'socket.sock')
 let server
 
-if (os.platform() === 'win32') {
-  // Skipping Unix socket tests on Windows
-  return
-}
+const isWindows = os.platform() === 'win32'
+
+// Skipping Unix socket tests on Windows
+if (!isWindows) {
 
 describe('Unix socket', () => {
   before(async () => {
@@ -87,3 +85,4 @@ describe('Unix socket', () => {
     expect(response).to.equal('hello world')
   })
 })
+}

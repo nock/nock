@@ -1,14 +1,12 @@
-'use strict'
-
-const crypto = require('node:crypto')
-const http = require('node:http')
-const fs = require('node:fs')
-const { expect } = require('chai')
-const path = require('node:path')
-const rimraf = require('rimraf')
-const sinon = require('sinon')
-const nock = require('..')
-const { startHttpServer } = require('./servers')
+import crypto from 'node:crypto'
+import http from 'node:http'
+import fs from 'node:fs'
+import { expect } from 'chai'
+import path from 'node:path'
+import rimraf from 'rimraf'
+import sinon from 'sinon'
+import nock from '../index.ts'
+import { startHttpServer } from './servers/index.js'
 
 const { back: nockBack } = nock
 
@@ -93,7 +91,7 @@ function nockBackWithFixtureLocalhost(mochaDone) {
 
 describe('Nock Back', () => {
   beforeEach(() => {
-    nockBack.fixtures = path.resolve(__dirname, 'fixtures')
+    nockBack.fixtures = path.resolve(import.meta.dirname, 'fixtures')
   })
 
   it('should throw an exception when fixtures is not set', () => {
@@ -261,12 +259,12 @@ describe('Nock Back', () => {
       // random fixture file so tests don't interfere with each other
       const token = crypto.randomBytes(4).toString('hex')
       fixture = `temp_${token}.json`
-      fixtureLoc = path.resolve(__dirname, 'fixtures', fixture)
+      fixtureLoc = path.resolve(import.meta.dirname, 'fixtures', fixture)
       nockBack.setMode('record')
     })
 
     after(() => {
-      rimraf.sync(path.resolve(__dirname, 'fixtures', 'temp_*.json'))
+      rimraf.sync(path.resolve(import.meta.dirname, 'fixtures', 'temp_*.json'))
     })
 
     it('should record when configured correctly', done => {
@@ -494,8 +492,8 @@ describe('Nock Back', () => {
       // random fixture file so tests don't interfere with each other
       const token = crypto.randomBytes(4).toString('hex')
       fixture = `temp_${token}.json`
-      fixtureLoc = path.resolve(__dirname, 'fixtures', fixture)
-      fixturePath = path.resolve(__dirname, 'fixtures')
+      fixtureLoc = path.resolve(import.meta.dirname, 'fixtures', fixture)
+      fixturePath = path.resolve(import.meta.dirname, 'fixtures')
       nockBack.setMode('update')
       fs.copyFileSync(
         path.resolve(fixturePath, 'wrong_uri.json'),
@@ -504,7 +502,7 @@ describe('Nock Back', () => {
     })
 
     after(() => {
-      rimraf.sync(path.resolve(__dirname, 'fixtures', 'temp_*.json'))
+      rimraf.sync(path.resolve(import.meta.dirname, 'fixtures', 'temp_*.json'))
     })
 
     it('should record when configured correctly', done => {

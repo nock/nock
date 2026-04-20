@@ -1,9 +1,7 @@
-'use strict'
-
-const { expect } = require('chai')
-const FormData = require('form-data')
-const nock = require('../..')
-const got = require('./got_client')
+import { expect } from 'chai'
+import FormData from 'form-data'
+import nock from '../../index.ts'
+import got from './got_client.js'
 
 describe('`matchBody()`', () => {
   it('match json body regardless of key ordering', async () => {

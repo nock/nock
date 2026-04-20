@@ -1,16 +1,14 @@
-'use strict'
+import events from 'node:events'
+import http from 'node:http'
+import path from 'node:path'
+import stream from 'node:stream'
+import util from 'node:util'
+import { expect } from 'chai'
+import sinon from 'sinon'
+import nock from '../../index.ts'
+import got from './got_client.js'
 
-const events = require('node:events')
-const http = require('node:http')
-const path = require('node:path')
-const stream = require('node:stream')
-const util = require('node:util')
-const { expect } = require('chai')
-const sinon = require('sinon')
-const nock = require('../..')
-const got = require('./got_client')
-
-const textFilePath = path.resolve(__dirname, '../assets/reply_file_1.txt')
+const textFilePath = path.resolve(import.meta.dirname, '../assets/reply_file_1.txt')
 
 it('reply with file and pipe response', done => {
   const scope = nock('http://example.test')

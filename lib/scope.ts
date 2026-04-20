@@ -1,21 +1,40 @@
-'use strict'
+import type { ReplyBody, ReplyHeaders, RequestBodyMatcher, RequestHeaderMatcher } from './interceptor.ts'
 
-/**
- * @module nock/scope
- */
-const fs = require('node:fs')
-const { scopeDebuglog } = require('./debug')
-const { addInterceptor, isOn } = require('./intercept')
-const common = require('./common')
-const assert = require('node:assert')
-const { EventEmitter } = require('node:events')
-const Interceptor = require('./interceptor')
+export interface Options {
+  allowUnmocked?: boolean
+  reqheaders?: Record<string, RequestHeaderMatcher>
+  badheaders?: string[]
+  conditionally?: () => boolean
+  filteringScope?: (scope: string) => boolean
+  encodedQueryParams?: boolean
+}
 
-/**
- * Normalizes the passed url for consistent internal processing
- * @param {string|URL} u
- */
-function normalizeUrl(u) {
+export interface Definition {
+  scope: string | RegExp
+  path: string | RegExp
+  port?: number | string
+  method?: string
+  status?: number
+  body?: RequestBodyMatcher
+  reply?: string
+  reqheaders?: Record<string, RequestHeaderMatcher>
+  badheaders?: string[]
+  rawHeaders?: ReplyHeaders
+  response?: ReplyBody
+  responseIsBinary?: boolean
+  headers?: ReplyHeaders
+  options?: Options
+}
+
+import fs from 'node:fs'
+import { scopeDebuglog } from './debug.ts'
+import { addInterceptor, isOn } from './intercept.ts'
+import * as common from './common.ts'
+import assert from 'node:assert'
+import { EventEmitter } from 'node:events'
+import { Interceptor } from './interceptor.ts'
+
+function normalizeUrl(u: string | URL) {
   if (typeof u === 'string') {
     // If the url is invalid, let the URL library report it
     return normalizeUrl(new URL(u))
@@ -47,19 +66,24 @@ function normalizeUrl(u) {
   }
 }
 
-/**
- * @param  {string|RegExp|URL} basePath
- * @param  {Object}   options
- * @param  {boolean}  options.allowUnmocked
- * @param  {string[]} options.badheaders
- * @param  {function} options.conditionally
- * @param  {boolean}  options.encodedQueryParams
- * @param  {function} options.filteringScope
- * @param  {Object}   options.reqheaders
- * @constructor
- */
 class Scope extends EventEmitter {
-  constructor(basePath, options) {
+  declare keyedInterceptors: Record<string, Interceptor[]>
+  declare interceptors: Interceptor[]
+  declare transformPathFunction: ((path: string) => string) | null
+  declare transformRequestBodyFunction: ((body: string, requestBody: any) => string) | null
+  declare matchHeaders: {name: string, value: any}[]
+  declare scopeOptions: Options & Record<string, any>
+  declare urlParts: Record<string, any>
+  declare _persist: boolean
+  declare contentLen: boolean
+  declare date: Date | null
+  declare basePath: string | RegExp
+  declare basePathname: string
+  declare port: any
+  declare _defaultReplyHeaders: any[]
+  declare logger: (...args: any[]) => void
+
+  constructor(basePath: string | RegExp | URL, options?: Options) {
     super()
 
     this.keyedInterceptors = {}
@@ -72,7 +96,7 @@ class Scope extends EventEmitter {
     this._persist = false
     this.contentLen = false
     this.date = null
-    this.basePath = basePath
+    this.basePath = basePath as string | RegExp
     this.basePathname = ''
     this.port = null
     this._defaultReplyHeaders = []
@@ -80,7 +104,7 @@ class Scope extends EventEmitter {
     let logNamespace = String(basePath)
 
     if (!(basePath instanceof RegExp)) {
-      this.urlParts = normalizeUrl(basePath)
+      this.urlParts = normalizeUrl(basePath as string | URL)
       this.port = this.urlParts.port
       this.basePathname = this.urlParts.pathname.replace(/\/$/, '')
       this.basePath = `${this.urlParts.protocol}//${this.urlParts.hostname}:${this.port}`
@@ -90,21 +114,21 @@ class Scope extends EventEmitter {
     this.logger = scopeDebuglog(logNamespace)
   }
 
-  add(key, interceptor) {
+  add(key: string, interceptor: Interceptor) {
     if (!(key in this.keyedInterceptors)) {
       this.keyedInterceptors[key] = []
     }
     this.keyedInterceptors[key].push(interceptor)
     addInterceptor(
-      this.basePath,
+      this.basePath as string,
       interceptor,
       this,
       this.scopeOptions,
-      this.urlParts.hostname,
+      this.urlParts.hostname as string,
     )
   }
 
-  remove(key, interceptor) {
+  remove(key: string, interceptor: Interceptor) {
     if (this._persist) {
       return
     }
@@ -117,7 +141,7 @@ class Scope extends EventEmitter {
     }
   }
 
-  intercept(uri, method, requestBody, interceptorOptions) {
+  intercept(uri: string | RegExp | ((path: string) => boolean), method: string, requestBody?: RequestBodyMatcher, interceptorOptions?: Options): Interceptor {
     const ic = new Interceptor(
       this,
       uri,
@@ -130,44 +154,42 @@ class Scope extends EventEmitter {
     return ic
   }
 
-  get(uri, requestBody, options) {
+  get(uri: string | RegExp | ((path: string) => boolean), requestBody?: RequestBodyMatcher, options?: Options): Interceptor {
     return this.intercept(uri, 'GET', requestBody, options)
   }
 
-  post(uri, requestBody, options) {
+  post(uri: string | RegExp | ((path: string) => boolean), requestBody?: RequestBodyMatcher, options?: Options): Interceptor {
     return this.intercept(uri, 'POST', requestBody, options)
   }
 
-  put(uri, requestBody, options) {
+  put(uri: string | RegExp | ((path: string) => boolean), requestBody?: RequestBodyMatcher, options?: Options): Interceptor {
     return this.intercept(uri, 'PUT', requestBody, options)
   }
 
-  head(uri, requestBody, options) {
+  head(uri: string | RegExp | ((path: string) => boolean), requestBody?: RequestBodyMatcher, options?: Options): Interceptor {
     return this.intercept(uri, 'HEAD', requestBody, options)
   }
 
-  patch(uri, requestBody, options) {
+  patch(uri: string | RegExp | ((path: string) => boolean), requestBody?: RequestBodyMatcher, options?: Options): Interceptor {
     return this.intercept(uri, 'PATCH', requestBody, options)
   }
 
-  merge(uri, requestBody, options) {
+  merge(uri: string | RegExp | ((path: string) => boolean), requestBody?: RequestBodyMatcher, options?: Options): Interceptor {
     return this.intercept(uri, 'MERGE', requestBody, options)
   }
 
-  delete(uri, requestBody, options) {
+  delete(uri: string | RegExp | ((path: string) => boolean), requestBody?: RequestBodyMatcher, options?: Options): Interceptor {
     return this.intercept(uri, 'DELETE', requestBody, options)
   }
 
-  options(uri, requestBody, options) {
+  options(uri: string | RegExp | ((path: string) => boolean), requestBody?: RequestBodyMatcher, options?: Options): Interceptor {
     return this.intercept(uri, 'OPTIONS', requestBody, options)
   }
 
   // Returns the list of keys for non-optional Interceptors that haven't been completed yet.
-  // TODO: This assumes that completed mocks are removed from the keyedInterceptors list
-  // (when persistence is off). We should change that (and this) in future.
   pendingMocks() {
-    return this.activeMocks().filter(key =>
-      this.keyedInterceptors[key].some(({ interceptionCounter, optional }) => {
+    return this.activeMocks().filter((key: string) =>
+      this.keyedInterceptors[key].some(({ interceptionCounter, optional }: Interceptor) => {
         const persistedAndUsed = this._persist && interceptionCounter > 0
         return !persistedAndUsed && !optional
       }),
@@ -175,8 +197,6 @@ class Scope extends EventEmitter {
   }
 
   // Returns all keyedInterceptors that are active.
-  // This includes incomplete interceptors, persisted but complete interceptors, and
-  // optional interceptors, but not non-persisted and completed interceptors.
   activeMocks() {
     return Object.keys(this.keyedInterceptors)
   }
@@ -197,16 +217,12 @@ class Scope extends EventEmitter {
   }
 
   buildFilter() {
-    const filteringArguments = arguments
+    const filteringArguments = Array.from(arguments) as any[]
 
     if (arguments[0] instanceof RegExp) {
-      return function (candidate) {
+      return function (candidate: string) {
         /* istanbul ignore if */
         if (typeof candidate !== 'string') {
-          // Given the way nock is written, it seems like `candidate` will always
-          // be a string, regardless of what options might be passed to it.
-          // However the code used to contain a truthiness test of `candidate`.
-          // The check is being preserved for now.
           throw Error(
             `Nock internal assertion failed: typeof candidate is ${typeof candidate}. If you encounter this error, please report it as a bug.`,
           )
@@ -219,7 +235,7 @@ class Scope extends EventEmitter {
   }
 
   filteringPath() {
-    this.transformPathFunction = this.buildFilter.apply(this, arguments)
+    this.transformPathFunction = this.buildFilter.apply(this, arguments as any)
     if (!this.transformPathFunction) {
       throw new Error(
         'Invalid arguments: filtering path should be a function or a regular expression',
@@ -229,7 +245,7 @@ class Scope extends EventEmitter {
   }
 
   filteringRequestBody() {
-    this.transformRequestBodyFunction = this.buildFilter.apply(this, arguments)
+    this.transformRequestBodyFunction = this.buildFilter.apply(this, arguments as any)
     if (!this.transformRequestBodyFunction) {
       throw new Error(
         'Invalid arguments: filtering request body should be a function or a regular expression',
@@ -238,13 +254,13 @@ class Scope extends EventEmitter {
     return this
   }
 
-  matchHeader(name, value) {
+  matchHeader(name: string, value: RequestHeaderMatcher) {
     //  We use lower-case header field names throughout Nock.
     this.matchHeaders.push({ name: name.toLowerCase(), value })
     return this
   }
 
-  defaultReplyHeaders(headers) {
+  defaultReplyHeaders(headers: ReplyHeaders) {
     this._defaultReplyHeaders = common.headersInputToRawArray(headers)
     return this
   }
@@ -257,10 +273,6 @@ class Scope extends EventEmitter {
     return this
   }
 
-  /**
-   * @private
-   * @returns {boolean}
-   */
   shouldPersist() {
     return this._persist
   }
@@ -270,7 +282,7 @@ class Scope extends EventEmitter {
     return this
   }
 
-  replyDate(d) {
+  replyDate(d?: Date) {
     this.date = d || new Date()
     return this
   }
@@ -280,20 +292,20 @@ class Scope extends EventEmitter {
   }
 }
 
-function loadDefs(path) {
+function loadDefs(path: string) {
   if (!fs) {
     throw new Error('No fs')
   }
 
-  const contents = fs.readFileSync(path)
+  const contents = fs.readFileSync(path) as unknown as string
   return JSON.parse(contents)
 }
 
-function load(path) {
+function load(path: string) {
   return define(loadDefs(path))
 }
 
-function getStatusFromDefinition(nockDef) {
+function getStatusFromDefinition(nockDef: Record<string, any>) {
   // Backward compatibility for when `status` was encoded as string in `reply`.
   if (nockDef.reply !== undefined) {
     const parsedReply = parseInt(nockDef.reply, 10)
@@ -308,11 +320,11 @@ function getStatusFromDefinition(nockDef) {
   return nockDef.status || DEFAULT_STATUS_OK
 }
 
-function getScopeFromDefinition(nockDef) {
+function getScopeFromDefinition(nockDef: Record<string, any>) {
   //  Backward compatibility for when `port` was part of definition.
   if (nockDef.port !== undefined) {
     //  Include `port` into scope if it doesn't exist.
-    const url = URL.parse(nockDef.scope)
+    const url = URL.parse(nockDef.scope) as any
 
     if (url.port === '') {
       return `${nockDef.scope}:${nockDef.port}`
@@ -328,7 +340,7 @@ function getScopeFromDefinition(nockDef) {
   return nockDef.scope
 }
 
-function tryJsonParse(string) {
+function tryJsonParse(string: string) {
   try {
     return JSON.parse(string)
   } catch {
@@ -336,10 +348,10 @@ function tryJsonParse(string) {
   }
 }
 
-function define(nockDefs) {
-  const scopes = []
+function define(nockDefs: Record<string, any>[]) {
+  const scopes: Scope[] = []
 
-  nockDefs.forEach(function (nockDef) {
+  nockDefs.forEach(function (nockDef: Record<string, any>) {
     const nscope = getScopeFromDefinition(nockDef)
     const npath = nockDef.path
     if (!nockDef.method) {
@@ -377,13 +389,13 @@ function define(nockDefs) {
 
     // If request headers were specified filter by them.
     Object.entries(reqheaders).forEach(([fieldName, value]) => {
-      scope.matchHeader(fieldName, value)
+      scope.matchHeader(fieldName, value as RequestHeaderMatcher)
     })
 
     const acceptableFilters = ['filteringRequestBody', 'filteringPath']
     acceptableFilters.forEach(filter => {
       if (nockDef[filter]) {
-        scope[filter](nockDef[filter])
+        ;(scope as any)[filter](nockDef[filter])
       }
     })
 
@@ -397,7 +409,7 @@ function define(nockDefs) {
   return scopes
 }
 
-module.exports = {
+export {
   Scope,
   load,
   loadDefs,
