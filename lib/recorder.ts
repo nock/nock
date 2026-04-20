@@ -168,7 +168,7 @@ const defaultRecordOptions = {
   use_separator: true,
 }
 
-function record(recOptions: boolean | RecorderOptions) {
+function record(recOptions?: boolean | RecorderOptions) {
   //  Trying to start recording with recording already in progress implies an error
   //  in the recording configuration (double recording makes no sense and used to lead
   //  to duplicates in output)

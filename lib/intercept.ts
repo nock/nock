@@ -209,7 +209,11 @@ function activate() {
       try {
         undiciMock = _require('./interceptors/undici.ts')
       } catch (err: any) {
-        if (err.code !== 'MODULE_NOT_FOUND' && err.code !== 'ERR_MODULE_NOT_FOUND') {
+        if (
+          err.code !== 'MODULE_NOT_FOUND' &&
+          err.code !== 'ERR_MODULE_NOT_FOUND' &&
+          err.code !== 'ERR_REQUIRE_ESM'
+        ) {
           throw err
         }
         debug(

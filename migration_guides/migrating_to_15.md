@@ -166,7 +166,7 @@ Nock is now a pure ES module. If your project uses CommonJS, you can still use `
 import nock from 'nock'
 
 // CommonJS (Node.js >= 22.12)
-const nock = require('nock')
+const { default: nock } = require('nock')
 ```
 
 ## TypeScript
