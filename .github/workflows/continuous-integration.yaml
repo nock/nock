@@ -78,8 +78,8 @@ jobs:
         run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
       - name: Test
         run: npm run test
-      - name: Test jest
-        run: npm run test:jest
+      - name: Test leak
+        run: npm run test:leak
       - name: Test build
         run: npm run test:build
 
