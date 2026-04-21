@@ -4,7 +4,9 @@
     "noEmit": false,
     "declaration": true,
     "emitDeclarationOnly": true,
-    "declarationDir": "types",
+    "allowImportingTsExtensions": false,
+    "rewriteRelativeImportExtensions": true,
+    "outDir": "dist",
     "rootDir": "."
   },
   "include": ["index.ts", "lib/**/*.ts"]

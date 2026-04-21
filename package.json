@@ -17,15 +17,15 @@
     "url": "https://github.com/nock/nock/issues"
   },
   "engines": {
-    "node": ">=22.6.0"
+    "node": ">=18.20.0 <20 || >=20.12.1"
   },
-  "main": "./index.ts",
+  "main": "./dist/index.js",
   "type": "module",
-  "types": "./types/index.d.ts",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./types/index.d.ts",
-      "default": "./index.ts"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     }
   },
   "dependencies": {
@@ -66,16 +66,15 @@
     "lint:js": "eslint --cache --cache-location './.cache/eslint' '**/*.{js,ts}'",
     "lint:fix": "eslint --cache --cache-location './.cache/eslint' --fix '**/*.{js,ts}'",
     "lint:ts": "tsc --noEmit",
-    "build:types": "rimraf types && tsc -p tsconfig.build.json",
+    "build": "rimraf dist && node scripts/build.js && tsc -p tsconfig.build.json",
     "test": "c8 --reporter=lcov --reporter=text mocha --recursive tests",
     "test:coverage": "open coverage/lcov-report/index.html",
-    "test:jest": "jest tests_jest --detectLeaks"
+    "test:jest": "jest tests_jest --detectLeaks",
+    "test:build": "npm run build && node scripts/test-build.js"
   },
   "license": "MIT",
   "files": [
-    "index.ts",
-    "lib",
-    "types"
+    "dist"
   ],
   "release": {
     "branches": [
