@@ -29,8 +29,17 @@ export default defineConfig([
     plugins: { n: node },
     extends: [node.configs["flat/recommended"]],
     rules: {
-      'n/no-unsupported-features/node-builtins': ['error', { allowExperimental: true }],
+      'n/no-unsupported-features/node-builtins': ['error', {
+        allowExperimental: true,
+        ignores: ['import.meta.dirname'],
+      }],
       'n/prefer-node-protocol': 'error',
+    }
+  },
+  {
+    files: ["scripts/**/*.js"],
+    rules: {
+      'n/no-unsupported-features/node-builtins': 'off',
     }
   },
   {

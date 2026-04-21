@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 
 // Smoke test: verify the built dist/ output is importable and functional.
 

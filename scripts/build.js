@@ -1,8 +1,7 @@
-#!/usr/bin/env node
 
 import { stripTypeScriptTypes } from 'node:module'
 import { readFileSync, writeFileSync, mkdirSync, globSync } from 'node:fs'
-import { join, dirname, relative } from 'node:path'
+import { join, dirname } from 'node:path'
 
 const root = join(import.meta.dirname, '..')
 const dist = join(root, 'dist')

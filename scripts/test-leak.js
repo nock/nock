@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 // Verify nock doesn't leak memory after cleanAll + restore.
 
 import nock from '../index.ts'
@@ -23,8 +22,7 @@ console.log(growth);
 
 // Allow up to 2MB of growth (generous threshold)
 if (growth > 2 * 1024 * 1024) {
-  console.error(`Memory leak: heap grew by ${(growth / 1024 / 1024).toFixed(1)}MB after 1000 mock cycles`)
-  process.exit(1)
+  throw new Error(`Memory leak: heap grew by ${(growth / 1024 / 1024).toFixed(1)}MB after 1000 mock cycles`)
 }
 
 console.log('Leak test passed')

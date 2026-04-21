@@ -1,5 +1,5 @@
 // This file is loaded lazily after confirming undici is installed
-// eslint-disable-next-line n/no-unpublished-import
+ 
 import undici from 'undici'
 import handleRequest from '../handle-request.ts'
 import { URL } from 'node:url'
