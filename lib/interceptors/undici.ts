@@ -1,5 +1,5 @@
 // This file is loaded lazily after confirming undici is installed
- 
+
 import undici from 'undici'
 import handleRequest from '../handle-request.ts'
 import { URL } from 'node:url'
@@ -56,7 +56,7 @@ class NockAgent extends undici.Dispatcher {
   constructor(options?: any) {
     super()
 
-    this.agent = new undici.Agent({ factory: (this.factory.bind(this)) as any })
+    this.agent = new undici.Agent({ factory: this.factory.bind(this) as any })
     this.originalOptions = options
   }
 
@@ -78,7 +78,4 @@ function deactivate() {
   undici.setGlobalDispatcher(new undici.Agent())
 }
 
-export {
-  activate,
-  deactivate,
-}
+export { activate, deactivate }

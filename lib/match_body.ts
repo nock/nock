@@ -48,13 +48,18 @@ export default function matchBody(request: Request, spec: any, body: string) {
   // Because the nature of URL encoding, all the values in the body must be cast to strings.
   // dataEqual does strict checking, so we have to cast the non-regexp values in the spec too.
   if (isUrlencoded) {
-    spec = mapValuesDeep(spec, (val: any) => (val instanceof RegExp ? val : `${val}`))
+    spec = mapValuesDeep(spec, (val: any) =>
+      val instanceof RegExp ? val : `${val}`,
+    )
   }
 
   return common.dataEqual(spec, matchBody)
 }
 
-function mapValues(object: Record<string, any>, cb: (value: any, key: string, object: Record<string, any>) => any) {
+function mapValues(
+  object: Record<string, any>,
+  cb: (value: any, key: string, object: Record<string, any>) => any,
+) {
   const keys = Object.keys(object)
   const clonedObject = { ...object }
   for (const key of keys) {

@@ -57,7 +57,4 @@ function deactivate() {
   interceptor.dispose()
 }
 
-export {
-  activate,
-  deactivate,
-}
+export { activate, deactivate }

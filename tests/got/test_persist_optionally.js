@@ -7,7 +7,10 @@ import { expect } from 'chai'
 import nock from '../../index.ts'
 import got from './got_client.js'
 
-const textFilePath = path.resolve(import.meta.dirname, '../assets/reply_file_1.txt')
+const textFilePath = path.resolve(
+  import.meta.dirname,
+  '../assets/reply_file_1.txt',
+)
 
 describe('`optionally()`', () => {
   it('optional mocks do not appear in `pendingMocks()`', () => {

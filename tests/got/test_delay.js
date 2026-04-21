@@ -6,7 +6,10 @@ import stream from 'node:stream'
 import nock from '../../index.ts'
 import got from './got_client.js'
 
-const textFilePath = path.resolve(import.meta.dirname, '../assets/reply_file_1.txt')
+const textFilePath = path.resolve(
+  import.meta.dirname,
+  '../assets/reply_file_1.txt',
+)
 const textFileContents = fs.readFileSync(textFilePath, { encoding: 'utf8' })
 
 async function resolvesInAtLeast(promise, durationMillis) {

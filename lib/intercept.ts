@@ -6,13 +6,15 @@ import * as builtinMock from './interceptors/builtin.ts'
 import { createRequire } from 'node:module'
 
 const _require = createRequire(import.meta.url)
-let undiciMock: { activate: () => void, deactivate: () => void } | undefined
+let undiciMock: { activate: () => void; deactivate: () => void } | undefined
 
 let allInterceptors: Record<string, any> = {}
-let allowNetConnect: RegExp | {test: (url: string) => boolean} | undefined
+let allowNetConnect: RegExp | { test: (url: string) => boolean } | undefined
 let _isActive = false
 
-function enableNetConnect(matcher?: string | RegExp | ((host: string) => boolean)) {
+function enableNetConnect(
+  matcher?: string | RegExp | ((host: string) => boolean),
+) {
   if (typeof matcher === 'string') {
     allowNetConnect = new RegExp(matcher)
   } else if (matcher instanceof RegExp) {
@@ -42,7 +44,13 @@ function isOff() {
   return process.env.NOCK_OFF === 'true'
 }
 
-function addInterceptor(key: string, interceptor: Interceptor, scope: Scope, scopeOptions: Record<string, any>, host: string) {
+function addInterceptor(
+  key: string,
+  interceptor: Interceptor,
+  scope: Scope,
+  scopeOptions: Record<string, any>,
+  host: string,
+) {
   if (!(key in allInterceptors)) {
     allInterceptors[key] = { key, interceptors: [] }
   }
@@ -79,7 +87,9 @@ function remove(interceptor: Interceptor) {
 
 function removeAll() {
   Object.keys(allInterceptors).forEach(function (key) {
-    allInterceptors[key].interceptors.forEach(function (interceptor: Interceptor) {
+    allInterceptors[key].interceptors.forEach(function (
+      interceptor: Interceptor,
+    ) {
       interceptor.scope.keyedInterceptors = {}
     })
   })
@@ -143,13 +153,22 @@ function interceptorsFor(url: URL) {
 
 import { Interceptor as InterceptorClass } from './interceptor.ts'
 
-function removeInterceptor(options: Interceptor | {proto?: string, host?: string, method?: string, path?: string}) {
+function removeInterceptor(
+  options:
+    | Interceptor
+    | { proto?: string; host?: string; method?: string; path?: string },
+) {
   let baseUrl, key, method, proto
   if (options instanceof InterceptorClass) {
     baseUrl = (options as Interceptor).basePath as string
     key = (options as Interceptor)._key
   } else {
-    const opts = options as {proto?: string, host?: string, method?: string, path?: string}
+    const opts = options as {
+      proto?: string
+      host?: string
+      method?: string
+      path?: string
+    }
     proto = opts.proto ? opts.proto : 'http'
 
     common.normalizeRequestOptions(opts)
@@ -185,7 +204,11 @@ function interceptorScopes() {
   const nestedInterceptors = Object.values(allInterceptors).map(
     (i: any) => i.interceptors,
   )
-  const scopes = new Set(([] as Interceptor[]).concat(...nestedInterceptors).map((i: Interceptor) => i.scope))
+  const scopes = new Set(
+    ([] as Interceptor[])
+      .concat(...nestedInterceptors)
+      .map((i: Interceptor) => i.scope),
+  )
   return [...scopes] as Scope[]
 }
 
@@ -194,11 +217,15 @@ function isDone() {
 }
 
 function pendingMocks() {
-  return ([] as string[]).concat(...interceptorScopes().map(scope => scope.pendingMocks()))
+  return ([] as string[]).concat(
+    ...interceptorScopes().map(scope => scope.pendingMocks()),
+  )
 }
 
 function activeMocks() {
-  return ([] as string[]).concat(...interceptorScopes().map(scope => scope.activeMocks()))
+  return ([] as string[]).concat(
+    ...interceptorScopes().map(scope => scope.activeMocks()),
+  )
 }
 
 function activate() {

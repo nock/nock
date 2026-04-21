@@ -6,6 +6,8 @@ export interface InterceptorMatchResult {
   reasons: string[]
 }
 
-type EventMap = { 'no match': [req: Request, interceptorResults?: InterceptorMatchResult[]] }
+type EventMap = {
+  'no match': [req: Request, interceptorResults?: InterceptorMatchResult[]]
+}
 
 export default new EventEmitter<EventMap>()

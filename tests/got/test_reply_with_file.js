@@ -7,8 +7,14 @@ import { expect } from 'chai'
 import nock from '../../index.ts'
 import got from './got_client.js'
 
-const textFilePath = path.resolve(import.meta.dirname, '../assets/reply_file_1.txt')
-const binaryFilePath = path.resolve(import.meta.dirname, '../assets/reply_file_2.txt.gz')
+const textFilePath = path.resolve(
+  import.meta.dirname,
+  '../assets/reply_file_1.txt',
+)
+const binaryFilePath = path.resolve(
+  import.meta.dirname,
+  '../assets/reply_file_2.txt.gz',
+)
 
 describe('`replyWithFile()`', () => {
   it('reply with file', async () => {

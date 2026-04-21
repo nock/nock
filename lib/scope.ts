@@ -1,4 +1,9 @@
-import type { ReplyBody, ReplyHeaders, RequestBodyMatcher, RequestHeaderMatcher } from './interceptor.ts'
+import type {
+  ReplyBody,
+  ReplyHeaders,
+  RequestBodyMatcher,
+  RequestHeaderMatcher,
+} from './interceptor.ts'
 
 export interface Options {
   allowUnmocked?: boolean
@@ -74,9 +79,11 @@ class Scope extends EventEmitter {
   /** @internal */
   declare transformPathFunction: ((path: string) => string) | null
   /** @internal */
-  declare transformRequestBodyFunction: ((body: string, requestBody: any) => string) | null
+  declare transformRequestBodyFunction:
+    | ((body: string, requestBody: any) => string)
+    | null
   /** @internal */
-  declare matchHeaders: {name: string, value: any}[]
+  declare matchHeaders: { name: string; value: any }[]
   /** @internal */
   declare scopeOptions: Options & Record<string, any>
   /** @internal */
@@ -156,7 +163,12 @@ class Scope extends EventEmitter {
     }
   }
 
-  intercept(uri: string | RegExp | ((path: string) => boolean), method: string, requestBody?: RequestBodyMatcher, interceptorOptions?: Options): Interceptor {
+  intercept(
+    uri: string | RegExp | ((path: string) => boolean),
+    method: string,
+    requestBody?: RequestBodyMatcher,
+    interceptorOptions?: Options,
+  ): Interceptor {
     const ic = new Interceptor(
       this,
       uri,
@@ -169,45 +181,79 @@ class Scope extends EventEmitter {
     return ic
   }
 
-  get(uri: string | RegExp | ((path: string) => boolean), requestBody?: RequestBodyMatcher, options?: Options): Interceptor {
+  get(
+    uri: string | RegExp | ((path: string) => boolean),
+    requestBody?: RequestBodyMatcher,
+    options?: Options,
+  ): Interceptor {
     return this.intercept(uri, 'GET', requestBody, options)
   }
 
-  post(uri: string | RegExp | ((path: string) => boolean), requestBody?: RequestBodyMatcher, options?: Options): Interceptor {
+  post(
+    uri: string | RegExp | ((path: string) => boolean),
+    requestBody?: RequestBodyMatcher,
+    options?: Options,
+  ): Interceptor {
     return this.intercept(uri, 'POST', requestBody, options)
   }
 
-  put(uri: string | RegExp | ((path: string) => boolean), requestBody?: RequestBodyMatcher, options?: Options): Interceptor {
+  put(
+    uri: string | RegExp | ((path: string) => boolean),
+    requestBody?: RequestBodyMatcher,
+    options?: Options,
+  ): Interceptor {
     return this.intercept(uri, 'PUT', requestBody, options)
   }
 
-  head(uri: string | RegExp | ((path: string) => boolean), requestBody?: RequestBodyMatcher, options?: Options): Interceptor {
+  head(
+    uri: string | RegExp | ((path: string) => boolean),
+    requestBody?: RequestBodyMatcher,
+    options?: Options,
+  ): Interceptor {
     return this.intercept(uri, 'HEAD', requestBody, options)
   }
 
-  patch(uri: string | RegExp | ((path: string) => boolean), requestBody?: RequestBodyMatcher, options?: Options): Interceptor {
+  patch(
+    uri: string | RegExp | ((path: string) => boolean),
+    requestBody?: RequestBodyMatcher,
+    options?: Options,
+  ): Interceptor {
     return this.intercept(uri, 'PATCH', requestBody, options)
   }
 
-  merge(uri: string | RegExp | ((path: string) => boolean), requestBody?: RequestBodyMatcher, options?: Options): Interceptor {
+  merge(
+    uri: string | RegExp | ((path: string) => boolean),
+    requestBody?: RequestBodyMatcher,
+    options?: Options,
+  ): Interceptor {
     return this.intercept(uri, 'MERGE', requestBody, options)
   }
 
-  delete(uri: string | RegExp | ((path: string) => boolean), requestBody?: RequestBodyMatcher, options?: Options): Interceptor {
+  delete(
+    uri: string | RegExp | ((path: string) => boolean),
+    requestBody?: RequestBodyMatcher,
+    options?: Options,
+  ): Interceptor {
     return this.intercept(uri, 'DELETE', requestBody, options)
   }
 
-  options(uri: string | RegExp | ((path: string) => boolean), requestBody?: RequestBodyMatcher, options?: Options): Interceptor {
+  options(
+    uri: string | RegExp | ((path: string) => boolean),
+    requestBody?: RequestBodyMatcher,
+    options?: Options,
+  ): Interceptor {
     return this.intercept(uri, 'OPTIONS', requestBody, options)
   }
 
   // Returns the list of keys for non-optional Interceptors that haven't been completed yet.
   pendingMocks() {
     return this.activeMocks().filter((key: string) =>
-      this.keyedInterceptors[key].some(({ interceptionCounter, optional }: Interceptor) => {
-        const persistedAndUsed = this._persist && interceptionCounter > 0
-        return !persistedAndUsed && !optional
-      }),
+      this.keyedInterceptors[key].some(
+        ({ interceptionCounter, optional }: Interceptor) => {
+          const persistedAndUsed = this._persist && interceptionCounter > 0
+          return !persistedAndUsed && !optional
+        },
+      ),
     )
   }
 
@@ -260,7 +306,10 @@ class Scope extends EventEmitter {
   }
 
   filteringRequestBody() {
-    this.transformRequestBodyFunction = this.buildFilter.apply(this, arguments as any)
+    this.transformRequestBodyFunction = this.buildFilter.apply(
+      this,
+      arguments as any,
+    )
     if (!this.transformRequestBodyFunction) {
       throw new Error(
         'Invalid arguments: filtering request body should be a function or a regular expression',
@@ -424,9 +473,4 @@ function define(nockDefs: Record<string, any>[]) {
   return scopes
 }
 
-export {
-  Scope,
-  load,
-  loadDefs,
-  define,
-}
+export { Scope, load, loadDefs, define }

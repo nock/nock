@@ -614,7 +614,9 @@ describe('Native Fetch', () => {
       })
 
       after(() => {
-        rimraf.sync(path.resolve(import.meta.dirname, 'fixtures', 'temp_*.json'))
+        rimraf.sync(
+          path.resolve(import.meta.dirname, 'fixtures', 'temp_*.json'),
+        )
         nock.back.setMode('dryrun')
       })
 

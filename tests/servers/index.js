@@ -42,8 +42,12 @@ async function startHttpServer(requestListener = defaultRequestListener) {
 async function startHttpsServer(requestListener = defaultRequestListener) {
   const server = https.createServer(
     {
-      key: fs.readFileSync(path.resolve(import.meta.dirname, './localhost.key')),
-      cert: fs.readFileSync(path.resolve(import.meta.dirname, './localhost.crt')),
+      key: fs.readFileSync(
+        path.resolve(import.meta.dirname, './localhost.key'),
+      ),
+      cert: fs.readFileSync(
+        path.resolve(import.meta.dirname, './localhost.crt'),
+      ),
     },
     requestListener,
   )
@@ -55,7 +59,4 @@ async function startHttpsServer(requestListener = defaultRequestListener) {
 }
 
 export const ca = fs.readFileSync(path.resolve(import.meta.dirname, './ca.crt'))
-export {
-  startHttpServer,
-  startHttpsServer,
-}
+export { startHttpServer, startHttpsServer }

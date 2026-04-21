@@ -60,7 +60,10 @@ it('emits request and request body', async () => {
 })
 
 it('emits request and replied events when response body is a stream', async () => {
-  const textFilePath = path.resolve(import.meta.dirname, '../assets/reply_file_1.txt')
+  const textFilePath = path.resolve(
+    import.meta.dirname,
+    '../assets/reply_file_1.txt',
+  )
   const scope = nock('http://example.test')
     .get('/')
     .replyWithFile(200, textFilePath)

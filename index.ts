@@ -1,12 +1,27 @@
 import type { Options, Definition } from './lib/scope.ts'
-import type { BackOptions, BackContext, BackMode, Back, InterceptorSurface } from './lib/back.ts'
+import type {
+  BackOptions,
+  BackContext,
+  BackMode,
+  Back,
+  InterceptorSurface,
+} from './lib/back.ts'
 import type { RecorderOptions } from './lib/recorder.ts'
 import type { InterceptorMatchResult } from './lib/global_emitter.ts'
 import type {
-  DataMatcher, DataMatcherArray, DataMatcherMap,
-  RequestBodyMatcher, RequestHeaderMatcher,
-  Body, ReplyBody, ReplyHeaderFunction, ReplyHeaderValue, ReplyHeaders,
-  StatusCode, ReplyFnResult, Interceptor,
+  DataMatcher,
+  DataMatcherArray,
+  DataMatcherMap,
+  RequestBodyMatcher,
+  RequestHeaderMatcher,
+  Body,
+  ReplyBody,
+  ReplyHeaderFunction,
+  ReplyHeaderValue,
+  ReplyHeaders,
+  StatusCode,
+  ReplyFnResult,
+  Interceptor,
 } from './lib/interceptor.ts'
 import type { Scope } from './lib/scope.ts'
 

@@ -39,10 +39,24 @@ declare namespace Back {
   let currentMode: string
 }
 
-function Back(fixtureName: string, nockedFn: (nockDone: () => void) => void): void
-function Back(fixtureName: string, options: BackOptions, nockedFn: (nockDone: () => void) => void): void
-function Back(fixtureName: string, options?: BackOptions): Promise<{ nockDone: () => void; context: BackContext }>
-function Back(fixtureName: string, options?: BackOptions | ((nockDone: () => void) => void), nockedFn?: (nockDone: () => void) => void) {
+function Back(
+  fixtureName: string,
+  nockedFn: (nockDone: () => void) => void,
+): void
+function Back(
+  fixtureName: string,
+  options: BackOptions,
+  nockedFn: (nockDone: () => void) => void,
+): void
+function Back(
+  fixtureName: string,
+  options?: BackOptions,
+): Promise<{ nockDone: () => void; context: BackContext }>
+function Back(
+  fixtureName: string,
+  options?: BackOptions | ((nockDone: () => void) => void),
+  nockedFn?: (nockDone: () => void) => void,
+) {
   if (!Back.fixtures) {
     throw new Error(
       'Back requires nock.back.fixtures to be set\n' +
@@ -154,7 +168,11 @@ const record = {
     return context
   },
 
-  finish: function (fixture: string, options: BackOptions, context: ReturnType<typeof load>) {
+  finish: function (
+    fixture: string,
+    options: BackOptions,
+    context: ReturnType<typeof load>,
+  ) {
     if (context.isRecording) {
       let outputs: any = recorder.outputs()
 

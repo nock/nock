@@ -13,7 +13,4 @@ function setGetRequestBody(request: Request, body: ArrayBuffer) {
   Reflect.set(request, kGetRequestBody, Buffer.from(body))
 }
 
-export {
-  getGetRequestBody,
-  setGetRequestBody,
-}
+export { getGetRequestBody, setGetRequestBody }

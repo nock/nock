@@ -165,7 +165,9 @@ async function playbackInterceptor({
     const bufferData = Array.isArray(interceptor.body)
       ? interceptor.body
       : [interceptor.body]
-    const responseBuffers = bufferData.map((data: string) => Buffer.from(data, 'hex'))
+    const responseBuffers = bufferData.map((data: string) =>
+      Buffer.from(data, 'hex'),
+    )
     const responseBody = new ReadableBuffers(responseBuffers)
     return continueWithResponseBody(responseBody)
   }

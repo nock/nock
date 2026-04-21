@@ -70,7 +70,10 @@ function getBodyFromChunks(chunks: Buffer[], headers?: Record<string, any>) {
   }
 }
 
-async function generateRequestAndResponseObject(request: Request, response: Response) {
+async function generateRequestAndResponseObject(
+  request: Request,
+  response: Response,
+) {
   const { body, isUtf8Representable } = getBodyFromChunks(
     [Buffer.from(await response.arrayBuffer())],
     Object.fromEntries(response.headers.entries()),
@@ -93,7 +96,10 @@ async function generateRequestAndResponseObject(request: Request, response: Resp
   }
 }
 
-async function generateRequestAndResponse(request: Request, response: Response) {
+async function generateRequestAndResponse(
+  request: Request,
+  response: Response,
+) {
   const url = new URL(request.url)
   const requestBody = getBodyFromChunks([
     Buffer.from(await request.arrayBuffer()),
@@ -200,7 +206,10 @@ function record(recOptions?: boolean | RecorderOptions) {
     use_separator: useSeparator,
   } = recOptions
 
-  debug(String(thisRecordingId), 'restoring overridden requests before new overrides')
+  debug(
+    String(thisRecordingId),
+    'restoring overridden requests before new overrides',
+  )
   //  To preserve backward compatibility (starting recording wasn't throwing if nock was already active)
   //  we restore any requests that may have been overridden by other parts of nock (e.g. intercept)
   //  NOTE: This is hacky as hell but it keeps the backward compatibility *and* allows correct
@@ -324,9 +333,4 @@ function outputs(): string[] | Definition[] {
   return _outputs as string[] | Definition[]
 }
 
-export {
-  record,
-  outputs,
-  restore,
-  clear,
-}
+export { record, outputs, restore, clear }

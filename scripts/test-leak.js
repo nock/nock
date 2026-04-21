@@ -12,17 +12,19 @@ for (let i = 0; i < 1000; i++) {
 nock.restore()
 
 global.gc()
-await new Promise((r) => setTimeout(r, 100))
+await new Promise(r => setTimeout(r, 100))
 global.gc()
 
 const after = process.memoryUsage().heapUsed
 const growth = after - before
 
-console.log(growth);
+console.log(growth)
 
 // Allow up to 2MB of growth (generous threshold)
 if (growth > 2 * 1024 * 1024) {
-  throw new Error(`Memory leak: heap grew by ${(growth / 1024 / 1024).toFixed(1)}MB after 1000 mock cycles`)
+  throw new Error(
+    `Memory leak: heap grew by ${(growth / 1024 / 1024).toFixed(1)}MB after 1000 mock cycles`,
+  )
 }
 
 console.log('Leak test passed')

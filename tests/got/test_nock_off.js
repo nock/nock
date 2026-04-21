@@ -19,12 +19,10 @@ describe('NOCK_OFF env var', () => {
 
   it('when true, https mocks reach the live server', async () => {
     const responseBody = 'the real thing'
-    const { origin } = await startHttpsServer(
-      (request, response) => {
-        response.writeHead(200)
-        response.end(responseBody)
-      },
-    )
+    const { origin } = await startHttpsServer((request, response) => {
+      response.writeHead(200)
+      response.end(responseBody)
+    })
 
     const scope = nock(origin, { allowUnmocked: true })
       .get('/')

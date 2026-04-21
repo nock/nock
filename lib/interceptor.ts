@@ -58,7 +58,7 @@ class Interceptor {
   /** @internal */
   declare scope: Scope
   /** @internal */
-  declare interceptorMatchHeaders: {name: string, value: any}[]
+  declare interceptorMatchHeaders: { name: string; value: any }[]
   /** @internal */
   declare method: string
   /** @internal */
@@ -70,7 +70,11 @@ class Interceptor {
   /** @internal */
   declare path: string | RegExp | ((path: string) => boolean)
   /** @internal */
-  declare queries: null | boolean | ((queryObject: Record<string, any>) => boolean) | Record<string, any>
+  declare queries:
+    | null
+    | boolean
+    | ((queryObject: Record<string, any>) => boolean)
+    | Record<string, any>
   /** @internal */
   declare options: Options & Record<string, any>
   /** @internal */
@@ -116,7 +120,13 @@ class Interceptor {
   /** @internal */
   declare replyFunction: any
 
-  constructor(scope: Scope, uri: string | RegExp | ((path: string) => boolean), method: string, requestBody?: RequestBodyMatcher, interceptorOptions?: Options) {
+  constructor(
+    scope: Scope,
+    uri: string | RegExp | ((path: string) => boolean),
+    method: string,
+    requestBody?: RequestBodyMatcher,
+    interceptorOptions?: Options,
+  ) {
     const uriIsStr = typeof uri === 'string'
     // Check for leading slash. Uri can be either a string or a regexp, but
     // When enabled filteringScope ignores the passed URL entirely so we skip validation.
@@ -332,7 +342,11 @@ class Interceptor {
     )
   }
 
-  reqheaderMatches(expected: RequestHeaderMatcher, actual: string | null, key: string) {
+  reqheaderMatches(
+    expected: RequestHeaderMatcher,
+    actual: string | null,
+    key: string,
+  ) {
     if (expected !== undefined && actual !== undefined) {
       if (typeof expected === 'function') {
         return expected(actual)
@@ -369,7 +383,13 @@ class Interceptor {
       path = this.scope.transformPathFunction(path)
     }
 
-    const requestMatchesFilter = ({ name, value: predicate }: {name: string, value: any}) => {
+    const requestMatchesFilter = ({
+      name,
+      value: predicate,
+    }: {
+      name: string
+      value: any
+    }) => {
       const headerValue = request.headers.get(name)
       if (typeof predicate === 'function') {
         return predicate(headerValue)
@@ -451,7 +471,9 @@ class Interceptor {
       matchKey = common.normalizeOrigin(url)
     }
 
-    if (!common.matchStringOrRegexp(matchKey, this.basePath as string | RegExp)) {
+    if (
+      !common.matchStringOrRegexp(matchKey, this.basePath as string | RegExp)
+    ) {
       const msg = `Base path mismatch: expected ${this.basePath}, got ${matchKey}`
       this.scope.logger(msg)
       mismatches.push(msg)
@@ -463,7 +485,9 @@ class Interceptor {
         this.scope.logger(msg)
         mismatches.push(msg)
       }
-    } else if (!common.matchStringOrRegexp(path, this.path as string | RegExp)) {
+    } else if (
+      !common.matchStringOrRegexp(path, this.path as string | RegExp)
+    ) {
       const msg = `Path mismatch: expected ${this.path}, got ${path}`
       this.scope.logger(msg)
       mismatches.push(msg)
@@ -502,7 +526,8 @@ class Interceptor {
     if (this.scope.transformPathFunction) {
       path = this.scope.transformPathFunction(path)
     }
-    const comparisonKey = isPathFn || isRegex ? this.__nock_scopeKey as string : this._key
+    const comparisonKey =
+      isPathFn || isRegex ? (this.__nock_scopeKey as string) : this._key
     const matchKey = `${method} ${url.protocol}//${url.hostname}:${port}${path}`
 
     if (isPathFn) {
@@ -514,7 +539,10 @@ class Interceptor {
     }
 
     if (isRegexBasePath) {
-      return (this.scope.basePath as RegExp).test(matchKey) && !!path.match(this.path as string)
+      return (
+        (this.scope.basePath as RegExp).test(matchKey) &&
+        !!path.match(this.path as string)
+      )
     }
 
     return comparisonKey === matchKey
@@ -569,13 +597,20 @@ class Interceptor {
     return this
   }
 
-  basicAuth({ user, pass = '' }: {user: string, pass?: string}) {
+  basicAuth({ user, pass = '' }: { user: string; pass?: string }) {
     const encoded = Buffer.from(`${user}:${pass}`).toString('base64')
     this.matchHeader('authorization', `Basic ${encoded}`)
     return this
   }
 
-  query(queries: boolean | string | URLSearchParams | Record<string, any> | ((queryObject: Record<string, any>) => boolean)) {
+  query(
+    queries:
+      | boolean
+      | string
+      | URLSearchParams
+      | Record<string, any>
+      | ((queryObject: Record<string, any>) => boolean),
+  ) {
     if (this.queries !== null) {
       throw Error(`Query parameters have already been defined`)
     }

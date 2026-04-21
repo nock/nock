@@ -1,4 +1,3 @@
-
 import { stripTypeScriptTypes } from 'node:module'
 import { readFileSync, writeFileSync, mkdirSync, globSync } from 'node:fs'
 import { join, dirname } from 'node:path'

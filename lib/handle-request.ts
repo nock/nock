@@ -26,7 +26,7 @@ async function handleRequest(request: Request) {
         requestBodyIsUtf8Representable ? 'utf8' : 'hex',
       )
 
-      const matchResults: {interceptor: Interceptor, reasons: string[]}[] = []
+      const matchResults: { interceptor: Interceptor; reasons: string[] }[] = []
       const matchedInterceptor = interceptors.find((i: Interceptor) => {
         const reasons = i.match(request, requestBodyString)
         if (reasons.length > 0) {
@@ -65,7 +65,8 @@ async function handleRequest(request: Request) {
 
         // Try to find a hostname match that allows unmocked.
         const allowUnmocked = interceptors.some(
-          (i: Interceptor) => i.matchHostName(url.hostname) && i.options.allowUnmocked,
+          (i: Interceptor) =>
+            i.matchHostName(url.hostname) && i.options.allowUnmocked,
         )
 
         if (!allowUnmocked) {

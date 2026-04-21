@@ -8,7 +8,10 @@ import sinon from 'sinon'
 import nock from '../../index.ts'
 import got from './got_client.js'
 
-const textFilePath = path.resolve(import.meta.dirname, '../assets/reply_file_1.txt')
+const textFilePath = path.resolve(
+  import.meta.dirname,
+  '../assets/reply_file_1.txt',
+)
 
 it('reply with file and pipe response', done => {
   const scope = nock('http://example.test')

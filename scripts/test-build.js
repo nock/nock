@@ -1,4 +1,3 @@
-
 // Smoke test: verify the built dist/ output is importable and functional.
 
 import { strict as assert } from 'node:assert'

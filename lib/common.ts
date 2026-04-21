@@ -83,7 +83,10 @@ function isJSONContent(headers: Headers) {
   return contentType.startsWith('application/json')
 }
 
-function headersFieldNamesToLowerCase(headers: Record<string, any>, throwOnDuplicate?: boolean) {
+function headersFieldNamesToLowerCase(
+  headers: Record<string, any>,
+  throwOnDuplicate?: boolean,
+) {
   if (!isPlainObject(headers)) {
     throw Error('Headers must be provided as an object')
   }
@@ -112,7 +115,9 @@ const headersFieldsArrayToLowerCase = (headers: string[]) => [
   ...new Set(headers.map(fieldName => fieldName.toLowerCase())),
 ]
 
-function headersInputToRawArray(headers?: any[] | Map<string, any> | Record<string, any>) {
+function headersInputToRawArray(
+  headers?: any[] | Map<string, any> | Record<string, any>,
+) {
   if (headers === undefined) {
     return []
   }
@@ -178,7 +183,11 @@ const noDuplicatesHeaders = new Set([
   'user-agent',
 ])
 
-function addHeaderLine(headers: Record<string, any>, name: string, value: string | string[] | ((...args: any[]) => any)) {
+function addHeaderLine(
+  headers: Record<string, any>,
+  name: string,
+  value: string | string[] | ((...args: any[]) => any),
+) {
   let values: string[] // code below expects `values` to be an array of strings
   if (typeof value === 'function') {
     // Function values are evaluated towards the end of the response, before that we use a placeholder
@@ -213,7 +222,10 @@ function addHeaderLine(headers: Record<string, any>, name: string, value: string
   }
 }
 
-function deleteHeadersField(headers: Record<string, any>, fieldNameToDelete: string) {
+function deleteHeadersField(
+  headers: Record<string, any>,
+  fieldNameToDelete: string,
+) {
   if (!isPlainObject(headers)) {
     throw Error('headers must be an object')
   }
@@ -230,7 +242,10 @@ function deleteHeadersField(headers: Record<string, any>, fieldNameToDelete: str
     .forEach(fieldName => delete headers[fieldName])
 }
 
-function forEachHeader(rawHeaders: any[], callback: (value: any, fieldName: any, index: number) => void) {
+function forEachHeader(
+  rawHeaders: any[],
+  callback: (value: any, fieldName: any, index: number) => void,
+) {
   for (let i = 0; i < rawHeaders.length; i += 2) {
     callback(rawHeaders[i + 1], rawHeaders[i], i)
   }
@@ -250,7 +265,10 @@ function percentEncode(str: string) {
   })
 }
 
-function matchStringOrRegexp(target: string | null | undefined, pattern: string | RegExp) {
+function matchStringOrRegexp(
+  target: string | null | undefined,
+  pattern: string | RegExp,
+) {
   const targetStr =
     target === undefined || target === null ? '' : String(target)
 
@@ -262,7 +280,11 @@ function matchStringOrRegexp(target: string | null | undefined, pattern: string 
   return targetStr === String(pattern)
 }
 
-function formatQueryValue(key: string, value: any, stringFormattingFn?: (s: string) => string): [string, any] {
+function formatQueryValue(
+  key: string,
+  value: any,
+  stringFormattingFn?: (s: string) => string,
+): [string, any] {
   // TODO: Probably refactor code to replace `switch(true)` with `if`/`else`.
   switch (true) {
     case typeof value === 'number': // fall-through
@@ -287,7 +309,10 @@ function formatQueryValue(key: string, value: any, stringFormattingFn?: (s: stri
       break
     }
     case typeof value === 'object': {
-      value = Object.entries(value).reduce(function (acc: Record<string, any>, [subKey, subVal]) {
+      value = Object.entries(value).reduce(function (
+        acc: Record<string, any>,
+        [subKey, subVal],
+      ) {
         const subPair = formatQueryValue(subKey, subVal, stringFormattingFn)
         acc[subPair[0]] = subPair[1]
 
