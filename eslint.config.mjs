@@ -40,6 +40,7 @@ export default defineConfig([
     files: ["scripts/**/*.js"],
     rules: {
       'n/no-unsupported-features/node-builtins': 'off',
+      'n/no-missing-import': 'off',
     }
   },
   {
@@ -54,6 +55,7 @@ export default defineConfig([
       "mocha/no-global-tests": "off",
       "mocha/max-top-level-suites": "off",
       "mocha/no-exports": "off",
+      "mocha/consistent-spacing-between-blocks": "off", // prefer prettier formatting
     },
   },
   prettier
