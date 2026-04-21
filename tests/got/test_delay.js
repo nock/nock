@@ -1,14 +1,15 @@
-'use strict'
+import fs from 'node:fs'
+import path from 'node:path'
+import http from 'node:http'
+import { expect } from 'chai'
+import stream from 'node:stream'
+import nock from '../../index.ts'
+import got from './got_client.js'
 
-const fs = require('node:fs')
-const path = require('node:path')
-const http = require('node:http')
-const { expect } = require('chai')
-const stream = require('node:stream')
-const nock = require('../..')
-const got = require('./got_client')
-
-const textFilePath = path.resolve(__dirname, '../assets/reply_file_1.txt')
+const textFilePath = path.resolve(
+  import.meta.dirname,
+  '../assets/reply_file_1.txt',
+)
 const textFileContents = fs.readFileSync(textFilePath, { encoding: 'utf8' })
 
 async function resolvesInAtLeast(promise, durationMillis) {

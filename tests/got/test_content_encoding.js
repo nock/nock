@@ -1,9 +1,7 @@
-'use strict'
-
-const { expect } = require('chai')
-const zlib = require('node:zlib')
-const nock = require('../..')
-const got = require('./got_client')
+import { expect } from 'chai'
+import zlib from 'node:zlib'
+import nock from '../../index.ts'
+import got from './got_client.js'
 
 describe('Content Encoding', () => {
   it('should accept gzipped content', async () => {

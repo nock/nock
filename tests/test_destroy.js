@@ -1,8 +1,6 @@
-'use strict'
-
-const { expect } = require('chai')
-const http = require('node:http')
-const nock = require('..')
+import { expect } from 'chai'
+import http from 'node:http'
+import nock from '../index.ts'
 
 describe('`res.destroy()`', () => {
   it('should emit error event if called with error', done => {

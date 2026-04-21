@@ -1,7 +1,5 @@
-'use strict'
-
-const { expect } = require('chai')
-const stringify = require('../lib/stringify')
+import { expect } from 'chai'
+import stringify from '../lib/stringify.ts'
 
 describe('stringify', () => {
   it('should stringify a number', () => {

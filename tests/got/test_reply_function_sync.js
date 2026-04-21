@@ -1,14 +1,12 @@
-'use strict'
-
 // Tests for invoking `.reply()` with a synchronous function which return the
 // response body or an array containing the status code and optional response
 // body and headers.
 
-const assertRejects = require('assert-rejects')
-const { expect } = require('chai')
-const sinon = require('sinon')
-const nock = require('../..')
-const got = require('./got_client')
+import assertRejects from 'assert-rejects'
+import { expect } from 'chai'
+import sinon from 'sinon'
+import nock from '../../index.ts'
+import got from './got_client.js'
 
 describe('synchronous `reply()` function', () => {
   describe('when invoked with status code followed by function', () => {

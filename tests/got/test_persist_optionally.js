@@ -1,15 +1,16 @@
-'use strict'
-
 // `persist()` and `optionally()` are closely related. Their tests are both
 // contained in this file.
 
-const http = require('node:http')
-const path = require('node:path')
-const { expect } = require('chai')
-const nock = require('../..')
-const got = require('./got_client')
+import http from 'node:http'
+import path from 'node:path'
+import { expect } from 'chai'
+import nock from '../../index.ts'
+import got from './got_client.js'
 
-const textFilePath = path.resolve(__dirname, '../assets/reply_file_1.txt')
+const textFilePath = path.resolve(
+  import.meta.dirname,
+  '../assets/reply_file_1.txt',
+)
 
 describe('`optionally()`', () => {
   it('optional mocks do not appear in `pendingMocks()`', () => {

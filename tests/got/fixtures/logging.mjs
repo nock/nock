@@ -1,4 +1,4 @@
-import nock from '../../../index.js'
+import nock from '../../../index.ts'
 import got from 'got'
 
 nock('http://example.test').post('/deep/link').reply(200, 'Hello World!')

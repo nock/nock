@@ -1,5 +1,3 @@
-'use strict'
-
 // Tests of the RequestOverrider, which mocks http.ClientRequest and
 // https.ClientRequest. The goal is to provide parity of behavior, both
 // documented and undocumented, with the real version.
@@ -10,16 +8,16 @@
 // assertions about how the mock client responds. Here the code under test is
 // the part of Nock that must interface with all http clients.
 
-const http = require('node:http')
-const https = require('node:https')
-const { URL } = require('node:url')
-const { expect } = require('chai')
-const sinon = require('sinon')
-const nock = require('../..')
-const FormData = require('form-data')
+import http from 'node:http'
+import https from 'node:https'
+import { URL } from 'node:url'
+import { expect } from 'chai'
+import sinon from 'sinon'
+import nock from '../../index.ts'
+import FormData from 'form-data'
 
-const got = require('./got_client')
-const servers = require('../servers')
+import got from './got_client.js'
+import * as servers from '../servers/index.js'
 
 describe('Request Overrider', () => {
   it('response is an http.IncomingMessage instance', done => {

@@ -1,14 +1,12 @@
-'use strict'
-
-const fs = require('node:fs')
-const path = require('node:path')
-const crypto = require('node:crypto')
-const zlib = require('node:zlib')
-const { expect } = require('chai')
-const nock = require('..')
-const assertRejects = require('assert-rejects')
-const { startHttpServer } = require('./servers')
-const rimraf = require('rimraf')
+import fs from 'node:fs'
+import path from 'node:path'
+import crypto from 'node:crypto'
+import zlib from 'node:zlib'
+import { expect } from 'chai'
+import nock from '../index.ts'
+import assertRejects from 'assert-rejects'
+import { startHttpServer } from './servers/index.js'
+import rimraf from 'rimraf'
 
 describe('Native Fetch', () => {
   it('input is string', async () => {
@@ -600,7 +598,7 @@ describe('Native Fetch', () => {
 
   describe('Nock Back', () => {
     beforeEach(() => {
-      nock.back.fixtures = path.resolve(__dirname, 'fixtures')
+      nock.back.fixtures = path.resolve(import.meta.dirname, 'fixtures')
     })
 
     describe('update mode', () => {
@@ -611,12 +609,14 @@ describe('Native Fetch', () => {
         // random fixture file so tests don't interfere with each other
         const token = crypto.randomBytes(4).toString('hex')
         fixture = `temp_${token}.json`
-        fixtureLoc = path.resolve(__dirname, 'fixtures', fixture)
+        fixtureLoc = path.resolve(import.meta.dirname, 'fixtures', fixture)
         nock.back.setMode('update')
       })
 
       after(() => {
-        rimraf.sync(path.resolve(__dirname, 'fixtures', 'temp_*.json'))
+        rimraf.sync(
+          path.resolve(import.meta.dirname, 'fixtures', 'temp_*.json'),
+        )
         nock.back.setMode('dryrun')
       })
 

@@ -1,12 +1,10 @@
-'use strict'
+import { expect } from 'chai'
+import assertRejects from 'assert-rejects'
+import sinon from 'sinon'
+import nock from '../../index.ts'
 
-const { expect } = require('chai')
-const assertRejects = require('assert-rejects')
-const sinon = require('sinon')
-const nock = require('../..')
-
-const got = require('./got_client')
-const servers = require('../servers')
+import got from './got_client.js'
+import * as servers from '../servers/index.js'
 
 describe('`disableNetConnect()`', () => {
   it('prevents connection to unmocked hosts', async () => {

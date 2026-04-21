@@ -1,16 +1,7 @@
-'use strict'
+import querystring from 'node:querystring'
+import * as common from './common.ts'
 
-const querystring = require('node:querystring')
-
-const common = require('./common')
-
-/**
- * @param {Request} request
- * @param {*} spec
- * @param {string} body - string or hex
- * @returns
- */
-module.exports = function matchBody(request, spec, body) {
+export default function matchBody(request: Request, spec: any, body: string) {
   if (spec instanceof RegExp) {
     return spec.test(body)
   }
@@ -26,6 +17,7 @@ module.exports = function matchBody(request, spec, body) {
 
   // try to transform body to json or query string
   let json
+  let matchBody: string | Record<string, any> = body
   if (typeof spec === 'object' || typeof spec === 'function') {
     try {
       json = JSON.parse(body)
@@ -33,20 +25,20 @@ module.exports = function matchBody(request, spec, body) {
       // not a valid JSON string
     }
     if (json !== undefined) {
-      body = json
+      matchBody = json
     } else if (isUrlencoded) {
-      body = querystring.parse(body)
+      matchBody = querystring.parse(body)
     }
   }
 
   if (typeof spec === 'function') {
-    return spec(body)
+    return spec(matchBody)
   }
 
   // strip line endings from both so that we get a match no matter what OS we are running on
   // if Content-Type does not contain 'multipart'
-  if (!isMultipart && typeof body === 'string') {
-    body = body.replace(/\r?\n|\r/g, '')
+  if (!isMultipart && typeof matchBody === 'string') {
+    matchBody = matchBody.replace(/\r?\n|\r/g, '')
   }
 
   if (!isMultipart && typeof spec === 'string') {
@@ -56,13 +48,18 @@ module.exports = function matchBody(request, spec, body) {
   // Because the nature of URL encoding, all the values in the body must be cast to strings.
   // dataEqual does strict checking, so we have to cast the non-regexp values in the spec too.
   if (isUrlencoded) {
-    spec = mapValuesDeep(spec, val => (val instanceof RegExp ? val : `${val}`))
+    spec = mapValuesDeep(spec, (val: any) =>
+      val instanceof RegExp ? val : `${val}`,
+    )
   }
 
-  return common.dataEqual(spec, body)
+  return common.dataEqual(spec, matchBody)
 }
 
-function mapValues(object, cb) {
+function mapValues(
+  object: Record<string, any>,
+  cb: (value: any, key: string, object: Record<string, any>) => any,
+) {
   const keys = Object.keys(object)
   const clonedObject = { ...object }
   for (const key of keys) {
@@ -71,16 +68,12 @@ function mapValues(object, cb) {
   return clonedObject
 }
 
-/**
- * Based on lodash issue discussion
- * https://github.com/lodash/lodash/issues/1244
- */
-function mapValuesDeep(obj, cb) {
+function mapValuesDeep(obj: any, cb: (value: any) => any): any {
   if (Array.isArray(obj)) {
-    return obj.map(v => mapValuesDeep(v, cb))
+    return obj.map((v: any) => mapValuesDeep(v, cb))
   }
   if (common.isPlainObject(obj)) {
-    return mapValues(obj, v => mapValuesDeep(v, cb))
+    return mapValues(obj, (v: any) => mapValuesDeep(v, cb))
   }
   return cb(obj)
 }

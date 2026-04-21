@@ -1,10 +1,8 @@
-'use strict'
-
 // Tests for the body argument passed to `.reply()`.
 
-const { expect } = require('chai')
-const nock = require('../..')
-const got = require('./got_client')
+import { expect } from 'chai'
+import nock from '../../index.ts'
+import got from './got_client.js'
 
 describe('`reply()` body', () => {
   it('stringifies an object', async () => {
