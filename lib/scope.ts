@@ -67,20 +67,35 @@ function normalizeUrl(u: string | URL) {
 }
 
 class Scope extends EventEmitter {
+  /** @internal */
   declare keyedInterceptors: Record<string, Interceptor[]>
+  /** @internal */
   declare interceptors: Interceptor[]
+  /** @internal */
   declare transformPathFunction: ((path: string) => string) | null
+  /** @internal */
   declare transformRequestBodyFunction: ((body: string, requestBody: any) => string) | null
+  /** @internal */
   declare matchHeaders: {name: string, value: any}[]
+  /** @internal */
   declare scopeOptions: Options & Record<string, any>
+  /** @internal */
   declare urlParts: Record<string, any>
+  /** @internal */
   declare _persist: boolean
+  /** @internal */
   declare contentLen: boolean
+  /** @internal */
   declare date: Date | null
+  /** @internal */
   declare basePath: string | RegExp
+  /** @internal */
   declare basePathname: string
+  /** @internal */
   declare port: any
+  /** @internal */
   declare _defaultReplyHeaders: any[]
+  /** @internal */
   declare logger: (...args: any[]) => void
 
   constructor(basePath: string | RegExp | URL, options?: Options) {

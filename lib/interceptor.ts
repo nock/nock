@@ -55,35 +55,65 @@ import { remove } from './intercept.ts'
 import matchBody from './match_body.ts'
 
 class Interceptor {
+  /** @internal */
   declare scope: Scope
+  /** @internal */
   declare interceptorMatchHeaders: {name: string, value: any}[]
+  /** @internal */
   declare method: string
+  /** @internal */
   declare uri: string | RegExp | ((path: string) => boolean)
+  /** @internal */
   declare _key: string
+  /** @internal */
   declare basePath: string | RegExp
+  /** @internal */
   declare path: string | RegExp | ((path: string) => boolean)
+  /** @internal */
   declare queries: null | boolean | ((queryObject: Record<string, any>) => boolean) | Record<string, any>
+  /** @internal */
   declare options: Options & Record<string, any>
+  /** @internal */
   declare counter: number
+  /** @internal */
   declare _requestBody: RequestBodyMatcher | undefined
+  /** @internal */
   declare reqheaders: Record<string, any>
+  /** @internal */
   declare badheaders: string[]
+  /** @internal */
   declare delayBodyInMs: number
+  /** @internal */
   declare optional: boolean
+  /** @internal */
   declare isPassthrough: boolean
+  /** @internal */
   declare __nock_filteredScope: string | undefined
+  /** @internal */
   declare __nock_scopeKey: string | undefined
+  /** @internal */
   declare __nock_scope: Scope | undefined
+  /** @internal */
   declare __nock_scopeOptions: Record<string, any> | undefined
+  /** @internal */
   declare __nock_scopeHost: string | undefined
+  /** @internal */
   declare interceptionCounter: number
+  /** @internal */
   declare statusCode: number | null | undefined
+  /** @internal */
   declare headers: Record<string, any> | undefined
+  /** @internal */
   declare rawHeaders: any[]
+  /** @internal */
   declare body: any
+  /** @internal */
   declare errorMessage: any
+  /** @internal */
   declare filePath: string | undefined
+  /** @internal */
   declare fullReplyFunction: any
+  /** @internal */
   declare replyFunction: any
 
   constructor(scope: Scope, uri: string | RegExp | ((path: string) => boolean), method: string, requestBody?: RequestBodyMatcher, interceptorOptions?: Options) {

@@ -4,6 +4,7 @@
     "noEmit": false,
     "declaration": true,
     "emitDeclarationOnly": true,
+    "stripInternal": true,
     "allowImportingTsExtensions": false,
     "rewriteRelativeImportExtensions": true,
     "outDir": "dist",
