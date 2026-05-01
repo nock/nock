@@ -31,7 +31,7 @@
     "@sinonjs/fake-timers": "^11.2.2",
     "assert-rejects": "^1.0.0",
     "chai": "^4.1.2",
-    "dirty-chai": "^2.0.1",
+    "dirty-chai": "^3.0.0",
     "eslint": "^8.8.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-config-standard": "^17.0.0-0",
