@@ -4,15 +4,15 @@ Mock the different hostname:port.
 Result: Nock allows request to proceed.
 */
 
-const log = require('./_log')
+import log from './_log.js'
 
 const events = ['socket', 'response', 'end', 'data', 'error']
 
-const nock = require('../')
+import nock from '../index.ts'
 
 nock('http://someotherservice.com').get('/').reply(200, 'whaaa')
 
-const http = require('node:http')
+import http from 'node:http'
 const req = http.get('http://www.google.com/', function (res) {
   console.log('request result: res.statusCode = %j', res.statusCode)
   events.forEach(log(res, 'res'))

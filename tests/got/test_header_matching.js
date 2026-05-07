@@ -1,10 +1,8 @@
-'use strict'
-
-const http = require('node:http')
-const { expect } = require('chai')
-const sinon = require('sinon')
-const nock = require('../..')
-const got = require('./got_client')
+import http from 'node:http'
+import { expect } from 'chai'
+import sinon from 'sinon'
+import nock from '../../index.ts'
+import got from './got_client.js'
 
 describe('Header matching', () => {
   describe('`Scope.matchHeader()`', () => {

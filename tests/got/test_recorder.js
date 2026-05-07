@@ -1,15 +1,13 @@
-'use strict'
+import http from 'node:http'
+import https from 'node:https'
+import { URLSearchParams } from 'node:url'
+import zlib from 'node:zlib'
+import sinon from 'sinon'
+import { expect } from 'chai'
+import nock from '../../index.ts'
 
-const http = require('node:http')
-const https = require('node:https')
-const { URLSearchParams } = require('node:url')
-const zlib = require('node:zlib')
-const sinon = require('sinon')
-const { expect } = require('chai')
-const nock = require('../..')
-
-const got = require('./got_client')
-const servers = require('../servers')
+import got from './got_client.js'
+import * as servers from '../servers/index.js'
 
 describe('Recorder', () => {
   let globalCount

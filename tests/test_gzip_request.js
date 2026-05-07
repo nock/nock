@@ -1,9 +1,7 @@
-'use strict'
-
-const { expect } = require('chai')
-const http = require('node:http')
-const zlib = require('node:zlib')
-const nock = require('..')
+import { expect } from 'chai'
+import http from 'node:http'
+import zlib from 'node:zlib'
+import nock from '../index.ts'
 
 it('should accept and decode gzip encoded application/json', done => {
   const message = {

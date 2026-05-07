@@ -1,12 +1,10 @@
-'use strict'
+import { expect } from 'chai'
+import http from 'node:http'
+import sinon from 'sinon'
+import nock from '../../index.ts'
 
-const { expect } = require('chai')
-const http = require('node:http')
-const sinon = require('sinon')
-const nock = require('../..')
-
-const got = require('./got_client')
-const { startHttpServer } = require('../servers')
+import got from './got_client.js'
+import { startHttpServer } from '../servers/index.js'
 
 describe('allowUnmocked option', () => {
   it('with allowUnmocked, mocked request still works', async () => {

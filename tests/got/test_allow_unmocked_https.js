@@ -1,10 +1,8 @@
-'use strict'
+import { expect } from 'chai'
+import nock from '../../index.ts'
 
-const { expect } = require('chai')
-const nock = require('../..')
-
-const got = require('./got_client')
-const servers = require('../servers')
+import got from './got_client.js'
+import * as servers from '../servers/index.js'
 
 describe('allowUnmocked option (https)', () => {
   it('Nock with allowUnmocked and an url match', async () => {

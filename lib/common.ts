@@ -1,16 +1,9 @@
-'use strict'
+import { common as debug } from './debug.ts'
+import timers from 'node:timers'
+import util from 'node:util'
+import zlib from 'node:zlib'
 
-const { common: debug } = require('./debug')
-const timers = require('node:timers')
-const util = require('node:util')
-const zlib = require('node:zlib')
-
-/**
- * Normalizes the request options so that it always has `host` property.
- *
- * @param  {Object} options - a parsed options object of the request
- */
-function normalizeRequestOptions(options) {
+function normalizeRequestOptions(options: Record<string, any>) {
   options.proto = options.proto || 'http'
   options.port = options.port || (options.proto === 'http' ? 80 : 443)
   if (options.host) {
@@ -37,14 +30,7 @@ function normalizeRequestOptions(options) {
   return options
 }
 
-/**
- * Returns true if the data contained in buffer can be reconstructed
- * from its utf8 representation.
- *
- * @param  {ArrayBuffer} buffer
- * @returns {boolean}
- */
-function isUtf8Representable(buffer) {
+function isUtf8Representable(buffer: ArrayBuffer | Buffer) {
   try {
     new TextDecoder('utf8', { fatal: true }).decode(buffer)
     return true
@@ -53,13 +39,7 @@ function isUtf8Representable(buffer) {
   }
 }
 
-/**
- * In WHATWG URL vernacular, this returns the origin portion of a URL.
- * However, the port is not included if it's standard and not already present on the host.
- *
- * @param {URL} url
- */
-function normalizeOrigin(url) {
+function normalizeOrigin(url: URL) {
   // Remove brackets from hostname if IPV6
   const normalizedOrigin = url.hostname.startsWith('[')
     ? `${url.protocol}//${url.hostname.slice(1, -1)}${url.port ? `:${url.port}` : ''}`
@@ -71,15 +51,10 @@ function normalizeOrigin(url) {
   }
 }
 
-/**
- * Get high level information about request as string
- * @param  {Request} request
- * @param  {string} body
- */
-function stringifyRequest(request, body) {
+function stringifyRequest(request: Request, body: string) {
   const url = new URL(request.url)
 
-  const log = {
+  const log: Record<string, any> = {
     method: request.method,
     url: `${url.origin}${url.pathname}`,
     headers: Object.fromEntries(request.headers.entries()),
@@ -92,41 +67,31 @@ function stringifyRequest(request, body) {
   return JSON.stringify(log, null, 2)
 }
 
-function isContentEncoded(headers) {
+function isContentEncoded(headers: Record<string, any>) {
   const contentEncoding = headers['content-encoding']
   return typeof contentEncoding === 'string' && contentEncoding !== ''
 }
 
-/**
- * @param {Headers} headers
- * @param {'gzip' | 'deflate'} encoder
- * @returns
- */
-function contentEncoding(headers, encoder) {
+function contentEncoding(headers: Headers, encoder: 'gzip' | 'deflate') {
   const contentEncoding = headers.get('content-encoding')
   return contentEncoding?.toString() === encoder
 }
 
-/**
- * @param {Headers} headers
- */
-function isJSONContent(headers) {
+function isJSONContent(headers: Headers) {
   // https://tools.ietf.org/html/rfc8259
   const contentType = String(headers.get('content-type') || '').toLowerCase()
   return contentType.startsWith('application/json')
 }
 
-/**
- * Return a new object with all field names of the headers lower-cased.
- *
- * Duplicates throw an error.
- */
-function headersFieldNamesToLowerCase(headers, throwOnDuplicate) {
+function headersFieldNamesToLowerCase(
+  headers: Record<string, any>,
+  throwOnDuplicate?: boolean,
+) {
   if (!isPlainObject(headers)) {
     throw Error('Headers must be provided as an object')
   }
 
-  const lowerCaseHeaders = {}
+  const lowerCaseHeaders: Record<string, any> = {}
   Object.entries(headers).forEach(([fieldName, fieldValue]) => {
     const key = fieldName.toLowerCase()
     if (lowerCaseHeaders[key] !== undefined) {
@@ -146,21 +111,13 @@ function headersFieldNamesToLowerCase(headers, throwOnDuplicate) {
   return lowerCaseHeaders
 }
 
-const headersFieldsArrayToLowerCase = headers => [
+const headersFieldsArrayToLowerCase = (headers: string[]) => [
   ...new Set(headers.map(fieldName => fieldName.toLowerCase())),
 ]
 
-/**
- * Converts the various accepted formats of headers into a flat array representing "raw headers".
- *
- * Nock allows headers to be provided as a raw array, a plain object, or a Map.
- *
- * While all the header names are expected to be strings, the values are left intact as they can
- * be functions, strings, or arrays of strings.
- *
- *  https://nodejs.org/api/http.html#http_message_rawheaders
- */
-function headersInputToRawArray(headers) {
+function headersInputToRawArray(
+  headers?: any[] | Map<string, any> | Record<string, any>,
+) {
   if (headers === undefined) {
     return []
   }
@@ -178,11 +135,13 @@ function headersInputToRawArray(headers) {
 
   // [].concat(...) is used instead of Array.flat until v11 is the minimum Node version
   if (util.types.isMap(headers)) {
-    return [].concat(...Array.from(headers, ([k, v]) => [k.toString(), v]))
+    return ([] as any[]).concat(
+      ...Array.from(headers as Map<string, any>, ([k, v]) => [k.toString(), v]),
+    )
   }
 
   if (isPlainObject(headers)) {
-    return [].concat(...Object.entries(headers))
+    return ([] as any[]).concat(...Object.entries(headers))
   }
 
   throw new Error(
@@ -190,17 +149,12 @@ function headersInputToRawArray(headers) {
   )
 }
 
-/**
- * Converts an array of raw headers to an object, using the same rules as Nodes `http.IncomingMessage.headers`.
- *
- * Header names/keys are lower-cased.
- */
-function headersArrayToObject(rawHeaders) {
+function headersArrayToObject(rawHeaders: any[]) {
   if (!Array.isArray(rawHeaders)) {
     throw Error('Expected a header array')
   }
 
-  const accumulator = {}
+  const accumulator: Record<string, any> = {}
 
   forEachHeader(rawHeaders, (value, fieldName) => {
     addHeaderLine(accumulator, fieldName, value)
@@ -229,29 +183,12 @@ const noDuplicatesHeaders = new Set([
   'user-agent',
 ])
 
-/**
- * Set key/value data in accordance with Node's logic for folding duplicate headers.
- *
- * The `value` param should be a function, string, or array of strings.
- *
- * Node's docs and source:
- * https://nodejs.org/api/http.html#http_message_headers
- * https://github.com/nodejs/node/blob/908292cf1f551c614a733d858528ffb13fb3a524/lib/_http_incoming.js#L245
- *
- * Header names are lower-cased.
- * Duplicates in raw headers are handled in the following ways, depending on the header name:
- * - Duplicates of field names listed in `noDuplicatesHeaders` (above) are discarded.
- * - `set-cookie` is always an array. Duplicates are added to the array.
- * - For duplicate `cookie` headers, the values are joined together with '; '.
- * - For all other headers, the values are joined together with ', '.
- *
- * Node's implementation is larger because it highly optimizes for not having to call `toLowerCase()`.
- * We've opted to always call `toLowerCase` in exchange for a more concise function.
- *
- * While Node has the luxury of knowing `value` is always a string, we do an extra step of coercion at the top.
- */
-function addHeaderLine(headers, name, value) {
-  let values // code below expects `values` to be an array of strings
+function addHeaderLine(
+  headers: Record<string, any>,
+  name: string,
+  value: string | string[] | ((...args: any[]) => any),
+) {
+  let values: string[] // code below expects `values` to be an array of strings
   if (typeof value === 'function') {
     // Function values are evaluated towards the end of the response, before that we use a placeholder
     // string just to designate that the header exists. Useful when `Content-Type` is set with a function.
@@ -285,14 +222,10 @@ function addHeaderLine(headers, name, value) {
   }
 }
 
-/**
- * Deletes the given `fieldName` property from `headers` object by performing
- * case-insensitive search through keys.
- *
- * @headers   {Object} headers - object of header field names and values
- * @fieldName {String} field name - string with the case-insensitive field name
- */
-function deleteHeadersField(headers, fieldNameToDelete) {
+function deleteHeadersField(
+  headers: Record<string, any>,
+  fieldNameToDelete: string,
+) {
   if (!isPlainObject(headers)) {
     throw Error('headers must be an object')
   }
@@ -309,21 +242,16 @@ function deleteHeadersField(headers, fieldNameToDelete) {
     .forEach(fieldName => delete headers[fieldName])
 }
 
-/**
- * Utility for iterating over a raw headers array.
- *
- * The callback is called with:
- *  - The header value. string, array of strings, or a function
- *  - The header field name. string
- *  - Index of the header field in the raw header array.
- */
-function forEachHeader(rawHeaders, callback) {
+function forEachHeader(
+  rawHeaders: any[],
+  callback: (value: any, fieldName: any, index: number) => void,
+) {
   for (let i = 0; i < rawHeaders.length; i += 2) {
     callback(rawHeaders[i + 1], rawHeaders[i], i)
   }
 }
 
-function percentDecode(str) {
+function percentDecode(str: string) {
   try {
     return decodeURIComponent(str.replace(/\+/g, ' '))
   } catch {
@@ -331,21 +259,16 @@ function percentDecode(str) {
   }
 }
 
-/**
- * URI encode the provided string, stringently adhering to RFC 3986.
- *
- * RFC 3986 reserves !, ', (, ), and * but encodeURIComponent does not encode them so we do it manually.
- *
- * https://tools.ietf.org/html/rfc3986
- * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent
- */
-function percentEncode(str) {
+function percentEncode(str: string) {
   return encodeURIComponent(str).replace(/[!'()*]/g, function (c) {
     return `%${c.charCodeAt(0).toString(16).toUpperCase()}`
   })
 }
 
-function matchStringOrRegexp(target, pattern) {
+function matchStringOrRegexp(
+  target: string | null | undefined,
+  pattern: string | RegExp,
+) {
   const targetStr =
     target === undefined || target === null ? '' : String(target)
 
@@ -357,17 +280,11 @@ function matchStringOrRegexp(target, pattern) {
   return targetStr === String(pattern)
 }
 
-/**
- * Formats a query parameter.
- *
- * @param key                The key of the query parameter to format.
- * @param value              The value of the query parameter to format.
- * @param stringFormattingFn The function used to format string values. Can
- *                           be used to encode or decode the query value.
- *
- * @returns *[] the formatted [key, value] pair.
- */
-function formatQueryValue(key, value, stringFormattingFn) {
+function formatQueryValue(
+  key: string,
+  value: any,
+  stringFormattingFn?: (s: string) => string,
+): [string, any] {
   // TODO: Probably refactor code to replace `switch(true)` with `if`/`else`.
   switch (true) {
     case typeof value === 'number': // fall-through
@@ -386,13 +303,16 @@ function formatQueryValue(key, value, stringFormattingFn) {
     case value instanceof RegExp:
       break
     case Array.isArray(value): {
-      value = value.map(function (val, idx) {
-        return formatQueryValue(idx, val, stringFormattingFn)[1]
+      value = value.map(function (val: any, idx: number) {
+        return formatQueryValue(String(idx), val, stringFormattingFn)[1]
       })
       break
     }
     case typeof value === 'object': {
-      value = Object.entries(value).reduce(function (acc, [subKey, subVal]) {
+      value = Object.entries(value).reduce(function (
+        acc: Record<string, any>,
+        [subKey, subVal],
+      ) {
         const subPair = formatQueryValue(subKey, subVal, stringFormattingFn)
         acc[subPair[0]] = subPair[1]
 
@@ -406,7 +326,7 @@ function formatQueryValue(key, value, stringFormattingFn) {
   return [key, value]
 }
 
-function isStream(obj) {
+function isStream(obj: any) {
   return (
     obj &&
     typeof obj !== 'string' &&
@@ -415,17 +335,7 @@ function isStream(obj) {
   )
 }
 
-/**
- * Determines if request data matches the expected schema.
- *
- * Used for comparing decoded search parameters, request body JSON objects,
- * and URL decoded request form bodies.
- *
- * Performs a general recursive strict comparison with two caveats:
- *  - The expected data can use regexp to compare values
- *  - JSON path notation and nested objects are considered equal
- */
-const dataEqual = (expected, actual) => {
+const dataEqual = (expected: any, actual: any) => {
   if (isPlainObject(expected)) {
     expected = expand(expected)
   }
@@ -435,12 +345,7 @@ const dataEqual = (expected, actual) => {
   return deepEqual(expected, actual)
 }
 
-/**
- * Performs a recursive strict comparison between two values.
- *
- * Expected values or leaf nodes of expected object values that are RegExp use test() for comparison.
- */
-function deepEqual(expected, actual) {
+function deepEqual(expected: any, actual: any): boolean {
   debug('deepEqual comparing', typeof expected, expected, typeof actual, actual)
   if (expected instanceof RegExp) {
     return expected.test(actual)
@@ -469,9 +374,9 @@ const timeouts = new Set()
 const immediates = new Set()
 
 const wrapTimer =
-  (timer, ids) =>
-  (callback, ...timerArgs) => {
-    const cb = (...callbackArgs) => {
+  (timer: (...args: any[]) => any, ids: Set<any>) =>
+  (callback: (...args: any[]) => any, ...timerArgs: any[]) => {
+    const cb = (...callbackArgs: any[]) => {
       try {
         callback(...callbackArgs)
       } finally {
@@ -486,7 +391,7 @@ const wrapTimer =
 const setTimeout = wrapTimer(timers.setTimeout, timeouts)
 const setImmediate = wrapTimer(timers.setImmediate, immediates)
 
-function clearTimer(clear, ids) {
+function clearTimer(clear: (id: any) => void, ids: Set<any>) {
   ids.forEach(clear)
   ids.clear()
 }
@@ -497,12 +402,7 @@ function removeAllTimers() {
   clearTimer(clearImmediate, immediates)
 }
 
-/**
- * Returns true if the given value is a plain object and not an Array.
- * @param {*} value
- * @returns {boolean}
- */
-function isPlainObject(value) {
+function isPlainObject(value: any) {
   if (typeof value !== 'object' || value === null) return false
 
   if (Object.prototype.toString.call(value) !== '[object Object]') return false
@@ -521,27 +421,19 @@ function isPlainObject(value) {
 }
 
 const prototypePollutionBlockList = ['__proto__', 'prototype', 'constructor']
-const blocklistFilter = function (part) {
+const blocklistFilter = function (part: string) {
   return prototypePollutionBlockList.indexOf(part) === -1
 }
 
-/**
- * Converts flat objects whose keys use JSON path notation to nested objects.
- *
- * The input object is not mutated.
- *
- * @example
- * { 'foo[bar][0]': 'baz' } -> { foo: { bar: [ 'baz' ] } }
- */
-const expand = input => {
+const expand = (input: Record<string, any> | null | undefined) => {
   if (input === undefined || input === null) {
     return input
   }
 
   const keys = Object.keys(input)
 
-  const result = {}
-  let resultPtr = result
+  const result: Record<string, any> = {}
+  let resultPtr: Record<string, any> = result
 
   for (let path of keys) {
     const originalPath = path
@@ -583,11 +475,7 @@ const expand = input => {
   return result
 }
 
-/**
- * @param {ArrayBuffer} buffer
- * @param {string} contentEncoding
- */
-function decompressRequestBody(buffer, contentEncoding) {
+function decompressRequestBody(buffer: ArrayBuffer, contentEncoding: string) {
   const encodings = contentEncoding
     .toLowerCase()
     .split(',')
@@ -606,18 +494,15 @@ function decompressRequestBody(buffer, contentEncoding) {
   return buffer
 }
 
-/**
- * @param {Headers} headers
- */
-function convertHeadersToRaw(headers) {
-  const rawHeaders = []
+function convertHeadersToRaw(headers: Headers) {
+  const rawHeaders: string[] = []
   for (const [name, value] of headers.entries()) {
     rawHeaders.push(name, value)
   }
   return rawHeaders
 }
 
-module.exports = {
+export {
   contentEncoding,
   dataEqual,
   deleteHeadersField,

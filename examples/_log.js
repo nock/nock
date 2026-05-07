@@ -1,4 +1,4 @@
-module.exports = log
+export default log
 
 const start = Date.now()
 

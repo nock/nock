@@ -1,18 +1,19 @@
-'use strict'
-
 // Tests for header objects passed to `.reply()`, including header objects
 // containing lambdas.
 
-const { expect } = require('chai')
-const sinon = require('sinon')
-const fakeTimers = require('@sinonjs/fake-timers')
-const fs = require('node:fs')
-const path = require('node:path')
+import { expect } from 'chai'
+import sinon from 'sinon'
+import fakeTimers from '@sinonjs/fake-timers'
+import fs from 'node:fs'
+import path from 'node:path'
 
-const nock = require('../..')
-const got = require('./got_client')
+import nock from '../../index.ts'
+import got from './got_client.js'
 
-const textFilePath = path.resolve(__dirname, '../assets/reply_file_1.txt')
+const textFilePath = path.resolve(
+  import.meta.dirname,
+  '../assets/reply_file_1.txt',
+)
 
 describe('`reply()` headers', () => {
   describe('using parameter value', () => {

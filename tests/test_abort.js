@@ -1,9 +1,7 @@
-'use strict'
-
-const { expect } = require('chai')
-const http = require('node:http')
-const sinon = require('sinon')
-const nock = require('..')
+import { expect } from 'chai'
+import http from 'node:http'
+import sinon from 'sinon'
+import nock from '../index.ts'
 
 // These tests use `setTimeout` before verifying emitted events to ensure any
 // number of `nextTicks` or `setImmediate` can process first.

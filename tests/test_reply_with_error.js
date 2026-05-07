@@ -1,10 +1,8 @@
-'use strict'
-
 // Tests for `.replyWithError()`.
 
-const http = require('node:http')
-const { expect } = require('chai')
-const nock = require('..')
+import http from 'node:http'
+import { expect } from 'chai'
+import nock from '../index.ts'
 
 describe('`replyWithError()`', () => {
   it('returns a string as an error response through the request', done => {

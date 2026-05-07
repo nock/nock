@@ -1,10 +1,8 @@
-'use strict'
-
-const { expect } = require('chai')
-const http = require('node:http')
-const https = require('node:https')
-const { Readable } = require('node:stream')
-const nock = require('..')
+import { expect } from 'chai'
+import http from 'node:http'
+import https from 'node:https'
+import { Readable } from 'node:stream'
+import nock from '../index.ts'
 
 it('should expose TLSSocket attributes for HTTPS requests', done => {
   nock('https://example.test').get('/').reply()

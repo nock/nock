@@ -1,13 +1,11 @@
-'use strict'
+import http from 'node:http'
+import { expect } from 'chai'
+import nock from '../../index.ts'
+import sinon from 'sinon'
+import assertRejects from 'assert-rejects'
 
-const http = require('node:http')
-const { expect } = require('chai')
-const nock = require('../..')
-const sinon = require('sinon')
-const assertRejects = require('assert-rejects')
-
-const got = require('./got_client')
-const servers = require('../servers')
+import got from './got_client.js'
+import * as servers from '../servers/index.js'
 
 describe('Nock lifecycle functions', () => {
   describe('`activate()`', () => {

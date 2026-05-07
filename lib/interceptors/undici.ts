@@ -1,14 +1,16 @@
-'use strict'
-
 // This file is loaded lazily after confirming undici is installed
-// eslint-disable-next-line n/no-unpublished-require
-const undici = require('undici')
-const handleRequest = require('../handle-request')
-const { URL } = require('node:url')
-const { convertHeadersToRaw } = require('../common')
+
+import undici from 'undici'
+import handleRequest from '../handle-request.ts'
+import { URL } from 'node:url'
+import { convertHeadersToRaw } from '../common.ts'
 
 class NockClient extends undici.Client {
-  dispatch(options, handler) {
+  constructor(origin: any, options?: any) {
+    super(origin, options)
+  }
+
+  dispatch(options: any, handler: any) {
     const url = new URL(options.path, options.origin)
     if (options.query) {
       url.search = new URLSearchParams(options.query).toString()
@@ -22,9 +24,9 @@ class NockClient extends undici.Client {
     })
 
     handleRequest(decompressedRequest)
-      .then(async response => {
+      .then(async (response: Response | undefined) => {
         if (response) {
-          handler.onConnect?.(err => handler.onError(err), null)
+          handler.onConnect?.((err: Error) => handler.onError(err), null)
           handler.onHeaders?.(
             response.status,
             convertHeadersToRaw(response.headers),
@@ -40,25 +42,29 @@ class NockClient extends undici.Client {
           dispatcher.dispatch(options, handler)
         }
       })
-      .catch(err => {
+      .catch((err: Error) => {
         handler.onError?.(err)
       })
+    return true
   }
 }
 
 class NockAgent extends undici.Dispatcher {
-  constructor(options) {
-    super(options)
+  declare agent: any
+  declare originalOptions: any
 
-    this.agent = new undici.Agent({ options, factory: this.factory.bind(this) })
+  constructor(options?: any) {
+    super()
+
+    this.agent = new undici.Agent({ factory: this.factory.bind(this) as any })
     this.originalOptions = options
   }
 
-  dispatch(options, handler) {
-    this.agent.dispatch(options, handler)
+  dispatch(options: any, handler: any) {
+    return this.agent.dispatch(options, handler)
   }
 
-  factory(origin) {
+  factory(origin: string | URL) {
     const mockOptions = { ...this.originalOptions, agent: this }
     return new NockClient(origin, mockOptions)
   }
@@ -72,7 +78,4 @@ function deactivate() {
   undici.setGlobalDispatcher(new undici.Agent())
 }
 
-module.exports = {
-  activate,
-  deactivate,
-}
+export { activate, deactivate }

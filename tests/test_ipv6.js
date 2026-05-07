@@ -1,9 +1,7 @@
-'use strict'
-
-const http = require('node:http')
-const { expect } = require('chai')
-const sinon = require('sinon')
-const nock = require('..')
+import http from 'node:http'
+import { expect } from 'chai'
+import sinon from 'sinon'
+import nock from '../index.ts'
 
 describe('IPv6', () => {
   it('IPV6 URL in http.get get gets mocked', done => {

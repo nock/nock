@@ -1,15 +1,13 @@
-'use strict'
-
-const path = require('node:path')
-const { expect } = require('chai')
-const sinon = require('sinon')
-const Interceptor = require('../../lib/interceptor')
-const nock = require('../..')
-const got = require('./got_client')
+import path from 'node:path'
+import { expect } from 'chai'
+import sinon from 'sinon'
+import { Interceptor } from '../../lib/interceptor.ts'
+import nock from '../../index.ts'
+import got from './got_client.js'
 
 it('scope exposes interceptors', () => {
   const scopes = nock.load(
-    path.join(__dirname, '..', 'fixtures', 'good_request.json'),
+    path.join(import.meta.dirname, '..', 'fixtures', 'good_request.json'),
   )
 
   expect(scopes).to.be.an.instanceOf(Array)

@@ -1,5 +1,3 @@
-'use strict'
-
 // Nock's strategy is to test as much as possible either through the public API
 // or, when that is not possible, through the mock surface.
 //
@@ -11,11 +9,11 @@
 // 100% test coverage, so when utility code falls out of test, we know it's time
 // to remove it.
 
-const { expect } = require('chai')
-const sinon = require('sinon')
+import { expect } from 'chai'
+import sinon from 'sinon'
 
-const common = require('../lib/common')
-const matchBody = require('../lib/match_body')
+import * as common from '../lib/common.ts'
+import matchBody from '../lib/match_body.ts'
 
 // match_body has its own test file that tests the functionality from the API POV.
 // Since it's not in common.js does it make more sense for these six unit tests to move into that file?

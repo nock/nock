@@ -1,0 +1,4 @@
+{
+  "check-leaks": true,
+  "file": ["tests/setup.js"]
+}

@@ -1,11 +1,9 @@
-'use strict'
+import { expect } from 'chai'
+import http from 'node:http'
+import sinon from 'sinon'
+import nock from '../index.ts'
 
-const { expect } = require('chai')
-const http = require('node:http')
-const sinon = require('sinon')
-const nock = require('..')
-
-const { startHttpServer } = require('./servers')
+import { startHttpServer } from './servers/index.js'
 
 // Because `Got` makes use of the `http(s).request` convenience function, it can not be used during these tests.
 describe('Direct use of `ClientRequest`', () => {

@@ -1,9 +1,7 @@
-'use strict'
-
-const { expect } = require('chai')
-const undici = require('undici')
-const nock = require('..')
-const { startHttpServer } = require('./servers')
+import { expect } from 'chai'
+import undici from 'undici'
+import nock from '../index.ts'
+import { startHttpServer } from './servers/index.js'
 
 describe('Undici', () => {
   it('GET request with query and response headers', async () => {

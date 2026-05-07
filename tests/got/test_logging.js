@@ -1,8 +1,6 @@
-'use strict'
-
-const { join } = require('node:path')
-const { spawn } = require('node:child_process')
-const { expect } = require('chai')
+import { join } from 'node:path'
+import { spawn } from 'node:child_process'
+import { expect } from 'chai'
 
 describe('Logging using the `debug` package', () => {
   it.skip('match debugging works', async () => {
@@ -55,7 +53,7 @@ describe('Logging using the `debug` package', () => {
 
     const child = spawn(
       process.execPath,
-      [join(__dirname, './fixtures/logging.mjs')],
+      [join(import.meta.dirname, './fixtures/logging.mjs')],
       {
         env: {
           NODE_DEBUG: 'nock:*',

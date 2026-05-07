@@ -1,26 +1,132 @@
-'use strict'
+import type { ReadStream } from 'node:fs'
+import type { Scope, Options } from './scope.ts'
 
-const fs = require('node:fs')
-const querystring = require('node:querystring')
-const { URL, URLSearchParams } = require('node:url')
+export type DataMatcher =
+  | boolean
+  | number
+  | string
+  | null
+  | undefined
+  | RegExp
+  | DataMatcherArray
+  | DataMatcherMap
+export type DataMatcherArray = ReadonlyArray<DataMatcher>
+export type DataMatcherMap = { [key: string]: DataMatcher }
 
-const stringify = require('./stringify')
-const common = require('./common')
-const { remove } = require('./intercept')
-const matchBody = require('./match_body')
+export type RequestBodyMatcher =
+  | string
+  | Buffer
+  | RegExp
+  | DataMatcherArray
+  | DataMatcherMap
+  | ((body: any) => boolean)
 
-module.exports = class Interceptor {
-  /**
-   *
-   * Valid argument types for `uri`:
-   *  - A string used for strict comparisons with pathname.
-   *    The search portion of the URI may also be postfixed, in which case the search params
-   *    are striped and added via the `query` method.
-   *  - A RegExp instance that tests against only the pathname of requests.
-   *  - A synchronous function bound to this Interceptor instance. It's provided the pathname
-   *    of requests and must return a boolean denoting if the request is considered a match.
-   */
-  constructor(scope, uri, method, requestBody, interceptorOptions) {
+export type RequestHeaderMatcher =
+  | string
+  | RegExp
+  | ((fieldValue: string | null) => boolean)
+
+export type Body = string | Record<string, any>
+export type ReplyBody = Body | Buffer | ReadStream
+
+export type ReplyHeaderFunction = (
+  req: Request,
+  body?: string | Buffer,
+) => string | string[] | Promise<string | string[]>
+export type ReplyHeaderValue = string | string[] | ReplyHeaderFunction
+export type ReplyHeaders =
+  | Record<string, ReplyHeaderValue>
+  | Map<string, ReplyHeaderValue>
+  | ReplyHeaderValue[]
+
+export type StatusCode = number
+export type ReplyFnResult =
+  | readonly [StatusCode]
+  | readonly [StatusCode, ReplyBody]
+  | readonly [StatusCode, ReplyBody, ReplyHeaders]
+
+import fs from 'node:fs'
+import querystring from 'node:querystring'
+import { URL, URLSearchParams } from 'node:url'
+
+import stringify from './stringify.ts'
+import * as common from './common.ts'
+import { remove } from './intercept.ts'
+import matchBody from './match_body.ts'
+
+class Interceptor {
+  /** @internal */
+  declare scope: Scope
+  /** @internal */
+  declare interceptorMatchHeaders: { name: string; value: any }[]
+  /** @internal */
+  declare method: string
+  /** @internal */
+  declare uri: string | RegExp | ((path: string) => boolean)
+  /** @internal */
+  declare _key: string
+  /** @internal */
+  declare basePath: string | RegExp
+  /** @internal */
+  declare path: string | RegExp | ((path: string) => boolean)
+  /** @internal */
+  declare queries:
+    | null
+    | boolean
+    | ((queryObject: Record<string, any>) => boolean)
+    | Record<string, any>
+  /** @internal */
+  declare options: Options & Record<string, any>
+  /** @internal */
+  declare counter: number
+  /** @internal */
+  declare _requestBody: RequestBodyMatcher | undefined
+  /** @internal */
+  declare reqheaders: Record<string, any>
+  /** @internal */
+  declare badheaders: string[]
+  /** @internal */
+  declare delayBodyInMs: number
+  /** @internal */
+  declare optional: boolean
+  /** @internal */
+  declare isPassthrough: boolean
+  /** @internal */
+  declare __nock_filteredScope: string | undefined
+  /** @internal */
+  declare __nock_scopeKey: string | undefined
+  /** @internal */
+  declare __nock_scope: Scope | undefined
+  /** @internal */
+  declare __nock_scopeOptions: Record<string, any> | undefined
+  /** @internal */
+  declare __nock_scopeHost: string | undefined
+  /** @internal */
+  declare interceptionCounter: number
+  /** @internal */
+  declare statusCode: number | null | undefined
+  /** @internal */
+  declare headers: Record<string, any> | undefined
+  /** @internal */
+  declare rawHeaders: any[]
+  /** @internal */
+  declare body: any
+  /** @internal */
+  declare errorMessage: any
+  /** @internal */
+  declare filePath: string | undefined
+  /** @internal */
+  declare fullReplyFunction: any
+  /** @internal */
+  declare replyFunction: any
+
+  constructor(
+    scope: Scope,
+    uri: string | RegExp | ((path: string) => boolean),
+    method: string,
+    requestBody?: RequestBodyMatcher,
+    interceptorOptions?: Options,
+  ) {
     const uriIsStr = typeof uri === 'string'
     // Check for leading slash. Uri can be either a string or a regexp, but
     // When enabled filteringScope ignores the passed URL entirely so we skip validation.
@@ -29,8 +135,8 @@ module.exports = class Interceptor {
       uriIsStr &&
       !scope.scopeOptions.filteringScope &&
       !scope.basePathname &&
-      !uri.startsWith('/') &&
-      !uri.startsWith('*')
+      !(uri as string).startsWith('/') &&
+      !(uri as string).startsWith('*')
     ) {
       throw Error(
         `Non-wildcard URL path strings must begin with a slash (otherwise they won't match anything) (got: ${uri})`,
@@ -72,8 +178,18 @@ module.exports = class Interceptor {
     this.optional = false
     this.isPassthrough = false
 
+    this.__nock_filteredScope = undefined
+    this.__nock_scopeKey = undefined
+    this.__nock_scope = undefined
+    this.__nock_scopeOptions = undefined
+    this.__nock_scopeHost = undefined
+    this.interceptionCounter = 0
+    this.statusCode = undefined
+    this.headers = undefined
+    this.rawHeaders = []
+
     // strip off literal query parameters if they were provided as part of the URI
-    if (uriIsStr && uri.includes('?')) {
+    if (uriIsStr && (uri as string).includes('?')) {
       // localhost is a dummy value because the URL constructor errors for only relative inputs
       const parsedURL = new URL(this.path, 'http://localhost')
       this.path = parsedURL.pathname
@@ -105,7 +221,7 @@ module.exports = class Interceptor {
     return this.scope
   }
 
-  replyWithError(errorMessage) {
+  replyWithError(errorMessage: string | Error | Record<string, any>) {
     this.errorMessage = errorMessage
 
     this.options = {
@@ -117,7 +233,7 @@ module.exports = class Interceptor {
     return this.scope
   }
 
-  reply(statusCode, body, rawHeaders) {
+  reply(statusCode: any, body?: any, rawHeaders?: ReplyHeaders) {
     // support the format of only passing in a callback
     if (typeof statusCode === 'function') {
       if (arguments.length > 1) {
@@ -176,16 +292,14 @@ module.exports = class Interceptor {
         throw new Error('Error encoding response body into JSON')
       }
 
-      if (!this.headers['content-type']) {
+      if (!this.headers!['content-type']) {
         // https://tools.ietf.org/html/rfc7231#section-3.1.1.5
         this.rawHeaders.push('Content-Type', 'application/json')
       }
 
       // Fix content-length header if it exists and doesn't match the stringified body
-      // This addresses the issue where recorded fixtures have a content-length
-      // that matches the original formatted JSON, but nock serializes it differently
       const contentLengthIndex = this.rawHeaders.findIndex(
-        (value, index) =>
+        (value: any, index: number) =>
           index % 2 === 0 && value.toLowerCase() === 'content-length',
       )
       if (contentLengthIndex !== -1) {
@@ -212,7 +326,7 @@ module.exports = class Interceptor {
     return this.scope
   }
 
-  replyWithFile(statusCode, filePath, headers) {
+  replyWithFile(statusCode: number, filePath: string, headers?: ReplyHeaders) {
     if (!fs) {
       throw new Error('No fs')
     }
@@ -228,7 +342,11 @@ module.exports = class Interceptor {
     )
   }
 
-  reqheaderMatches(expected, actual, key) {
+  reqheaderMatches(
+    expected: RequestHeaderMatcher,
+    actual: string | null,
+    key: string,
+  ) {
     if (expected !== undefined && actual !== undefined) {
       if (typeof expected === 'function') {
         return expected(actual)
@@ -246,17 +364,12 @@ module.exports = class Interceptor {
     return false
   }
 
-  /**
-   * @param {Request} request
-   * @param {string} body - string or hex
-   * @returns {string[]}
-   */
-  match(request, body) {
+  match(request: Request, body: string) {
     const url = new URL(request.url)
     // TODO: fix request log to string
     this.scope.logger('attempting match %j, body = %j', request, body)
 
-    const mismatches = []
+    const mismatches: string[] = []
     let path = url.pathname + url.search
     let matchKey
 
@@ -270,7 +383,13 @@ module.exports = class Interceptor {
       path = this.scope.transformPathFunction(path)
     }
 
-    const requestMatchesFilter = ({ name, value: predicate }) => {
+    const requestMatchesFilter = ({
+      name,
+      value: predicate,
+    }: {
+      name: string
+      value: any
+    }) => {
       const headerValue = request.headers.get(name)
       if (typeof predicate === 'function') {
         return predicate(headerValue)
@@ -290,7 +409,7 @@ module.exports = class Interceptor {
       }
     }
 
-    const reqHeadersMatch = Object.keys(this.reqheaders).every(key =>
+    const reqHeadersMatch = Object.keys(this.reqheaders).every((key: string) =>
       this.reqheaderMatches(
         this.reqheaders[key],
         request.headers.get(key),
@@ -313,7 +432,7 @@ module.exports = class Interceptor {
       mismatches.push(msg)
     }
 
-    const badHeaders = this.badheaders.filter(header =>
+    const badHeaders = this.badheaders.filter((header: string) =>
       request.headers.has(header),
     )
 
@@ -328,7 +447,7 @@ module.exports = class Interceptor {
       this.scope.logger('query matching skipped')
     } else {
       // can't rely on pathname or search being in the options, but path has a default
-      const [pathname, search] = path.split('?')
+      const [pathname, search] = (path as string).split('?')
       const matchQueries = this.matchQuery({ search })
 
       if (!matchQueries) {
@@ -347,12 +466,14 @@ module.exports = class Interceptor {
     // necessarily match and we have to remove the scope that was matched (vs.
     // that was defined).
     if (this.__nock_filteredScope) {
-      matchKey = this.__nock_filteredScope
+      matchKey = this.__nock_filteredScope as string
     } else {
       matchKey = common.normalizeOrigin(url)
     }
 
-    if (!common.matchStringOrRegexp(matchKey, this.basePath)) {
+    if (
+      !common.matchStringOrRegexp(matchKey, this.basePath as string | RegExp)
+    ) {
       const msg = `Base path mismatch: expected ${this.basePath}, got ${matchKey}`
       this.scope.logger(msg)
       mismatches.push(msg)
@@ -364,7 +485,9 @@ module.exports = class Interceptor {
         this.scope.logger(msg)
         mismatches.push(msg)
       }
-    } else if (!common.matchStringOrRegexp(path, this.path)) {
+    } else if (
+      !common.matchStringOrRegexp(path, this.path as string | RegExp)
+    ) {
       const msg = `Path mismatch: expected ${this.path}, got ${path}`
       this.scope.logger(msg)
       mismatches.push(msg)
@@ -385,13 +508,7 @@ module.exports = class Interceptor {
     return mismatches
   }
 
-  /**
-   * Return true when the interceptor's method, protocol, host, port, and path
-   * match the provided options.
-   *
-   * @param {Request} request
-   */
-  matchOrigin(request) {
+  matchOrigin(request: Request) {
     const url = new URL(request.url)
     const isPathFn = typeof this.path === 'function'
     const isRegex = this.path instanceof RegExp
@@ -409,28 +526,29 @@ module.exports = class Interceptor {
     if (this.scope.transformPathFunction) {
       path = this.scope.transformPathFunction(path)
     }
-    const comparisonKey = isPathFn || isRegex ? this.__nock_scopeKey : this._key
+    const comparisonKey =
+      isPathFn || isRegex ? (this.__nock_scopeKey as string) : this._key
     const matchKey = `${method} ${url.protocol}//${url.hostname}:${port}${path}`
 
     if (isPathFn) {
-      return !!(matchKey.match(comparisonKey) && this.path(path))
+      return !!(matchKey.match(comparisonKey) && (this.path as Function)(path))
     }
 
     if (isRegex && !isRegexBasePath) {
-      return !!matchKey.match(comparisonKey) && this.path.test(path)
+      return !!matchKey.match(comparisonKey) && (this.path as RegExp).test(path)
     }
 
     if (isRegexBasePath) {
-      return this.scope.basePath.test(matchKey) && !!path.match(this.path)
+      return (
+        (this.scope.basePath as RegExp).test(matchKey) &&
+        !!path.match(this.path as string)
+      )
     }
 
     return comparisonKey === matchKey
   }
 
-  /**
-   * @param {string} hostname
-   */
-  matchHostName(hostname) {
+  matchHostName(hostname: string) {
     const { basePath } = this.scope
 
     if (basePath instanceof RegExp) {
@@ -440,7 +558,7 @@ module.exports = class Interceptor {
     return hostname === this.scope.urlParts.hostname
   }
 
-  matchQuery(options) {
+  matchQuery(options: Record<string, any>) {
     if (this.queries === true) {
       return true
     }
@@ -456,8 +574,8 @@ module.exports = class Interceptor {
     return common.dataEqual(this.queries, reqQueries)
   }
 
-  filteringPath(...args) {
-    this.scope.filteringPath(...args)
+  filteringPath(...args: any[]) {
+    ;(this.scope.filteringPath as Function).apply(this.scope, args)
     return this
   }
 
@@ -465,7 +583,7 @@ module.exports = class Interceptor {
   // by request body?
 
   markConsumed() {
-    this.interceptionCounter++
+    this.interceptionCounter = (this.interceptionCounter || 0) + 1
 
     remove(this)
 
@@ -474,27 +592,25 @@ module.exports = class Interceptor {
     }
   }
 
-  matchHeader(name, value) {
+  matchHeader(name: string, value: RequestHeaderMatcher) {
     this.interceptorMatchHeaders.push({ name, value })
     return this
   }
 
-  basicAuth({ user, pass = '' }) {
+  basicAuth({ user, pass = '' }: { user: string; pass?: string }) {
     const encoded = Buffer.from(`${user}:${pass}`).toString('base64')
     this.matchHeader('authorization', `Basic ${encoded}`)
     return this
   }
 
-  /**
-   * Set query strings for the interceptor
-   * @name query
-   * @param queries Object of query string name,values (accepts regexp values)
-   * @public
-   * @example
-   * // Will match 'http://zombo.com/?q=t'
-   * nock('http://zombo.com').get('/').query({q: 't'});
-   */
-  query(queries) {
+  query(
+    queries:
+      | boolean
+      | string
+      | URLSearchParams
+      | Record<string, any>
+      | ((queryObject: Record<string, any>) => boolean),
+  ) {
     if (this.queries !== null) {
       throw Error(`Query parameters have already been defined`)
     }
@@ -523,26 +639,17 @@ module.exports = class Interceptor {
       throw Error(`Argument Error: ${queries}`)
     }
 
-    this.queries = {}
+    this.queries = {} as Record<string, any>
     for (const [key, value] of Object.entries(queries)) {
       const formatted = common.formatQueryValue(key, value, strFormattingFn)
       const [formattedKey, formattedValue] = formatted
-      this.queries[formattedKey] = formattedValue
+      ;(this.queries as Record<string, any>)[formattedKey] = formattedValue
     }
 
     return this
   }
 
-  /**
-   * Set number of times will repeat the interceptor
-   * @name times
-   * @param newCounter Number of times to repeat (should be > 0)
-   * @public
-   * @example
-   * // Will repeat mock 5 times for same king of request
-   * nock('http://zombo.com).get('/').times(5).reply(200, 'Ok');
-   */
-  times(newCounter) {
+  times(newCounter: number) {
     if (newCounter < 1) {
       return this
     }
@@ -552,49 +659,19 @@ module.exports = class Interceptor {
     return this
   }
 
-  /**
-   * An sugar syntax for times(1)
-   * @name once
-   * @see {@link times}
-   * @public
-   * @example
-   * nock('http://zombo.com).get('/').once().reply(200, 'Ok');
-   */
   once() {
     return this.times(1)
   }
 
-  /**
-   * An sugar syntax for times(2)
-   * @name twice
-   * @see {@link times}
-   * @public
-   * @example
-   * nock('http://zombo.com).get('/').twice().reply(200, 'Ok');
-   */
   twice() {
     return this.times(2)
   }
 
-  /**
-   * An sugar syntax for times(3).
-   * @name thrice
-   * @see {@link times}
-   * @public
-   * @example
-   * nock('http://zombo.com).get('/').thrice().reply(200, 'Ok');
-   */
   thrice() {
     return this.times(3)
   }
 
-  /**
-   * Delay the response by a certain number of ms.
-   *
-   * @param {number} ms - Number of milliseconds to wait before response is sent
-   * @return {Interceptor} - the current interceptor for chaining
-   */
-  delay(ms) {
+  delay(ms: number) {
     if (typeof ms === 'number') {
       this.delayBodyInMs = ms
       return this
@@ -603,3 +680,5 @@ module.exports = class Interceptor {
     }
   }
 }
+
+export { Interceptor }

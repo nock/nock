@@ -1,27 +1,19 @@
-'use strict'
-const { inherits } = require('node:util')
-const globalEmitter = require('./global_emitter')
-const common = require('./common')
-const { playbackInterceptor } = require('./playback_interceptor')
+import type { Interceptor } from './interceptor.ts'
+import globalEmitter from './global_emitter.ts'
+import * as common from './common.ts'
+import { playbackInterceptor } from './playback_interceptor.ts'
+import { interceptorsFor, isOn, isEnabledForNetConnect } from './intercept.ts'
 
-/**
- * @param {Request} request
- */
-async function handleRequest(request) {
-  const {
-    interceptorsFor,
-    isOn,
-    isEnabledForNetConnect,
-  } = require('./intercept')
+async function handleRequest(request: Request) {
   const url = new URL(request.url)
   const interceptors = interceptorsFor(url)
 
   if (isOn() && interceptors) {
-    const matches = interceptors.some(interceptor =>
+    const matches = interceptors.some((interceptor: Interceptor) =>
       interceptor.matchOrigin(request),
     )
     const allowUnmocked = interceptors.some(
-      interceptor => interceptor.options.allowUnmocked,
+      (interceptor: Interceptor) => interceptor.options.allowUnmocked,
     )
     if (!matches && allowUnmocked) {
       globalEmitter.emit('no match', request)
@@ -34,8 +26,8 @@ async function handleRequest(request) {
         requestBodyIsUtf8Representable ? 'utf8' : 'hex',
       )
 
-      const matchResults = []
-      const matchedInterceptor = interceptors.find(i => {
+      const matchResults: { interceptor: Interceptor; reasons: string[] }[] = []
+      const matchedInterceptor = interceptors.find((i: Interceptor) => {
         const reasons = i.match(request, requestBodyString)
         if (reasons.length > 0) {
           matchResults.push({ interceptor: i, reasons })
@@ -73,7 +65,8 @@ async function handleRequest(request) {
 
         // Try to find a hostname match that allows unmocked.
         const allowUnmocked = interceptors.some(
-          i => i.matchHostName(url.hostname) && i.options.allowUnmocked,
+          (i: Interceptor) =>
+            i.matchHostName(url.hostname) && i.options.allowUnmocked,
         )
 
         if (!allowUnmocked) {
@@ -100,26 +93,14 @@ async function handleRequest(request) {
   }
 }
 
-/**
- * @name NetConnectNotAllowedError
- * @private
- * @desc Error trying to make a connection when disabled external access.
- * @class
- * @example
- * nock.disableNetConnect();
- * http.get('http://zombo.com');
- * // throw NetConnectNotAllowedError
- */
-function NetConnectNotAllowedError(host, path) {
-  Error.call(this)
+class NetConnectNotAllowedError extends Error {
+  declare code: string
 
-  this.name = 'NetConnectNotAllowedError'
-  this.code = 'ENETUNREACH'
-  this.message = `Nock: Disallowed net connect for "${host}${path}"`
-
-  Error.captureStackTrace(this, this.constructor)
+  constructor(host: string, path: string) {
+    super(`Nock: Disallowed net connect for "${host}${path}"`)
+    this.name = 'NetConnectNotAllowedError'
+    this.code = 'ENETUNREACH'
+  }
 }
 
-inherits(NetConnectNotAllowedError, Error)
-
-module.exports = handleRequest
+export default handleRequest

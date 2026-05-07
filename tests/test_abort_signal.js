@@ -1,8 +1,6 @@
-'use strict'
-
-const { expect } = require('chai')
-const http = require('node:http')
-const nock = require('..')
+import { expect } from 'chai'
+import http from 'node:http'
+import nock from '../index.ts'
 
 // These tests use `AbortSignal` to abort HTTP requests
 

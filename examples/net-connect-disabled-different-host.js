@@ -4,17 +4,17 @@ Mock the different hostname:port.
 Result: Nock does not allow request to proceed.
 */
 
-const log = require('./_log')
+import log from './_log.js'
 
 const events = ['socket', 'response', 'end', 'data', 'error']
 
-const nock = require('../')
+import nock from '../index.ts'
 
 nock.disableNetConnect()
 
 nock('http://someotherservice.com').get('/').reply(200, 'whaaa')
 
-const http = require('node:http')
+import http from 'node:http'
 const req = http.get('http://www.google.com/')
 
 req.once('error', function (err) {

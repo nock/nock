@@ -31,8 +31,8 @@ jobs:
         run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
       - name: Format
         run: npm run format
-  lint-javascript:
-    name: Lint JavaScript
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -47,27 +47,7 @@ jobs:
       - name: Install dependencies
         run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
       - name: Lint
-        run: npm run lint:js
-  lint-typescript:
-    name: Lint TypeScript declaration files
-    runs-on: ubuntu-latest
-    # skip this for now because we are using outdated dtslint which doesn't support newer TypeScript features.
-    if: ${{ false }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-        with:
-          persist-credentials: false
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: lts/*
-          cache: 'npm'
-      - name: Install dependencies
-        run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
-      - name: Lint
-        run: |
-          npm run lint:ts
+        run: npm run lint
 
   # verify against ranges defined as supported in engines.node
   test_matrix:
@@ -75,7 +55,6 @@ jobs:
       fail-fast: false
       matrix:
         node-version:
-          - 20
           - 22
           - 24
         os:
@@ -99,8 +78,10 @@ jobs:
         run: npm ci --ignore-scripts --no-audit --no-progress --prefer-offline
       - name: Test
         run: npm run test
-      - name: Test jest
-        run: npm run test:jest
+      - name: Test leak
+        run: npm run test:leak
+      - name: Test build
+        run: npm run test:build
 
   # separate job to set as required in branch protection,
   # as the build names above change each time Node versions change

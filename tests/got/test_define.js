@@ -1,10 +1,8 @@
-'use strict'
-
-const http = require('node:http')
-const { expect } = require('chai')
-const assertRejects = require('assert-rejects')
-const nock = require('../..')
-const got = require('./got_client')
+import http from 'node:http'
+import { expect } from 'chai'
+import assertRejects from 'assert-rejects'
+import nock from '../../index.ts'
+import got from './got_client.js'
 
 describe('`define()`', () => {
   it('is backward compatible', async () => {
