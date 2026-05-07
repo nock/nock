@@ -95,27 +95,22 @@ describe('`delay()`', () => {
     http.get('http://example.test', res => {
       checkDuration(start, 200)
 
-      let data = ''
-      res.on('data', chunk => {
-        data += chunk
-      })
-      res.once('end', () => {
+      res.once('data', function (data) {
         checkDuration(start, 500)
-        expect(data).to.equal('OK')
-        done()
+        expect(data.toString()).to.equal('OK')
+        res.once('end', done)
       })
     })
   })
 })
 
 describe('`delayBody()`', () => {
-  it('should delay the clock between the `response` event and the response `end` event', done => {
+  it('should delay the clock between the `response` event and the first `data` event', done => {
     nock('http://example.test').get('/').delayBody(200).reply(201, 'OK')
 
+    const start = process.hrtime()
     http.get('http://example.test', res => {
-      const start = process.hrtime()
-      res.on('data', () => {})
-      res.once('end', () => {
+      res.once('data', () => {
         checkDuration(start, 200)
         done()
       })
