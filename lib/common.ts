@@ -467,6 +467,8 @@ const expand = (input: Record<string, any> | null | undefined) => {
           } else {
             resultPtr[part] = {}
           }
+        } else if (typeof resultPtr[part] !== 'object') {
+          return input
         }
         resultPtr = resultPtr[part]
       }

@@ -462,6 +462,20 @@ describe('`dataEqual()`', () => {
     expect(result).to.equal(true)
   })
 
+  it('treats mixed scalar and nested query keys as literal keys', () => {
+    const result = common.dataEqual(
+      { include: 'record-labels,artists', 'include[music-videos]': 'artists' },
+      { include: 'record-labels,artists', 'include[music-videos]': 'artists' },
+    )
+    expect(result).to.equal(true)
+
+    const dottedResult = common.dataEqual(
+      { q: 'foo', 'q.something': 'bar' },
+      { q: 'foo', 'q.something': 'bar' },
+    )
+    expect(dottedResult).to.equal(true)
+  })
+
   it('does not equate arrays of different length', () => {
     const result = common.dataEqual(['a'], ['a', 'b'])
     expect(result).to.equal(false)

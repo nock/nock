@@ -109,6 +109,22 @@ describe('`query()` complex encoding', () => {
     scope.done()
   })
 
+  it('query with mixed scalar and bracketed object keys', async () => {
+    const scope = nock('http://example.test')
+      .get('/test')
+      .query({
+        include: 'record-labels,artists',
+        'include[music-videos]': 'artists',
+      })
+      .reply()
+
+    await got(
+      'http://example.test/test?include=record-labels,artists&include[music-videos]=artists',
+    )
+
+    scope.done()
+  })
+
   it('query with array and regexp', async () => {
     // In Node 10.x this can be updated:
     // const exampleQuery = new URLSearchParams([
