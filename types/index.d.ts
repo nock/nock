@@ -286,6 +286,7 @@ declare namespace nock {
     counter: number
     body: string
     statusCode: number
+  statusMessage?: string
     optional: boolean
   }
 
