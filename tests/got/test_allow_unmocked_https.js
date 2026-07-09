@@ -84,7 +84,7 @@ describe('allowUnmocked option (https)', () => {
       .query({ foo: 'bar' })
       .reply(418)
 
-    // no query so wont match the interceptor
+    // no query so won't match the interceptor
     const { statusCode, body } = await got(`${origin}/foo`, {
       https: { certificateAuthority: servers.ca },
     })
