@@ -1,4 +1,5 @@
 import { expect } from 'chai'
+import { Readable } from 'node:stream'
 import undici from 'undici'
 import nock from '../index.ts'
 import { startHttpServer } from './servers/index.js'
@@ -95,5 +96,76 @@ describe('Undici', () => {
 
     const { statusCode } = await undici.request(origin)
     expect(statusCode).to.equal(200)
+  })
+
+  it('passthrough forwards a buffered (Buffer) body', async () => {
+    let receivedBody = ''
+    const { origin } = await startHttpServer((request, response) => {
+      request.on('data', chunk => {
+        receivedBody += chunk
+      })
+      request.on('end', () => {
+        response.writeHead(200)
+        response.end()
+      })
+    })
+
+    const scope = nock(origin).post('/submit').passthrough()
+
+    const { body } = await undici.request(`${origin}/submit`, {
+      method: 'POST',
+      body: Buffer.from('hello'),
+    })
+    await body.dump()
+
+    expect(receivedBody).to.equal('hello')
+    scope.done()
+  })
+
+  it('passthrough forwards a streamed (Readable) body', async () => {
+    let receivedBody = ''
+    const { origin } = await startHttpServer((request, response) => {
+      request.on('data', chunk => {
+        receivedBody += chunk
+      })
+      request.on('end', () => {
+        response.writeHead(200)
+        response.end()
+      })
+    })
+
+    const scope = nock(origin).post('/submit').passthrough()
+
+    const { body } = await undici.request(`${origin}/submit`, {
+      method: 'POST',
+      body: Readable.from(['hello']),
+    })
+    await body.dump()
+
+    expect(receivedBody).to.equal('hello')
+    scope.done()
+  })
+
+  it('passthrough forwards a streamed (fetch) body', async () => {
+    let receivedBody = ''
+    const { origin } = await startHttpServer((request, response) => {
+      request.on('data', chunk => {
+        receivedBody += chunk
+      })
+      request.on('end', () => {
+        response.writeHead(200)
+        response.end()
+      })
+    })
+
+    const scope = nock(origin).post('/submit').passthrough()
+
+    await undici.fetch(`${origin}/submit`, {
+      method: 'POST',
+      body: new URLSearchParams({ hello: 'world' }),
+    })
+
+    expect(receivedBody).to.equal('hello=world')
+    scope.done()
   })
 })

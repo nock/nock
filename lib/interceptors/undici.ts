@@ -36,6 +36,13 @@ class NockClient extends undici.Client {
           handler.onData?.(Buffer.from(await response.arrayBuffer()))
           handler.onComplete?.([]) // responseTrailers
         } else {
+          // Checking for a match reads the request body. If the body
+          // was a stream, then that leaves `options.body` empty.
+          // Since `decompressedRequest.body` still has a copy of the body,
+          // we can send that instead.
+          if (decompressedRequest.body) {
+            options.body = decompressedRequest.body
+          }
           const dispatcher = options.dispatcher || {
             dispatch: super.dispatch.bind(this),
           }
