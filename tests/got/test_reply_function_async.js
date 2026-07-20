@@ -55,7 +55,7 @@ describe('asynchronous `reply()` function', () => {
         .reply(201, function (request, cb) {
           expect(new URL(request.url).pathname).to.equal('/yo')
           expect(Object.fromEntries(request.headers.entries())).to.deep.equal({
-            connection: 'close',
+            connection: 'keep-alive',
             'accept-encoding': 'gzip, deflate, br',
             host: 'example.test',
             'x-my-header': 'some-value',

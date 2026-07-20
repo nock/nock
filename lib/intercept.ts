@@ -3,10 +3,6 @@ import type { Scope } from './scope.ts'
 import * as common from './common.ts'
 import { intercept as debug } from './debug.ts'
 import * as builtinMock from './interceptors/builtin.ts'
-import { createRequire } from 'node:module'
-
-const _require = createRequire(import.meta.url)
-let undiciMock: { activate: () => void; deactivate: () => void } | undefined
 
 let allInterceptors: Record<string, any> = {}
 let allowNetConnect: RegExp | { test: (url: string) => boolean } | undefined
@@ -231,25 +227,6 @@ function activeMocks() {
 function activate() {
   if (!_isActive) {
     builtinMock.activate()
-
-    if (!undiciMock) {
-      try {
-        undiciMock = _require('./interceptors/undici.ts')
-      } catch (err: any) {
-        if (
-          err.code !== 'MODULE_NOT_FOUND' &&
-          err.code !== 'ERR_MODULE_NOT_FOUND' &&
-          err.code !== 'ERR_REQUIRE_ESM'
-        ) {
-          throw err
-        }
-        debug(
-          'Undici mocking is disabled because the undici module is not installed',
-        )
-      }
-    }
-
-    undiciMock?.activate()
     _isActive = true
   } else {
     throw new Error('Nock already active')
@@ -259,7 +236,6 @@ function activate() {
 function deactivate() {
   if (_isActive) {
     builtinMock.deactivate()
-    undiciMock?.deactivate()
     _isActive = false
   }
 }

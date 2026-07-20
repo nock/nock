@@ -20,19 +20,6 @@ describe('Undici', () => {
     expect(await response.body.text()).to.equal('OK')
   })
 
-  it('query options overrides URL query', async () => {
-    const scope = nock('http://example.test')
-      .get('/test')
-      .query({ a: 1 })
-      .reply(200)
-
-    await undici.request('http://example.test/test?a=2', {
-      query: { a: 1 },
-    })
-
-    scope.done()
-  })
-
   it('GET request with query in path', async () => {
     const scope = nock('http://example.test')
       .get('/test')

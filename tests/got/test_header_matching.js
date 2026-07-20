@@ -554,20 +554,6 @@ describe('Header matching', () => {
       scope.done()
     })
 
-    // TODO: why this is the desired behavior?
-    it.skip('Host header is ignored during matching if not defined on the request', async () => {
-      const scope = nock('http://example.test', {
-        reqheaders: { host: 'some.other.domain.test' },
-      })
-        .get('/')
-        .reply()
-
-      const { statusCode } = await got('http://example.test/')
-
-      expect(statusCode).to.equal(200)
-      scope.done()
-    })
-
     it('Host header is used to reject a match if defined on the scope and request', async () => {
       nock('http://example.test', {
         reqheaders: { host: 'example.test' },

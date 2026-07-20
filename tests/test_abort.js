@@ -159,8 +159,7 @@ describe('`ClientRequest.abort()`', () => {
     }, 20)
   })
 
-  // TODO: https://github.com/mswjs/interceptors/pull/542#issuecomment-2028881290
-  it.skip('Emits the expected event sequence when aborted after a delay from the `finish` event', done => {
+  it('Emits the expected event sequence when aborted after a delay from the `finish` event', done => {
     // use the delay functionality to create a window where the abort is called during the artificial connection wait.
     const scope = nock('http://example.test').get('/').delay(100).reply()
 
