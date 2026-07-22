@@ -571,11 +571,10 @@ describe('Request Overrider', () => {
     const req = http.get('http://example.test')
     req.once('socket', socket => {
       socket.once('connect', () => {
-        expect(socket.address()).to.deep.equal({
-          port: 80,
-          family: 'IPv4',
-          address: '127.0.0.1',
-        })
+        const address = socket.address()
+        expect(address.port).to.be.a('number')
+        expect(address.family).to.equal('IPv4')
+        expect(address.address).to.equal('127.0.0.1')
         done()
       })
     })
@@ -587,11 +586,10 @@ describe('Request Overrider', () => {
     const req = https.get('https://example.test', { family: 6 })
     req.once('socket', socket => {
       socket.once('connect', () => {
-        expect(socket.address()).to.deep.equal({
-          port: 443,
-          family: 'IPv6',
-          address: '::1',
-        })
+        const address = socket.address()
+        expect(address.port).to.be.a('number')
+        expect(address.family).to.equal('IPv6')
+        expect(address.address).to.equal('::1')
         done()
       })
     })

@@ -29,7 +29,7 @@
     }
   },
   "dependencies": {
-    "@mswjs/interceptors": "^0.41.2"
+    "@mswjs/interceptors": "^0.42.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.27.0",

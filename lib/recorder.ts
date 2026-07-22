@@ -14,15 +14,18 @@ import { inspect } from 'node:util'
 
 import * as common from './common.ts'
 import { restoreOverriddenClientRequest } from './intercept.ts'
-import { gzipSync, brotliCompressSync, deflateSync } from 'node:zlib'
-import nodeInterceptors from '@mswjs/interceptors/presets/node'
+import { BatchInterceptor } from '@mswjs/interceptors'
+import { ClientRequestInterceptor } from '@mswjs/interceptors/ClientRequest'
+import { FetchInterceptor } from '@mswjs/interceptors/fetch'
+
 const SEPARATOR = '\n<<<<<<-- cut here -->>>>>>\n'
 let recordingInProgress = false
 let _outputs: Array<string | Definition> = []
 
-// TODO: don't reuse the nodeInterceptors, create new ones.
-const clientRequestInterceptor = nodeInterceptors[0]
-const fetchRequestInterceptor = nodeInterceptors[2]
+const interceptor = new BatchInterceptor({
+  name: 'intercept',
+  interceptors: [new ClientRequestInterceptor(), new FetchInterceptor()],
+})
 
 function getScope(url: URL) {
   return common.normalizeOrigin(url)
@@ -219,39 +222,10 @@ function record(recOptions?: boolean | RecorderOptions) {
   restoreOverriddenClientRequest()
 
   //  We override the requests so that we can save information on them before executing.
-  clientRequestInterceptor.apply()
-  fetchRequestInterceptor.apply()
-  clientRequestInterceptor.on(
-    'response',
-    async function ({ request, response }: any) {
-      await recordResponse(request, response)
-    },
-  )
-  fetchRequestInterceptor.on(
-    'response',
-    async function ({ request, response }: any) {
-      // fetch decompresses the body automatically, so we need to recompress it
-      const codings =
-        response.headers
-          .get('content-encoding')
-          ?.toLowerCase()
-          .split(',')
-          .map((c: string) => c.trim()) || []
-
-      let body: ArrayBuffer = await response.arrayBuffer()
-      for (const coding of codings) {
-        if (coding === 'gzip') {
-          body = gzipSync(body) as any
-        } else if (coding === 'deflate') {
-          body = deflateSync(body) as any
-        } else if (coding === 'br') {
-          body = brotliCompressSync(body) as any
-        }
-      }
-
-      await recordResponse(request, new Response(body, response))
-    },
-  )
+  interceptor.apply()
+  interceptor.on('response', async function ({ request, response }) {
+    await recordResponse(request, response)
+  })
 
   async function recordResponse(mswRequest: Request, mswResponse: Response) {
     const request = mswRequest.clone()
@@ -319,8 +293,7 @@ function restore() {
     'restoring all the overridden http/https properties',
   )
 
-  clientRequestInterceptor.dispose()
-  fetchRequestInterceptor.dispose()
+  interceptor.dispose()
   restoreOverriddenClientRequest()
   recordingInProgress = false
 }

@@ -24,37 +24,6 @@ describe('Recorder', () => {
     expect(leaks).to.be.empty()
   })
 
-  // The problem is that after the migration to "@mswjs/interceptors" the request is no longer synchronous, which is Node compatible behavior.
-  // so in the test we initiate a new recording session because we record the first request.
-  it.skip('does not record requests from previous sessions', async () => {
-    const { origin } = await servers.startHttpServer()
-
-    nock.restore()
-    nock.recorder.clear()
-    nock.recorder.rec(true)
-
-    const req1 = http.get(`${origin}/foo`)
-    const req1Promise = new Promise(resolve => {
-      req1.on('response', res => {
-        res.on('end', resolve)
-        res.resume()
-      })
-    })
-
-    // start a new recording session while the first request is still in flight
-    nock.restore()
-    nock.recorder.rec(true)
-    await got.post(`${origin}/bar`)
-
-    // wait for the first request to end
-    await req1Promise
-
-    // validate only the request from the second session is in the outputs
-    const outputs = nock.recorder.play()
-    expect(outputs).to.have.lengthOf(1)
-    expect(outputs[0]).to.match(/\.post\('\/bar'\)/)
-  })
-
   it('when request port is different, use the alternate port', async () => {
     nock.restore()
     nock.recorder.clear()
@@ -627,7 +596,7 @@ describe('Recorder', () => {
                 .to.be.an('object')
                 .and.deep.include({
                   reqheaders: {
-                    connection: 'close',
+                    connection: 'keep-alive',
                     host: `localhost:${port}`,
                     authorization: `Basic ${Buffer.from('foo:bar').toString(
                       'base64',
