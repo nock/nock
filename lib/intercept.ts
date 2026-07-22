@@ -186,6 +186,10 @@ function removeInterceptor(
       ) {
         allInterceptors[baseUrl].interceptors.splice(i, 1)
         interceptor.scope.remove(key, interceptor)
+        const scopeIndex = interceptor.scope.interceptors.indexOf(interceptor)
+        if (scopeIndex !== -1) {
+          interceptor.scope.interceptors.splice(scopeIndex, 1)
+        }
         break
       }
     }
