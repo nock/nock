@@ -14,7 +14,6 @@ import { inspect } from 'node:util'
 
 import * as common from './common.ts'
 import { restoreOverriddenClientRequest } from './intercept.ts'
-import { gzipSync, brotliCompressSync, deflateSync, inflateSync } from 'node:zlib'
 import { BatchInterceptor } from '@mswjs/interceptors'
 import { ClientRequestInterceptor } from '@mswjs/interceptors/ClientRequest'
 import { FetchInterceptor } from '@mswjs/interceptors/fetch'
@@ -25,7 +24,7 @@ let _outputs: Array<string | Definition> = []
 
 const interceptor = new BatchInterceptor({
   name: 'intercept',
-  interceptors: [new ClientRequestInterceptor(), new FetchInterceptor()]
+  interceptors: [new ClientRequestInterceptor(), new FetchInterceptor()],
 })
 
 function getScope(url: URL) {
@@ -224,12 +223,9 @@ function record(recOptions?: boolean | RecorderOptions) {
 
   //  We override the requests so that we can save information on them before executing.
   interceptor.apply()
-  interceptor.on(
-    'response',
-    async function ({ request, response }) {
-        await recordResponse(request, response)
-      }
-  )
+  interceptor.on('response', async function ({ request, response }) {
+    await recordResponse(request, response)
+  })
 
   async function recordResponse(mswRequest: Request, mswResponse: Response) {
     const request = mswRequest.clone()

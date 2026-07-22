@@ -77,7 +77,7 @@ describe('When `AbortSignal` is used', () => {
   })
 
   // TODO: For some reason we or interceptors throw first the error from the response and then the error from the request.
-  // This is not what happens in Node.js, so we need to investigate this further. 
+  // This is not what happens in Node.js, so we need to investigate this further.
   it.skip('aborts a request if the signal is aborted after the response headers have been read', async () => {
     const abortController = new AbortController()
     const scope = nock('http://example.test').post('/form').reply(201, 'OK!')
@@ -120,7 +120,7 @@ describe('When `AbortSignal` is used', () => {
   })
 
   // TODO: For some reason we or interceptors throw first the error from the response and then the error from the request.
-  // This is not what happens in Node.js, so we need to investigate this further. 
+  // This is not what happens in Node.js, so we need to investigate this further.
   it.skip('aborts a request if the signal is aborted before the body is returned', async () => {
     const signal = AbortSignal.timeout(10)
     const scope = nock('http://example.test')

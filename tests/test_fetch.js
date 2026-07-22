@@ -121,11 +121,11 @@ describe('Native Fetch', () => {
   })
 
   it('should abort a request with a timeout signal', async () => {
-    let timer;
+    let timer
     const scope = nock('http://test.com')
       .get('/')
       .reply(200, async () => {
-        await new Promise(resolve => timer = setTimeout(resolve, 100))
+        await new Promise(resolve => (timer = setTimeout(resolve, 100)))
         return true
       })
 
@@ -392,10 +392,7 @@ describe('Native Fetch', () => {
         .get('/')
         .reply(302, '', { Location: `${origin}/redirected` })
 
-      await assertRejects(
-        fetch(origin, { redirect: 'error' }),
-        /fetch failed/,
-      )
+      await assertRejects(fetch(origin, { redirect: 'error' }), /fetch failed/)
     })
 
     it('should throws a network error on a non-303 redirect with a body', async () => {
@@ -404,7 +401,11 @@ describe('Native Fetch', () => {
         .reply(302, '', { Location: `${origin}/redirected` })
 
       await assertRejects(
-        fetch(origin, { method: 'PUT', body: Readable.from('hello'), duplex: 'half' }),
+        fetch(origin, {
+          method: 'PUT',
+          body: Readable.from('hello'),
+          duplex: 'half',
+        }),
         /fetch failed/,
       )
     })
@@ -449,7 +450,12 @@ describe('Native Fetch', () => {
       expect(response.status).to.eq(200)
       // Must remove body-related request headers.
       expect(headers).to.includes({ 'x-other-header': 'value' })
-      expect(Object.keys(headers)).to.not.includes([ 'content-language', 'content-location', 'content-type', 'content-length' ])
+      expect(Object.keys(headers)).to.not.includes([
+        'content-language',
+        'content-location',
+        'content-type',
+        'content-length',
+      ])
       // Non-GET/HEAD request body of a 303 redirect must be null.
       expect(body).to.be.empty()
     })
@@ -480,7 +486,12 @@ describe('Native Fetch', () => {
       expect(response.status).to.eq(200)
       // Must remove body-related request headers.
       expect(headers).to.includes({ 'x-other-header': 'value' })
-      expect(Object.keys(headers)).to.not.includes([ 'content-language', 'content-location', 'content-type', 'content-length' ])
+      expect(Object.keys(headers)).to.not.includes([
+        'content-language',
+        'content-location',
+        'content-type',
+        'content-length',
+      ])
       // Non-GET/HEAD request body of a 303 redirect must be null.
       expect(body).to.be.empty()
     })
@@ -509,7 +520,12 @@ describe('Native Fetch', () => {
 
       expect(response.status).to.eq(200)
       expect(headers).to.includes({ 'x-other-header': 'value' })
-      expect(Object.keys(headers)).to.not.includes([ 'authorization', 'proxy-authorization', 'cookie', 'host' ])
+      expect(Object.keys(headers)).to.not.includes([
+        'authorization',
+        'proxy-authorization',
+        'cookie',
+        'host',
+      ])
       expect(body).to.be.empty()
     })
   })
@@ -548,7 +564,9 @@ describe('Native Fetch', () => {
 
       const replayedResponse = await fetch(origin)
       expect(await replayedResponse.text()).to.equal(exampleText)
-      expect(replayedResponse.headers.get('content-encoding')).to.equal('gzip, br')
+      expect(replayedResponse.headers.get('content-encoding')).to.equal(
+        'gzip, br',
+      )
 
       nocks.forEach(nock => nock.done())
     })
@@ -586,7 +604,9 @@ describe('Native Fetch', () => {
 
       const replayedResponse = await fetch(origin)
       expect(await replayedResponse.text()).to.equal(exampleText)
-      expect(replayedResponse.headers.get('content-encoding')).to.equal('deflate')
+      expect(replayedResponse.headers.get('content-encoding')).to.equal(
+        'deflate',
+      )
 
       nocks.forEach(nock => nock.done())
     })
