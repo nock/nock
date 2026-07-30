@@ -36,6 +36,15 @@ describe('`removeInterceptor()`', () => {
       expect(scope.pendingMocks()).to.deep.equal([])
     })
 
+    it('removes the interceptor from the scope.interceptors array', () => {
+      const givenInterceptor = nock('http://example.test').get('/somepath')
+      const scope = givenInterceptor.reply(200, 'hey')
+
+      expect(scope.interceptors).to.have.lengthOf(1)
+      expect(nock.removeInterceptor(givenInterceptor)).to.be.true()
+      expect(scope.interceptors).to.have.lengthOf(0)
+    })
+
     it('removes given interceptor for https', async () => {
       const givenInterceptor = nock('https://example.test').get('/somepath')
       const scope = givenInterceptor.reply(200, 'hey')
