@@ -17,7 +17,7 @@ describe('repeating', () => {
 
     await assertRejects(
       got('http://example.test/'),
-      /Nock: No match for request/,
+      /RequestError: getaddrinfo ENOTFOUND example.test/,
     )
 
     scope.done()
@@ -37,7 +37,7 @@ describe('repeating', () => {
 
     await assertRejects(
       got('http://example.test/'),
-      /Nock: No match for request/,
+      /RequestError: getaddrinfo ENOTFOUND example.test/,
     )
 
     scope.done()
@@ -57,7 +57,7 @@ describe('repeating', () => {
 
     await assertRejects(
       got('http://example.test/'),
-      /Nock: No match for request/,
+      /RequestError: getaddrinfo ENOTFOUND example.test/,
     )
 
     scope.done()
@@ -78,7 +78,7 @@ describe('repeating', () => {
 
       await assertRejects(
         got('http://example.test/'),
-        /Nock: No match for request/,
+        /RequestError: getaddrinfo ENOTFOUND example.test/,
       )
 
       scope.done()
@@ -95,7 +95,7 @@ describe('repeating', () => {
 
       await assertRejects(
         got('http://example.test/'),
-        /Nock: No match for request/,
+        /RequestError: getaddrinfo ENOTFOUND example.test/,
       )
 
       scope.done()
