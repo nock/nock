@@ -221,6 +221,7 @@ declare namespace nock {
     badheaders?: string[]
     filteringScope?: { (scope: string): boolean }
     encodedQueryParams?: boolean
+    conditionally?: () => boolean
   }
 
   interface Recorder {
