@@ -158,3 +158,40 @@ describe('`reply()` status code', () => {
     )
   })
 })
+
+describe('statusMessage', () => {
+  it('sets statusMessage on the response via chainable method', async () => {
+    const scope = nock('http://example.test')
+      .get('/')
+      .statusMessage('Internal Server Error')
+      .reply(500)
+
+    const { statusCode, statusMessage } = await got('http://example.test/', { throwHttpErrors: false })
+
+    expect(statusCode).to.equal(500)
+    expect(statusMessage).to.equal('Internal Server Error')
+    scope.done()
+  })
+
+  it('response statusMessage is undefined when not explicitly set', async () => {
+    const scope = nock('http://example.test').get('/').reply(200)
+
+    const { statusCode } = await got('http://example.test/')
+
+    expect(statusCode).to.equal(200)
+    scope.done()
+  })
+
+  it('can set statusMessage from a full reply callback array', async () => {
+    const scope = nock('http://example.test')
+      .get('/')
+      .reply(() => [201, 'Created', {}, 'Created Successfully'])
+
+    const { statusCode, statusMessage, body } = await got('http://example.test/')
+
+    expect(statusCode).to.equal(201)
+    expect(statusMessage).to.equal('Created Successfully')
+    expect(body).to.equal('Created')
+    scope.done()
+  })
+})
