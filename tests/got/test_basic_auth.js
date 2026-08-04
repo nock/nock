@@ -23,7 +23,7 @@ describe('basic auth with username and password', () => {
     expect(response.body).to.equal('Here is the content')
   })
 
-  it('fails when it doesnt match', async () => {
+  it("fails when it doesn't match", async () => {
     await assertRejects(
       got('http://example.test/test'),
       /Nock: No match for request/,
@@ -49,7 +49,7 @@ describe('basic auth with username only', () => {
     expect(response.body).to.equal('Here is the content')
   })
 
-  it('fails when it doesnt match', async () => {
+  it("fails when it doesn't match", async () => {
     await assertRejects(
       got('http://example.test/test'),
       /Nock: No match for request/,

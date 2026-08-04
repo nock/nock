@@ -586,7 +586,7 @@ describe('Intercept', () => {
       .end()
   })
 
-  it('explicitly specifiying port 80 works', done => {
+  it('explicitly specifying port 80 works', done => {
     const scope = nock('http://example.test:80').get('/').reply()
 
     http
