@@ -36,6 +36,60 @@ describe('Direct use of `ClientRequest`', () => {
     req.end()
   })
 
+  it('completes when http.request sends Connection: keep-alive', function (done) {
+    const scope = nock('http://example.test').get('/ka').reply(200, 'hello')
+
+    const req = http.request(
+      {
+        host: 'example.test',
+        path: '/ka',
+        headers: { connection: 'keep-alive' },
+      },
+      res => {
+        const chunks = []
+        res.on('data', chunk => chunks.push(chunk))
+        res.on('end', () => {
+          expect(res.statusCode).to.equal(200)
+          expect(Buffer.concat(chunks).toString()).to.equal('hello')
+          expect(res.headers['content-length']).to.equal('5')
+          scope.done()
+          done()
+        })
+      },
+    )
+    req.on('error', done)
+    req.end()
+  })
+
+  it('completes keep-alive requests when the agent reuses the socket', function (done) {
+    const scope = nock('http://example.test').get('/ka').reply(200, 'hello')
+    const agent = new http.Agent({ keepAlive: true })
+
+    const req = http.request(
+      {
+        host: 'example.test',
+        path: '/ka',
+        agent,
+      },
+      res => {
+        const chunks = []
+        res.on('data', chunk => chunks.push(chunk))
+        res.on('end', () => {
+          agent.destroy()
+          expect(res.statusCode).to.equal(200)
+          expect(Buffer.concat(chunks).toString()).to.equal('hello')
+          scope.done()
+          done()
+        })
+      },
+    )
+    req.on('error', err => {
+      agent.destroy()
+      done(err)
+    })
+    req.end()
+  })
+
   it('should intercept POST requests', done => {
     const dataSpy = sinon.spy()
 
