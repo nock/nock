@@ -37,7 +37,7 @@ describe('Nock lifecycle functions', () => {
         response.end()
       })
 
-      const scope = nock(origin).get('/').reply(304, 'served from our mock')
+      const scope = nock(origin).get('/').reply(304)
 
       nock.restore()
       expect(nock.isActive()).to.be.false()

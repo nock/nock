@@ -3,6 +3,7 @@
 // Tests for the body argument passed to `.reply()`.
 
 const { expect } = require('chai')
+const assertRejects = require('assert-rejects')
 const nock = require('../..')
 const got = require('./got_client')
 
@@ -113,6 +114,30 @@ describe('`reply()` body', () => {
 
     expect(statusCode).to.equal(204)
     expect(body).to.be.a('string').and.equal('')
+    scope.done()
+  })
+
+  // https://github.com/nock/nock/issues/3000
+  // 204/205/304 responses are represented internally as a Fetch API `Response`,
+  // whose spec forbids a body on these statuses, so any body bytes given here
+  // would silently never reach the client. Fail loudly instead.
+  ;[204, 205, 304].forEach(statusCode => {
+    it(`throws when a body is given for a ${statusCode} response`, async () => {
+      nock('http://example.test').get('/').reply(statusCode, { hello: 'world' })
+
+      await assertRejects(got('http://example.test/'), err => {
+        expect(err.message).to.include(String(statusCode))
+        return true
+      })
+    })
+  })
+
+  it('does not throw when no body is given for a 204 response', async () => {
+    const scope = nock('http://example.test').get('/').reply(204, undefined)
+
+    const { statusCode } = await got('http://example.test/')
+
+    expect(statusCode).to.equal(204)
     scope.done()
   })
 
