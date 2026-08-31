@@ -22,6 +22,44 @@ const got = require('./got_client')
 const servers = require('../servers')
 
 describe('Request Overrider', () => {
+  it('completes passthrough responses when a server rejects oversized headers', async function () {
+    this.timeout(4000)
+
+    const server = http.createServer({ maxHeaderSize: 64000 })
+    await new Promise(resolve => server.listen(resolve))
+
+    const req = http.request({ port: server.address().port })
+    req.setHeader('test', 'a'.repeat(64001))
+    req.end()
+
+    let timeout
+    try {
+      const statusCode = await Promise.race([
+        new Promise((resolve, reject) => {
+          req.on('response', res => {
+            res.on('error', reject)
+            res.on('end', () => resolve(res.statusCode))
+            res.resume()
+          })
+          req.on('error', reject)
+        }),
+        new Promise((resolve, reject) => {
+          timeout = setTimeout(
+            () =>
+              reject(new Error('Timed out waiting for the response to end')),
+            1000,
+          )
+        }),
+      ])
+
+      expect(statusCode).to.equal(431)
+    } finally {
+      clearTimeout(timeout)
+      req.destroy()
+      await new Promise(resolve => server.close(resolve))
+    }
+  })
+
   it('response is an http.IncomingMessage instance', done => {
     const responseText = 'incoming message!'
     const scope = nock('http://example.test')
@@ -841,6 +879,28 @@ describe('Request Overrider', () => {
     expect(overriddenGet).not.to.have.been.called()
 
     req.abort()
+  })
+
+  it('does not alter requests made through a saved native request function', async () => {
+    nock.restore()
+    const nativeRequest = http.request
+    nock.activate()
+
+    const { origin } = await servers.startHttpServer((request, response) => {
+      response.writeHead(200)
+      response.end()
+    })
+
+    const statusCode = await new Promise((resolve, reject) => {
+      const req = nativeRequest(origin, res => {
+        res.on('end', () => resolve(res.statusCode))
+        res.resume()
+      })
+      req.on('error', reject)
+      req.end()
+    })
+
+    expect(statusCode).to.equal(200)
   })
 
   it('mocking a request which sends an empty buffer should finalize', async () => {
