@@ -372,6 +372,37 @@ describe('`replyContentLength()`', () => {
     scope.done()
   })
 
+  it('counts bytes, not characters, for a multi-byte string response', async () => {
+    const response = 'héllo 🌍'
+
+    const scope = nock('http://example.test')
+      .replyContentLength()
+      .get('/')
+      .reply(200, response)
+
+    const { headers, body } = await got('http://example.test/')
+
+    expect(headers['content-length']).to.equal(`${Buffer.byteLength(response)}`)
+    expect(body).to.equal(response)
+    scope.done()
+  })
+
+  it('counts bytes, not characters, for a multi-byte JSON response', async () => {
+    const response = { hello: 'wörld' }
+
+    const scope = nock('http://example.test')
+      .replyContentLength()
+      .get('/')
+      .reply(200, response)
+
+    const { headers } = await got('http://example.test/')
+
+    expect(headers['content-length']).to.equal(
+      `${Buffer.byteLength(JSON.stringify(response))}`,
+    )
+    scope.done()
+  })
+
   it('sends explicit content-length header with buffer response', async () => {
     const response = Buffer.from([1, 2, 3, 4, 5, 6])
 
