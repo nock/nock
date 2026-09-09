@@ -190,11 +190,9 @@ function removeInterceptor(
         if (scopeIndex !== -1) {
           interceptor.scope.interceptors.splice(scopeIndex, 1)
         }
-        break
+        return true
       }
     }
-
-    return true
   }
 
   return false

@@ -21,6 +21,19 @@ describe('`removeInterceptor()`', () => {
       newScope.done()
     })
 
+    it('returns false for an unregistered instance with the same request key', async () => {
+      const scope = nock('http://example.test')
+        .get('/somepath')
+        .reply(200, 'hey')
+      const unregistered = nock('http://example.test').get('/somepath')
+
+      expect(nock.removeInterceptor(unregistered)).to.be.false()
+
+      const { body } = await got('http://example.test/somepath')
+      expect(body).to.equal('hey')
+      scope.done()
+    })
+
     it('reflects the removal in `pendingMocks()`', () => {
       const givenInterceptor = nock('http://example.test').get('/somepath')
       const scope = givenInterceptor.reply(200, 'hey')
@@ -120,6 +133,41 @@ describe('`removeInterceptor()`', () => {
           path: '/somepath',
         }),
       ).to.be.false()
+    })
+
+    it('returns false when the path does not match any interceptor', async () => {
+      const scope = nock('http://example.test')
+        .get('/somepath')
+        .reply(200, 'hey')
+
+      expect(
+        nock.removeInterceptor({
+          hostname: 'example.test',
+          path: '/anotherpath',
+        }),
+      ).to.be.false()
+
+      const { body } = await got('http://example.test/somepath')
+      expect(body).to.equal('hey')
+      scope.done()
+    })
+
+    it('returns false when the method does not match any interceptor', async () => {
+      const scope = nock('http://example.test')
+        .get('/somepath')
+        .reply(200, 'hey')
+
+      expect(
+        nock.removeInterceptor({
+          hostname: 'example.test',
+          path: '/somepath',
+          method: 'POST',
+        }),
+      ).to.be.false()
+
+      const { body } = await got('http://example.test/somepath')
+      expect(body).to.equal('hey')
+      scope.done()
     })
 
     it('can match a request with a proto', () => {
