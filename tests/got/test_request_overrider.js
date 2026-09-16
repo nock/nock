@@ -12,6 +12,9 @@
 
 const http = require('http')
 const https = require('https')
+const net = require('net')
+const { once } = require('events')
+const { rejects } = require('assert')
 const { URL } = require('url')
 const { expect } = require('chai')
 const sinon = require('sinon')
@@ -22,6 +25,190 @@ const got = require('./got_client')
 const servers = require('../servers')
 
 describe('Request Overrider', () => {
+  describe('large request headers', () => {
+    const headers = { test: 'a'.repeat(64001) }
+    let server
+    let onRequest
+    let native
+
+    beforeEach(async () => {
+      nock.restore()
+      native = {
+        request: http.request,
+        get: http.get,
+        httpsRequest: https.request,
+        httpsGet: https.get,
+        ClientRequest: http.ClientRequest,
+        onSocket: http.ClientRequest.prototype.onSocket,
+        maxHeaderSize: http.maxHeaderSize,
+      }
+      nock.activate()
+      nock.enableNetConnect('127.0.0.1')
+
+      onRequest = sinon.spy((req, res) => res.end('ok'))
+      server = http.createServer({ maxHeaderSize: 64000 }, onRequest)
+      server.listen(0, '127.0.0.1')
+      await once(server, 'listening')
+    })
+
+    afterEach(done => {
+      server.close(done)
+      server.closeAllConnections()
+    })
+
+    async function sendRequest(options = {}, request = http.request) {
+      let req
+      let timeout
+      try {
+        return await new Promise((resolve, reject) => {
+          req = request(
+            {
+              hostname: '127.0.0.1',
+              port: server.address().port,
+              agent: false,
+              ...options,
+            },
+            res => {
+              let body = ''
+              res.setEncoding('utf8')
+              res.on('data', chunk => {
+                body += chunk
+              })
+              res.on('error', reject)
+              res.on('end', () =>
+                resolve({
+                  statusCode: res.statusCode,
+                  body,
+                  complete: res.complete,
+                }),
+              )
+            },
+          )
+          req.on('error', reject)
+          timeout = setTimeout(
+            () => req.destroy(new Error('Request did not complete within 1s')),
+            1000,
+          )
+          if (!req.writableEnded) {
+            req.end()
+          }
+        })
+      } finally {
+        clearTimeout(timeout)
+        req?.destroy()
+      }
+    }
+
+    const requestMethods = [
+      ['http.request', (...args) => http.request(...args)],
+      ['http.get', (...args) => http.get(...args)],
+      ['http.ClientRequest', (...args) => new http.ClientRequest(...args)],
+    ]
+    requestMethods.forEach(([name, request]) => {
+      it(`passes through the server 431 response for an oversized header via ${name}`, async () => {
+        expect(await sendRequest({ headers }, request)).to.deep.equal({
+          statusCode: 431,
+          body: '',
+          complete: true,
+        })
+        expect(onRequest).not.to.have.been.called()
+      })
+    })
+
+    it('passes through ordinary request headers', async () => {
+      expect(await sendRequest({ headers: { test: 'small' } })).to.deep.equal({
+        statusCode: 200,
+        body: 'ok',
+        complete: true,
+      })
+      expect(onRequest).to.have.been.calledOnce()
+      expect(onRequest.firstCall.args[0].headers.test).to.equal('small')
+    })
+
+    it('leaves a saved native request able to receive the server 431 response', async () => {
+      nock.disableNetConnect()
+      expect(await sendRequest({ headers }, native.request)).to.deep.equal({
+        statusCode: 431,
+        body: '',
+        complete: true,
+      })
+    })
+
+    it('does not reinitialize parsers on non-interceptor sockets', async () => {
+      expect(native.ClientRequest.prototype.onSocket).to.equal(native.onSocket)
+      const parser = { initialize: sinon.spy() }
+      const agent = new http.Agent({ keepAlive: false })
+      agent.createConnection = (options, callback) => {
+        const socket = net.createConnection(options, callback)
+        socket.requestParser = parser
+        return socket
+      }
+
+      try {
+        expect(await sendRequest({ agent }, native.request)).to.deep.equal({
+          statusCode: 200,
+          body: 'ok',
+          complete: true,
+        })
+        expect(parser.initialize).not.to.have.been.called()
+      } finally {
+        agent.destroy()
+      }
+    })
+
+    const responseModes = [false, true]
+    responseModes.forEach(intercepted => {
+      it(`preserves the ${intercepted ? 'intercepted' : 'native'} response header limit`, async () => {
+        server.removeAllListeners('request')
+        server.on('request', (req, res) => {
+          res.setHeader('test', 'a'.repeat(256))
+          res.end('ok')
+        })
+
+        await rejects(
+          sendRequest(
+            { maxHeaderSize: 128 },
+            intercepted ? http.request : native.request,
+          ),
+          { code: 'HPE_HEADER_OVERFLOW' },
+        )
+      })
+    })
+
+    it('matches a mocked request with an oversized header', async () => {
+      const scope = nock(`http://127.0.0.1:${server.address().port}`)
+        .get('/')
+        .matchHeader('test', headers.test)
+        .reply(200, 'mocked')
+      nock.disableNetConnect()
+
+      expect(await sendRequest({ headers })).to.deep.equal({
+        statusCode: 200,
+        body: 'mocked',
+        complete: true,
+      })
+      scope.done()
+      expect(onRequest).not.to.have.been.called()
+    })
+
+    it('restores native request hooks across repeated activation cycles', async () => {
+      for (let cycle = 0; cycle < 2; cycle++) {
+        expect((await sendRequest({ headers })).statusCode).to.equal(431)
+
+        nock.restore()
+        expect(http.request).to.equal(native.request)
+        expect(http.get).to.equal(native.get)
+        expect(https.request).to.equal(native.httpsRequest)
+        expect(https.get).to.equal(native.httpsGet)
+        expect(http.ClientRequest).to.equal(native.ClientRequest)
+        expect(http.ClientRequest.prototype.onSocket).to.equal(native.onSocket)
+        expect(http.maxHeaderSize).to.equal(native.maxHeaderSize)
+        expect((await sendRequest({ headers })).statusCode).to.equal(431)
+        nock.activate()
+      }
+    })
+  })
+
   it('response is an http.IncomingMessage instance', done => {
     const responseText = 'incoming message!'
     const scope = nock('http://example.test')
