@@ -115,6 +115,47 @@ describe('Request Overrider', () => {
       })
     })
 
+    const httpsRequestMethods = [
+      [
+        'https.request',
+        (...args) => https.request(...args),
+        (...args) => native.httpsRequest(...args),
+      ],
+      [
+        'https.get',
+        (...args) => https.get(...args),
+        (...args) => native.httpsGet(...args),
+      ],
+    ]
+    httpsRequestMethods.forEach(([name, request, nativeRequest]) => {
+      it(`passes through the server 431 response for an oversized header via ${name}`, async () => {
+        const secureServer = await servers.startHttpsServer(onRequest)
+        secureServer.maxHeaderSize = 64000
+        nock.enableNetConnect('localhost')
+
+        const options = {
+          headers,
+          hostname: 'localhost',
+          port: secureServer.port,
+          ca: servers.ca,
+          rejectUnauthorized: true,
+        }
+        const expectedResponse = {
+          statusCode: 431,
+          body: '',
+          complete: true,
+        }
+
+        expect(await sendRequest(options, nativeRequest)).to.deep.equal(
+          expectedResponse,
+        )
+        expect(await sendRequest(options, request)).to.deep.equal(
+          expectedResponse,
+        )
+        expect(onRequest).not.to.have.been.called()
+      })
+    })
+
     it('passes through ordinary request headers', async () => {
       expect(await sendRequest({ headers: { test: 'small' } })).to.deep.equal({
         statusCode: 200,
