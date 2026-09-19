@@ -33,6 +33,22 @@ describe('`query()`', () => {
   })
 
   describe('when called with an object', () => {
+    for (const flags of ['g', 'y']) {
+      it(`matches repeated requests with a ${flags} query regexp`, async () => {
+        const scope = nock('http://example.test')
+          .get('/')
+          .query({ foo: new RegExp('^bar$', flags) })
+          .twice()
+          .reply(200)
+
+        for (let i = 0; i < 2; i++) {
+          const { statusCode } = await got('http://example.test/?foo=bar')
+          expect(statusCode).to.equal(200)
+        }
+        scope.done()
+      })
+    }
+
     it('matches a query string of the same name=value', async () => {
       const scope = nock('http://example.test')
         .get('/')

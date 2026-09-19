@@ -348,6 +348,9 @@ const dataEqual = (expected: any, actual: any) => {
 function deepEqual(expected: any, actual: any): boolean {
   debug('deepEqual comparing', typeof expected, expected, typeof actual, actual)
   if (expected instanceof RegExp) {
+    if (expected.global || expected.sticky) {
+      expected.lastIndex = 0
+    }
     return expected.test(actual)
   }
 
