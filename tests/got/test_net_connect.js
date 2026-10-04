@@ -1,5 +1,6 @@
 import { expect } from 'chai'
 import assertRejects from 'assert-rejects'
+import net from 'node:net'
 import sinon from 'sinon'
 import nock from '../../index.ts'
 
@@ -109,5 +110,54 @@ describe('`enableNetConnect()`', () => {
     await got('https://example.test/').catch(() => undefined) // ignore rejection, expected
 
     expect(matcher).to.have.been.calledOnceWithExactly('example.test:443')
+  })
+
+  it('passes a non-http socket through when the server writes first', async () => {
+    const serverDataListener = sinon.spy()
+    const server = net.createServer(connection => {
+      connection.write('PING')
+      connection.on('data', chunk => {
+        serverDataListener(chunk.toString())
+        connection.write('PONG')
+      })
+    })
+
+    await new Promise((resolve, reject) => {
+      server.once('error', reject)
+      server.listen(0, '127.0.0.1', resolve)
+    })
+
+    const { port, address } = server.address()
+    const messages = []
+
+    try {
+      await new Promise((resolve, reject) => {
+        const socket = net.connect(port, address)
+
+        socket.on('data', chunk => {
+          messages.push(chunk.toString())
+
+          if (messages.length === 1) {
+            socket.write('hello')
+            return
+          }
+
+          resolve()
+          socket.destroy()
+        })
+
+        socket.on('error', reject)
+      })
+
+      expect(messages).to.deep.equal(['PING', 'PONG'])
+      expect(serverDataListener).to.have.been.calledOnceWithExactly('hello')
+    } finally {
+      await new Promise((resolve, reject) => {
+        server.close(err => {
+          if (err) reject(err)
+          else resolve()
+        })
+      })
+    }
   })
 })
