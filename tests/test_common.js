@@ -444,6 +444,27 @@ it('`percentEncode()` encodes extra reserved characters', () => {
 })
 
 describe('`dataEqual()`', () => {
+  it('matches frozen regexps without global or sticky flags', () => {
+    const pattern = Object.freeze(/^foo$/)
+    expect(common.dataEqual({ value: pattern }, { value: 'foo' })).to.equal(
+      true,
+    )
+  })
+
+  for (const flags of ['g', 'y']) {
+    it(`matches a shared ${flags} regexp independently for each value`, () => {
+      const pattern = new RegExp('^foo$', flags)
+      pattern.lastIndex = 1
+
+      expect(
+        common.dataEqual(
+          { first: pattern, second: [pattern] },
+          { first: 'foo', second: ['foo'] },
+        ),
+      ).to.equal(true)
+    })
+  }
+
   it('treats explicit and implicit undefined object values as equal', () => {
     const result = common.dataEqual({ a: 'a', b: undefined }, { a: 'a' })
     expect(result).to.equal(true)
