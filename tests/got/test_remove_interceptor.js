@@ -34,14 +34,12 @@ describe('`removeInterceptor()`', () => {
       expect(scope.pendingMocks()).to.deep.equal([])
     })
 
-    it('removes given interceptor from `scope.interceptors`', () => {
+    it('removes the interceptor from the scope.interceptors array', () => {
       const givenInterceptor = nock('http://example.test').get('/somepath')
       const scope = givenInterceptor.reply(200, 'hey')
 
       expect(scope.interceptors).to.have.lengthOf(1)
-
       expect(nock.removeInterceptor(givenInterceptor)).to.be.true()
-
       expect(scope.interceptors).to.have.lengthOf(0)
     })
 
