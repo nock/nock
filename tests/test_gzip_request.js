@@ -1,9 +1,7 @@
-'use strict'
-
-const { expect } = require('chai')
-const http = require('http')
-const zlib = require('zlib')
-const nock = require('..')
+import { expect } from 'chai'
+import http from 'node:http'
+import zlib from 'node:zlib'
+import nock from '../index.ts'
 
 it('should accept and decode gzip encoded application/json', done => {
   const message = {
@@ -12,8 +10,8 @@ it('should accept and decode gzip encoded application/json', done => {
 
   nock('http://example.test')
     .post('/')
-    .reply(function (url, actual) {
-      expect(actual).to.deep.equal(message)
+    .reply(async request => {
+      expect(await request.json()).to.deep.equal(message)
       done()
       return [200]
     })
@@ -29,17 +27,16 @@ it('should accept and decode gzip encoded application/json', done => {
   })
 
   const compressedMessage = zlib.gzipSync(JSON.stringify(message))
-
   req.write(compressedMessage)
   req.end()
 })
 
 it('should accept and decode gzip encoded application/json, when headers come from a client as an array', done => {
-  const compressedMessage = zlib.gzipSync(JSON.stringify({ my: 'contents' }))
+  const message = {
+    my: 'contents',
+  }
 
-  const scope = nock('http://example.test')
-    .post('/', compressedMessage)
-    .reply(200)
+  const scope = nock('http://example.test').post('/', message).reply(200)
 
   const req = http.request({
     hostname: 'example.test',
@@ -55,6 +52,7 @@ it('should accept and decode gzip encoded application/json, when headers come fr
     done()
   })
 
+  const compressedMessage = zlib.gzipSync(JSON.stringify(message))
   req.write(compressedMessage)
   req.end()
 })
@@ -66,8 +64,8 @@ it('should accept and decode deflate encoded application/json', done => {
 
   nock('http://example.test')
     .post('/')
-    .reply(function (url, actual) {
-      expect(actual).to.deep.equal(message)
+    .reply(async request => {
+      expect(await request.json()).to.deep.equal(message)
       done()
       return [200]
     })

@@ -1,8 +1,6 @@
-'use strict'
-
-const { expect } = require('chai')
-const nock = require('../..')
-const got = require('./got_client')
+import { expect } from 'chai'
+import nock from '../../index.ts'
+import got from './got_client.js'
 
 // "dynamic" refers to `reply` getting a single callback argument that returns or calls the callback with an array of [status, [body, headers]]]
 describe('dynamic `reply()` function', () => {
@@ -50,10 +48,10 @@ describe('dynamic `reply()` function', () => {
   it('should provide the status code and body by passing them to the asynchronous callback', async () => {
     const scope = nock('http://example.test')
       .get('/')
-      .reply(function (path, reqBody, cb) {
+      .reply(function (request, cb) {
         setTimeout(function () {
           cb(null, [201, 'GHI'])
-        }, 1e3)
+        }, 100)
       })
 
     const { statusCode, body } = await got('http://example.test')

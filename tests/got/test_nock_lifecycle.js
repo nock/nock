@@ -1,13 +1,11 @@
-'use strict'
+import http from 'node:http'
+import { expect } from 'chai'
+import nock from '../../index.ts'
+import sinon from 'sinon'
+import assertRejects from 'assert-rejects'
 
-const http = require('http')
-const { expect } = require('chai')
-const nock = require('../..')
-const sinon = require('sinon')
-const assertRejects = require('assert-rejects')
-
-const got = require('./got_client')
-const servers = require('../servers')
+import got from './got_client.js'
+import * as servers from '../servers/index.js'
 
 describe('Nock lifecycle functions', () => {
   describe('`activate()`', () => {
@@ -104,25 +102,6 @@ describe('Nock lifecycle functions', () => {
         return true
       })
     })
-
-    it.skip('should be safe to call in the middle of a request', done => {
-      // This covers a race-condition where cleanAll() is called while a request
-      // is in mid-flight. The request itself should continue to process normally.
-      // Notably, `cleanAll` is being called before the Interceptor is marked as
-      // consumed and removed from the global map. Having this test wait until the
-      // response event means we verify it didn't throw an error when attempting
-      // to remove an Interceptor that doesn't exist in the global map `allInterceptors`.
-      nock('http://example.test').get('/').reply()
-
-      const req = http.request('http://example.test', () => {
-        done()
-      })
-      req.once('socket', () => {
-        nock.cleanAll()
-      })
-
-      req.end()
-    })
   })
 
   describe('`isDone()`', () => {
@@ -194,7 +173,7 @@ describe('Nock lifecycle functions', () => {
       const responseBody = 'hi'
       const scope = nock('http://example.test')
         .get('/somepath')
-        .reply(200, (uri, requestBody) => {
+        .reply(200, () => {
           somethingBad()
           return responseBody
         })
@@ -208,14 +187,16 @@ describe('Nock lifecycle functions', () => {
 
   describe('`abortPendingRequests()`', () => {
     it('prevents the request from completing', done => {
-      const onRequest = sinon.spy()
+      const onResponseEnd = sinon.spy()
 
-      nock('http://example.test').get('/').delayConnection(100).reply(200, 'OK')
+      nock('http://example.test').get('/').delay(100).reply(200, 'OK')
 
-      http.get('http://example.test', onRequest)
+      http.get('http://example.test', res => {
+        res.on('end', onResponseEnd)
+      })
 
       setTimeout(() => {
-        expect(onRequest).not.to.have.been.called()
+        expect(onResponseEnd).not.to.have.been.called()
         done()
       }, 200)
       setImmediate(nock.abortPendingRequests)

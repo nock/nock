@@ -1,16 +1,17 @@
-'use strict'
+import events from 'node:events'
+import http from 'node:http'
+import path from 'node:path'
+import stream from 'node:stream'
+import util from 'node:util'
+import { expect } from 'chai'
+import sinon from 'sinon'
+import nock from '../../index.ts'
+import got from './got_client.js'
 
-const events = require('events')
-const http = require('http')
-const path = require('path')
-const stream = require('stream')
-const util = require('util')
-const { expect } = require('chai')
-const sinon = require('sinon')
-const nock = require('../..')
-const got = require('./got_client')
-
-const textFilePath = path.resolve(__dirname, '../assets/reply_file_1.txt')
+const textFilePath = path.resolve(
+  import.meta.dirname,
+  '../assets/reply_file_1.txt',
+)
 
 it('reply with file and pipe response', done => {
   const scope = nock('http://example.test')
@@ -261,35 +262,4 @@ it('response readable pull stream works as expected', done => {
   )
 
   req.end()
-})
-
-// TODO: what's the use case for this test?
-it.skip('error events on reply streams proxy to the response', done => {
-  // This test could probably be written to use got, however, that lib has a lot
-  // of built in error handling and this test would get convoluted.
-
-  const replyBody = new stream.PassThrough()
-  const scope = nock('http://example.test').get('/').reply(201, replyBody)
-
-  // We have to push the first bytes so Node will emit the response event
-  replyBody.push('start')
-
-  http.get(
-    {
-      host: 'example.test',
-      method: 'GET',
-      path: '/',
-    },
-    res => {
-      res.on('error', err => {
-        expect(err).to.equal('oh no!')
-        scope.done()
-        done()
-      })
-
-      replyBody.end(() => {
-        replyBody.emit('error', 'oh no!')
-      })
-    },
-  )
 })

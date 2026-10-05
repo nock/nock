@@ -53,6 +53,7 @@ For instance, if a module performs HTTP requests to a CouchDB server or makes HT
   - [Request Headers Matching](#request-headers-matching)
   - [Optional Requests](#optional-requests)
   - [Allow **unmocked** requests on a mocked hostname](#allow-unmocked-requests-on-a-mocked-hostname)
+  - [Passthrough requests](#passthrough-requests)
 - [Expectations](#expectations)
   - [.isDone()](#isdone)
   - [.cleanAll()](#cleanall)
@@ -911,6 +912,44 @@ const scope = nock('http://my.existing.service.com', { allowUnmocked: true })
 
 > Note: When applying `{allowUnmocked: true}`, if the request is made to the real server, no interceptor is removed.
 
+### Passthrough requests
+
+For more granular control over which requests should hit the real server, you can use `passthrough()`. While `allowUnmocked` lets through any request that doesn't match an interceptor, `passthrough()` lets you specify exactly which requests go through the HTTP stack.
+
+```js
+const scope = nock('http://my.existing.service.com')
+  .get('/mock')
+  .reply(200, { users: ['fake'] })
+  .post('/live')
+  .passthrough()
+
+// GET /mock => goes through nock
+// POST /live => actually makes request to the server
+```
+
+You can use `passthrough()` with query strings, header matching, and other interceptor features:
+
+```js
+nock('http://my.existing.service.com')
+  .get('/api/data')
+  .query({ live: 'true' })
+  .matchHeader('authorization', /^Bearer /)
+  .passthrough()
+```
+
+Like other interceptors, passthrough interceptors are consumed when matched. They work with modifiers like `times()`, `persist()`, and `optionally()`:
+
+```js
+// Passthrough the first 3 requests, then fail
+nock('http://example.com').get('/').times(3).passthrough()
+
+// Passthrough indefinitely
+nock('http://example.com').persist().get('/').passthrough()
+
+// Don't fail scope.done() if this is never called
+nock('http://example.com').get('/maybe').optionally().passthrough()
+```
+
 ## Expectations
 
 Every time an HTTP request is performed for a scope that is mocked, Nock expects to find a handler for it. If it doesn't, it will throw an error.
@@ -1311,7 +1350,7 @@ nock.removeInterceptor({
   hostname: 'localhost',
   path: '/mockedResource',
   // method defaults to `GET`
-  // proto defaullts to `http`
+  // proto defaults to `http`
 })
 ```
 
@@ -1353,8 +1392,38 @@ A scope emits the following events:
 You can also listen for no match events like this:
 
 ```js
-nock.emitter.on('no match', req => {})
+nock.emitter.on('no match', (req, interceptorResults) => {
+  console.log('Request did not match any interceptors:', req.url)
+
+  if (interceptorResults && interceptorResults.length > 0) {
+    interceptorResults.forEach(({ interceptor, reasons }) => {
+      console.log(
+        'Interceptor:',
+        interceptor.method,
+        interceptor.basePath + interceptor.path,
+      )
+      console.log('Reasons:', reasons)
+    })
+  }
+})
 ```
+
+The callback receives two parameters:
+
+- `req` - The request object that didn't match
+- `interceptorResults` - An array of objects containing detailed information about each interceptor that was tested.
+  Each object contains:
+  - `interceptor` - The interceptor that was tested against the request
+  - `reasons` - An array of strings describing why the request didn't match this interceptor
+    > ⚠️ **Experimental**: The structure and format of the detailed mismatch information may change in future versions as we gather user feedback and refine the API. The feature itself is stable and ready for use and we're seeking community input on the API design before marking it stable.
+
+Common mismatch reasons include:
+
+- **Method mismatch**: `"Method mismatch: expected GET, got POST"`
+- **Path mismatch**: `"Path mismatch: expected /api/users, got /api/posts"`
+- **Header mismatch**: `"Header mismatch: expected authorization to match Bearer token, got null"`
+- **Body mismatch**: `"Body mismatch: expected "expected body", got actual body"`
+- **Query mismatch**: `"query matching failed"`
 
 ## Nock Back
 

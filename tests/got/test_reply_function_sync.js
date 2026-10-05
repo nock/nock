@@ -1,14 +1,12 @@
-'use strict'
-
 // Tests for invoking `.reply()` with a synchronous function which return the
 // response body or an array containing the status code and optional response
 // body and headers.
 
-const assertRejects = require('assert-rejects')
-const { expect } = require('chai')
-const sinon = require('sinon')
-const nock = require('../..')
-const got = require('./got_client')
+import assertRejects from 'assert-rejects'
+import { expect } from 'chai'
+import sinon from 'sinon'
+import nock from '../../index.ts'
+import got from './got_client.js'
 
 describe('synchronous `reply()` function', () => {
   describe('when invoked with status code followed by function', () => {
@@ -87,7 +85,7 @@ describe('synchronous `reply()` function', () => {
 
       const scope = nock('http://example.test')
         .get('/')
-        .reply(200, (uri, body) => {
+        .reply(200, () => {
           onReply()
           return ''
         })
@@ -130,10 +128,10 @@ describe('synchronous `reply()` function', () => {
 
           const scope = nock('http://example.test')
             .post('/endpoint', exampleRequestBody)
-            .reply(404, (uri, requestBody) => {
+            .reply(404, async request => {
               replyFnCalled()
-              expect(uri).to.equal('/endpoint')
-              expect(requestBody).to.equal(exampleRequestBody)
+              expect(new URL(request.url).pathname).to.equal('/endpoint')
+              expect(await request.text()).to.equal(exampleRequestBody)
             })
 
           await assertRejects(
@@ -159,9 +157,9 @@ describe('synchronous `reply()` function', () => {
 
           const scope = nock('http://example.test')
             .post('/')
-            .reply(201, (uri, requestBody) => {
+            .reply(201, async request => {
               replyFnCalled()
-              expect(requestBody)
+              expect(await request.json())
                 .to.be.an('object')
                 .and.to.deep.equal(JSON.parse(exampleRequestBody))
             })
@@ -182,9 +180,9 @@ describe('synchronous `reply()` function', () => {
 
           const scope = nock('http://example.test')
             .post('/')
-            .reply(201, (uri, requestBody) => {
+            .reply(201, async request => {
               replyFnCalled()
-              expect(requestBody)
+              expect(await request.json())
                 .to.be.an('object')
                 .and.to.to.deep.equal(JSON.parse(exampleRequestBody))
             })
@@ -206,9 +204,9 @@ describe('synchronous `reply()` function', () => {
 
           const scope = nock('http://example.test')
             .post('/')
-            .reply(201, (uri, requestBody) => {
+            .reply(201, async request => {
               replyFnCalled()
-              expect(requestBody)
+              expect(await request.text())
                 .to.be.a('string')
                 .and.to.equal(exampleRequestBody)
             })

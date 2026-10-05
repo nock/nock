@@ -1,7 +1,5 @@
-'use strict'
-
-const nock = require('../..')
-const got = require('./got_client')
+import nock from '../../index.ts'
+import got from './got_client.js'
 
 describe('`query()` complex encoding', () => {
   it('query with array', async () => {

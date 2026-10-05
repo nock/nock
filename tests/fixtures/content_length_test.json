@@ -1,0 +1,15 @@
+[
+  {
+    "scope": "http://example.test:80",
+    "method": "GET",
+    "path": "/api/data",
+    "body": "",
+    "status": 200,
+    "response": {
+      "name": "John Doe",
+      "age": 30,
+      "city": "New York"
+    },
+    "rawHeaders": ["Content-Type", "application/json", "Content-Length", "63"]
+  }
+]

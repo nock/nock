@@ -1,9 +1,7 @@
-'use strict'
-
-const { expect } = require('chai')
-const http = require('http')
-const sinon = require('sinon')
-const nock = require('..')
+import { expect } from 'chai'
+import http from 'node:http'
+import sinon from 'sinon'
+import nock from '../index.ts'
 
 // These tests use `setTimeout` before verifying emitted events to ensure any
 // number of `nextTicks` or `setImmediate` can process first.
@@ -161,8 +159,7 @@ describe('`ClientRequest.abort()`', () => {
     }, 20)
   })
 
-  // TODO: https://github.com/mswjs/interceptors/pull/542#issuecomment-2028881290
-  it.skip('Emits the expected event sequence when aborted after a delay from the `finish` event', done => {
+  it('Emits the expected event sequence when aborted after a delay from the `finish` event', done => {
     // use the delay functionality to create a window where the abort is called during the artificial connection wait.
     const scope = nock('http://example.test').get('/').delay(100).reply()
 

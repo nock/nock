@@ -1,16 +1,16 @@
-'use strict'
-
 // `persist()` and `optionally()` are closely related. Their tests are both
 // contained in this file.
 
-const http = require('http')
-const path = require('path')
-const assertRejects = require('assert-rejects')
-const { expect } = require('chai')
-const nock = require('../..')
-const got = require('./got_client')
+import http from 'node:http'
+import path from 'node:path'
+import { expect } from 'chai'
+import nock from '../../index.ts'
+import got from './got_client.js'
 
-const textFilePath = path.resolve(__dirname, '../assets/reply_file_1.txt')
+const textFilePath = path.resolve(
+  import.meta.dirname,
+  '../assets/reply_file_1.txt',
+)
 
 describe('`optionally()`', () => {
   it('optional mocks do not appear in `pendingMocks()`', () => {
@@ -100,7 +100,7 @@ describe('`optionally()`', () => {
     expect(nock.activeMocks()).to.deep.equal([
       'GET http://example.test:80/optional',
     ])
-    http.get({ host: 'example.test', path: '/optional' }, res => {
+    http.get({ host: 'example.test', path: '/optional' }, () => {
       expect(nock.activeMocks()).to.be.empty()
       done()
     })
@@ -201,10 +201,11 @@ describe('`persist()`', () => {
     expect(nock.activeMocks()).to.be.empty()
     expect(scope.isDone()).to.be.true()
 
-    await assertRejects(
-      got('http://example.test/'),
-      /Nock: No match for request/,
-    )
+    const { statusCode, body } = await got('http://example.test/', {
+      responseType: 'json',
+    }).catch(err => err.response)
+    expect(statusCode).to.equal(501)
+    expect(body.code).to.equal('ERR_NOCK_NO_MATCH')
   })
 
   it('when called with an invalid argument, throws the expected error', () => {

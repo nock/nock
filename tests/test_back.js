@@ -1,15 +1,12 @@
-'use strict'
-
-const crypto = require('crypto')
-const http = require('http')
-const fs = require('fs')
-const { expect } = require('chai')
-const path = require('path')
-const rimraf = require('rimraf')
-const sinon = require('sinon')
-const proxyquire = require('proxyquire').preserveCache()
-const nock = require('..')
-const { startHttpServer } = require('./servers')
+import crypto from 'node:crypto'
+import http from 'node:http'
+import fs from 'node:fs'
+import { expect } from 'chai'
+import path from 'node:path'
+import rimraf from 'rimraf'
+import sinon from 'sinon'
+import nock from '../index.ts'
+import { startHttpServer } from './servers/index.js'
 
 const { back: nockBack } = nock
 
@@ -94,7 +91,7 @@ function nockBackWithFixtureLocalhost(mochaDone) {
 
 describe('Nock Back', () => {
   beforeEach(() => {
-    nockBack.fixtures = path.resolve(__dirname, 'fixtures')
+    nockBack.fixtures = path.resolve(import.meta.dirname, 'fixtures')
   })
 
   it('should throw an exception when fixtures is not set', () => {
@@ -214,7 +211,9 @@ describe('Nock Back', () => {
 
     it('normal nocks work', testNock)
 
-    it('uses recorded fixtures', done => nockBackWithFixture(done, true))
+    it('uses recorded fixtures', done => {
+      nockBackWithFixture(done, true)
+    })
 
     it("goes to internet, doesn't record new fixtures", done => {
       const onData = sinon.spy()
@@ -250,14 +249,6 @@ describe('Nock Back', () => {
         })
       })
     })
-
-    it('should throw the expected exception when fs is not available', () => {
-      const nockBackWithoutFs = proxyquire('../lib/back', { fs: null })
-      nockBackWithoutFs.setMode('dryrun')
-
-      nockBackWithoutFs.fixtures = path.resolve(__dirname, 'fixtures')
-      expect(() => nockBackWithoutFs('good_request.json')).to.throw('no fs')
-    })
   })
 
   describe('record mode', () => {
@@ -268,12 +259,12 @@ describe('Nock Back', () => {
       // random fixture file so tests don't interfere with each other
       const token = crypto.randomBytes(4).toString('hex')
       fixture = `temp_${token}.json`
-      fixtureLoc = path.resolve(__dirname, 'fixtures', fixture)
+      fixtureLoc = path.resolve(import.meta.dirname, 'fixtures', fixture)
       nockBack.setMode('record')
     })
 
     after(() => {
-      rimraf.sync(path.resolve(__dirname, 'fixtures', 'temp_*.json'))
+      rimraf.sync(path.resolve(import.meta.dirname, 'fixtures', 'temp_*.json'))
     })
 
     it('should record when configured correctly', done => {
@@ -490,14 +481,6 @@ describe('Nock Back', () => {
         },
       )
     })
-
-    it('should throw the expected exception when fs is not available', () => {
-      const nockBackWithoutFs = proxyquire('../lib/back', { fs: null })
-      nockBackWithoutFs.setMode('record')
-
-      nockBackWithoutFs.fixtures = path.resolve(__dirname, 'fixtures')
-      expect(() => nockBackWithoutFs('good_request.json')).to.throw('no fs')
-    })
   })
 
   describe('update mode', () => {
@@ -509,8 +492,8 @@ describe('Nock Back', () => {
       // random fixture file so tests don't interfere with each other
       const token = crypto.randomBytes(4).toString('hex')
       fixture = `temp_${token}.json`
-      fixtureLoc = path.resolve(__dirname, 'fixtures', fixture)
-      fixturePath = path.resolve(__dirname, 'fixtures')
+      fixtureLoc = path.resolve(import.meta.dirname, 'fixtures', fixture)
+      fixturePath = path.resolve(import.meta.dirname, 'fixtures')
       nockBack.setMode('update')
       fs.copyFileSync(
         path.resolve(fixturePath, 'wrong_uri.json'),
@@ -519,7 +502,7 @@ describe('Nock Back', () => {
     })
 
     after(() => {
-      rimraf.sync(path.resolve(__dirname, 'fixtures', 'temp_*.json'))
+      rimraf.sync(path.resolve(import.meta.dirname, 'fixtures', 'temp_*.json'))
     })
 
     it('should record when configured correctly', done => {
@@ -754,14 +737,6 @@ describe('Nock Back', () => {
         },
       )
     })
-
-    it('should throw the expected exception when fs is not available', () => {
-      const nockBackWithoutFs = proxyquire('../lib/back', { fs: null })
-      nockBackWithoutFs.setMode('update')
-
-      nockBackWithoutFs.fixtures = path.resolve(__dirname, 'fixtures')
-      expect(() => nockBackWithoutFs('good_request.json')).to.throw('no fs')
-    })
   })
 
   describe('lockdown mode', () => {
@@ -771,7 +746,9 @@ describe('Nock Back', () => {
 
     it('normal nocks work', testNock)
 
-    it('nock back loads scope', done => nockBackWithFixture(done, true))
+    it('nock back loads scope', done => {
+      nockBackWithFixture(done, true)
+    })
 
     it('no unnocked http calls work', done => {
       const req = http.request(
@@ -790,6 +767,44 @@ describe('Nock Back', () => {
       })
 
       req.end()
+    })
+
+    it('fixes content-length header when JSON is reserialized', done => {
+      nockBack('content_length_test.json', function (nockDone) {
+        expect(this.scopes).to.have.length(1)
+
+        const req = http.get('http://example.test/api/data', res => {
+          let body = ''
+          res.on('data', chunk => {
+            body += chunk.toString()
+          })
+
+          res.on('end', () => {
+            const contentLength = parseInt(res.headers['content-length'], 10)
+            const actualLength = Buffer.byteLength(body, 'utf8')
+
+            // The content-length should match the actual body size
+            expect(contentLength).to.equal(actualLength)
+
+            // Verify the body is valid JSON
+            const parsed = JSON.parse(body)
+            expect(parsed).to.deep.equal({
+              name: 'John Doe',
+              age: 30,
+              city: 'New York',
+            })
+
+            this.assertScopesFinished()
+            nockDone()
+            done()
+          })
+        })
+
+        req.on('error', err => {
+          nockDone()
+          done(err)
+        })
+      })
     })
   })
 })

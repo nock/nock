@@ -17,58 +17,62 @@
     "url": "https://github.com/nock/nock/issues"
   },
   "engines": {
-    "node": ">=18.20.0 <20 || >=20.12.1"
+    "node": ">=20.12.1"
   },
-  "main": "./index.js",
-  "types": "types",
+  "main": "./dist/index.js",
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
   "dependencies": {
-    "@mswjs/interceptors": "^0.41.0",
-    "json-stringify-safe": "^5.0.1",
-    "propagate": "^2.0.0"
+    "@mswjs/interceptors": "^0.44.0"
   },
   "devDependencies": {
-    "@definitelytyped/dtslint": "^0.2.39",
+    "@eslint/js": "^9.27.0",
     "@sinonjs/fake-timers": "^11.2.2",
+    "@types/node": "^22.15.3",
     "assert-rejects": "^1.0.0",
+    "c8": "^11.0.0",
     "chai": "^4.1.2",
     "dirty-chai": "^2.0.1",
-    "eslint": "^8.8.0",
-    "eslint-config-prettier": "^9.0.0",
-    "eslint-config-standard": "^17.0.0-0",
-    "eslint-plugin-import": "^2.16.0",
-    "eslint-plugin-mocha": "^10.0.3",
-    "eslint-plugin-node": "^11.0.0",
-    "eslint-plugin-promise": "^6.0.0",
+    "eslint": "^9.27.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-mocha": "^11.0.0",
+    "eslint-plugin-n": "^17.18.0",
     "form-data": "^4.0.0",
-    "got": "^11.3.0",
-    "jest": "^29.7.0",
+    "globals": "^16.1.0",
+    "got": "^11.8.6",
     "mocha": "^11.7.2",
     "npm-run-all": "^4.1.5",
-    "nyc": "^15.0.0",
     "prettier": "3.6.2",
-    "proxyquire": "^2.1.0",
     "rimraf": "^3.0.0",
     "semantic-release": "^25.0.3",
     "sinon": "^17.0.1",
     "sinon-chai": "^3.7.0",
-    "typescript": "^5.0.4"
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.58.2",
+    "undici": "^7.9.0"
   },
   "scripts": {
     "format:fix": "prettier --write '**/*.{js,json,md,ts,yml,yaml}'",
     "format": "prettier --check '**/*.{js,json,md,ts,yml,yaml}'",
     "lint": "run-p lint:js lint:ts",
-    "lint:js": "eslint --cache --cache-location './.cache/eslint' '**/*.js'",
-    "lint:js:fix": "eslint --cache --cache-location './.cache/eslint' --fix '**/*.js'",
-    "lint:ts": "dtslint --expectOnly types",
-    "test": "nyc --reporter=lcov --reporter=text mocha --recursive tests",
+    "lint:js": "eslint --cache --cache-location './.cache/eslint' '**/*.{js,ts}'",
+    "lint:fix": "eslint --cache --cache-location './.cache/eslint' --fix '**/*.{js,ts}'",
+    "lint:ts": "tsc --noEmit",
+    "build": "rimraf dist && node scripts/build.js && tsc -p tsconfig.build.json",
+    "test": "c8 --reporter=lcov --reporter=text mocha --recursive tests",
     "test:coverage": "open coverage/lcov-report/index.html",
-    "test:jest": "jest tests_jest --detectLeaks"
+    "test:leak": "node --expose-gc scripts/test-leak.js",
+    "test:build": "npm run build && node scripts/test-build.js"
   },
   "license": "MIT",
   "files": [
-    "index.js",
-    "lib",
-    "types/index.d.ts"
+    "dist"
   ],
   "release": {
     "branches": [

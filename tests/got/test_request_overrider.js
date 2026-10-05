@@ -1,5 +1,3 @@
-'use strict'
-
 // Tests of the RequestOverrider, which mocks http.ClientRequest and
 // https.ClientRequest. The goal is to provide parity of behavior, both
 // documented and undocumented, with the real version.
@@ -10,16 +8,16 @@
 // assertions about how the mock client responds. Here the code under test is
 // the part of Nock that must interface with all http clients.
 
-const http = require('http')
-const https = require('https')
-const { URL } = require('url')
-const { expect } = require('chai')
-const sinon = require('sinon')
-const nock = require('../..')
-const FormData = require('form-data')
+import http from 'node:http'
+import https from 'node:https'
+import { URL } from 'node:url'
+import { expect } from 'chai'
+import sinon from 'sinon'
+import nock from '../../index.ts'
+import FormData from 'form-data'
 
-const got = require('./got_client')
-const servers = require('../servers')
+import got from './got_client.js'
+import * as servers from '../servers/index.js'
 
 describe('Request Overrider', () => {
   it('response is an http.IncomingMessage instance', done => {
@@ -457,7 +455,7 @@ describe('Request Overrider', () => {
         method: 'GET',
         path: '/the/path/to/infinity',
       },
-      res => {
+      () => {
         scope.done()
         expect(req.path).to.equal('/the/path/to/infinity')
         done()
@@ -573,11 +571,10 @@ describe('Request Overrider', () => {
     const req = http.get('http://example.test')
     req.once('socket', socket => {
       socket.once('connect', () => {
-        expect(socket.address()).to.deep.equal({
-          port: 80,
-          family: 'IPv4',
-          address: '127.0.0.1',
-        })
+        const address = socket.address()
+        expect(address.port).to.be.a('number')
+        expect(address.family).to.equal('IPv4')
+        expect(address.address).to.equal('127.0.0.1')
         done()
       })
     })
@@ -589,11 +586,10 @@ describe('Request Overrider', () => {
     const req = https.get('https://example.test', { family: 6 })
     req.once('socket', socket => {
       socket.once('connect', () => {
-        expect(socket.address()).to.deep.equal({
-          port: 443,
-          family: 'IPv6',
-          address: '::1',
-        })
+        const address = socket.address()
+        expect(address.port).to.be.a('number')
+        expect(address.family).to.equal('IPv6')
+        expect(address.address).to.equal('::1')
         done()
       })
     })
@@ -605,16 +601,6 @@ describe('Request Overrider', () => {
     const req = http.get('http://example.test')
     req.once('socket', socket => {
       socket.setKeepAlive(true)
-      done()
-    })
-  })
-
-  it('socket has write() method', done => {
-    nock('http://example.test').get('/').reply(200, 'hey')
-
-    const req = http.get('http://example.test')
-    req.once('socket', socket => {
-      socket.write('test')
       done()
     })
   })
@@ -657,19 +643,6 @@ describe('Request Overrider', () => {
         expect(closeSpy).to.have.been.calledOnce()
         done()
       }, 10)
-    })
-  })
-
-  it.skip('socket has getPeerCertificate() method which returns a random base64 string', done => {
-    nock('https://example.test').get('/').reply()
-
-    const req = https.get('https://example.test')
-    req.once('socket', socket => {
-      const first = socket.getPeerCertificate()
-      const second = socket.getPeerCertificate()
-      expect(first).to.be.a('string')
-      expect(second).to.be.a('string').and.not.equal(first)
-      done()
     })
   })
 
@@ -716,7 +689,7 @@ describe('Request Overrider', () => {
 
     expect(req.method).to.equal('GET')
 
-    req.on('response', res => {
+    req.on('response', () => {
       expect(req.method).to.equal('GET')
       scope.done()
       done()

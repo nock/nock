@@ -1,10 +1,8 @@
-'use strict'
-
-const { expect } = require('chai')
-const http = require('http')
-const https = require('https')
-const { Readable } = require('stream')
-const nock = require('..')
+import { expect } from 'chai'
+import http from 'node:http'
+import https from 'node:https'
+import { Readable } from 'node:stream'
+import nock from '../index.ts'
 
 it('should expose TLSSocket attributes for HTTPS requests', done => {
   nock('https://example.test').get('/').reply()
@@ -28,7 +26,7 @@ it('should not have TLSSocket attributes for HTTP requests', done => {
 
 describe('`Socket#setTimeout()`', () => {
   it('adds callback as a one-time listener for parity with a real socket', done => {
-    nock('http://example.test').get('/').delayConnection(100).reply()
+    nock('http://example.test').get('/').delay(100).reply()
 
     const onTimeout = () => {
       done()
@@ -40,7 +38,7 @@ describe('`Socket#setTimeout()`', () => {
   })
 
   it('can be called without a callback', done => {
-    nock('http://example.test').get('/').delayConnection(100).reply()
+    nock('http://example.test').get('/').delay(100).reply()
 
     http.get('http://example.test').on('socket', socket => {
       socket.setTimeout(50)

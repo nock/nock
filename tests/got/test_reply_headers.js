@@ -1,19 +1,19 @@
-'use strict'
-
 // Tests for header objects passed to `.reply()`, including header objects
 // containing lambdas.
 
-const { IncomingMessage } = require('http')
-const { expect } = require('chai')
-const sinon = require('sinon')
-const fakeTimers = require('@sinonjs/fake-timers')
-const fs = require('fs')
-const path = require('path')
+import { expect } from 'chai'
+import sinon from 'sinon'
+import fakeTimers from '@sinonjs/fake-timers'
+import fs from 'node:fs'
+import path from 'node:path'
 
-const nock = require('../..')
-const got = require('./got_client')
+import nock from '../../index.ts'
+import got from './got_client.js'
 
-const textFilePath = path.resolve(__dirname, '../assets/reply_file_1.txt')
+const textFilePath = path.resolve(
+  import.meta.dirname,
+  '../assets/reply_file_1.txt',
+)
 
 describe('`reply()` headers', () => {
   describe('using parameter value', () => {
@@ -251,14 +251,12 @@ describe('`reply()` headers', () => {
     it('receives the correct arguments', async () => {
       const myHeaderFnCalled = sinon.spy()
 
-      const { ClientRequest: OverriddenClientRequest } = require('http')
       const scope = nock('http://example.test')
         .post('/')
         .reply(200, 'boo!', {
-          'X-My-Headers': (req, res, body) => {
+          'X-My-Headers': (req, body) => {
             myHeaderFnCalled()
-            expect(req).to.be.an.instanceof(OverriddenClientRequest)
-            expect(res).to.be.an.instanceof(IncomingMessage)
+            expect(req).to.be.an.instanceof(Request)
             expect(body).to.equal('boo!')
             return 'gotcha'
           },
@@ -413,9 +411,11 @@ describe('`replyDate()`', () => {
 
   describe('with mock timers', () => {
     let clock
+
     beforeEach(() => {
       clock = fakeTimers.install()
     })
+
     afterEach(() => {
       if (clock) {
         clock.uninstall()

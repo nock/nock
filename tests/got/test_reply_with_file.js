@@ -1,17 +1,20 @@
-'use strict'
-
 // Tests for `.replyWithFile()`.
 
-const fs = require('fs')
-const path = require('path')
-const sinon = require('sinon')
-const { expect } = require('chai')
-const proxyquire = require('proxyquire').preserveCache()
-const nock = require('../..')
-const got = require('./got_client')
+import fs from 'node:fs'
+import path from 'node:path'
+import sinon from 'sinon'
+import { expect } from 'chai'
+import nock from '../../index.ts'
+import got from './got_client.js'
 
-const textFilePath = path.resolve(__dirname, '../assets/reply_file_1.txt')
-const binaryFilePath = path.resolve(__dirname, '../assets/reply_file_2.txt.gz')
+const textFilePath = path.resolve(
+  import.meta.dirname,
+  '../assets/reply_file_1.txt',
+)
+const binaryFilePath = path.resolve(
+  import.meta.dirname,
+  '../assets/reply_file_2.txt.gz',
+)
 
 describe('`replyWithFile()`', () => {
   it('reply with file', async () => {
@@ -85,22 +88,6 @@ describe('`replyWithFile()`', () => {
     expect(fs.createReadStream.callCount).to.equal(2)
 
     scope.done()
-  })
-
-  describe('with no fs', () => {
-    const { Scope } = proxyquire('../../lib/scope', {
-      './interceptor': proxyquire('../../lib/interceptor', {
-        fs: null,
-      }),
-    })
-
-    it('throws the expected error', () => {
-      expect(() =>
-        new Scope('http://example.test')
-          .get('/')
-          .replyWithFile(200, textFilePath),
-      ).to.throw(Error, 'No fs')
-    })
   })
 
   it('does not create ReadStream eagerly', async () => {

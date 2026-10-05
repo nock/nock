@@ -1,32 +1,132 @@
-'use strict'
+import type { ReadStream } from 'node:fs'
+import type { Scope, Options } from './scope.ts'
 
-const stringify = require('json-stringify-safe')
-const querystring = require('querystring')
-const { URL, URLSearchParams } = require('url')
+export type DataMatcher =
+  | boolean
+  | number
+  | string
+  | null
+  | undefined
+  | RegExp
+  | DataMatcherArray
+  | DataMatcherMap
+export type DataMatcherArray = ReadonlyArray<DataMatcher>
+export type DataMatcherMap = { [key: string]: DataMatcher }
 
-const common = require('./common')
-const { remove } = require('./intercept')
-const matchBody = require('./match_body')
+export type RequestBodyMatcher =
+  | string
+  | Buffer
+  | RegExp
+  | DataMatcherArray
+  | DataMatcherMap
+  | ((body: any) => boolean)
 
-let fs
-try {
-  fs = require('fs')
-} catch (err) {
-  // do nothing, we're in the browser
-}
+export type RequestHeaderMatcher =
+  | string
+  | RegExp
+  | ((fieldValue: string | null) => boolean)
 
-module.exports = class Interceptor {
-  /**
-   *
-   * Valid argument types for `uri`:
-   *  - A string used for strict comparisons with pathname.
-   *    The search portion of the URI may also be postfixed, in which case the search params
-   *    are striped and added via the `query` method.
-   *  - A RegExp instance that tests against only the pathname of requests.
-   *  - A synchronous function bound to this Interceptor instance. It's provided the pathname
-   *    of requests and must return a boolean denoting if the request is considered a match.
-   */
-  constructor(scope, uri, method, requestBody, interceptorOptions) {
+export type Body = string | Record<string, any>
+export type ReplyBody = Body | Buffer | ReadStream
+
+export type ReplyHeaderFunction = (
+  req: Request,
+  body?: string | Buffer,
+) => string | string[] | Promise<string | string[]>
+export type ReplyHeaderValue = string | string[] | ReplyHeaderFunction
+export type ReplyHeaders =
+  | Record<string, ReplyHeaderValue>
+  | Map<string, ReplyHeaderValue>
+  | ReplyHeaderValue[]
+
+export type StatusCode = number
+export type ReplyFnResult =
+  | readonly [StatusCode]
+  | readonly [StatusCode, ReplyBody]
+  | readonly [StatusCode, ReplyBody, ReplyHeaders]
+
+import fs from 'node:fs'
+import querystring from 'node:querystring'
+import { URL, URLSearchParams } from 'node:url'
+
+import stringify from './stringify.ts'
+import * as common from './common.ts'
+import { remove } from './intercept.ts'
+import matchBody from './match_body.ts'
+
+class Interceptor {
+  /** @internal */
+  declare scope: Scope
+  /** @internal */
+  declare interceptorMatchHeaders: { name: string; value: any }[]
+  /** @internal */
+  declare method: string
+  /** @internal */
+  declare uri: string | RegExp | ((path: string) => boolean)
+  /** @internal */
+  declare _key: string
+  /** @internal */
+  declare basePath: string | RegExp
+  /** @internal */
+  declare path: string | RegExp | ((path: string) => boolean)
+  /** @internal */
+  declare queries:
+    | null
+    | boolean
+    | ((queryObject: Record<string, any>) => boolean)
+    | Record<string, any>
+  /** @internal */
+  declare options: Options & Record<string, any>
+  /** @internal */
+  declare counter: number
+  /** @internal */
+  declare _requestBody: RequestBodyMatcher | undefined
+  /** @internal */
+  declare reqheaders: Record<string, any>
+  /** @internal */
+  declare badheaders: string[]
+  /** @internal */
+  declare delayBodyInMs: number
+  /** @internal */
+  declare optional: boolean
+  /** @internal */
+  declare isPassthrough: boolean
+  /** @internal */
+  declare __nock_filteredScope: string | undefined
+  /** @internal */
+  declare __nock_scopeKey: string | undefined
+  /** @internal */
+  declare __nock_scope: Scope | undefined
+  /** @internal */
+  declare __nock_scopeOptions: Record<string, any> | undefined
+  /** @internal */
+  declare __nock_scopeHost: string | undefined
+  /** @internal */
+  declare interceptionCounter: number
+  /** @internal */
+  declare statusCode: number | null | undefined
+  /** @internal */
+  declare headers: Record<string, any> | undefined
+  /** @internal */
+  declare rawHeaders: any[]
+  /** @internal */
+  declare body: any
+  /** @internal */
+  declare errorMessage: any
+  /** @internal */
+  declare filePath: string | undefined
+  /** @internal */
+  declare fullReplyFunction: any
+  /** @internal */
+  declare replyFunction: any
+
+  constructor(
+    scope: Scope,
+    uri: string | RegExp | ((path: string) => boolean),
+    method: string,
+    requestBody?: RequestBodyMatcher,
+    interceptorOptions?: Options,
+  ) {
     const uriIsStr = typeof uri === 'string'
     // Check for leading slash. Uri can be either a string or a regexp, but
     // When enabled filteringScope ignores the passed URL entirely so we skip validation.
@@ -35,8 +135,8 @@ module.exports = class Interceptor {
       uriIsStr &&
       !scope.scopeOptions.filteringScope &&
       !scope.basePathname &&
-      !uri.startsWith('/') &&
-      !uri.startsWith('*')
+      !(uri as string).startsWith('/') &&
+      !(uri as string).startsWith('*')
     ) {
       throw Error(
         `Non-wildcard URL path strings must begin with a slash (otherwise they won't match anything) (got: ${uri})`,
@@ -74,12 +174,22 @@ module.exports = class Interceptor {
     )
 
     this.delayBodyInMs = 0
-    this.delayConnectionInMs = 0
 
     this.optional = false
+    this.isPassthrough = false
+
+    this.__nock_filteredScope = undefined
+    this.__nock_scopeKey = undefined
+    this.__nock_scope = undefined
+    this.__nock_scopeOptions = undefined
+    this.__nock_scopeHost = undefined
+    this.interceptionCounter = 0
+    this.statusCode = undefined
+    this.headers = undefined
+    this.rawHeaders = []
 
     // strip off literal query parameters if they were provided as part of the URI
-    if (uriIsStr && uri.includes('?')) {
+    if (uriIsStr && (uri as string).includes('?')) {
       // localhost is a dummy value because the URL constructor errors for only relative inputs
       const parsedURL = new URL(this.path, 'http://localhost')
       this.path = parsedURL.pathname
@@ -99,7 +209,19 @@ module.exports = class Interceptor {
     return this
   }
 
-  replyWithError(errorMessage) {
+  passthrough() {
+    this.isPassthrough = true
+
+    this.options = {
+      ...this.scope.scopeOptions,
+      ...this.options,
+    }
+
+    this.scope.add(this._key, this)
+    return this.scope
+  }
+
+  replyWithError(errorMessage: string | Error | Record<string, any>) {
     this.errorMessage = errorMessage
 
     this.options = {
@@ -111,7 +233,7 @@ module.exports = class Interceptor {
     return this.scope
   }
 
-  reply(statusCode, body, rawHeaders) {
+  reply(statusCode: any, body?: any, rawHeaders?: ReplyHeaders) {
     // support the format of only passing in a callback
     if (typeof statusCode === 'function') {
       if (arguments.length > 1) {
@@ -166,13 +288,23 @@ module.exports = class Interceptor {
     ) {
       try {
         body = stringify(body)
-      } catch (err) {
+      } catch {
         throw new Error('Error encoding response body into JSON')
       }
 
-      if (!this.headers['content-type']) {
+      if (!this.headers!['content-type']) {
         // https://tools.ietf.org/html/rfc7231#section-3.1.1.5
         this.rawHeaders.push('Content-Type', 'application/json')
+      }
+
+      // Fix content-length header if it exists and doesn't match the stringified body
+      const contentLengthIndex = this.rawHeaders.findIndex(
+        (value: any, index: number) =>
+          index % 2 === 0 && value.toLowerCase() === 'content-length',
+      )
+      if (contentLengthIndex !== -1) {
+        const actualLength = Buffer.byteLength(body, 'utf8')
+        this.rawHeaders[contentLengthIndex + 1] = String(actualLength)
       }
     }
 
@@ -194,7 +326,7 @@ module.exports = class Interceptor {
     return this.scope
   }
 
-  replyWithFile(statusCode, filePath, headers) {
+  replyWithFile(statusCode: number, filePath: string, headers?: ReplyHeaders) {
     if (!fs) {
       throw new Error('No fs')
     }
@@ -210,30 +342,15 @@ module.exports = class Interceptor {
     )
   }
 
-  // Also match request headers
-  // https://github.com/nock/nock/issues/163
-  reqheaderMatches(options, key) {
-    const reqHeader = this.reqheaders[key]
-    let header = options.headers[key]
-
-    // https://github.com/nock/nock/issues/399
-    // https://github.com/nock/nock/issues/822
-    if (header && typeof header !== 'string' && header.toString) {
-      header = header.toString()
-    }
-
-    // We skip 'host' header comparison unless it's available in both mock and
-    // actual request. This because 'host' may get inserted by Nock itself and
-    // then get recorded. NOTE: We use lower-case header field names throughout
-    // Nock. See https://github.com/nock/nock/pull/196.
-    if (key === 'host' && (header === undefined || reqHeader === undefined)) {
-      return true
-    }
-
-    if (reqHeader !== undefined && header !== undefined) {
-      if (typeof reqHeader === 'function') {
-        return reqHeader(header)
-      } else if (common.matchStringOrRegexp(header, reqHeader)) {
+  reqheaderMatches(
+    expected: RequestHeaderMatcher,
+    actual: string | null,
+    key: string,
+  ) {
+    if (expected !== undefined && actual !== undefined) {
+      if (typeof expected === 'function') {
+        return expected(actual)
+      } else if (common.matchStringOrRegexp(actual, expected)) {
         return true
       }
     }
@@ -241,34 +358,39 @@ module.exports = class Interceptor {
     this.scope.logger(
       "request header field doesn't match:",
       key,
-      header,
-      reqHeader,
+      actual,
+      expected,
     )
     return false
   }
 
-  match(req, options, body) {
-    this.scope.logger('attempting match %j, body = %j', options, body)
+  match(request: Request, body: string) {
+    const url = new URL(request.url)
+    // TODO: fix request log to string
+    this.scope.logger('attempting match %j, body = %j', request, body)
 
-    const method = (options.method || 'GET').toUpperCase()
-    let { path = '/' } = options
-    let matches
+    const mismatches: string[] = []
+    let path = url.pathname + url.search
     let matchKey
-    const { proto } = options
 
-    if (this.method !== method) {
-      this.scope.logger(
-        `Method did not match. Request ${method} Interceptor ${this.method}`,
-      )
-      return false
+    if (this.method !== request.method) {
+      const msg = `Method mismatch: expected ${this.method}, got ${request.method}`
+      this.scope.logger(msg)
+      mismatches.push(msg)
     }
 
     if (this.scope.transformPathFunction) {
       path = this.scope.transformPathFunction(path)
     }
 
-    const requestMatchesFilter = ({ name, value: predicate }) => {
-      const headerValue = req.getHeader(name)
+    const requestMatchesFilter = ({
+      name,
+      value: predicate,
+    }: {
+      name: string
+      value: any
+    }) => {
+      const headerValue = request.headers.get(name)
       if (typeof predicate === 'function') {
         return predicate(headerValue)
       } else {
@@ -276,40 +398,48 @@ module.exports = class Interceptor {
       }
     }
 
-    if (
-      !this.scope.matchHeaders.every(requestMatchesFilter) ||
-      !this.interceptorMatchHeaders.every(requestMatchesFilter)
-    ) {
-      this.scope.logger("headers don't match")
-      return false
+    for (const header of [
+      ...this.scope.matchHeaders,
+      ...this.interceptorMatchHeaders,
+    ]) {
+      if (!requestMatchesFilter(header)) {
+        const msg = `Header mismatch: expected ${header.name} to match ${header.value}, got ${request.headers.get(header.name)}`
+        this.scope.logger(msg)
+        mismatches.push(msg)
+      }
     }
 
-    const reqHeadersMatch = Object.keys(this.reqheaders).every(key =>
-      this.reqheaderMatches(options, key),
+    const reqHeadersMatch = Object.keys(this.reqheaders).every((key: string) =>
+      this.reqheaderMatches(
+        this.reqheaders[key],
+        request.headers.get(key),
+        key,
+      ),
     )
 
     if (!reqHeadersMatch) {
-      this.scope.logger("headers don't match")
-      return false
+      const msg = "Request headers don't match"
+      this.scope.logger(msg)
+      mismatches.push(msg)
     }
 
     if (
       this.scope.scopeOptions.conditionally &&
       !this.scope.scopeOptions.conditionally()
     ) {
-      this.scope.logger(
-        'matching failed because Scope.conditionally() did not validate',
-      )
-      return false
+      const msg = 'conditionally() did not validate'
+      this.scope.logger(msg)
+      mismatches.push(msg)
     }
 
-    const badHeaders = this.badheaders.filter(
-      header => header in options.headers,
+    const badHeaders = this.badheaders.filter((header: string) =>
+      request.headers.has(header),
     )
 
     if (badHeaders.length) {
-      this.scope.logger('request contains bad headers', ...badHeaders)
-      return false
+      const msg = `Request contains bad headers: ${badHeaders.join(', ')}`
+      this.scope.logger(msg)
+      mismatches.push(msg)
     }
 
     // Match query strings when using query()
@@ -317,15 +447,13 @@ module.exports = class Interceptor {
       this.scope.logger('query matching skipped')
     } else {
       // can't rely on pathname or search being in the options, but path has a default
-      const [pathname, search] = path.split('?')
+      const [pathname, search] = (path as string).split('?')
       const matchQueries = this.matchQuery({ search })
 
-      this.scope.logger(
-        matchQueries ? 'query matching succeeded' : 'query matching failed',
-      )
-
       if (!matchQueries) {
-        return false
+        const msg = 'query matching failed'
+        this.scope.logger(msg)
+        mismatches.push(msg)
       }
 
       // If the query string was explicitly checked then subsequent checks against
@@ -338,56 +466,57 @@ module.exports = class Interceptor {
     // necessarily match and we have to remove the scope that was matched (vs.
     // that was defined).
     if (this.__nock_filteredScope) {
-      matchKey = this.__nock_filteredScope
+      matchKey = this.__nock_filteredScope as string
     } else {
-      matchKey = common.normalizeOrigin(proto, options.host, options.port)
+      matchKey = common.normalizeOrigin(url)
+    }
+
+    if (
+      !common.matchStringOrRegexp(matchKey, this.basePath as string | RegExp)
+    ) {
+      const msg = `Base path mismatch: expected ${this.basePath}, got ${matchKey}`
+      this.scope.logger(msg)
+      mismatches.push(msg)
     }
 
     if (typeof this.uri === 'function') {
-      matches =
-        common.matchStringOrRegexp(matchKey, this.basePath) &&
-        // This is a false positive, as `uri` is not bound to `this`.
-        // eslint-disable-next-line no-useless-call
-        this.uri.call(this, path)
-    } else {
-      matches =
-        common.matchStringOrRegexp(matchKey, this.basePath) &&
-        common.matchStringOrRegexp(path, this.path)
+      if (!this.uri.call(this, path)) {
+        const msg = `Path function mismatch: expected function to return true for ${path}`
+        this.scope.logger(msg)
+        mismatches.push(msg)
+      }
+    } else if (
+      !common.matchStringOrRegexp(path, this.path as string | RegExp)
+    ) {
+      const msg = `Path mismatch: expected ${this.path}, got ${path}`
+      this.scope.logger(msg)
+      mismatches.push(msg)
     }
 
-    this.scope.logger(`matching ${matchKey}${path} to ${this._key}: ${matches}`)
-
-    if (matches && this._requestBody !== undefined) {
+    if (this._requestBody !== undefined) {
       if (this.scope.transformRequestBodyFunction) {
         body = this.scope.transformRequestBodyFunction(body, this._requestBody)
       }
 
-      matches = matchBody(options, this._requestBody, body)
-      if (!matches) {
-        this.scope.logger(
-          "bodies don't match: \n",
-          this._requestBody,
-          '\n',
-          body,
-        )
+      if (!matchBody(request, this._requestBody, body)) {
+        const msg = `Body mismatch: expected ${stringify(this._requestBody)}, got ${body}`
+        this.scope.logger(msg)
+        mismatches.push(msg)
       }
     }
 
-    return matches
+    return mismatches
   }
 
-  /**
-   * Return true when the interceptor's method, protocol, host, port, and path
-   * match the provided options.
-   */
-  matchOrigin(options) {
+  matchOrigin(request: Request) {
+    const url = new URL(request.url)
     const isPathFn = typeof this.path === 'function'
     const isRegex = this.path instanceof RegExp
     const isRegexBasePath = this.scope.basePath instanceof RegExp
 
-    const method = (options.method || 'GET').toUpperCase()
-    let { path } = options
-    const { proto } = options
+    const method = (request.method || 'GET').toUpperCase()
+    const port = url.port || (url.protocol === 'https:' ? 443 : 80)
+    let path = url.pathname + url.search
 
     // NOTE: Do not split off the query params as the regex could use them
     if (!isRegex) {
@@ -397,35 +526,39 @@ module.exports = class Interceptor {
     if (this.scope.transformPathFunction) {
       path = this.scope.transformPathFunction(path)
     }
-    const comparisonKey = isPathFn || isRegex ? this.__nock_scopeKey : this._key
-    const matchKey = `${method} ${proto}://${options.host}${path}`
+    const comparisonKey =
+      isPathFn || isRegex ? (this.__nock_scopeKey as string) : this._key
+    const matchKey = `${method} ${url.protocol}//${url.hostname}:${port}${path}`
 
     if (isPathFn) {
-      return !!(matchKey.match(comparisonKey) && this.path(path))
+      return !!(matchKey.match(comparisonKey) && (this.path as Function)(path))
     }
 
     if (isRegex && !isRegexBasePath) {
-      return !!matchKey.match(comparisonKey) && this.path.test(path)
+      return !!matchKey.match(comparisonKey) && (this.path as RegExp).test(path)
     }
 
     if (isRegexBasePath) {
-      return this.scope.basePath.test(matchKey) && !!path.match(this.path)
+      return (
+        (this.scope.basePath as RegExp).test(matchKey) &&
+        !!path.match(this.path as string)
+      )
     }
 
     return comparisonKey === matchKey
   }
 
-  matchHostName(options) {
+  matchHostName(hostname: string) {
     const { basePath } = this.scope
 
     if (basePath instanceof RegExp) {
-      return basePath.test(options.hostname)
+      return basePath.test(hostname)
     }
 
-    return options.hostname === this.scope.urlParts.hostname
+    return hostname === this.scope.urlParts.hostname
   }
 
-  matchQuery(options) {
+  matchQuery(options: Record<string, any>) {
     if (this.queries === true) {
       return true
     }
@@ -441,8 +574,8 @@ module.exports = class Interceptor {
     return common.dataEqual(this.queries, reqQueries)
   }
 
-  filteringPath(...args) {
-    this.scope.filteringPath(...args)
+  filteringPath(...args: any[]) {
+    ;(this.scope.filteringPath as Function).apply(this.scope, args)
     return this
   }
 
@@ -450,7 +583,7 @@ module.exports = class Interceptor {
   // by request body?
 
   markConsumed() {
-    this.interceptionCounter++
+    this.interceptionCounter = (this.interceptionCounter || 0) + 1
 
     remove(this)
 
@@ -459,27 +592,25 @@ module.exports = class Interceptor {
     }
   }
 
-  matchHeader(name, value) {
+  matchHeader(name: string, value: RequestHeaderMatcher) {
     this.interceptorMatchHeaders.push({ name, value })
     return this
   }
 
-  basicAuth({ user, pass = '' }) {
+  basicAuth({ user, pass = '' }: { user: string; pass?: string }) {
     const encoded = Buffer.from(`${user}:${pass}`).toString('base64')
     this.matchHeader('authorization', `Basic ${encoded}`)
     return this
   }
 
-  /**
-   * Set query strings for the interceptor
-   * @name query
-   * @param queries Object of query string name,values (accepts regexp values)
-   * @public
-   * @example
-   * // Will match 'http://zombo.com/?q=t'
-   * nock('http://zombo.com').get('/').query({q: 't'});
-   */
-  query(queries) {
+  query(
+    queries:
+      | boolean
+      | string
+      | URLSearchParams
+      | Record<string, any>
+      | ((queryObject: Record<string, any>) => boolean),
+  ) {
     if (this.queries !== null) {
       throw Error(`Query parameters have already been defined`)
     }
@@ -508,26 +639,17 @@ module.exports = class Interceptor {
       throw Error(`Argument Error: ${queries}`)
     }
 
-    this.queries = {}
+    this.queries = {} as Record<string, any>
     for (const [key, value] of Object.entries(queries)) {
       const formatted = common.formatQueryValue(key, value, strFormattingFn)
       const [formattedKey, formattedValue] = formatted
-      this.queries[formattedKey] = formattedValue
+      ;(this.queries as Record<string, any>)[formattedKey] = formattedValue
     }
 
     return this
   }
 
-  /**
-   * Set number of times will repeat the interceptor
-   * @name times
-   * @param newCounter Number of times to repeat (should be > 0)
-   * @public
-   * @example
-   * // Will repeat mock 5 times for same king of request
-   * nock('http://zombo.com).get('/').times(5).reply(200, 'Ok');
-   */
-  times(newCounter) {
+  times(newCounter: number) {
     if (newCounter < 1) {
       return this
     }
@@ -537,85 +659,26 @@ module.exports = class Interceptor {
     return this
   }
 
-  /**
-   * An sugar syntax for times(1)
-   * @name once
-   * @see {@link times}
-   * @public
-   * @example
-   * nock('http://zombo.com).get('/').once().reply(200, 'Ok');
-   */
   once() {
     return this.times(1)
   }
 
-  /**
-   * An sugar syntax for times(2)
-   * @name twice
-   * @see {@link times}
-   * @public
-   * @example
-   * nock('http://zombo.com).get('/').twice().reply(200, 'Ok');
-   */
   twice() {
     return this.times(2)
   }
 
-  /**
-   * An sugar syntax for times(3).
-   * @name thrice
-   * @see {@link times}
-   * @public
-   * @example
-   * nock('http://zombo.com).get('/').thrice().reply(200, 'Ok');
-   */
   thrice() {
     return this.times(3)
   }
 
-  /**
-   * Delay the response by a certain number of ms.
-   *
-   * @param {(integer|object)} opts - Number of milliseconds to wait, or an object
-   * @param {integer} [opts.head] - Number of milliseconds to wait before response is sent
-   * @param {integer} [opts.body] - Number of milliseconds to wait before response body is sent
-   * @return {Interceptor} - the current interceptor for chaining
-   */
-  delay(opts) {
-    let headDelay
-    let bodyDelay
-    if (typeof opts === 'number') {
-      headDelay = opts
-      bodyDelay = 0
-    } else if (typeof opts === 'object') {
-      headDelay = opts.head || 0
-      bodyDelay = opts.body || 0
+  delay(ms: number) {
+    if (typeof ms === 'number') {
+      this.delayBodyInMs = ms
+      return this
     } else {
-      throw new Error(`Unexpected input opts ${opts}`)
+      throw new Error(`Unexpected input ${ms}`)
     }
-
-    return this.delayConnection(headDelay).delayBody(bodyDelay)
-  }
-
-  /**
-   * Delay the response body by a certain number of ms.
-   *
-   * @param {integer} ms - Number of milliseconds to wait before response is sent
-   * @return {Interceptor} - the current interceptor for chaining
-   */
-  delayBody(ms) {
-    this.delayBodyInMs = ms
-    return this
-  }
-
-  /**
-   * Delay the connection by a certain number of ms.
-   *
-   * @param  {integer} ms - Number of milliseconds to wait
-   * @return {Interceptor} - the current interceptor for chaining
-   */
-  delayConnection(ms) {
-    this.delayConnectionInMs = ms
-    return this
   }
 }
+
+export { Interceptor }

@@ -1,58 +1,27 @@
-'use strict'
+import http from 'node:http'
+import https from 'node:https'
+import { URLSearchParams } from 'node:url'
+import zlib from 'node:zlib'
+import sinon from 'sinon'
+import { expect } from 'chai'
+import nock from '../../index.ts'
 
-const http = require('http')
-const https = require('https')
-const { URLSearchParams } = require('url')
-const zlib = require('zlib')
-const sinon = require('sinon')
-const { expect } = require('chai')
-const nock = require('../..')
-
-const got = require('./got_client')
-const servers = require('../servers')
+import got from './got_client.js'
+import * as servers from '../servers/index.js'
 
 describe('Recorder', () => {
   let globalCount
+
   beforeEach(() => {
     globalCount = Object.keys(global).length
   })
+
   afterEach(() => {
     let leaks = Object.keys(global).splice(globalCount, Number.MAX_VALUE)
     if (leaks.length === 1 && leaks[0] === '_key') {
       leaks = []
     }
     expect(leaks).to.be.empty()
-  })
-
-  // The problem is that after the migration to "@mswjs/interceptors" the request is no longer synchronous, which is Node compatible behavior.
-  // so in the test we initiate a new recording session because we record the first request.
-  it.skip('does not record requests from previous sessions', async () => {
-    const { origin } = await servers.startHttpServer()
-
-    nock.restore()
-    nock.recorder.clear()
-    nock.recorder.rec(true)
-
-    const req1 = http.get(`${origin}/foo`)
-    const req1Promise = new Promise(resolve => {
-      req1.on('response', res => {
-        res.on('end', resolve)
-        res.resume()
-      })
-    })
-
-    // start a new recording session while the first request is still in flight
-    nock.restore()
-    nock.recorder.rec(true)
-    await got.post(`${origin}/bar`)
-
-    // wait for the first request to end
-    await req1Promise
-
-    // validate only the request from the second session is in the outputs
-    const outputs = nock.recorder.play()
-    expect(outputs).to.have.lengthOf(1)
-    expect(outputs[0]).to.match(/\.post\('\/bar'\)/)
   })
 
   it('when request port is different, use the alternate port', async () => {
@@ -251,7 +220,7 @@ describe('Recorder', () => {
     const exampleText = '<html><body>example</body></html>'
 
     const { origin } = await servers.startHttpServer((request, response) => {
-      switch (require('url').parse(request.url).pathname) {
+      switch (request.url) {
         case '/':
           response.writeHead(302, { Location: '/abc' })
           break
@@ -627,7 +596,7 @@ describe('Recorder', () => {
                 .to.be.an('object')
                 .and.deep.include({
                   reqheaders: {
-                    connection: 'close',
+                    connection: 'keep-alive',
                     host: `localhost:${port}`,
                     authorization: `Basic ${Buffer.from('foo:bar').toString(
                       'base64',
@@ -715,7 +684,7 @@ describe('Recorder', () => {
     const exampleBody = '<html><body>example</body></html>'
 
     const { origin } = await servers.startHttpServer((request, response) => {
-      switch (require('url').parse(request.url).pathname) {
+      switch (request.url) {
         case '/':
           response.writeHead(302, { Location: '/abc' })
           break

@@ -1,12 +1,12 @@
-const http = require('http')
-const fs = require('fs')
-const path = require('path')
+import http from 'node:http'
+import fs from 'node:fs'
+import path from 'node:path'
 
-const nock = require('../')
+import nock from '../index.ts'
 
 const readFile = function () {
   return fs.readFileSync(
-    path.resolve(__dirname, '../tests/assets/reply_file_2.txt.gz'),
+    path.resolve(import.meta.dirname, '../tests/assets/reply_file_2.txt.gz'),
   )
 }
 
