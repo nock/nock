@@ -13,6 +13,16 @@ describe('query params in path', () => {
     expect(statusCode).to.equal(200)
     scope.done()
   })
+
+  it('matches literal question marks in the query string', async () => {
+    const path = '/foo?redirect=https://example.test/?page=2&other=ok'
+    const scope = nock('http://example.test').get(path).reply()
+
+    const { statusCode } = await got(`http://example.test${path}`)
+
+    expect(statusCode).to.equal(200)
+    scope.done()
+  })
 })
 
 describe('`query()`', () => {
@@ -33,6 +43,25 @@ describe('`query()`', () => {
   })
 
   describe('when called with an object', () => {
+    it('does not discard query values after a literal question mark', async () => {
+      const truncated = nock('http://example.test')
+        .get('/')
+        .query({ foo: 'bar' })
+        .reply(200, 'truncated')
+      const complete = nock('http://example.test')
+        .get('/')
+        .query({ foo: 'bar?baz?qux', other: 'ok' })
+        .reply(200, 'complete')
+
+      const { body } = await got(
+        'http://example.test/?foo=bar?baz?qux&other=ok',
+      )
+
+      expect(body).to.equal('complete')
+      expect(truncated.isDone()).to.be.false()
+      complete.done()
+    })
+
     for (const flags of ['g', 'y']) {
       it(`matches repeated requests with a ${flags} query regexp`, async () => {
         const scope = nock('http://example.test')
@@ -321,6 +350,22 @@ describe('`query()`', () => {
   })
 
   describe('when called with a function', () => {
+    it('passes literal question marks in query keys and values to the function', async () => {
+      const queryFn = sinon.stub().returns(true)
+      const scope = nock('http://example.test').get('/').query(queryFn).reply()
+
+      const { statusCode } = await got(
+        'http://example.test/?key?part=value?part&other=ok',
+      )
+
+      expect(statusCode).to.equal(200)
+      expect(queryFn).to.have.been.calledOnceWithExactly({
+        'key?part': 'value?part',
+        other: 'ok',
+      })
+      scope.done()
+    })
+
     it('function called with actual queryObject', async () => {
       const queryFn = sinon.stub().returns(true)
       const scope = nock('http://example.test').get('/').query(queryFn).reply()
