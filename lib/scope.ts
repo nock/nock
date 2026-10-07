@@ -352,7 +352,8 @@ class Scope extends EventEmitter {
   }
 
   clone() {
-    return new Scope(this.basePath, this.scopeOptions)
+    // Preserve the original URL's pathname and bracketed IPv6 host.
+    return new Scope(this.urlParts.href || this.basePath, this.scopeOptions)
   }
 }
 

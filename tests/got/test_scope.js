@@ -182,6 +182,8 @@ describe('filteringRequestBody()', () => {
   })
 
   describe('`Scope#clone()`', () => {
+    beforeEach(() => nock.disableNetConnect())
+
     it('creates a new Scope with the same basePath and scope options', () => {
       const scope = nock('http://example.test', { encodedQueryParams: true })
       const clonedScope = scope.clone()
@@ -201,6 +203,105 @@ describe('filteringRequestBody()', () => {
 
       await got.post('http://example.test/')
       expect(postScope.isDone()).to.be.true()
+    })
+
+    const pathCases = [
+      ['a string URL', 'http://example.test/api', '/users', '/api/users'],
+      [
+        'a URL instance',
+        new URL('http://example.test/api'),
+        '/users',
+        '/api/users',
+      ],
+      ['a trailing slash', 'http://example.test/api/', '/users', '/api/users'],
+      [
+        'multiple trailing slashes',
+        'http://example.test/api//',
+        '/users',
+        '/api//users',
+      ],
+      ['an empty interceptor path', 'http://example.test/api', '', '/api'],
+      [
+        'a slashless interceptor path',
+        'http://example.test/api',
+        'users',
+        '/apiusers',
+      ],
+      [
+        'an encoded path',
+        'http://example.test/api%2Fv1',
+        '/users',
+        '/api%2Fv1/users',
+      ],
+      ['a root path', 'http://example.test/', '/users', '/users'],
+      ['an IPv6 URL', 'http://[::1]:8080/api', '/users', '/api/users'],
+      [
+        'an IPv6 URL instance',
+        new URL('http://[::1]:8080/api'),
+        '/users',
+        '/api/users',
+      ],
+      [
+        'an HTTPS URL with a port',
+        'https://example.test:8443/api',
+        '/users',
+        '/api/users',
+      ],
+    ]
+
+    for (const [
+      description,
+      basePath,
+      interceptorPath,
+      requestPath,
+    ] of pathCases) {
+      it(`preserves the base path for ${description}`, async () => {
+        const scope = nock(basePath)
+        const clonedScope = scope.clone()
+
+        expect(clonedScope.basePath).to.equal(scope.basePath)
+        expect(clonedScope.basePathname).to.equal(scope.basePathname)
+        clonedScope.get(interceptorPath).reply(200, 'cloned')
+
+        const { body } = await got(`${new URL(basePath).origin}${requestPath}`)
+
+        expect(body).to.equal('cloned')
+        clonedScope.done()
+      })
+    }
+
+    it('preserves a regular expression base path', async () => {
+      const basePath = /example\.test/
+      const scope = nock(basePath)
+      const clonedScope = scope.clone().get('/users').reply(200, 'cloned')
+
+      expect(clonedScope.basePath).to.equal(basePath)
+
+      const { body } = await got('http://example.test/users')
+
+      expect(body).to.equal('cloned')
+      clonedScope.done()
+    })
+
+    it('does not share interceptors with a scope that has a base path', async () => {
+      const scope = nock('http://example.test/api')
+        .get('/original')
+        .reply(200, 'original')
+      const clonedScope = scope.clone()
+
+      expect(clonedScope.interceptors).to.have.lengthOf(0)
+      clonedScope.get('/cloned').reply(200, 'cloned')
+
+      const { body } = await got('http://example.test/api/cloned')
+      expect(body).to.equal('cloned')
+      clonedScope.done()
+      expect(scope.isDone()).to.be.false()
+
+      const { body: originalBody } = await got(
+        'http://example.test/api/original',
+      )
+      expect(originalBody).to.equal('original')
+      scope.done()
     })
   })
 })
