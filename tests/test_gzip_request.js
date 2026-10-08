@@ -3,6 +3,60 @@ import http from 'node:http'
 import zlib from 'node:zlib'
 import nock from '../index.ts'
 
+for (const encodings of [
+  ['gzip', 'deflate'],
+  ['deflate', 'gzip'],
+  ['gzip', 'br'],
+  ['gzip', 'gzip'],
+  ['gzip', 'deflate', 'br'],
+  ['br'],
+  [],
+]) {
+  it(`decodes all request content codings in reverse order: ${encodings}`, async () => {
+    const message = { my: 'contents' }
+    const compressors = {
+      gzip: zlib.gzipSync,
+      deflate: zlib.deflateSync,
+      br: zlib.brotliCompressSync,
+    }
+    const compressed = encodings.reduce(
+      (body, encoding) => compressors[encoding](body),
+      Buffer.from(JSON.stringify(message)),
+    )
+    const scope = nock('http://example.test')
+      .post('/', message)
+      .reply(async request => {
+        expect(await request.json()).to.deep.equal(message)
+        return [201, 'decoded']
+      })
+
+    const response = await new Promise((resolve, reject) => {
+      const req = http.request(
+        'http://example.test/',
+        {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            'content-encoding': encodings.join(', '),
+          },
+        },
+        res => {
+          let body = ''
+          res.on('data', chunk => {
+            body += chunk
+          })
+          res.on('end', () => resolve({ statusCode: res.statusCode, body }))
+          res.on('error', reject)
+        },
+      )
+      req.on('error', reject)
+      req.end(compressed)
+    })
+    expect(response).to.deep.equal({ statusCode: 201, body: 'decoded' })
+    scope.done()
+  })
+}
+
 it('should accept and decode gzip encoded application/json', done => {
   const message = {
     my: 'contents',

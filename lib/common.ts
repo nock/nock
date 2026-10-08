@@ -486,17 +486,19 @@ function decompressRequestBody(buffer: ArrayBuffer, contentEncoding: string) {
     .split(',')
     .map(coding => coding.trim())
 
-  for (const encoding of encodings) {
+  let decompressed: ArrayBuffer | Buffer = buffer
+  // Content codings are listed in the order they were applied.
+  for (const encoding of encodings.reverse()) {
     if (encoding === 'gzip') {
-      return zlib.gunzipSync(buffer)
+      decompressed = zlib.gunzipSync(decompressed)
     } else if (encoding === 'deflate') {
-      return zlib.inflateSync(buffer)
+      decompressed = zlib.inflateSync(decompressed)
     } else if (encoding === 'br') {
-      return zlib.brotliDecompressSync(buffer)
+      decompressed = zlib.brotliDecompressSync(decompressed)
     }
   }
 
-  return buffer
+  return decompressed
 }
 
 function convertHeadersToRaw(headers: Headers) {
