@@ -447,7 +447,9 @@ class Interceptor {
       this.scope.logger('query matching skipped')
     } else {
       // can't rely on pathname or search being in the options, but path has a default
-      const [pathname, search] = (path as string).split('?')
+      const queryIndex = path.indexOf('?')
+      const pathname = queryIndex === -1 ? path : path.slice(0, queryIndex)
+      const search = queryIndex === -1 ? '' : path.slice(queryIndex + 1)
       const matchQueries = this.matchQuery({ search })
 
       if (!matchQueries) {
