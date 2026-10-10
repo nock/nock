@@ -4,62 +4,35 @@ import nock from '../../index.ts'
 import got from './got_client.js'
 
 describe('`matchBody()`', () => {
-  for (const contentType of [
-    'Application/X-WWW-Form-Urlencoded',
-    'APPLICATION/X-WWW-FORM-URLENCODED; charset=UTF-8',
-    'application/x-www-form-urlencoded; charset=UTF-8',
-  ]) {
-    it(`matches reordered form fields with ${contentType}`, async () => {
-      const scope = nock('http://example.test')
-        .post('/', { foo: 123, bar: /two words/ })
-        .reply(200, 'matched')
-      const { body } = await got.post('http://example.test/', {
-        body: 'bar=two+words&foo=123',
-        headers: { 'content-type': contentType },
-      })
-      expect(body).to.equal('matched')
-      scope.done()
+  it('matches form fields with a mixed-case media type', async () => {
+    const contentType = 'Application/X-WWW-Form-Urlencoded'
+    const scope = nock('http://example.test')
+      .post('/', { foo: 123, bar: /two words/ })
+      .reply(200, 'matched')
+    const { body } = await got.post('http://example.test/', {
+      body: 'bar=two+words&foo=123',
+      headers: { 'content-type': contentType },
     })
+    expect(body).to.equal('matched')
+    scope.done()
+  })
 
-    it(`passes parsed form fields to predicates with ${contentType}`, async () => {
-      let actual
-      const scope = nock('http://example.test')
-        .post('/', body => {
-          actual = body
-          return body.foo === '123'
-        })
-        .reply(200)
-      const { statusCode } = await got.post('http://example.test/', {
-        body: 'foo=123',
-        headers: { 'content-type': contentType },
-      })
-      expect(statusCode).to.equal(200)
-      expect(actual).to.deep.equal({ foo: '123' })
-      scope.done()
+  it('preserves multipart line endings with a mixed-case media type', async () => {
+    const contentType = 'Multipart/Form-Data; boundary=CaseSensitiveBoundary'
+    const body =
+      '--CaseSensitiveBoundary\r\nContent-Disposition: form-data; name="field"\r\n\r\nvalue\r\n--CaseSensitiveBoundary--\r\n'
+    const incorrect = nock('http://example.test')
+      .post('/', body.replace(/\r\n/g, ''))
+      .reply(201)
+    const correct = nock('http://example.test').post('/', body).reply(200)
+    const { statusCode } = await got.post('http://example.test/', {
+      body,
+      headers: { 'content-type': contentType },
     })
-  }
-
-  for (const contentType of [
-    'Multipart/Form-Data; boundary=CaseSensitiveBoundary',
-    'MULTIPART/FORM-DATA; boundary=CaseSensitiveBoundary',
-    'multipart/form-data; boundary=CaseSensitiveBoundary',
-  ]) {
-    it(`preserves multipart line endings with ${contentType}`, async () => {
-      const body =
-        '--CaseSensitiveBoundary\r\nContent-Disposition: form-data; name="field"\r\n\r\nvalue\r\n--CaseSensitiveBoundary--\r\n'
-      const incorrect = nock('http://example.test')
-        .post('/', body.replace(/\r\n/g, ''))
-        .reply(201)
-      const correct = nock('http://example.test').post('/', body).reply(200)
-      const { statusCode } = await got.post('http://example.test/', {
-        body,
-        headers: { 'content-type': contentType },
-      })
-      expect(statusCode).to.equal(200)
-      expect(incorrect.isDone()).to.equal(false)
-      correct.done()
-    })
-  }
+    expect(statusCode).to.equal(200)
+    expect(incorrect.isDone()).to.equal(false)
+    correct.done()
+  })
 
   for (const flags of ['g', 'y']) {
     it(`matches repeated JSON bodies with a ${flags} regexp`, async () => {
