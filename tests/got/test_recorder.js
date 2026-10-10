@@ -88,6 +88,37 @@ describe('Recorder', () => {
     ).to.be.true()
   })
 
+  for (const [name, data] of [
+    ['binary', [0x00, 0xff, 0x80, 0x41]],
+    ['hex-looking text', '00ff8041'],
+    ['JSON', '{"hello":"world"}'],
+    ['empty', ''],
+  ]) {
+    it(`replays generated code with a ${name} response byte-for-byte`, async () => {
+      const body = Buffer.from(data)
+      const { origin } = await servers.startHttpServer((request, response) => {
+        response.writeHead(200, { 'transfer-encoding': 'chunked' })
+        response.end(body)
+      })
+
+      nock.restore()
+      nock.recorder.clear()
+      nock.recorder.rec({ dont_print: true })
+      const recordedResponse = await got(origin, { responseType: 'buffer' })
+      expect(recordedResponse.body).to.deep.equal(body)
+
+      nock.restore()
+      const [recorded] = nock.recorder.play()
+      nock.activate()
+      nock.disableNetConnect()
+      const scope = new Function('nock', `return ${recorded.trim()}`)(nock)
+      const replayedResponse = await got(origin, { responseType: 'buffer' })
+
+      expect(replayedResponse.body).to.deep.equal(body)
+      scope.done()
+    })
+  }
+
   it('records parallel requests', async () => {
     const gotRequest = sinon.spy()
 

@@ -107,10 +107,10 @@ async function generateRequestAndResponse(
   const requestBody = getBodyFromChunks([
     Buffer.from(await request.arrayBuffer()),
   ]).body
-  const responseBody = getBodyFromChunks(
+  const { body: responseBody, isUtf8Representable } = getBodyFromChunks(
     [Buffer.from(await response.arrayBuffer())],
     response.headers as any,
-  ).body
+  )
 
   const encodedQueryObj: Record<string, any> = {}
 
@@ -155,7 +155,10 @@ async function generateRequestAndResponse(
   }
 
   const statusCode = String(response.status)
-  const stringifiedResponseBody = JSON.stringify(responseBody)
+  const stringifiedResponseBody =
+    isUtf8Representable === false
+      ? `Buffer.from(${JSON.stringify(responseBody)}, 'hex')`
+      : JSON.stringify(responseBody)
   const headers = inspect(Object.fromEntries(response.headers.entries()))
   lines.push(`  .reply(${statusCode}, ${stringifiedResponseBody}, ${headers});`)
 
