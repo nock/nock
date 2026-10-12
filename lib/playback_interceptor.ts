@@ -273,6 +273,19 @@ async function playbackInterceptor({
 
     const status = interceptor.statusCode || fullResponseStatus
     const hasBody = FetchResponse.isResponseWithBody(status as number)
+
+    // For responses without a body (e.g. 204, 205), the delayed `readable`
+    // below is discarded: `new Response(null, ...)` makes the interceptors
+    // write the head and end the message immediately, so the delay never
+    // applies and client request timeouts cannot fire first. Delay the
+    // whole response instead so `delay` behaves the same as for responses
+    // with a body.
+    if (!hasBody && interceptor.delayBodyInMs > 0) {
+      await new Promise(resolve =>
+        common.setTimeout(resolve, interceptor.delayBodyInMs),
+      )
+    }
+
     return new Response(hasBody ? readable : null, {
       status: status as number,
       statusText: STATUS_CODES[status as number],

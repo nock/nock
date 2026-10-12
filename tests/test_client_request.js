@@ -81,6 +81,38 @@ describe('Direct use of `ClientRequest`', () => {
     req.end()
   })
 
+  it('should emit the timeout event before the response when delayed beyond the request timeout', done => {
+    // Regression test for https://github.com/nock/nock/issues/2919:
+    // `delay()` must also apply to responses without a body (e.g. 204, 205),
+    // otherwise the response is delivered immediately and the request-level
+    // timeout (`timeout` option or `ClientRequest#setTimeout()`) can never
+    // fire first.
+    const scope = nock('http://example.test')
+      .get('/')
+      .delay(500)
+      .reply(204)
+
+    const req = http.request('http://example.test', { timeout: 100 })
+
+    const onTimeout = () => {
+      req.destroy(new Error('Request timed out successfully'))
+    }
+    req.on('timeout', onTimeout)
+    req.on('error', err => {
+      req.off('timeout', onTimeout)
+      expect(err.message).to.equal('Request timed out successfully')
+      scope.isDone()
+      done()
+    })
+    // If the response arrives before the timeout, the delay was not applied.
+    req.on('response', () => {
+      req.off('timeout', onTimeout)
+      done(new Error('response arrived before the timeout event'))
+    })
+
+    req.end()
+  })
+
   it('should pass thru a live request when no interceptors and net connect is allowed', async () => {
     const { origin } = await startHttpServer((request, response) => {
       response.writeHead(201)
