@@ -298,6 +298,15 @@ describe('`matchStringOrRegexp()`', () => {
     expect(result).to.equal(false)
   })
 
+  it('matches frozen stateless regexps without writing lastIndex', () => {
+    expect(common.matchStringOrRegexp('foo', Object.freeze(/^foo$/))).to.equal(
+      true,
+    )
+    expect(common.matchStringOrRegexp('bar', Object.freeze(/^foo$/))).to.equal(
+      false,
+    )
+  })
+
   it('should match if pattern is regex and target matches', () => {
     const result = common.matchStringOrRegexp('to match', /match/)
     expect(result).to.equal(true)

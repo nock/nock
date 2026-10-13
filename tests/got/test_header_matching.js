@@ -143,6 +143,18 @@ describe('Header matching', () => {
       scope.done()
     })
 
+    it('matches a frozen stateless header regexp', async () => {
+      const scope = nock('http://example.test')
+        .get('/')
+        .matchHeader('x-value', Object.freeze(/^value$/))
+        .reply(200)
+      const { statusCode } = await got('http://example.test/', {
+        headers: { 'x-value': 'value' },
+      })
+      expect(statusCode).to.equal(200)
+      scope.done()
+    })
+
     it('should match headers with regexp', async () => {
       const scope = nock('http://example.test')
         .get('/')

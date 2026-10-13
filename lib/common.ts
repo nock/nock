@@ -273,8 +273,10 @@ function matchStringOrRegexp(
     target === undefined || target === null ? '' : String(target)
 
   if (pattern instanceof RegExp) {
-    // if the regexp happens to have a global flag, we want to ensure we test the entire target
-    pattern.lastIndex = 0
+    // Stateful expressions must test the entire target; stateless ones need no mutation.
+    if (pattern.global || pattern.sticky) {
+      pattern.lastIndex = 0
+    }
     return pattern.test(targetStr)
   }
   return targetStr === String(pattern)
