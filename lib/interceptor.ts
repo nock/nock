@@ -639,7 +639,7 @@ class Interceptor {
       throw Error(`Argument Error: ${queries}`)
     }
 
-    this.queries = {} as Record<string, any>
+    this.queries = Object.create(null) as Record<string, any>
     for (const [key, value] of Object.entries(queries)) {
       const formatted = common.formatQueryValue(key, value, strFormattingFn)
       const [formattedKey, formattedValue] = formatted
