@@ -73,6 +73,39 @@ describe('`delay()`', () => {
     scope.done()
   })
 
+  // https://github.com/nock/nock/issues/2919
+  for (const status of [204, 205, 304]) {
+    it(`should delay the \`response\` event of a ${status} reply without a body`, done => {
+      const scope = nock('http://example.test')
+        .get('/')
+        .delay(100)
+        .reply(status)
+
+      const start = process.hrtime()
+      const req = http.get('http://example.test', res => {
+        checkDuration(start, 100)
+        expect(res.statusCode).to.equal(status)
+        scope.done()
+        req.destroy()
+        done()
+      })
+    })
+  }
+
+  // https://github.com/nock/nock/issues/2919
+  it('should let the request time out before a delayed reply without a body', done => {
+    nock('http://example.test').get('/').delay(200).reply(204)
+
+    const req = http.request('http://example.test', { timeout: 50 })
+    req.on('response', () => done(new Error('should not receive a response')))
+    req.on('timeout', () => {
+      req.destroy()
+      done()
+    })
+    req.on('error', () => {})
+    req.end()
+  })
+
   it('should work with a response stream', async () => {
     const scope = nock('http://example.test')
       .get('/')

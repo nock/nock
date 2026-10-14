@@ -273,6 +273,12 @@ async function playbackInterceptor({
 
     const status = interceptor.statusCode || fullResponseStatus
     const hasBody = FetchResponse.isResponseWithBody(status as number)
+    if (!hasBody && interceptor.delayBodyInMs > 0) {
+      // Statuses like 204 and 304 have no body to hold back, so delay the response itself.
+      await new Promise(resolve =>
+        common.setTimeout(resolve, interceptor.delayBodyInMs),
+      )
+    }
     return new Response(hasBody ? readable : null, {
       status: status as number,
       statusText: STATUS_CODES[status as number],
