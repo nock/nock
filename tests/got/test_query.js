@@ -32,6 +32,48 @@ describe('`query()`', () => {
     })
   })
 
+  it('decodes encoded query strings only once with encodedQueryParams', async () => {
+    const query = 'q=a%2520b&key%2520name=hello%2Bworld'
+    const scope = nock('http://example.test', { encodedQueryParams: true })
+      .get('/')
+      .query(query)
+      .reply(200)
+
+    const { statusCode } = await got(`http://example.test/?${query}`)
+    expect(statusCode).to.equal(200)
+    scope.done()
+  })
+
+  it('preserves literal escapes and duplicate values in URLSearchParams', async () => {
+    const params = new URLSearchParams({ 'key%20name': 'a%20b' })
+    params.append('key%20name', 'c%2B+d')
+    const scope = nock('http://example.test', { encodedQueryParams: true })
+      .get('/')
+      .query(params)
+      .reply(200)
+
+    const { statusCode } = await got(`http://example.test/?${params}`)
+    expect(statusCode).to.equal(200)
+    scope.done()
+  })
+
+  it('decodes query parameters in interceptor paths only once', async () => {
+    const scope = nock('http://example.test', { encodedQueryParams: true })
+      .get('/?q=a%2520b')
+      .reply(200, 'literal')
+    const fallback = nock('http://example.test')
+      .get('/')
+      .query(true)
+      .reply(200, 'different')
+
+    const first = await got('http://example.test/?q=a%20b')
+    expect(first.body).to.equal('different')
+    fallback.done()
+    const second = await got('http://example.test/?q=a%2520b')
+    expect(second.body).to.equal('literal')
+    scope.done()
+  })
+
   describe('when called with an object', () => {
     for (const flags of ['g', 'y']) {
       it(`matches repeated requests with a ${flags} query regexp`, async () => {
