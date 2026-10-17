@@ -481,6 +481,11 @@ const expand = (input: Record<string, any> | null | undefined) => {
 }
 
 function decompressRequestBody(buffer: ArrayBuffer, contentEncoding: string) {
+  // Nothing to inflate; gunzipSync() throws "unexpected end of file" on an empty buffer.
+  if (buffer.byteLength === 0) {
+    return buffer
+  }
+
   const encodings = contentEncoding
     .toLowerCase()
     .split(',')
