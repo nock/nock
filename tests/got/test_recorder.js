@@ -88,6 +88,50 @@ describe('Recorder', () => {
     ).to.be.true()
   })
 
+  for (const method of ['PROPFIND', 'COPY', 'GET', 'POST', 'MERGE']) {
+    for (const body of ['', 'request body']) {
+      if (method === 'GET' && body) continue
+
+      it(`replays recorded ${method} requests with ${body ? 'a body' : 'no body'}`, async () => {
+        nock.restore()
+        nock.recorder.clear()
+        const { origin } = await servers.startHttpServer(
+          (request, response) => {
+            response.end('recorded response')
+          },
+        )
+        nock.recorder.rec({ dont_print: true })
+
+        const send = () =>
+          new Promise((resolve, reject) => {
+            const request = http.request(
+              `${origin}/resource?version=1`,
+              { method },
+              response => {
+                let result = ''
+                response.on('data', chunk => {
+                  result += chunk
+                })
+                response.on('end', () => resolve(result))
+              },
+            )
+            request.on('error', reject)
+            request.end(body)
+          })
+
+        expect(await send()).to.equal('recorded response')
+        nock.restore()
+        const recorded = nock.recorder.play()
+        expect(recorded).to.have.lengthOf(1)
+        nock.activate()
+        nock.disableNetConnect()
+        Function('nock', recorded[0])(nock)
+        expect(await send()).to.equal('recorded response')
+        expect(nock.isDone()).to.be.true()
+      })
+    }
+  }
+
   it('records parallel requests', async () => {
     const gotRequest = sinon.spy()
 
