@@ -21,6 +21,45 @@ describe('`matchBody()`', () => {
     })
   }
 
+  for (const [name, expected, missing, present] of [
+    ['top-level', { required: /^undefined$/ }, {}, { required: 'undefined' }],
+    [
+      'nested',
+      { item: { required: /^undefined$/ } },
+      { item: {} },
+      { item: { required: 'undefined' } },
+    ],
+  ]) {
+    it(`does not match a missing ${name} body property with a regexp`, async () => {
+      const scope = nock('http://example.test')
+        .post('/', expected)
+        .reply(200, 'matched')
+      const fallback = nock('http://example.test')
+        .post('/')
+        .reply(200, 'missing')
+      const first = await got.post('http://example.test/', { json: missing })
+      expect(first.body).to.equal('missing')
+      fallback.done()
+      const second = await got.post('http://example.test/', { json: present })
+      expect(second.body).to.equal('matched')
+      scope.done()
+    })
+  }
+
+  it('matches present falsy body values with a regexp', async () => {
+    const scope = nock('http://example.test')
+      .post('/', { required: /.*/ })
+      .times(4)
+      .reply(200)
+    for (const required of [0, false, '', null]) {
+      const { statusCode } = await got.post('http://example.test/', {
+        json: { required },
+      })
+      expect(statusCode).to.equal(200)
+    }
+    scope.done()
+  })
+
   it('match json body regardless of key ordering', async () => {
     const scope = nock('http://example.test')
       .post('/', { foo: 'bar', bar: 'foo' })

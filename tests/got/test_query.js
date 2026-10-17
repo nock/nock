@@ -32,6 +32,23 @@ describe('`query()`', () => {
     })
   })
 
+  it('does not match a missing query parameter with a regexp', async () => {
+    const scope = nock('http://example.test')
+      .get('/')
+      .query({ required: /^undefined$/ })
+      .reply(200, 'matched')
+    const fallback = nock('http://example.test')
+      .get('/')
+      .query(true)
+      .reply(200, 'missing')
+    const first = await got('http://example.test/')
+    expect(first.body).to.equal('missing')
+    fallback.done()
+    const second = await got('http://example.test/?required=undefined')
+    expect(second.body).to.equal('matched')
+    scope.done()
+  })
+
   describe('when called with an object', () => {
     for (const flags of ['g', 'y']) {
       it(`matches repeated requests with a ${flags} query regexp`, async () => {
