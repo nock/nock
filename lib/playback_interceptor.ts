@@ -253,27 +253,52 @@ async function playbackInterceptor({
     const bodyAsStream = convertBodyToStream(rawBody)
     bodyAsStream.resume()
 
+    const responseContentLength = Number(headers.get('Content-Length')) || -1
+    let bytesRead = 0
+    const { promise: delayPromise, resolve } = Promise.withResolvers()
+
     // TODO: there is probably a better way to support delay.
     // Wrap the stream in a duplex stream to support the delay.
     const readable = new stream.Readable({
       read() {},
     })
-    bodyAsStream.on('data', function (chunk: Buffer) {
+    bodyAsStream.on('data', async function (chunk: Buffer) {
+      // Apply the delay before pushing the last chunk of the response body.
+      if (responseContentLength >= 0 && interceptor.delayBodyInMs > 0) {
+        // Push the first byte immediately to flush headers and prevent Node from buffering the response before the delay.
+        if (bytesRead === 0) {
+          readable.push(chunk.subarray(0, 1))
+          chunk = chunk.subarray(1)
+          bytesRead = 1
+        }
+        bytesRead += chunk.length
+        if (bytesRead === responseContentLength) {
+          common.setTimeout(resolve, interceptor.delayBodyInMs)
+          await delayPromise
+        }
+      }
+
       readable.push(chunk)
     })
-    bodyAsStream.on('end', function () {
-      common.setTimeout(() => {
+    bodyAsStream.on('end', async function () {
+      // Apply the delay before ending the response body stream for response with no body.
+      if (bytesRead === 0 && interceptor.delayBodyInMs > 0) {
+        common.setTimeout(resolve, interceptor.delayBodyInMs)
+        await delayPromise
+      }
+
+      // End the stream if the response has no content length specified.
+      if (responseContentLength === -1) {
         readable.push(null)
-        interceptor.scope.emit('replied', decompressedRequest, interceptor)
-      }, interceptor.delayBodyInMs)
+      }
+      interceptor.scope.emit('replied', decompressedRequest, interceptor)
     })
     bodyAsStream.on('error', function (err: Error) {
       readable.emit('error', err)
     })
 
     const status = interceptor.statusCode || fullResponseStatus
-    const hasBody = FetchResponse.isResponseWithBody(status as number)
-    return new Response(hasBody ? readable : null, {
+    return new FetchResponse(readable, {
       status: status as number,
       statusText: STATUS_CODES[status as number],
       headers,
