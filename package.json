@@ -17,7 +17,7 @@
     "url": "https://github.com/nock/nock/issues"
   },
   "engines": {
-    "node": ">=20.12.1"
+    "node": ">=22.20.0"
   },
   "main": "./dist/index.js",
   "type": "module",
