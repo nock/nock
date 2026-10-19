@@ -81,16 +81,7 @@ The goal of this release is to create more predictable, modern and consistent AP
    })
    ```
 
-5. **New `getGetRequestBody` Function**  
-  A new utility function, `getGetRequestBody`, has been introduced to handle the edge case of `GET` requests with a body. This function allows you to retrieve the decompressed body of a `GET` request, which is not natively supported by the `Request` object.
-
-   ```js
-   const scope = nock('http://example.test')
-     .get('/')
-     .reply(200, request => text(getGetRequestBody(request)))
-   ```
-
-6. **Removed `delayBody` and `delayConnection` methods**  
+5. **Removed `delayBody` and `delayConnection` methods**  
    These methods have been consolidated into a single `delay` method that accepts a single argument and behave as `delayBody`.
    To better reflect real-world scenarios, the delay is now applied at the end of the response rather than at the beginning.
 
@@ -104,7 +95,7 @@ The goal of this release is to create more predictable, modern and consistent AP
    .delay(200) // actual waits 200ms
    ```
 
-7. **Body matcher functions now only receive the body**  
+6. **Body matcher functions now only receive the body**  
    The body matcher functions no longer receive the `Request` object.
 
    ```js
@@ -115,7 +106,7 @@ The goal of this release is to create more predictable, modern and consistent AP
    .post('/', (body) => body.includes('test'))
    ```
 
-8. **Removed `this.req` in reply functions**  
+7. **Removed `this.req` in reply functions**  
    The `this.req` property is no longer available. Use the `Request` object passed to the `replyFunction`.
 
    ```js
@@ -132,7 +123,7 @@ The goal of this release is to create more predictable, modern and consistent AP
    })
    ```
 
-9. **Updated `Host` header behavior**  
+8. **Updated `Host` header behavior**  
    We no longer ignore the `Host` header if it is not explicitly defined in the request and match it like any other header.
 
    ```js
@@ -145,7 +136,7 @@ The goal of this release is to create more predictable, modern and consistent AP
    const { statusCode } = await got('http://example.test/') // Nock no match
    ```
 
-10. **Scope constructor no longer supports legacy URL format**  
+9. **Scope constructor no longer supports legacy URL format**  
    The `Scope` constructor no longer supports the legacy URL format. Use the modern URL format instead.
 
    ```js
