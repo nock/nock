@@ -3,6 +3,9 @@ import * as common from './common.ts'
 
 export default function matchBody(request: Request, spec: any, body: string) {
   if (spec instanceof RegExp) {
+    if (spec.global || spec.sticky) {
+      spec.lastIndex = 0
+    }
     return spec.test(body)
   }
 
