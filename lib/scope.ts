@@ -24,10 +24,9 @@ export interface Definition {
   reply?: string
   reqheaders?: Record<string, RequestHeaderMatcher>
   badheaders?: string[]
-  rawHeaders?: ReplyHeaders
+  rawHeaders?: Record<string, string | string[]>
   response?: ReplyBody
   responseIsBinary?: boolean
-  headers?: ReplyHeaders
   options?: Options
 }
 
