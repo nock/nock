@@ -166,7 +166,7 @@ class Interceptor {
 
     //  We use lower-case header field names throughout Nock.
     this.reqheaders = common.headersFieldNamesToLowerCase(
-      scope.scopeOptions.reqheaders || {},
+      this.options.reqheaders ?? scope.scopeOptions.reqheaders ?? {},
       true,
     )
     this.badheaders = common.headersFieldsArrayToLowerCase(
