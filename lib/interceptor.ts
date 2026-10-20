@@ -311,7 +311,7 @@ class Interceptor {
     if (this.scope.contentLen) {
       // https://tools.ietf.org/html/rfc7230#section-3.3.2
       if (typeof body === 'string') {
-        this.rawHeaders.push('Content-Length', body.length)
+        this.rawHeaders.push('Content-Length', Buffer.byteLength(body))
       } else if (Buffer.isBuffer(body)) {
         this.rawHeaders.push('Content-Length', body.byteLength)
       }
@@ -447,7 +447,9 @@ class Interceptor {
       this.scope.logger('query matching skipped')
     } else {
       // can't rely on pathname or search being in the options, but path has a default
-      const [pathname, search] = (path as string).split('?')
+      const queryIndex = path.indexOf('?')
+      const pathname = queryIndex === -1 ? path : path.slice(0, queryIndex)
+      const search = queryIndex === -1 ? '' : path.slice(queryIndex + 1)
       const matchQueries = this.matchQuery({ search })
 
       if (!matchQueries) {
@@ -639,7 +641,7 @@ class Interceptor {
       throw Error(`Argument Error: ${queries}`)
     }
 
-    this.queries = {} as Record<string, any>
+    this.queries = Object.create(null) as Record<string, any>
     for (const [key, value] of Object.entries(queries)) {
       const formatted = common.formatQueryValue(key, value, strFormattingFn)
       const [formattedKey, formattedValue] = formatted

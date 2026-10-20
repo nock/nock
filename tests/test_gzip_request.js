@@ -57,6 +57,26 @@ it('should accept and decode gzip encoded application/json, when headers come fr
   req.end()
 })
 
+it('should not attempt to decode an empty request body with gzip content-encoding', done => {
+  const scope = nock('http://example.test').post('/').reply(200)
+
+  const req = http.request({
+    hostname: 'example.test',
+    path: '/',
+    method: 'POST',
+    headers: {
+      'content-encoding': 'gzip',
+    },
+  })
+
+  req.on('response', res => {
+    expect(res.statusCode).to.equal(200)
+    scope.done()
+    done()
+  })
+  req.end()
+})
+
 it('should accept and decode deflate encoded application/json', done => {
   const message = {
     my: 'contents',

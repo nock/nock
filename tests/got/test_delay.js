@@ -61,6 +61,21 @@ describe('`delay()`', () => {
     })
   })
 
+  it('should delay the response body when content-length is 2', done => {
+    nock('http://example.test').get('/').delay(100).reply(200, 'OK', {
+      'Content-Length': '2',
+    })
+
+    http.get('http://example.test', res => {
+      const start = process.hrtime()
+      res.on('data', () => {})
+      res.on('end', () => {
+        checkDuration(start, 100)
+        done()
+      })
+    })
+  })
+
   it('should delay the overall response', async () => {
     const scope = nock('http://example.test')
       .get('/')
