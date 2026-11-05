@@ -251,54 +251,43 @@ async function playbackInterceptor({
       fullResponseRawHeaders,
     )
     const bodyAsStream = convertBodyToStream(rawBody)
-    bodyAsStream.resume()
-
     const responseContentLength = Number(headers.get('Content-Length')) || -1
-    let bytesRead = 0
-    const { promise: delayPromise, resolve } = Promise.withResolvers()
+    const delayMs = interceptor.delayBodyInMs
+    const delay = () =>
+      new Promise<void>(resolve => common.setTimeout(resolve, delayMs))
 
-    // TODO: there is probably a better way to support delay.
-    // Wrap the stream in a duplex stream to support the delay.
-    const readable = new stream.Readable({
-      read() {},
-    })
-    bodyAsStream.on('data', async function (chunk: Buffer) {
-      // Apply the delay before pushing the last chunk of the response body.
-      if (responseContentLength >= 0 && interceptor.delayBodyInMs > 0) {
-        // Push the first byte immediately to flush headers and prevent Node from buffering the response before the delay.
-        if (bytesRead === 0) {
-          readable.push(chunk.subarray(0, 1))
-          chunk = chunk.subarray(1)
-          bytesRead = 1
-        }
-        bytesRead += chunk.length
-        if (bytesRead === responseContentLength) {
-          common.setTimeout(resolve, interceptor.delayBodyInMs)
-          await delayPromise
+    async function* body() {
+      let bytesRead = 0
+
+      for await (const chunk of bodyAsStream as AsyncIterable<Buffer>) {
+        if (responseContentLength >= 0 && delayMs > 0) {
+          let rest = chunk
+          // Push the first byte immediately to flush headers and prevent Node from buffering the response before the delay.
+          if (bytesRead === 0) {
+            yield rest.subarray(0, 1)
+            rest = rest.subarray(1)
+            bytesRead = 1
+          }
+          bytesRead += rest.length
+          // Apply the delay before pushing the last chunk of the response body.
+          if (bytesRead === responseContentLength) {
+            await delay()
+          }
+          if (rest.length) yield rest
+        } else {
+          yield chunk
         }
       }
 
-      readable.push(chunk)
-    })
-    bodyAsStream.on('end', async function () {
       // Apply the delay before ending the response body stream for response with no body.
-      if (bytesRead === 0 && interceptor.delayBodyInMs > 0) {
-        common.setTimeout(resolve, interceptor.delayBodyInMs)
-        await delayPromise
-      }
-
-      // End the stream if the response has no content length specified.
-      if (responseContentLength === -1) {
-        readable.push(null)
+      if (bytesRead === 0 && delayMs > 0) {
+        await delay()
       }
       interceptor.scope.emit('replied', decompressedRequest, interceptor)
-    })
-    bodyAsStream.on('error', function (err: Error) {
-      readable.emit('error', err)
-    })
+    }
 
     const status = interceptor.statusCode || fullResponseStatus
-    return new FetchResponse(readable, {
+    return new FetchResponse(ReadableStream.from(body()), {
       status: status as number,
       statusText: STATUS_CODES[status as number],
       headers,
