@@ -629,16 +629,14 @@ class Interceptor {
     }
 
     let strFormattingFn
-    if (this.scope.scopeOptions.encodedQueryParams) {
-      strFormattingFn = common.percentDecode
-    }
-
     if (queries instanceof URLSearchParams || typeof queries === 'string') {
       // Normalize the data into the shape that is matched against.
       // Duplicate keys are handled by combining the values into an array.
       queries = querystring.parse(queries.toString())
     } else if (!common.isPlainObject(queries)) {
       throw Error(`Argument Error: ${queries}`)
+    } else if (this.scope.scopeOptions.encodedQueryParams) {
+      strFormattingFn = common.percentDecode
     }
 
     this.queries = Object.create(null) as Record<string, any>
