@@ -133,15 +133,27 @@ async function generateRequestAndResponse(
   const scope = getScope(url)
   lines.push(`nock('${scope}', {"encodedQueryParams":true})`)
 
-  const methodName = getMethod(request).toLowerCase()
+  const method = getMethod(request)
+  const methodName = method.toLowerCase()
   // Escape any single quotes in the path as the output uses them
   const escapedPath = url.pathname.replace(/'/g, `\\'`)
+  const hasConvenienceMethod = [
+    'GET',
+    'POST',
+    'PUT',
+    'HEAD',
+    'DELETE',
+    'PATCH',
+    'OPTIONS',
+    'MERGE',
+  ].includes(method)
+  const invocation = hasConvenienceMethod
+    ? `.${methodName}('${escapedPath}'`
+    : `.intercept('${escapedPath}', ${JSON.stringify(method)}`
   if (requestBody) {
-    lines.push(
-      `  .${methodName}('${escapedPath}', ${JSON.stringify(requestBody)})`,
-    )
+    lines.push(`  ${invocation}, ${JSON.stringify(requestBody)})`)
   } else {
-    lines.push(`  .${methodName}('${escapedPath}')`)
+    lines.push(`  ${invocation})`)
   }
 
   request.headers.forEach((value, name) => {
