@@ -260,6 +260,55 @@ describe('Header matching', () => {
     })
   })
 
+  describe('`Interceptor#reqheaders`', () => {
+    it('should enforce request headers with an undefined request body', async () => {
+      const scope = nock('http://example.test')
+        .get('/', undefined, {
+          reqheaders: { 'X-App-Token': 'apptoken' },
+        })
+        .reply(200, 'Hello World!')
+
+      const mismatch = await got('http://example.test/', {
+        responseType: 'json',
+      }).catch(err => err.response)
+
+      expect(mismatch.statusCode).to.equal(501)
+      expect(mismatch.body.code).to.equal('ERR_NOCK_NO_MATCH')
+      expect(scope.isDone()).to.be.false()
+
+      const { statusCode, body } = await got('http://example.test/', {
+        headers: { 'X-App-Token': 'apptoken' },
+      })
+
+      expect(statusCode).to.equal(200)
+      expect(body).to.equal('Hello World!')
+      scope.done()
+    })
+
+    it('should override scope request headers only for that interceptor', async () => {
+      const scope = nock('http://example.test', {
+        reqheaders: { 'X-App-Token': 'scope-token' },
+      })
+        .get('/one', undefined, {
+          reqheaders: { 'X-App-Token': 'interceptor-token' },
+        })
+        .reply(200)
+        .get('/two')
+        .reply(200)
+
+      const first = await got('http://example.test/one', {
+        headers: { 'X-App-Token': 'interceptor-token' },
+      })
+      const second = await got('http://example.test/two', {
+        headers: { 'X-App-Token': 'scope-token' },
+      })
+
+      expect(first.statusCode).to.equal(200)
+      expect(second.statusCode).to.equal(200)
+      scope.done()
+    })
+  })
+
   describe('`Scope#reqheaders`', () => {
     it('should fail when specified request header is missing', async () => {
       nock('http://example.test', {
