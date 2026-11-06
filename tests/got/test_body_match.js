@@ -21,6 +21,23 @@ describe('`matchBody()`', () => {
     })
   }
 
+  for (const flags of ['g', 'y']) {
+    it(`matches repeated raw bodies with a ${flags} regexp`, async () => {
+      const scope = nock('http://example.test')
+        .post('/', new RegExp('^test$', flags))
+        .twice()
+        .reply(200)
+
+      for (let i = 0; i < 2; i++) {
+        const { statusCode } = await got.post('http://example.test/', {
+          body: 'test',
+        })
+        expect(statusCode).to.equal(200)
+      }
+      scope.done()
+    })
+  }
+
   it('match json body regardless of key ordering', async () => {
     const scope = nock('http://example.test')
       .post('/', { foo: 'bar', bar: 'foo' })
