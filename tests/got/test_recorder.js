@@ -267,7 +267,9 @@ describe('Recorder', () => {
     nock.activate()
 
     expect(recorded).to.have.lengthOf(1)
-    expect(recorded[0]).to.include(`'set-cookie': [ '${cookies[0]}', '${cookies[1]}' ]`)
+    expect(recorded[0]).to.include(
+      `'set-cookie': [ '${cookies[0]}', '${cookies[1]}' ]`,
+    )
   })
 
   it('records and replays objects correctly', async () => {

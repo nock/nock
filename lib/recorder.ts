@@ -94,7 +94,7 @@ async function generateRequestAndResponseObject(
 ) {
   const { body, isUtf8Representable } = getBodyFromChunks(
     [Buffer.from(await response.arrayBuffer())],
-    responseHeadersToObject(response.headers),
+    Object.fromEntries(response.headers.entries()),
   )
   const url = new URL(request.url)
   const reqheaders = Object.fromEntries(request.headers.entries())
