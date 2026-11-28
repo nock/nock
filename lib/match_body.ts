@@ -11,7 +11,7 @@ export default function matchBody(request: Request, spec: any, body: string) {
     spec = spec.toString(encoding)
   }
 
-  const contentType = request.headers.get('content-type') || ''
+  const contentType = (request.headers.get('content-type') || '').toLowerCase()
   const isMultipart = contentType.includes('multipart')
   const isUrlencoded = contentType.includes('application/x-www-form-urlencoded')
 
