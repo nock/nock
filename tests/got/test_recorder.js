@@ -216,6 +216,60 @@ describe('Recorder', () => {
     // expect(recorded[0]).to.include({ body: JSON.stringify(exampleBody) })
   })
 
+  it('records and replays multiple set-cookie response headers', async () => {
+    const cookies = ['session=abc; Path=/; HttpOnly', 'csrf=xyz; Path=/']
+    const { origin } = await servers.startHttpServer((request, response) => {
+      response.writeHead(200, { 'set-cookie': cookies })
+      response.end('ok')
+    })
+
+    nock.restore()
+    nock.recorder.clear()
+    nock.recorder.rec({
+      dont_print: true,
+      output_objects: true,
+    })
+
+    const response1 = await got(origin)
+    expect(response1.body).to.equal('ok')
+
+    nock.restore()
+    const recorded = nock.recorder.play()
+    nock.recorder.clear()
+    nock.activate()
+
+    expect(recorded).to.have.lengthOf(1)
+    expect(recorded[0].rawHeaders['set-cookie']).to.deep.equal(cookies)
+
+    const nocks = nock.define(recorded)
+    const response2 = await got(origin)
+    expect(response2.headers['set-cookie']).to.deep.equal(cookies)
+    nocks.forEach(nock => nock.done())
+  })
+
+  it('records multiple set-cookie response headers in generated code', async () => {
+    const cookies = ['session=abc; Path=/; HttpOnly', 'csrf=xyz; Path=/']
+    const { origin } = await servers.startHttpServer((request, response) => {
+      response.writeHead(200, { 'set-cookie': cookies })
+      response.end('ok')
+    })
+
+    nock.restore()
+    nock.recorder.clear()
+    nock.recorder.rec({ dont_print: true })
+
+    const response = await got(origin)
+    expect(response.body).to.equal('ok')
+
+    nock.restore()
+    const recorded = nock.recorder.play()
+    nock.recorder.clear()
+    nock.activate()
+
+    expect(recorded).to.have.lengthOf(1)
+    expect(recorded[0]).to.include(`'set-cookie': [ '${cookies[0]}', '${cookies[1]}' ]`)
+  })
+
   it('records and replays objects correctly', async () => {
     const exampleText = '<html><body>example</body></html>'
 
